@@ -1,3 +1,3 @@
-# X1
+# X1 Community
 
 Coming soon!

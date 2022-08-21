@@ -1,0 +1,23 @@
+debug: false
+
+server:
+  address: 0.0.0.0
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: x1-community
+  datasource:
+    url: jdbc:mysql://mysql:3306/x1-community
+    username: root
+    password: Rc4K3L6f
+  redis:
+    host: redis
+    port: 6379
+    password: QZe1326g
+
+jwt:
+  secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
+  issuer: BasicAI
+  expireHours: 120
