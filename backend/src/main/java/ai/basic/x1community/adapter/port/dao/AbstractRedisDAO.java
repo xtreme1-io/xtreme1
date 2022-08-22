@@ -1,4 +1,4 @@
-package ai.basic.basicai.common.adapter.api.port.dao;
+package ai.basic.x1community.adapter.port.dao;
 
 import cn.hutool.core.lang.Assert;
 
