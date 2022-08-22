@@ -1,3 +1,3 @@
-# X1
+# X1 Community
 
-Coming soon!
+X1 community edition, free and open source!

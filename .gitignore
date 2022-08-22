@@ -1,5 +1,8 @@
 target/
 log/
+out/
+build/
+.ops/local
 
 ### STS ###
 .apt_generated
@@ -22,7 +25,6 @@ log/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
 
 ### VS Code ###
 .vscode/
