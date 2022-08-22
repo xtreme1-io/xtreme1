@@ -1,0 +1,103 @@
+# This file is for internal GitLab CI/CD, contributors should not change the content.
+stages:
+  - build-package
+  - build-image
+  - deploy
+
+variables:
+  APP_NAME: "x1-community"
+  APP_VERSION: "1.0"
+  JAR_PACKAGE_NAME: "${APP_NAME}-${APP_VERSION}-SNAPSHOT.jar"
+  IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}"
+  KUBERNETES_NAMESPACE: "x1-community"
+
+maven-build:
+  stage: build-package
+  tags:
+    - openjdk-11
+  only:
+    - dev
+    - test
+    - main
+    - tags
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+    MAVEN_ARGS: "--batch-mode"
+  script:
+    - mvn $MAVEN_ARGS package
+  artifacts:
+    paths:
+      - target/*.jar
+  cache:
+    paths:
+      - .m2/repository
+
+docker-build:
+  stage: build-image
+  tags:
+    - docker
+  only:
+    - dev
+    - test
+    - main
+    - tags
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  services:
+    - docker:20-dind
+  before_script:
+    - until docker info; do sleep 1; done
+    - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
+  script:
+    - sed -i 's/$JAR_PACKAGE_NAME/'"$JAR_PACKAGE_NAME"'/g' Dockerfile
+    - docker pull $IMAGE_NAME:latest || true
+    - docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$CI_COMMIT_REF_NAME -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest .
+    - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
+    - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - docker push $IMAGE_NAME:latest
+
+.kubernetes-deploy:
+  stage: deploy
+  tags:
+    - kubectl
+  before_script:
+    - cd ops/$ENV
+    - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' deployment.yml
+    - sed -i 's/$APP_VERSION/'"$APP_VERSION"'/g' deployment.yml
+    - sed -i 's|$IMAGE_NAME|'"$IMAGE_NAME"'|g' deployment.yml
+    - sed -i 's/$CI_COMMIT_SHORT_SHA/'"$CI_COMMIT_SHORT_SHA"'/g' deployment.yml
+    - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' configmap.yml || true
+
+kubernetes-deploy-dev:
+  extends: .kubernetes-deploy
+  only:
+    refs:
+      - dev
+  variables:
+    ENV: dev
+  script:
+    - kubectl apply -f configmap.yml -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_DEVELOPMENT
+
+kubernetes-deploy-test:
+  extends: .kubernetes-deploy
+  only:
+    refs:
+      - test
+  variables:
+    ENV: test
+  script:
+    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_TESTING
+
+kubernetes-deploy-prod:
+  extends: .kubernetes-deploy
+  only:
+    refs:
+      - main
+  when: manual
+  variables:
+    ENV: prod
+  script:
+    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_PRODUCTION
