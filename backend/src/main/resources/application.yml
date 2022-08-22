@@ -7,9 +7,9 @@ server:
 
 spring:
   application:
-    name: x1-community
+    name: x1
   datasource:
-    url: jdbc:mysql://mysql:3306/x1-community
+    url: jdbc:mysql://mysql:3306/x1
     username: root
     password: Rc4K3L6f
   redis:

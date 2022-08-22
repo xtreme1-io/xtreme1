@@ -10,7 +10,7 @@
         <version>2.6.6</version>
     </parent>
 
-    <groupId>ai.basic.x1-community</groupId>
+    <groupId>ai.basic</groupId>
     <artifactId>x1-community</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>X1 Community</name>
