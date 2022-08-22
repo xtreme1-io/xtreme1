@@ -1,6 +1,6 @@
 package ai.basic.x1community.usecase;
 
-import ai.basic.x1community.adapter.port.dao.UserDAOImpl;
+import ai.basic.x1community.adapter.port.dao.UserDAO;
 import ai.basic.x1community.adapter.port.dao.mybatis.model.User;
 import ai.basic.x1community.entity.UserBO;
 import ai.basic.x1community.usecase.exception.UsecaseCode;
@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class UserUseCase {
 
     @Autowired
-    private UserDAOImpl userDAOImpl;
+    private UserDAO userDAO;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -27,11 +27,11 @@ public class UserUseCase {
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userDAOImpl.save(User.fromBO(user));
+        userDAO.save(User.fromBO(user));
     }
 
     public UserBO findById(Long id) {
-        var user = userDAOImpl.getById(id);
+        var user = userDAO.getById(id);
         if (user == null) {
             return null;
         }
@@ -40,7 +40,7 @@ public class UserUseCase {
     }
 
     public UserBO findByUsername(String username) {
-        var user = userDAOImpl.getOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        var user = userDAO.getOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         if (user == null) {
             return null;
         }
