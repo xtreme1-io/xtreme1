@@ -1,7 +1,7 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.filter.JwtHelper;
-import ai.basic.x1.adapter.api.filter.LoggedUser;
+import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -18,14 +18,14 @@ public abstract class BaseController {
     @Autowired
     protected JwtHelper jwtHelper;
 
-    protected LoggedUser loggedUser() {
+    protected LoggedUserDTO loggedUser() {
         var securityContext = SecurityContextHolder.getContext();
         var authentication = securityContext.getAuthentication();
         if (authentication instanceof AnonymousAuthenticationToken) {
             return null;
         }
 
-        return  (LoggedUser) authentication.getPrincipal();
+        return  (LoggedUserDTO) authentication.getPrincipal();
     }
 
 }

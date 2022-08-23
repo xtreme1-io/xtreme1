@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.api.filter;
 
+import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.usecase.UserUseCase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -56,7 +57,7 @@ public class JwtAuthenticationFilter implements Filter {
             return;
         }
 
-        var loggedUser = new LoggedUser(userBO);
+        var loggedUser = new LoggedUserDTO(userBO);
         var authentication = new UsernamePasswordAuthenticationToken(
                 loggedUser, loggedUser.getPassword(), loggedUser.getAuthorities());
         // 显示创建 SecutiryContext，避免多线程之间的条件竞争
