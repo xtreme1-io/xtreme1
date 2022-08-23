@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.DataInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo">
+        <id column="id" property="id"/>
+        <result column="dataset_id" property="datasetId"/>
+        <result column="name" property="name"/>
+        <result column="content" property="content"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="status" property="status"/>
+        <result column="annotation_status" property="annotationStatus"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <select id="getDatasetStatisticsByDatasetIds" resultType="ai.basic.x1.adapter.port.dao.mybatis.model.DatasetStatistics">
+        SELECT dataset_id AS datasetId,
+               SUM(CASE `annotation_status` WHEN 'ANNOTATED' THEN 1 ELSE 0 END) AS annotatedCount,
+               SUM(CASE `annotation_status` WHEN 'NOT_ANNOTATED' THEN 1 ELSE 0 END) AS notAnnotatedCount,
+               SUM(CASE `annotation_status` WHEN 'INVALID' THEN 1 ELSE 0 END) AS invalidCount
+        FROM data WHERE dataset_id in
+        <foreach collection="datasetIds" item="datasetId" open="(" separator="," close=")">
+            #{datasetId}
+        </foreach> AND is_deleted = FALSE
+        GROUP BY dataset_id,annotation_status
+    </select>
+</mapper>

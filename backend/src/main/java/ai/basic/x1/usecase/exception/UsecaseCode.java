@@ -13,9 +13,11 @@ public enum UsecaseCode {
     PARAM_ERROR("PARAM_ERROR", "Param error"),
 
     // User
-    USERNAME_AND_PASSWORD_NOT_MATCH("USERNAME_AND_PASSWORD_NOT_MATCH", "Username and password not match");
+    USERNAME_AND_PASSWORD_NOT_MATCH("USERNAME_AND_PASSWORD_NOT_MATCH", "Username and password not match"),
 
     // Dataset
+    // 数据集名称重复
+    DATASET_NAME_DUPLICATED("DATASET_NAME_DUPLICATED", "Dataset duplicate name");
 
     // Storage
 
