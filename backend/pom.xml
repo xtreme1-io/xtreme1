@@ -10,7 +10,7 @@
         <version>2.6.6</version>
     </parent>
 
-    <groupId>ai.basic.x1-community</groupId>
+    <groupId>ai.basic</groupId>
     <artifactId>x1-community</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>X1 Community</name>
@@ -18,13 +18,18 @@
 
     <properties>
         <java.version>11</java.version>
+        <guava.version>31.0.1-jre</guava.version>
+        <cn.hutool.verion>5.8.5</cn.hutool.verion>
+        <jaxb-api.version>2.3.0</jaxb-api.version>
+        <jjwt.version>0.9.1</jjwt.version>
+        <mybatis-plus.version>3.5.0</mybatis-plus.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.0.1-jre</version>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
@@ -46,19 +51,19 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.7.22</version>
+            <version>${cn.hutool.verion}</version>
         </dependency>
 
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.0</version>
+            <version>${jaxb-api.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
+            <version>${jjwt.version}</version>
         </dependency>
 
         <dependency>
@@ -103,7 +108,7 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.0</version>
+            <version>${mybatis-plus.version}</version>
         </dependency>
 
         <dependency>
@@ -115,8 +120,18 @@
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter-test</artifactId>
-            <version>3.5.0</version>
+            <version>${mybatis-plus.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
         </dependency>
     </dependencies>
 

@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $APP_NAME
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: basicai
+      app.kubernetes.io/instance: basicai
+      app.kubernetes.io/component: $APP_NAME
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: basicai
+        app.kubernetes.io/instance: basicai
+        app.kubernetes.io/component: $APP_NAME
+    spec:
+      nodeSelector:
+        dedicated: app
+      # 提前准备好拉取镜像的凭证
+      imagePullSecrets:
+      - name: basicai-registry
+      containers:
+      - name: $APP_NAME
+        image: $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+        env:
+          - name: JAVA_OPTS
+            value: "-XX:InitialRAMPercentage=20.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -XshowSettings:vm"
+        resources:
+          requests:
+            memory: 200Mi
+            cpu: 100m
+          limits:
+            memory: 2Gi
+            cpu: 1
+        ports:
+        - name: http
+          containerPort: 8080
+        # 启动探针，会尝试多次，如果失败将重启服务
+        startupProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          periodSeconds: 10
+          failureThreshold: 6
+        # 存活探针，会尝试多次，如果失败将重启服务
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          periodSeconds: 10
+          failureThreshold: 3
+        # 就绪探针，如果失败将拒绝服务
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        volumeMounts:
+          - name: config
+            mountPath: /app/config
+      volumes:
+      - name: config
+        configMap:
+          name: $APP_NAME
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: $APP_NAME
+spec:
+  selector:
+    app.kubernetes.io/name: basicai
+    app.kubernetes.io/instance: basicai
+    app.kubernetes.io/component: $APP_NAME
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: $APP_NAME
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: admin.dev.basic.ai
+      http:
+        paths:
+          - backend:
+              service:
+                name: $APP_NAME
+                port:
+                  number: 80
+            path: /api(/|$)(.*)
+            pathType: Prefix
+  tls:
+    - hosts:
+        - admin.dev.basic.ai
+      secretName: admin.dev.basic.ai
