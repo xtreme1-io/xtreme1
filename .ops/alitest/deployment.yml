@@ -85,7 +85,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: x1-community.test.basic.ai
+    - host: x1-community.alitest.beisai.com
       http:
         paths:
           - backend:
