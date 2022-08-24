@@ -67,7 +67,7 @@ build-backend-image:
   tags:
     - kubectl
   before_script:
-    - cd ops/$ENV
+    - cd .ops/$ENV
     - sed -i 's/$APP_VERSION/'"$APP_VERSION"'/g' deployment.yml
     - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' deployment.yml
     - sed -i 's/$CI_COMMIT_SHORT_SHA/'"$CI_COMMIT_SHORT_SHA"'/g' deployment.yml
