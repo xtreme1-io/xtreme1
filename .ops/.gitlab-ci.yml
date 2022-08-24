@@ -4,10 +4,11 @@ stages:
   - deploy
 
 variables:
+  APP_NAME: "x1-community"
   APP_VERSION: "1.0"
-  BACKEND_PACKAGE_NAME: "x1-community-backend-${APP_VERSION}-SNAPSHOT.jar"
-  FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/x1-community-frontend"
-  BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/x1-community-backend"
+  BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
+  FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/frontend"
+  BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/backend"
   KUBERNETES_NAMESPACE: "x1-community"
 
 build-backend-package:
