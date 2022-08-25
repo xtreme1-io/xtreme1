@@ -1,15 +1,18 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.dto.ApiResult;
+import ai.basic.x1.adapter.exception.ApiException;
 import ai.basic.x1.usecase.exception.UsecaseCode;
+import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.json.JSONUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -21,17 +24,32 @@ import java.util.Set;
 /**
  * @author Jagger Wang
  */
-@ControllerAdvice
+@RestControllerAdvice
+@Slf4j
 public class CustomExceptionHandler {
 
-    private CustomExceptionConverter converter = new CustomExceptionConverter();
-
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ApiResult> handle(Throwable e) {
-        return converter.convert(e);
+    public ResponseEntity<ApiResult> handle(Throwable throwable) {
+        if (throwable instanceof ApiException) {
+            var e = (ApiException) throwable;
+            return ResponseEntity
+                    .status(e.getStatus())
+                    .body(new ApiResult(e.getCode(), e.getMessage(), e.getData()));
+        } else if (throwable instanceof UsecaseException) {
+            var e = (UsecaseException) throwable;
+            return ResponseEntity
+                    .ok()
+                    .body(new ApiResult(e.getCode(), e.getMessage()));
+        } else {
+            log.error("unknown exception", throwable);
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResult(UsecaseCode.UNKNOWN, throwable.toString()));
+        }
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = ConstraintViolationException.class)
+    @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResult<?>> constraintViolationException(ConstraintViolationException exception) {
         Set<ConstraintViolation<?>> constraintViolations = exception.getConstraintViolations();
         Iterator<ConstraintViolation<?>> iterator = constraintViolations.iterator();
@@ -44,7 +62,7 @@ public class CustomExceptionHandler {
         return new ResponseEntity<>(new ApiResult<>(UsecaseCode.PARAM_ERROR, builder.toString()), HttpStatus.BAD_REQUEST);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = {BindException.class})
+    @ExceptionHandler(BindException.class)
     public ResponseEntity<ApiResult> validException(BindException bindException) {
         List<String> errorMsgList = new ArrayList<>();
         for (ObjectError objectError : bindException.getAllErrors()) {
