@@ -22,8 +22,8 @@ build-frontend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**/*
-        - frontend/**/*
+        - .ops/**
+        - frontend/**
   script:
     - cd frontend
     - yarn
@@ -42,8 +42,8 @@ build-backend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**/*
-        - backend/**/*
+        - .ops/**
+        - backend/**
   variables:
     MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"
     MAVEN_ARGS: "--batch-mode"
@@ -64,8 +64,8 @@ build-frontend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**/*
-        - frontend/**/*
+        - .ops/**
+        - frontend/**
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
@@ -93,8 +93,8 @@ build-backend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**/*
-        - backend/**/*
+        - .ops/**
+        - backend/**
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
@@ -129,6 +129,11 @@ kubernetes-deploy-alidev:
   extends: .kubernetes-deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - .ops/**
+        - frontend/**
+        - backend/**
+        - model/**
   variables:
     ENV: alidev
   script:
@@ -138,6 +143,11 @@ kubernetes-deploy-alitest:
   extends: .kubernetes-deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "test"
+      changes:
+        - .ops/**
+        - frontend/**
+        - backend/**
+        - model/**
   variables:
     ENV: alitest
   script:
