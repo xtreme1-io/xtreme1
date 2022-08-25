@@ -1,4 +1,3 @@
-# This file is for internal GitLab CI/CD, contributors should not change the content.
 stages:
   - build-package
   - build-image
@@ -7,40 +6,42 @@ stages:
 variables:
   APP_NAME: "x1-community"
   APP_VERSION: "1.0"
-  JAR_PACKAGE_NAME: "${APP_NAME}-${APP_VERSION}-SNAPSHOT.jar"
-  IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}"
+  BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
+  FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/frontend"
+  BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/backend"
   KUBERNETES_NAMESPACE: "x1-community"
 
-maven-build:
+build-backend-package:
   stage: build-package
   tags:
     - openjdk-11
-  only:
-    - dev
-    - test
-    - main
-    - tags
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+      changes:
+        - .ops/**/*
+        - backend/**/*
   variables:
-    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"
     MAVEN_ARGS: "--batch-mode"
   script:
+    - cd backend
     - mvn $MAVEN_ARGS package
   artifacts:
     paths:
-      - target/*.jar
+      - backend/target/*.jar
   cache:
     paths:
-      - .m2/repository
+      - backend/.m2/repository
 
-docker-build:
+build-backend-image:
   stage: build-image
   tags:
     - docker
-  only:
-    - dev
-    - test
-    - main
-    - tags
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+      changes:
+        - .ops/**/*
+        - backend/**/*
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
@@ -52,52 +53,39 @@ docker-build:
     - until docker info; do sleep 1; done
     - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
   script:
-    - sed -i 's/$JAR_PACKAGE_NAME/'"$JAR_PACKAGE_NAME"'/g' Dockerfile
-    - docker pull $IMAGE_NAME:latest || true
-    - docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$CI_COMMIT_REF_NAME -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest .
-    - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
-    - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-    - docker push $IMAGE_NAME:latest
+    - cd backend
+    - cp ../.ops/backend.dockerfile ./Dockerfile
+    - sed -i 's/$BACKEND_PACKAGE_NAME/'"$BACKEND_PACKAGE_NAME"'/g' Dockerfile
+    - docker pull $BACKEND_IMAGE_NAME:latest || true
+    - docker build --cache-from $BACKEND_IMAGE_NAME:latest -t $BACKEND_IMAGE_NAME:$CI_COMMIT_REF_NAME -t $BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $BACKEND_IMAGE_NAME:latest .
+    - docker push $BACKEND_IMAGE_NAME:$CI_COMMIT_REF_NAME
+    - docker push $BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - docker push $BACKEND_IMAGE_NAME:latest
 
 .kubernetes-deploy:
   stage: deploy
   tags:
     - kubectl
   before_script:
-    - cd ops/$ENV
-    - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' deployment.yml
+    - cd .ops/$ENV
     - sed -i 's/$APP_VERSION/'"$APP_VERSION"'/g' deployment.yml
-    - sed -i 's|$IMAGE_NAME|'"$IMAGE_NAME"'|g' deployment.yml
+    - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' deployment.yml
     - sed -i 's/$CI_COMMIT_SHORT_SHA/'"$CI_COMMIT_SHORT_SHA"'/g' deployment.yml
-    - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' configmap.yml || true
 
-kubernetes-deploy-dev:
+kubernetes-deploy-alidev:
   extends: .kubernetes-deploy
-  only:
-    refs:
-      - dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
   variables:
-    ENV: dev
+    ENV: alidev
   script:
-    - kubectl apply -f configmap.yml -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_DEVELOPMENT
+    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
 
-kubernetes-deploy-test:
+kubernetes-deploy-alitest:
   extends: .kubernetes-deploy
-  only:
-    refs:
-      - test
+  rules:
+    - if: $CI_COMMIT_BRANCH == "test"
   variables:
-    ENV: test
+    ENV: alitest
   script:
-    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_TESTING
-
-kubernetes-deploy-prod:
-  extends: .kubernetes-deploy
-  only:
-    refs:
-      - main
-  when: manual
-  variables:
-    ENV: prod
-  script:
-    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_PRODUCTION
+    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING

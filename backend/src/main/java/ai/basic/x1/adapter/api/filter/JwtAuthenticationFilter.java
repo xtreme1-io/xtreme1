@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter implements Filter {
             return;
         }
 
-        var loggedUser = new LoggedUserDTO(userBO);
+        var loggedUser = new LoggedUserDTO(userBO.getUsername(), userBO.getPassword(), userBO.getId());
         var authentication = new UsernamePasswordAuthenticationToken(
                 loggedUser, loggedUser.getPassword(), loggedUser.getAuthorities());
         // 显示创建 SecutiryContext，避免多线程之间的条件竞争
