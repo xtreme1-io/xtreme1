@@ -2,7 +2,7 @@ target/
 log/
 out/
 build/
-.ops/local
+backend/.ops/local/
 
 ### STS ###
 .apt_generated
