@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author Jagger Wang
+ */
 public class CustomerMetaObjectHandler implements MetaObjectHandler {
     private static final String CREATED_AT = "createdAt";
     private static final String UPDATED_AT = "updatedAt";
