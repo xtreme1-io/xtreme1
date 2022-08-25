@@ -22,8 +22,10 @@ build-frontend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**
-        - frontend/**
+        - .ops/*
+        - .ops/**/*
+        - frontend/*
+        - frontend/**/*
   script:
     - cd frontend
     - yarn
@@ -42,8 +44,10 @@ build-backend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**
-        - backend/**
+        - .ops/*
+        - .ops/**/*
+        - backend/*
+        - backend/**/*
   variables:
     MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"
     MAVEN_ARGS: "--batch-mode"
@@ -83,8 +87,10 @@ build-frontend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**
-        - frontend/**
+        - .ops/*
+        - .ops/**/*
+        - frontend/*
+        - frontend/**/*
   variables:
     IMAGE_NAME: $FRONTEND_IMAGE_NAME
   script:
@@ -97,8 +103,10 @@ build-backend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/**
-        - backend/**
+        - .ops/*
+        - .ops/**/*
+        - backend/*
+        - backend/**/*
   variables:
     IMAGE_NAME: $BACKEND_IMAGE_NAME
   script:
@@ -123,10 +131,14 @@ deploy-to-alidev:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/**
-        - frontend/**
-        - backend/**
-        - model/**
+        - .ops/*
+        - .ops/**/*
+        - frontend/*
+        - frontend/**/*
+        - backend/*
+        - backend/**/*
+        - model/*
+        - model/**/*
   variables:
     ENV: alidev
   script:
@@ -137,10 +149,14 @@ deploy-to-alitest:
   rules:
     - if: $CI_COMMIT_BRANCH == "test"
       changes:
-        - .ops/**
-        - frontend/**
-        - backend/**
-        - model/**
+        - .ops/*
+        - .ops/**/*
+        - frontend/*
+        - frontend/**/*
+        - backend/*
+        - backend/**/*
+        - model/*
+        - model/**/*
   variables:
     ENV: alitest
   script:
