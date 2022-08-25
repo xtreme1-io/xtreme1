@@ -19,8 +19,7 @@ public abstract class BaseController {
     protected JwtHelper jwtHelper;
 
     protected LoggedUserDTO loggedUser() {
-        var securityContext = SecurityContextHolder.getContext();
-        var authentication = securityContext.getAuthentication();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof AnonymousAuthenticationToken) {
             return null;
         }

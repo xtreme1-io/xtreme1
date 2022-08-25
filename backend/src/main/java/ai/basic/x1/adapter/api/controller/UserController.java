@@ -27,7 +27,7 @@ public class UserController extends BaseController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public UserDTO create(@RequestBody UserDTO userDTO) {
+    public UserDTO register(@RequestBody UserDTO userDTO) {
         userUseCase.create(userDTO.toBO());
 
         var user = userUseCase.findByUsername(userDTO.getUsername());
