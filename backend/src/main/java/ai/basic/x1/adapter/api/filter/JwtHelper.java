@@ -39,7 +39,7 @@ public class JwtHelper {
     public boolean validateToken(String token) {
         try {
             jwtParser.parseClaimsJws(token);
-        } catch (ExpiredJwtException e) {
+        } catch (JwtException e) {
             return false;
         }
 
@@ -50,7 +50,7 @@ public class JwtHelper {
         Claims claims;
         try {
             claims = jwtParser.parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException e) {
+        } catch (JwtException e) {
             return null;
         }
 
