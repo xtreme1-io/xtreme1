@@ -6,10 +6,34 @@ stages:
 variables:
   APP_NAME: "x1-community"
   APP_VERSION: "1.0"
+
+  FRONTEND_PACKAGE_DIR: "dist"
   BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
+
   FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/frontend"
   BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/backend"
+
   KUBERNETES_NAMESPACE: "x1-community"
+
+build-frontend-package:
+  stage: build-package
+  tags:
+    - nodejs-16
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+      changes:
+        - .ops/**/*
+        - frontend/**/*
+  script:
+    - cd frontend
+    - yarn
+    - yarn build:$CI_COMMIT_BRANCH
+  artifacts:
+    paths:
+      - frontend/$FRONTEND_PACKAGE_DIR
+  cache:
+    paths:
+      - frontend/node_modules
 
 build-backend-package:
   stage: build-package
@@ -32,6 +56,35 @@ build-backend-package:
   cache:
     paths:
       - backend/.m2/repository
+
+build-frontend-image:
+  stage: build-image
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+      changes:
+        - .ops/**/*
+        - frontend/**/*
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  services:
+    - docker:20-dind
+  before_script:
+    - until docker info; do sleep 1; done
+    - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
+  script:
+    - cd frontend
+    - cp ../.ops/frontend.dockerfile ./Dockerfile
+    - sed -i 's/$FRONTEND_PACKAGE_DIR/'"$FRONTEND_PACKAGE_DIR"'/g' Dockerfile
+    - docker pull $FRONTEND_IMAGE_NAME:latest || true
+    - docker build --cache-from $FRONTEND_IMAGE_NAME:latest -t $FRONTEND_IMAGE_NAME:$CI_COMMIT_REF_NAME -t $FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $FRONTEND_IMAGE_NAME:latest .
+    - docker push $FRONTEND_IMAGE_NAME:$CI_COMMIT_REF_NAME
+    - docker push $FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - docker push $FRONTEND_IMAGE_NAME:latest
 
 build-backend-image:
   stage: build-image
