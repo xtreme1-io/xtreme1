@@ -42,7 +42,7 @@ public class UserUseCase {
     @Autowired
     private FileDAO fileDAO;
 
-    public UserBO create(String username, String password, Boolean isSubscribeNewsLetter) {
+    public UserBO create(String username, String password) {
         var existUser = findByUsername(username);
         if (existUser != null) {
             throw new UsecaseException(UsecaseCode.UNKNOWN, "User already existed");
@@ -51,9 +51,6 @@ public class UserUseCase {
                 .nickname(StrUtil.subBefore(username, "@", false))
                 .password(passwordEncoder.encode(password)).build();
         userDAO.save(newUser);
-        if (Boolean.TRUE.equals(isSubscribeNewsLetter)) {
-            subscribeNewsLetterAsync(username);
-        }
         return findByUsername(username);
     }
 
@@ -126,13 +123,6 @@ public class UserUseCase {
                 .collect(Collectors.toMap(File::getId, File::getPath));
         users.forEach(user -> user.setAvatarUrl(avatarIdMap.get(user.getAvatarId())));
         return users;
-    }
-
-    private void subscribeNewsLetterAsync(String email) {
-        CompletableFuture.runAsync(() -> {
-            log.info("submit email to basicAI");
-            HttpUtil.post("", Map.of("email", email));
-        });
     }
 
 }

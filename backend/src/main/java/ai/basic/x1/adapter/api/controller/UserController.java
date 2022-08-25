@@ -34,8 +34,7 @@ public class UserController extends BaseController {
 
     @PostMapping("/register")
     public UserDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
-        return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()
-                , authDto.getIsSubscribeNewsLetter()));
+        return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()));
     }
 
     @PostMapping("/login")

@@ -27,6 +27,4 @@ public class UserAuthRequestDTO {
     @Pattern(regexp = PASSWORD_REGEX, message = PASSWORD_ERROR)
     private String password;
 
-    private Boolean isSubscribeNewsLetter;
-
 }
