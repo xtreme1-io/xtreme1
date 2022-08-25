@@ -33,6 +33,8 @@ public class UserBO {
 
     private Long avatarId;
 
+    private String avatarUrl;
+
     private OffsetDateTime lastLoginAt;
 
     private OffsetDateTime createdAt;
