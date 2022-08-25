@@ -12,6 +12,8 @@ public enum UsecaseCode {
     DUPLICATED("DUPLICATED", "Resource duplicated"),
     PARAM_ERROR("PARAM_ERROR", "Param error"),
 
+    NAME_DUPLICATED("NAME_DUPLICATED","name already exists"),
+
     // User
     USERNAME_AND_PASSWORD_NOT_MATCH("USERNAME_AND_PASSWORD_NOT_MATCH", "Username and password not match"),
 

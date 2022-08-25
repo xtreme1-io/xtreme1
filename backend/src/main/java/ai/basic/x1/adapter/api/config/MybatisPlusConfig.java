@@ -1,6 +1,5 @@
 package ai.basic.x1.adapter.api.config;
 
-
 import ai.basic.x1.adapter.port.dao.mybatis.extension.CustomizedSqlInjector;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.injector.ISqlInjector;

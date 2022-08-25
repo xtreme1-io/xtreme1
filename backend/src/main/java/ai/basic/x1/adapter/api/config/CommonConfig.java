@@ -105,8 +105,31 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
-        return new DistributedLock(stringRedisTemplate, "x1:dataset:", 30000);
+    public ClassUseCase classUseCase(){
+        return new ClassUseCase();
     }
 
+    @Bean
+    public ClassificationUseCase classificationUseCase(){
+        return new ClassificationUseCase();
+    }
+
+    @Bean
+    public DatasetClassUseCase datasetClassUseCase(){
+        return new DatasetClassUseCase();
+    }
+    @Bean
+    public DatasetClassificationUseCase datasetClassificationUseCase(){
+        return new DatasetClassificationUseCase();
+    }
+
+    @Bean
+    public OntologyUseCase ontologyUseCase(){
+        return new OntologyUseCase();
+    }
+
+    @Bean
+    public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
+        return new DistributedLock(stringRedisTemplate, "basicai:x1:", 5000);
+    }
 }

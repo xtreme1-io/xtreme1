@@ -15,8 +15,8 @@ spring:
     hikari:
       connection-test-query: SELECT 1
       connection-timeout: 60000
-      max-lifetime: 540000
-      idle-timeout: 500000
+      max-lifetime: 54000
+      idle-timeout: 50000
 
   redis:
     host: redis
@@ -27,3 +27,15 @@ jwt:
   secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
   issuer: BasicAI
   expireHours: 120
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  type-aliases-package: ai.basic.x1.adapter.port.dao.mybatis.model
