@@ -138,14 +138,14 @@ spec:
     - host: x1-community.alidev.beisai.com
       http:
         paths:
-          - frontend:
+          - backend:
               service:
                 name: frontend
                 port:
                   number: 80
             path: /
             pathType: Prefix
-          - x1-community:
+          - backend:
               service:
                 name: backend
                 port:

@@ -138,7 +138,7 @@ spec:
     - host: x1-community.alitest.beisai.com
       http:
         paths:
-          - frontend:
+          - backend:
               service:
                 name: frontend
                 port:
