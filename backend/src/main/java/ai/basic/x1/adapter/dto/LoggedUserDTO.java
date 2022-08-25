@@ -1,26 +1,27 @@
 package ai.basic.x1.adapter.dto;
 
-import ai.basic.x1.entity.UserBO;
 import org.springframework.security.core.userdetails.User;
-
 import java.util.List;
 
 
 /**
  * @author Jagger Wang
  */
+
 public class LoggedUserDTO extends User {
 
-    private UserBO user;
+    private Long id;
 
-    public LoggedUserDTO(UserBO user) {
-        super(user.getUsername(), user.getPassword(), List.of());
-
-        this.user = user;
+    public LoggedUserDTO(String username, String password, Long id) {
+        super(username, password, List.of());
+        this.id = id;
     }
 
-    public UserBO getUser() {
-        return user;
+    public Long getId() {
+        return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

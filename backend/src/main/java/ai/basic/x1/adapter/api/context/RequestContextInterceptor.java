@@ -18,7 +18,7 @@ public class RequestContextInterceptor implements HandlerInterceptor {
         if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
             LoggedUserDTO loggedUserDTO = getLoggedUserDTO();
-            requestContext.setUserInfo(UserInfo.builder().id(loggedUserDTO.getUser().getId()).build());
+            requestContext.setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
             requestContext.setRequestInfo(RequestInfo.builder().host(request.getHeader(X_HOST))
                     .realIp(request.getHeader(X_REAL_IP)).forwardedFor(request.getHeader(X_FORWARDED_FOR)).userAgent(request.getHeader(X_UA)).build());
             RequestContextHolder.setContext(requestContext);

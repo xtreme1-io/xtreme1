@@ -1,9 +1,10 @@
 package ai.basic.x1.adapter.api.controller;
 
+import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.api.filter.JwtPayload;
+import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.adapter.dto.UserDTO;
 import ai.basic.x1.adapter.dto.request.UserLoginRequestDTO;
-import ai.basic.x1.adapter.dto.response.UserLoggedResponseDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
 import ai.basic.x1.usecase.UserUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
@@ -50,14 +51,8 @@ public class UserController extends BaseController {
     }
 
     @GetMapping("/logged")
-    public UserLoggedResponseDTO logged() {
-        if (loggedUser() == null) {
-            return null;
-        }
-
-        return UserLoggedResponseDTO.builder()
-                .user(UserDTO.fromBO(loggedUser().getUser()))
-                .build();
+    public LoggedUserDTO logged(@LoggedUser LoggedUserDTO loggedUserDTO) {
+        return loggedUserDTO;
     }
 
     @GetMapping("/info/{id}")
