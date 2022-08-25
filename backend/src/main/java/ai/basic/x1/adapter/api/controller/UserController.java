@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.api.filter.JwtPayload;
 import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.adapter.dto.UserDTO;
 import ai.basic.x1.adapter.dto.request.UserAuthRequestDTO;
+import ai.basic.x1.adapter.dto.request.UserDeleteRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserUpdateRequestDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
 import ai.basic.x1.entity.UserBO;
@@ -34,8 +35,7 @@ public class UserController extends BaseController {
 
     @PostMapping("/register")
     public UserDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
-        return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()
-                , authDto.getIsSubscribeNewsLetter()));
+        return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()));
     }
 
     @PostMapping("/login")
@@ -55,9 +55,10 @@ public class UserController extends BaseController {
                 .build();
     }
 
-    @PostMapping("/delete/{userId}")
-    public UserDTO delete(@PathVariable Long userId) {
-        return UserDTO.fromBO(userUseCase.deleteById(userId));
+    @PostMapping("/delete")
+    public void delete(@RequestBody UserDeleteRequestDTO deleteRequestDTO,
+                          @LoggedUser LoggedUserDTO loggedUser) {
+        userUseCase.deleteOtherUsers(deleteRequestDTO.getUserIds(), loggedUser.getId());
     }
 
     @PostMapping("/update")
@@ -77,8 +78,8 @@ public class UserController extends BaseController {
     }
 
     @GetMapping("/logged")
-    public LoggedUserDTO logged(@LoggedUser LoggedUserDTO loggedUserDTO) {
-        return loggedUserDTO;
+    public UserDTO logged(@LoggedUser LoggedUserDTO loggedUserDTO) {
+        return UserDTO.fromBO(userUseCase.findById(loggedUserDTO.getId()));
     }
 
     @GetMapping("/info/{id}")
