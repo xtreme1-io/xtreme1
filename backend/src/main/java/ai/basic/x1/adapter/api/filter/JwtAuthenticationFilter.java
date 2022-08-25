@@ -11,14 +11,11 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -95,6 +92,11 @@ public class JwtAuthenticationFilter implements Filter {
         return;
     }
 
+    @Override
+    public void destroy() {
+        SecurityContextHolder.clearContext();
+    }
+
     private void setSecurityContext(UserBO userBO) {
         var loggedUser = new LoggedUserDTO(userBO.getUsername(), userBO.getPassword(), userBO.getId());
         var authentication = new UsernamePasswordAuthenticationToken(
@@ -109,7 +111,7 @@ public class JwtAuthenticationFilter implements Filter {
         PrintWriter out = servletResponse.getWriter();
         servletResponse.setContentType("application/json");
         servletResponse.setCharacterEncoding("UTF-8");
-        out.print(JSONUtil.parseObj(apiResult,false));
+        out.print(JSONUtil.parseObj(apiResult, false));
         out.flush();
         out.close();
     }
