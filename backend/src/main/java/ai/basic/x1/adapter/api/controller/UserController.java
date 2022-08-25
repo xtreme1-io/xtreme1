@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Jagger Wang、Zhujh
- *
  */
 @RestController
 @RequestMapping("/user")
