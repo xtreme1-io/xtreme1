@@ -17,7 +17,7 @@ import javax.validation.constraints.Pattern;
 public class UserAuthRequestDTO {
 
     public static final String PASSWORD_REGEX = "(?=[^a-zA-Z]*[a-zA-Z])(?=\\D*\\d).{8,64}";
-    public static final String PASSWORD_ERROR = "password must contains one letter, number, and " +
+    public static final String PASSWORD_ERROR = "must contains one letter, number, and " +
             "length 8-64";
 
     @Pattern(regexp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "must be " +

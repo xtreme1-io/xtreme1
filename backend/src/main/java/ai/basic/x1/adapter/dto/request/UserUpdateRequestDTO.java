@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 /**
@@ -17,9 +16,10 @@ import javax.validation.constraints.Pattern;
 @AllArgsConstructor
 public class UserUpdateRequestDTO {
 
-    @NotNull(message = "avatarId can not null")
     private Long avatarId;
 
+    private String nickname;
+
     @Pattern(regexp = UserAuthRequestDTO.PASSWORD_REGEX, message = UserAuthRequestDTO.PASSWORD_ERROR)
-    private Long newPassword;
+    private String newPassword;
 }

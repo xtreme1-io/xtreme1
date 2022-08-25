@@ -6,8 +6,6 @@ import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.adapter.dto.UserDTO;
 import ai.basic.x1.adapter.dto.request.UserAuthRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserUpdateRequestDTO;
-import ai.basic.x1.adapter.dto.response.UserLoggedResponseDTO;
-import ai.basic.x1.adapter.dto.request.UserLoginRequestDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
 import ai.basic.x1.entity.UserBO;
 import ai.basic.x1.usecase.UserUseCase;
@@ -19,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * @author Jagger Wang、Zhujh
@@ -68,6 +64,7 @@ public class UserController extends BaseController {
     public UserDTO update(@Validated @RequestBody UserUpdateRequestDTO updateRequestDTO,
                           @LoggedUser LoggedUserDTO loggedUser) {
         var user = DefaultConverter.convert(updateRequestDTO, UserBO.class);
+        user.setId(loggedUser.getId());
         return UserDTO.fromBO(userUseCase.update(user));
     }
 
