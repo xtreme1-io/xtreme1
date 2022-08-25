@@ -33,7 +33,7 @@ public class UserController extends BaseController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public UserDTO create(@Validated @RequestBody UserAuthRequestDTO authDto) {
+    public UserDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
         return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()
                 , authDto.getIsSubscribeNewsLetter()));
     }
