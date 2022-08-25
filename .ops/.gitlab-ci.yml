@@ -57,76 +57,69 @@ build-backend-package:
     paths:
       - backend/.m2/repository
 
-build-frontend-image:
+.build-image:
   stage: build-image
   tags:
     - docker
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  services:
+    - docker:20-dind
+  before_script:
+    - until docker info; do sleep 1; done
+    - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
+  after_script:
+    - docker pull $IMAGE_NAME:latest || true
+    - docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$CI_COMMIT_REF_NAME -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest .
+    - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
+    - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - docker push $IMAGE_NAME:latest
+
+build-frontend-image:
+  extends: .build-image
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
         - .ops/**
         - frontend/**
   variables:
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
-  services:
-    - docker:20-dind
-  before_script:
-    - until docker info; do sleep 1; done
-    - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
+    IMAGE_NAME: $FRONTEND_IMAGE_NAME
   script:
     - cd frontend
     - cp ../.ops/frontend.dockerfile ./Dockerfile
     - sed -i 's/$FRONTEND_PACKAGE_DIR/'"$FRONTEND_PACKAGE_DIR"'/g' Dockerfile
-    - docker pull $FRONTEND_IMAGE_NAME:latest || true
-    - docker build --cache-from $FRONTEND_IMAGE_NAME:latest -t $FRONTEND_IMAGE_NAME:$CI_COMMIT_REF_NAME -t $FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $FRONTEND_IMAGE_NAME:latest .
-    - docker push $FRONTEND_IMAGE_NAME:$CI_COMMIT_REF_NAME
-    - docker push $FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-    - docker push $FRONTEND_IMAGE_NAME:latest
 
 build-backend-image:
-  stage: build-image
-  tags:
-    - docker
+  extends: .build-image
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
         - .ops/**
         - backend/**
   variables:
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
-  services:
-    - docker:20-dind
-  before_script:
-    - until docker info; do sleep 1; done
-    - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
+    IMAGE_NAME: $BACKEND_IMAGE_NAME
   script:
     - cd backend
     - cp ../.ops/backend.dockerfile ./Dockerfile
     - sed -i 's/$BACKEND_PACKAGE_NAME/'"$BACKEND_PACKAGE_NAME"'/g' Dockerfile
-    - docker pull $BACKEND_IMAGE_NAME:latest || true
-    - docker build --cache-from $BACKEND_IMAGE_NAME:latest -t $BACKEND_IMAGE_NAME:$CI_COMMIT_REF_NAME -t $BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $BACKEND_IMAGE_NAME:latest .
-    - docker push $BACKEND_IMAGE_NAME:$CI_COMMIT_REF_NAME
-    - docker push $BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-    - docker push $BACKEND_IMAGE_NAME:latest
 
-.kubernetes-deploy:
+.deploy:
   stage: deploy
   tags:
     - kubectl
   before_script:
     - cd .ops/$ENV
+    - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' deployment.yml
     - sed -i 's/$APP_VERSION/'"$APP_VERSION"'/g' deployment.yml
+    - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' deployment.yml
     - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' deployment.yml
     - sed -i 's/$CI_COMMIT_SHORT_SHA/'"$CI_COMMIT_SHORT_SHA"'/g' deployment.yml
 
-kubernetes-deploy-alidev:
-  extends: .kubernetes-deploy
+deploy-to-alidev:
+  extends: .deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
@@ -139,8 +132,8 @@ kubernetes-deploy-alidev:
   script:
     - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
 
-kubernetes-deploy-alitest:
-  extends: .kubernetes-deploy
+deploy-to-alitest:
+  extends: .deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "test"
       changes:
