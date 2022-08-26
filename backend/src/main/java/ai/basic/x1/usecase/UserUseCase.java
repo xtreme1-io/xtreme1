@@ -105,6 +105,13 @@ public class UserUseCase {
         return wrapUser(user.toBO());
     }
 
+    public List<UserBO> findByIds(List<Long> userIds) {
+        if (CollUtil.isEmpty(userIds)) {
+            return List.of();
+        }
+        return wrapUsers(userDAO.listByIds(userIds).stream().map(User::toBO).collect(Collectors.toList()));
+    }
+
     @CachePut(cacheNames = "user", key = "#result.id", condition = "#result != null ")
     public UserBO findByUsername(String username) {
         var user = userDAO.getOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
