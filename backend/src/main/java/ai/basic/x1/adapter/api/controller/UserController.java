@@ -71,7 +71,7 @@ public class UserController extends BaseController {
         return UserDTO.fromBO(userUseCase.update(user));
     }
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/uploadAvatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Long uploadAvatar(@RequestPart(value = "file") MultipartFile file,
                              @LoggedUser LoggedUserDTO loggedUser) {
         return userUseCase.uploadAvatar(file, loggedUser.getId());
