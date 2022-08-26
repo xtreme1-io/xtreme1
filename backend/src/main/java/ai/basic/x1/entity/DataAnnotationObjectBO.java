@@ -1,7 +1,6 @@
 package ai.basic.x1.entity;
 
 import cn.hutool.json.JSONObject;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,6 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(autoResultMap = true)
 public class DataAnnotationObjectBO {
 
     private Long id;
@@ -39,9 +37,17 @@ public class DataAnnotationObjectBO {
      */
     private JSONObject classAttributes;
 
+    /**
+     * 创建时间
+     */
     private OffsetDateTime createdAt;
 
+    /**
+     * 创建者
+     */
     private Long createdBy;
+
+    private Integer objectCount;
 
     private String frontId;
 

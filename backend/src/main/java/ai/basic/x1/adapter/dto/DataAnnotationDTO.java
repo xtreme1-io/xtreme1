@@ -1,4 +1,4 @@
-package ai.basic.x1.entity;
+package ai.basic.x1.adapter.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
@@ -6,13 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.time.OffsetDateTime;
-
+/**
+ * @author chenchao
+ * @date 2022/8/26
+ */
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataAnnotationBO {
+public class DataAnnotationDTO {
+
 
     private Long id;
 
@@ -35,15 +38,4 @@ public class DataAnnotationBO {
      * 类型属性
      */
     private JsonNode classificationAttributes;
-
-    /**
-     * 创建时间
-     */
-    private OffsetDateTime createdAt;
-
-    /**
-     * 创建者
-     */
-    private Long createdBy;
-
 }

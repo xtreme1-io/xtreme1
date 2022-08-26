@@ -28,7 +28,9 @@ public enum UsecaseCode {
 
     FILE_URL_ERROR("FILE_URL_ERROR", "File url error"),
 
-    DATASET_NOT_FOUND("DATASET_NOT_FOUND", "Dataset not found");
+    DATASET_NOT_FOUND("DATASET_NOT_FOUND", "Dataset not found"),
+
+    DATASET__DATA__DATA_HAS_BEEN_UNLOCKED("DATASET__DATA_DATA_HAS_BEEN_UNLOCKED", "The data has been unlocked");
 
     // Storage
 
