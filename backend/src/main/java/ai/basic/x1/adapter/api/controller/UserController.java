@@ -15,9 +15,11 @@ import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author Jagger Wang、Zhujh
@@ -69,6 +71,12 @@ public class UserController extends BaseController {
         return UserDTO.fromBO(userUseCase.update(user));
     }
 
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Long uploadAvatar(@RequestPart(value = "file") MultipartFile file,
+                             @LoggedUser LoggedUserDTO loggedUser) {
+        return userUseCase.uploadAvatar(file, loggedUser.getId());
+    }
+
     @GetMapping("/list")
     public Page<UserDTO> list(@RequestParam(required = false) String nickname,
                               @RequestParam(defaultValue = "1") Integer pageNo,
@@ -80,6 +88,10 @@ public class UserController extends BaseController {
     @GetMapping("/logged")
     public UserDTO logged(@LoggedUser LoggedUserDTO loggedUserDTO) {
         return UserDTO.fromBO(userUseCase.findById(loggedUserDTO.getId()));
+    }
+
+    @GetMapping("/logout")
+    public void logout() {
     }
 
     @GetMapping("/info/{id}")

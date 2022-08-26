@@ -19,6 +19,10 @@ public enum UsecaseCode {
 
     LOGIN_STATUS_TIMEOUT("LOGIN_STATUS_TIMEOUT", "User login status timeout"),
 
+    USER_EXIST("USER_EXIST", "User already existed"),
+
+    FILE_TYPE_NOT_SUPPORT("FILE_TYPE_NOT_SUPPORT", "File type not support"),
+
     // Dataset
     DATASET_NAME_DUPLICATED("DATASET_NAME_DUPLICATED", "Dataset duplicate name"),
 
