@@ -1,5 +1,7 @@
 package ai.basic.x1.entity;
 
+import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
+import ai.basic.x1.entity.enums.DataStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,24 +36,20 @@ public class DataInfoBO {
     private String name;
 
     /**
-     * 数据大小
-     */
-    private Long size;
-
-    /**
-     * 配置参数（例如旋转）存入json由前端控制
-     */
-    private String displaySettings;
-
-    /**
-     * 标注数量
-     */
-    private Integer annotationCount;
-
-    /**
      * 内容（文件夹路径、版本信息）
      */
     private List<FileNodeBO> content;
+
+    /**
+     * 数据状态 INVALID,VALID
+     */
+    private DataStatusEnum status;
+
+    /**
+     * 数据标注状态 ANNOTATED, NOT_ANNOTATED, INVALID
+     */
+    private DataAnnotationStatusEnum annotationStatus;
+
 
     /**
      * 是否删除 0 否 1是
@@ -79,14 +77,14 @@ public class DataInfoBO {
     private Long updatedBy;
 
     /**
-     * 文件Id
-     */
-    private Long fileId;
-
-    /**
      * 锁定人员的名称
      */
     private String lockedBy;
+
+    /**
+     * 临时数据ID 用于关联获取ID
+     */
+    private Long tempDataId;
 
 
     @Data

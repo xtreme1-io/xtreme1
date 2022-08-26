@@ -76,7 +76,6 @@ public class DatasetController {
                 dataInfoBOList.addAll(datas);
             }
         });
-
         var dataMap = dataInfoUsecase.getDataInfoListFileMap(dataInfoBOList);
         return datasetBOPage.convert(datasetBO -> {
             var datasetDTO = DefaultConverter.convert(datasetBO, DatasetDTO.class);
