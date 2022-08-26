@@ -1,18 +1,20 @@
-package ai.basic.x1.entity;
+package ai.basic.x1.adapter.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.time.OffsetDateTime;
-
+/**
+ * @author chenchao
+ * @date 2022/8/26
+ */
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataAnnotationBO {
+public class DataAnnotationObjectDTO {
 
     private Long id;
 
@@ -29,21 +31,15 @@ public class DataAnnotationBO {
     /**
      * 类型ID
      */
-    private Long classificationId;
+    private Long classId;
+
 
     /**
-     * 类型属性
+     * 对象标注属性
      */
-    private JsonNode classificationAttributes;
+    private JSONObject classAttributes;
 
-    /**
-     * 创建时间
-     */
-    private OffsetDateTime createdAt;
+    private Integer objectCount;
 
-    /**
-     * 创建者
-     */
-    private Long createdBy;
-
+    private String frontId;
 }
