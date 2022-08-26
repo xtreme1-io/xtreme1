@@ -132,4 +132,9 @@ public class CommonConfig implements WebMvcConfigurer {
     public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
         return new DistributedLock(stringRedisTemplate, "basicai:x1:", 5000);
     }
+
+    @Bean
+    public ModelUseCase modelUseCase(){
+        return new ModelUseCase();
+    }
 }
