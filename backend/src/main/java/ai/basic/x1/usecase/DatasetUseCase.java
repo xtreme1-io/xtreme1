@@ -15,7 +15,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -29,9 +28,6 @@ public class DatasetUseCase {
 
     @Autowired
     private DatasetDAO datasetDAO;
-
-    @Autowired
-    private DataInfoUseCase dataInfoUseCase;
 
     @Autowired
     private IDistributedLock distributedLock;

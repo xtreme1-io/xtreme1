@@ -18,9 +18,13 @@ public enum UsecaseCode {
     USERNAME_AND_PASSWORD_NOT_MATCH("USERNAME_AND_PASSWORD_NOT_MATCH", "Username and password not match"),
 
     LOGIN_STATUS_TIMEOUT("LOGIN_STATUS_TIMEOUT", "User login status timeout"),
+
     // Dataset
-    // 数据集名称重复
-    DATASET_NAME_DUPLICATED("DATASET_NAME_DUPLICATED", "Dataset duplicate name");
+    DATASET_NAME_DUPLICATED("DATASET_NAME_DUPLICATED", "Dataset duplicate name"),
+
+    FILE_URL_ERROR("FILE_URL_ERROR", "File url error"),
+
+    DATASET_NOT_FOUND("DATASET_NOT_FOUND", "Dataset not found");
 
     // Storage
 

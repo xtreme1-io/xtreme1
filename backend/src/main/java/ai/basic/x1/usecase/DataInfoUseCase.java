@@ -1,29 +1,52 @@
 package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.DataInfoDAO;
+import ai.basic.x1.adapter.port.dao.DatasetDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetStatistics;
-import ai.basic.x1.entity.DataInfoBO;
-import ai.basic.x1.entity.DataInfoQueryBO;
-import ai.basic.x1.entity.DatasetStatisticsBO;
-import ai.basic.x1.entity.FileBO;
+import ai.basic.x1.adapter.port.minio.MinioProp;
+import ai.basic.x1.adapter.port.minio.MinioService;
+import ai.basic.x1.entity.*;
+import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
+import ai.basic.x1.entity.enums.DataStatusEnum;
+import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.usecase.exception.UsecaseException;
+import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.ByteUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static ai.basic.x1.util.Constants.FILE;
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.LIDAR_BASIC;
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.LIDAR_FUSION;
+import static ai.basic.x1.usecase.exception.UsecaseCode.DATASET_NOT_FOUND;
+import static ai.basic.x1.usecase.exception.UsecaseCode.FILE_URL_ERROR;
+import static ai.basic.x1.util.Constants.*;
 
 /**
  * @author fyb
@@ -38,11 +61,17 @@ public class DataInfoUseCase {
     @Autowired
     private FileUseCase fileUseCase;
 
+    @Autowired
+    private DatasetDAO datasetDAO;
 
-    /*public DataInfoUseCase() {
-        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-    }*/
+    @Autowired
+    private MinioService minioService;
 
+    @Autowired
+    private MinioProp minioProp;
+
+    @Value("${file.tempPath:/tmp/x1/}")
+    private String tempPath;
 
     /**
      * 批量删除
@@ -179,6 +208,491 @@ public class DataInfoUseCase {
         var datasetStatisticsList = dataInfoDAO.getBaseMapper().getDatasetStatisticsByDatasetIds(datasetIds);
         return datasetStatisticsList.stream()
                 .collect(Collectors.toMap(DatasetStatistics::getDatasetId, datasetStatistics -> DefaultConverter.convert(datasetStatistics, DatasetStatisticsBO.class), (k1, k2) -> k1));
+    }
+
+    /**
+     * generate pre-signed url
+     *
+     * @param fileName  file name
+     * @param datasetId dataset id
+     * @param userId    user id
+     */
+    public PresignedUrlBO generatePresignedUrl(String fileName, Long datasetId, Long userId) {
+        var objectName = String.format("%s/%s/%s/%s", userId, datasetId, UUID.randomUUID().toString().replace("-", ""), fileName);
+        try {
+            return minioService.generatePresignedUrl(minioProp.getBucketName(), objectName);
+        } catch (Exception e) {
+            log.error("Minio generate presigned url error", e);
+            throw new UsecaseException("minio generate presigned url error!");
+        }
+    }
+
+    /**
+     * 批量插入
+     *
+     * @param dataInfoBOList 数据详情集合
+     */
+    public List<DataInfoBO> insertBatch(List<DataInfoBO> dataInfoBOList) {
+        List<DataInfo> infos = DefaultConverter.convert(dataInfoBOList, DataInfo.class);
+        dataInfoDAO.getBaseMapper().insertBatch(infos);
+        return DefaultConverter.convert(infos, DataInfoBO.class);
+    }
+
+    /**
+     * 往dataset中上传数据
+     *
+     * @param dataInfoUploadBO 上传数据对象 包含文件信息集合
+     */
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void upload(DataInfoUploadBO dataInfoUploadBO) throws IOException {
+        boolean boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
+        if (!boo) {
+            throw new UsecaseException(FILE_URL_ERROR);
+        }
+        var dataset = datasetDAO.getById(dataInfoUploadBO.getDatasetId());
+        if (ObjectUtil.isNull(dataset)) {
+            throw new UsecaseException(DATASET_NOT_FOUND);
+        }
+        dataInfoUploadBO.setType(dataset.getType());
+        if (DatasetTypeEnum.IMAGE.equals(dataset.getType())) {
+            downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageUploadFile);
+        } else {
+            downloadAndDecompressionFile(dataInfoUploadBO, this::parsePointCloudUploadFile);
+        }
+    }
+
+    private void parsePointCloudUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+        var datasetId = dataInfoUploadBO.getDatasetId();
+        var userId = dataInfoUploadBO.getUserId();
+        var datasetType = dataInfoUploadBO.getType();
+        var pointCloudList = new ArrayList<File>();
+        findPointCloudList(tempPath, pointCloudList);
+        var rootPath = String.format("%s/%s/%s/", userId, datasetId, UUID.randomUUID().toString().replace("-", ""));
+        log.info("Get point_cloud datasetId:{},size:{}", datasetId, pointCloudList.size());
+        if (CollectionUtil.isEmpty(pointCloudList)) {
+            throw new UsecaseException("The format of the compressed package is incorrect. It must contain point_cloud");
+        }
+        pointCloudList.forEach(pointCloudFile -> {
+            var isError = this.validDirectoryFormat(pointCloudFile.getParentFile(), datasetType);
+            if (isError) {
+                return;
+            }
+            var dataNameList = getDataNames(pointCloudFile.getParentFile(), datasetType);
+            if (CollectionUtil.isEmpty(dataNameList)) {
+                log.error("The file in {} folder is empty", pointCloudFile.getParentFile().getName());
+                return;
+            }
+            log.info("Get data name,pointCloudParentName:{},dataName:{} ", pointCloudFile.getParentFile().getName(), JSONUtil.toJsonStr(dataNameList));
+            var dataInfoBOList = new ArrayList<DataInfoBO>();
+            var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>();
+            var dataInfoBOBuilder = DataInfoBO.builder().datasetId(datasetId).status(DataStatusEnum.VALID)
+                    .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
+                    .createdAt(OffsetDateTime.now())
+                    .updatedAt(OffsetDateTime.now())
+                    .createdBy(userId)
+                    .isDeleted(false);
+            var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
+                    .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
+            for (var dataName : dataNameList) {
+                var dataFiles = getDataFiles(pointCloudFile.getParentFile(), dataName, datasetType);
+                if (CollectionUtil.isNotEmpty(dataFiles)) {
+                    var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
+                    dataAnnotationObjectBOBuilder.dataId(tempDataId);
+                    handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBOBuilder, dataAnnotationObjectBOList);
+                    var fileNodeList = assembleContent(userId, dataFiles, rootPath, tempPath);
+                    log.info("get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
+                    var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
+                    dataInfoBOList.add(dataInfoBO);
+                    if (dataInfoBOList.size() == BATCH_SIZE) {
+                        var dataInfoBOS = insertBatch(dataInfoBOList);
+                        saveBatchDataResult(dataInfoBOS, dataAnnotationObjectBOList);
+                        dataInfoBOList.clear();
+                    }
+                }
+            }
+            if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+                var insertRs = insertBatch(dataInfoBOList);
+                saveBatchDataResult(insertRs, dataAnnotationObjectBOList);
+            }
+        });
+    }
+
+    private void parseImageUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+        var userId = dataInfoUploadBO.getUserId();
+        var datasetId = dataInfoUploadBO.getDatasetId();
+        var files = FileUtil.loopFiles(Paths.get(tempPath), 2, filefilter);
+        var rootPath = String.format("%s/%s/%s/", userId, datasetId, UUID.randomUUID().toString().replace("-", ""));
+        var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
+                .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
+        var dataInfoBOList = new ArrayList<DataInfoBO>();
+        var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>();
+        var dataInfoBOBuilder = DataInfoBO.builder().datasetId(datasetId).status(DataStatusEnum.VALID)
+                .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
+                .createdAt(OffsetDateTime.now())
+                .updatedAt(OffsetDateTime.now())
+                .createdBy(userId)
+                .isDeleted(false);
+        if (CollectionUtil.isNotEmpty(files)) {
+            //500为一段
+            var list = ListUtil.split(files, 50);
+            list.forEach(fl -> {
+                var fileBOS = uploadFileList(userId,rootPath,tempPath,fl);
+                fileBOS.forEach(fileBO -> {
+                    var file = FileUtil.file(tempPath+fileBO.getPath().replace(rootPath,""));
+                    handleDataResult(file.getParentFile(),fileBO.getName(), dataAnnotationObjectBOBuilder, dataAnnotationObjectBOList);
+                    var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
+                            .fileId(fileBO.getId()).type(FILE).build();
+                    var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).build();
+                    dataInfoBOList.add(dataInfoBO);
+                });
+                if(CollectionUtil.isNotEmpty(dataInfoBOList)){
+                    var resDataInfoList = insertBatch(dataInfoBOList);
+                    saveBatchDataResult(resDataInfoList,dataAnnotationObjectBOList);
+                }
+            });
+        } else {
+            log.error("Image compressed package is empty,dataset id:{},filePath:{}", datasetId, dataInfoUploadBO.getFileUrl());
+        }
+    }
+
+    /**
+     * 这个文件过滤器会过滤掉文件后缀不是image的文件，当返回为false时则丢弃文件
+     */
+    private FileFilter filefilter = file -> {
+        //if the file extension is image return true, else false
+        return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath()));
+    };
+
+    /**
+     * 保存数据结果
+     *
+     * @param dataInfoBOList             已经保存的数据集合
+     * @param dataAnnotationObjectBOList 需要保存的数据结果集合
+     */
+    public void saveBatchDataResult(List<DataInfoBO> dataInfoBOList, List<DataAnnotationObjectBO> dataAnnotationObjectBOList) {
+        var dataIdMap = dataInfoBOList.stream()
+                .collect(Collectors.toMap(DataInfoBO::getTempDataId, DataInfoBO::getId, (k1, k2) -> k1));
+        if (CollectionUtil.isNotEmpty(dataAnnotationObjectBOList)) {
+            dataAnnotationObjectBOList.forEach(d -> d.setDataId(dataIdMap.get(d.getDataId())));
+            //TODO
+            //dataAnnotationObjectDAO.insertBatch(DefaultConverter.convert(dataAnnotationObjectBOList, DataAnnotationObject.class));
+            dataAnnotationObjectBOList.clear();
+        }
+    }
+
+    /**
+     * 组装单帧的content
+     *
+     * @param dataFiles 单帧组成文件
+     * @param rootPath  根路径
+     * @return 单帧content
+     */
+    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath, String tempPath) {
+        var nodeList = new ArrayList<DataInfoBO.FileNodeBO>();
+        var files = new ArrayList<File>();
+        dataFiles.forEach(dataFile -> {
+            var parentName = dataFile.getParentFile().getName();
+            var node = DataInfoBO.FileNodeBO.builder()
+                    .name(StrUtil.toCamelCase(parentName))
+                    .type(DIRECTORY)
+                    .files(getDirList(dataFile, rootPath, files)).build();
+            nodeList.add(node);
+        });
+        var fileBOS = uploadFileList(userId, rootPath, tempPath, files);
+        var fileIdMap = fileBOS.stream().collect(Collectors.toMap(FileBO::getPathHash, FileBO::getId));
+        replaceFileId(nodeList, fileIdMap);
+        nodeList.sort(Comparator.comparing(DataInfoBO.FileNodeBO::getName));
+        return nodeList;
+    }
+
+    /**
+     * 将content中的fileId替换为真实的fileId
+     *
+     * @param nodeList  nodeList
+     * @param fileIdMap 文件ID Map
+     */
+    private void replaceFileId(List<DataInfoBO.FileNodeBO> nodeList, Map<Long, Long> fileIdMap) {
+        nodeList.forEach(fileNodeBO -> {
+            if (fileNodeBO.getType().equals(FILE)) {
+                fileNodeBO.setFileId(fileIdMap.get(fileNodeBO.getFileId()));
+            } else if (fileNodeBO.getType().equals(DIRECTORY) && CollectionUtil.isNotEmpty(fileNodeBO.getFiles())) {
+                replaceFileId(fileNodeBO.getFiles(), fileIdMap);
+            }
+        });
+    }
+
+    /**
+     * 上传文件list
+     *
+     * @param rootPath 路径前缀
+     * @param files    文件列表
+     * @return 上传后的文件对象集合
+     */
+    public List<FileBO> uploadFileList(Long userId, String rootPath, String tempPath, List<File> files) {
+        var bucketName = minioProp.getBucketName();
+        try {
+            minioService.uploadFileList(bucketName, rootPath, tempPath, files);
+        } catch (Exception e) {
+            log.error("batch upload file error,filesPath:{}", JSONUtil.parseArray(files.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
+        }
+        var fileBOS = new ArrayList<FileBO>();
+        files.forEach(file -> {
+            var path = rootPath + file.getAbsolutePath().replace(tempPath, "");
+            var mimeType = FileUtil.getMimeType(path);
+            var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(bucketName)
+                    .size(file.length()).path(path).type(mimeType).build();
+            fileBOS.add(fileBO);
+        });
+        return fileUseCase.saveBatchFile(userId, fileBOS);
+    }
+
+    /**
+     * 处理 data 对应的标注结果
+     *
+     * @param file                          图片为data父级，点云文件为point_cloud
+     * @param dataName                      数据名称
+     * @param dataAnnotationObjectBOBuilder 数据标注builder
+     * @param dataAnnotationObjectBOList    数据标注结果数据集
+     */
+    public void handleDataResult(File file, String dataName, DataAnnotationObjectBO.DataAnnotationObjectBOBuilder dataAnnotationObjectBOBuilder, List<DataAnnotationObjectBO> dataAnnotationObjectBOList) {
+        var resultFile = FileUtil.loopFiles(file).stream()
+                .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && getFileName(fc).equals(dataName)
+                        && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
+        if (resultFile.isPresent()) {
+            try {
+                var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
+                var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
+                result.getResults().forEach(resultBO -> resultBO.getObjects().forEach(object -> {
+                    var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.classAttributes(object).build();
+                    dataAnnotationObjectBOList.add(dataAnnotationObjectBO);
+                }));
+            } catch (Exception e) {
+                var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.build();
+                log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
+            }
+        }
+    }
+
+    /**
+     * 查找某一个data的文件
+     *
+     * @param file file
+     */
+    private List<File> getDataFiles(File file, String dataName, DatasetTypeEnum type) {
+        var dataFiles = new ArrayList<File>();
+        var isErr = false;
+        for (var f : Objects.requireNonNull(file.listFiles())) {
+            var boo = validateFileNameByType(f, type);
+            if (boo) {
+                var fcList = Arrays.stream(Objects.requireNonNull(f.listFiles()))
+                        .filter(fc -> (validateFileFormat(fc) && getFileName(fc).equals(dataName))).collect(Collectors.toList());
+                var count = fcList.size();
+                switch (count) {
+                    case 0:
+                        log.error("Missing files in {} folder,file name is {}", f.getName(), dataName);
+                        isErr = true;
+                        break;
+                    case 1:
+                        dataFiles.addAll(fcList);
+                        break;
+                    default:
+                        log.error("There are duplicate files in {} folder,file name is {}", f.getName(), dataName);
+                        isErr = true;
+                }
+            }
+        }
+        return isErr ? ListUtil.empty() : dataFiles;
+    }
+
+    /**
+     * Get the name collection of data
+     *
+     * @param pointCloudParentFile point_cloud parent file
+     */
+    private List<String> getDataNames(File pointCloudParentFile, DatasetTypeEnum type) {
+        var dataNames = new LinkedHashSet<String>();
+        for (var f : Objects.requireNonNull(pointCloudParentFile.listFiles())) {
+            var boo = validateFileNameByType(f, type);
+            if (boo) {
+                var list = Arrays.stream(Objects.requireNonNull(f.listFiles())).filter(this::validateFileFormat).map(this::getFileName).collect(Collectors.toSet());
+                dataNames.addAll(list);
+            }
+        }
+        return dataNames.stream().sorted().collect(Collectors.toList());
+    }
+
+    /**
+     * 获取文件名称 去掉后缀
+     *
+     * @param file 文件或者文件夹
+     * @return 文件名称
+     */
+    private String getFileName(File file) {
+        var fileName = file.getName();
+        if (FileUtil.isFile(file)) {
+            fileName = fileName.substring(0, fileName.lastIndexOf("."));
+        }
+        return fileName;
+    }
+
+    /**
+     * 根据上传压缩包类型验证文件名称是否正确
+     *
+     * @param f    压缩包中文件
+     * @param type 上传类型
+     * @return 文件名称是否正确
+     */
+    private boolean validateFileNameByType(File f, DatasetTypeEnum type) {
+        var fileName = f.getName();
+        var boo = false;
+        if (type.equals(LIDAR_FUSION)) {
+            boo = f.isDirectory() && (fileName.startsWith(POINT_CLOUD_IMG) || fileName.equals(POINT_CLOUD) || fileName.equals(CAMERA_CONFIG));
+        } else if (type.equals(DatasetTypeEnum.LIDAR_BASIC)) {
+            boo = f.isDirectory() && fileName.equals(POINT_CLOUD);
+        }
+        return boo;
+    }
+
+    /**
+     * 验证文件格式是否正确
+     *
+     * @param file 文件对象
+     * @return 文件格式是否正确
+     */
+    private boolean validateFileFormat(File file) {
+        var boo = false;
+        var mimeType = FileUtil.getMimeType(file.getAbsolutePath());
+        var fileName = file.getName();
+        if (DATA_TYPE.contains(mimeType) || fileName.toUpperCase().endsWith(PCD_SUFFIX) ||
+                fileName.toUpperCase().endsWith(JSON_SUFFIX)) {
+            boo = true;
+        } else {
+            log.error("this format file is not supported,filePath:{}", file.getAbsolutePath());
+        }
+        return boo;
+    }
+
+    /**
+     * 验证文件格式。
+     * 如果 type 是 LIDAR_FUSION 类型, 文件目录必须包含：image、point_cloud、camera_config.
+     * 如果 type 是 LIDAR_BASIC 类型, 文件目录必须包含：point_cloud
+     *
+     * @param pointCloudParentFile point_cloud目录的父目录
+     * @param type                 上传类型
+     */
+    private boolean validDirectoryFormat(File pointCloudParentFile, DatasetTypeEnum type) {
+        var dirNames = Arrays.stream(Objects.requireNonNull(pointCloudParentFile.listFiles()))
+                .filter(File::isDirectory)
+                .map(file -> {
+                    var fileName = file.getName();
+                    if (fileName.startsWith(POINT_CLOUD_IMG)) {
+                        return POINT_CLOUD_IMG;
+                    } else if (fileName.equals(POINT_CLOUD)) {
+                        return POINT_CLOUD;
+                    } else if (fileName.equals(CAMERA_CONFIG)) {
+                        return CAMERA_CONFIG;
+                    } else {
+                        return fileName;
+                    }
+                })
+                .collect(Collectors.toSet());
+
+        var allMatchDirFormat = false;
+        var missDirs = new HashSet<String>();
+        if (type.equals(LIDAR_FUSION)) {
+            var fusionDirNames = Sets.newHashSet(POINT_CLOUD_IMG, POINT_CLOUD, CAMERA_CONFIG);
+            allMatchDirFormat = dirNames.containsAll(fusionDirNames);
+            missDirs.addAll(Sets.difference(fusionDirNames, dirNames));
+        } else if (type.equals(LIDAR_BASIC)) {
+            var basicDirNames = Sets.newHashSet(POINT_CLOUD);
+            allMatchDirFormat = dirNames.containsAll(basicDirNames);
+            missDirs.addAll(Sets.difference(basicDirNames, dirNames));
+        }
+        if (!allMatchDirFormat) {
+            log.error("压缩文件格式缺失: " + missDirs);
+        }
+        return !allMatchDirFormat;
+    }
+
+    /**
+     * 查找所有点云的文件夹
+     *
+     * @param path path
+     */
+    private void findPointCloudList(String path, List<File> pointCloudList) {
+        var file = new File(path);
+        if (FileUtil.isDirectory(path)) {
+            for (var f : Objects.requireNonNull(file.listFiles())) {
+                getPointCloudFile(f, pointCloudList);
+                if (f.isDirectory()) {
+                    findPointCloudList(f.getAbsolutePath(), pointCloudList);
+                }
+            }
+        }
+    }
+
+    /**
+     * 根据固定的文件夹获取文件夹下的文件夹或者文件的名称 用于判断该压缩包中有多少贞数据
+     *
+     * @param file           file
+     * @param pointCloudList point_cloud文件夹集合
+     */
+    private void getPointCloudFile(File file, List<File> pointCloudList) {
+        var fileName = file.getName();
+        if (POINT_CLOUD.equals(fileName)) {
+            pointCloudList.add(file);
+        }
+    }
+
+    public DataInfoBO.FileNodeBO getNode(File node, String rootPath, List<File> files) {
+        if (node.isDirectory()) {
+            return DataInfoBO.FileNodeBO.builder()
+                    .name(StrUtil.toCamelCase(node.getName()))
+                    .type(DIRECTORY)
+                    .files(getDirList(node, rootPath, files)).build();
+        } else {
+            var path = rootPath + node.getAbsolutePath();
+            var fileId = ByteUtil.bytesToLong(SecureUtil.md5().digest(path));
+            files.add(node);
+            return DataInfoBO.FileNodeBO.builder()
+                    .name(node.getName())
+                    .fileId(fileId)
+                    .type(FILE).build();
+        }
+    }
+
+    public List<DataInfoBO.FileNodeBO> getDirList(File node, String rootPath, List<File> files) {
+        List<DataInfoBO.FileNodeBO> nodeList = new ArrayList<>();
+        if (node.isDirectory()) {
+            for (File n : Objects.requireNonNull(node.listFiles())) {
+                nodeList.add(getNode(n, rootPath, files));
+            }
+        } else {
+            nodeList.add(getNode(node, rootPath, files));
+        }
+        return nodeList;
+    }
+
+
+    public <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
+        var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
+        var datasetId = dataInfoUploadBO.getDatasetId();
+        var path = fileUrl;
+        if (path.contains("?")) {
+            path = path.substring(0, path.indexOf("?"));
+        }
+        tempPath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
+        var savePath = tempPath + FileUtil.getName(path);
+        FileUtil.mkParentDirs(savePath);
+        //将压缩包下载到本地
+        log.info("get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
+        HttpUtil.downloadFileFromUrl(fileUrl, savePath);
+        log.info("get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
+
+        //解压文件
+        log.info("start decompression,datasetId:{},filePath:{}", datasetId, savePath);
+        DecompressionFileUtils.decompress(savePath, tempPath);
+        function.accept(dataInfoUploadBO);
     }
 
 
