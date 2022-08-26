@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.groups.Default;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +35,6 @@ public class DataAnnotationController {
 
     @GetMapping("listByDataIds")
     public List<DataAnnotationDTO> listByDataIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
-        var queryDate = OffsetDateTime.now();
         var dataAnnotations = DefaultConverter.convert(
                 dataAnnotationUseCase.findByDataIds(dataIds), DataAnnotationDTO.class);
         return dataAnnotations;
