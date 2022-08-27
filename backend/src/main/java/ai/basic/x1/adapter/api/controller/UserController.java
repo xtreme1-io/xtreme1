@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.api.filter.JwtPayload;
 import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.adapter.dto.UserDTO;
 import ai.basic.x1.adapter.dto.request.UserAuthRequestDTO;
+import ai.basic.x1.adapter.dto.request.UserDeleteRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserUpdateRequestDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
 import ai.basic.x1.entity.UserBO;
@@ -14,9 +15,11 @@ import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author Jagger Wang、Zhujh
@@ -34,8 +37,7 @@ public class UserController extends BaseController {
 
     @PostMapping("/register")
     public UserDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
-        return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()
-                , authDto.getIsSubscribeNewsLetter()));
+        return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()));
     }
 
     @PostMapping("/login")
@@ -55,9 +57,10 @@ public class UserController extends BaseController {
                 .build();
     }
 
-    @PostMapping("/delete/{userId}")
-    public UserDTO delete(@PathVariable Long userId) {
-        return UserDTO.fromBO(userUseCase.deleteById(userId));
+    @PostMapping("/delete")
+    public void delete(@RequestBody UserDeleteRequestDTO deleteRequestDTO,
+                          @LoggedUser LoggedUserDTO loggedUser) {
+        userUseCase.deleteOtherUsers(deleteRequestDTO.getUserIds(), loggedUser.getId());
     }
 
     @PostMapping("/update")
@@ -66,6 +69,12 @@ public class UserController extends BaseController {
         var user = DefaultConverter.convert(updateRequestDTO, UserBO.class);
         user.setId(loggedUser.getId());
         return UserDTO.fromBO(userUseCase.update(user));
+    }
+
+    @PostMapping(value = "/uploadAvatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Long uploadAvatar(@RequestPart(value = "file") MultipartFile file,
+                             @LoggedUser LoggedUserDTO loggedUser) {
+        return userUseCase.uploadAvatar(file, loggedUser.getId());
     }
 
     @GetMapping("/list")
@@ -77,8 +86,12 @@ public class UserController extends BaseController {
     }
 
     @GetMapping("/logged")
-    public LoggedUserDTO logged(@LoggedUser LoggedUserDTO loggedUserDTO) {
-        return loggedUserDTO;
+    public UserDTO logged(@LoggedUser LoggedUserDTO loggedUserDTO) {
+        return UserDTO.fromBO(userUseCase.findById(loggedUserDTO.getId()));
+    }
+
+    @GetMapping("/logout")
+    public void logout() {
     }
 
     @GetMapping("/info/{id}")

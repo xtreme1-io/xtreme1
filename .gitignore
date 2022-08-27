@@ -1,8 +1,10 @@
+local/
 target/
+dist/
+node_modules/
 log/
 out/
-build/
-.ops/local
+docker-compose.override.yml
 
 ### STS ###
 .apt_generated

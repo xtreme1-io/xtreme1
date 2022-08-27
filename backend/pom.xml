@@ -11,7 +11,7 @@
 
     <groupId>ai.basic</groupId>
     <artifactId>x1-community-backend</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
     <name>X1 Community Backend</name>
     <description></description>
 
@@ -23,6 +23,7 @@
         <jjwt.version>0.9.1</jjwt.version>
         <mybatis-plus.version>3.5.0</mybatis-plus.version>
         <transmittable-thread-local.version>2.12.6</transmittable-thread-local.version>
+        <minio-version>8.3.7</minio-version>
     </properties>
 
     <dependencies>
@@ -138,6 +139,18 @@
             <groupId>com.alibaba</groupId>
             <artifactId>transmittable-thread-local</artifactId>
             <version>${transmittable-thread-local.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.8.1</version>
         </dependency>
     </dependencies>
 

@@ -38,7 +38,7 @@ public class CommonConfig implements WebMvcConfigurer {
     @Value("${jwt.expireHours}")
     public Integer jwtExpireHours;
 
-    public static final List<String> excludeUris = List.of("/user/login", "/user/register","/error");
+    public static final List<String> excludeUris = List.of("/user/login", "/user/register", "/error");
 
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
@@ -105,8 +105,64 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
-        return new DistributedLock(stringRedisTemplate, "x1:dataset:", 30000);
+    public ClassUseCase classUseCase() {
+        return new ClassUseCase();
     }
 
+    @Bean
+    public ClassificationUseCase classificationUseCase() {
+        return new ClassificationUseCase();
+    }
+
+    @Bean
+    public DatasetClassUseCase datasetClassUseCase() {
+        return new DatasetClassUseCase();
+    }
+
+    @Bean
+    public DatasetClassificationUseCase datasetClassificationUseCase() {
+        return new DatasetClassificationUseCase();
+    }
+
+    @Bean
+    public OntologyUseCase ontologyUseCase() {
+        return new OntologyUseCase();
+    }
+
+    @Bean
+    public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
+        return new DistributedLock(stringRedisTemplate, "basicai:x1:", 5000);
+    }
+
+    @Bean
+    public ModelUseCase modelUseCase() {
+        return new ModelUseCase();
+    }
+
+    @Bean
+    public DataAnnotationObjectUseCase dataAnnotationObjectUseCase() {
+        return new DataAnnotationObjectUseCase();
+    }
+
+    @Bean
+    public DataAnnotationUseCase dataAnnotationUseCase() {
+        return new DataAnnotationUseCase();
+    }
+
+    @Bean
+    public DataAnnotationRecordUseCase dataAnnotationRecordUseCase() {
+        return new DataAnnotationRecordUseCase();
+    }
+
+    @Bean
+    public DataEditUseCase dataEditUseCase() {
+        return new DataEditUseCase();
+    }
+
+
+
+    @Bean
+    public DataFlowUseCase dataFlowUseCase(){
+        return new DataFlowUseCase();
+    }
 }

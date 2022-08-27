@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.ClassMapper">
+
+    <!-- generic query result column -->
+    <sql id="Base_Column_List">
+        id, ontology_id, name, color, tool_type, tool_type_options, attributes, is_deleted,created_at, created_by, updated_at, updated_by
+    </sql>
+    <select id="countGroupByOntologyId" resultType="ai.basic.x1.adapter.port.dao.mybatis.model.Class">
+        select ontology_id as "ontology_id",
+               count(id) as "class_num"
+        from class
+        where is_deleted = 0
+          and ontology_id in
+            <foreach collection="ontologyIds" item="ontology_id" index="index" open="(" close=")" separator=",">
+                #{ontology_id}
+            </foreach>
+        group by ontology_id;
+    </select>
+
+
+</mapper>

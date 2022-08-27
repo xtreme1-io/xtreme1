@@ -2,8 +2,11 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.ExportRecordDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ExportRecord;
+import ai.basic.x1.adapter.port.minio.MinioProp;
+import ai.basic.x1.adapter.port.minio.MinioService;
 import ai.basic.x1.entity.BaseQueryBO;
 import ai.basic.x1.entity.ExportRecordBO;
+import ai.basic.x1.entity.FileBO;
 import ai.basic.x1.entity.enums.ExportStatusEnum;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.Page;
@@ -28,13 +31,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 public class ExportUseCase {
 
-    @Value("${file.tempPath:/temp/}")
-    private String tempPath;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -43,6 +45,18 @@ public class ExportUseCase {
 
     @Autowired
     private ExportRecordDAO exportRecordDAO;
+
+    @Autowired
+    private MinioService minioService;
+
+    @Autowired
+    private MinioProp minioProp;
+
+    @Autowired
+    private FileUseCase fileUseCase;
+
+    @Value("${file.tempPath:/tmp}")
+    private String tempPath;
 
     @FunctionalInterface
     public interface Function2<A, B, R> {
@@ -82,7 +96,7 @@ public class ExportUseCase {
         var lambdaQueryWrapper = new LambdaQueryWrapper<ExportRecord>();
         lambdaQueryWrapper.in(ExportRecord::getSerialNumber, serialNumber);
         var exportRecord = exportRecordDAO.getOne(lambdaQueryWrapper);
-        var fullPath = String.format("%s%s/%s.json", tempPath, System.currentTimeMillis(), FileUtil.getPrefix(fileName));
+        var fullPath = String.format("%s/%s/%s.json", tempPath, System.currentTimeMillis(), FileUtil.getPrefix(fileName));
         var file = FileUtil.newFile(fullPath);
         FileUtil.mkParentDirs(file);
         getDataAndUpload(exportRecord, file, firstContent, lastContent, query, fun, processData);
@@ -114,29 +128,26 @@ public class ExportUseCase {
                         write.flush();
                     }
                     var path = String.format("%s/%s", rootPath, file.getName());
-                    /*ossService.uploadFile(path, file, datasetBucketName);
-                    var fileDTOs = new ArrayList<FileDTO>();
-                    var mimeType = MimeUtil.getMimeTypes(file).stream().findFirst().orElse("").toString();
-                    var fileDTO = FileDTO.builder().name(file.getName()).originalName(file.getName()).region(region).bucketName(datasetBucketName)
-                            .size(file.length()).path(path).type(mimeType).build();
-                    fileDTOs.add(fileDTO);
-                    var apiResult = storageService.saveBatchFile(fileDTOs);
-                    if (UsecaseCode.OK.equals(apiResult.getCode())) {
+                    try {
+                        var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(minioProp.getBucketName())
+                                .size(file.length()).path(path).type(FileUtil.getMimeType(path)).build();
+                        var resFileBOS = fileUseCase.saveBatchFile(record.getCreatedBy(), Collections.singletonList(fileBO));
+                        minioService.uploadFile(minioProp.getBucketName(), path, FileUtil.getInputStream(file), FileUtil.getMimeType(path), file.length());
                         var exportRecord = exportRecordBuilder
-                                .fileId(CollectionUtil.getFirst(apiResult.getData()).getId())
-                                .status(ExportEnum.COMPLETED)
+                                .fileId(CollectionUtil.getFirst(resFileBOS).getId())
+                                .status(ExportStatusEnum.COMPLETED)
                                 .generatedNum(page.getTotal())
                                 .totalNum(page.getTotal())
                                 .updatedAt(OffsetDateTime.now())
                                 .build();
                         exportRecordDAO.saveOrUpdate(exportRecord);
-                    } else {
-                        logger.error("upload file error,message:{}", apiResult.getMessage());
-                        throw new UsecaseException("upload file error");
-                    }*/
+                    } catch (Exception e) {
+                        logger.error("Upload file error", e);
+                        throw new UsecaseException("Upload file error!");
+                    }
                     break;
                 }
-                var jsonConfig = JSONConfig.create().setDateFormat(DatePattern.NORM_DATETIME_PATTERN).setOrder(true);
+                var jsonConfig = JSONConfig.create().setDateFormat(DatePattern.NORM_DATETIME_PATTERN);
                 var list = page.getList();
                 var jsonString = JSONUtil.toJsonStr(null != processData ? processData.apply(list, query) : list, jsonConfig);
                 //DefaultConverter

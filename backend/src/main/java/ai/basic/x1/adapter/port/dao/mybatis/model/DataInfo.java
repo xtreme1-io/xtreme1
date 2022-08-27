@@ -85,6 +85,12 @@ public class DataInfo implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updatedBy;
 
+    /**
+     * 临时数据ID 用于关联获取ID
+     */
+    @TableField(exist = false)
+    private Long tempDataId;
+
     @Data
     @Builder
     @NoArgsConstructor

@@ -1,28 +1,34 @@
 package ai.basic.x1.usecase;
 
-import ai.basic.x1.adapter.port.dao.FileDAO;
 import ai.basic.x1.adapter.port.dao.UserDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.File;
 import ai.basic.x1.adapter.port.dao.mybatis.model.User;
+import ai.basic.x1.adapter.port.minio.MinioProp;
+import ai.basic.x1.adapter.port.minio.MinioService;
+import ai.basic.x1.entity.FileBO;
 import ai.basic.x1.entity.UserBO;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -40,32 +46,35 @@ public class UserUseCase {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private FileDAO fileDAO;
+    private FileUseCase fileUseCase;
 
-    public UserBO create(String username, String password, Boolean isSubscribeNewsLetter) {
+    @Autowired
+    private MinioService minioService;
+
+    @Autowired
+    private MinioProp minioProp;
+
+    public UserBO create(String username, String password) {
         var existUser = findByUsername(username);
         if (existUser != null) {
-            throw new UsecaseException(UsecaseCode.UNKNOWN, "User already existed");
+            throw new UsecaseException(UsecaseCode.USER_EXIST);
         }
         var newUser = User.builder().username(username)
                 .nickname(StrUtil.subBefore(username, "@", false))
                 .password(passwordEncoder.encode(password)).build();
         userDAO.save(newUser);
-        if (Boolean.TRUE.equals(isSubscribeNewsLetter)) {
-            subscribeNewsLetterAsync(username);
-        }
         return findByUsername(username);
     }
 
-    public UserBO deleteById(Long id) {
-        var user = findById(id);
-        if (user == null) {
-            throw new UsecaseException(UsecaseCode.UNKNOWN, "not found user");
+    @CacheEvict(cacheNames = "user", allEntries = true)
+    public void deleteOtherUsers(Set<Long> ids, Long currentUserId) {
+        if (CollUtil.isNotEmpty(ids)) {
+            ids.remove(currentUserId);
+            userDAO.removeByIds(ids);
         }
-        userDAO.removeById(id);
-        return user;
     }
 
+    @CacheEvict(cacheNames = "user", key = "#user.id", condition = "#user.id != null ")
     public UserBO update(UserBO user) {
         Assert.notNull(user, "user is null");
         Assert.notNull(user.getId(), "userId is null");
@@ -87,6 +96,7 @@ public class UserUseCase {
                 UserBO.class);
     }
 
+    @Cacheable(cacheNames = "user", key = "#id", unless = "#result == null ")
     public UserBO findById(Long id) {
         var user = userDAO.getById(id);
         if (user == null) {
@@ -96,6 +106,14 @@ public class UserUseCase {
         return wrapUser(user.toBO());
     }
 
+    public List<UserBO> findByIds(List<Long> userIds) {
+        if (CollUtil.isEmpty(userIds)) {
+            return List.of();
+        }
+        return wrapUsers(userDAO.listByIds(userIds).stream().map(User::toBO).collect(Collectors.toList()));
+    }
+
+    @CachePut(cacheNames = "user", key = "#result.id", condition = "#result != null ")
     public UserBO findByUsername(String username) {
         var user = userDAO.getOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         if (user == null) {
@@ -112,6 +130,31 @@ public class UserUseCase {
         userDAO.updateById(updateUser);
     }
 
+    public Long uploadAvatar(MultipartFile multipartFile, Long userId) {
+        var contentType = multipartFile.getContentType();
+        var originalFilename = multipartFile.getOriginalFilename();
+        var path = String.format("/user/avatar/%s/%s-%s", userId, System.currentTimeMillis(),
+                originalFilename);
+        var bucketName = minioProp.getBucketName();
+        var fileSize = multipartFile.getSize();
+        if (contentType == null || !contentType.contains("image")) {
+            log.error("not support avatar type upload: " + contentType);
+            throw new UsecaseException(UsecaseCode.FILE_TYPE_NOT_SUPPORT, "Only support image type upload");
+        }
+        try(InputStream inputStream = multipartFile.getInputStream()) {
+            log.info("start uploadAvatar. path: {}, contentType: {}", path, contentType);
+            minioService.uploadFile(bucketName, path, inputStream, contentType, fileSize);
+
+            var fileBO = FileBO.builder().bucketName(bucketName).name(originalFilename)
+                    .originalName(originalFilename).path(path).type(contentType).size(fileSize)
+                    .build();
+            return fileUseCase.saveBatchFile(userId, List.of(fileBO)).get(0).getId();
+        } catch (Exception e) {
+            log.error("uploadAvatar fail: " + e);
+            throw new UsecaseException(UsecaseCode.UNKNOWN, "Upload fail.Please try again");
+        }
+    }
+
     private UserBO wrapUser(UserBO user) {
         return wrapUsers(List.of(user)).get(0);
     }
@@ -122,17 +165,11 @@ public class UserUseCase {
         if (avatarIds.isEmpty()) {
             return users;
         }
-        var avatarIdMap = fileDAO.listByIds(avatarIds).stream()
-                .collect(Collectors.toMap(File::getId, File::getPath));
+
+        var avatarIdMap = new HashMap<Long, String>();
+        fileUseCase.findByIds(avatarIds).forEach(file -> avatarIdMap.put(file.getId(), file.getUrl()));
         users.forEach(user -> user.setAvatarUrl(avatarIdMap.get(user.getAvatarId())));
         return users;
-    }
-
-    private void subscribeNewsLetterAsync(String email) {
-        CompletableFuture.runAsync(() -> {
-            log.info("submit email to basicAI");
-            HttpUtil.post("", Map.of("email", email));
-        });
     }
 
 }

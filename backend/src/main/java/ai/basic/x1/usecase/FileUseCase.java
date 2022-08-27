@@ -2,16 +2,21 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.FileDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.File;
+import ai.basic.x1.adapter.port.minio.MinioService;
 import ai.basic.x1.entity.FileBO;
 import ai.basic.x1.entity.RelationFileBO;
+import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ByteUtil;
+import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +27,9 @@ public class FileUseCase {
 
     @Autowired
     private FileDAO fileDAO;
+
+    @Autowired
+    private MinioService minioService;
 
     /**
      * 文件id
@@ -56,12 +64,12 @@ public class FileUseCase {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(File.class);
         lambdaQueryWrapper.in(File::getRelationId, ids);
         var relationFiles = fileDAO.list(lambdaQueryWrapper);
-        fileBOs.forEach(fileBO -> {
+        Objects.requireNonNull(fileBOs).forEach(fileBO -> {
             setUrl(fileBO);
             if (CollectionUtil.isNotEmpty(relationFiles)) {
                 var relationFileBOs = DefaultConverter.convert(relationFiles.stream().
                         filter(relationFile -> relationFile.getRelationId().equals(fileBO.getId())).collect(Collectors.toList()), FileBO.class);
-                relationFileBOs.forEach(this::setUrl);
+                Objects.requireNonNull(relationFileBOs).forEach(this::setUrl);
                 fileBO.setRelationFiles(relationFileBOs);
             }
         });
@@ -70,6 +78,31 @@ public class FileUseCase {
 
 
     private void setUrl(FileBO fileBO) {
+        try {
+            fileBO.setUrl(minioService.getUrl(fileBO.getBucketName(), fileBO.getPath()));
+        } catch (Exception e) {
+            throw new UsecaseException("Get url error");
+        }
+    }
 
+    /**
+     * 批量保存文件信息
+     *
+     * @param fileBOS 文件信息对象
+     * @return 文件信息集合
+     */
+    public List<FileBO> saveBatchFile(Long userId, List<FileBO> fileBOS) {
+        var files = DefaultConverter.convert(fileBOS, File.class);
+        Objects.requireNonNull(files).forEach(file -> {
+            file.setPathHash(ByteUtil.bytesToLong(SecureUtil.md5().digest(file.getPath())));
+            file.setCreatedBy(userId);
+            file.setCreatedAt(OffsetDateTime.now());
+            file.setUpdatedBy(userId);
+            file.setUpdatedAt(OffsetDateTime.now());
+        });
+        fileDAO.saveBatch(files);
+        var reFileBOs = DefaultConverter.convert(files, FileBO.class);
+        Objects.requireNonNull(reFileBOs).forEach(reFileBO -> setUrl(reFileBO));
+        return reFileBOs;
     }
 }
