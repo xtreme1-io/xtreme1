@@ -135,18 +135,18 @@ public class UserUseCase {
         var path = String.format("/user/avatar/%s/%s-%s", userId, System.currentTimeMillis(),
                 originalFilename);
         var bucketName = minioProp.getBucketName();
+        var fileSize = multipartFile.getSize();
         if (contentType == null || !contentType.contains("image")) {
             log.error("not support avatar type upload: " + contentType);
             throw new UsecaseException(UsecaseCode.FILE_TYPE_NOT_SUPPORT, "Only support image type upload");
         }
         try {
             log.info("start uploadAvatar. path: {}, contentType: {}", path, contentType);
-            minioService.uploadFile(bucketName, path,
-                    multipartFile.getInputStream(), contentType,
-                    multipartFile.getSize());
+            minioService.uploadFile(bucketName, path, multipartFile.getInputStream(),
+                    contentType, fileSize);
 
             var fileBO = FileBO.builder().bucketName(bucketName).name(originalFilename)
-                    .originalName(originalFilename).path(path).type(contentType)
+                    .originalName(originalFilename).path(path).type(contentType).size(fileSize)
                     .build();
             return fileUseCase.saveBatchFile(userId, List.of(fileBO)).get(0).getId();
         } catch (Exception e) {
