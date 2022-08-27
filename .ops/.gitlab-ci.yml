@@ -5,7 +5,7 @@ stages:
 
 variables:
   APP_NAME: "x1-community"
-  APP_VERSION: "1.0"
+  APP_VERSION: "0.5"
 
   FRONTEND_PACKAGE_DIR: "dist"
   BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
@@ -28,8 +28,8 @@ build-frontend-package:
         - frontend/**/*
   script:
     - cd frontend
-    - yarn
-    - yarn build:$CI_COMMIT_BRANCH
+    - npm install
+    - npm run build
   artifacts:
     paths:
       - frontend/$FRONTEND_PACKAGE_DIR

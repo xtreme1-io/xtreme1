@@ -22,6 +22,7 @@ services:
       - 8081:3306
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./backend/src/main/resources/db/migration:/docker-entrypoint-initdb.d
   redis:
     image: redis:6.2
     ports:
@@ -39,11 +40,16 @@ services:
       - 8084:9001
     volumes:
       - minio-data:/data
+  frontend:
+    build: ./frontend
+    image: frontend
+    ports:
+      - 8180:8080
   backend:
     build: ./backend
     image: backend
     ports:
-      - 8180:8080
+      - 8181:8080
     # volumes:
     # Using customized application.yml to override default configs.
     #   - /host/path/to/customized/application.yml:/app/config/application.yml
