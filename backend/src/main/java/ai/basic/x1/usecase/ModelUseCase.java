@@ -25,7 +25,11 @@ public class ModelUseCase {
         modelLambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelBO.getDatasetType()), Model::getDatasetType, modelBO.getDatasetType());
         modelLambdaQueryWrapper.orderBy(true, true, Model::getName);
         var modelList = modelDAO.list(modelLambdaQueryWrapper);
-        List<ModelBO> modelBOList = DefaultConverter.convert(modelList, ModelBO.class);
-        return modelBOList;
+        return DefaultConverter.convert(modelList, ModelBO.class);
+    }
+
+    public ModelBO findById(Long id) {
+        var model = modelDAO.getById(id);
+        return DefaultConverter.convert(model, ModelBO.class);
     }
 }

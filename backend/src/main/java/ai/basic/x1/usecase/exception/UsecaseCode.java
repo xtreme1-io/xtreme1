@@ -34,7 +34,11 @@ public enum UsecaseCode {
 
     DATASET_DATA_OTHERS_ANNOTATING("DATASET_DATA_OTHERS_ANNOTATING","Select data that others are annotating"),
 
-    DATASET_DATA_UNLOCK_ID_ERROR("DATASET__DATA__UNLOCK_ID_ERROR", "Please pass in the correct unlock id");
+    DATASET_DATA_UNLOCK_ID_ERROR("DATASET__DATA__UNLOCK_ID_ERROR", "Please pass in the correct unlock id"),
+
+    DATASET_DATA_EXIST_ANNOTATE("DATASET_DATA_EXIST_ANNOTATE", "The selected data is being marked by others"),
+
+    MODEL_DOES_NOT_EXIST("MODEL_DOES_NOT_EXIST","Model does not exist");
 
     // Storage
 

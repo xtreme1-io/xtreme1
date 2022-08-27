@@ -2,14 +2,18 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.DataAnnotationRecordDAO;
 import ai.basic.x1.adapter.port.dao.DataEditDAO;
+import ai.basic.x1.adapter.port.dao.ModelDataResultDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationRecord;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
+import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDataResult;
 import ai.basic.x1.entity.DataAnnotationRecordBO;
 import ai.basic.x1.entity.LockRecordBO;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +35,9 @@ public class DataAnnotationRecordUseCase {
 
     @Autowired
     private DataAnnotationRecordDAO dataAnnotationRecordDAO;
+
+    @Autowired
+    private ModelDataResultDAO modelDataResultDAO;
 
     /**
      * 查询当前登录人在dataset下的锁定数据
@@ -70,7 +77,7 @@ public class DataAnnotationRecordUseCase {
             throw new UsecaseException(DATASET_DATA_UNLOCK_ID_ERROR);
         }
         dataAnnotationRecordDAO.removeById(recordId);
-        /*删除data_edit中锁定数据*/
+        //删除data_edit中锁定数据
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();
         lambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, recordId);
         dataEditDAO.remove(lambdaQueryWrapper);
@@ -83,9 +90,8 @@ public class DataAnnotationRecordUseCase {
      * @param dataIds  数据ID集合
      */
     @Transactional(rollbackFor = Exception.class)
-    //TODO
     public void removeModelDataResult(Long serialNo, List<Long> dataIds) {
-        /*var lambdaUpdateWrapper = Wrappers.lambdaQuery(ModelDataResult.class);
+        var lambdaUpdateWrapper = Wrappers.lambdaQuery(ModelDataResult.class);
         lambdaUpdateWrapper.eq(ModelDataResult::getModelSerialNo, serialNo);
         if (CollectionUtil.isNotEmpty(dataIds)) {
             lambdaUpdateWrapper.in(ModelDataResult::getDataId, dataIds);
@@ -99,7 +105,7 @@ public class DataAnnotationRecordUseCase {
                     .eq(DataAnnotationRecord::getSerialNo, serialNo);
             recordLambdaUpdateWrapper.set(DataAnnotationRecord::getSerialNo, null);
             dataAnnotationRecordDAO.update(recordLambdaUpdateWrapper);
-        }*/
+        }
     }
 
 
