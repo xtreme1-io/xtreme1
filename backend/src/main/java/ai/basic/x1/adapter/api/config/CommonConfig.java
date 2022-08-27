@@ -150,8 +150,14 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public DataAnnotationRecordUseCase dataAnnotationRecordUseCase() {
+        return new DataAnnotationRecordUseCase();
+    }
+
+    @Bean
     public DataEditUseCase dataEditUseCase() {
         return new DataEditUseCase();
     }
+
 
 }

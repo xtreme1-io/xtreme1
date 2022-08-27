@@ -51,11 +51,6 @@ public class FileDTO {
     private Long size;
 
     /**
-     * 区域
-     */
-    private String region;
-
-    /**
      * 文件存储的桶名称
      */
     private String bucketName;
@@ -64,11 +59,6 @@ public class FileDTO {
      * 外网URL
      */
     private String url;
-
-    /**
-     * 内网URL
-     */
-    private String internalUrl;
 
     /**
      * path MD5后 Hash值

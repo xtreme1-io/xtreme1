@@ -183,70 +183,38 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 获取文件信息，并往data list设置文件信息
+     * 根据id查询详情
      *
-     * @param dataInfoBOList 数据集合
+     * @param id 数据id
+     * @return 数据对象
      */
-    private void setDataInfoBOListFile(List<DataInfoBO> dataInfoBOList) {
-        var fileIds = new ArrayList<Long>();
-        dataInfoBOList.forEach(dataInfoBO -> fileIds.addAll(getFileIds(dataInfoBO.getContent())));
-        if (CollectionUtil.isNotEmpty(fileIds)) {
+    public DataInfoBO findById(Long id) {
+        var dataInfoBO = DefaultConverter.convert(dataInfoDAO.getById(id), DataInfoBO.class);
+        if (dataInfoBO == null) {
+            throw new UsecaseException(UsecaseCode.NOT_FOUND);
+        }
+        var content = dataInfoBO.getContent();
+        if (CollectionUtil.isNotEmpty(content)) {
+            var fileIds = getFileIds(content);
             var fileMap = findFileByFileIds(fileIds);
-            dataInfoBOList.forEach(dataInfoBO -> setFile(dataInfoBO.getContent(), fileMap));
+            setFile(content, fileMap);
         }
+        return dataInfoBO;
     }
 
+
     /**
-     * 往content中设置文件信息
+     * 根据id集合查询数据对象list
      *
-     * @param fileNodeBOList data文件信息
-     * @param fileMap        文件map
+     * @param ids id集合
+     * @return 数据对象集合
      */
-    private void setFile(List<DataInfoBO.FileNodeBO> fileNodeBOList, Map<Long, FileBO> fileMap) {
-        if (CollectionUtil.isEmpty(fileNodeBOList)) {
-            return;
+    public List<DataInfoBO> listByIds(List<Long> ids) {
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
+        if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+            setDataInfoBOListFile(dataInfoBOList);
         }
-        fileNodeBOList.forEach(fileNodeBO -> {
-            if (fileNodeBO.getType().equals(FILE)) {
-                fileNodeBO.setFile(fileMap.get(fileNodeBO.getFileId()));
-            } else {
-                setFile(fileNodeBO.getFiles(), fileMap);
-            }
-        });
-    }
-
-    /**
-     * 根据数据id查询文件信息
-     *
-     * @param fileIds 文件id集合
-     * @return 文件对象map
-     */
-    private Map<Long, FileBO> findFileByFileIds(List<Long> fileIds) {
-        var relationFileBOList = fileUseCase.findByIds(fileIds);
-        return CollectionUtil.isNotEmpty(relationFileBOList) ?
-                relationFileBOList.stream().collect(Collectors.toMap(FileBO::getId, fileBO -> fileBO, (k1, k2) -> k1)) : new HashMap<>();
-
-    }
-
-    /**
-     * 从content中循环获取文件ID
-     *
-     * @param fileNodeBOList 数据集合
-     * @return 文件ID集合
-     */
-    private List<Long> getFileIds(List<DataInfoBO.FileNodeBO> fileNodeBOList) {
-        var fileIds = new ArrayList<Long>();
-        if (CollectionUtil.isEmpty(fileNodeBOList)) {
-            return fileIds;
-        }
-        fileNodeBOList.forEach(fileNodeBO -> {
-            if (fileNodeBO.getType().equals(FILE)) {
-                fileIds.add(fileNodeBO.getFileId());
-            } else {
-                fileIds.addAll(getFileIds(fileNodeBO.getFiles()));
-            }
-        });
-        return fileIds;
+        return dataInfoBOList;
     }
 
 
@@ -457,6 +425,73 @@ public class DataInfoUseCase {
         log.info("start decompression,datasetId:{},filePath:{}", datasetId, savePath);
         DecompressionFileUtils.decompress(savePath, tempPath);
         function.accept(dataInfoUploadBO);
+    }
+
+    /**
+     * 获取文件信息，并往data list设置文件信息
+     *
+     * @param dataInfoBOList 数据集合
+     */
+    private void setDataInfoBOListFile(List<DataInfoBO> dataInfoBOList) {
+        var fileIds = new ArrayList<Long>();
+        dataInfoBOList.forEach(dataInfoBO -> fileIds.addAll(getFileIds(dataInfoBO.getContent())));
+        if (CollectionUtil.isNotEmpty(fileIds)) {
+            var fileMap = findFileByFileIds(fileIds);
+            dataInfoBOList.forEach(dataInfoBO -> setFile(dataInfoBO.getContent(), fileMap));
+        }
+    }
+
+    /**
+     * 往content中设置文件信息
+     *
+     * @param fileNodeBOList data文件信息
+     * @param fileMap        文件map
+     */
+    private void setFile(List<DataInfoBO.FileNodeBO> fileNodeBOList, Map<Long, FileBO> fileMap) {
+        if (CollectionUtil.isEmpty(fileNodeBOList)) {
+            return;
+        }
+        fileNodeBOList.forEach(fileNodeBO -> {
+            if (fileNodeBO.getType().equals(FILE)) {
+                fileNodeBO.setFile(fileMap.get(fileNodeBO.getFileId()));
+            } else {
+                setFile(fileNodeBO.getFiles(), fileMap);
+            }
+        });
+    }
+
+    /**
+     * 根据数据id查询文件信息
+     *
+     * @param fileIds 文件id集合
+     * @return 文件对象map
+     */
+    private Map<Long, FileBO> findFileByFileIds(List<Long> fileIds) {
+        var relationFileBOList = fileUseCase.findByIds(fileIds);
+        return CollectionUtil.isNotEmpty(relationFileBOList) ?
+                relationFileBOList.stream().collect(Collectors.toMap(FileBO::getId, fileBO -> fileBO, (k1, k2) -> k1)) : new HashMap<>();
+
+    }
+
+    /**
+     * 从content中循环获取文件ID
+     *
+     * @param fileNodeBOList 数据集合
+     * @return 文件ID集合
+     */
+    private List<Long> getFileIds(List<DataInfoBO.FileNodeBO> fileNodeBOList) {
+        var fileIds = new ArrayList<Long>();
+        if (CollectionUtil.isEmpty(fileNodeBOList)) {
+            return fileIds;
+        }
+        fileNodeBOList.forEach(fileNodeBO -> {
+            if (fileNodeBO.getType().equals(FILE)) {
+                fileIds.add(fileNodeBO.getFileId());
+            } else {
+                fileIds.addAll(getFileIds(fileNodeBO.getFiles()));
+            }
+        });
+        return fileIds;
     }
 
     /**

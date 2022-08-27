@@ -32,8 +32,9 @@ public enum UsecaseCode {
 
     DATASET__DATA__DATA_HAS_BEEN_UNLOCKED("DATASET__DATA_DATA_HAS_BEEN_UNLOCKED", "The data has been unlocked"),
 
-    DATASET_DATA_OTHERS_ANNOTATING("DATASET_DATA_OTHERS_ANNOTATING","Select data that others are annotating");
+    DATASET_DATA_OTHERS_ANNOTATING("DATASET_DATA_OTHERS_ANNOTATING","Select data that others are annotating"),
 
+    DATASET_DATA_UNLOCK_ID_ERROR("DATASET__DATA__UNLOCK_ID_ERROR", "Please pass in the correct unlock id");
 
     // Storage
 

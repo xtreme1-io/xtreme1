@@ -11,7 +11,6 @@
         <result column="path_hash" property="pathHash" />
         <result column="type" property="type" />
         <result column="size" property="size" />
-        <result column="region" property="region" />
         <result column="bucket_name" property="bucketName" />
         <result column="created_at" property="createdAt" />
         <result column="created_by" property="createdBy" />
@@ -22,7 +21,7 @@
     </resultMap>
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, name, original_name, path,path_hash, type, size, region, bucket_name, created_at, created_by, updated_at, updated_by, relation_id, relation
+        id, name, original_name, path,path_hash, type, size, bucket_name, created_at, created_by, updated_at, updated_by, relation_id, relation
     </sql>
 
 </mapper>

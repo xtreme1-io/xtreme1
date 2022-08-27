@@ -4,6 +4,7 @@ import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.entity.DataInfoQueryBO;
 import ai.basic.x1.entity.DataInfoUploadBO;
+import ai.basic.x1.usecase.DataAnnotationRecordUseCase;
 import ai.basic.x1.usecase.DataInfoUseCase;
 import ai.basic.x1.usecase.DatasetUseCase;
 import ai.basic.x1.usecase.ExportUseCase;
@@ -14,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,6 +36,9 @@ public class DataInfoController {
 
     @Autowired
     protected DatasetUseCase datasetUseCase;
+
+    @Autowired
+    protected DataAnnotationRecordUseCase dataAnnotationRecordUseCase;
 
     /**
      * 上传data数据
@@ -60,6 +65,41 @@ public class DataInfoController {
         return DefaultConverter.convert(dataInfoPage, DataInfoDTO.class);
     }
 
+    @GetMapping("info/{id}")
+    public DataInfoDTO info(@PathVariable Long id) {
+        var dataInfoBO = dataInfoUsecase.findById(id);
+        return DefaultConverter.convert(dataInfoBO, DataInfoDTO.class);
+    }
+
+    @GetMapping("listByIds")
+    public List<DataInfoDTO> listByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
+        var dataInfoBos = dataInfoUsecase.listByIds(dataIds);
+        return DefaultConverter.convert(dataInfoBos, DataInfoDTO.class);
+    }
+
+    @GetMapping("findLockRecordIdByDatasetId")
+    public LockRecordDTO findLockRecordIdByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
+                                                     @LoggedUser LoggedUserDTO userDTO) {
+        var lockRecordBO = dataAnnotationRecordUseCase.findLockRecordIdByDatasetId(datasetId, userDTO.getId());
+        return DefaultConverter.convert(lockRecordBO, LockRecordDTO.class);
+    }
+
+    @PostMapping("unLock/{id}")
+    public void unLockByRecordId(@PathVariable Long id, @LoggedUser LoggedUserDTO userDTO) {
+        dataAnnotationRecordUseCase.unLockByRecordId(id, userDTO.getId());
+    }
+
+    @PostMapping("removeModelDataResult")
+    public void removeModelDataResult(@RequestBody @Validated RemoveModelDataResultDTO removeModelDataResultDTO) {
+        dataAnnotationRecordUseCase.removeModelDataResult(removeModelDataResultDTO.getSerialNo(), removeModelDataResultDTO.getDataIds());
+    }
+
+    @GetMapping("findDataAnnotationRecord/{id}")
+    public DataAnnotationRecordDTO findDataIdsByRecordId(@PathVariable Long id, @LoggedUser LoggedUserDTO userDTO) {
+        var dataAnnotationRecordBO = dataAnnotationRecordUseCase.findDataAnnotationRecordById(id, userDTO.getId());
+        return DefaultConverter.convert(dataAnnotationRecordBO, DataAnnotationRecordDTO.class);
+    }
+
     @PostMapping("deleteBatch")
     public void deleteBatch(@RequestBody @Validated DataInfoDeleteDTO dto) {
         dataInfoUsecase.deleteBatch(dto.getIds());
@@ -72,9 +112,8 @@ public class DataInfoController {
     }
 
 
-
     @GetMapping("export")
-    public Long export(@Validated DataInfoQueryDTO dataInfoQueryDTO){
+    public Long export(@Validated DataInfoQueryDTO dataInfoQueryDTO) {
         var dataInfoQueryBO = DefaultConverter.convert(dataInfoQueryDTO, DataInfoQueryBO.class);
         assert dataInfoQueryBO != null;
         return dataInfoUsecase.export(dataInfoQueryBO);
