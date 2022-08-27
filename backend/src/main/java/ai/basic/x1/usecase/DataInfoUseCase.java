@@ -1,13 +1,7 @@
 package ai.basic.x1.usecase;
 
-import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
-import ai.basic.x1.adapter.port.dao.DataEditDAO;
-import ai.basic.x1.adapter.port.dao.DataInfoDAO;
-import ai.basic.x1.adapter.port.dao.DatasetDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetStatistics;
+import ai.basic.x1.adapter.port.dao.*;
+import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
 import ai.basic.x1.entity.*;
@@ -25,20 +19,19 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
-import cn.hutool.core.util.ByteUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -97,7 +90,16 @@ public class DataInfoUseCase {
     private DataEditDAO dataEditDAO;
 
     @Autowired
+    private ModelUseCase modelUseCase;
+
+    @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
+
+    @Autowired
+    private DataAnnotationRecordDAO dataAnnotationRecordDAO;
+
+    @Autowired
+    private ModelDataResultDAO modelDataResultDAO;
 
     @Value("${file.tempPath:/tmp/x1/}")
     private String tempPath;
@@ -406,7 +408,136 @@ public class DataInfoUseCase {
         }
     }
 
-    public <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
+    /**
+     * 数据标注
+     *
+     * @param dataPreAnnotationBO 数据预标注对象
+     * @return 标注记录ID
+     */
+    @Transactional(rollbackFor = Throwable.class)
+    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+        try {
+            Long serialNo = IdUtil.getSnowflakeNextId();
+            DataAnnotationRecord dataAnnotationRecord;
+            ModelBO modelBO = null;
+            DataAnnotationRecord.DataAnnotationRecordBuilder builder = DataAnnotationRecord.builder();
+            if (ObjectUtil.isNotNull(dataPreAnnotationBO.getModelId())) {
+                modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
+                builder.serialNo(serialNo);
+                if (ObjectUtil.isNull(modelBO)) {
+                    throw new UsecaseException(UsecaseCode.MODEL_DOES_NOT_EXIST);
+                }
+            }
+            builder.datasetId(dataPreAnnotationBO.getDatasetId());
+            dataAnnotationRecord = builder.build();
+            dataAnnotationRecordDAO.getBaseMapper().insertIgnore(dataAnnotationRecord);
+            List<Long> dataIds = dataPreAnnotationBO.getDataIds();
+            batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+            if (ObjectUtil.isNotNull(modelBO)) {
+                batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
+            }
+            return dataAnnotationRecord.getId();
+        } catch (DuplicateKeyException duplicateKeyException) {
+            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+        }
+    }
+
+    /**
+     * 批量插入锁定数据
+     *
+     * @param dataIds              数据ID集合
+     * @param dataAnnotationRecord 数据标注记录对象
+     */
+    private void batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord) {
+        if (CollectionUtil.isEmpty(dataIds)) {
+            return;
+        }
+        List<DataEdit> dataEditSubList = new ArrayList<>();
+        int i = 1;
+        DataEdit.DataEditBuilder dataEditBuilder = DataEdit.builder()
+                .annotationRecordId(dataAnnotationRecordId)
+                .datasetId(dataAnnotationRecord.getDatasetId())
+                .modelId(dataAnnotationRecord.getModelId())
+                .modelVersion(dataAnnotationRecord.getModelVersion());
+        for (Long dataId : dataIds) {
+            DataEdit dataEdit = dataEditBuilder.dataId(dataId).build();
+            dataEditSubList.add(dataEdit);
+            if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
+                dataEditDAO.getBaseMapper().insertBatch(dataEditSubList);
+                dataEditSubList.clear();
+            }
+            i++;
+        }
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public Long modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+        ModelBO modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
+        Long serialNo = IdUtil.getSnowflakeNextId();
+        batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
+        return serialNo;
+    }
+
+    /**
+     * 批量插入data模型结果
+     *
+     * @param dataPreAnnotationBO 数据预标注对象
+     * @param modelBO             模型对象
+     * @param userId              用户ID
+     */
+    private void batchInsertModelDataResult(DataPreAnnotationBO dataPreAnnotationBO, ModelBO modelBO, Long userId, Long serialNo) {
+        List<ModelDataResult> modelDataResultList = new ArrayList<>();
+        List<Long> dataIds = dataPreAnnotationBO.getDataIds();
+        ModelMessageBO modelMessageBO = DefaultConverter.convert(dataPreAnnotationBO, ModelMessageBO.class);
+        modelMessageBO.setCreatedBy(userId);
+        modelMessageBO.setModelSerialNo(serialNo);
+        modelMessageBO.setModelId(modelBO.getId());
+        modelMessageBO.setModelVersion(modelBO.getVersion());
+        int i = 1;
+        ModelDataResult.ModelDataResultBuilder modelDataResultBuilder = ModelDataResult.builder()
+                .modelId(modelBO.getId())
+                .modelVersion(modelBO.getVersion())
+                .datasetId(dataPreAnnotationBO.getDatasetId())
+                .modelSerialNo(serialNo)
+                .resultFilterParam(JSONUtil.toJsonStr(dataPreAnnotationBO.getResultFilterParam()));
+        for (Long dataId : dataIds) {
+            ModelDataResult modelDataResult = modelDataResultBuilder.dataId(dataId).build();
+            modelDataResultList.add(modelDataResult);
+            if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
+                modelDataResultDAO.getBaseMapper().insertIgnoreBatch(modelDataResultList);
+                modelDataResultList.clear();
+            }
+            i++;
+        }
+        List<DataInfoBO> dataInfoBOList = listByIds(dataIds);
+        Map<Long, DataInfoBO> dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
+        for (var dataId : dataIds) {
+            modelMessageBO.setDataId(dataId);
+            modelMessageBO.setDataInfo(dataMap.get(dataId));
+            modelMessageBO.setDatasetId(dataMap.get(dataId).getDatasetId());
+            //TODO
+        }
+    }
+
+    public ModelObjectBO getModelAnnotateResult(Long serialNo, List<Long> dataIds) {
+        var lambdaQueryWrapper = new LambdaQueryWrapper<ModelDataResult>();
+        lambdaQueryWrapper.eq(ModelDataResult::getModelSerialNo, serialNo);
+        if (CollectionUtil.isNotEmpty(dataIds)) {
+            lambdaQueryWrapper.in(ModelDataResult::getDataId, dataIds);
+        }
+        lambdaQueryWrapper.isNotNull(ModelDataResult::getModelResult);
+        List<ModelDataResult> modelDataResultList = modelDataResultDAO.getBaseMapper().selectList(lambdaQueryWrapper);
+        if (CollectionUtil.isNotEmpty(modelDataResultList)) {
+            var modelId = modelDataResultList.stream().findFirst().orElse(new ModelDataResult()).getModelId();
+            var modelBO = modelUseCase.findById(modelId);
+            return ModelObjectBO.builder().modelCode(modelBO.getModelCode())
+                    .modelDataResults(DefaultConverter.convert(modelDataResultList, ModelDataResultBO.class)).build();
+        }
+        return new ModelObjectBO();
+    }
+
+
+    private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
         var path = fileUrl;

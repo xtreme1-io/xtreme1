@@ -4,12 +4,16 @@ import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.entity.DataInfoQueryBO;
 import ai.basic.x1.entity.DataInfoUploadBO;
+import ai.basic.x1.entity.DataPreAnnotationBO;
+import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.usecase.DataAnnotationRecordUseCase;
 import ai.basic.x1.usecase.DataInfoUseCase;
 import ai.basic.x1.usecase.DatasetUseCase;
 import ai.basic.x1.usecase.ExportUseCase;
 import ai.basic.x1.util.DefaultConverter;
+import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.util.EnumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -72,13 +76,13 @@ public class DataInfoController {
     }
 
     @GetMapping("listByIds")
-    public List<DataInfoDTO> listByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
+    public List<DataInfoDTO> listByIds(@NotEmpty(message = "DataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
         var dataInfoBos = dataInfoUsecase.listByIds(dataIds);
         return DefaultConverter.convert(dataInfoBos, DataInfoDTO.class);
     }
 
     @GetMapping("findLockRecordIdByDatasetId")
-    public LockRecordDTO findLockRecordIdByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
+    public LockRecordDTO findLockRecordIdByDatasetId(@NotNull(message = "DatasetId cannot be null") @RequestParam(required = false) Long datasetId,
                                                      @LoggedUser LoggedUserDTO userDTO) {
         var lockRecordBO = dataAnnotationRecordUseCase.findLockRecordIdByDatasetId(datasetId, userDTO.getId());
         return DefaultConverter.convert(lockRecordBO, LockRecordDTO.class);
@@ -120,9 +124,43 @@ public class DataInfoController {
     }
 
     @GetMapping("findExportRecordBySerialNumbers")
-    public List<ExportRecordDTO> findExportRecordBySerialNumber(@NotEmpty(message = "serialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
+    public List<ExportRecordDTO> findExportRecordBySerialNumber(@NotEmpty(message = "SerialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
         var exportRecordList = exportUsecase.findExportRecordBySerialNumbers(serialNumbers);
         return DefaultConverter.convert(exportRecordList, ExportRecordDTO.class);
+    }
+
+    @PostMapping("annotate")
+    public Long annotate(@Validated @RequestBody DataAnnotateDTO dataAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
+        return dataInfoUsecase.annotate(
+                DefaultConverter.convert(dataAnnotateDTO, DataPreAnnotationBO.class),
+                loggedUserDTO.getId()
+        );
+    }
+
+    @PostMapping("annotateWithModel")
+    public Long annotateWithModel(@Validated @RequestBody DataModelAnnotateDTO dataModelAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
+        var resultFilterParam = dataModelAnnotateDTO.getResultFilterParam();
+        var modelCode = EnumUtil.fromString(ModelCodeEnum.class, dataModelAnnotateDTO.getModelCode());
+        ModelParamUtils.valid(resultFilterParam, modelCode);
+        return dataInfoUsecase.annotate(
+                DefaultConverter.convert(dataModelAnnotateDTO, DataPreAnnotationBO.class),
+                loggedUserDTO.getId()
+        );
+    }
+
+    @PostMapping("modelAnnotate")
+    public Long modelAnnotate(@Validated @RequestBody DataModelAnnotateDTO dataModelAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
+        var resultFilterParam = dataModelAnnotateDTO.getResultFilterParam();
+        var modelCode = EnumUtil.fromString(ModelCodeEnum.class, dataModelAnnotateDTO.getModelCode());
+        ModelParamUtils.valid(resultFilterParam, modelCode);
+        return dataInfoUsecase.modelAnnotate(DefaultConverter.convert(dataModelAnnotateDTO, DataPreAnnotationBO.class),
+                loggedUserDTO.getId());
+    }
+
+    @GetMapping("modelAnnotationResult")
+    public ModelObjectDTO modelAnnotationResult(@NotNull(message = "serialNo cannot be null") @RequestParam(required = false) Long serialNo, @RequestParam(required = false) List<Long> dataIds) {
+        var modelObjectBO = dataInfoUsecase.getModelAnnotateResult(serialNo, dataIds);
+        return DefaultConverter.convert(modelObjectBO, ModelObjectDTO.class);
     }
 
 }
