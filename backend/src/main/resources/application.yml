@@ -23,6 +23,12 @@ spring:
     port: 6379
     password: QZe1326g
 
+minio:
+  endPoint: https://minio.minio-cluster
+  accessKey: user
+  secretKey: password
+  bucketName: x1-community
+
 jwt:
   secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
   issuer: BasicAI
@@ -39,3 +45,7 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath:/mybatis/mapper/*.xml
   type-aliases-package: ai.basic.x1.adapter.port.dao.mybatis.model
+
+export:
+  data:
+    version: basic.ai/v1

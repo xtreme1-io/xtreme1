@@ -67,9 +67,13 @@ public interface Constants {
      */
     String JSON_SUFFIX = ".JSON";
 
-    String RESULT = "RESULTS";
+    String RESULT = "result";
 
     Integer BATCH_SIZE = 1000;
+
+    Integer PAGE_NO = 1;
+
+    Integer PAGE_SIZE = 1000;
 
 
     Set<String> COMPRESSED_DATA_TYPE = new HashSet<>() {{
@@ -85,7 +89,6 @@ public interface Constants {
         add("image/jpeg");
         add("image/bmp");
     }};
-
 
 
     Set<String> DATA_TYPE = new HashSet<>() {{

@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author fyb
@@ -33,29 +35,6 @@ public class DataInfoController {
     @Autowired
     protected DatasetUseCase datasetUseCase;
 
-
-    @PostMapping("deleteBatch")
-    public void deleteBatch(@RequestBody @Validated DataInfoDeleteDTO dto) {
-        dataInfoUsecase.deleteBatch(dto.getIds());
-    }
-
-    @GetMapping("findByPage")
-    public Page<DataInfoDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo,
-                                        @RequestParam(defaultValue = "10") Integer pageSize, @Validated DataInfoQueryDTO dataInfoQueryDTO) {
-        var dataInfoQueryBO = DefaultConverter.convert(dataInfoQueryDTO, DataInfoQueryBO.class);
-        dataInfoQueryBO.setPageNo(pageNo);
-        dataInfoQueryBO.setPageSize(pageSize);
-        var dataInfoPage = dataInfoUsecase.findByPage(dataInfoQueryBO);
-        var dataInfoDTOPage = DefaultConverter.convert(dataInfoPage, DataInfoDTO.class);
-        return dataInfoDTOPage;
-    }
-
-    @GetMapping("generatePresignedUrl")
-    public PresignedUrlDTO generatePresignedUrl(@RequestParam(value = "fileName") String fileName, @RequestParam(value = "datasetId") Long datasetId, @LoggedUser LoggedUserDTO userDTO) {
-        var presignedUrlBO = dataInfoUsecase.generatePresignedUrl(fileName, datasetId, userDTO.getId());
-        return DefaultConverter.convert(presignedUrlBO, PresignedUrlDTO.class);
-    }
-
     /**
      * 上传data数据
      *
@@ -64,8 +43,47 @@ public class DataInfoController {
     @PostMapping("upload")
     public void upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);
+        assert dataInfoUploadBO != null;
         dataInfoUploadBO.setUserId(userDTO.getId());
         dataInfoUsecase.upload(dataInfoUploadBO);
+    }
+
+
+    @GetMapping("findByPage")
+    public Page<DataInfoDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo,
+                                        @RequestParam(defaultValue = "10") Integer pageSize, @Validated DataInfoQueryDTO dataInfoQueryDTO) {
+        var dataInfoQueryBO = DefaultConverter.convert(dataInfoQueryDTO, DataInfoQueryBO.class);
+        assert dataInfoQueryBO != null;
+        dataInfoQueryBO.setPageNo(pageNo);
+        dataInfoQueryBO.setPageSize(pageSize);
+        var dataInfoPage = dataInfoUsecase.findByPage(dataInfoQueryBO);
+        return DefaultConverter.convert(dataInfoPage, DataInfoDTO.class);
+    }
+
+    @PostMapping("deleteBatch")
+    public void deleteBatch(@RequestBody @Validated DataInfoDeleteDTO dto) {
+        dataInfoUsecase.deleteBatch(dto.getIds());
+    }
+
+    @GetMapping("generatePresignedUrl")
+    public PresignedUrlDTO generatePresignedUrl(@RequestParam(value = "fileName") String fileName, @RequestParam(value = "datasetId") Long datasetId, @LoggedUser LoggedUserDTO userDTO) {
+        var presignedUrlBO = dataInfoUsecase.generatePresignedUrl(fileName, datasetId, userDTO.getId());
+        return DefaultConverter.convert(presignedUrlBO, PresignedUrlDTO.class);
+    }
+
+
+
+    @GetMapping("export")
+    public Long export(@Validated DataInfoQueryDTO dataInfoQueryDTO){
+        var dataInfoQueryBO = DefaultConverter.convert(dataInfoQueryDTO, DataInfoQueryBO.class);
+        assert dataInfoQueryBO != null;
+        return dataInfoUsecase.export(dataInfoQueryBO);
+    }
+
+    @GetMapping("findExportRecordBySerialNumbers")
+    public List<ExportRecordDTO> findExportRecordBySerialNumber(@NotEmpty(message = "serialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
+        var exportRecordList = exportUsecase.findExportRecordBySerialNumbers(serialNumbers);
+        return DefaultConverter.convert(exportRecordList, ExportRecordDTO.class);
     }
 
 }

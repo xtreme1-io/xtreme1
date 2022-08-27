@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.DataEditMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit">
+        <id column="id" property="id" />
+        <result column="annotation_record_id" property="annotationRecordId" />
+        <result column="data_id" property="dataId" />
+        <result column="dataset_id" property="datasetId" />
+        <result column="model_id" property="modelId" />
+        <result column="model_version" property="modelVersion" />
+        <result column="created_by" property="createdBy" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id,annotation_record_id, data_id, dataset_id, model_id, model_version, created_by, created_at
+    </sql>
+
+
+</mapper>

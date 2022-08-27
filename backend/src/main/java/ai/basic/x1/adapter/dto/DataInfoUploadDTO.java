@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -22,6 +23,7 @@ public class DataInfoUploadDTO {
      * Upload file url
      */
     @NotEmpty(message = "fileUrl is not null")
+    @URL(message = "invalid url")
     private String fileUrl;
 
     /**

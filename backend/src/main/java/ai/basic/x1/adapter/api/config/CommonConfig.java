@@ -38,7 +38,7 @@ public class CommonConfig implements WebMvcConfigurer {
     @Value("${jwt.expireHours}")
     public Integer jwtExpireHours;
 
-    public static final List<String> excludeUris = List.of("/user/login", "/user/register","/error");
+    public static final List<String> excludeUris = List.of("/user/login", "/user/register", "/error");
 
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
@@ -105,26 +105,27 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public ClassUseCase classUseCase(){
+    public ClassUseCase classUseCase() {
         return new ClassUseCase();
     }
 
     @Bean
-    public ClassificationUseCase classificationUseCase(){
+    public ClassificationUseCase classificationUseCase() {
         return new ClassificationUseCase();
     }
 
     @Bean
-    public DatasetClassUseCase datasetClassUseCase(){
+    public DatasetClassUseCase datasetClassUseCase() {
         return new DatasetClassUseCase();
     }
+
     @Bean
-    public DatasetClassificationUseCase datasetClassificationUseCase(){
+    public DatasetClassificationUseCase datasetClassificationUseCase() {
         return new DatasetClassificationUseCase();
     }
 
     @Bean
-    public OntologyUseCase ontologyUseCase(){
+    public OntologyUseCase ontologyUseCase() {
         return new OntologyUseCase();
     }
 
@@ -134,17 +135,23 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public ModelUseCase modelUseCase(){
+    public ModelUseCase modelUseCase() {
         return new ModelUseCase();
     }
 
     @Bean
-    public DataAnnotationObjectUseCase dataAnnotationObjectUseCase(){
+    public DataAnnotationObjectUseCase dataAnnotationObjectUseCase() {
         return new DataAnnotationObjectUseCase();
     }
 
     @Bean
-    public DataAnnotationUseCase dataAnnotationUseCase(){
+    public DataAnnotationUseCase dataAnnotationUseCase() {
         return new DataAnnotationUseCase();
     }
+
+    @Bean
+    public DataEditUseCase dataEditUseCase() {
+        return new DataEditUseCase();
+    }
+
 }
