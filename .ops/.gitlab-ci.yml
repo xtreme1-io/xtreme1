@@ -13,6 +13,9 @@ variables:
   FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/frontend"
   BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/backend"
 
+  DOCKER_HUB_FRONTEND_IMAGE_NAME: "basicai/${APP_NAME}-frontend"
+  DOCKER_HUB_BACKEND_IMAGE_NAME: "basicai/${APP_NAME}-backend"
+
   KUBERNETES_NAMESPACE: "x1-community"
 
 build-frontend-package:
@@ -81,6 +84,9 @@ build-backend-package:
     - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
     - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
     - docker push $IMAGE_NAME:latest
+    # Push main and tag image to Docker Hub.
+    - if [[ $CI_COMMIT_REF_NAME == main ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:latest; docker push $DOCKER_HUB_IMAGE_NAME:latest; fi
+    - if [[ $CI_COMMIT_REF_NAME == v* ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; docker push $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; fi
 
 build-frontend-image:
   extends: .build-image
@@ -93,6 +99,7 @@ build-frontend-image:
         - frontend/**/*
   variables:
     IMAGE_NAME: $FRONTEND_IMAGE_NAME
+    DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_FRONTEND_IMAGE_NAME
   script:
     - cd frontend
     - cp ../.ops/frontend.dockerfile ./Dockerfile
@@ -109,6 +116,7 @@ build-backend-image:
         - backend/**/*
   variables:
     IMAGE_NAME: $BACKEND_IMAGE_NAME
+    DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_BACKEND_IMAGE_NAME
   script:
     - cd backend
     - cp ../.ops/backend.dockerfile ./Dockerfile
