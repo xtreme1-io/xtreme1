@@ -1,2 +1,8 @@
-node_modules/
-dist/
+main/dist/
+main/node_modules/
+
+pc-tool/dist/
+pc-tool/node_modules/
+
+image-tool/dist/
+image-tool/node_modules/
