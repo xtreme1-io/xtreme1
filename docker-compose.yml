@@ -42,23 +42,10 @@ services:
   backend:
     build: ./backend
     image: backend
-    environment:
-      # Override configs in application.yml.
-      X1_DEBUG: false
-      # X1_SPRING_DATASOURCE_URL:
-      # X1_SPRING_DATASOURCE_USERNAME:
-      # X1_SPRING_DATASOURCE_PASSWORD:
-      # X1_SPRING_REDIS_HOST:
-      # X1_SPRING_REDIS_PORT:
-      # X1_SPRING_REDIS_PASSWORD:
-      # X1_MINIO_ENDPOINT:
-      # X1_MINIO_ACCESSKEY:
-      # X1_MINIO_SECRETKEY:
-      # X1_MINIO_BUCKETNAME:
     ports:
       - 8180:8080
     # volumes:
-    # Using customized application.yml to override default file in image.
+    # Using customized application.yml to override default configs.
     #   - /host/path/to/customized/application.yml:/app/config/application.yml
     depends_on:
       - mysql

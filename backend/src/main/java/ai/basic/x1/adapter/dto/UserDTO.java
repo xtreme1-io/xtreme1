@@ -43,6 +43,7 @@ public class UserDTO {
                 .username(bo.getUsername())
                 .nickname(bo.getNickname())
                 .avatarId(bo.getAvatarId())
+                .avatarUrl(bo.getAvatarUrl())
                 .lastLoginAt(bo.getLastLoginAt())
                 .createdAt(bo.getCreatedAt())
                 .updatedAt(bo.getUpdatedAt())

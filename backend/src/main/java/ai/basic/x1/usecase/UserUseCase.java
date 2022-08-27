@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -135,18 +136,17 @@ public class UserUseCase {
         var path = String.format("/user/avatar/%s/%s-%s", userId, System.currentTimeMillis(),
                 originalFilename);
         var bucketName = minioProp.getBucketName();
+        var fileSize = multipartFile.getSize();
         if (contentType == null || !contentType.contains("image")) {
             log.error("not support avatar type upload: " + contentType);
             throw new UsecaseException(UsecaseCode.FILE_TYPE_NOT_SUPPORT, "Only support image type upload");
         }
-        try {
+        try(InputStream inputStream = multipartFile.getInputStream()) {
             log.info("start uploadAvatar. path: {}, contentType: {}", path, contentType);
-            minioService.uploadFile(bucketName, path,
-                    multipartFile.getInputStream(), contentType,
-                    multipartFile.getSize());
+            minioService.uploadFile(bucketName, path, inputStream, contentType, fileSize);
 
             var fileBO = FileBO.builder().bucketName(bucketName).name(originalFilename)
-                    .originalName(originalFilename).path(path).type(contentType)
+                    .originalName(originalFilename).path(path).type(contentType).size(fileSize)
                     .build();
             return fileUseCase.saveBatchFile(userId, List.of(fileBO)).get(0).getId();
         } catch (Exception e) {
