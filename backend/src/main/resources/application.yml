@@ -1,4 +1,4 @@
-debug: false
+debug: ${X1_DEBUG:false}
 
 server:
   address: 0.0.0.0
@@ -9,25 +9,18 @@ spring:
   application:
     name: x1-community
   datasource:
-    url: jdbc:mysql://mysql:3306/x1-community
-    username: root
-    password: Rc4K3L6f
+    url: ${X1_SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/x1_community}
+    username: ${X1_SPRING_DATASOURCE_USERNAME:x1_community}
+    password: ${X1_SPRING_DATASOURCE_PASSWORD:Rc4K3L6f}
     hikari:
       connection-test-query: SELECT 1
       connection-timeout: 60000
       max-lifetime: 54000
       idle-timeout: 50000
-
   redis:
-    host: redis
-    port: 6379
-    password: QZe1326g
-
-minio:
-  endPoint: https://minio.minio-cluster
-  accessKey: user
-  secretKey: password
-  bucketName: x1-community
+    host: ${X1_SPRING_REDIS_HOST:redis}
+    port: ${X1_SPRING_REDIS_PORT:6379}
+    password: ${X1_SPRING_REDIS_PASSWORD:}
 
 jwt:
   secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
@@ -49,3 +42,9 @@ mybatis-plus:
 export:
   data:
     version: basic.ai/v1
+
+minio:
+  endpoint: ${X1_MINIO_ENDPOINT:http://minio/}
+  accessKey: ${X1_MINIO_ACCESSKEY:admin}
+  secretKey: ${X1_MINIO_SECRETKEY:1tQB970y}
+  bucketName: ${X1_MINIO_BUCKETNAME:x1-community}
