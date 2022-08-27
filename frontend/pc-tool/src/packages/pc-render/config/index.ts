@@ -1,0 +1,17 @@
+export const Event = {
+    SELECT: 'select',
+    OBJECT_DBLCLICK: 'object_dblclick',
+    ADD_OBJECT: 'add_object',
+    REMOVE_OBJECT: 'remove_object',
+    VISIBLE_CHANGE: 'visible_change',
+    USER_DATA_CHANGE: 'user_data_change',
+    OBJECT_TRANSFORM: 'object_transform',
+    OBJECT_2D_TRANSFORM: 'object_2d_transform',
+    RENDER_BEFORE: 'render_before',
+    RENDER_AFTER: 'render_after',
+    CONTAINER_TRANSFORM: 'container_transform',
+    LOAD_POINT_AFTER: 'load_point_after',
+    LOAD_POINT_BEFORE: 'load_point_before',
+    POINTS_CHANGE: 'POINTS_CHANGE',
+    CLEAR_DATA: 'clear_data',
+};
