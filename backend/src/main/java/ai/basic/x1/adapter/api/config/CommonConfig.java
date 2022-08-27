@@ -160,4 +160,9 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
 
+
+    @Bean
+    public DataFlowUseCase dataFlowUseCase(){
+        return new DataFlowUseCase();
+    }
 }

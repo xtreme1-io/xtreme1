@@ -46,7 +46,7 @@ public class ClassificationUseCase {
                 .le(ObjectUtil.isNotNull(bo.getEndTime()), Classification::getCreatedAt, bo.getEndTime())
                 .like(!ObjectUtils.isEmpty(bo.getName()),Classification::getName,bo.getName());
         addOrderRule(classificationQueryWrapper,bo.getSortBy(),bo.getAscOrDesc());
-        var classificationPage = classificationDAO.getBaseMapper().selectPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize), classificationQueryWrapper);
+        var classificationPage = classificationDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize), classificationQueryWrapper);
         return DefaultConverter.convert(classificationPage, ClassificationBO.class);
     }
 }

@@ -91,7 +91,7 @@ public class DataAnnotationObjectUseCase {
         Set<Long> dataIds = dataAnnotationObjectBOs.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toSet());
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationObject.class)
                 .in(DataAnnotationObject::getDataId, dataIds);
-        List<DataAnnotationObject> oldInfos = dataAnnotationObjectDAO.getBaseMapper().selectList(lambdaQueryWrapper);
+        List<DataAnnotationObject> oldInfos = dataAnnotationObjectDAO.list(lambdaQueryWrapper);
         var oldInfoMap = oldInfos.stream().collect(Collectors.toMap(DataAnnotationObject::getId, dataAnnotationObject -> dataAnnotationObject));
 
         List<DataAnnotationObjectBO> needUpdateObjectBOs = new ArrayList<>();

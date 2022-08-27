@@ -77,8 +77,7 @@ public class DatasetClassUseCase {
                 .le(ObjectUtil.isNotNull(datasetClassBO.getEndTime()), DatasetClass::getCreatedAt, datasetClassBO.getEndTime())
                 .like(StrUtil.isNotEmpty(datasetClassBO.getName()), DatasetClass::getName, datasetClassBO.getName());
         addOrderRule(lambdaQueryWrapper,datasetClassBO.getSortBy(),datasetClassBO.getAscOrDesc());
-        Page<DatasetClassBO> datasetClassBOPage = DefaultConverter.convert(datasetClassDao.getBaseMapper()
-                        .selectPage(com.baomidou.mybatisplus.extension.plugins.pagination.Page.of(pageNo, pageSize), lambdaQueryWrapper), DatasetClassBO.class);
+        Page<DatasetClassBO> datasetClassBOPage = DefaultConverter.convert(datasetClassDao.page(com.baomidou.mybatisplus.extension.plugins.pagination.Page.of(pageNo, pageSize), lambdaQueryWrapper), DatasetClassBO.class);
         return datasetClassBOPage;
     }
 
