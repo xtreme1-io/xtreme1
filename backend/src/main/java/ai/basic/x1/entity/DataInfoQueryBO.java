@@ -1,6 +1,7 @@
 package ai.basic.x1.entity;
 
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
+import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,5 +53,10 @@ public class DataInfoQueryBO extends BaseQueryBO {
      * 数据标注状态 ANNOTATED,NOT_ANNOTATED,INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
+
+    /**
+     * Dataset type
+     */
+    private DatasetTypeEnum datasetType;
 
 }

@@ -39,6 +39,10 @@ mybatis-plus:
   mapper-locations: classpath:/mybatis/mapper/*.xml
   type-aliases-package: ai.basic.x1.adapter.port.dao.mybatis.model
 
+export:
+  data:
+    version: basic.ai/v1
+
 minio:
   endpoint: http://minio/
   accessKey: admin

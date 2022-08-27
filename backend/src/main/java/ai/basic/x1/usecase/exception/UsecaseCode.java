@@ -30,7 +30,10 @@ public enum UsecaseCode {
 
     DATASET_NOT_FOUND("DATASET_NOT_FOUND", "Dataset not found"),
 
-    DATASET__DATA__DATA_HAS_BEEN_UNLOCKED("DATASET__DATA_DATA_HAS_BEEN_UNLOCKED", "The data has been unlocked");
+    DATASET__DATA__DATA_HAS_BEEN_UNLOCKED("DATASET__DATA_DATA_HAS_BEEN_UNLOCKED", "The data has been unlocked"),
+
+    DATASET_DATA_OTHERS_ANNOTATING("DATASET_DATA_OTHERS_ANNOTATING","Select data that others are annotating");
+
 
     // Storage
 

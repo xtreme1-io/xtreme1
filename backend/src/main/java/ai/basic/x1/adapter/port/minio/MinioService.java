@@ -66,7 +66,14 @@ public class MinioService {
         return getUrl(bucketName, fileName);
     }
 
-    public void uploadFileList(String rootPath, String bucketName, String tempPath, List<File> fileList)
+    /**
+     * *批量上传文件
+     * @param bucketName 存储桶*
+     * @param rootPath 根路径
+     * @param tempPath 临时存储路径
+     * @param fileList 文件集合
+     */
+    public void uploadFileList( String bucketName,String rootPath, String tempPath, List<File> fileList)
             throws ErrorResponseException, InsufficientDataException, InternalException,
             InvalidKeyException, InvalidResponseException, IOException, NoSuchAlgorithmException,
             ServerException, XmlParserException {
