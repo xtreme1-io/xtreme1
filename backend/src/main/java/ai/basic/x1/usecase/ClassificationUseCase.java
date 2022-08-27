@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
 * @author chenchao
-* @version 1.0
 * @date 2022/4/2
 */
 public class ClassificationUseCase {

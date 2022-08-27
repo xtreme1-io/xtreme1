@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author chenchao
- * @version 1.0
  * @date 2022/8/24
  */
 public class OntologyUseCase {
