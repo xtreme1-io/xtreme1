@@ -2,7 +2,6 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.DataAnnotationDAO;
-import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotation;
 import ai.basic.x1.entity.DataAnnotationBO;
 import ai.basic.x1.util.DefaultConverter;
@@ -27,8 +26,6 @@ public class DataAnnotationUseCase {
     @Autowired
     private DataAnnotationDAO dataAnnotationDAO;
 
-    @Autowired
-    private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 //
 //    @Autowired
 //    private DataEditDAO dataEditDAO;

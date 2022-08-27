@@ -57,11 +57,6 @@ public class File implements Serializable {
     private Long size;
 
     /**
-     * 区域
-     */
-    private String region;
-
-    /**
      * 文件存储的桶名称
      */
     private String bucketName;

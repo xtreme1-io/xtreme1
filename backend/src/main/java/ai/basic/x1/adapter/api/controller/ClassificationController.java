@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 /**
 * @author chenchao
-* @version 1.0
 * @date 2022/4/2
 */
 @RestController

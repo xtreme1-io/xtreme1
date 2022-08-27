@@ -93,4 +93,10 @@ public class DatasetBO {
 
     private List<DataInfoBO> datas;
 
+    private Integer notAnnotatedDataCount;
+
+    private Integer annotatedDataCount;
+
+    private Integer invalidDataCount;
+
 }

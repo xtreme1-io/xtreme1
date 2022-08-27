@@ -1,5 +1,7 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
+import ai.basic.x1.entity.enums.DataStatusEnum;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -35,30 +37,19 @@ public class DataInfoDTO {
     private String name;
 
     /**
-     * 配置参数（例如旋转）存入json由前端控制
-     */
-    private String displaySettings;
-
-    /**
-     * 标注数量
-     */
-    private Integer annotationCount;
-
-    /**
      * 内容（文件夹路径、版本信息）
      */
     private List<FileNodeDTO> content;
 
     /**
-     * 类型（表示连续帧、非连续帧）
+     * 数据状态 INVALID,VALID
      */
-    private String type;
+    private DataStatusEnum status;
 
     /**
-     * 父级ID(连续帧ID)
+     * 数据标注状态 ANNOTATED, NOT_ANNOTATED, INVALID
      */
-    private Long parentId;
-
+    private DataAnnotationStatusEnum annotationStatus;
     /**
      * 锁定人员的名称
      */

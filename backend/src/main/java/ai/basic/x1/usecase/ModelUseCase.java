@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author chenchao
@@ -25,9 +24,8 @@ public class ModelUseCase {
         LambdaQueryWrapper<Model> modelLambdaQueryWrapper = Wrappers.lambdaQuery();
         modelLambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelBO.getDatasetType()), Model::getDatasetType, modelBO.getDatasetType());
         modelLambdaQueryWrapper.orderBy(true, true, Model::getName);
-        var modelList = modelDAO.getBaseMapper().selectList(modelLambdaQueryWrapper);
+        var modelList = modelDAO.list(modelLambdaQueryWrapper);
         List<ModelBO> modelBOList = DefaultConverter.convert(modelList, ModelBO.class);
-        List<Long> modelIds = modelList.stream().map(Model::getId).collect(Collectors.toList());
         return modelBOList;
     }
 }

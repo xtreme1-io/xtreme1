@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author chenchao
- * @version 1.0
  * @date 2022/4/6
  */
 @Data

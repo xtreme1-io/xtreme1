@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.groups.Default;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +33,8 @@ public class DataAnnotationController {
     }
 
     @GetMapping("listByDataIds")
-    public List<DataAnnotationDTO> listByDataIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
-        var dataAnnotations = DefaultConverter.convert(
-                dataAnnotationUseCase.findByDataIds(dataIds), DataAnnotationDTO.class);
-        return dataAnnotations;
+    public List<DataAnnotationDTO> listByDataIds(@RequestParam List<Long> dataIds) {
+        return DefaultConverter.convert(dataAnnotationUseCase.findByDataIds(dataIds), DataAnnotationDTO.class);
     }
 
     private List<DataAnnotationDTO> convertToDataAnnotation(ObjectResultDTO objectResultDTO){

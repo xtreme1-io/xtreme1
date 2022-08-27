@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author chenchao
- * @version 1.0
  * @date 2022/8/24
  */
 public class OntologyUseCase {
@@ -35,8 +34,7 @@ public class OntologyUseCase {
         ontologyQueryWrapper.like(StrUtil.isNotBlank(bo.getName()), Ontology::getName, bo.getName())
                 .eq(ObjectUtil.isNotNull(bo.getType()), Ontology::getType, bo.getType())
                 .orderBy(true, true, Ontology::getCreatedAt);
-        var ontologyPage = ontologyDAO.getBaseMapper()
-                .selectPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize), ontologyQueryWrapper);
+        var ontologyPage = ontologyDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize), ontologyQueryWrapper);
         Page<OntologyBO> ontologyBOPage = DefaultConverter.convert(ontologyPage, OntologyBO.class);
         if (ontologyBOPage.getList().size() == 0) {
             return ontologyBOPage;
@@ -54,6 +52,6 @@ public class OntologyUseCase {
     }
 
     public OntologyBO findById(Long id) {
-        return DefaultConverter.convert(ontologyDAO.getBaseMapper().selectById(id), OntologyBO.class);
+        return DefaultConverter.convert(ontologyDAO.getById(id), OntologyBO.class);
     }
 }

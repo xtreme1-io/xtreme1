@@ -11,7 +11,6 @@ import java.time.OffsetDateTime;
 
 /**
  * @author chenchao
- * @version 1.0
  * @date 2022/4/11
  */
 @Data
