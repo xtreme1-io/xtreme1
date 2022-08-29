@@ -2,6 +2,8 @@ local/
 target/
 dist/
 node_modules/
+venv/
+__pycache__/
 log/
 out/
 docker-compose.override.yml
