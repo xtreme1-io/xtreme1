@@ -90,6 +90,10 @@ build-backend-package:
     - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
   after_script:
     - cd $WORKING_DIR
+    - pwd
+    - ls
+    - ls target
+    - ls ..
     - docker pull $IMAGE_NAME:latest || true
     - docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$CI_COMMIT_REF_NAME -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest .
     - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
