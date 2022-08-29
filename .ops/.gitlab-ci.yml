@@ -12,9 +12,11 @@ variables:
 
   FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/frontend"
   BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/backend"
+  IMAGE_OBJECT_DETECTION_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/image-object-detection"
 
   DOCKER_HUB_FRONTEND_IMAGE_NAME: "basicai/${APP_NAME}-frontend"
   DOCKER_HUB_BACKEND_IMAGE_NAME: "basicai/${APP_NAME}-backend"
+  DOCKER_HUB_IMAGE_OBJECT_DETECTION_IMAGE_NAME: "basicai/${APP_NAME}-image-object-detection"
 
   KUBERNETES_NAMESPACE: "x1-community"
 
@@ -30,15 +32,23 @@ build-frontend-package:
         - frontend/*
         - frontend/**/*
   script:
-    - cd frontend
+    - cd frontend/main
     - npm install
     - npm run build
+    # - cd ../image-tool
+    # - npm install
+    # - npm run build
+    # - cd ../pc-tool
+    # - npm install
+    # - npm run build
   artifacts:
     paths:
       - frontend/$FRONTEND_PACKAGE_DIR
   cache:
     paths:
-      - frontend/node_modules
+      - frontend/main/node_modules
+      - frontend/image-tool/node_modules
+      - frontend/pc-tool/node_modules
 
 build-backend-package:
   stage: build-package
@@ -59,7 +69,7 @@ build-backend-package:
     - mvn $MAVEN_ARGS package
   artifacts:
     paths:
-      - backend/target/*.jar
+      - backend/target/$BACKEND_PACKAGE_NAME
   cache:
     paths:
       - backend/.m2/repository
@@ -122,6 +132,22 @@ build-backend-image:
     - cp ../.ops/backend.dockerfile ./Dockerfile
     - sed -i 's/$BACKEND_PACKAGE_NAME/'"$BACKEND_PACKAGE_NAME"'/g' Dockerfile
 
+build-image-object-detection-image:
+  extends: .build-image
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+      changes:
+        - .ops/*
+        - .ops/**/*
+        - model/image-object-detection/*
+        - model/image-object-detection/**/*
+  variables:
+    IMAGE_NAME: $IMAGE_OBJECT_DETECTION_IMAGE_NAME
+    DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_IMAGE_OBJECT_DETECTION_IMAGE_NAME
+  script:
+    - cd model/image-object-detection
+    - cp ../../.ops/image-object-detection.dockerfile ./Dockerfile
+
 .deploy:
   stage: deploy
   tags:
@@ -132,6 +158,7 @@ build-backend-image:
     - sed -i 's/$APP_VERSION/'"$APP_VERSION"'/g' deployment.yml
     - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' deployment.yml
     - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' deployment.yml
+    - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' deployment.yml
     - sed -i 's/$CI_COMMIT_SHORT_SHA/'"$CI_COMMIT_SHORT_SHA"'/g' deployment.yml
 
 deploy-to-alidev:
