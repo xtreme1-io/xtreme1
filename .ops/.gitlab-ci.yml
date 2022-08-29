@@ -89,6 +89,7 @@ build-backend-package:
     - until docker info; do sleep 1; done
     - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
   after_script:
+    - cd $WORKING_DIR
     - docker pull $IMAGE_NAME:latest || true
     - docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$CI_COMMIT_REF_NAME -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest .
     - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
@@ -108,10 +109,11 @@ build-frontend-image:
         - frontend/*
         - frontend/**/*
   variables:
+    WORKING_DIR: frontend
     IMAGE_NAME: $FRONTEND_IMAGE_NAME
     DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_FRONTEND_IMAGE_NAME
   script:
-    - cd frontend
+    - cd $WORKING_DIR
     - cp ../.ops/frontend.dockerfile ./Dockerfile
     - sed -i 's/$FRONTEND_PACKAGE_DIR/'"$FRONTEND_PACKAGE_DIR"'/g' Dockerfile
 
@@ -125,10 +127,11 @@ build-backend-image:
         - backend/*
         - backend/**/*
   variables:
+    WORKING_DIR: backend
     IMAGE_NAME: $BACKEND_IMAGE_NAME
     DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_BACKEND_IMAGE_NAME
   script:
-    - cd backend
+    - cd $WORKING_DIR
     - cp ../.ops/backend.dockerfile ./Dockerfile
     - sed -i 's/$BACKEND_PACKAGE_NAME/'"$BACKEND_PACKAGE_NAME"'/g' Dockerfile
 
@@ -142,10 +145,11 @@ build-image-object-detection-image:
         - model/image-object-detection/*
         - model/image-object-detection/**/*
   variables:
+    WORKING_DIR: model/image-object-detection
     IMAGE_NAME: $IMAGE_OBJECT_DETECTION_IMAGE_NAME
     DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_IMAGE_OBJECT_DETECTION_IMAGE_NAME
   script:
-    - cd model/image-object-detection
+    - cd $WORKING_DIR
     - cp ../../.ops/image-object-detection.dockerfile ./Dockerfile
 
 .deploy:
