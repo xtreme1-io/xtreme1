@@ -17,11 +17,7 @@ public class ModelParamUtils {
             return;
         }
         switch (modelCode) {
-            case TRACKING:
-                break;
             case PRE_LABEL:
-            case FRONT_VIEW_16:
-            case FRONT_VIEW_47:
             case COCO_80:
                 var modelClass = DefaultConverter.convert(resultFilterParam, PreModelParamDTO.class);
                 ValidateUtil.validate(modelClass);

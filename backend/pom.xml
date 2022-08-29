@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.6</version>
+        <version>2.7.3</version>
     </parent>
 
     <groupId>ai.basic</groupId>
@@ -24,6 +24,8 @@
         <mybatis-plus.version>3.5.0</mybatis-plus.version>
         <transmittable-thread-local.version>2.12.6</transmittable-thread-local.version>
         <minio-version>8.3.7</minio-version>
+        <okhttp.version>4.8.1</okhttp.version>
+        <fegin.version>11.7</fegin.version>
     </properties>
 
     <dependencies>
@@ -150,8 +152,9 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.8.1</version>
+            <version>${okhttp.version}</version>
         </dependency>
+
     </dependencies>
 
     <build>

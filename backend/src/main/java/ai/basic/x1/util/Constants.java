@@ -96,4 +96,8 @@ public interface Constants {
         addAll(COMPRESSED_DATA_TYPE);
     }};
 
+
+    String MODEL_RUN_STREAM_KEY = "ai:basic:x1:model_run";
+    String MODEL_RUN_CONSUMER_GROUP = "default-group";
+    String MODEL_RUN_CONSUMER_NAME = "consumer";
 }

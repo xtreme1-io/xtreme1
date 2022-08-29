@@ -8,13 +8,22 @@ import ai.basic.x1.adapter.dto.request.UserAuthRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserDeleteRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserUpdateRequestDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
+import ai.basic.x1.entity.DataInfoBO;
+import ai.basic.x1.entity.ModelMessageBO;
 import ai.basic.x1.entity.UserBO;
+import ai.basic.x1.entity.enums.ModelCodeEnum;
+import ai.basic.x1.usecase.ModelUseCase;
 import ai.basic.x1.usecase.UserUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.stream.ObjectRecord;
+import org.springframework.data.redis.connection.stream.RecordId;
+import org.springframework.data.redis.connection.stream.StreamRecords;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/user")
 @Validated
+@Slf4j
 public class UserController extends BaseController {
 
     @Autowired
@@ -34,6 +44,9 @@ public class UserController extends BaseController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ModelUseCase modelUseCase;
 
     @PostMapping("/register")
     public UserDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
@@ -59,7 +72,7 @@ public class UserController extends BaseController {
 
     @PostMapping("/delete")
     public void delete(@RequestBody UserDeleteRequestDTO deleteRequestDTO,
-                          @LoggedUser LoggedUserDTO loggedUser) {
+                       @LoggedUser LoggedUserDTO loggedUser) {
         userUseCase.deleteOtherUsers(deleteRequestDTO.getUserIds(), loggedUser.getId());
     }
 
@@ -98,6 +111,17 @@ public class UserController extends BaseController {
     public UserDTO info(@PathVariable Long id) {
         var user = userUseCase.findById(id);
         return UserDTO.fromBO(user);
+    }
+
+    @GetMapping("/test")
+    public void test() {
+        ModelMessageBO modelMessageBO = ModelMessageBO.builder()
+                .modelCode(ModelCodeEnum.PRE_LABEL)
+                .datasetId(1l)
+                .dataId(1l)
+                .dataInfo(DataInfoBO.builder().build())
+                .build();
+        modelUseCase.sendModelMessageToMQ(modelMessageBO);
     }
 
 }
