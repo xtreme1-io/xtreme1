@@ -13,6 +13,7 @@ import ai.basic.x1.usecase.ExportUseCase;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.EnumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author fyb
@@ -30,7 +32,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/data/")
 @Validated
-public class DataInfoController {
+public class DataInfoController extends DatasetBaseController {
 
     @Autowired
     protected DataInfoUseCase dataInfoUsecase;
@@ -66,19 +68,22 @@ public class DataInfoController {
         dataInfoQueryBO.setPageNo(pageNo);
         dataInfoQueryBO.setPageSize(pageSize);
         var dataInfoPage = dataInfoUsecase.findByPage(dataInfoQueryBO);
-        return DefaultConverter.convert(dataInfoPage, DataInfoDTO.class);
+        return dataInfoPage.convert(dataInfoBO -> convertDataInfoDTO(dataInfoBO));
     }
 
     @GetMapping("info/{id}")
     public DataInfoDTO info(@PathVariable Long id) {
         var dataInfoBO = dataInfoUsecase.findById(id);
-        return DefaultConverter.convert(dataInfoBO, DataInfoDTO.class);
+        return convertDataInfoDTO(dataInfoBO);
     }
 
     @GetMapping("listByIds")
     public List<DataInfoDTO> listByIds(@NotEmpty(message = "DataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
         var dataInfoBos = dataInfoUsecase.listByIds(dataIds);
-        return DefaultConverter.convert(dataInfoBos, DataInfoDTO.class);
+        if (CollectionUtil.isNotEmpty(dataInfoBos)) {
+            return dataInfoBos.stream().map(dataInfoBO -> convertDataInfoDTO(dataInfoBO)).collect(Collectors.toList());
+        }
+        return List.of();
     }
 
     @GetMapping("findLockRecordIdByDatasetId")

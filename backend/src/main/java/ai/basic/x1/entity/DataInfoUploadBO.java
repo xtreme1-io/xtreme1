@@ -27,7 +27,12 @@ public class DataInfoUploadBO {
     private Long datasetId;
 
     /**
-     * user id
+     * Data upload source local or url
+     */
+    private String source;
+
+    /**
+     * User id
      */
     private Long userId;
 
