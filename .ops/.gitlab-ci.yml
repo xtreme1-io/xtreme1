@@ -90,10 +90,6 @@ build-backend-package:
     - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
   after_script:
     - cd $WORKING_DIR
-    - pwd
-    - ls
-    - ls target
-    - ls ..
     - docker pull $IMAGE_NAME:latest || true
     - docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:$CI_COMMIT_REF_NAME -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -t $IMAGE_NAME:latest .
     - docker push $IMAGE_NAME:$CI_COMMIT_REF_NAME
@@ -119,6 +115,7 @@ build-frontend-image:
   script:
     - cd $WORKING_DIR
     - cp ../.ops/frontend.dockerfile ./Dockerfile
+    - cp ../.ops/frontend.dockerignore ./.dockerignore
     - sed -i 's/$FRONTEND_PACKAGE_DIR/'"$FRONTEND_PACKAGE_DIR"'/g' Dockerfile
 
 build-backend-image:
@@ -137,6 +134,7 @@ build-backend-image:
   script:
     - cd $WORKING_DIR
     - cp ../.ops/backend.dockerfile ./Dockerfile
+    - cp ../.ops/backend.dockerignore ./.dockerignore
     - sed -i 's/$BACKEND_PACKAGE_NAME/'"$BACKEND_PACKAGE_NAME"'/g' Dockerfile
 
 build-image-object-detection-image:
@@ -155,6 +153,7 @@ build-image-object-detection-image:
   script:
     - cd $WORKING_DIR
     - cp ../../.ops/image-object-detection.dockerfile ./Dockerfile
+    - cp ../../.ops/image-object-detection.dockerignore ./.dockerignore
 
 .deploy:
   stage: deploy
