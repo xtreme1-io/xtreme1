@@ -1,6 +1,5 @@
 package ai.basic.x1.adapter.api.controller;
 
-import ai.basic.x1.adapter.dto.DataInfoDTO;
 import ai.basic.x1.adapter.dto.DatasetDTO;
 import ai.basic.x1.adapter.dto.DatasetQueryDTO;
 import ai.basic.x1.adapter.dto.request.DatasetRequestDTO;
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/dataset/")
 @Validated
-public class DatasetController {
+public class DatasetController extends DatasetBaseController {
 
     @Autowired
     private DatasetUseCase datasetUsecase;
@@ -86,7 +85,10 @@ public class DatasetController {
                 datasetDTO.setInvalidCount(datasetStatisticsBO.getInvalidCount());
                 datasetDTO.setItemCount(datasetStatisticsBO.getItemCount());
             }
-            datasetDTO.setDatas(DefaultConverter.convert(dataMap.get(datasetBO.getId()), DataInfoDTO.class));
+            var dataInfoBOS = dataMap.get(datasetBO.getId());
+            if (CollectionUtil.isNotEmpty(dataInfoBOS)) {
+                datasetDTO.setDatas(dataInfoBOS.stream().map(dataInfoBO -> convertDataInfoDTO(dataInfoBO)).collect(Collectors.toList()));
+            }
             return datasetDTO;
         });
     }

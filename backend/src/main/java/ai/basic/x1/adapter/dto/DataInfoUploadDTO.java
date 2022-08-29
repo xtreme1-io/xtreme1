@@ -1,5 +1,7 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
+import ai.basic.x1.entity.enums.DataUploadSourceEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,5 +34,11 @@ public class DataInfoUploadDTO {
     @NotNull(message = "datasetId cannot be null")
     private Long datasetId;
 
+    /**
+     * 来源
+     */
+    @ValidStringEnum(message = "source must be one of LOCAL, URL", enumClass = DataUploadSourceEnum.class)
+    @NotNull(message = "source cannot be null")
+    private String source;
 
 }

@@ -50,7 +50,6 @@ public class DataInfoBO {
      */
     private DataAnnotationStatusEnum annotationStatus;
 
-
     /**
      * 是否删除 0 否 1是
      */
@@ -111,7 +110,7 @@ public class DataInfoBO {
         /**
          * 文件对象
          */
-        private FileBO file;
+        private RelationFileBO file;
 
         /**
          * 子文件

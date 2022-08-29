@@ -267,7 +267,8 @@ public class DataInfoUseCase {
      */
     @Transactional(rollbackFor = RuntimeException.class)
     public void upload(DataInfoUploadBO dataInfoUploadBO) throws IOException {
-        boolean boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
+
+        var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
         if (!boo) {
             throw new UsecaseException(FILE_URL_ERROR);
         }
@@ -280,6 +281,12 @@ public class DataInfoUseCase {
             downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageUploadFile);
         } else {
             downloadAndDecompressionFile(dataInfoUploadBO, this::parsePointCloudUploadFile);
+        }
+    }
+
+    private void validateUrlFileSuffix(DataInfoUploadBO dataInfoUploadBO) {
+        boolean boo = false;
+        if (IMAGE.equals(dataInfoUploadBO.getType())) {
         }
     }
 
@@ -515,7 +522,7 @@ public class DataInfoUseCase {
             modelMessageBO.setDataId(dataId);
             modelMessageBO.setDataInfo(dataMap.get(dataId));
             modelMessageBO.setDatasetId(dataMap.get(dataId).getDatasetId());
-            //TODO
+            modelUseCase.sendModelMessageToMQ(modelMessageBO);
         }
     }
 
@@ -548,12 +555,12 @@ public class DataInfoUseCase {
         var savePath = tempPath + FileUtil.getName(path);
         FileUtil.mkParentDirs(savePath);
         //将压缩包下载到本地
-        log.info("get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
+        log.info("Get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
         HttpUtil.downloadFileFromUrl(fileUrl, savePath);
-        log.info("get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
+        log.info("Get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
 
         //解压文件
-        log.info("start decompression,datasetId:{},filePath:{}", datasetId, savePath);
+        log.info("Start decompression,datasetId:{},filePath:{}", datasetId, savePath);
         DecompressionFileUtils.decompress(savePath, tempPath);
         function.accept(dataInfoUploadBO);
     }
@@ -578,7 +585,7 @@ public class DataInfoUseCase {
      * @param fileNodeBOList data文件信息
      * @param fileMap        文件map
      */
-    private void setFile(List<DataInfoBO.FileNodeBO> fileNodeBOList, Map<Long, FileBO> fileMap) {
+    private void setFile(List<DataInfoBO.FileNodeBO> fileNodeBOList, Map<Long, RelationFileBO> fileMap) {
         if (CollectionUtil.isEmpty(fileNodeBOList)) {
             return;
         }
@@ -597,10 +604,10 @@ public class DataInfoUseCase {
      * @param fileIds 文件id集合
      * @return 文件对象map
      */
-    private Map<Long, FileBO> findFileByFileIds(List<Long> fileIds) {
+    private Map<Long, RelationFileBO> findFileByFileIds(List<Long> fileIds) {
         var relationFileBOList = fileUseCase.findByIds(fileIds);
         return CollectionUtil.isNotEmpty(relationFileBOList) ?
-                relationFileBOList.stream().collect(Collectors.toMap(FileBO::getId, fileBO -> fileBO, (k1, k2) -> k1)) : new HashMap<>();
+                relationFileBOList.stream().collect(Collectors.toMap(RelationFileBO::getId, relationFileBO -> relationFileBO, (k1, k2) -> k1)) : new HashMap<>();
 
     }
 
