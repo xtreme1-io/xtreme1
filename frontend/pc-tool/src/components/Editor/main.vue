@@ -4,7 +4,7 @@
             <Layout>
                 <template #main-view>
                     <MainView>
-                        <!-- <template #editClass><EditClass /></template> -->
+                        <template #editClass><EditClass /></template>
                     </MainView>
                 </template>
                 <template #img-view><ImgView /></template>
@@ -19,7 +19,7 @@
     import MainView from '../MainView/index.vue';
     import ImgView from '../ImgView/index.vue';
     import SideView from '../SideView/index.vue';
-    // import EditClass from '../EditClass/bs/main.vue';
+    import EditClass from '../EditClass/bs/main.vue';
 </script>
 
 <style lang="less">

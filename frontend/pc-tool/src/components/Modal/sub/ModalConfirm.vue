@@ -36,9 +36,6 @@
 <script setup lang="ts">
     import { CloseOutlined } from '@ant-design/icons-vue';
     import { reactive, computed, watch, ref } from 'vue';
-    import { useInjectTool } from '../../state';
-    import * as api from '../../api';
-    import { IModel } from '../../type';
     type btnType = 'ok' | 'cancel' | 'discard';
     interface IProps {
         content: string;

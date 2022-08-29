@@ -22,7 +22,7 @@ import TrackManager from './common/TrackManager';
 
 import { getDefaultState } from './state';
 import type { IState } from './state';
-import { IUserData, IClassType, IImgViewConfig, LangType, IFrame } from './type';
+import { IUserData, IClassType, IImgViewConfig, LangType, IFrame, Const } from './type';
 import { IModeType, OPType, IModeConfig } from './config/type';
 import handleHack from './hack';
 import * as _ from 'lodash';
@@ -42,7 +42,7 @@ export default class Editor extends THREE.EventDispatcher {
     idCount: number = 1;
     pc: PointCloud;
     state: IState;
-    currentTrack: string | null = null;
+    // currentTrack: string | null = null;
     frameMap: Map<string, IFrame> = new Map();
     frameIndexMap: Map<string, number> = new Map();
     classMap: Map<string, IClassType> = new Map();
@@ -56,11 +56,11 @@ export default class Editor extends THREE.EventDispatcher {
     configManager: ConfigManager;
     dataManager: DataManager;
     businessManager: BusinessManager;
-    playManager: PlayManager;
+    // playManager: PlayManager;
     loadManager: LoadManager;
     dataResource: DataResource;
     modelManager: ModelManager;
-    trackManager: TrackManager;
+    // trackManager: TrackManager;
 
     // ui
     registerModal: RegisterFn = () => {};
@@ -83,12 +83,12 @@ export default class Editor extends THREE.EventDispatcher {
         this.viewManager = new ViewManager(this);
         this.configManager = new ConfigManager(this);
         this.dataManager = new DataManager(this);
-        this.playManager = new PlayManager(this);
+        // this.playManager = new PlayManager(this);
         this.loadManager = new LoadManager(this);
         this.dataResource = new DataResource(this);
         this.businessManager = new BusinessManager(this);
         this.modelManager = new ModelManager(this);
-        this.trackManager = new TrackManager(this);
+        // this.trackManager = new TrackManager(this);
 
         handleHack(this);
 
@@ -109,22 +109,6 @@ export default class Editor extends THREE.EventDispatcher {
             }
 
             this.dispatchEvent({ type: Event.ANNOTATE_SELECT, data: { ...data.data } });
-
-            let trackId = selection.length > 0 ? selection[0].userData.trackId : null;
-            this.setCurrentTrack(trackId);
-        });
-
-        let updateTrack = () => {
-            let selection = this.pc.selection;
-            let currentTrack = selection.length > 0 ? selection[0].userData.trackId : null;
-            this.setCurrentTrack(currentTrack);
-        };
-        this.cmdManager.addEventListener(Event.UNDO, () => {
-            updateTrack();
-        });
-
-        this.cmdManager.addEventListener(Event.REDO, () => {
-            updateTrack();
         });
 
         // 双击选中trackId的所有结果
@@ -197,13 +181,16 @@ export default class Editor extends THREE.EventDispatcher {
         return this.idCount++ + '';
     }
 
-    setCurrentTrack(trackId: string | null = null) {
-        if (this.currentTrack !== trackId) {
-            this.currentTrack = trackId;
-            this.dispatchEvent({ type: Event.CURRENT_TRACK_CHANGE, data: this.currentTrack });
-        }
+    // setCurrentTrack(trackId: string | null = null) {
+    //     if (this.currentTrack !== trackId) {
+    //         this.currentTrack = trackId;
+    //         this.dispatchEvent({ type: Event.CURRENT_TRACK_CHANGE, data: this.currentTrack });
+    //     }
+    // }
+    getCurTrack() {
+        let box = this.pc.selection.find((object) => object instanceof Box);
+        return box ? box.userData.trackId : '';
     }
-
     // create
     createAnnotate3D(
         position: THREE.Vector3,
@@ -245,15 +232,39 @@ export default class Editor extends THREE.EventDispatcher {
     }
 
     getObjectUserData(object: AnnotateObject, frame?: IFrame) {
-        let { isSeriesFrame } = this.state;
+        // let { isSeriesFrame } = this.state;
 
         let userData = object.userData as Required<IUserData>;
         let trackId = userData.trackId as string;
-        if (isSeriesFrame) {
-            let globalTrack = this.trackManager.getTrackObject(trackId) || {};
-            Object.assign(userData, globalTrack);
-        }
+        // if (isSeriesFrame) {
+        //     let globalTrack = this.trackManager.getTrackObject(trackId) || {};
+        //     Object.assign(userData, globalTrack);
+        // }
         return userData;
+    }
+
+    updateObjectRenderInfo(objects: AnnotateObject[] | AnnotateObject) {
+        if (!Array.isArray(objects)) objects = [objects];
+
+        objects.forEach((obj) => {
+            let frame = (obj as any).frame as IFrame;
+            // TODO
+            if (frame) frame.needSave = true;
+
+            let userData = this.getObjectUserData(obj);
+            let classType = userData.classType || '';
+            let classConfig = this.getClassType(classType);
+
+            if (obj instanceof Box) {
+                // obj.editConfig.resize = !userData.isStandard && userData.resultType !== Const.Fixed;
+                obj.color.setStyle(classConfig ? classConfig.color : '#ffffff');
+            } else {
+                obj.color = classConfig ? classConfig.color : '#ffffff';
+            }
+
+            // obj.dashed = !!userData.invisibleFlag;
+        });
+        this.pc.render();
     }
 
     // set get
@@ -341,38 +352,38 @@ export default class Editor extends THREE.EventDispatcher {
         }
     }
 
-    toggleInvisible(trackId: string, invisible: boolean) {
-        let { frames, frameIndex } = this.state;
+    // toggleInvisible(trackId: string, invisible: boolean) {
+    //     let { frames, frameIndex } = this.state;
 
-        let curData = frames[frameIndex];
-        curData.needSave = true;
+    //     let curData = frames[frameIndex];
+    //     curData.needSave = true;
 
-        let annotate3D = this.pc.getAnnotate3D();
-        let annotate2D = this.pc.getAnnotate2D();
-        let objects = [...annotate3D, ...annotate2D].filter((e) => e.userData.trackId === trackId);
+    //     let annotate3D = this.pc.getAnnotate3D();
+    //     let annotate2D = this.pc.getAnnotate2D();
+    //     let objects = [...annotate3D, ...annotate2D].filter((e) => e.userData.trackId === trackId);
 
-        if (objects.length === 0) return;
+    //     if (objects.length === 0) return;
 
-        this.cmdManager.withGroup(() => {
-            if (invisible) {
-                // 保留一个
-                if (objects.length > 1) {
-                    this.cmdManager.execute('delete-object', objects.slice(1));
-                }
-                this.cmdManager.execute('update-object-user-data', {
-                    objects: objects[0],
-                    data: { invisibleFlag: true },
-                });
-            } else {
-                this.cmdManager.execute('update-object-user-data', {
-                    objects: objects,
-                    data: { invisibleFlag: false },
-                });
-            }
+    //     this.cmdManager.withGroup(() => {
+    //         if (invisible) {
+    //             // 保留一个
+    //             if (objects.length > 1) {
+    //                 this.cmdManager.execute('delete-object', objects.slice(1));
+    //             }
+    //             this.cmdManager.execute('update-object-user-data', {
+    //                 objects: objects[0],
+    //                 data: { invisibleFlag: true },
+    //             });
+    //         } else {
+    //             this.cmdManager.execute('update-object-user-data', {
+    //                 objects: objects,
+    //                 data: { invisibleFlag: false },
+    //             });
+    //         }
 
-            this.cmdManager.execute('select-object', objects[0]);
-        });
-    }
+    //         this.cmdManager.execute('select-object', objects[0]);
+    //     });
+    // }
 
     blurPage() {
         if (document.activeElement && document.activeElement !== document.body) {

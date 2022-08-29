@@ -101,7 +101,7 @@ function hackImgView(editor: Editor, view: Image2DRenderView) {
     let get2DObject = view.get2DObject;
     view.get2DObject = function () {
         let { config } = editor.state;
-        let currentTrack = editor.currentTrack;
+        let currentTrack = editor.getCurTrack();
 
         let objects = get2DObject.call(view);
         if (config.filter2DByTrack && currentTrack) {
@@ -118,7 +118,7 @@ function hackImgView(editor: Editor, view: Image2DRenderView) {
     let get3DObject = view.get3DObject;
     view.get3DObject = function () {
         let { config } = editor.state;
-        let currentTrack = editor.currentTrack;
+        let currentTrack = editor.getCurTrack();
 
         let objects = get3DObject.call(view);
         if (config.filter2DByTrack && currentTrack) {

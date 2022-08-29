@@ -4,7 +4,7 @@ import Code from '../config/code';
 
 // token
 export const requestConfig = {
-    token: 'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIzMDA4MCIsInRlYW1JZCI6IjUxIiwiaXNzIjoiYmFzaWMuYWkiLCJpYXQiOjE2NTI0MDc3MDcsImV4cCI6MTY1MjQ1MDkwN30.HC2tAjiDdYpjVvlnLXfNO_2_V7b0AAHrLVPm7Ox0tyuBA-c4-asQnDkbu6P4Nn1yvW2K9-8THpJEnOruA1Yf5g',
+    token: '',
 };
 
 export function setToken(token: string) {

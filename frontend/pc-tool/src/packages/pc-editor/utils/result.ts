@@ -21,10 +21,10 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         let userData = {} as IUserData;
         userData.id = obj.id;
         userData.backId = obj.uuid;
-        userData.invisibleFlag = obj.invisibleFlag;
+        // userData.invisibleFlag = obj.invisibleFlag;
         // userData.refId = obj.refId;
         userData.isProjection = obj.isProjection || false;
-        userData.isStandard = obj.isStandard || false;
+        // userData.isStandard = obj.isStandard || false;
         userData.trackId = obj.trackId || '';
         userData.trackName = obj.trackName || '';
         userData.classType = obj.classType || '';
@@ -34,8 +34,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         userData.modelRunLabel = obj.modelRunLabel || '';
         userData.attrs = obj.attrs || {};
         userData.pointN = obj.pointN || 0;
-        userData.resultStatus = obj.resultStatus;
-        userData.resultType = obj.resultType;
+        // userData.resultStatus = obj.resultStatus;
+        // userData.resultType = obj.resultType;
 
         let classType = userData.classType;
         let classConfig = classType && classMap[classType] ? classMap[classType] : null;
@@ -49,7 +49,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             if (obj.uuid) box.uuid = obj.uuid;
             if (classConfig) {
                 box.color.setStyle(classConfig.color);
-                box.editConfig.resize = !userData.isStandard && userData.resultType !== Const.Fixed;
+                // box.editConfig.resize = !userData.isStandard && userData.resultType !== Const.Fixed;
             }
 
             annotates.push(box);
@@ -117,13 +117,13 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
             objType: getObjType(obj),
             id: userData.id,
             // refId: userData.refId || '',
-            invisibleFlag: !!userData.invisibleFlag,
+            // invisibleFlag: !!userData.invisibleFlag,
             isProjection: userData.isProjection || false,
-            isStandard: userData.isStandard || false,
+            // isStandard: userData.isStandard || false,
             trackId: userData.trackId || '',
             trackName: userData.trackName || '',
-            resultStatus: userData.resultStatus || '',
-            resultType: userData.resultType || '',
+            // resultStatus: userData.resultStatus || '',
+            // resultType: userData.resultType || '',
             classType: userData.classType || '',
             confidence: userData.confidence || undefined,
             modelRun: userData.modelRun || '',

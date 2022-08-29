@@ -47,17 +47,9 @@ export default function useClassItem() {
     }
 
     function onEdit(item: IClass) {
-        let { checkConfig, config } = editor.state;
+        let { config } = editor.state;
         let ids = item.data.map((e) => e.id);
-        if (ids.length > 0) {
-            if (config.showCheckView) {
-                checkConfig.showAttr = true;
-                checkConfig.showAttrType = 'single';
-            } else {
-                config.showClassView = true;
-            }
-            editor.dispatchEvent({ type: EditorEvent.SHOW_CLASS_INFO, data: { id: ids } });
-        }
+        editor.viewManager.showClassView(ids);
     }
 
     function onToggleVisible(item: IClass) {

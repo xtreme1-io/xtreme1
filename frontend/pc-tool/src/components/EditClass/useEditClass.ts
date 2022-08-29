@@ -8,7 +8,6 @@ import { useInjectEditor } from '../../state';
 import * as _ from 'lodash';
 import * as THREE from 'three';
 import * as locale from './lang';
-import { IFrame, ReportEvent } from 'pc-editor';
 import useControl from './useControl';
 
 let SOURCE_CLASS = 'edit_class';
@@ -27,7 +26,7 @@ export default function useEditClass() {
     let $$ = editor.bindLocale(locale);
 
     let state = reactive<IState>({
-        activeTab: [],
+        activeTab: ['attribute','objects','cuboid'],
         showType: 'select',
         // batch
         batchVisible: true,
@@ -58,12 +57,12 @@ export default function useEditClass() {
 
     // let { needUpdate = defaultNeedUpdate } = option;
 
-    editor.addEventListener(Event.SHOW_CLASS_INFO, (data: any) => {
-        let trackIds = data.data.id;
+    // editor.addEventListener(Event.SHOW_CLASS_INFO, (data: any) => {
+    //     let trackIds = data.data.id;
 
-        state.showType = 'msg';
-        handleObject(trackIds);
-    });
+    //     state.showType = 'msg';
+    //     handleObject(trackIds);
+    // });
 
     watch(
         () => [state.confidenceRange, state.instances],
@@ -95,10 +94,14 @@ export default function useEditClass() {
     }, 100);
 
     onMounted(() => {
+        editor.addEventListener(Event.SHOW_CLASS_INFO, (data: any) => {
+            let trackIds = data.data.id;
+            state.showType = 'msg';
+            handleObject(trackIds);
+        });
         editor.addEventListener(Event.ANNOTATE_SELECT, onSelect);
         editor.addEventListener(Event.ANNOTATE_REMOVE, syncUpdate);
         editor.addEventListener(Event.ANNOTATE_ADD, syncUpdate);
-        editor.addEventListener(Event.CLEAR_MERGE_SPLIT, onClearMergeSplit);
         editor.addEventListener(Event.ANNOTATE_CHANGE, syncUpdate);
     });
 
@@ -106,7 +109,6 @@ export default function useEditClass() {
         editor.removeEventListener(Event.ANNOTATE_SELECT, onSelect);
         editor.removeEventListener(Event.ANNOTATE_REMOVE, syncUpdate);
         editor.removeEventListener(Event.ANNOTATE_ADD, syncUpdate);
-        editor.removeEventListener(Event.CLEAR_MERGE_SPLIT, onClearMergeSplit);
         editor.removeEventListener(Event.ANNOTATE_CHANGE, syncUpdate);
     });
 
@@ -172,9 +174,6 @@ export default function useEditClass() {
     function close() {
         // emit('close');
         control.close();
-        editor.reportManager.report(ReportEvent.ATTRIBUTE_PAD_HIDE, {
-            Method: 'Close',
-        });
     }
 
     function showBatchObject(trackIds: string[]) {
@@ -233,12 +232,12 @@ export default function useEditClass() {
         state.objectId = object.uuid;
         state.modelClass = userData.modelClass || '';
         state.classType = userData.classType || '';
-        state.isInvisible = !!userData.invisibleFlag;
+        // state.isInvisible = !!userData.invisibleFlag;
         state.trackId = userData.trackId || '';
         state.trackName = userData.trackName || '';
-        state.isStandard = userData.isStandard || false;
-        state.resultStatus = userData.resultStatus || Const.True_Value;
-        state.resultType = userData.resultType || Const.Dynamic;
+        // state.isStandard = userData.isStandard || false;
+        // state.resultStatus = userData.resultStatus || Const.True_Value;
+        // state.resultType = userData.resultType || Const.Dynamic;
 
         // temp
         trackObject = object;
@@ -317,7 +316,6 @@ export default function useEditClass() {
                 () => {
                     let objects = getFilterObjects();
                     editor.cmdManager.execute('delete-object', [{ objects: objects }]);
-                    editor.reportManager.reportDeleteObject('Attribute Pad', objects);
 
                     let [min, max] = state.confidenceRange;
                     state.instances = state.instances.filter(
@@ -354,30 +352,36 @@ export default function useEditClass() {
             resultStatus: Const.True_Value,
         } as IUserData;
 
-        if (!classConfig || classConfig.type !== 'standard') {
-            userData.isStandard = false;
-        }
+        // if (!classConfig || classConfig.type !== 'standard') {
+        //     userData.isStandard = false;
+        // }
+        editor.cmdManager.execute('update-object-user-data', {
+            objects: tempObjects,
 
-        editor.cmdManager.withGroup(() => {
-            editor.trackManager.setTrackData(state.trackId, {
-                userData: { classType: state.classType },
-            });
-
-            editor.trackManager.setDataByTrackId(
-                state.trackId,
-                {
-                    userData: userData,
-                },
-                [editor.getCurrentFrame()],
-            );
+            data: {
+                classType: state.classType,
+            },
         });
+        // editor.cmdManager.withGroup(() => {
+        //     editor.trackManager.setTrackData(state.trackId, {
+        //         userData: { classType: state.classType },
+        //     });
+
+        //     editor.trackManager.setDataByTrackId(
+        //         state.trackId,
+        //         {
+        //             userData: userData,
+        //         },
+        //         [editor.getCurrentFrame()],
+        //     );
+        // });
 
         state.resultStatus = Const.True_Value;
         updateAttrInfo(trackObject.userData, state.classType);
     }
 
     function updateClassMulti() {
-        let { isSeriesFrame, frameIndex, frames } = editor.state;
+        let { frameIndex, frames } = editor.state;
 
         let objects = getFilterObjects();
         let trackIdMap = {};
@@ -388,19 +392,26 @@ export default function useEditClass() {
         let userData = {} as IUserData;
         userData.classType = state.classType;
         userData.attrs = {};
-        userData.resultStatus = Const.True_Value;
+        // userData.resultStatus = Const.True_Value;
 
-        editor.cmdManager.withGroup(() => {
-            editor.trackManager.setTrackData(ids, {
-                userData: { classType: state.classType },
-            });
+        editor.cmdManager.execute('update-object-user-data', {
+            objects: tempObjects,
 
-            editor.trackManager.setDataByTrackId(
-                ids,
-                { userData },
-                isSeriesFrame ? frames : [editor.getCurrentFrame()],
-            );
+            data: {
+                classType: state.classType,
+            },
         });
+        // editor.cmdManager.withGroup(() => {
+        //     editor.trackManager.setTrackData(ids, {
+        //         userData: { classType: state.classType },
+        //     });
+
+        //     editor.trackManager.setDataByTrackId(
+        //         ids,
+        //         { userData },
+        //         isSeriesFrame ? frames : [editor.getCurrentFrame()],
+        //     );
+        // });
 
         // editor.dispatchEvent({ type: Event.UPDATE_RESULT_LIST });
         // editor.dispatchEvent({ type: Event.UPDATE_TIME_LINE });
@@ -413,7 +424,7 @@ export default function useEditClass() {
             let attrs = JSON.parse(JSON.stringify(trackAttrs));
             editor.cmdManager.execute('update-object-user-data', {
                 objects: tempObjects,
-                data: { attrs, resultStatus: Const.True_Value },
+                data: { attrs },
             });
         });
     }, 100);
@@ -424,56 +435,63 @@ export default function useEditClass() {
         state.resultStatus = Const.True_Value;
     }
 
-    function onObjectTypeChange(type: any) {
-        let { isSeriesFrame, frames } = editor.state;
-        let frame = editor.getCurrentFrame();
+    // function onObjectTypeChange(type: any) {
+    //     let { isSeriesFrame, frames } = editor.state;
+    //     let frame = editor.getCurrentFrame();
 
-        state.resultType = type;
-        let size3D: undefined | THREE.Vector3 = undefined;
-        let userData: IUserData = { resultType: type, resultStatus: Const.True_Value };
+    //     state.resultType = type;
+    //     let size3D: undefined | THREE.Vector3 = undefined;
+    //     let userData: IUserData = { resultType: type, resultStatus: Const.True_Value };
 
-        let object3D = tempObjects.find((e) => e instanceof Box) as Box;
-        if (type === Const.Fixed && object3D && isSeriesFrame) {
-            size3D = object3D.scale.clone();
-        }
+    //     let object3D = tempObjects.find((e) => e instanceof Box) as Box;
+    //     if (type === Const.Fixed && object3D && isSeriesFrame) {
+    //         size3D = object3D.scale.clone();
+    //     }
 
-        editor.cmdManager.withGroup(() => {
-            editor.trackManager.setTrackData(state.trackId, {
-                userData: { resultType: type },
-            });
+    //     editor.cmdManager.withGroup(() => {
+    //         editor.trackManager.setTrackData(state.trackId, {
+    //             userData: { resultType: type },
+    //         });
 
-            editor.trackManager.setDataByTrackId(
-                state.trackId,
-                {
-                    userData: userData,
-                    size3D: size3D,
-                },
-                isSeriesFrame ? frames : [frame],
-                (f: IFrame, obj: AnnotateObject) => {
-                    return f.id !== frame.id && !obj.userData.isStandard;
-                },
-            );
-        });
+    //         editor.trackManager.setDataByTrackId(
+    //             state.trackId,
+    //             {
+    //                 userData: userData,
+    //                 size3D: size3D,
+    //             },
+    //             isSeriesFrame ? frames : [frame],
+    //             (f: IFrame, obj: AnnotateObject) => {
+    //                 return f.id !== frame.id && !obj.userData.isStandard;
+    //             },
+    //         );
+    //     });
 
-        state.resultStatus = Const.True_Value;
-    }
+    //     state.resultStatus = Const.True_Value;
+    // }
 
-    function onObjectStatusChange(status: any) {
-        let frame = editor.getCurrentFrame();
-        state.resultStatus = status;
-        editor.trackManager.setDataByTrackId(
-            state.trackId,
-            {
-                userData: { resultStatus: status },
-            },
-            [frame],
-        );
-        // editor.cmdManager.execute('update-track-data', {
-        //     trackId: state.trackId,
-        //     frame: editor.getCurrentFrame(),
-        //     data: { resultStatus: status },
-        // });
-    }
+    // function onObjectStatusChange(status: any) {
+    //     let frame = editor.getCurrentFrame();
+    //     state.resultStatus = status;
+    //     editor.cmdManager.execute('update-object-user-data', {
+    //         objects: tempObjects,
+
+    //         data: {
+    //             resultStatus: status,
+    //         },
+    //     });
+    //     editor.trackManager.setDataByTrackId(
+    //         state.trackId,
+    //         {
+    //             userData: { resultStatus: status },
+    //         },
+    //         [frame],
+    //     );
+    //     editor.cmdManager.execute('update-track-data', {
+    //         trackId: state.trackId,
+    //         frame: editor.getCurrentFrame(),
+    //         data: { resultStatus: status },
+    //     });
+    // }
 
     function onObjectInstanceRemove(item: IInstanceItem) {
         // state.showType = 'msg';
@@ -486,7 +504,6 @@ export default function useEditClass() {
                 }
                 editor.cmdManager.execute('delete-object', annotate);
             });
-            editor.reportManager.reportDeleteObject('Attribute Pad', [annotate]);
         }
 
         if (tempObjects.length === 0) {
@@ -494,84 +511,84 @@ export default function useEditClass() {
         }
     }
 
-    function onToggleInVisible() {
-        let isInvisible = !state.isInvisible;
-        editor.toggleInvisible(state.trackId, isInvisible);
-        state.isInvisible = isInvisible;
-    }
+    // function onToggleInVisible() {
+    //     let isInvisible = !state.isInvisible;
+    //     editor.toggleInvisible(state.trackId, isInvisible);
+    //     state.isInvisible = isInvisible;
+    // }
 
-    function onMergeTrackObject(sourceTrackId: string, targetTrackId: string) {
-        let info = editor.trackManager.canMerge(sourceTrackId, targetTrackId);
-        if (info.code !== 'ok') {
-            let msg =
-                info.code === 'classType_diff'
-                    ? $$('msg-merge-different-class')
-                    : $$('msg-merge-conflict');
-            editor.showMsg('warning', msg);
-            return;
-        }
+    // function onMergeTrackObject(sourceTrackId: string, targetTrackId: string) {
+    //     let info = editor.trackManager.canMerge(sourceTrackId, targetTrackId);
+    //     if (info.code !== 'ok') {
+    //         let msg =
+    //             info.code === 'classType_diff'
+    //                 ? $$('msg-merge-different-class')
+    //                 : $$('msg-merge-conflict');
+    //         editor.showMsg('warning', msg);
+    //         return;
+    //     }
 
-        // console.log(sourceTrackId, targetTrackId);
-        editor.trackManager.mergeTrackObject(sourceTrackId, targetTrackId);
-        editor.showMsg('success', $$('msg-merge-success'));
-        // editor.dispatchEvent({ type: Event.UPDATE_RESULT_LIST });
-        editor.dispatchEvent({ type: Event.CLEAR_MERGE_SPLIT });
-        // editor.pc.selectObject(tempObjects[0]);
-    }
+    //     // console.log(sourceTrackId, targetTrackId);
+    //     editor.trackManager.mergeTrackObject(sourceTrackId, targetTrackId);
+    //     editor.showMsg('success', $$('msg-merge-success'));
+    //     // editor.dispatchEvent({ type: Event.UPDATE_RESULT_LIST });
+    //     editor.dispatchEvent({ type: Event.CLEAR_MERGE_SPLIT });
+    //     // editor.pc.selectObject(tempObjects[0]);
+    // }
 
-    function onSplitTrackObject(targetTrackId: string, classType: string) {
-        let { frameIndex } = editor.state;
+    // function onSplitTrackObject(targetTrackId: string, classType: string) {
+    //     let { frameIndex } = editor.state;
 
-        const canSplit = editor.trackManager.canSplit(state.trackId, frameIndex);
-        if (!canSplit) {
-            editor.showMsg('warning', $$('msg-split-empty'));
-            return;
-        }
+    //     const canSplit = editor.trackManager.canSplit(state.trackId, frameIndex);
+    //     if (!canSplit) {
+    //         editor.showMsg('warning', $$('msg-split-empty'));
+    //         return;
+    //     }
 
-        editor.trackManager.splitTrackObject({
-            trackId: state.trackId,
-            start: frameIndex,
-            userData: {
-                trackId: targetTrackId,
-                classType,
-            },
-        });
-        editor.showMsg('success', $$('msg-split-success'));
-        // editor.dispatchEvent({ type: Event.UPDATE_RESULT_LIST });
-        editor.dispatchEvent({ type: Event.CLEAR_MERGE_SPLIT });
-        // editor.pc.selectObject(tempObjects[0]);
-    }
+    //     editor.trackManager.splitTrackObject({
+    //         trackId: state.trackId,
+    //         start: frameIndex,
+    //         userData: {
+    //             trackId: targetTrackId,
+    //             classType,
+    //         },
+    //     });
+    //     editor.showMsg('success', $$('msg-split-success'));
+    //     // editor.dispatchEvent({ type: Event.UPDATE_RESULT_LIST });
+    //     editor.dispatchEvent({ type: Event.CLEAR_MERGE_SPLIT });
+    //     // editor.pc.selectObject(tempObjects[0]);
+    // }
 
-    function onDeleteTrackObject(type: MsgType, range?: [number, number]) {
-        let { isSeriesFrame, frameIndex, frames } = editor.state;
+    // function onDeleteTrackObject(type: MsgType, range?: [number, number]) {
+    //     let { isSeriesFrame, frameIndex, frames } = editor.state;
 
-        let trackId = state.trackId;
-        if (type === 'delete-all') {
-            editor.trackManager.deleteObjectByTrack(trackId, frames);
-            close();
-            editor.showMsg('success', $$('msg-delete-success'));
-        } else if (type === 'delete-range' && range) {
-            let deleteFrames = frames.slice(range[0], range[1] + 1);
-            editor.trackManager.deleteObjectByTrack(trackId, deleteFrames);
-            if (frameIndex >= range[0] && frameIndex <= range[1]) {
-                close();
-            }
-            editor.showMsg('success', $$('msg-delete-success'));
-        } else if (type === 'delete-no-true') {
-            editor.trackManager.deleteObjectByTrack(
-                trackId,
-                frames,
-                (fame: IFrame, e: AnnotateObject) => {
-                    return e.userData.resultStatus !== Const.True_Value;
-                },
-            );
-            editor.showMsg('success', $$('msg-delete-success'));
-            if (state.resultStatus === Const.True_Value) {
-                close();
-            }
-        }
-        // editor.dispatchEvent({ type: Event.UPDATE_TIME_LINE });
-    }
+    //     let trackId = state.trackId;
+    //     if (type === 'delete-all') {
+    //         editor.trackManager.deleteObjectByTrack(trackId, frames);
+    //         close();
+    //         editor.showMsg('success', $$('msg-delete-success'));
+    //     } else if (type === 'delete-range' && range) {
+    //         let deleteFrames = frames.slice(range[0], range[1] + 1);
+    //         editor.trackManager.deleteObjectByTrack(trackId, deleteFrames);
+    //         if (frameIndex >= range[0] && frameIndex <= range[1]) {
+    //             close();
+    //         }
+    //         editor.showMsg('success', $$('msg-delete-success'));
+    //     } else if (type === 'delete-no-true') {
+    //         editor.trackManager.deleteObjectByTrack(
+    //             trackId,
+    //             frames,
+    //             (fame: IFrame, e: AnnotateObject) => {
+    //                 return e.userData.resultStatus !== Const.True_Value;
+    //             },
+    //         );
+    //         editor.showMsg('success', $$('msg-delete-success'));
+    //         if (state.resultStatus === Const.True_Value) {
+    //             close();
+    //         }
+    //     }
+    //     // editor.dispatchEvent({ type: Event.UPDATE_TIME_LINE });
+    // }
 
     function copyAttrFrom(trackId: string) {
         // console.log(trackId);
@@ -590,20 +607,20 @@ export default function useEditClass() {
         }
     }
 
-    function copyAttrTo(range: [number, number]) {
-        let { frames } = editor.state;
-        console.log(range);
-        let copyFrames = frames.slice(range[0], range[1] + 1);
-        let attrs = JSON.parse(JSON.stringify(trackObject.userData.attrs));
-        let objects = editor.trackManager.getObjects(state.trackId, copyFrames);
-        if (objects.length === 0) return;
+    // function copyAttrTo(range: [number, number]) {
+    //     let { frames } = editor.state;
+    //     console.log(range);
+    //     let copyFrames = frames.slice(range[0], range[1] + 1);
+    //     let attrs = JSON.parse(JSON.stringify(trackObject.userData.attrs));
+    //     let objects = editor.trackManager.getObjects(state.trackId, copyFrames);
+    //     if (objects.length === 0) return;
 
-        editor.cmdManager.execute('update-object-user-data', {
-            objects: objects,
-            data: { attrs: attrs },
-        });
-        editor.showMsg('success', $$('msg-copy-success'));
-    }
+    //     editor.cmdManager.execute('update-object-user-data', {
+    //         objects: objects,
+    //         data: { attrs: attrs },
+    //     });
+    //     editor.showMsg('success', $$('msg-copy-success'));
+    // }
 
     function onToggleTrackVisible() {
         let visible = !state.trackVisible;
@@ -614,46 +631,61 @@ export default function useEditClass() {
         editor.cmdManager.execute('toggle-visible', { objects, visible });
     }
 
-    function markAllTrueValue() {
-        let { frames } = editor.state;
-        editor.trackManager.setDataByTrackId(
-            state.trackId,
-            {
-                userData: { resultStatus: Const.True_Value },
-            },
-            frames,
-        );
-        state.resultStatus = Const.True_Value;
-    }
+    // function markAllTrueValue() {
+    //     let { frames } = editor.state;
+    //     editor.trackManager.setDataByTrackId(
+    //         state.trackId,
+    //         {
+    //             userData: { resultStatus: Const.True_Value },
+    //         },
+    //         frames,
+    //     );
+    //     state.resultStatus = Const.True_Value;
+    // }
 
-    function toggleStandard() {
-        let { frameIndex, frames } = editor.state;
+    // function toggleStandard() {
+    //     let { frameIndex, frames } = editor.state;
 
-        let isStandard = !state.isStandard;
-        state.isStandard = isStandard;
+    //     let isStandard = !state.isStandard;
+    //     state.isStandard = isStandard;
 
-        let classConfig = editor.getClassType(state.classType);
+    //     let classConfig = editor.getClassType(state.classType);
 
-        let size3D: THREE.Vector3 | undefined = undefined;
-        let userData: IUserData = { resultStatus: Const.True_Value, isStandard };
+    //     let size3D: THREE.Vector3 | undefined = undefined;
+    //     let userData: IUserData = { resultStatus: Const.True_Value, isStandard };
 
-        if (isStandard && classConfig && classConfig.size3D) {
-            size3D = classConfig.size3D;
-        }
+    //     if (isStandard && classConfig && classConfig.size3D) {
+    //         size3D = classConfig.size3D;
+    //     }
+    //     editor.cmdManager.withGroup(() => {
+    //         let object3D = tempObjects.filter((item) => item instanceof Box) as Box[];
+    //         editor.cmdManager.execute('update-object-user-data', {
+    //             objects: tempObjects,
+    //             data: {},
+    //         });
+    //         if (object3D.length > 0) {
+    //             editor.cmdManager.execute('update-transform-batch', {
+    //                 objects: object3D,
+    //                 transforms: {
+    //                     scale: size3D,
+    //                 },
+    //             });
+    //         }
+    //     });
 
-        editor.trackManager.setDataByTrackId(
-            state.trackId,
-            {
-                userData: userData,
-                size3D: size3D,
-            },
-            [editor.getCurrentFrame()],
-        );
-        state.resultStatus = Const.True_Value;
-        // 只修改当前帧
-        // tool.setDataByTrackId(state.trackId, { userData, size3D }, [dataList[dataIndex]]);
-        // editor.pc.selectObject(editor.pc.selection);
-    }
+    //     // editor.trackManager.setDataByTrackId(
+    //     //     state.trackId,
+    //     //     {
+    //     //         userData: userData,
+    //     //         size3D: size3D,
+    //     //     },
+    //     //     [editor.getCurrentFrame()],
+    //     // );
+    //     state.resultStatus = Const.True_Value;
+    //     // 只修改当前帧
+    //     // tool.setDataByTrackId(state.trackId, { userData, size3D }, [dataList[dataIndex]]);
+    //     // editor.pc.selectObject(editor.pc.selection);
+    // }
 
     function onCopy() {
         copy(state.trackId);
@@ -663,25 +695,25 @@ export default function useEditClass() {
     return {
         state,
         update,
+        //         onObjectTypeChange,
+        // onToggleInVisible,
+        // onMergeTrackObject,
+        // onSplitTrackObject,
+        // onDeleteTrackObject,
+        // markAllTrueValue,
+        // onCopy,
         control,
         onAttChange,
         onClassChange,
         onInstanceRemove,
         onToggleObjectsVisible,
         onRemoveObjects,
-        onObjectTypeChange,
-        onObjectStatusChange,
-        onToggleInVisible,
+        // onObjectStatusChange,
         onObjectInstanceRemove,
-        onMergeTrackObject,
-        onSplitTrackObject,
-        onDeleteTrackObject,
         copyAttrFrom,
-        copyAttrTo,
+        // copyAttrTo,
         onToggleTrackVisible,
-        markAllTrueValue,
-        toggleStandard,
-        onCopy,
+        // toggleStandard,
     };
 }
 
