@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.stream.StreamListener;
 
 @Slf4j
-public class ModelJobConsumerListener implements StreamListener<String, ObjectRecord<String, ModelMessageBO>> {
+public class ModelJobConsumerListener implements StreamListener<String, ObjectRecord<String, String>> {
 
     private String group;
     private String streamKey;
@@ -25,8 +25,9 @@ public class ModelJobConsumerListener implements StreamListener<String, ObjectRe
 
     @Override
     public void onMessage(ObjectRecord message) {
-        ModelMessageBO modelMessageBO = (ModelMessageBO) message.getValue();
-        modelMessageHandler.modelRun(modelMessageBO);
-        redisTemplate.opsForStream().acknowledge(streamKey, group, message.getId());
+        String modelMessageBO = (String) message.getValue();
+        if (modelMessageHandler.modelRun(JSONUtil.toBean(modelMessageBO, ModelMessageBO.class))) {
+            redisTemplate.opsForStream().acknowledge(streamKey, group, message.getId());
+        }
     }
 }

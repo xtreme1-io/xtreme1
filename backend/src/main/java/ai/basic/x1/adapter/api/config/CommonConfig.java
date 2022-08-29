@@ -38,7 +38,7 @@ public class CommonConfig implements WebMvcConfigurer {
     @Value("${jwt.expireHours}")
     public Integer jwtExpireHours;
 
-    public static final List<String> excludeUris = List.of("/user/login", "/user/register","/error","/user/test");
+    public static final List<String> excludeUris = List.of("/user/login", "/user/register","/error");
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
         return new Jackson2ObjectMapperBuilder()
