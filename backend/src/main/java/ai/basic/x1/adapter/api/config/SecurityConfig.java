@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling(exceptionConfigurer -> exceptionConfigurer
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeRequests(authConfigurer -> authConfigurer.
-                        antMatchers("/actuator/**", "/user/test", "/user/register", "/user/login", "/user/logged").permitAll()
+                        antMatchers("/actuator/**", "/user/register", "/user/login", "/user/logged").permitAll()
                         .anyRequest().authenticated());
     }
 

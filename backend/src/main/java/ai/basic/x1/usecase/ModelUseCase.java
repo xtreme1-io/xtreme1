@@ -9,6 +9,7 @@ import ai.basic.x1.util.Constants;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Maps;
@@ -73,9 +74,9 @@ public class ModelUseCase {
     }
 
     public RecordId sendModelMessageToMQ(ModelMessageBO modelMessageBO) {
-        ObjectRecord<String, ModelMessageBO> record = StreamRecords.newRecord()
+        ObjectRecord<String, String> record = StreamRecords.newRecord()
                 .in(Constants.MODEL_RUN_STREAM_KEY)
-                .ofObject(modelMessageBO)
+                .ofObject(JSONUtil.toJsonStr(modelMessageBO))
                 .withId(RecordId.autoGenerate());
         return streamRedisTemplate.opsForStream().add(record);
     }
