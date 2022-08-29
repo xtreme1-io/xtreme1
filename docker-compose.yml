@@ -41,7 +41,9 @@ services:
     volumes:
       - minio-data:/data
   backend:
-    build: ./backend
+    image: basicai/x1-community-backend
+    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
+    # build: ./backend
     ports:
       - 8180:8080
     # volumes:
@@ -51,7 +53,9 @@ services:
       - mysql
       - redis
   frontend:
-    build: ./frontend
+    image: basicai/x1-community-frontend
+    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
+    # build: ./frontend
     ports:
       - 8181:8080
 volumes:
