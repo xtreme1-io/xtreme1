@@ -7,7 +7,6 @@ import ActionManager from './common/ActionManager';
 import BusinessManager from './common/BusinessManager';
 import DataManager from './common/DataManager';
 import LoadManager from './common/LoadManager';
-import ReportManager, { ReportEvent } from './common/ReportManager';
 
 import Event from './config/event';
 import { UIType } from './config/mode';
@@ -24,11 +23,9 @@ export {
     HotkeyManager,
     ActionManager,
     BusinessManager,
-    ReportManager,
     DataManager,
     BSError,
     Event,
-    ReportEvent,
     ModeKeys,
     modes,
     AllActions,

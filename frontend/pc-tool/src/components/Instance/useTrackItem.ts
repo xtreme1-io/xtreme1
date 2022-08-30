@@ -11,14 +11,9 @@ export default function useTrackItem() {
     let $$ = editor.bindLocale(locale);
 
     function onEdit(item: IItem) {
-        let { checkConfig, config } = editor.state;
-        if (config.showCheckView) {
-            checkConfig.showAttr = true;
-            checkConfig.showAttrType = 'single';
-        } else {
-            config.showClassView = true;
-        }
-        editor.dispatchEvent({ type: EditorEvent.SHOW_CLASS_INFO, data: { id: item.id } });
+        editor.viewManager.showClassView(item.id);
+        // editor.state.config.showClassView = true;
+        // editor.dispatchEvent({ type: EditorEvent.SHOW_CLASS_INFO, data: { id: item.id } });
     }
 
     function onSelect(item: IItem) {
@@ -27,7 +22,6 @@ export default function useTrackItem() {
 
         let objects = [...annotate3D, ...annotate2D].filter((e) => e.userData.trackId === item.id);
         editor.pc.selectObject(objects);
-        editor.reportManager.reportSelect('Result List', objects);
     }
 
     function onDelete(item: IItem) {
@@ -59,7 +53,6 @@ export default function useTrackItem() {
 
                     if (objects.length > 0) {
                         editor.cmdManager.execute('delete-object', [{ objects: objects }]);
-                        editor.reportManager.reportDeleteObject('Result List', objects);
                     }
                 },
                 () => {},

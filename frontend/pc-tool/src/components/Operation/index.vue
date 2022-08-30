@@ -1,6 +1,6 @@
 <template>
     <div class="pc-editor-operation">
-        <Results />
+        <!-- <Results /> -->
         <Classification />
         <Instance />
         <!-- <a-collapse v-model:activeKey="state.activeTabs" :bordered="false">

@@ -35,25 +35,25 @@ export default class ModelManager {
 
         annotates.forEach((object) => {
             let userData = object.userData as IUserData;
-            userData.resultStatus = Const.Predicted;
+            // userData.resultStatus = Const.Predicted;
 
             utils.setIdInfo(this.editor, userData);
 
-            let trackId = userData.trackId as string;
-            let trackName = userData.trackName as string;
-            let resultType = userData.resultType;
+            // let trackId = userData.trackId as string;
+            // let trackName = userData.trackName as string;
+            // let resultType = userData.resultType;
 
-            if (!this.editor.trackManager.hasTrackObject(trackId)) {
-                newTracks.push({ trackId, trackName, resultType, classType: '' });
-            }
+            // if (!this.editor.trackManager.hasTrackObject(trackId)) {
+            //     newTracks.push({ trackId, trackName, resultType, classType: '' });
+            // }
         });
 
         this.editor.needUpdateFilter = true;
-
-        this.editor.cmdManager.withGroup(() => {
-            this.editor.cmdManager.execute('add-track', newTracks);
-            this.editor.cmdManager.execute('add-object', annotates);
-        });
+        this.editor.cmdManager.execute('add-object', annotates);
+        // this.editor.cmdManager.withGroup(() => {
+        //     this.editor.cmdManager.execute('add-track', newTracks);
+        //     this.editor.cmdManager.execute('add-object', annotates);
+        // });
 
         // this.updateDataId();
         // this.dataManager.setDataObject(dataInfo.dataId, [...oldAnnotate, ...annotates]);

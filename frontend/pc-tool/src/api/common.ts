@@ -270,3 +270,8 @@ export async function getUserInfo() {
     } = await get(url);
     return user;
 }
+export async function getDataSetInfo(datasetId: string) {
+    let url = `/api/dataset/dataset/info/${datasetId}`;
+    let { data } = await get(url);
+    return data;
+}

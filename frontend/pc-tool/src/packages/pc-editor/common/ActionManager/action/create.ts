@@ -47,8 +47,8 @@ export const createObjectWith3 = define({
                     // debugger;
 
                     let userData = {} as IUserData;
-                    userData.resultType = Const.Dynamic;
-                    userData.resultStatus = Const.True_Value;
+                    // userData.resultType = Const.Dynamic;
+                    // userData.resultStatus = Const.True_Value;
 
                     let box = editor.createAnnotate3D(
                         transform.position,
@@ -61,17 +61,17 @@ export const createObjectWith3 = define({
                     let trackObject: Partial<IObject> = {
                         trackId: userData.trackId,
                         trackName: userData.trackName,
-                        resultType: userData.resultType,
-                        resultStatus: userData.resultStatus,
+                        // resultType: userData.resultType,
+                        // resultStatus: userData.resultStatus,
                     };
 
                     editor.state.config.showClassView = true;
 
                     editor.cmdManager.withGroup(() => {
                         editor.cmdManager.execute('add-object', box);
-                        if (editor.state.isSeriesFrame) {
-                            editor.cmdManager.execute('add-track', trackObject);
-                        }
+                        // if (editor.state.isSeriesFrame) {
+                        //     editor.cmdManager.execute('add-track', trackObject);
+                        // }
 
                         editor.cmdManager.execute('select-object', box);
                     });
