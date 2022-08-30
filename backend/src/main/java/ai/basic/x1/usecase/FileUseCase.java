@@ -81,6 +81,7 @@ public class FileUseCase {
         try {
             fileBO.setUrl(minioService.getUrl(fileBO.getBucketName(), fileBO.getPath()));
         } catch (Exception e) {
+            log.error("Get url error",e);
             throw new UsecaseException("Get url error");
         }
     }

@@ -25,7 +25,7 @@ public abstract class DatasetBaseController {
      * @return
      */
     protected DataInfoDTO convertDataInfoDTO(DataInfoBO dataInfoBO) {
-        var dataInfoDTO = DefaultConverter.convert(dataInfoBO,DataInfoDTO.class);
+        var dataInfoDTO = DefaultConverter.convert(dataInfoBO, DataInfoDTO.class);
         List<DataInfoDTO.FileNodeDTO> fileNodeDTOList = setFile(dataInfoBO.getContent());
         dataInfoDTO.setContent(fileNodeDTOList);
         return dataInfoDTO;
@@ -46,10 +46,10 @@ public abstract class DatasetBaseController {
                     var file = fileNodeBO.getFile();
                     var fileDTO = convertFileDTO(file);
                     fileNodeDTO.setFile(fileDTO);
-                    fileNodeDTOList.add(fileNodeDTO);
                 } else {
-                    fileNodeDTOList.addAll(setFile(fileNodeBO.getFiles()));
+                    fileNodeDTO.setFiles(setFile(fileNodeBO.getFiles()));
                 }
+                fileNodeDTOList.add(fileNodeDTO);
             });
         }
         return fileNodeDTOList;

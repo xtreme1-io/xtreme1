@@ -137,4 +137,17 @@ public class DecompressionFileUtils {
         }
     }
 
+    /**
+     * Remove url parameter
+     *
+     * @param fileUrl File url
+     * @return File url
+     */
+    public static String removeUrlParameter(String fileUrl) {
+        if (fileUrl.contains("?")) {
+            fileUrl = fileUrl.substring(0, fileUrl.indexOf("?"));
+        }
+        return fileUrl;
+    }
+
 }
