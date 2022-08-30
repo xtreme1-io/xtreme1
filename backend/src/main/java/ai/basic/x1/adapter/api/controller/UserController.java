@@ -49,8 +49,15 @@ public class UserController extends BaseController {
     private ModelUseCase modelUseCase;
 
     @PostMapping("/register")
-    public UserDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
-        return UserDTO.fromBO(userUseCase.create(authDto.getUsername(), authDto.getPassword()));
+    public UserLoginResponseDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
+        var user =  UserDTO.fromBO(userUseCase.create(authDto.getUsername(),
+                authDto.getPassword()));
+        return UserLoginResponseDTO.builder()
+                .token(jwtHelper.generateToken(JwtPayload.builder()
+                        .userId(user.getId())
+                        .build()))
+                .user(user)
+                .build();
     }
 
     @PostMapping("/login")
