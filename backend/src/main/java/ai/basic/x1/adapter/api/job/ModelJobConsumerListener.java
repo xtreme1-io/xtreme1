@@ -18,15 +18,12 @@ public class ModelJobConsumerListener implements StreamListener<String, ObjectRe
     private String group;
     private String streamKey;
     private RedisTemplate<String, Object> redisTemplate;
-
-    private ApplicationContext applicationContext;
     private ConcurrentHashMap<String, AbstractModelMessageHandler> modelMessageHandlerMap = new ConcurrentHashMap<>();
 
     public ModelJobConsumerListener(String streamKey, String group, RedisTemplate<String, Object> redisTemplate, ApplicationContext applicationContext) {
         this.streamKey = streamKey;
         this.group = group;
         this.redisTemplate = redisTemplate;
-        this.applicationContext = applicationContext;
         for (AbstractModelMessageHandler messageHandler : applicationContext.getBeansOfType(AbstractModelMessageHandler.class).values()) {
             modelMessageHandlerMap.put(messageHandler.getModelCodeEnum().name(), messageHandler);
         }
