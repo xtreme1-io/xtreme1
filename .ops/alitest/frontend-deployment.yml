@@ -65,3 +65,7 @@ spec:
                   number: 80
             path: /
             pathType: Prefix
+  tls:
+    - hosts:
+        - x1-community.alitest.beisai.com
+      secretName: alitest.beisai.com

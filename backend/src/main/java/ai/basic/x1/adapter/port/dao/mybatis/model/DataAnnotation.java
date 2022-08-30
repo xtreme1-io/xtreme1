@@ -23,48 +23,24 @@ public class DataAnnotation {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 数据集ID
-     */
     private Long datasetId;
 
-    /**
-     * 数据ID
-     */
     private Long dataId;
 
-    /**
-     * 类型ID
-     */
     private Long classificationId;
 
-    /**
-     * 类型属性
-     */
     @TableField(value = "classification_attributes", typeHandler = JacksonTypeHandler.class)
     private JsonNode classificationAttributes;
 
-    /**
-     * 创建时间
-     */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
 
-    /**
-     * 创建者
-     */
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
 
-    /**
-     * 更新时间
-     */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private OffsetDateTime updatedAt;
 
-    /**
-     * 更新者
-     */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updatedBy;
 }

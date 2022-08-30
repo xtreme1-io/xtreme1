@@ -7,6 +7,7 @@ public enum UsecaseCode {
 
     // Common
     OK("OK", "OK"),
+    ERROR("ERROR", "Service error"),
     UNKNOWN("UNKNOWN", "Unknown error"),
     NOT_FOUND("NOT_FOUND", "Resource not found"),
     DUPLICATED("DUPLICATED", "Resource duplicated"),
