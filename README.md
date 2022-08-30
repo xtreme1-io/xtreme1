@@ -4,6 +4,20 @@ X1 community edition from [Basic AI](https://www.basic.ai/).
 
 ## What is X1
 
+## Components and Architecture
+
+![Components and Architecture](/docs/images/components-and-architecture.png?raw=true)
+
+| Layer | Component | Description |
+| --- | --- | --- |
+| Application Services | Frontend | Web user interface, write in Vue3 and Typescript. |
+| Application Services | Backend | Data API for managing user, dataset, annotation object etc., write in Java and Spring Boot. |
+| Application Services | Image Object Detection | AI auto detect objects in image, write in Python and PyTorch. |
+| Application Services | Point Cloud Object Detection | AI auto detect objects in point cloud, write in Python and PyTorch. |
+| Base Services | MySQL | Relational database for storing business data. |
+| Base Services | Redis | Cache hot data, and schedule background tasks. |
+| Base Services | MinIO | Store unstructured data like image and point cloud files. |
+
 ## Try out X1
 
 * [Run with Docker Compose](#run-with-docker-compose)
@@ -45,7 +59,6 @@ services:
 
 It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
 
-
 ### Local development
 
 #### Enable Docker BuildKit
@@ -61,8 +74,6 @@ $ DOCKER_BUILDKIT=1 docker compose up
 $ vi /etc/docker/daemon.json
  { "features": { "buildkit": true } }
  ```
-
-#### Project structure
 
 #### Develop with Docker Compose
 
