@@ -10,10 +10,10 @@ X1 community edition from [Basic AI](https://www.basic.ai/).
 
 | Layer | Component | Description |
 | --- | --- | --- |
-| Application Services | Frontend | Web user interface, write in Vue3 and Typescript. |
-| Application Services | Backend | Data API for managing user, dataset, annotation object etc., write in Java and Spring Boot. |
-| Application Services | Image Object Detection | AI auto detect objects in image, write in Python and PyTorch. |
-| Application Services | Point Cloud Object Detection | AI auto detect objects in point cloud, write in Python and PyTorch. |
+| Application Services | Frontend | Web user interface, written in Vue3 and Typescript. |
+| Application Services | Backend | Data API for managing user, dataset, annotation object etc., written in Java and Spring Boot. |
+| Application Services | Image Object Detection | AI auto detect objects in image, written in Python and PyTorch. |
+| Application Services | Point Cloud Object Detection | AI auto detect objects in point cloud, written in Python and PyTorch. |
 | Base Services | MySQL | Relational database for storing business data. |
 | Base Services | Redis | Cache hot data, and schedule background tasks. |
 | Base Services | MinIO | Store unstructured data like image and point cloud files. |
@@ -46,7 +46,7 @@ docker compose up -d
 docker compose --profile model up
 ```
 
-It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `basicai/x1-community-backend`, `basicai/x1-community-frontend` etc.
+It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `basicai/x1-community-backend`, `basicai/x1-community-frontend` etc. You can find the username and password to access MySQL and MinIO in `docker-compose.yml`, and the host binding port of each service, for example, you can access MinIO console at `http://localhost:8194`.
 
 > Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content.
 
