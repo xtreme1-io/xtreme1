@@ -19,16 +19,19 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
@@ -41,12 +44,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static ai.basic.x1.entity.enums.DataUploadSourceEnum.LOCAL;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
-import static ai.basic.x1.usecase.exception.UsecaseCode.DATASET_NOT_FOUND;
-import static ai.basic.x1.usecase.exception.UsecaseCode.FILE_URL_ERROR;
+import static ai.basic.x1.entity.enums.RelationEnum.*;
+import static ai.basic.x1.usecase.exception.UsecaseCode.*;
 import static ai.basic.x1.util.Constants.*;
 
 /**
@@ -106,6 +111,26 @@ public class DataInfoUseCase {
 
     @Value("${export.data.version}")
     private String version;
+
+    @Value("${file.size.large:400}")
+    private int largeFileSise;
+
+    @Value("${file.size.medium:200}")
+    private int mediumFileSise;
+
+    @Value("${file.size.small:100}")
+    private int smallFileSise;
+
+    @Value("${file.prefix.large:large}")
+    private String large;
+
+    @Value("${file.prefix.medium:medium}")
+    private String medium;
+
+    @Value("${file.prefix.small:small}")
+    private String small;
+
+    private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
 
     /**
      * 过滤掉文件后缀不是image的文件，当返回为false时则丢弃文件
@@ -266,28 +291,44 @@ public class DataInfoUseCase {
      * @param dataInfoUploadBO 上传数据对象 包含文件信息集合
      */
     @Transactional(rollbackFor = RuntimeException.class)
-    public void upload(DataInfoUploadBO dataInfoUploadBO) throws IOException {
-
+    public void upload(DataInfoUploadBO dataInfoUploadBO) {
+        var fileUrl = removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var mimeType = FileUtil.getMimeType(fileUrl);
+        if (!validateUrlFileSuffix(dataInfoUploadBO, mimeType)) {
+            throw new UsecaseException(DATASET_DATA_FILE_FORMAT_ERROR);
+        }
         var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
         if (!boo) {
-            throw new UsecaseException(FILE_URL_ERROR);
+            throw new UsecaseException(DATASET_DATA_FILE_URL_ERROR);
         }
         var dataset = datasetDAO.getById(dataInfoUploadBO.getDatasetId());
         if (ObjectUtil.isNull(dataset)) {
             throw new UsecaseException(DATASET_NOT_FOUND);
         }
         dataInfoUploadBO.setType(dataset.getType());
-        if (IMAGE.equals(dataset.getType())) {
-            downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageUploadFile);
-        } else {
-            downloadAndDecompressionFile(dataInfoUploadBO, this::parsePointCloudUploadFile);
-        }
+        executorService.execute(TtlRunnable.get(() -> {
+            try {
+                if (IMAGE.equals(dataset.getType()) && IMAGE_DATA_TYPE.contains(mimeType)) {
+                    downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageUploadFile);
+                } else if (IMAGE.equals(dataset.getType()) && COMPRESSED_DATA_TYPE.contains(mimeType)) {
+                    downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageCompressedUploadFile);
+                } else {
+                    downloadAndDecompressionFile(dataInfoUploadBO, this::parsePointCloudUploadFile);
+                }
+            } catch (IOException e) {
+                log.error("Download decompression file error", e);
+            }
+        }));
+
     }
 
-    private void validateUrlFileSuffix(DataInfoUploadBO dataInfoUploadBO) {
-        boolean boo = false;
-        if (IMAGE.equals(dataInfoUploadBO.getType())) {
+    private boolean validateUrlFileSuffix(DataInfoUploadBO dataInfoUploadBO, String mimeType) {
+        boolean boo;
+        boo = COMPRESSED_DATA_TYPE.contains(mimeType);
+        if (IMAGE.equals(dataInfoUploadBO.getType()) && LOCAL.equals(dataInfoUploadBO.getSource())) {
+            boo = boo || IMAGE_DATA_TYPE.contains(mimeType);
         }
+        return boo;
     }
 
     /**
@@ -324,7 +365,7 @@ public class DataInfoUseCase {
         var userId = dataInfoUploadBO.getUserId();
         var datasetType = dataInfoUploadBO.getType();
         var pointCloudList = new ArrayList<File>();
-        findPointCloudList(tempPath, pointCloudList);
+        findPointCloudList(dataInfoUploadBO.getBaseSavePath(), pointCloudList);
         var rootPath = String.format("%s/%s/", userId, datasetId);
         log.info("Get point_cloud datasetId:{},size:{}", datasetId, pointCloudList.size());
         if (CollectionUtil.isEmpty(pointCloudList)) {
@@ -357,7 +398,7 @@ public class DataInfoUseCase {
                     var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                     var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
                     handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList);
-                    var fileNodeList = assembleContent(userId, dataFiles, rootPath, tempPath);
+                    var fileNodeList = assembleContent(userId, dataFiles, rootPath);
                     log.info("get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
                     var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                     dataInfoBOList.add(dataInfoBO);
@@ -378,7 +419,34 @@ public class DataInfoUseCase {
     private void parseImageUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var files = FileUtil.loopFiles(Paths.get(tempPath), 2, filefilter);
+        var dataInfoBOBuilder = DataInfoBO.builder().datasetId(datasetId).status(DataStatusEnum.VALID)
+                .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
+                .createdAt(OffsetDateTime.now())
+                .updatedAt(OffsetDateTime.now())
+                .createdBy(userId)
+                .isDeleted(false);
+        var file = FileUtil.file(dataInfoUploadBO.getSavePath());
+        var fileUrl = removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var path = fileUrl.replace(minioProp.getEndpoint(), "").replace(minioProp.getBucketName() + "/", "");
+        var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(minioProp.getBucketName())
+                .size(file.length()).path(path).type(FileUtil.getMimeType(path)).build();
+        var fileBOS = fileUseCase.saveBatchFile(userId, Collections.singletonList(fileBO));
+        var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
+                .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(FILE).build();
+        var dataInfoBO = dataInfoBOBuilder.name(getFileName(file))
+                .content(Collections.singletonList(fileNodeBO)).build();
+        dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
+        var rootPath = String.format("%s/%s/", userId, datasetId);
+        var newSavePath = tempPath + fileBO.getPath().replace(rootPath, "");
+        FileUtil.copy(dataInfoUploadBO.getSavePath(), newSavePath, true);
+        createUploadThumbnail(userId, fileBOS, rootPath);
+        FileUtil.clean(newSavePath);
+    }
+
+    private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+        var userId = dataInfoUploadBO.getUserId();
+        var datasetId = dataInfoUploadBO.getDatasetId();
+        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 2, filefilter);
         var rootPath = String.format("%s/%s/", userId, datasetId);
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
@@ -395,6 +463,7 @@ public class DataInfoUseCase {
             var list = ListUtil.split(files, 50);
             list.forEach(fl -> {
                 var fileBOS = uploadFileList(userId, rootPath, tempPath, fl);
+                createUploadThumbnail(userId, fileBOS, rootPath);
                 fileBOS.forEach(fileBO -> {
                     var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                     var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
@@ -547,22 +616,27 @@ public class DataInfoUseCase {
     private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var path = fileUrl;
-        if (path.contains("?")) {
-            path = path.substring(0, path.indexOf("?"));
-        }
-        tempPath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
-        var savePath = tempPath + FileUtil.getName(path);
+        var path = removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
+        var savePath = baseSavePath + FileUtil.getName(path);
         FileUtil.mkParentDirs(savePath);
         //将压缩包下载到本地
         log.info("Get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
         HttpUtil.downloadFileFromUrl(fileUrl, savePath);
         log.info("Get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
-
+        dataInfoUploadBO.setSavePath(savePath);
+        dataInfoUploadBO.setBaseSavePath(baseSavePath);
+        //A single image does not need to be decompressed
+        if (IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(path))) {
+            function.accept(dataInfoUploadBO);
+            FileUtil.clean(baseSavePath);
+            return;
+        }
         //解压文件
         log.info("Start decompression,datasetId:{},filePath:{}", datasetId, savePath);
-        DecompressionFileUtils.decompress(savePath, tempPath);
+        DecompressionFileUtils.decompress(savePath, baseSavePath);
         function.accept(dataInfoUploadBO);
+        FileUtil.clean(baseSavePath);
     }
 
     /**
@@ -800,7 +874,7 @@ public class DataInfoUseCase {
      * @param rootPath  根路径
      * @return 单帧content
      */
-    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath, String tempPath) {
+    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath) {
         var nodeList = new ArrayList<DataInfoBO.FileNodeBO>();
         var files = new ArrayList<File>();
         dataFiles.forEach(dataFile -> {
@@ -812,6 +886,7 @@ public class DataInfoUseCase {
             nodeList.add(node);
         });
         var fileBOS = uploadFileList(userId, rootPath, tempPath, files);
+        createUploadThumbnail(userId, fileBOS, rootPath);
         var fileIdMap = fileBOS.stream().collect(Collectors.toMap(FileBO::getPathHash, FileBO::getId));
         replaceFileId(nodeList, fileIdMap);
         nodeList.sort(Comparator.comparing(DataInfoBO.FileNodeBO::getName));
@@ -937,8 +1012,6 @@ public class DataInfoUseCase {
         if (DATA_TYPE.contains(mimeType) || fileName.toUpperCase().endsWith(PCD_SUFFIX) ||
                 fileName.toUpperCase().endsWith(JSON_SUFFIX)) {
             boo = true;
-        } else {
-            log.error("this format file is not supported,filePath:{}", file.getAbsolutePath());
         }
         return boo;
     }
@@ -1018,6 +1091,70 @@ public class DataInfoUseCase {
             }
         });
         return pointCloudList;
+    }
+
+    /**
+     * Remove url parameter
+     *
+     * @param fileUrl File url
+     * @return File url
+     */
+    private String removeUrlParameter(String fileUrl) {
+        if (fileUrl.contains("?")) {
+            fileUrl = fileUrl.substring(0, fileUrl.indexOf("?"));
+        }
+        return fileUrl;
+    }
+
+    /**
+     * 生成缩略图并上传
+     *
+     * @param userId  用户ID集合
+     * @param fileBOS 文件对象集合
+     */
+    private void createUploadThumbnail(Long userId, List<FileBO> fileBOS, String rootPath) {
+        try {
+            var thumbnailFileBOS = new ArrayList<FileBO>();
+            var files = new ArrayList<File>();
+            for (FileBO fileBO : fileBOS) {
+                var mimeType = fileBO.getType();
+                var savePath = tempPath + fileBO.getPath().replace(rootPath, "");
+                if (IMAGE_DATA_TYPE.contains(mimeType)) {
+                    var filePath = fileBO.getPath();
+                    var basePath = filePath.substring(0, filePath.lastIndexOf(SLANTING_BAR) + 1);
+                    var fileName = filePath.substring(filePath.lastIndexOf(SLANTING_BAR) + 1);
+                    var fileBOBuilder = FileBO.builder().name(fileBO.getName()).originalName(fileBO.getName())
+                            .bucketName(fileBO.getBucketName()).type(mimeType);
+                    var file = FileUtil.file(savePath);
+                    var baseSavePath = file.getParentFile().getAbsolutePath();
+                    var largeFile = FileUtil.file(baseSavePath, String.format("%s/%s", large, fileName));
+                    var mediumFile = FileUtil.file(baseSavePath, String.format("%s/%s", medium, fileName));
+                    var smallFile = FileUtil.file(baseSavePath, String.format("%s/%s", small, fileName));
+                    Thumbnails.of(file).size(largeFileSise, largeFileSise).toFile(largeFile);
+                    Thumbnails.of(file).size(mediumFileSise, mediumFileSise).toFile(mediumFile);
+                    Thumbnails.of(file).size(smallFileSise, smallFileSise).toFile(smallFile);
+                    // 大压缩图
+                    var largePath = String.format("%s%s/%s", basePath, large, fileName);
+                    var largeFileBO = fileBOBuilder.path(largePath).relation(LARGE_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
+                    // 中等缩略图
+                    var mediumPath = String.format("%s%s/%s", basePath, medium, fileName);
+                    var mediumFileBO = fileBOBuilder.path(mediumPath).relation(MEDIUM_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
+                    // 小缩略图
+                    var smallPath = String.format("%s%s/%s", basePath, small, fileName);
+                    var smallFileBO = fileBOBuilder.path(smallPath).relation(SMALL_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
+                    thumbnailFileBOS.addAll(ListUtil.toList(largeFileBO, mediumFileBO, smallFileBO));
+                    files.addAll(ListUtil.toList(largeFile, mediumFile, smallFile));
+                }
+            }
+            try {
+                minioService.uploadFileList(minioProp.getBucketName(), rootPath, tempPath, files);
+            } catch (Exception e) {
+                log.error("batch upload file error,filesPath:{}", JSONUtil.parseArray(files.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
+            }
+            fileUseCase.saveBatchFile(userId, thumbnailFileBOS);
+        } catch (IOException e) {
+            log.error("Upload thumbnail error", e);
+        }
     }
 
 }
