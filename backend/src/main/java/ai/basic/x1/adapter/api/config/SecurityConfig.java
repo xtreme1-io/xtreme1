@@ -31,7 +31,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // Need to be after AnonymousAuthenticationFilter, otherwise JWT authentication will be overriden.
                 .addFilterAfter(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class)
                 .exceptionHandling(exceptionConfigurer -> exceptionConfigurer
-                        .authenticationEntryPoint(new JSONAuthenticationEntryPoint(new ApiResult(UsecaseCode.LOGIN_STATUS_TIMEOUT, UsecaseCode.LOGIN_STATUS_TIMEOUT.getMessage()), HttpStatus.UNAUTHORIZED)))
+                        .authenticationEntryPoint(new JSONAuthenticationEntryPoint(new ApiResult(UsecaseCode.LOGIN_STATUS_TIMEOUT,
+                                UsecaseCode.LOGIN_STATUS_TIMEOUT.getMessage()), HttpStatus.UNAUTHORIZED)))
                 .authorizeRequests(authConfigurer -> authConfigurer.
                         antMatchers("/actuator/**", "/user/register", "/user/login").permitAll()
                         .anyRequest().authenticated());
