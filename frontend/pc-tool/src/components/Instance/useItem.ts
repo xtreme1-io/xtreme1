@@ -20,12 +20,14 @@ export default function useItem() {
     }
 
     function onEdit(item: IItem) {
+        let config = editor.state.config;
         let objects = item.annotateType === '3d' ? pc.getAnnotate3D() : pc.getAnnotate2D();
         let find = _.find(objects, (box: AnnotateObject) => {
             return box.uuid === item.id;
         }) as AnnotateObject;
 
         if (find) {
+            config.showClassView = true;
             editor.dispatchEvent({ type: EditorEvent.SHOW_CLASS_INFO, data: { object: find } });
         }
     }
@@ -38,7 +40,6 @@ export default function useItem() {
 
         if (find) {
             editor.cmdManager.execute('delete-object', [{ objects: [find] }]);
-            editor.reportManager.reportDeleteObject('Result List', [find]);
         }
     }
 

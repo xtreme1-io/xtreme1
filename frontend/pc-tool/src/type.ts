@@ -20,6 +20,8 @@ export interface IBSState {
     recordId: string;
     // 数据集
     datasetId: string;
+    datasetName: string;
+    datasetType: string;
     seriesFrameId?: string;
     //
     user: IUser;

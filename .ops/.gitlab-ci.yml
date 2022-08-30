@@ -88,6 +88,7 @@ build-backend-package:
   before_script:
     - until docker info; do sleep 1; done
     - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
+    - echo "$DOCKER_HUB_REGISTRY_PASS" | docker login --username $DOCKER_HUB_REGISTRY_USER --password-stdin
   after_script:
     - cd $WORKING_DIR
     - docker pull $IMAGE_NAME:latest || true
@@ -98,25 +99,6 @@ build-backend-package:
     # Push main and tag image to Docker Hub.
     - if [[ $CI_COMMIT_REF_NAME == main ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:latest; docker push $DOCKER_HUB_IMAGE_NAME:latest; fi
     - if [[ $CI_COMMIT_REF_NAME == v* ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; docker push $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; fi
-
-build-frontend-image:
-  extends: .build-image
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
-      changes:
-        - .ops/*
-        - .ops/**/*
-        - frontend/*
-        - frontend/**/*
-  variables:
-    WORKING_DIR: frontend
-    IMAGE_NAME: $FRONTEND_IMAGE_NAME
-    DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_FRONTEND_IMAGE_NAME
-  script:
-    - cd $WORKING_DIR
-    - cp ../.ops/frontend.dockerfile ./Dockerfile
-    - cp ../.ops/frontend.dockerignore ./.dockerignore
-    - sed -i 's/$FRONTEND_PACKAGE_DIR/'"$FRONTEND_PACKAGE_DIR"'/g' Dockerfile
 
 build-backend-image:
   extends: .build-image
@@ -136,6 +118,25 @@ build-backend-image:
     - cp ../.ops/backend.dockerfile ./Dockerfile
     - cp ../.ops/backend.dockerignore ./.dockerignore
     - sed -i 's/$BACKEND_PACKAGE_NAME/'"$BACKEND_PACKAGE_NAME"'/g' Dockerfile
+
+build-frontend-image:
+  extends: .build-image
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+      changes:
+        - .ops/*
+        - .ops/**/*
+        - frontend/*
+        - frontend/**/*
+  variables:
+    WORKING_DIR: frontend
+    IMAGE_NAME: $FRONTEND_IMAGE_NAME
+    DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_FRONTEND_IMAGE_NAME
+  script:
+    - cd $WORKING_DIR
+    - cp ../.ops/frontend.dockerfile ./Dockerfile
+    - cp ../.ops/frontend.dockerignore ./.dockerignore
+    - sed -i 's/$FRONTEND_PACKAGE_DIR/'"$FRONTEND_PACKAGE_DIR"'/g' Dockerfile
 
 build-image-object-detection-image:
   extends: .build-image
@@ -161,14 +162,27 @@ build-image-object-detection-image:
     - kubectl
   before_script:
     - cd .ops/$ENV
-    - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' deployment.yml
-    - sed -i 's/$APP_VERSION/'"$APP_VERSION"'/g' deployment.yml
-    - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' deployment.yml
-    - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' deployment.yml
-    - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' deployment.yml
-    - sed -i 's/$CI_COMMIT_SHORT_SHA/'"$CI_COMMIT_SHORT_SHA"'/g' deployment.yml
+    - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' $DEPLOYMENT
+    - sed -i 's/$APP_VERSION/'"$APP_VERSION"'/g' $DEPLOYMENT
+    - sed -i 's/$CI_COMMIT_SHORT_SHA/'"$CI_COMMIT_SHORT_SHA"'/g' $DEPLOYMENT
 
-deploy-to-alidev:
+deploy-backend-to-alidev:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - .ops/*
+        - .ops/**/*
+        - backend/*
+        - backend/**/*
+  variables:
+    ENV: alidev
+    DEPLOYMENT: backend-deployment.yml
+  script:
+    - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' $DEPLOYMENT
+    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
+
+deploy-frontend-to-alidev:
   extends: .deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
@@ -177,16 +191,46 @@ deploy-to-alidev:
         - .ops/**/*
         - frontend/*
         - frontend/**/*
-        - backend/*
-        - backend/**/*
+  variables:
+    ENV: alidev
+    DEPLOYMENT: frontend-deployment.yml
+  script:
+    - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
+    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
+
+deploy-model-to-alidev:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - .ops/*
+        - .ops/**/*
         - model/*
         - model/**/*
   variables:
     ENV: alidev
+    DEPLOYMENT: model-deployment.yml
   script:
-    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
+    - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' $DEPLOYMENT
+    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
 
-deploy-to-alitest:
+deploy-backend-to-alitest:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "test"
+      changes:
+        - .ops/*
+        - .ops/**/*
+        - backend/*
+        - backend/**/*
+  variables:
+    ENV: alitest
+    DEPLOYMENT: backend-deployment.yml
+  script:
+    - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' $DEPLOYMENT
+    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING
+
+deploy-frontend-to-alitest:
   extends: .deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "test"
@@ -195,11 +239,25 @@ deploy-to-alitest:
         - .ops/**/*
         - frontend/*
         - frontend/**/*
-        - backend/*
-        - backend/**/*
+  variables:
+    ENV: alitest
+    DEPLOYMENT: frontend-deployment.yml
+  script:
+    - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
+    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING
+
+deploy-model-to-alitest:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "test"
+      changes:
+        - .ops/*
+        - .ops/**/*
         - model/*
         - model/**/*
   variables:
     ENV: alitest
+    DEPLOYMENT: model-deployment.yml
   script:
-    - kubectl apply -f deployment.yml -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING
+    - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' $DEPLOYMENT
+    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING

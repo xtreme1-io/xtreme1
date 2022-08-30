@@ -42,10 +42,10 @@ export default function useTool() {
 
     async function loadRecord() {
         try {
-            let { dataInfos, isSeriesFrame, seriesFrameId } = await api.getInfoByRecordId(
+            let { dataInfos, seriesFrameId } = await api.getInfoByRecordId(
                 bsState.recordId,
             );
-            state.isSeriesFrame = isSeriesFrame;
+            // state.isSeriesFrame = isSeriesFrame;
             bsState.seriesFrameId = seriesFrameId;
 
             if (dataInfos.length === 0) {
@@ -94,10 +94,22 @@ export default function useTool() {
         }
     }
 
+    async function loadDataSetInfo() {
+        try{
+        let datasetId = editor.bsState.datasetId;
+        let data = await api.getDataSetInfo(datasetId);
+        bsState.datasetName = data.name;
+        bsState.datasetType = data.type;
+        }catch(error){
+            throw new BSError('','load data-set info error', error);
+        }
+    }
+
     return {
         loadUserInfo,
         loadModels,
         loadClasses,
+        loadDataSetInfo,
         loadRecord,
         loadDateSetClassification,
         loadDataFromFrameSeries,

@@ -19,6 +19,7 @@ import {
     IModelClass,
     IModel,
     ICheckConfig,
+    IUserData,
 } from './type';
 
 export interface IState {
@@ -32,18 +33,18 @@ export interface IState {
     filterActive: string[];
 
     classifications: IClassification[];
-    isSeriesFrame: boolean;
+    // isSeriesFrame: boolean;
     models: IModel[];
     modelConfig: IModelConfig;
     recentClass: IClassType[];
     // user: IUserInfo;
 
-    checkConfig: ICheckConfig;
+    // checkConfig: ICheckConfig;
 
     // 批注
-    annotations: IAnnotationItem[];
-    annotationTags: IAnnotationTag[];
-    annotationInfos: IAnnotationInfo[];
+    // annotations: IAnnotationItem[];
+    // annotationTags: IAnnotationTag[];
+    // annotationInfos: IAnnotationInfo[];
     // 视图显示配置
     config: IConfig;
     // 2D视图配置
@@ -79,7 +80,7 @@ export function getDefaultState(): IState {
         frameIndex: -1,
 
         classifications: [],
-        isSeriesFrame: false,
+        // isSeriesFrame: false,
         models: [],
         modelConfig: {
             confidence: [0.5, 1],
@@ -90,27 +91,27 @@ export function getDefaultState(): IState {
             start: 0,
             duration: 0,
         },
-        annotations: [],
+        // annotations: [],
         recentClass: [],
 
-        checkConfig: {
-            type: '3d',
-            axis: 'z',
-            trackId: '',
-            imageIndex: 0,
-            imageMaxIndex: 0,
-            showImageMax: false,
-            showAttr: false,
-            showAttrType: 'single',
-            status3D: [],
-            status2D: [],
-            subViewHeight: 200,
-            subViewWidth: 140,
-            subViewScale: 1,
-        },
+        // checkConfig: {
+        //     type: '3d',
+        //     axis: 'z',
+        //     trackId: '',
+        //     imageIndex: 0,
+        //     imageMaxIndex: 0,
+        //     showImageMax: false,
+        //     showAttr: false,
+        //     showAttrType: 'single',
+        //     status3D: [],
+        //     status2D: [],
+        //     subViewHeight: 200,
+        //     subViewWidth: 140,
+        //     subViewScale: 1,
+        // },
 
-        annotationTags: tags,
-        annotationInfos: [],
+        // annotationTags: tags,
+        // annotationInfos: [],
         config: getDefaultConfig(),
         imgViews: [],
         // mode: 'empty',
@@ -132,11 +133,11 @@ function getDefaultConfig(): IConfig {
         showSingleImgView: false,
         showSideView: true,
         showOperationView: true,
-        showCheckView: false,
+        // showCheckView: false,
         // showCheckClassView: false,
         // showCheckViewImgMax: false,
         showLabel: false,
-        showAnnotation: true,
+        // showAnnotation: true,
         showAttr: false,
         enableShowAttr: false,
         //

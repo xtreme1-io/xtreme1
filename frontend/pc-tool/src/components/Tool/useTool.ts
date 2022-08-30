@@ -1,7 +1,7 @@
 import { reactive, toRefs, watch } from 'vue';
 import { useInjectEditor } from '../../state';
 import { allItems } from './item';
-import { IActionName, ReportEvent } from 'pc-editor';
+import { IActionName } from 'pc-editor';
 import { Image2DRenderView, CreateAction, Box } from 'pc-render';
 import { IModelResult, IModel } from 'pc-editor';
 import * as api from '../../api';
@@ -156,8 +156,6 @@ export default function useTool() {
             // annotationRecordId: +toolState.recordId,
             resultFilterParam,
         };
-        modelConfig.start = Date.now();
-        // editor.reportManager.reportRunModel();
         // modelConfig.loading = true;
         try {
             let result = await api.runModel(config);
@@ -190,9 +188,6 @@ export default function useTool() {
             // );
             api.clearModel([+dataInfo.id], model.recordId);
             editor.modelManager.addModelData();
-            // editor.reportManager.report(ReportEvent.ADD_MODEL_RESULT, {
-            //     'Model Run Time': editor.state.modelConfig.duration,
-            // });
         } else {
             runModel();
             // editor.showModal('modelRun', { title: 'AI Annotation', data: {} });

@@ -1,22 +1,17 @@
 <template>
     <div>
         <!-- <div v-show="state.attrs.length > 0"> -->
-        <div class="sub-header" style="position: relative">
+        <!-- <div class="sub-header" style="position: relative">
             <span>{{ $$('attributes-title') }}</span>
-            <div class="copy-attr" v-show="state.classType && TState.isSeriesFrame && canEdit()">
+            <div class="copy-attr" v-show="state.classType && canEdit()">
                 <NodeCollapseOutlined
                     class="icon"
                     @click="onCopy('attr-from')"
                     :title="$$('attr-copy-from')"
                 />
-                <NodeExpandOutlined
-                    class="icon"
-                    @click="onCopy('attr-to')"
-                    :title="$$('attr-copy-to')"
-                />
             </div>
-        </div>
-        <div
+        </div> -->
+        <!-- <div
             class="class-msg-box"
             v-if="state.showMsgType === 'attr-from' || state.showMsgType === 'attr-to'"
         >
@@ -34,13 +29,13 @@
                             v-model:value="iState.trackNameAddId"
                         >
                         </a-select>
-                        <!-- <a-input
+                        <a-input
                             size="small"
                             style="width: 140px"
                             disabled
                             v-model:value="iState.trackId"
                             placeholder=""
-                        /> -->
+                        />
                         <SubnodeOutlined title="Pick" @click="onPick" class="pick" />
                     </div>
                 </template>
@@ -75,7 +70,7 @@
                     {{ $$('btn-title-copy') }}</a-button
                 >
             </div>
-        </div>
+        </div> -->
         <div class="attr-container">
             <div
                 class="attr-item"
@@ -112,7 +107,7 @@
         value: string;
     }
     // ***************Props and Emits***************
-    let emit = defineEmits(['copy-from', 'copy-to', 'change']);
+    let emit = defineEmits(['copy-from', 'change']);
     let props = defineProps<IProps>();
     // *********************************************
     let editor = useInjectEditor();
@@ -129,7 +124,7 @@
         trackNameAddIds: [] as IOption[],
     });
 
-    function onCopy(type: 'attr-from' | 'attr-to') {
+    function onCopy(type: 'attr-from') {
         let { frames } = editor.state;
         if (type === 'attr-from') {
             updateTrackIds();
@@ -208,9 +203,10 @@
     function onOk() {
         if (props.state.showMsgType === 'attr-from') {
             emit('copy-from', iState.trackId);
-        } else {
-            emit('copy-to', [iState.range[0] - 1, iState.range[1] - 1]);
-        }
+        } 
+        // else {
+        //     emit('copy-to', [iState.range[0] - 1, iState.range[1] - 1]);
+        // }
 
         props.state.showMsgType = '';
     }

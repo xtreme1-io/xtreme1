@@ -16,7 +16,7 @@ export default class LoadManager {
     async loadFrame(index: number, showLoading: boolean = true, force: boolean = false) {
         if (index === this.editor.state.frameIndex && !force) return;
         if (index > this.editor.state.frames.length - 1 || index < 0) return;
-        let currentTrack = this.editor.currentTrack;
+        // let currentTrack = this.editor.currentTrack;
 
         this.editor.state.frameIndex = index;
 
@@ -26,17 +26,17 @@ export default class LoadManager {
         try {
             await Promise.all([this.loadObject(), this.loadResource(), this.loadClassification()]);
             // 自动加载数据
-            if (!this.editor.playManager.playing) this.editor.dataResource.load();
+            // if (!this.editor.playManager.playing) this.editor.dataResource.load();
         } catch (error: any) {
             this.editor.handleErr(error);
         }
 
         // 更新选中状态
-        if (currentTrack) this.editor.selectByTrackId(currentTrack);
-        else this.editor.pc.selectObject();
+        // if (currentTrack) this.editor.selectByTrackId(currentTrack);
+        this.editor.pc.selectObject();
 
         showLoading && this.editor.showLoading(false);
-        this.editor.setCurrentTrack(currentTrack);
+        // this.editor.setCurrentTrack(currentTrack);
         this.editor.dispatchEvent({ type: Event.FRAME_CHANGE, data: this.editor.state.frameIndex });
     }
 
@@ -66,7 +66,7 @@ export default class LoadManager {
     }
 
     async loadObject() {
-        let { frameIndex, frames, isSeriesFrame } = this.editor.state;
+        let { frameIndex, frames } = this.editor.state;
         let frame = frames[frameIndex];
 
         let objects = this.editor.dataManager.getFrameObject(frame.id);
@@ -91,7 +91,7 @@ export default class LoadManager {
         this.editor.state.filterActive = [];
         this.editor.dataManager.setFilterFromData();
         this.editor.dataManager.loadDataFromManager();
-        if (!isSeriesFrame) this.editor.updateIDCounter();
+        // if (!isSeriesFrame) this.editor.updateIDCounter();
         // this.editor.pc.addObject(annotates);
     }
 
@@ -129,7 +129,7 @@ export default class LoadManager {
             let data = await this.editor.businessManager.getFrameObject(filterFrames);
             // let data = await api.getDataObject(dataIds);
 
-            this.setTrackData(data.objectsMap);
+            // this.setTrackData(data.objectsMap);
 
             filterFrames.forEach((frame) => {
                 let objects = data.objectsMap[frame.id] || [];
@@ -149,39 +149,39 @@ export default class LoadManager {
         }
     }
 
-    setTrackData(objectsMap: Record<string, IObject[]>) {
-        // update trackId
-        Object.keys(objectsMap).forEach((frameId) => {
-            let objects = objectsMap[frameId] || [];
-            objects.forEach((obj) => {
-                if (!obj.trackId) obj.trackId = this.editor.createTrackId();
-            });
-        });
+    // setTrackData(objectsMap: Record<string, IObject[]>) {
+    //     // update trackId
+    //     Object.keys(objectsMap).forEach((frameId) => {
+    //         let objects = objectsMap[frameId] || [];
+    //         objects.forEach((obj) => {
+    //             if (!obj.trackId) obj.trackId = this.editor.createTrackId();
+    //         });
+    //     });
 
-        let trackInfo = utils.getTrackFromObject(objectsMap);
-        let objects = Object.keys(trackInfo.globalTrack).map((id) => trackInfo.globalTrack[id]);
-        // update editor Id
-        let maxId = getMaxId(objects);
-        let startId = maxId + 1;
-        objects.forEach((e) => {
-            if (!e.trackName) e.trackName = startId++ + '';
-        });
-        this.editor.idCount = startId;
+    //     let trackInfo = utils.getTrackFromObject(objectsMap);
+    //     let objects = Object.keys(trackInfo.globalTrack).map((id) => trackInfo.globalTrack[id]);
+    //     // update editor Id
+    //     let maxId = getMaxId(objects);
+    //     let startId = maxId + 1;
+    //     objects.forEach((e) => {
+    //         if (!e.trackName) e.trackName = startId++ + '';
+    //     });
+    //     this.editor.idCount = startId;
 
-        Object.keys(trackInfo.globalTrack).forEach((trackId) => {
-            this.editor.trackManager.addTrackObject(trackId, trackInfo.globalTrack[trackId]);
-        });
+    //     Object.keys(trackInfo.globalTrack).forEach((trackId) => {
+    //         this.editor.trackManager.addTrackObject(trackId, trackInfo.globalTrack[trackId]);
+    //     });
 
-        function getMaxId(objects: Partial<IObject>[]) {
-            let maxId = 0;
-            objects.forEach((e) => {
-                if (!e.trackName) return;
-                let id = parseInt(e.trackName);
-                if (id > maxId) maxId = id;
-            });
-            return maxId;
-        }
-    }
+    //     function getMaxId(objects: Partial<IObject>[]) {
+    //         let maxId = 0;
+    //         objects.forEach((e) => {
+    //             if (!e.trackName) return;
+    //             let id = parseInt(e.trackName);
+    //             if (id > maxId) maxId = id;
+    //         });
+    //         return maxId;
+    //     }
+    // }
 
     async loadResource() {
         let { frames, frameIndex } = this.editor.state;

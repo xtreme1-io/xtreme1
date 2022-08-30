@@ -90,13 +90,13 @@ export default function useInstance() {
 
     // *****life hook******
 
-    let annotationMap = computed(() => {
-        let annotationMap = {} as Record<string, true>;
-        editor.state.annotationInfos.forEach((e) => {
-            if (e.objectId) annotationMap[e.objectId] = true;
-        });
-        return annotationMap;
-    });
+    // let annotationMap = computed(() => {
+    //     let annotationMap = {} as Record<string, true>;
+    //     editor.state.annotationInfos.forEach((e) => {
+    //         if (e.objectId) annotationMap[e.objectId] = true;
+    //     });
+    //     return annotationMap;
+    // });
 
     let scrollSelectToView = _.debounce(() => {
         // scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
@@ -169,12 +169,12 @@ export default function useInstance() {
     }, 100);
 
     // 批注
-    watch(
-        () => editor.state.annotationInfos,
-        () => {
-            onUpdateList();
-        },
-    );
+    // watch(
+    //     () => editor.state.annotationInfos,
+    //     () => {
+    //         onUpdateList();
+    //     },
+    // );
 
     function onUpdateList() {
         updateListFlag = true;
@@ -291,7 +291,7 @@ export default function useInstance() {
                 name: name,
                 visible: obj.visible,
                 isModel: !!userData.modelClass,
-                hasAnnotation: !!annotationMap.value[uuid],
+                // hasAnnotation: !!annotationMap.value[uuid],
                 invisible: !!userData.invisibleFlag,
                 active: [],
             };
@@ -537,7 +537,6 @@ export default function useInstance() {
 
         if (find) {
             pc.selectObject(find as any);
-            editor.reportManager.reportSelect('Result List');
         }
     }
 
