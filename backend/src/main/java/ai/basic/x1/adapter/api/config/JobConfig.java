@@ -43,7 +43,7 @@ public class JobConfig {
     }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
-    public StreamMessageListenerContainer<String, ObjectRecord<String, ModelMessageBO>> streamMessageListenerContainer(Executor redisStreamExecutor,
+    public StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainer(Executor redisStreamExecutor,
                                                                                                                        RedisConnectionFactory redisConnectionFactory,
                                                                                                                        RedisTemplate redisTemplate) {
 
@@ -52,7 +52,7 @@ public class JobConfig {
         } catch (RedisSystemException redisSystemException) {
             //no do
         }
-        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, ModelMessageBO>> options =
+        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, String>> options =
                 StreamMessageListenerContainer.StreamMessageListenerContainerOptions
                         .builder()
                         .batchSize(10)
@@ -64,9 +64,9 @@ public class JobConfig {
                         .pollTimeout(Duration.ofSeconds(1))
                         .objectMapper(new ObjectHashMapper())
                         .errorHandler(new ModelRunErrorHandler())
-                        .targetType(ModelMessageBO.class)
+                        .targetType(String.class)
                         .build();
-        StreamMessageListenerContainer<String, ObjectRecord<String, ModelMessageBO>> streamMessageListenerContainer =
+        StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainer =
                 StreamMessageListenerContainer.create(redisConnectionFactory, options);
         StreamMessageListenerContainer.ConsumerStreamReadRequest<String> streamReadRequest = StreamMessageListenerContainer
                 .StreamReadRequest

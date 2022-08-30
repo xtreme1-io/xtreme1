@@ -79,12 +79,12 @@ export const create2DRect = define({
                         editor.state.config.showClassView = true;
 
                         editor.cmdManager.withGroup(() => {
-                            if (editor.state.isSeriesFrame) {
-                                editor.cmdManager.execute('add-track', {
-                                    trackId: userData.trackId,
-                                    trackName: userData.trackName,
-                                });
-                            }
+                            // if (editor.state.isSeriesFrame) {
+                            //     editor.cmdManager.execute('add-track', {
+                            //         trackId: userData.trackId,
+                            //         trackName: userData.trackName,
+                            //     });
+                            // }
 
                             editor.cmdManager.execute('add-object', [
                                 { objects: rect, frame: editor.getCurrentFrame() },
@@ -165,12 +165,12 @@ export const create2DBox = define({
 
                         editor.state.config.showClassView = true;
                         editor.cmdManager.withGroup(() => {
-                            if (editor.state.isSeriesFrame) {
-                                editor.cmdManager.execute('add-track', {
-                                    trackId: userData.trackId,
-                                    trackName: userData.trackName,
-                                });
-                            }
+                            // if (editor.state.isSeriesFrame) {
+                            //     editor.cmdManager.execute('add-track', {
+                            //         trackId: userData.trackId,
+                            //         trackName: userData.trackName,
+                            //     });
+                            // }
                             editor.cmdManager.execute('add-object', [{ objects: box }]);
                             editor.cmdManager.execute('select-object', box);
                         });

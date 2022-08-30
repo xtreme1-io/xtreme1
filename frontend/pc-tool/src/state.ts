@@ -44,6 +44,8 @@ export function getDefault(): IBSState {
             id: '',
             nickname: '',
         },
+        datasetName:'',
+        datasetType:'',
         datasetId: '',
         recordId: '',
     };

@@ -2,140 +2,61 @@
     <!-- <div class="edit-class-common"> -->
     <div class="edit-class-common" v-show="state.objectId">
         <div class="view-class-wrap" ref="container">
-            <ModelInfo
-                :state="state"
-                @visible="onToggleObjectsVisible"
-                @delete="onRemoveObjects"
-                @instance-delete="onInstanceRemove"
-            />
-            <!-- Tracking Object -->
-            <div class="item-header">
-                <span class="title1">{{
-                    state.isBatch ? $$('model-info') : $$('track-title') + ' ' + state.trackName
-                }}</span>
-                <template v-if="!state.isBatch && !state.isInvisible">
-                    <EyeInvisibleOutlined
-                        @click="onToggleTrackVisible"
-                        v-if="!state.trackVisible"
-                        class="title-icon"
-                    />
-                    <EyeOutlined @click="onToggleTrackVisible" v-else class="title-icon" />
-                    <a-button
-                        v-show="TState.isSeriesFrame && canEdit()"
-                        style="margin-left: 6px"
-                        size="small"
-                        type="primary"
-                        @click="markAllTrueValue"
-                        >{{ $$('mark-all-true') }}</a-button
-                    >
-                </template>
-            </div>
-            <div class="item-content">
-                <div v-show="state.modelClass">
-                    <div class="sub-header">{{ $$('predict-class') }}</div>
-                    <div>
-                        <span class="item limit active"
-                            ><FileMarkdownOutlined />{{ state.modelClass }}
+            <a-collapse v-model:activeKey="state.activeTab">
+                <a-collapse-panel key="cuboid">
+                    <template #header="{ isActive }">
+                        <span class="item-header">
+                            <span class="title1">{{ 'Cuboid' + ' ' + state.trackName }}</span>
+                            <template v-if="!state.isBatch && !state.isInvisible">
+                                <EyeInvisibleOutlined
+                                    @click="onToggleTrackVisible"
+                                    v-if="!state.trackVisible"
+                                    class="title-icon"
+                                />
+                                <EyeOutlined
+                                    @click="onToggleTrackVisible"
+                                    v-else
+                                    class="title-icon"
+                                />
+                            </template>
                         </span>
-                    </div>
-                </div>
-                <ObjectClass @change="onClassChange" :state="state" />
-            </div>
-            <!-- Frame N Object  -->
-            <template v-if="!state.isBatch">
-                <div class="item-header">
-                    <span class="title1">{{
-                        $$('frame-object', { n: editor.state.frameIndex + 1 })
-                    }}</span>
-                    <a-button
-                        v-show="
-                            !state.isInvisible &&
-                            state.isClassStandard &&
-                            (canEdit() || state.isStandard)
-                        "
-                        style="margin-left: 6px"
-                        size="small"
-                        type="primary"
-                        :ghost="!state.isStandard"
-                        @click="canEdit() ? toggleStandard() : null"
-                        :title="state.isStandard ? $$('mark-no-standard') : $$('mark-as-standard')"
-                    >
-                        {{ state.isStandard ? $$('mark-standard') : $$('mark-as-standard') }}
-                    </a-button>
-                    <a-button
-                        v-show="TState.isSeriesFrame && canEdit()"
-                        style="margin-left: 10px"
-                        size="small"
-                        type="primary"
-                        @click="onToggleInVisible"
-                        :danger="!state.isInvisible"
-                        >{{ state.isInvisible ? $$('mark-present') : $$('mark-gone') }}
-                    </a-button>
-                </div>
-                <template v-if="!state.isInvisible">
-                    <div class="item-content">
-                        <!-- Attr -->
-                        <ObjectAttr
-                            :state="state"
-                            @change="onAttChange"
-                            @copy-from="copyAttrFrom"
-                            @copy-to="copyAttrTo"
-                        />
-                        <!-- Instances-->
-                        <div class="sub-header">{{ $$('instances-title') }}</div>
-                        <ObjectItem
-                            v-for="item in state.resultInstances"
-                            :data="item"
-                            @remove="onObjectInstanceRemove(item)"
-                        />
-                        <!-- Status -->
-                        <div class="sub-header">{{ $$('status-title') }}</div>
-                        <a-radio-group
-                            :value="state.resultStatus"
-                            :disabled="!canEdit()"
-                            @change="onStatusChange"
-                        >
-                            <a-radio-button v-for="item in statusList" :value="item.value">
-                                {{ item.label }}
-                            </a-radio-button>
-                        </a-radio-group>
-                    </div>
-                </template>
-            </template>
-            <!-- Advanced -->
-            <template
-                v-if="canEdit() && TState.isSeriesFrame && !state.isBatch && !state.isInvisible"
-            >
-                <a-collapse v-model:activeKey="state.activeTab">
-                    <a-collapse-panel key="advance">
-                        <template #header="{ isActive }">
-                            <span class="item-header">
-                                <span class="title1">{{ $$('advanced-title') }}</span>
+                    </template>
+                    <div v-show="state.modelClass">
+                        <div class="sub-header">{{ $$('predict-class') }}</div>
+                        <div>
+                            <span class="item limit active"
+                                ><FileMarkdownOutlined />{{ state.modelClass }}
                             </span>
-                        </template>
-                        <div class="item-content">
-                            <div class="sub-header"
-                                >{{ $$('track-id')
-                                }}<CopyOutlined
-                                    class="copy"
-                                    :title="$$('copy-title')"
-                                    @click="onCopy"
-                            /></div>
-                            <a-input
-                                size="small"
-                                style="width: 250px"
-                                disabled
-                                v-model:value="state.trackId"
-                                placeholder=""
-                            />
-                            <ObjectType @change="onObjectTypeChange" :state="state" />
-                            <ObjectMerge @merge="onMergeTrackObject" :state="state" />
-                            <ObjectSplit @split="onSplitTrackObject" :state="state" />
-                            <ObjectDelete @delete="onDeleteTrackObject" :state="state" />
                         </div>
-                    </a-collapse-panel>
-                </a-collapse>
-            </template>
+                    </div>
+                    <ObjectClass @change="onClassChange" :state="state" />
+                </a-collapse-panel>
+
+                <a-collapse-panel v-show="state.attrs.length>0" key="attribute">
+                    <template #header="{ isActive }">
+                        <span class="item-header">
+                            <span class="title1">
+                                {{ 'Attributes' }}
+                            </span>
+                        </span>
+                    </template>
+                    <ObjectAttr :state="state" @change="onAttChange" @copy-from="copyAttrFrom" />
+                </a-collapse-panel>
+                <a-collapse-panel key="objects">
+                    <template #header="{ isActive }">
+                        <span class="item-header">
+                            <span class="title1">
+                                {{ 'Objects' }}
+                            </span>
+                        </span>
+                    </template>
+                    <ObjectItem
+                        v-for="item in state.resultInstances"
+                        :data="item"
+                        @remove="onObjectInstanceRemove(item)"
+                    />
+                </a-collapse-panel>
+            </a-collapse>
         </div>
         <CloseCircleOutlined v-show="showClose" @click="onClose" class="close" />
     </div>
@@ -200,10 +121,10 @@
         return data;
     });
 
-    function onStatusChange(e: any) {
-        editor.blurPage();
-        onObjectStatusChange(e.target.value);
-    }
+    // function onStatusChange(e: any) {
+    //     editor.blurPage();
+    //     onObjectStatusChange(e.target.value);
+    // }
 
     function onClose() {
         // emit('close');
@@ -219,19 +140,11 @@
         onInstanceRemove,
         onToggleObjectsVisible,
         onRemoveObjects,
-        onObjectTypeChange,
-        onObjectStatusChange,
-        onToggleInVisible,
+        // onObjectStatusChange,
         onObjectInstanceRemove,
-        onMergeTrackObject,
-        onSplitTrackObject,
-        onDeleteTrackObject,
         copyAttrFrom,
-        copyAttrTo,
         onToggleTrackVisible,
-        markAllTrueValue,
-        toggleStandard,
-        onCopy,
+        // toggleStandard,
     } = useEditClass();
     defineExpose({
         update,
@@ -247,7 +160,7 @@
             overflow: auto;
             max-height: calc(100vh - 300px);
             min-height: 200px;
-            padding: 0px 20px;
+            padding: 0px 32px;
         }
 
         .attr-container {
@@ -400,6 +313,7 @@
         }
         .ant-collapse {
             border: none;
+            background-color: #1e1f23;
         }
         .ant-collapse-content-box {
             background: #1e1f23 !important;
@@ -407,6 +321,7 @@
 
         .ant-collapse-content {
             border: none;
+            background-color: #1e1f23;
         }
 
         .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {

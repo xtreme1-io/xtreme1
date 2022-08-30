@@ -39,7 +39,7 @@
     import { useInjectEditor } from '../../state';
     import * as THREE from 'three';
     import * as locale from './lang';
-    import useUI from 'pc-ui/hook/useUI';
+    import useUI from '../../hook/useUI';
     import { utils } from 'pc-editor';
     import { QuestionCircleOutlined } from '@ant-design/icons-vue';
 

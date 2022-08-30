@@ -41,7 +41,7 @@ export default class UpdateObjectUserData extends CmdBase<
         }
 
         editor.dataManager.setAnnotatesUserData(objects, data);
-        if (objects.length > 0) this.editor.trackManager.updateObjectRenderInfo(objects);
+        if (objects.length > 0) this.editor.updateObjectRenderInfo(objects);
     }
     undo(): void {
         let editor = this.editor;
@@ -54,7 +54,7 @@ export default class UpdateObjectUserData extends CmdBase<
 
         editor.dataManager.setAnnotatesUserData(objects, data);
 
-        if (objects.length > 0) this.editor.trackManager.updateObjectRenderInfo(objects);
+        if (objects.length > 0) this.editor.updateObjectRenderInfo(objects);
     }
 
     canMerge(cmd: UpdateObjectUserData): boolean {

@@ -9,7 +9,7 @@
     import { MobileOutlined, CloseOutlined } from '@ant-design/icons-vue';
 
     import { IInstanceItem } from './type';
-    import useUI from 'pc-ui/hook/useUI';
+    import useUI from '../../hook/useUI';
 
     interface IProps {
         item: IInstanceItem;

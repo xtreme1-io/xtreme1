@@ -2,8 +2,8 @@
 FROM node:16 as build
 WORKDIR /build
 COPY . .
-RUN --mount=type=cache,target=main/node_modules cd main && \
-    npm install && npm run build
+RUN --mount=type=cache,target=main/node_modules \
+    cd main && npm install && npm run build
 
 FROM tjmehta/node-http-server
 WORKDIR /app

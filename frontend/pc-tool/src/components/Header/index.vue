@@ -4,8 +4,13 @@
             <span :class="blocking ? 'close disable' : 'close'" @click="blocking ? null : onClose()"
                 ><CloseOutlined /><span style="margin-left: 4px">Close</span></span
             >
+            <div class="header-info">
+                <span class="dataset-type">{{ bsState.datasetType }}</span>
+                <span>-</span>
+                <span class="dataset-name">{{ bsState.datasetName }}</span>
+            </div>
         </div>
-        <div class="item-wrap data-index" v-if="!state.isSeriesFrame && state.frames.length > 0">
+        <div class="item-wrap data-index" v-if="state.frames.length > 0">
             <LeftOutlined
                 :class="state.frameIndex > 0 && !blocking ? 'icon' : 'icon disable'"
                 @click="state.frameIndex > 0 && !blocking ? onPre() : null"
@@ -34,32 +39,50 @@
             />
         </div>
         <div class="item-wrap">
-            <a-tooltip placement="bottom" title="Help">
-                <div class="icon" style="margin-right: 10px" @click="onHelp">
-                    <i style="font-size: 22px" class="iconfont icon-help"></i>
-                </div>
-            </a-tooltip>
-            <a-tooltip
-                placement="bottom"
-                :title="iState.fullScreen ? 'Exit Full Screen' : 'Full Screen'"
-            >
-                <div class="icon" style="margin-right: 10px" @click="onFullScreen">
-                    <i
-                        style="font-size: 21px"
-                        class="iconfont"
-                        :class="[iState.fullScreen ? 'icon-tuichuquanping' : 'icon-a-Fullscreen']"
-                    ></i>
-                </div>
-            </a-tooltip>
+            <!-- Save -->
             <a-button
-                class="save"
+                class="basic-btn"
                 v-if="has(BsUIType.flowSave)"
                 :disabled="blocking"
+                size="large"
                 :loading="bsState.saving"
                 @click="onSave"
             >
                 <template #icon><SaveOutlined /></template>
-                Save
+                <div class="title">Save</div>
+            </a-button>
+            <!-- shortcut -->
+            <a-button class="basic-btn" size="large" @click="onHelp">
+                <template #icon
+                    ><i style="font-size: 16px" class="iconfont icon-help"></i
+                ></template>
+                <div class="title">Shortcut</div>
+            </a-button>
+            <!-- full screen -->
+            <a-button class="basic-btn" size="large" @click="onFullScreen">
+                <template #icon>
+                    <i
+                        style="font-size: 16px"
+                        class="iconfont"
+                        :class="[iState.fullScreen ? 'icon-tuichuquanping' : 'icon-a-Fullscreen']"
+                    ></i
+                ></template>
+                <div class="title">{{
+                    iState.fullScreen ? 'Exit Full Screen' : 'Full Screen'
+                }}</div>
+            </a-button>
+            <a-divider type="vertical" style="height: 32px; background-color: #57575c" />
+            <a-button class="basic mark" v-if="has(BsUIType.flowSave)" :disabled="blocking">
+                <!-- <template #icon><SaveOutlined /></template> -->
+                Mark as Invalid
+            </a-button>
+            <a-button class="basic skip" v-if="has(BsUIType.flowSave)" :disabled="blocking">
+                <!-- <template #icon><SaveOutlined /></template> -->
+                Skip
+            </a-button>
+            <a-button class="basic submit" v-if="has(BsUIType.flowSave)" :disabled="blocking">
+                <template #icon><SaveOutlined /></template>
+                Submit
             </a-button>
         </div>
     </div>
@@ -114,6 +137,30 @@
             // min-width: 100px;
             display: flex;
             align-items: center;
+            .basic-btn {
+                padding: 0 8px;
+                border: none;
+                .anticon {
+                    font-size: 16px;
+                }
+                .title {
+                    font-size: 14px;
+                    margin-top: -4px;
+                }
+                &.ant-btn:hover,
+                &.ant-btn:focus {
+                    color: white;
+                    border-color: #434343;
+                }
+            }
+            .header-info {
+                background-color: #3a393e;
+                border-radius: 16px;
+                margin-left: 20px;
+                padding: 5px 15px;
+                color: #bec1ca;
+            }
+
             .icon {
                 font-size: 20px;
                 margin: 0px 4px;
@@ -151,7 +198,7 @@
             }
         }
 
-        .save {
+        .basic {
             // font-size: 18px;
             margin-right: 10px;
             // cursor: pointer;
@@ -159,6 +206,24 @@
             border-radius: 30px;
             // background: #3a393e;
 
+            &.mark {
+                background-color: #fcb17a;
+            }
+            &.skip {
+                background-color: #98b0d2;
+            }
+            &.submit {
+                background-color: #60a9fe99;
+                .anticon {
+                    background: #60a9fe;
+                    height: 30px;
+                    margin-top: -4px;
+                    width: 32px;
+                    margin-left: -16px;
+                    border-radius: 16px;
+                    padding-top: 5px;
+                }
+            }
             .anticon {
                 font-size: 20px;
                 vertical-align: middle;

@@ -52,7 +52,7 @@ export interface IUserData {
     trackId?: string;
     trackName?: string;
     isProjection?: boolean;
-    isStandard?: boolean;
+    // isStandard?: boolean;
     backId?: string;
     // model
     confidence?: number;
@@ -63,16 +63,16 @@ export interface IUserData {
     // 标签
     classType?: string;
     // 结果类型
-    resultType?: ResultType;
+    // resultType?: ResultType;
     // 结果状态
-    resultStatus?: ResultStatus;
+    // resultStatus?: ResultStatus;
     // 不可见标记
-    invisibleFlag?: Boolean;
+    // invisibleFlag?: Boolean;
     // 属性
     attrs?: Record<string, any>;
     // info
     pointN?: number;
-    [key: string]: any;
+    // [key: string]: any;
 }
 
 export interface IObject extends IUserData {
@@ -133,8 +133,8 @@ export interface IConfig {
     showSideView: boolean;
     showOperationView: boolean;
     showLabel: boolean;
-    showCheckView: boolean;
-    showAnnotation: boolean;
+    // showCheckView: boolean;
+    // showAnnotation: boolean;
     showAttr: boolean;
     enableShowAttr: boolean;
     // img view info
