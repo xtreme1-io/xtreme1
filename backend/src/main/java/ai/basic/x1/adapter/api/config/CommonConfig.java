@@ -38,7 +38,6 @@ public class CommonConfig implements WebMvcConfigurer {
     @Value("${jwt.expireHours}")
     public Integer jwtExpireHours;
 
-    public static final List<String> excludeUris = List.of("/user/login", "/user/register","/error","/user/test");
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
         return new Jackson2ObjectMapperBuilder()
@@ -60,7 +59,7 @@ public class CommonConfig implements WebMvcConfigurer {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(JwtHelper jwtHelper, UserUseCase userUseCase) {
-        return new JwtAuthenticationFilter(jwtHelper, userUseCase, excludeUris);
+        return new JwtAuthenticationFilter(jwtHelper, userUseCase);
     }
 
     @Override
@@ -130,7 +129,7 @@ public class CommonConfig implements WebMvcConfigurer {
 
     @Bean
     public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
-        return new DistributedLock(stringRedisTemplate, "basicai:x1:", 5000);
+        return new DistributedLock(stringRedisTemplate, "ai:basicai:x1:", 5000);
     }
 
     @Bean

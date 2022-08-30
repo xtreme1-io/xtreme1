@@ -277,10 +277,10 @@ export default class DataManager {
         let { frameIndex, frames } = this.editor.state;
         let { FILTER_ALL } = this.editor.state.config;
 
-        if (this.editor.playManager.playing) {
-            this.editor.state.filterActive = [FILTER_ALL];
-            return;
-        }
+        // if (this.editor.playManager.playing) {
+        //     this.editor.state.filterActive = [FILTER_ALL];
+        //     return;
+        // }
 
         let frame = this.editor.getCurrentFrame();
         let objects = this.getFrameObject(frame.id) || [];
@@ -398,140 +398,140 @@ export default class DataManager {
 
     async pollDataModelResult() {}
 
-    async runModelTrack(
-        curId: string,
-        toIds: string[],
-        direction: 'BACKWARD' | 'FORWARD',
-        targetObjects: any[],
-        trackIdName: Record<string, string>,
-        onComplete?: () => void,
-    ) {}
-    copyForward() {
-        return this.track({
-            direction: 'FORWARD',
-            object: this.editor.pc.selection.length > 0 ? 'select' : 'all',
-            method: 'copy',
-            frameN: 1,
-        });
-    }
-    copyBackWard() {
-        return this.track({
-            direction: 'BACKWARD',
-            object: this.editor.pc.selection.length > 0 ? 'select' : 'all',
-            method: 'copy',
-            frameN: 1,
-        });
-    }
-    async track(option: {
-        method: 'copy' | 'model';
-        object: 'select' | 'all';
-        direction: 'BACKWARD' | 'FORWARD';
-        frameN: number;
-    }) {
-        let editor = this.editor;
-        let { frameIndex, frames } = editor.state;
-        let curId = frames[frameIndex].id;
+    // async runModelTrack(
+    //     curId: string,
+    //     toIds: string[],
+    //     direction: 'BACKWARD' | 'FORWARD',
+    //     targetObjects: any[],
+    //     trackIdName: Record<string, string>,
+    //     onComplete?: () => void,
+    // ) {}
+    // copyForward() {
+    //     return this.track({
+    //         direction: 'FORWARD',
+    //         object: this.editor.pc.selection.length > 0 ? 'select' : 'all',
+    //         method: 'copy',
+    //         frameN: 1,
+    //     });
+    // }
+    // copyBackWard() {
+    //     return this.track({
+    //         direction: 'BACKWARD',
+    //         object: this.editor.pc.selection.length > 0 ? 'select' : 'all',
+    //         method: 'copy',
+    //         frameN: 1,
+    //     });
+    // }
+    // async track(option: {
+    //     method: 'copy' | 'model';
+    //     object: 'select' | 'all';
+    //     direction: 'BACKWARD' | 'FORWARD';
+    //     frameN: number;
+    // }) {
+    //     let editor = this.editor;
+    //     let { frameIndex, frames } = editor.state;
+    //     let curId = frames[frameIndex].id;
 
-        const getToDataId = function getToDataId() {
-            let ids = [] as string[];
-            let forward = option.direction === 'FORWARD' ? 1 : -1;
-            let frameN = option.frameN;
+    //     const getToDataId = function getToDataId() {
+    //         let ids = [] as string[];
+    //         let forward = option.direction === 'FORWARD' ? 1 : -1;
+    //         let frameN = option.frameN;
 
-            if (frameN > 0)
-                for (let i = 1; i <= frameN; i++) {
-                    let frame = frames[frameIndex + forward * i];
-                    if (frame) {
-                        ids.push(frame.id);
-                    }
-                }
-            return ids;
-        };
-        const getObjects = function getObjects() {
-            let dataId = frames[frameIndex].id;
-            let objects = editor.dataManager.getFrameObject(dataId) || [];
+    //         if (frameN > 0)
+    //             for (let i = 1; i <= frameN; i++) {
+    //                 let frame = frames[frameIndex + forward * i];
+    //                 if (frame) {
+    //                     ids.push(frame.id);
+    //                 }
+    //             }
+    //         return ids;
+    //     };
+    //     const getObjects = function getObjects() {
+    //         let dataId = frames[frameIndex].id;
+    //         let objects = editor.dataManager.getFrameObject(dataId) || [];
 
-            if (option.object === 'select') {
-                objects = editor.pc.selection;
-            }
+    //         if (option.object === 'select') {
+    //             objects = editor.pc.selection;
+    //         }
 
-            objects = objects.filter((object) => {
-                return object instanceof Box && !object.userData.invisibleFlag;
-            });
+    //         objects = objects.filter((object) => {
+    //             return object instanceof Box && !object.userData.invisibleFlag;
+    //         });
 
-            return objects as Box[];
-        };
-        let ids = getToDataId();
-        if (ids.length === 0) {
-            // editor.showMsg('warning', props.state.$$('warnEmptyTarget'));
-            return;
-        }
+    //         return objects as Box[];
+    //     };
+    //     let ids = getToDataId();
+    //     if (ids.length === 0) {
+    //         // editor.showMsg('warning', props.state.$$('warnEmptyTarget'));
+    //         return;
+    //     }
 
-        let objects = getObjects();
-        if (objects.length === 0) {
-            editor.showMsg('warning', editor.lang('track-no-source'));
-            return;
-        }
+    //     let objects = getObjects();
+    //     if (objects.length === 0) {
+    //         editor.showMsg('warning', editor.lang('track-no-source'));
+    //         return;
+    //     }
 
-        if (option.method === 'copy') {
-            utils.copyData(editor, curId, ids, objects);
-            editor.showMsg('success', editor.lang('track-ok'));
-            this.gotoNext(ids[0]);
-        } else {
-            await this.modelTrack(ids, objects, option.direction);
-        }
-    }
-    gotoNext(dataId: string) {
-        let { frames } = this.editor.state;
-        let index = frames.findIndex((e) => e.id === dataId);
-        // index = Math.max(0, Math.min(editor.state.frames.length-1, index))
-        if (index < 0) return;
-        this.editor.loadFrame(index);
-        this.editor.dispatchEvent({ type: EditorEvent.UPDATE_TIME_LINE });
-    }
-    async modelTrack(
-        toIds: string[],
-        objects: AnnotateObject[],
-        direction: 'BACKWARD' | 'FORWARD',
-    ) {
-        let editor = this.editor;
-        let { frameIndex, frames } = editor.state;
-        let dataInfo = frames[frameIndex];
-        let curId = dataInfo.id;
-        // let direction = iState.trackDirection === 'backward' ? 'BACKWARD' : 'FORWARD';
-        // let dataIds = dataList.slice(1, 10).map((e) => +e.dataId);
+    //     if (option.method === 'copy') {
+    //         utils.copyData(editor, curId, ids, objects);
+    //         editor.showMsg('success', editor.lang('track-ok'));
+    //         this.gotoNext(ids[0]);
+    //     } else {
+    //         await this.modelTrack(ids, objects, option.direction);
+    //     }
+    // }
+    // gotoNext(dataId: string) {
+    //     let { frames } = this.editor.state;
+    //     let index = frames.findIndex((e) => e.id === dataId);
+    //     // index = Math.max(0, Math.min(editor.state.frames.length-1, index))
+    //     if (index < 0) return;
+    //     this.editor.loadFrame(index);
+    //     this.editor.dispatchEvent({ type: EditorEvent.UPDATE_TIME_LINE });
+    // }
+    // async modelTrack(
+    //     toIds: string[],
+    //     objects: AnnotateObject[],
+    //     direction: 'BACKWARD' | 'FORWARD',
+    // ) {
+    //     let editor = this.editor;
+    //     let { frameIndex, frames } = editor.state;
+    //     let dataInfo = frames[frameIndex];
+    //     let curId = dataInfo.id;
+    //     // let direction = iState.trackDirection === 'backward' ? 'BACKWARD' : 'FORWARD';
+    //     // let dataIds = dataList.slice(1, 10).map((e) => +e.dataId);
 
-        // Partial<IObject>
-        let trackIdName = {} as Record<string, string>;
-        let targetObjects = [] as any[];
-        objects.forEach((object) => {
-            if (object instanceof Box) {
-                let userData = object.userData as IUserData;
-                let { position, scale, rotation } = object;
-                let center3D = new THREE.Vector3().set(position.x, position.y, position.z);
-                let rotation3D = new THREE.Vector3().set(rotation.x, rotation.y, rotation.z);
-                let size3D = new THREE.Vector3().set(scale.x, scale.y, scale.z);
+    //     // Partial<IObject>
+    //     let trackIdName = {} as Record<string, string>;
+    //     let targetObjects = [] as any[];
+    //     objects.forEach((object) => {
+    //         if (object instanceof Box) {
+    //             let userData = object.userData as IUserData;
+    //             let { position, scale, rotation } = object;
+    //             let center3D = new THREE.Vector3().set(position.x, position.y, position.z);
+    //             let rotation3D = new THREE.Vector3().set(rotation.x, rotation.y, rotation.z);
+    //             let size3D = new THREE.Vector3().set(scale.x, scale.y, scale.z);
 
-                if (!userData.trackId) {
-                    userData.trackId = editor.createTrackId();
-                }
+    //             if (!userData.trackId) {
+    //                 userData.trackId = editor.createTrackId();
+    //             }
 
-                trackIdName[userData.trackId] = userData.trackName || '';
+    //             trackIdName[userData.trackId] = userData.trackName || '';
 
-                targetObjects.push({
-                    uuid: object.uuid,
-                    trackingId: userData.trackId,
-                    objType: '3d',
-                    modelClass: userData.modelClass || null,
-                    confidence: userData.confidence || null,
-                    center3D,
-                    rotation3D,
-                    size3D,
-                });
-            }
-        });
+    //             targetObjects.push({
+    //                 uuid: object.uuid,
+    //                 trackingId: userData.trackId,
+    //                 objType: '3d',
+    //                 modelClass: userData.modelClass || null,
+    //                 confidence: userData.confidence || null,
+    //                 center3D,
+    //                 rotation3D,
+    //                 size3D,
+    //             });
+    //         }
+    //     });
 
-        this.runModelTrack(curId, toIds, direction as any, targetObjects, trackIdName, () => {
-            this.gotoNext(toIds[0]);
-        });
-    }
+    //     this.runModelTrack(curId, toIds, direction as any, targetObjects, trackIdName, () => {
+    //         this.gotoNext(toIds[0]);
+    //     });
+    // }
 }

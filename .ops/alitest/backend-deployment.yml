@@ -1,42 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: x1-community
-      app.kubernetes.io/instance: x1-community
-      app.kubernetes.io/component: frontend
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: x1-community
-        app.kubernetes.io/instance: x1-community
-        app.kubernetes.io/component: frontend
-    spec:
-      nodeSelector:
-        dedicated: app
-      imagePullSecrets:
-        - name: basicai-registry
-      containers:
-        - name: frontend
-          image: $FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-          resources:
-            requests:
-              memory: 200Mi
-              cpu: 100m
-            limits:
-              memory: 2Gi
-              cpu: 1
-          ports:
-            - name: http
-              containerPort: 8080
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: backend
 spec:
   replicas: 1
@@ -101,20 +65,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
-spec:
-  selector:
-    app.kubernetes.io/name: x1-community
-    app.kubernetes.io/instance: x1-community
-    app.kubernetes.io/component: frontend
-  ports:
-    - name: http
-      port: 80
-      targetPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
   name: backend
 spec:
   selector:
@@ -131,20 +81,13 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-  name: x1-community
+  name: backend
 spec:
   ingressClassName: nginx
   rules:
     - host: x1-community.alitest.beisai.com
       http:
         paths:
-          - backend:
-              service:
-                name: frontend
-                port:
-                  number: 80
-            path: /
-            pathType: Prefix
           - backend:
               service:
                 name: backend

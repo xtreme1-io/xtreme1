@@ -50,47 +50,47 @@
         return map;
     });
 
-    let updateAnnotation = () => {
-        if (!editor.state.config.showAnnotation) return;
-        let data = editor.state.annotationInfos;
-        let camera = view.camera;
-        let matrix = new THREE.Matrix4();
-        matrix.copy(camera.projectionMatrix);
-        matrix.multiply(camera.matrixWorldInverse);
+    // let updateAnnotation = () => {
+    //     if (!editor.state.config.showAnnotation) return;
+    //     let data = editor.state.annotationInfos;
+    //     let camera = view.camera;
+    //     let matrix = new THREE.Matrix4();
+    //     matrix.copy(camera.projectionMatrix);
+    //     matrix.multiply(camera.matrixWorldInverse);
 
-        let object3d = editor.pc.getAnnotate3D();
-        let idMap: Record<string, THREE.Object3D> = {};
-        object3d.forEach((obj) => {
-            idMap[obj.uuid] = obj;
-        });
+    //     let object3d = editor.pc.getAnnotate3D();
+    //     let idMap: Record<string, THREE.Object3D> = {};
+    //     object3d.forEach((obj) => {
+    //         idMap[obj.uuid] = obj;
+    //     });
 
-        let annotations = [] as any[];
-        let pos = new THREE.Vector3();
-        data.forEach((e) => {
-            if (e.position) {
-                pos.copy(e.position);
-            } else if (e.objectId) {
-                let obj = idMap[e.objectId];
-                if (!obj) return;
-                pos.copy(obj.position);
-            }
+    //     let annotations = [] as any[];
+    //     let pos = new THREE.Vector3();
+    //     data.forEach((e) => {
+    //         if (e.position) {
+    //             pos.copy(e.position);
+    //         } else if (e.objectId) {
+    //             let obj = idMap[e.objectId];
+    //             if (!obj) return;
+    //             pos.copy(obj.position);
+    //         }
 
-            pos.applyMatrix4(matrix);
+    //         pos.applyMatrix4(matrix);
 
-            pos.x = ((pos.x + 1) / 2) * view.width;
-            pos.y = (-(pos.y - 1) / 2) * view.height;
+    //         pos.x = ((pos.x + 1) / 2) * view.width;
+    //         pos.y = (-(pos.y - 1) / 2) * view.height;
 
-            let obj = {
-                name: e.msg,
-                x: pos.x,
-                y: pos.y,
-                scale: 1,
-            };
-            annotations.push(obj);
-        });
+    //         let obj = {
+    //             name: e.msg,
+    //             x: pos.x,
+    //             y: pos.y,
+    //             scale: 1,
+    //         };
+    //         annotations.push(obj);
+    //     });
 
-        state.annotations = annotations;
-    };
+    //     state.annotations = annotations;
+    // };
 
     let updateLabel = () => {
         // if (!editor.state.config.showLabel) return;
@@ -164,7 +164,7 @@
 
     function update() {
         updateLabel();
-        updateAnnotation();
+        // updateAnnotation();
     }
 
     onMounted(() => {

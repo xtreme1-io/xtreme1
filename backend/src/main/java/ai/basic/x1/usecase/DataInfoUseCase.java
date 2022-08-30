@@ -522,7 +522,7 @@ public class DataInfoUseCase {
             modelMessageBO.setDataId(dataId);
             modelMessageBO.setDataInfo(dataMap.get(dataId));
             modelMessageBO.setDatasetId(dataMap.get(dataId).getDatasetId());
-            //TODO
+            modelUseCase.sendModelMessageToMQ(modelMessageBO);
         }
     }
 

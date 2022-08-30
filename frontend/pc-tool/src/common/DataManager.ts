@@ -80,8 +80,6 @@ export default class DataManager extends BaseDataManager {
                                     (e) => e.confidence && e.confidence >= 0.5,
                                 );
                                 editor.modelManager.modelMap.set(dataMeta.id, objects);
-                                let { start } = editor.state.modelConfig;
-                                editor.state.modelConfig.duration = Date.now() - start;
                             } else {
                                 dataMeta.model = undefined;
                                 if (dataMeta.id === curData.id)
@@ -102,57 +100,57 @@ export default class DataManager extends BaseDataManager {
         }
     }
 
-    async runModelTrack(
-        curId: string,
-        toIds: string[],
-        direction: 'BACKWARD' | 'FORWARD',
-        targetObjects: any[],
-        trackIdName: Record<string, string>,
-        onComplete?: () => void,
-    ) {
-        let editor = this.editor;
-        let { frameIndex, frames } = this.editor.state;
-        let { datasetId } = this.editor.bsState;
-        let dataInfo = frames[frameIndex];
-        let config = {
-            datasetId: +datasetId,
-            dataId: +dataInfo.id,
-            direction,
-            dataIds: toIds,
-            targetObjects,
-        };
-        editor.showLoading({ type: 'loading', content: editor.lang('load-track') });
+    // async runModelTrack(
+    //     curId: string,
+    //     toIds: string[],
+    //     direction: 'BACKWARD' | 'FORWARD',
+    //     targetObjects: any[],
+    //     trackIdName: Record<string, string>,
+    //     onComplete?: () => void,
+    // ) {
+    //     let editor = this.editor;
+    //     let { frameIndex, frames } = this.editor.state;
+    //     let { datasetId } = this.editor.bsState;
+    //     let dataInfo = frames[frameIndex];
+    //     let config = {
+    //         datasetId: +datasetId,
+    //         dataId: +dataInfo.id,
+    //         direction,
+    //         dataIds: toIds,
+    //         targetObjects,
+    //     };
+    //     editor.showLoading({ type: 'loading', content: editor.lang('load-track') });
 
-        await api
-            .runModelTrack(config)
-            .then((result) => {
-                let recordId = result.data as string;
-                let clear = bsUtils.pollModelTrack(
-                    recordId,
-                    (objectsMap) => {
-                        if (Object.keys(objectsMap).length === 0) {
-                            editor.showMsg('warning', editor.lang('track-no-data'));
-                        } else {
-                            let dataIdMap = {} as Record<string, IObject[]>;
-                            Object.keys(objectsMap).forEach((index) => {
-                                let dataId = toIds[index];
-                                dataIdMap[dataId] = objectsMap[index];
-                            });
-                            editor.modelManager.addModelTrackData(dataIdMap);
-                            editor.showMsg('success', editor.lang('track-ok'));
-                            onComplete && onComplete();
-                        }
-                        editor.showLoading(false);
-                    },
-                    () => {
-                        editor.showLoading(false);
-                        editor.showMsg('error', editor.lang('track-error'));
-                    },
-                );
-            })
-            .catch((e) => {
-                editor.showLoading(false);
-                editor.showMsg('error', e.message || editor.lang('track-error'));
-            });
-    }
+    //     await api
+    //         .runModelTrack(config)
+    //         .then((result) => {
+    //             let recordId = result.data as string;
+    //             let clear = bsUtils.pollModelTrack(
+    //                 recordId,
+    //                 (objectsMap) => {
+    //                     if (Object.keys(objectsMap).length === 0) {
+    //                         editor.showMsg('warning', editor.lang('track-no-data'));
+    //                     } else {
+    //                         let dataIdMap = {} as Record<string, IObject[]>;
+    //                         Object.keys(objectsMap).forEach((index) => {
+    //                             let dataId = toIds[index];
+    //                             dataIdMap[dataId] = objectsMap[index];
+    //                         });
+    //                         editor.modelManager.addModelTrackData(dataIdMap);
+    //                         editor.showMsg('success', editor.lang('track-ok'));
+    //                         onComplete && onComplete();
+    //                     }
+    //                     editor.showLoading(false);
+    //                 },
+    //                 () => {
+    //                     editor.showLoading(false);
+    //                     editor.showMsg('error', editor.lang('track-error'));
+    //                 },
+    //             );
+    //         })
+    //         .catch((e) => {
+    //             editor.showLoading(false);
+    //             editor.showMsg('error', e.message || editor.lang('track-error'));
+    //         });
+    // }
 }

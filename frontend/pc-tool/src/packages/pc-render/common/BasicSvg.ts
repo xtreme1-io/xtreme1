@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 // type DragHandler = (offsetLocal: THREE.Vector3, offsetCamera: THREE.Vector2) => ITransform | null;
 const tempV2_1 = new THREE.Vector2();
 export type ClearHandler = () => void;
+// svg element attribute 'data-info'
 export type Info =
     | 'lt'
     | 'lb'
@@ -24,6 +25,7 @@ export type Info =
     | 'bg'
     | 'line'
     | 'rotate';
+// event type
 export type IEvent = 'start' | 'update' | 'end' | 'start-rotate' | 'rotate' | 'end-rotate';
 export type IDir = 'front' | 'back' | 'bg';
 export interface IBaseEvent extends THREE.Event {
@@ -48,12 +50,14 @@ export interface IBoxEvent extends IBaseEvent {
     };
 }
 
+// create svg dom
+
 export function createSvg(): SVGElement {
     var ns = 'http://www.w3.org/2000/svg';
     var element = document.createElementNS(ns, 'svg') as SVGElement;
     return element;
 }
-
+//
 export function createRectTag(
     tag: string,
     info: Info,
@@ -168,6 +172,8 @@ function getBox2DIndex(info: Info) {
     }
     return index;
 }
+
+// set svg element css of key-value
 function setStyle(
     nodeList: NodeListOf<SVGElement> | SVGElement,
     styleObject: Record<string, number | string>,

@@ -120,15 +120,4 @@ public class UserController extends BaseController {
         return UserDTO.fromBO(user);
     }
 
-    @GetMapping("/test")
-    public void test() {
-        ModelMessageBO modelMessageBO = ModelMessageBO.builder()
-                .modelCode(ModelCodeEnum.PRE_LABEL)
-                .datasetId(1l)
-                .dataId(1l)
-                .dataInfo(DataInfoBO.builder().build())
-                .build();
-        modelUseCase.sendModelMessageToMQ(modelMessageBO);
-    }
-
 }

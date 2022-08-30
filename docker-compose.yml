@@ -10,7 +10,7 @@ services:
     ports:
       - 8190:80
     volumes:
-      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./deploy/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
   mysql:
     image: mysql:5.7
     environment:
@@ -22,7 +22,7 @@ services:
       - 8191:3306
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./backend/src/main/resources/db/migration:/docker-entrypoint-initdb.d
+      - ./deploy/mysql/migration:/docker-entrypoint-initdb.d
   redis:
     image: redis:6.2
     ports:
@@ -58,6 +58,15 @@ services:
     # build: ./frontend
     ports:
       - 8181:8080
+  image-object-detection:
+    image: basicai/x1-community-image-object-detection
+    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
+    # build: ./model/image-object-detection
+    ports:
+      - 8182:8080
+    # You need to explicitly specify model profile to start this service.
+    profiles:
+      - model
 volumes:
   mysql-data:
   redis-data:

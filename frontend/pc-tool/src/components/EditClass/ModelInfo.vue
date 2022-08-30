@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
     import { IState } from './type';
-    import useUI from 'pc-ui/hook/useUI';
+    import useUI from '../../hook/useUI';
     import {
         EyeOutlined,
         DeleteOutlined,
