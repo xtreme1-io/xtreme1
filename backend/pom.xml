@@ -26,6 +26,7 @@
         <minio-version>8.3.7</minio-version>
         <okhttp.version>4.8.1</okhttp.version>
         <fegin.version>11.7</fegin.version>
+        <thumbnail.version>0.4.17</thumbnail.version>
     </properties>
 
     <dependencies>
@@ -153,6 +154,12 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>${thumbnail.version}</version>
         </dependency>
 
     </dependencies>

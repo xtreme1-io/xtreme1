@@ -7,12 +7,13 @@ public enum UsecaseCode {
 
     // Common
     OK("OK", "OK"),
+    ERROR("ERROR", "Service error"),
     UNKNOWN("UNKNOWN", "Unknown error"),
     NOT_FOUND("NOT_FOUND", "Resource not found"),
     DUPLICATED("DUPLICATED", "Resource duplicated"),
     PARAM_ERROR("PARAM_ERROR", "Param error"),
 
-    NAME_DUPLICATED("NAME_DUPLICATED","name already exists"),
+    NAME_DUPLICATED("NAME_DUPLICATED", "name already exists"),
 
     // User
     USERNAME_AND_PASSWORD_NOT_MATCH("USERNAME_AND_PASSWORD_NOT_MATCH", "Username and password not match"),
@@ -26,19 +27,21 @@ public enum UsecaseCode {
     // Dataset
     DATASET_NAME_DUPLICATED("DATASET_NAME_DUPLICATED", "Dataset duplicate name"),
 
-    FILE_URL_ERROR("FILE_URL_ERROR", "File url error"),
+    DATASET_DATA_FILE_URL_ERROR("DATASET_DATA_FILE_URL_ERROR", "File url error"),
+
+    DATASET_DATA_FILE_FORMAT_ERROR("DATASET_DATA_FILE_FORMAT_ERROR", "Incorrect file format"),
 
     DATASET_NOT_FOUND("DATASET_NOT_FOUND", "Dataset not found"),
 
     DATASET__DATA__DATA_HAS_BEEN_UNLOCKED("DATASET__DATA_DATA_HAS_BEEN_UNLOCKED", "The data has been unlocked"),
 
-    DATASET_DATA_OTHERS_ANNOTATING("DATASET_DATA_OTHERS_ANNOTATING","Select data that others are annotating"),
+    DATASET_DATA_OTHERS_ANNOTATING("DATASET_DATA_OTHERS_ANNOTATING", "Select data that others are annotating"),
 
     DATASET_DATA_UNLOCK_ID_ERROR("DATASET__DATA__UNLOCK_ID_ERROR", "Please pass in the correct unlock id"),
 
-    DATASET_DATA_EXIST_ANNOTATE("DATASET_DATA_EXIST_ANNOTATE", "The selected data is being marked by others"),
+    DATASET_DATA_EXIST_ANNOTATE("DATASET_DATA_EXIST_ANNOTATE", "The selected data has been annotated by others"),
 
-    MODEL_DOES_NOT_EXIST("MODEL_DOES_NOT_EXIST","Model does not exist");
+    MODEL_DOES_NOT_EXIST("MODEL_DOES_NOT_EXIST", "Model does not exist");
 
     // Storage
 
