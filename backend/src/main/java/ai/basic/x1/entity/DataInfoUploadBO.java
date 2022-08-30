@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import ai.basic.x1.entity.enums.DataUploadSourceEnum;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +30,7 @@ public class DataInfoUploadBO {
     /**
      * Data upload source local or url
      */
-    private String source;
+    private DataUploadSourceEnum source;
 
     /**
      * User id
@@ -40,5 +41,9 @@ public class DataInfoUploadBO {
      * Dataset type LIDAR_FUSION,LIDAR_BASIC,IMAGE
      */
     private DatasetTypeEnum type;
+
+    private String savePath;
+
+    private String baseSavePath;
 
 }
