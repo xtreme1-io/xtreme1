@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.api.job.ModelRunErrorHandler;
 import ai.basic.x1.adapter.api.job.PreLabelModelMessageHandler;
 import ai.basic.x1.adapter.api.job.PredictImageCo80ModelHandler;
 import ai.basic.x1.entity.ModelMessageBO;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.RedisSystemException;
@@ -45,8 +46,10 @@ public class JobConfig {
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainer(Executor redisStreamExecutor,
-                                                                                                                       RedisConnectionFactory redisConnectionFactory,
-                                                                                                                       RedisTemplate redisTemplate) {
+                                                                                                               RedisConnectionFactory redisConnectionFactory,
+                                                                                                               RedisTemplate redisTemplate,
+                                                                                                               ApplicationContext applicationContext
+    ) {
 
         try {
             redisTemplate.opsForStream().createGroup(MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
@@ -76,7 +79,7 @@ public class JobConfig {
                 .autoAcknowledge(false)
                 .cancelOnError(throwable -> false)
                 .build();
-        streamMessageListenerContainer.register(streamReadRequest, new ModelJobConsumerListener(MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, preLabelModelMessageHandler()));
+        streamMessageListenerContainer.register(streamReadRequest, new ModelJobConsumerListener(MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
         return streamMessageListenerContainer;
     }
 
