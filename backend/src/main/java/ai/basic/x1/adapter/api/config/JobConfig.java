@@ -3,6 +3,7 @@ package ai.basic.x1.adapter.api.config;
 import ai.basic.x1.adapter.api.job.ModelJobConsumerListener;
 import ai.basic.x1.adapter.api.job.ModelRunErrorHandler;
 import ai.basic.x1.adapter.api.job.PreLabelModelMessageHandler;
+import ai.basic.x1.adapter.api.job.PredictImageCo80ModelHandler;
 import ai.basic.x1.entity.ModelMessageBO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,5 +83,10 @@ public class JobConfig {
     @Bean
     public PreLabelModelMessageHandler preLabelModelMessageHandler() {
         return new PreLabelModelMessageHandler();
+    }
+
+    @Bean
+    public PredictImageCo80ModelHandler predictImageCo80ModelHandler() {
+        return new PredictImageCo80ModelHandler();
     }
 }
