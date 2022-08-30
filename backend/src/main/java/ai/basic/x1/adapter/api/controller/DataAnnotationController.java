@@ -19,7 +19,7 @@ import java.util.List;
  * @date 2022/8/26
  */
 @RestController
-@RequestMapping("/annotation/data/")
+@RequestMapping("/annotate/data/")
 public class DataAnnotationController {
 
     @Autowired
