@@ -21,6 +21,7 @@ spring:
     port: 6379
     password:
 
+
 jwt:
   secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
   issuer: BasicAI
@@ -47,3 +48,9 @@ minio:
   accessKey: admin
   secretKey: 1tQB970y
   bucketName: x1-community
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
