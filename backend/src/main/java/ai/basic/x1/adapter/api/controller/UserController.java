@@ -8,22 +8,16 @@ import ai.basic.x1.adapter.dto.request.UserAuthRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserDeleteRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserUpdateRequestDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
-import ai.basic.x1.entity.DataInfoBO;
-import ai.basic.x1.entity.ModelMessageBO;
 import ai.basic.x1.entity.UserBO;
-import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.usecase.ModelUseCase;
 import ai.basic.x1.usecase.UserUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.stream.ObjectRecord;
-import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -88,6 +82,9 @@ public class UserController extends BaseController {
                           @LoggedUser LoggedUserDTO loggedUser) {
         var user = DefaultConverter.convert(updateRequestDTO, UserBO.class);
         user.setId(loggedUser.getId());
+        if (StrUtil.isNotEmpty(updateRequestDTO.getNewPassword())) {
+            user.setPassword(passwordEncoder.encode(updateRequestDTO.getNewPassword()));
+        }
         return UserDTO.fromBO(userUseCase.update(user));
     }
 
