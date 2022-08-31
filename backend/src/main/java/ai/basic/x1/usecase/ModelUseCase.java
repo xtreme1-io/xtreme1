@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.port.dao.mybatis.model.Model;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
 import ai.basic.x1.entity.ModelBO;
 import ai.basic.x1.entity.ModelMessageBO;
+import ai.basic.x1.entity.enums.ModelDatasetTypeEnum;
 import ai.basic.x1.util.Constants;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollUtil;
@@ -12,6 +13,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
@@ -23,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static ai.basic.x1.entity.enums.ModelDatasetTypeEnum.*;
 
 /**
  * @author chenchao
@@ -36,9 +40,16 @@ public class ModelUseCase {
     private RedisTemplate<String, Object> streamRedisTemplate;
 
     public List<ModelBO> findAll(ModelBO modelBO) {
+        ModelDatasetTypeEnum datasetType = modelBO.getDatasetType();
         LambdaQueryWrapper<Model> modelLambdaQueryWrapper = Wrappers.lambdaQuery();
-        modelLambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelBO.getDatasetType()), Model::getDatasetType, modelBO.getDatasetType());
         modelLambdaQueryWrapper.orderBy(true, true, Model::getName);
+        if(ObjectUtil.isNotNull(datasetType)){
+            if(LIDAR_BASIC.equals(datasetType)||LIDAR_FUSION.equals(datasetType)){
+                modelLambdaQueryWrapper.in(Model::getDatasetType, Lists.newArrayList(datasetType.name(),"LIDAR"));
+            }else {
+                modelLambdaQueryWrapper.eq(Model::getDatasetType, datasetType);
+            }
+        }
         var modelList = modelDAO.list(modelLambdaQueryWrapper);
         return DefaultConverter.convert(modelList, ModelBO.class);
     }
