@@ -6,10 +6,7 @@ import ai.basic.x1.entity.DataInfoQueryBO;
 import ai.basic.x1.entity.DataInfoUploadBO;
 import ai.basic.x1.entity.DataPreAnnotationBO;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
-import ai.basic.x1.usecase.DataAnnotationRecordUseCase;
-import ai.basic.x1.usecase.DataInfoUseCase;
-import ai.basic.x1.usecase.DatasetUseCase;
-import ai.basic.x1.usecase.ExportUseCase;
+import ai.basic.x1.usecase.*;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
@@ -41,6 +38,8 @@ public class DataInfoController extends DatasetBaseController {
     protected ExportUseCase exportUsecase;
 
     @Autowired
+    protected UploadUseCase uploadUseCase;
+    @Autowired
     protected DatasetUseCase datasetUseCase;
 
     @Autowired
@@ -52,13 +51,19 @@ public class DataInfoController extends DatasetBaseController {
      * @param dto data数据对象
      */
     @PostMapping("upload")
-    public void upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
+    public Long upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);
         assert dataInfoUploadBO != null;
         dataInfoUploadBO.setUserId(userDTO.getId());
-        dataInfoUsecase.upload(dataInfoUploadBO);
+        return dataInfoUsecase.upload(dataInfoUploadBO);
     }
 
+    @GetMapping("findUploadRecordBySerialNumbers")
+    public List<UploadRecordDTO> findUploadRecordBySerialNumbers(
+            @NotEmpty(message = "SerialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
+        var uploadRecordBOList = uploadUseCase.findBySerialNumbers(serialNumbers);
+        return DefaultConverter.convert(uploadRecordBOList, UploadRecordDTO.class);
+    }
 
     @GetMapping("findByPage")
     public Page<DataInfoDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo,
@@ -68,7 +73,7 @@ public class DataInfoController extends DatasetBaseController {
         dataInfoQueryBO.setPageNo(pageNo);
         dataInfoQueryBO.setPageSize(pageSize);
         var dataInfoPage = dataInfoUsecase.findByPage(dataInfoQueryBO);
-        return dataInfoPage.convert(dataInfoBO -> convertDataInfoDTO(dataInfoBO));
+        return dataInfoPage.convert(this::convertDataInfoDTO);
     }
 
     @GetMapping("info/{id}")
@@ -81,9 +86,15 @@ public class DataInfoController extends DatasetBaseController {
     public List<DataInfoDTO> listByIds(@NotEmpty(message = "DataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
         var dataInfoBos = dataInfoUsecase.listByIds(dataIds);
         if (CollectionUtil.isNotEmpty(dataInfoBos)) {
-            return dataInfoBos.stream().map(dataInfoBO -> convertDataInfoDTO(dataInfoBO)).collect(Collectors.toList());
+            return dataInfoBos.stream().map(this::convertDataInfoDTO).collect(Collectors.toList());
         }
         return List.of();
+    }
+
+    @GetMapping("getAnnotationStatusStatisticsByDatasetId")
+    public DatasetStatisticsDTO getAnnotationStatusStatisticsByDatasetId(
+            @NotNull(message = "DatasetId cannot be null") @RequestParam(required = false) Long datasetId) {
+        return DefaultConverter.convert(dataInfoUsecase.getDatasetStatisticsByDatasetId(datasetId), DatasetStatisticsDTO.class);
     }
 
     @GetMapping("findLockRecordIdByDatasetId")
@@ -115,11 +126,11 @@ public class DataInfoController extends DatasetBaseController {
     }
 
     @GetMapping("generatePresignedUrl")
-    public PresignedUrlDTO generatePresignedUrl(@RequestParam(value = "fileName") String fileName, @RequestParam(value = "datasetId") Long datasetId, @LoggedUser LoggedUserDTO userDTO) {
+    public PresignedUrlDTO generatePresignedUrl(@RequestParam(value = "fileName") String fileName,
+                                                @RequestParam(value = "datasetId") Long datasetId, @LoggedUser LoggedUserDTO userDTO) {
         var presignedUrlBO = dataInfoUsecase.generatePresignedUrl(fileName, datasetId, userDTO.getId());
         return DefaultConverter.convert(presignedUrlBO, PresignedUrlDTO.class);
     }
-
 
     @GetMapping("export")
     public Long export(@Validated DataInfoQueryDTO dataInfoQueryDTO) {
@@ -129,7 +140,8 @@ public class DataInfoController extends DatasetBaseController {
     }
 
     @GetMapping("findExportRecordBySerialNumbers")
-    public List<ExportRecordDTO> findExportRecordBySerialNumber(@NotEmpty(message = "SerialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
+    public List<ExportRecordDTO> findExportRecordBySerialNumber(
+            @NotEmpty(message = "SerialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
         var exportRecordList = exportUsecase.findExportRecordBySerialNumbers(serialNumbers);
         return DefaultConverter.convert(exportRecordList, ExportRecordDTO.class);
     }
@@ -163,7 +175,8 @@ public class DataInfoController extends DatasetBaseController {
     }
 
     @GetMapping("modelAnnotationResult")
-    public ModelObjectDTO modelAnnotationResult(@NotNull(message = "serialNo cannot be null") @RequestParam(required = false) Long serialNo, @RequestParam(required = false) List<Long> dataIds) {
+    public ModelObjectDTO modelAnnotationResult(@NotNull(message = "serialNo cannot be null") @RequestParam(required = false) Long serialNo,
+                                                @RequestParam(required = false) List<Long> dataIds) {
         var modelObjectBO = dataInfoUsecase.getModelAnnotateResult(serialNo, dataIds);
         return DefaultConverter.convert(modelObjectBO, ModelObjectDTO.class);
     }

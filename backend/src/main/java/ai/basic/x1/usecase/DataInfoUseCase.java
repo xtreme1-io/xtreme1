@@ -18,6 +18,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
@@ -45,12 +46,14 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DataUploadSourceEnum.LOCAL;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
 import static ai.basic.x1.entity.enums.RelationEnum.*;
+import static ai.basic.x1.entity.enums.UploadStatusEnum.*;
 import static ai.basic.x1.usecase.exception.UsecaseCode.*;
 import static ai.basic.x1.util.Constants.*;
 
@@ -105,6 +108,12 @@ public class DataInfoUseCase {
 
     @Autowired
     private ModelDataResultDAO modelDataResultDAO;
+
+    @Autowired
+    private UploadUseCase uploadUseCase;
+
+    @Autowired
+    private UploadRecordDAO uploadRecordDAO;
 
     @Value("${file.tempPath:/tmp/x1/}")
     private String tempPath;
@@ -170,12 +179,17 @@ public class DataInfoUseCase {
         if (StrUtil.isNotBlank(queryBO.getName())) {
             lambdaQueryWrapper.like(DataInfo::getName, queryBO.getName());
         }
+        if (ObjectUtil.isNotNull(queryBO.getAnnotationStatus())) {
+            lambdaQueryWrapper.eq(DataInfo::getAnnotationStatus, queryBO.getAnnotationStatus());
+        }
         if (ObjectUtil.isNotEmpty(queryBO.getCreateStartTime()) && ObjectUtil.isNotEmpty(queryBO.getCreateEndTime())) {
             lambdaQueryWrapper.ge(DataInfo::getCreatedAt, queryBO.getCreateStartTime()).le(DataInfo::getCreatedAt, queryBO.getCreateEndTime());
         }
         if (StrUtil.isNotBlank(queryBO.getSortField())) {
             lambdaQueryWrapper.last(" order by " + queryBO.getSortField().toLowerCase() + " " + queryBO.getAscOrDesc());
         }
+
+
         var dataInfoPage = dataInfoDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()), lambdaQueryWrapper);
         var dataInfoBOPage = DefaultConverter.convert(dataInfoPage, DataInfoBO.class);
         var dataInfoBOList = dataInfoBOPage.getList();
@@ -257,6 +271,12 @@ public class DataInfoUseCase {
                 .collect(Collectors.toMap(DatasetStatistics::getDatasetId, datasetStatistics -> DefaultConverter.convert(datasetStatistics, DatasetStatisticsBO.class), (k1, k2) -> k1));
     }
 
+    public DatasetStatisticsBO getDatasetStatisticsByDatasetId(Long datasetId) {
+        var datasetStatisticsList = dataInfoDAO.getBaseMapper().getDatasetStatisticsByDatasetIds(Collections.singletonList(datasetId));
+        return DefaultConverter.convert(datasetStatisticsList.stream().findFirst()
+                .orElse(new DatasetStatistics(datasetId, 0, 0, 0)), DatasetStatisticsBO.class);
+    }
+
     /**
      * generate pre-signed url
      *
@@ -291,22 +311,27 @@ public class DataInfoUseCase {
      * @param dataInfoUploadBO 上传数据对象 包含文件信息集合
      */
     @Transactional(rollbackFor = RuntimeException.class)
-    public void upload(DataInfoUploadBO dataInfoUploadBO) {
-        var fileUrl = removeUrlParameter(dataInfoUploadBO.getFileUrl());
+    public Long upload(DataInfoUploadBO dataInfoUploadBO) {
+        var uploadRecordBO = uploadUseCase.createUploadRecord(dataInfoUploadBO.getFileUrl());
+        var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
         var mimeType = FileUtil.getMimeType(fileUrl);
         if (!validateUrlFileSuffix(dataInfoUploadBO, mimeType)) {
+            uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_FORMAT_ERROR.getMessage());
             throw new UsecaseException(DATASET_DATA_FILE_FORMAT_ERROR);
         }
         var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
         if (!boo) {
+            uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ERROR.getMessage());
             throw new UsecaseException(DATASET_DATA_FILE_URL_ERROR);
         }
         var dataset = datasetDAO.getById(dataInfoUploadBO.getDatasetId());
         if (ObjectUtil.isNull(dataset)) {
+            uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_NOT_FOUND.getMessage());
             throw new UsecaseException(DATASET_NOT_FOUND);
         }
         dataInfoUploadBO.setType(dataset.getType());
-        executorService.execute(TtlRunnable.get(() -> {
+        dataInfoUploadBO.setUploadRecordId(uploadRecordBO.getId());
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             try {
                 if (IMAGE.equals(dataset.getType()) && IMAGE_DATA_TYPE.contains(mimeType)) {
                     downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageUploadFile);
@@ -318,7 +343,8 @@ public class DataInfoUseCase {
             } catch (IOException e) {
                 log.error("Download decompression file error", e);
             }
-        }));
+        })));
+        return uploadRecordBO.getSerialNumber();
 
     }
 
@@ -369,8 +395,20 @@ public class DataInfoUseCase {
         var rootPath = String.format("%s/%s/", userId, datasetId);
         log.info("Get point_cloud datasetId:{},size:{}", datasetId, pointCloudList.size());
         if (CollectionUtil.isEmpty(pointCloudList)) {
-            throw new UsecaseException("The format of the compressed package is incorrect. It must contain point_cloud");
+            uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, POINT_CLOUD_COMPRESSED_FILE_ERROR.getMessage());
+            throw new UsecaseException(POINT_CLOUD_COMPRESSED_FILE_ERROR);
         }
+        var totalDataNum = pointCloudList.stream()
+                .filter(pointCloudFile -> !validDirectoryFormat(pointCloudFile.getParentFile(), datasetType))
+                .mapToLong(pointCloudFile -> getDataNames(pointCloudFile.getParentFile(), datasetType).size()).sum();
+        AtomicReference<Long> parsedDataNum = new AtomicReference<>(0L);
+        var uploadRecordBOBuilder = UploadRecordBO.builder()
+                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
+        if (totalDataNum <= 0) {
+            uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, COMPRESSED_PACKAGE_EMPTY.getMessage());
+            throw new UsecaseException(COMPRESSED_PACKAGE_EMPTY);
+        }
+
         pointCloudList.forEach(pointCloudFile -> {
             var isError = this.validDirectoryFormat(pointCloudFile.getParentFile(), datasetType);
             if (isError) {
@@ -393,13 +431,18 @@ public class DataInfoUseCase {
             var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                     .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
             for (var dataName : dataNameList) {
+                parsedDataNum.set(parsedDataNum.get() + 1);
+                if (parsedDataNum.get() % 5 == 0) {
+                    var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                    uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+                }
                 var dataFiles = getDataFiles(pointCloudFile.getParentFile(), dataName, datasetType);
                 if (CollectionUtil.isNotEmpty(dataFiles)) {
                     var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                     var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
                     handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList);
                     var fileNodeList = assembleContent(userId, dataFiles, rootPath);
-                    log.info("get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
+                    log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
                     var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                     dataInfoBOList.add(dataInfoBO);
                     if (dataInfoBOList.size() == BATCH_SIZE) {
@@ -413,6 +456,8 @@ public class DataInfoUseCase {
                 var insertRs = insertBatch(dataInfoBOList);
                 saveBatchDataResult(insertRs, dataAnnotationObjectBOList);
             }
+            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
+            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
         });
     }
 
@@ -426,7 +471,7 @@ public class DataInfoUseCase {
                 .createdBy(userId)
                 .isDeleted(false);
         var file = FileUtil.file(dataInfoUploadBO.getSavePath());
-        var fileUrl = removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
         var path = fileUrl.replace(minioProp.getEndpoint(), "").replace(minioProp.getBucketName() + "/", "");
         var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(minioProp.getBucketName())
                 .size(file.length()).path(path).type(FileUtil.getMimeType(path)).build();
@@ -441,6 +486,9 @@ public class DataInfoUseCase {
         FileUtil.copy(dataInfoUploadBO.getSavePath(), newSavePath, true);
         createUploadThumbnail(userId, fileBOS, rootPath);
         FileUtil.clean(newSavePath);
+        var uploadRecordBO = UploadRecordBO.builder()
+                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).status(PARSE_COMPLETED).build();
+        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
     }
 
     private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -458,10 +506,18 @@ public class DataInfoUseCase {
                 .updatedAt(OffsetDateTime.now())
                 .createdBy(userId)
                 .isDeleted(false);
+        var totalDataNum = Long.valueOf(files.size());
+        AtomicReference<Long> parsedDataNum = new AtomicReference<>(0L);
+        var uploadRecordBOBuilder = UploadRecordBO.builder()
+                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
+
         if (CollectionUtil.isNotEmpty(files)) {
-            //50为一段
-            var list = ListUtil.split(files, 50);
+            //10为一段
+            var list = ListUtil.split(files, 10);
             list.forEach(fl -> {
+                parsedDataNum.set(parsedDataNum.get() + fl.size());
+                var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
                 var fileBOS = uploadFileList(userId, rootPath, tempPath, fl);
                 createUploadThumbnail(userId, fileBOS, rootPath);
                 fileBOS.forEach(fileBO -> {
@@ -479,7 +535,11 @@ public class DataInfoUseCase {
                     saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
                 }
             });
+            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
+            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
         } else {
+            var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
+            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
             log.error("Image compressed package is empty,dataset id:{},filePath:{}", datasetId, dataInfoUploadBO.getFileUrl());
         }
     }
@@ -616,13 +676,35 @@ public class DataInfoUseCase {
     private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var path = removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var path = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
         var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
         var savePath = baseSavePath + FileUtil.getName(path);
         FileUtil.mkParentDirs(savePath);
         //将压缩包下载到本地
         log.info("Get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
-        HttpUtil.downloadFileFromUrl(fileUrl, savePath);
+        HttpUtil.downloadFileFromUrl(fileUrl, FileUtil.newFile(savePath), new StreamProgress() {
+            @Override
+            public void start() {
+                uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOADING, null);
+            }
+
+            @Override
+            public void progress(long total, long progressSize) {
+                if (progressSize % 1000 == 0 || total == progressSize) {
+                    var uploadRecord = UploadRecord.builder()
+                            .id(dataInfoUploadBO.getUploadRecordId())
+                            .status(DOWNLOADING)
+                            .totalFileSize(total)
+                            .downloadedFileSize(progressSize).build();
+                    uploadRecordDAO.updateById(uploadRecord);
+                }
+            }
+
+            @Override
+            public void finish() {
+                uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOAD_COMPLETED, null);
+            }
+        });
         log.info("Get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
         dataInfoUploadBO.setSavePath(savePath);
         dataInfoUploadBO.setBaseSavePath(baseSavePath);
@@ -1091,19 +1173,6 @@ public class DataInfoUseCase {
             }
         });
         return pointCloudList;
-    }
-
-    /**
-     * Remove url parameter
-     *
-     * @param fileUrl File url
-     * @return File url
-     */
-    private String removeUrlParameter(String fileUrl) {
-        if (fileUrl.contains("?")) {
-            fileUrl = fileUrl.substring(0, fileUrl.indexOf("?"));
-        }
-        return fileUrl;
     }
 
     /**

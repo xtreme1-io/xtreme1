@@ -21,7 +21,6 @@ spring:
     port: 6379
     password:
 
-
 jwt:
   secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
   issuer: BasicAI
@@ -44,10 +43,17 @@ export:
     version: basic.ai/v1
 
 minio:
-  endpoint: http://minio/
+  endpoint: http://minio:9000/
   accessKey: admin
   secretKey: 1tQB970y
   bucketName: x1-community
+
+model:
+  arithmetic:
+    preModel:
+      url: http://pcdet-open.basicai-algorithm/pointcloud/3dbox
+    image80:
+      url: http://yolor-detection-coco80.basicai-algorithm/basic_predict
 
 management:
   endpoint:

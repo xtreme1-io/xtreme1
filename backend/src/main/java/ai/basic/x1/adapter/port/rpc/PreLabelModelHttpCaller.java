@@ -9,6 +9,7 @@ import cn.hutool.core.lang.TypeReference;
 import cn.hutool.http.*;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,8 +18,8 @@ import java.util.List;
 @Slf4j
 public class PreLabelModelHttpCaller {
 
-
-    private static final String preModelUrl = "http://nlb.alidev.beisai.com:9503/pointcloud/3dbox";
+    @Value("${model.arithmetic.preModel.url}")
+    private String preModelUrl;
 
 
     public ApiResult<List<PreModelRespDTO>> callPreLabelModel(PreModelReqDTO preModelReqDTO) {
@@ -33,7 +34,7 @@ public class PreLabelModelHttpCaller {
             log.info(String.format("call trackingModelService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
             if (httpResponse.getStatus() == HttpStatus.HTTP_OK) {
                 ApiResult<List<PreModelRespDTO>> apiResult = JSONUtil.toBean(httpResponse.body(), new TypeReference<>() {
-                },false);
+                }, false);
                 return apiResult;
             } else {
                 throw new UsecaseException("preLabelModel run error!");

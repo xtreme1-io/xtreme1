@@ -95,3 +95,7 @@ spec:
                   number: 80
             path: /api(/|$)(.*)
             pathType: Prefix
+  tls:
+    - hosts:
+        - x1-community.alidev.beisai.com
+      secretName: alidev.beisai.com

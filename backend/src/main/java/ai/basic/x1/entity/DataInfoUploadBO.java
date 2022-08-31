@@ -46,4 +46,6 @@ public class DataInfoUploadBO {
 
     private String baseSavePath;
 
+    private Long uploadRecordId;
+
 }

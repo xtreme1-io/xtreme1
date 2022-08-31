@@ -3,17 +3,21 @@ package ai.basic.x1.adapter.dto.request;
 import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * @author chenchao
+ * @date 2022/8/26
+ */
 @Data
-@SuperBuilder(toBuilder = true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ObjectResultDTO {
@@ -48,7 +52,7 @@ public class ObjectResultDTO {
         private Long id;
 
         /**
-         * 保存时前端传的唯一id
+         * The unique id passed by the frontend when saving
          */
         private String frontId;
 

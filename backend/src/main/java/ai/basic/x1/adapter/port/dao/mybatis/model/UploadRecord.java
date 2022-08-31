@@ -1,6 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
-import ai.basic.x1.entity.enums.ExportStatusEnum;
+import ai.basic.x1.entity.enums.UploadStatusEnum;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,70 +11,73 @@ import java.time.OffsetDateTime;
 
 /**
  * @author fyb
- * @date 2022-04-21 11:48:13
+ * @date 2022-08-30 15:14:37
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(autoResultMap = true)
-public class ExportRecord {
+public class UploadRecord {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 流水号
+     * Serial number
      */
     private Long serialNumber;
-
     /**
-     * 文件ID
+     * File url
      */
-    private Long fileId;
-
+    private String fileUrl;
     /**
-     * 文件名称
+     * File name
      */
     private String fileName;
-
     /**
-     * 状态(UNSTARTED:未开始,GENERATING:生成中,COMPLETED:已完成,FAILED:失败)
+     * Error information
      */
-    private ExportStatusEnum status;
-
+    private String errorMessage;
     /**
-     * 已生成数量
+     * Total file size
      */
-    private Integer generatedNum;
-
+    private Long totalFileSize;
     /**
-     * 总数
+     * Downloaded file size
      */
-    private Integer totalNum;
-
-
+    private Long downloadedFileSize;
     /**
-     * 创建时间
+     * The total number of data
+     */
+    private Long totalDataNum;
+    /**
+     * Number of parsed data
+     */
+    private Long parsedDataNum;
+    /**
+     * Upload status
+     */
+    private UploadStatusEnum status;
+    /**
+     * Creation time
      */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
-
     /**
-     * 创建人ID
+     * Creator ID
      */
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
-
     /**
-     * 更新时间
+     * Update time
      */
     @TableField(fill = FieldFill.UPDATE)
     private OffsetDateTime updatedAt;
-
     /**
-     * 更改人ID
+     * Change person ID
      */
     @TableField(fill = FieldFill.UPDATE)
     private Long updatedBy;
+
 }

@@ -2,11 +2,6 @@ version: '3.9'
 services:
   nginx:
     image: nginx:1.22
-    environment:
-      MYSQL_ROOT_PASSWORD: ImOxO8Lz
-      MYSQL_DATABASE: x1_community
-      MYSQL_USER: x1_community
-      MYSQL_PASSWORD: Rc4K3L6f
     ports:
       - 8190:80
     volumes:

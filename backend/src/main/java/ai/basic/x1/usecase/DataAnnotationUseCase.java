@@ -2,8 +2,12 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.DataAnnotationDAO;
+import ai.basic.x1.adapter.port.dao.DataEditDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotation;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
 import ai.basic.x1.entity.DataAnnotationBO;
+import ai.basic.x1.usecase.exception.UsecaseCode;
+import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -26,15 +30,15 @@ public class DataAnnotationUseCase {
     @Autowired
     private DataAnnotationDAO dataAnnotationDAO;
 
-//
-//    @Autowired
-//    private DataEditDAO dataEditDAO;
+
+    @Autowired
+    private DataEditDAO dataEditDAO;
 
     /**
-     * 查询classifications标注结果
+     * query classifications annotation results
      *
-     * @param dataIds 数据ID集合
-     * @return 数据标注集合
+     * @param dataIds data id list
+     * @return annotate result list
      */
     public List<DataAnnotationBO> findByDataIds(Collection<Long> dataIds) {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotation.class);
@@ -43,21 +47,21 @@ public class DataAnnotationUseCase {
     }
 
     /**
-     * 查询出所有保存的dataAnnotation，用classificationid去匹配，如果匹配上了就更新，没有就插入
+     * for one data and one classiofication, it can only have one record, so query all saved dataAnnotations,
+     * use classification id to match, if they match, update, if not, insert
      *
-     * @param dataAnnotationBOs 输入的数据
+     * @param dataAnnotationBOs records that need save
      */
     @Transactional(rollbackFor = Exception.class)
     public void saveDataAnnotation(List<DataAnnotationBO> dataAnnotationBOs) {
 
-//        checkPermission(dataAnnotationBOs);
+        checkPermission(dataAnnotationBOs);
 
         if (ObjectUtil.isEmpty(dataAnnotationBOs)) {
             return;
         }
         Set<Long> dataIds = dataAnnotationBOs.stream().map(DataAnnotationBO::getDataId).collect(Collectors.toSet());
         List<DataAnnotationBO> oldInfos = findByDataIds(dataIds);
-
         dataAnnotationBOs.forEach(bo -> {
             bo.setCreatedAt(OffsetDateTime.now());
             bo.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
@@ -79,23 +83,24 @@ public class DataAnnotationUseCase {
         dataAnnotationDAO.getBaseMapper().mysqlInsertOrUpdateBatch(DefaultConverter.convert(dataAnnotationBOs, DataAnnotation.class));
 
         Set<Long> oldIds = oldInfos.stream().map(DataAnnotationBO::getId).collect(Collectors.toSet());
-        //获得原数据和新数据对比，新数据中没有的就删除，该方法的作用是获取差集
+        // Obtain the comparison between the original data and the new data,
+        // and delete what is not in the new data. The function of this method is to obtain the difference set
         oldIds.removeIf(annotationIds::contains);
         dataAnnotationDAO.removeBatchByIds(oldIds);
     }
 
-//    private void checkPermission(List<DataAnnotationBO> dataAnnotationBOs) {
-//        Set<Long> lockedDataIdList = getLockedDataIdList(RequestContextHolder.getContext().getUserInfo().getId());
-//        Set<Long> dataIds = dataAnnotationBOs.stream().map(DataAnnotationBO::getDataId).collect(Collectors.toSet());
-//        if (!lockedDataIdList.containsAll(dataIds)) {
-//            throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
-//        }
-//    }
+    private void checkPermission(List<DataAnnotationBO> dataAnnotationBOs) {
+        Set<Long> lockedDataIdList = getLockedDataIdList(RequestContextHolder.getContext().getUserInfo().getId());
+        Set<Long> dataIds = dataAnnotationBOs.stream().map(DataAnnotationBO::getDataId).collect(Collectors.toSet());
+        if (!lockedDataIdList.containsAll(dataIds)) {
+            throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
+        }
+    }
 
-//    public Set<Long> getLockedDataIdList(@NotNull Long userId){
-//        var dataEditQueryWrapper = Wrappers.lambdaQuery(DataEdit.class)
-//                .eq(DataEdit::getCreatedBy, userId);
-//        List<DataEdit> dataEdits = dataEditDAO.list(dataEditQueryWrapper);
-//        return dataEdits.stream().map(DataEdit::getDataId).collect(Collectors.toSet());
-//    }
+    public Set<Long> getLockedDataIdList(Long userId) {
+        var dataEditQueryWrapper = Wrappers.lambdaQuery(DataEdit.class)
+                .eq(DataEdit::getCreatedBy, userId);
+        List<DataEdit> dataEdits = dataEditDAO.list(dataEditQueryWrapper);
+        return dataEdits.stream().map(DataEdit::getDataId).collect(Collectors.toSet());
+    }
 }

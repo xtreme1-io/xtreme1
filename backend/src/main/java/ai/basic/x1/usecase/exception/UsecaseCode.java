@@ -41,7 +41,10 @@ public enum UsecaseCode {
 
     DATASET_DATA_EXIST_ANNOTATE("DATASET_DATA_EXIST_ANNOTATE", "The selected data has been annotated by others"),
 
-    MODEL_DOES_NOT_EXIST("MODEL_DOES_NOT_EXIST", "Model does not exist");
+    MODEL_DOES_NOT_EXIST("MODEL_DOES_NOT_EXIST", "Model does not exist"),
+    
+    POINT_CLOUD_COMPRESSED_FILE_ERROR("POINT_CLOUD_COMPRESSED_FILE_ERROR", "The format of the compressed package is incorrect. It must contain point_cloud"),
+    COMPRESSED_PACKAGE_EMPTY("COMPRESSED_PACKAGE_EMPTY", "Compressed package is empty");
 
     // Storage
 
