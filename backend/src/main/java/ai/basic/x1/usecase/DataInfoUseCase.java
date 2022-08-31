@@ -313,12 +313,6 @@ public class DataInfoUseCase {
     @Transactional(rollbackFor = RuntimeException.class)
     public Long upload(DataInfoUploadBO dataInfoUploadBO) {
         var uploadRecordBO = uploadUseCase.createUploadRecord(dataInfoUploadBO.getFileUrl());
-        var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
-        var mimeType = FileUtil.getMimeType(fileUrl);
-        if (!validateUrlFileSuffix(dataInfoUploadBO, mimeType)) {
-            uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_FORMAT_ERROR.getMessage());
-            throw new UsecaseException(DATASET_DATA_FILE_FORMAT_ERROR);
-        }
         var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
         if (!boo) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ERROR.getMessage());
@@ -330,6 +324,12 @@ public class DataInfoUseCase {
             throw new UsecaseException(DATASET_NOT_FOUND);
         }
         dataInfoUploadBO.setType(dataset.getType());
+        var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var mimeType = FileUtil.getMimeType(fileUrl);
+        if (!validateUrlFileSuffix(dataInfoUploadBO, mimeType)) {
+            uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_FORMAT_ERROR.getMessage());
+            throw new UsecaseException(DATASET_DATA_FILE_FORMAT_ERROR);
+        }
         dataInfoUploadBO.setUploadRecordId(uploadRecordBO.getId());
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             try {
@@ -408,7 +408,6 @@ public class DataInfoUseCase {
             uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, COMPRESSED_PACKAGE_EMPTY.getMessage());
             throw new UsecaseException(COMPRESSED_PACKAGE_EMPTY);
         }
-
         pointCloudList.forEach(pointCloudFile -> {
             var isError = this.validDirectoryFormat(pointCloudFile.getParentFile(), datasetType);
             if (isError) {
@@ -430,6 +429,7 @@ public class DataInfoUseCase {
                     .isDeleted(false);
             var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                     .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
+            int i = 1;
             for (var dataName : dataNameList) {
                 parsedDataNum.set(parsedDataNum.get() + 1);
                 if (parsedDataNum.get() % 5 == 0) {
@@ -445,16 +445,13 @@ public class DataInfoUseCase {
                     log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
                     var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                     dataInfoBOList.add(dataInfoBO);
-                    if (dataInfoBOList.size() == BATCH_SIZE) {
+                    if (dataInfoBOList.size() % BATCH_SIZE == 0 || i == dataNameList.size()) {
                         var dataInfoBOS = insertBatch(dataInfoBOList);
                         saveBatchDataResult(dataInfoBOS, dataAnnotationObjectBOList);
                         dataInfoBOList.clear();
                     }
+                    i++;
                 }
-            }
-            if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
-                var insertRs = insertBatch(dataInfoBOList);
-                saveBatchDataResult(insertRs, dataAnnotationObjectBOList);
             }
             var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
@@ -510,7 +507,6 @@ public class DataInfoUseCase {
         AtomicReference<Long> parsedDataNum = new AtomicReference<>(0L);
         var uploadRecordBOBuilder = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
-
         if (CollectionUtil.isNotEmpty(files)) {
             //10为一段
             var list = ListUtil.split(files, 10);
