@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
-
 /**
  * @author fyb
  * @date 2022-08-30 15:14:37
@@ -57,15 +55,5 @@ public class UploadRecordDTO {
      * Upload status
      */
     private UploadStatusEnum status;
-
-    /**
-     * Creation time
-     */
-    private OffsetDateTime createdAt;
-
-    /**
-     * Creator ID
-     */
-    private Long createdBy;
 
 }
