@@ -6,8 +6,12 @@ import ai.basic.x1.entity.UploadRecordBO;
 import ai.basic.x1.entity.enums.UploadStatusEnum;
 import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 public class UploadUseCase {
 
@@ -16,7 +20,7 @@ public class UploadUseCase {
 
     public UploadRecordBO createUploadRecord(String fileUrl) {
         var serialNumber = IdUtil.getSnowflakeNextId();
-        var fileName = DecompressionFileUtils.removeUrlParameter(fileUrl);
+        var fileName = FileUtil.getName(DecompressionFileUtils.removeUrlParameter(fileUrl));
         var uploadRecord = UploadRecord.builder()
                 .serialNumber(serialNumber)
                 .fileUrl(fileUrl)
@@ -39,5 +43,18 @@ public class UploadUseCase {
                 .status(uploadStatus)
                 .errorMessage(errorMessage).build();
         uploadRecordDAO.updateById(uploadRecord);
+    }
+
+    /**
+     * Query import records according to serial number
+     *
+     * @param serialNumbers Serial number
+     * @return Import record collection
+     */
+    public List<UploadRecordBO> findBySerialNumbers(List<String> serialNumbers) {
+        var lambdaQueryWrapper = new LambdaQueryWrapper<UploadRecord>();
+        lambdaQueryWrapper.in(UploadRecord::getSerialNumber, serialNumbers);
+        var uploadRecordList = uploadRecordDAO.list(lambdaQueryWrapper);
+        return DefaultConverter.convert(uploadRecordList, UploadRecordBO.class);
     }
 }
