@@ -54,7 +54,7 @@ model:
     preModel:
       url: http://pcdet-open.basicai-algorithm/pointcloud/3dbox
     image80:
-      url: http://pre/basic_predict
+      url: http://image-object-detection.x1-community/basic_predict
 
 management:
   endpoint:
