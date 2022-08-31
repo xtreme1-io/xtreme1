@@ -93,7 +93,7 @@ public class DataInfoController extends DatasetBaseController {
 
     @GetMapping("getAnnotationStatusStatisticsByDatasetId")
     public DatasetStatisticsDTO getAnnotationStatusStatisticsByDatasetId(
-            @NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId) {
+            @NotNull(message = "DatasetId cannot be null") @RequestParam(required = false) Long datasetId) {
         return DefaultConverter.convert(dataInfoUsecase.getDatasetStatisticsByDatasetId(datasetId), DatasetStatisticsDTO.class);
     }
 
