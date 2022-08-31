@@ -31,6 +31,7 @@ const zh: ILocale = {
     'network-error': '网络错误',
     'login-invalid': '登录过期',
     'not-login': '未登录',
+    'retry':'重试',
 
     // msg
     'msg-not-save': '是否保存变更?',

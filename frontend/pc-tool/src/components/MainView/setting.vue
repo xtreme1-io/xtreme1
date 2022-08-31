@@ -1,9 +1,9 @@
 <template>
     <div class="main-view-setting">
-        <div v-show="visible" class="item">
+        <div class="item">
             <label>{{ $$('height-range') }}:</label>
         </div>
-        <div v-show="visible" class="item">
+        <div class="item">
             <a-input-number
                 v-model:value="config.heightRange[0]"
                 size="small"
@@ -11,7 +11,7 @@
                 @blur="onBlur"
                 :formatter="formatter"
                 :min="config.pointInfo.min.z"
-                :max="_max"
+                :max="config.heightRange[1] || config.pointInfo.max.z"
                 :step="0.1"
                 style="width: 60px"
             ></a-input-number>
@@ -22,7 +22,7 @@
                 @change="update"
                 @blur="onBlur"
                 :formatter="formatter"
-                :min="_min"
+                :min="config.heightRange[0] || config.pointInfo.min.z"
                 :max="config.pointInfo.max.z"
                 :step="0.1"
                 style="width: 60px"
@@ -56,10 +56,10 @@
     import * as THREE from 'three';
     import * as _ from 'lodash';
     import * as locale from './lang';
+    import { utils } from 'pc-editor';
     const editor = useInjectEditor();
     const $$ = editor.bindLocale(locale);
     const config = editor.state.config;
-    const visible = ref(true);
     function formatter(value: any) {
         let n = ('' + value).split('.');
         if (n[1] && n[1].length > 1) {
@@ -77,15 +77,6 @@
             heightRange[1] = config.pointInfo.max.z;
         }
     }
-    const _max = computed(() => {
-        return isNaN(config.heightRange[1]) ? config.heightRange[1] : config.pointInfo.max.z;
-    });
-    const _min = computed(() => {
-        return isNaN(config.heightRange[0]) ? config.heightRange[0] : config.pointInfo.min.z;
-    });
-    function onVisible() {
-        visible.value = !visible.value;
-    }
     function onBlur() {
         verify();
         update();
@@ -95,16 +86,18 @@
         config.heightRange[1] = config.pointInfo.max.z;
         update();
     }
-    const update = _.throttle(() => {
+    const update = _.debounce(() => {
         const heightRange = config.heightRange;
         if (isNaN(heightRange[0]) || isNaN(heightRange[1])) return;
         let points = editor.pc.groupPoints.children[0] as THREE.Points;
+        let positions = points.geometry.getAttribute('position') as THREE.BufferAttribute;
         let material = points.material as PointsMaterial;
         let option = {} as any;
         option.heightRange = new THREE.Vector2().fromArray(heightRange);
         material.setUniforms(option);
+        config.pointInfo.vCount = utils.filterPosition(positions, heightRange).length;
         editor.pc.render();
-    });
+    }, 300);
 </script>
 <style lang="less">
     .main-view-setting {

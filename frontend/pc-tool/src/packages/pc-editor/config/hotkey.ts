@@ -16,8 +16,8 @@ const hotkeyConfig: IHotkeyConfig[] = [
     { key: 'ctrl+z', action: 'undo' },
     { key: 'ctrl+shift+z', action: 'redo' },
 
-    { key: 'Alt+right', action: 'copyForward' },
-    { key: 'Alt+left', action: 'copyBackWard' },
+    // { key: 'Alt+right', action: 'copyForward' },
+    // { key: 'Alt+left', action: 'copyBackWard' },
 
     // side view
     // 【AWSD】 以物体行进方向，向后向上向下向前平移结果

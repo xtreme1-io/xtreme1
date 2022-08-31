@@ -1,5 +1,5 @@
 import Editor from '../Editor';
-import { getColorRange, statisticPositionInfo, getColorRangeByArray } from '../utils';
+import { getColorRangeByArray, filterPosition } from '../utils';
 import * as THREE from 'three';
 import { Points, PointsMaterial } from 'pc-render';
 
@@ -67,6 +67,8 @@ export default class ConfigManager {
         pointInfo.max.copy(boundingBox.max);
         config.heightRange[0] = Math.max(config.heightRange[0], pointInfo.min.z);
         config.heightRange[1] = Math.min(config.heightRange[1], pointInfo.max.z);
+
+        pointInfo.vCount = filterPosition(position, config.heightRange).length;
 
         const _ground = config.pointHeight[0];
         if (_ground < pointInfo.min.z || _ground > pointInfo.max.z) {

@@ -8,7 +8,7 @@
                         :class="item.isActive(editor) ? 'item active' : 'item'"
                         :style="item.getStyle ? item.getStyle(editor) : ''"
                         @click="onTool(item.action)"
-                        :title="item.title"
+                        :title="item.title($$)"
                     >
                         <i :class="item.getIcon(editor)"></i>
                         <span class="msg" v-show="item.hasMsg && item.hasMsg(editor)">+</span>
@@ -41,8 +41,10 @@
     import useTool from './useTool';
     import { useInjectEditor } from '../../state';
     import { StatusType } from 'pc-editor';
+import * as locale from './lang';
 
     let editor = useInjectEditor();
+    let $$ = editor.bindLocale(locale);
 
     let { tools, onTool } = useTool();
 </script>
