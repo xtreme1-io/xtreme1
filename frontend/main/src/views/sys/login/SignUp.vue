@@ -45,6 +45,12 @@
           </FormItem>
         </div>
 
+        <div class="mt-7">
+          <FormItem name="subscribe" label="" class="enter-x">
+            <Checkbox v-model:checked="subscribe">Subscribe newsletter from us</Checkbox>
+          </FormItem>
+        </div>
+
         <FormItem class="box enter-x">
           <Button
             :size="ButtonSize.LG"
@@ -74,13 +80,14 @@
 </template>
 <script lang="ts" setup>
   import { reactive, ref, unref, computed, onMounted } from 'vue';
-  import { Form, Input } from 'ant-design-vue';
+  import { Form, Input, Checkbox } from 'ant-design-vue';
   import { ButtonSize } from '/@@/Button/typing';
   import Button from '/@@/Button/index.vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { signUpApi } from '/@/api/sys/user';
   import { useUserStore } from '/@/store/modules/user';
+  import mixpanel from 'mixpanel-browser';
   const InputPassword = Input.Password;
 
   const { setLoginState, getLoginState, setLoginErrorState } = useLoginState();
@@ -88,7 +95,7 @@
   const formRef = ref();
   const loading = ref(false);
   const isSuccess = ref(false);
-
+  const subscribe = ref(false);
   const { t } = useI18n();
   const userStore = useUserStore();
   const FormItem = Form.Item;
@@ -118,9 +125,12 @@
       const res = await signUpApi({
         ...formData,
       });
+      if (subscribe.value) {
+        mixpanel.track('signUp', formData);
+      }
       userStore.setToken(res.token);
       // isSuccess.value = true;
-      userStore.afterLoginAction();
+      userStore.afterLoginAction(true);
     } catch (error) {
       console.log(error);
       if ((error as unknown as any).message.includes('account')) {

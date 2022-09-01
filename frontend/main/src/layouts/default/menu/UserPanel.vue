@@ -43,6 +43,7 @@
   import { useUserStore } from '/@/store/modules/user';
   import { useGo } from '/@/hooks/web/usePage';
   import { RouteEnum } from '/@/enums/routeEnum';
+  import { Popover } from 'ant-design-vue';
   const userStore = useUserStore();
   const { prefixCls } = useDesign('user-panel');
   const { t } = useI18n();
