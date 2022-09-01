@@ -32,7 +32,7 @@
             <a-row>
                 <a-col :span="12">{{ $$('info_pointall') }}： {{ config.pointInfo.count }}</a-col>
                 <a-col :span="12"
-                    >{{ $$('info_pointvisible') }}： {{ config.pointInfo.count }}</a-col
+                    >{{ $$('info_pointvisible') }}： {{ config.pointInfo.vCount }}</a-col
                 >
             </a-row>
         </div>

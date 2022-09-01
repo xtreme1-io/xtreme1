@@ -292,7 +292,7 @@ export default function useInstance() {
                 visible: obj.visible,
                 isModel: !!userData.modelClass,
                 // hasAnnotation: !!annotationMap.value[uuid],
-                invisible: !!userData.invisibleFlag,
+                // invisible: !!userData.invisibleFlag,
                 active: [],
             };
 

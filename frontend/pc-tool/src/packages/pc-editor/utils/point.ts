@@ -101,6 +101,18 @@ export function getMiniBox(transform: Required<ITransform>, positions: THREE.Buf
 
     // return newBox;
 }
+export function filterPosition(positions: THREE.BufferAttribute, zRange: [number, number]) {
+    let filterPosition = [];
+    for (let i = 0; i < positions.count; i++) {
+        let x = positions.getX(i);
+        let y = positions.getY(i);
+        let z = positions.getZ(i);
+        if (z <= zRange[1] && z >= zRange[0]) {
+            filterPosition.push(new THREE.Vector3(x, y, z));
+        }
+    }
+    return filterPosition;
+}
 export function getMiniBox1(
     transform: Required<ITransform>,
     positions: THREE.BufferAttribute,

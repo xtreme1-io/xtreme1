@@ -133,7 +133,7 @@ export default class SideRenderView extends Render {
                 this.enableFit
             ) {
                 this.fitObject();
-                // this.render();
+                this.render();
             }
         });
     }
@@ -231,7 +231,7 @@ export default class SideRenderView extends Render {
         this.updateCameraProject();
         // this._render();
         // this.updateDom();
-        this.render();
+        // this.render();
     }
 
     updateCameraProject() {

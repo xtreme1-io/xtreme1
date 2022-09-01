@@ -10,8 +10,8 @@ X1 for community, free and open source, powered by [Basic AI](https://www.basic.
 
 | Layer | Component | Description |
 | --- | --- | --- |
-| Application Services | Frontend | Web user interface, written in Vue3 and Typescript. |
-| Application Services | Backend | Data API for managing user, dataset, annotation object etc., written in Java and Spring Boot. |
+| Application Services | Web Frontend | Web user interface, written in Vue3 and Typescript. |
+| Application Services | API Backend | Data API for managing user, dataset, annotation object etc., written in Java and Spring Boot. |
 | Application Services | Image Object Detection | AI auto detect objects in image, written in Python and PyTorch. |
 | Application Services | Point Cloud Object Detection | AI auto detect objects in point cloud, written in Python and PyTorch. |
 | Base Services | MySQL | Relational database for storing business data. |
@@ -56,9 +56,9 @@ docker compose down
 docker compose down -v
 ```
 
-It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `basicai/x1-community-backend`, `basicai/x1-community-frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`, for example, you can access MinIO console at `http://localhost:8194`. We use Docker volume to save data, so you won't lose any data bwtween container recreating.
+It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `basicai/x1-community-backend`, `basicai/x1-community-frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
-After successfully started all services, you need to manually create a bucket named `x1-community` through MinIO console, the bucket name should be the same to `minio.bucketName` in `backend` service's configurtion file `backend/src/main/resouces/application.yml`.
+After successfully started all services, you can open `http://localhost:8190` to access web frontend, and access MinIO console at `http://localhost:8194`.
 
 > Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
 

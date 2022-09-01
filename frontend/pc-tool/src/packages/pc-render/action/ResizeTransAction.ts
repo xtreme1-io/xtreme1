@@ -5,7 +5,6 @@ import { ITransform, AnnotateType } from '../type';
 import { Event } from '../config';
 import { Box } from '../objects';
 import { IRectEvent, RectTool, ClearHandler } from '../common/BasicSvg';
-import View3D from '../renderView/renderGroup/View3D';
 
 // type DragHandler = (offsetLocal: THREE.Vector3, offsetCamera: THREE.Vector2) => ITransform | null;
 // type ClearHandler = () => void;
@@ -42,8 +41,8 @@ export default class ResizeTransAction extends Action {
         moveCanvas: true,
     };
 
-    renderView: SideRenderView | View3D;
-    constructor(renderView: SideRenderView | View3D) {
+    renderView: SideRenderView;
+    constructor(renderView: SideRenderView) {
         super();
         this.renderView = renderView;
         this.rectTool = new RectTool(renderView.container);
@@ -231,16 +230,11 @@ export default class ResizeTransAction extends Action {
     }
     updateChange(data: ITransform | null, type: 'move' | 'side' | 'corner' | 'rotation') {
         if (!data) return;
-        if (this.renderView instanceof View3D) {
-            this.renderView.updateObjectTransform(this.renderView.object as any, data);
-        } else {
-            this.renderView.pointCloud.updateObjectTransform(this.renderView.object as any, data);
-        }
+        this.renderView.pointCloud.updateObjectTransform(this.renderView.object as any, data);
         this.renderView.updateProjectRect();
     }
     render() {
-        if (this.renderView instanceof View3D) this.renderView.group.render();
-        else if (this.renderView instanceof SideRenderView) this.renderView.pointCloud.render();
+        this.renderView.pointCloud.render();
     }
     updateEnd() {
         if (this.renderView.enableFit) {
@@ -293,6 +287,7 @@ export default class ResizeTransAction extends Action {
                 last.set(e.clientX, e.clientY);
             }
             function onDocUp() {
+                renderView.enableFit = true;
                 document.removeEventListener('mousemove', onDocMove);
                 document.removeEventListener('mouseup', onDocUp);
             }

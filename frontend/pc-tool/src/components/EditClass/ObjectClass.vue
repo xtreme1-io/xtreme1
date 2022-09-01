@@ -2,7 +2,7 @@
     <div class="sub-header">{{ $$('class-title') }}</div>
     <div class="class-list">
         <!-- :getPopupContainer="(node:HTMLElement)=>node.parentNode" -->
-        <SelectClass
+        <!-- <SelectClass
             ref="select"
             :attr="{
                 size: 'small',
@@ -10,7 +10,20 @@
             }"
             @change="onClassChange"
             v-model:value="iState.classType"
-        />
+        /> -->
+
+        <div class="classType-tag-container">
+            <a-tag
+                class="classType-tag"
+                @click="() => onClassChange(item.name, item)"
+                v-for="item in editor.state.classTypes"
+                :style="style(item)"
+                :key="item.name"
+            >
+                {{ item.label }}
+            </a-tag>
+        </div>
+
         <span class="class-help" v-show="classInfo">
             <QuestionCircleOutlined />
             <div class="class-info">{{ classInfo }}</div>
@@ -44,6 +57,19 @@
     import { QuestionCircleOutlined } from '@ant-design/icons-vue';
 
     let { formatNumStr: format } = utils;
+
+    function style(item: IClassType) {
+        return item.name === iState.classType
+            ? {
+                  backgroundColor: '#177ddc',
+                  color: '#ffffff',
+              }
+            : {
+                  borderColor: item.color,
+                  color: item.color,
+                  backgroundColor: 'transparent',
+              };
+    }
 
     interface IOption {
         label: string;
@@ -93,7 +119,7 @@
         },
     );
 
-    function onClassChange(value: any, item: IOption) {
+    function onClassChange(value: any, item: any) {
         editor.blurPage();
 
         let classConfig = editor.state.classTypes.find((e) => e.name === value) as IClassType;
@@ -174,6 +200,9 @@
 </script>
 
 <style lang="less" scoped>
+    .classType-tag{
+        margin-bottom: 8px;
+    }
     .class-label {
         display: inline-block;
         width: 200px;

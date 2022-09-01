@@ -9,7 +9,7 @@ export * from './config/type';
 export type { IState } from './state';
 export * from './uitype';
 
-export type { IMergeCodeData, IMergeStatus } from './common/TrackManager';
+// export type { IMergeCodeData, IMergeStatus } from './common/TrackManager';
 
 export enum AttrType {
     RADIO = 'RADIO',
@@ -186,6 +186,7 @@ export interface IAnnotationInfo {
 
 export interface IPointInfo {
     count: number;
+    vCount:number;
     min: Vector3;
     max: Vector3;
     hasIntensity: boolean;
