@@ -10,7 +10,7 @@
     "serve": "npm run dev",
     "dev": "vite",
     "test": "vite --mode test ",
-    "build": "vite build --config vite-build.config.ts",
+    "build": "cross-env NODE_ENV=production vite build && esno ./build/script/postBuild.ts",
     "type:check": "vue-tsc --noEmit --skipLibCheck",
     "preview": "vite preview",
     "clean:cache": "rimraf node_modules/.cache/ && rimraf node_modules/.vite",
@@ -135,9 +135,6 @@
     "vite-plugin-windicss": "^1.4.12",
     "vue-eslint-parser": "^8.0.1",
     "vue-tsc": "^0.28.10"
-  },
-  "optionalDependencies": {
-    "esbuild-darwin-arm64": "^0.15.1"
   },
   "resolutions": {
     "//": "Used to install imagemin dependencies, because imagemin may not be installed in China. If it is abroad, you can delete it",

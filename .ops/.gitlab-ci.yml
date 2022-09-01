@@ -38,9 +38,9 @@ build-frontend-package:
     # - cd ../image-tool
     # - npm install
     # - npm run build
-    # - cd ../pc-tool
-    # - npm install
-    # - npm run build
+    - cd ../pc-tool
+    - npm install
+    - npm run build
   artifacts:
     paths:
       - frontend/$FRONTEND_PACKAGE_DIR
