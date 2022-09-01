@@ -28,14 +28,14 @@ export function view(): IPageHandler {
 
         editor.showLoading(true);
         try {
-            await loadUserInfo();
+            // await loadUserInfo();
             await Promise.all([loadDateSetClassification(), loadClasses(), loadDataInfo()]);
 
             // 连续帧 需要加载所有的数据
-            if (state.isSeriesFrame) {
-                await editor.loadManager.loadAllObjects();
-                await editor.loadManager.loadAllClassification();
-            }
+            // if (state.isSeriesFrame) {
+            //     await editor.loadManager.loadAllObjects();
+            //     await editor.loadManager.loadAllClassification();
+            // }
 
             await editor.loadFrame(0, false);
         } catch (error: any) {
@@ -48,14 +48,14 @@ export function view(): IPageHandler {
     async function loadDataInfo() {
         let { query } = editor.bsState;
 
-        let dataId = query.dataId;
-        if (query.dataType === 'frame') {
-            // 连续帧
-            editor.state.isSeriesFrame = true;
-            await loadDataFromFrameSeries(dataId);
-        } else {
-            createSingleData();
-        }
+        // let dataId = query.dataId;
+        // if (query.dataType === 'frame') {
+        //     // 连续帧
+        //     editor.state.isSeriesFrame = true;
+        //     await loadDataFromFrameSeries(dataId);
+        // } else {
+        // }
+        createSingleData();
     }
 
     function createSingleData() {
