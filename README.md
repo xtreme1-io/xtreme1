@@ -59,9 +59,13 @@ It is recommended to use Compose V2 and the new `docker compose` command, not th
 
 > Docker Desktop(Mac, Win, Linux) will auto install Docker Compose. If you are on Linux server, you can install Docker Compose plugin following this article [Install Docker Compose CLI plugin](https://docs.docker.com/compose/install/compose-plugin/).
 
-Run the following command to manage services of X1, each service running in a docker container.
+Run the following command to clone repository and start all services of X1, each service running in a docker container.
 ```bash
+# Clone repository
+git clone https://github.com/basicai/x1.git
+
 # Start in forground.
+cd x1
 docker compose up
 
 # Or add -d option to run in background.
