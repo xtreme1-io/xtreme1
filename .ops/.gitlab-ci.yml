@@ -27,8 +27,6 @@ build-frontend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/*
-        - .ops/**/*
         - frontend/*
         - frontend/**/*
   script:
@@ -57,8 +55,6 @@ build-backend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/*
-        - .ops/**/*
         - backend/*
         - backend/**/*
   variables:
@@ -81,22 +77,16 @@ build-deploy-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/*
-        - .ops/**/*
-        - backend/*
-        - backend/**/*
+        - deploy/*
+        - deploy/**/*
+        - docker-compose.yml
   variables:
-    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"
-    MAVEN_ARGS: "--batch-mode"
+    DEPLOY_PACKAGE_NAME: "${APP_NAME}-${APP_VERSION}-${CI_COMMIT_REF_NAME}.tar.gz"
   script:
-    - cd backend
-    - mvn $MAVEN_ARGS package
+    - tar zcvf $DEPLOY_PACKAGE_NAME --transform 's,^,'"$APP_NAME"'/,' deploy docker-compose.yml
   artifacts:
     paths:
-      - backend/target/$BACKEND_PACKAGE_NAME
-  cache:
-    paths:
-      - backend/.m2/repository
+      - $DEPLOY_PACKAGE_NAME
 
 .build-image:
   stage: build-image
@@ -129,8 +119,7 @@ build-backend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/*
-        - .ops/**/*
+        - .ops/backend.*
         - backend/*
         - backend/**/*
   variables:
@@ -148,8 +137,7 @@ build-frontend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/*
-        - .ops/**/*
+        - .ops/frontend.*
         - frontend/*
         - frontend/**/*
   variables:
@@ -167,8 +155,7 @@ build-image-object-detection-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/*
-        - .ops/**/*
+        - .ops/image-object-detection.*
         - model/image-object-detection/*
         - model/image-object-detection/**/*
   variables:
@@ -195,8 +182,7 @@ deploy-backend-to-alidev:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/*
-        - .ops/**/*
+        - .ops/alidev/backend-*
         - backend/*
         - backend/**/*
   variables:
@@ -211,8 +197,7 @@ deploy-frontend-to-alidev:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/*
-        - .ops/**/*
+        - .ops/alidev/frontend-*
         - frontend/*
         - frontend/**/*
   variables:
@@ -222,18 +207,17 @@ deploy-frontend-to-alidev:
     - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
     - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
 
-deploy-model-to-alidev:
+deploy-image-object-detection-to-alidev:
   extends: .deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/*
-        - .ops/**/*
-        - model/*
-        - model/**/*
+        - .ops/alidev/image-object-detection-*
+        - model/image-object-detection/*
+        - model/image-object-detection/**/*
   variables:
     ENV: alidev
-    DEPLOYMENT: model-deployment.yml
+    DEPLOYMENT: image-object-detection-deployment.yml
   script:
     - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' $DEPLOYMENT
     - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
@@ -243,8 +227,7 @@ deploy-backend-to-alitest:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/*
-        - .ops/**/*
+        - .ops/alitest/backend-*
         - backend/*
         - backend/**/*
   when: manual
@@ -260,8 +243,7 @@ deploy-frontend-to-alitest:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/*
-        - .ops/**/*
+        - .ops/alitest/frontend-*
         - frontend/*
         - frontend/**/*
   when: manual
@@ -272,19 +254,18 @@ deploy-frontend-to-alitest:
     - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
     - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING
 
-deploy-model-to-alitest:
+deploy-image-object-detection-to-alitest:
   extends: .deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/*
-        - .ops/**/*
-        - model/*
-        - model/**/*
+        - .ops/alitest/image-object-detection-*
+        - model/image-object-detection/*
+        - model/image-object-detection/**/*
   when: manual
   variables:
     ENV: alitest
-    DEPLOYMENT: model-deployment.yml
+    DEPLOYMENT: image-object-detection-deployment.yml
   script:
     - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' $DEPLOYMENT
     - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING
