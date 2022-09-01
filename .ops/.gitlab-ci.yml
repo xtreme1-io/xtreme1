@@ -25,7 +25,7 @@ build-frontend-package:
   tags:
     - nodejs-16
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
         - .ops/*
         - .ops/**/*
@@ -55,7 +55,7 @@ build-backend-package:
   tags:
     - openjdk-11
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
         - .ops/*
         - .ops/**/*
@@ -103,7 +103,7 @@ build-backend-package:
 build-backend-image:
   extends: .build-image
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
         - .ops/*
         - .ops/**/*
@@ -122,7 +122,7 @@ build-backend-image:
 build-frontend-image:
   extends: .build-image
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
         - .ops/*
         - .ops/**/*
@@ -141,7 +141,7 @@ build-frontend-image:
 build-image-object-detection-image:
   extends: .build-image
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "test" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
         - .ops/*
         - .ops/**/*
@@ -217,12 +217,13 @@ deploy-model-to-alidev:
 deploy-backend-to-alitest:
   extends: .deploy
   rules:
-    - if: $CI_COMMIT_BRANCH == "test"
+    - if: $CI_COMMIT_BRANCH == "dev"
       changes:
         - .ops/*
         - .ops/**/*
         - backend/*
         - backend/**/*
+  when: manual
   variables:
     ENV: alitest
     DEPLOYMENT: backend-deployment.yml
@@ -233,12 +234,13 @@ deploy-backend-to-alitest:
 deploy-frontend-to-alitest:
   extends: .deploy
   rules:
-    - if: $CI_COMMIT_BRANCH == "test"
+    - if: $CI_COMMIT_BRANCH == "dev"
       changes:
         - .ops/*
         - .ops/**/*
         - frontend/*
         - frontend/**/*
+  when: manual
   variables:
     ENV: alitest
     DEPLOYMENT: frontend-deployment.yml
@@ -249,12 +251,13 @@ deploy-frontend-to-alitest:
 deploy-model-to-alitest:
   extends: .deploy
   rules:
-    - if: $CI_COMMIT_BRANCH == "test"
+    - if: $CI_COMMIT_BRANCH == "dev"
       changes:
         - .ops/*
         - .ops/**/*
         - model/*
         - model/**/*
+  when: manual
   variables:
     ENV: alitest
     DEPLOYMENT: model-deployment.yml
