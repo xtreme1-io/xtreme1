@@ -37,10 +37,6 @@ export { default as RenderView } from './renderView/Render';
 export { default as MainRenderView } from './renderView/MainRenderView';
 export { default as SideRenderView } from './renderView/SideRenderView';
 export { default as Image2DRenderView } from './renderView/Image2DRenderView';
-export { default as Group3DView } from './renderView/renderGroup/Group3DView';
-export { default as Group2DView } from './renderView/renderGroup/Group2DView';
-export { default as View3D } from './renderView/renderGroup/View3D';
-export { default as View2D } from './renderView/renderGroup/View2D';
 
 export { default as PointsMaterial } from './material/PointsMaterial';
 export { default as PCDLoader } from './loader/PCDLoader';

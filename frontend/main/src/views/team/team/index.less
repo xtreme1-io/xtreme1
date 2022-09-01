@@ -1,0 +1,126 @@
+@prefix-cls: ~'@{namespace}-team';
+.@{prefix-cls} {
+  background: white;
+  padding: 20px;
+  height: 100%;
+
+  .actionSelect {
+    position: relative;
+    padding: 6px 16px;
+    display: inline-block;
+    border: 1px solid #57ccef;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: #fff;
+    :global(.action-item) {
+      display: inline-flex;
+      align-items: center;
+    }
+    .label {
+      color: #57ccef;
+      .count {
+        display: inline-block;
+        margin-right: 4px;
+      }
+    }
+    .list {
+      position: absolute;
+      left: 10px;
+      top: 100%;
+      width: 100%;
+
+      .item {
+        background: #fff;
+      }
+    }
+  }
+
+  .team-info {
+    background: #e6f7fd;
+    border-radius: 20px;
+    padding: 10px;
+    margin-bottom: 10px;
+    .team-info-wrapper {
+      background: white;
+      border-radius: 20px;
+      padding: 15px 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+  .member-content {
+    display: flex;
+    .table {
+      flex: 1;
+      max-width: 100%;
+    }
+    .sider {
+      width: 220px;
+      margin: 20px;
+      margin-right: 0;
+      border: 1px solid #eaecf0;
+      box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+    }
+  }
+  :global(.add-text) {
+    font-size: 14px;
+    color: @primary-color;
+    vertical-align: middle;
+  }
+
+  :global(.add-icon) {
+    cursor: pointer;
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border-radius: 6px;
+    background: #e6f7fd;
+    line-height: 20px;
+    vertical-align: middle;
+    font-size: 20px;
+  }
+
+  .table-title {
+    font-size: 20px;
+    vertical-align: middle;
+  }
+
+  .add-icon {
+    cursor: pointer;
+    vertical-align: middle;
+    margin-left: 10px;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    border-radius: 6px;
+    background: #e6f7fd;
+    line-height: 24px;
+  }
+  .approve-title {
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  :deep(.ant-tabs) {
+    .ant-tabs-nav {
+      color: #aaa;
+      .ant-tabs-tab-active {
+        background: linear-gradient(135deg, #57ccef 0%, #86e5c9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+        &:hover {
+          color: transparent !important;
+        }
+      }
+      .ant-tabs-tab {
+        &:hover {
+          color: #aaa;
+        }
+      }
+    }
+  }
+}

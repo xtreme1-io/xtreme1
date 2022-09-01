@@ -30,6 +30,7 @@ const en = {
     'network-error': 'Network Error',
     'login-invalid': 'Login Invalid',
     'not-login': 'Not logged in',
+    'retry':'retry',
 
     // msg
     'msg-not-save': "You didn't save changes?",

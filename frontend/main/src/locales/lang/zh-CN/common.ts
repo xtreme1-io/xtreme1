@@ -1,0 +1,57 @@
+export default {
+  okText: '确认',
+  closeText: '关闭',
+  cancelText: '取消',
+  loadingText: '加载中...',
+  saveText: '保存',
+  delText: '删除',
+  resetText: '重置',
+  renameText: '重命名',
+  searchText: '搜索',
+  queryText: '查询',
+  editText: '编辑',
+  nameText: '名字',
+  confirmText: '确认',
+  addText: '添加',
+  removeText: '移除',
+  rejectText: '拒绝',
+  approveText: '同意',
+  mailText: '邮箱',
+  createText: '创建',
+  doneText: '完成',
+  imageText: '图片',
+  newName: '新名字',
+  allText: '全部',
+  submitText: '提交',
+  publishText: '发布',
+  runText: '运行',
+  sendText: '发送',
+
+  filterText: '过滤',
+  continueText: '继续',
+  urlText: '链接',
+
+  inputText: '请输入',
+  chooseText: '请选择',
+
+  redo: '刷新',
+  back: '返回',
+
+  exportText: '导出',
+
+  light: '亮色主题',
+  dark: '黑暗主题',
+  role: {
+    user: '用户',
+    admin: '管理员',
+    root: '所有者',
+  },
+  sort: {
+    Asc: '升序',
+    Desc: '降序',
+  },
+  action: {
+    selectAll: '全选',
+    unselectAll: '反选',
+  },
+};

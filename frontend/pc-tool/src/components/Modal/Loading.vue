@@ -3,7 +3,10 @@
         <div v-show="state.type === 'loading'">
             <LoadingOutlined /><span>{{ state.content }}</span>
         </div>
-        <div v-show="state.type === 'error'">加载失败,点击<span class="retry">重试</span></div>
+        <div v-show="state.type === 'error'"
+            >{{ editor.lang('load-error')
+            }}<span class="retry">{{ editor.lang('retry') }}</span></div
+        >
     </div>
 </template>
 
@@ -23,7 +26,7 @@
     let editor = useInjectEditor();
     let state = reactive({
         visible: false,
-        content: '加载中......',
+        content: editor.lang('load-point'),
         type: 'error' as IType,
         // type: 'loading' as IType,
     });
