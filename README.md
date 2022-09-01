@@ -25,16 +25,41 @@ X1 for community, free and open source, powered by [Basic AI](https://www.basic.
 
 ### Branches
 
-* **dev** Default branch, contains the newest feature and bug fix, but may not be stable, do not use in production.
-* **main** Stable release, well tested.
+* **dev** Contains the newest features and bug fixes, but may not be stable, do not use in production.
+* **main** Default branch, stable and well tested.
 
 ### Run with Docker Compose
+
+#### Quick Start
+
+##### Prerequisites 
+
+We use Docker Compose to simplify running multiple containers together, the latest [Docker Desktop](https://docs.docker.com/desktop/) already integrated `docker compose` subcommand. If you haven't installed Docker Desktop yet, you should install it first.
+
+##### Download release package
+
+Click the latest release on the right of repository home, select asset who's name likes `x1-community-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
+
+```bash
+wget https://github.com/basicai/x1/releases/download/v0.5/x1-community-v0.5.zip
+unzip -d x1-community x1-community-v0.5.zip
+```
+
+##### Start all services
+
+Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out X1.
+
+```bash
+docker compose up
+```
+
+#### Quick Start - Advanced
 
 It is recommended to use Compose V2 and the new `docker compose` command, not the old `docker-compose` command, you can see the differences between the two in the document [Overview of Docker Compose](https://docs.docker.com/compose/).
 
 > Docker Desktop(Mac, Win, Linux) will auto install Docker Compose. If you are on Linux server, you can install Docker Compose plugin following this article [Install Docker Compose CLI plugin](https://docs.docker.com/compose/install/compose-plugin/).
 
-Run the following command to start all services of X1, each service run in a docker container.
+Run the following command to manage services of X1, each service running in a docker container.
 ```bash
 # Start in forground.
 docker compose up
