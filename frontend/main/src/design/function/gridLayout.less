@@ -1,0 +1,18 @@
+/** 列表页网格布局 */
+.gridLayout(@width, @gap:10px, @height:auto, @column:auto-fit,) {
+  display: grid;
+  grid-template-columns: repeat(@column, @width);
+  grid-template-rows: @height;
+  justify-content: space-between;
+  gap: @gap;
+}
+
+.gridLayoutCover(@width, @gap:10px, @height:auto, @column:auto-fill) {
+  display: grid;
+  grid-template-columns: repeat(@column, minmax(@width, 0.7fr));
+  grid-template-rows: @height;
+  gap: @gap;
+  img {
+    object-fit: cover;
+  }
+}

@@ -1,0 +1,17 @@
+export default {
+  taskText: 'Task',
+  annotate: 'Annotate',
+  review: 'Review',
+  addStage: 'Add Stage',
+  selectClassTitle: 'Select Classes and Classifications',
+  selected: 'Selected',
+  clearAll: 'Clear All',
+  addAll: 'Add All',
+  createTask: 'Create Task',
+  closeTask: 'Close Task',
+  saveChange: 'Save Change',
+  instruction: 'Instruction',
+  manageClass: 'Manage Class',
+  searchClassPlaceholder: 'Search classes and classification name',
+  closed: 'Closed',
+};

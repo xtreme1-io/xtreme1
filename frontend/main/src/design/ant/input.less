@@ -1,0 +1,104 @@
+@import (reference) '../color.less';
+
+// input
+.ant-input {
+  &-number {
+    min-width: 110px;
+  }
+}
+
+.ant-input-affix-wrapper .ant-input-suffix {
+  right: 9px;
+}
+
+.ant-input-clear-icon {
+  margin-right: 5px;
+}
+
+.ant-input-affix-wrapper-textarea-with-clear-btn {
+  padding: 0 !important;
+
+  textarea.ant-input {
+    padding: 4px;
+  }
+}
+
+.normal-size-ant-pro {
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 14px;
+  height: 28px;
+}
+input.ant-input {
+  .normal-size-ant-pro;
+  color: #666;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #cccccc;
+}
+span.ant-input-password,
+span.ant-input-affix-wrapper {
+  .normal-size-ant-pro;
+  color: #666;
+  box-sizing: border-box;
+  border-radius: 4px;
+  .ant-input {
+    height: 14px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+input.ant-input.mint {
+  background: linear-gradient(135deg, rgba(87, 204, 239, 0.1) 0%, rgba(134, 229, 201, 0.1) 100%);
+  box-shadow: inset 0px 0px 4px #57ccef;
+}
+span.ant-input-password.mint,
+span.ant-input-affix-wrapper.mint {
+  background: linear-gradient(135deg, rgba(87, 204, 239, 0.1) 0%, rgba(134, 229, 201, 0.1) 100%);
+  box-shadow: inset 0px 0px 4px #57ccef;
+  .ant-input {
+    // height: 12px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+.large-size-ant-pro {
+  padding: 11px 10px;
+  font-size: 14px;
+  line-height: 14px;
+  height: 40px;
+}
+
+input.ant-input.ant-input-lg {
+  .large-size-ant-pro;
+}
+span.ant-input-password-lg,
+span.ant-input-affix-wrapper-lg {
+  .large-size-ant-pro;
+  .ant-input {
+    padding: 0;
+    height: 14px;
+  }
+}
+
+.small-size-ant-pro {
+  padding: 3px 6px;
+  font-size: 12px;
+  line-height: 14px;
+  height: 20px;
+}
+input.ant-input.ant-input-sm {
+  .small-size-ant-pro;
+}
+span.ant-input-password-sm,
+span.ant-input-affix-wrapper-sm {
+  .small-size-ant-pro;
+  .ant-input {
+    padding: 0;
+    height: 14px;
+  }
+}
