@@ -51,7 +51,9 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: /main
+  name: frontend-main
 spec:
   ingressClassName: nginx
   rules:
@@ -64,6 +66,54 @@ spec:
                 port:
                   number: 80
             path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - x1-community.alidev.beisai.com
+      secretName: alidev.beisai.com
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: /image-tool
+  name: frontend-image-tool
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: x1-community.alidev.beisai.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+            path: /tool/image
+            pathType: Prefix
+  tls:
+    - hosts:
+        - x1-community.alidev.beisai.com
+      secretName: alidev.beisai.com
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: /pc-tool
+  name: frontend-pc-tool
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: x1-community.alidev.beisai.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+            path: /tool/pc
             pathType: Prefix
   tls:
     - hosts:
