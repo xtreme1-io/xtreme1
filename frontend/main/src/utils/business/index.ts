@@ -4,7 +4,7 @@ import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 export const goToTool = (query: any, type?: datasetTypeEnum) => {
   const host = location.hostname || location.host;
-  const toolPath = type === datasetTypeEnum.IMAGE ? '/image' : '/pc';
+  const toolPath = type === datasetTypeEnum.IMAGE ? '/tool/image' : '/tool/pc';
   console.log(type);
   const BaseURL =
     host.indexOf('local') >= 0
