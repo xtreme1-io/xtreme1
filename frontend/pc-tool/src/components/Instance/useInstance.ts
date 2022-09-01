@@ -48,8 +48,8 @@ export default function useInstance() {
     let updateSelectFlag = true;
 
     const state = reactive<IState>({
-        activeClass: [],
-        activeTrack: [],
+        // activeClass: [],
+        // activeTrack: [],
         trackId: '',
         classType: '',
         selectMap: {},
@@ -89,14 +89,6 @@ export default function useInstance() {
     });
 
     // *****life hook******
-
-    // let annotationMap = computed(() => {
-    //     let annotationMap = {} as Record<string, true>;
-    //     editor.state.annotationInfos.forEach((e) => {
-    //         if (e.objectId) annotationMap[e.objectId] = true;
-    //     });
-    //     return annotationMap;
-    // });
 
     let scrollSelectToView = _.debounce(() => {
         // scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
@@ -159,22 +151,14 @@ export default function useInstance() {
             updateSelect();
         }
 
-        if (updateAttrFlag) {
-            updateAttr();
-        }
+        // if (updateAttrFlag) {
+        //     updateAttr();
+        // }
 
         scrollSelectToView();
 
         // map info
     }, 100);
-
-    // 批注
-    // watch(
-    //     () => editor.state.annotationInfos,
-    //     () => {
-    //         onUpdateList();
-    //     },
-    // );
 
     function onUpdateList() {
         updateListFlag = true;
@@ -197,11 +181,11 @@ export default function useInstance() {
         });
 
         config.showAttr = expandAll;
-        if (config.showAttr) {
-            updateListFlag = true;
-            updateAttrFlag = true;
-            update(false);
-        }
+        // if (config.showAttr) {
+        //     updateListFlag = true;
+        //     updateAttrFlag = true;
+        //     update(false);
+        // }
     }
 
     function onAnnotateChange(data: any) {
@@ -276,6 +260,8 @@ export default function useInstance() {
             // attr update
             if (!attrObjectMap[trackId]) attrObjectMap[trackId] = obj;
 
+            // only one classify
+            classify = noClassifyKey;
             let trackMapId = trackId;
             let classMapId = classify + classType;
 
@@ -291,8 +277,6 @@ export default function useInstance() {
                 name: name,
                 visible: obj.visible,
                 isModel: !!userData.modelClass,
-                // hasAnnotation: !!annotationMap.value[uuid],
-                // invisible: !!userData.invisibleFlag,
                 active: [],
             };
 

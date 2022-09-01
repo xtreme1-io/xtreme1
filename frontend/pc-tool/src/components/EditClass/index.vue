@@ -9,12 +9,12 @@
                             <span class="title1">{{ 'Cuboid' + ' ' + state.trackName }}</span>
                             <template v-if="!state.isBatch && !state.isInvisible">
                                 <EyeInvisibleOutlined
-                                    @click="onToggleTrackVisible"
+                                    @click.stop="onToggleTrackVisible"
                                     v-if="!state.trackVisible"
                                     class="title-icon"
                                 />
                                 <EyeOutlined
-                                    @click="onToggleTrackVisible"
+                                    @click.stop="onToggleTrackVisible"
                                     v-else
                                     class="title-icon"
                                 />
@@ -32,7 +32,7 @@
                     <ObjectClass @change="onClassChange" :state="state" />
                 </a-collapse-panel>
 
-                <a-collapse-panel v-show="state.attrs.length>0" key="attribute">
+                <a-collapse-panel v-show="state.attrs.length > 0" key="attribute">
                     <template #header="{ isActive }">
                         <span class="item-header">
                             <span class="title1">
@@ -77,18 +77,12 @@
     import { Const } from 'pc-editor';
 
     import ObjectItem from './ObjectItem.vue';
-    import ModelInfo from './ModelInfo.vue';
-    import ObjectType from './ObjectType.vue';
     import ObjectClass from './ObjectClass.vue';
     import ObjectAttr from './ObjectAttr.vue';
-    import ObjectMerge from './ObjectMerge.vue';
-    import ObjectSplit from './ObjectSplit.vue';
-    import ObjectDelete from './ObjectDelete.vue';
 
     import useUI from '../../hook/useUI';
     import useEditClass from './useEditClass';
     import { computed, ref, onMounted } from 'vue';
-    // import { IClassOption } from './type';
 
     interface IProps {
         // option: IClassOption;
