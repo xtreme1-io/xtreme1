@@ -27,6 +27,8 @@ build-frontend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
+        - ops/*
+        - ops/**/*
         - frontend/*
         - frontend/**/*
   script:
@@ -55,6 +57,8 @@ build-backend-package:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
+        - ops/*
+        - ops/**/*
         - backend/*
         - backend/**/*
   variables:
@@ -75,11 +79,7 @@ build-deploy-package:
   tags:
     - ubuntu
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
-      changes:
-        - deploy/*
-        - deploy/**/*
-        - docker-compose.yml
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
   variables:
     DEPLOY_PACKAGE_NAME: "${APP_NAME}-${APP_VERSION}-${CI_COMMIT_REF_NAME}.tar.gz"
   script:
@@ -119,7 +119,8 @@ build-backend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/backend.*
+        - ops/*
+        - ops/**/*
         - backend/*
         - backend/**/*
   variables:
@@ -137,7 +138,8 @@ build-frontend-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/frontend.*
+        - ops/*
+        - ops/**/*
         - frontend/*
         - frontend/**/*
   variables:
@@ -155,7 +157,8 @@ build-image-object-detection-image:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
       changes:
-        - .ops/image-object-detection.*
+        - ops/*
+        - ops/**/*
         - model/image-object-detection/*
         - model/image-object-detection/**/*
   variables:
@@ -182,7 +185,8 @@ deploy-backend-to-alidev:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/alidev/backend-*
+        - ops/*
+        - ops/**/*
         - backend/*
         - backend/**/*
   variables:
@@ -197,7 +201,8 @@ deploy-frontend-to-alidev:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/alidev/frontend-*
+        - ops/*
+        - ops/**/*
         - frontend/*
         - frontend/**/*
   variables:
@@ -212,7 +217,8 @@ deploy-image-object-detection-to-alidev:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/alidev/image-object-detection-*
+        - ops/*
+        - ops/**/*
         - model/image-object-detection/*
         - model/image-object-detection/**/*
   variables:
@@ -227,7 +233,8 @@ deploy-backend-to-alitest:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/alitest/backend-*
+        - ops/*
+        - ops/**/*
         - backend/*
         - backend/**/*
   when: manual
@@ -243,7 +250,8 @@ deploy-frontend-to-alitest:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/alitest/frontend-*
+        - ops/*
+        - ops/**/*
         - frontend/*
         - frontend/**/*
   when: manual
@@ -259,7 +267,8 @@ deploy-image-object-detection-to-alitest:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       changes:
-        - .ops/alitest/image-object-detection-*
+        - ops/*
+        - ops/**/*
         - model/image-object-detection/*
         - model/image-object-detection/**/*
   when: manual
