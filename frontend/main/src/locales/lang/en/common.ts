@@ -1,0 +1,57 @@
+export default {
+  okText: 'OK',
+  closeText: 'Close',
+  cancelText: 'Cancel',
+  loadingText: 'Loading...',
+  saveText: 'Save',
+  delText: 'Delete',
+  resetText: 'Reset',
+  renameText: 'Rename',
+  searchText: 'Search',
+  queryText: 'Search',
+  editText: 'Edit',
+  nameText: 'Name',
+  confirmText: 'Confirm',
+  addText: 'Add',
+  removeText: 'Remove',
+  rejectText: 'Reject',
+  approveText: 'Approve',
+  mailText: 'Mail',
+  createText: 'Create',
+  doneText: 'Done',
+  imageText: 'Image',
+  newName: 'New Name',
+  allText: 'All',
+  submitText: 'Submit',
+  publishText: 'Publish',
+  runText: 'Run',
+  sendText: 'Send',
+
+  filterText: 'Filter',
+  continueText: 'Continue',
+  urlText: 'URL',
+
+  inputText: 'Please enter ',
+  chooseText: 'Please choose',
+
+  redo: 'Refresh',
+  back: 'Back',
+
+  exportText: 'Export',
+
+  light: 'Light',
+  dark: 'Dark',
+  role: {
+    user: 'User',
+    admin: 'Team Admin',
+    root: 'Team Owner',
+  },
+  sort: {
+    Asc: 'Ascending',
+    Desc: 'Descending',
+  },
+  action: {
+    selectAll: 'Select All',
+    unselectAll: 'Unselect All',
+  },
+};
