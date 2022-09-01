@@ -22,6 +22,8 @@ public enum UsecaseCode {
 
     USER_EXIST("USER_EXIST", "User already existed"),
 
+    USER_NOT_REGISTER("USER_NOT_REGISTER", "User not register"),
+
     FILE_TYPE_NOT_SUPPORT("FILE_TYPE_NOT_SUPPORT", "File type not support"),
 
     // Dataset
