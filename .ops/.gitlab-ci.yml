@@ -80,6 +80,8 @@ build-deploy-package:
     - ubuntu
   rules:
     - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+  script:
+    - ls
   artifacts:
     name: "${APP_NAME}-${CI_COMMIT_REF_NAME}.tar.gz"
     paths:
