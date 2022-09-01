@@ -49,7 +49,7 @@
                 @click="onSave"
             >
                 <template #icon><SaveOutlined /></template>
-                <div class="title">{{$$('btn-save')}}</div>
+                <div class="title">{{ $$('btn-save') }}</div>
             </a-button>
             <!-- shortcut -->
             <a-button class="basic-btn" size="large" @click="onHelp">
@@ -72,15 +72,13 @@
                 }}</div>
             </a-button>
             <a-divider type="vertical" style="height: 32px; background-color: #57575c" />
-            <a-button class="basic mark" v-if="has(BsUIType.flowSave)" :disabled="blocking">
-                <!-- <template #icon><SaveOutlined /></template> -->
+            <a-button class="basic mark" v-show="canEdit()" :disabled="blocking">
                 {{ $$('btn-invalid') }}
             </a-button>
-            <a-button class="basic skip" v-if="has(BsUIType.flowSave)" :disabled="blocking">
-                <!-- <template #icon><SaveOutlined /></template> -->
+            <a-button class="basic skip" v-show="canEdit()" :disabled="blocking">
                 {{ $$('btn-skip') }}
             </a-button>
-            <a-button class="basic submit" v-if="has(BsUIType.flowSave)" :disabled="blocking">
+            <a-button class="basic submit" v-show="canEdit()" :disabled="blocking">
                 <template #icon><SaveOutlined /></template>
                 {{ $$('btn-submit') }}
             </a-button>
@@ -118,7 +116,7 @@
         onNext,
         onClose,
     } = useHeader();
-    let { has } = useUI();
+    let { has, canEdit } = useUI();
     let { init } = useFlow();
     let editor = useInjectEditor();
     let { state, bsState } = editor;
