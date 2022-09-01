@@ -13,7 +13,10 @@
   import { AppProvider } from '/@/components/Application';
   import { useTitle } from '/@/hooks/web/useTitle';
   import { useLocale } from '/@/locales/useLocale';
+  import mixpanel from 'mixpanel-browser';
   // support Multi-language
   const { getAntdLocale } = useLocale();
+  let token = 'd26602b8c457915fdd009ef6bf7b165c';
+  mixpanel.init(token, { debug: false });
   useTitle();
 </script>
