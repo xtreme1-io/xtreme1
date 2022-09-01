@@ -15,6 +15,7 @@ import { configThemePlugin } from './theme';
 import { configImageminPlugin } from './imagemin';
 import { configSvgIconsPlugin } from './svgSprite';
 import { configHmrPlugin } from './hmr';
+import alias from '@rollup/plugin-alias';
 
 export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
   const {
@@ -26,6 +27,7 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean) {
   } = viteEnv;
 
   const vitePlugins: (Plugin | Plugin[])[] = [
+    alias(),
     // have to
     vue(),
     // have to
