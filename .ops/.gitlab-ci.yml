@@ -80,13 +80,11 @@ build-deploy-package:
     - ubuntu
   rules:
     - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
-  variables:
-    DEPLOY_PACKAGE_NAME: "${APP_NAME}-${APP_VERSION}-${CI_COMMIT_REF_NAME}.tar.gz"
-  script:
-    - tar zcvf $DEPLOY_PACKAGE_NAME --transform 's,^,'"$APP_NAME"'/,' deploy docker-compose.yml
   artifacts:
+    name: "${APP_NAME}-${CI_COMMIT_REF_NAME}.tar.gz"
     paths:
-      - $DEPLOY_PACKAGE_NAME
+      - deploy/
+      - docker-compose.yml
 
 .build-image:
   stage: build-image
