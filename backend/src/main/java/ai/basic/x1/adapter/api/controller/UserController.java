@@ -57,8 +57,10 @@ public class UserController extends BaseController {
     @PostMapping("/login")
     public UserLoginResponseDTO login(@Validated @RequestBody UserAuthRequestDTO requestDTO) {
         var user = userUseCase.findByUsername(requestDTO.getUsername());
-        if (user == null ||
-                !passwordEncoder.matches(requestDTO.getPassword(), user.getPassword())) {
+        if (user == null) {
+            throw new UsecaseException(UsecaseCode.USER_NOT_REGISTER);
+        }
+        if (!passwordEncoder.matches(requestDTO.getPassword(), user.getPassword())) {
             throw new UsecaseException(UsecaseCode.USERNAME_AND_PASSWORD_NOT_MATCH);
         }
         userUseCase.loginSuccessProcess(user);
