@@ -136,6 +136,9 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
         private final Map<String, ModelClass> systemModelClassMap = new ConcurrentHashMap<>();
 
         private void initSystemModelClass() {
+            if (!systemModelClassMap.isEmpty()) {
+                return;
+            }
             Model model = modelDAO.getOne(new LambdaQueryWrapper<Model>().eq(Model::getModelCode,
                     getModelCodeEnum()));
             if (model == null) {
