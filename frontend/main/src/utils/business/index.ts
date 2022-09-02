@@ -47,3 +47,7 @@ export const handleToast = (list, action) => {
     `${action} ${list.length > 1 ? `${list.length} members` : 'member'} successfully`,
   );
 };
+
+export const countFormat = (num) => {
+  return num > 999 ? '999+' : num;
+};

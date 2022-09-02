@@ -42,7 +42,7 @@ Click the latest release on the right of repository home, select asset who's nam
 
 ```bash
 wget https://github.com/basicai/x1/releases/download/v0.5/x1-community-v0.5.zip
-unzip -d x1-community x1-community-v0.5.zip
+unzip -d x1-community-v0.5 x1-community-v0.5.zip
 ```
 
 ##### Start all services
@@ -130,7 +130,7 @@ Also you can run each application service in your favorite IDE, like IDEA or Vis
 
 #### Develop with your own base services
 
-If you already have an MySQL, Redis, or MinIO base service, you can use it directly, and not depend on Docker Compose to manage these services, but you need to change application service's configuration. As an example for `backend`, you need to set `spring.datasource`, `spring.redis` and `minio` configurations in the default configuration file, or supply a new one to override the default one.
+If you already have an MySQL, Redis, or MinIO base service, you can use it directly, and not depend on Docker Compose to manage these services, but you need to change `backend` service's configuration. You can change configurations in default configuration file at `backend/src/main/resources/application.yml`, or using command argument `--spring.config.additional-location` to specify another configuration file to override the default.
 
 To get more development guides, you can read the README doc in each application service's directory.
 
