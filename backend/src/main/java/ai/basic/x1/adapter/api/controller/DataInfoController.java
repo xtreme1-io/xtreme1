@@ -45,11 +45,6 @@ public class DataInfoController extends DatasetBaseController {
     @Autowired
     protected DataAnnotationRecordUseCase dataAnnotationRecordUseCase;
 
-    /**
-     * 上传data数据
-     *
-     * @param dto data数据对象
-     */
     @PostMapping("upload")
     public Long upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);

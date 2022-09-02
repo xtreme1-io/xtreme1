@@ -40,7 +40,17 @@ mybatis-plus:
 
 export:
   data:
-    version: basic.ai/v1
+    version: x1/v1
+file:
+  tempPath: /tmp/x1/
+  size:
+    large: 400
+    medium: 200
+    small: 100
+  prefix:
+    large: large
+    medium: medium
+    small: small
 
 minio:
   endpoint: http://minio:9000/
