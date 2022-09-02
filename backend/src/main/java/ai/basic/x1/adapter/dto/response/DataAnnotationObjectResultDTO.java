@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -17,6 +18,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataAnnotationObjectResultDTO {
+
+    private OffsetDateTime queryDate;
 
     private List<DataAnnotationObjectDTO> dataAnnotationObjects;
 }

@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.groups.Default;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class DataAnnotationObjectController {
     public DataAnnotationObjectResultDTO listByDataIds(@RequestParam List<Long> dataIds) {
         var dataAnnotationObjects = DefaultConverter.convert(
                 dataAnnotationObjectUseCase.findByDataIds(dataIds), DataAnnotationObjectDTO.class);
-        return DataAnnotationObjectResultDTO.builder().dataAnnotationObjects(dataAnnotationObjects).build();
+        return DataAnnotationObjectResultDTO.builder().dataAnnotationObjects(dataAnnotationObjects).queryDate(OffsetDateTime.now()).build();
     }
 
     private List<DataAnnotationObjectDTO> convertToDataAnnotationObject(ObjectResultDTO objectResultDTO) {
