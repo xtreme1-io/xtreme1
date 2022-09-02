@@ -135,7 +135,7 @@
   const rules = {
     url: [
       { validator: validateUrl, trigger: 'change' },
-      { max: 255, message: t('business.ontology.maxLength') },
+      // { max: 255, message: t('business.ontology.maxLength') },
     ],
   };
 

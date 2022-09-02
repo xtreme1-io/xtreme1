@@ -11,8 +11,8 @@ import {
 import { BasicIdParams } from '/@/api/model/baseModel';
 
 enum Api {
-  CLASS = '/annotation/class',
-  CLASSIFICATION = '/annotation/classification',
+  CLASS = '/class',
+  CLASSIFICATION = '/classification',
 }
 
 /**
