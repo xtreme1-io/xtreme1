@@ -50,7 +50,13 @@ export default class ViewManager {
     handleWindowResize() {
         if (this.initResize) return;
         window.addEventListener('resize', () => {
-            this.editor.pc.render();
+            this.editor.pc.renderViews.forEach((view) => {
+                if (view instanceof SideRenderView) {
+                    view.fitObject();
+                }
+                view.render();
+            });
+            // this.editor.pc.render();
         });
         this.initResize = true;
     }

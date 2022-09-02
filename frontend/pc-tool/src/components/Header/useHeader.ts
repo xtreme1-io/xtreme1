@@ -1,11 +1,14 @@
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useInjectEditor } from '../../state';
 import { StatusType } from 'pc-editor';
 import * as _ from 'lodash';
 import * as api from '../../api';
+import * as locale from './lang';
 import screenFull from 'screenfull';
+import { SideRenderView } from 'pc-render';
 export default function useHeader() {
     let editor = useInjectEditor();
+    let $$ = editor.bindLocale(locale);
     let { state, bsState } = editor;
     let editorState = editor.state;
     let dataIndex = ref(state.frameIndex + 1);
@@ -27,13 +30,19 @@ export default function useHeader() {
     function onIndexBlur() {
         if (!dataIndex.value) dataIndex.value = state.frameIndex + 1;
     }
-    function onFullScreen() {
+    async function onFullScreen() {
         if (iState.fullScreen) {
-            screenFull.exit();
+            await screenFull.exit();
         } else {
-            screenFull.request();
+            await screenFull.request();
         }
         iState.fullScreen = !iState.fullScreen;
+        setTimeout(() => {
+            editor.pc.renderViews.forEach((view) => {
+                if (view instanceof SideRenderView) view.fitObject();
+                view.render();
+            });
+        },400);
     }
     function onSave() {
         editor.saveObject();
@@ -105,6 +114,7 @@ export default function useHeader() {
     }
 
     return {
+        $$,
         iState,
         blocking,
         dataIndex,

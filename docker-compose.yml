@@ -47,6 +47,7 @@ services:
     depends_on:
       - mysql
       - redis
+      - minio
   frontend:
     image: basicai/x1-community-frontend
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.

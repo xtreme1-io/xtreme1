@@ -1,0 +1,17 @@
+export default {
+  taskText: '任务',
+  annotate: '标注',
+  review: '审查',
+  addStage: '添加阶段',
+  selectClassTitle: '选择类',
+  selected: '已选择',
+  clearAll: '清空',
+  addAll: '添加全部',
+  createTask: '创建任务',
+  closeTask: '关闭任务',
+  saveChange: '保存变更',
+  instruction: '简介',
+  manageClass: '管理类',
+  searchClassPlaceholder: '搜索类名和分类名',
+  closed: '已关闭',
+};

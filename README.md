@@ -10,8 +10,8 @@ X1 for community, free and open source, powered by [Basic AI](https://www.basic.
 
 | Layer | Component | Description |
 | --- | --- | --- |
-| Application Services | Frontend | Web user interface, written in Vue3 and Typescript. |
-| Application Services | Backend | Data API for managing user, dataset, annotation object etc., written in Java and Spring Boot. |
+| Application Services | Web Frontend | Web user interface, written in Vue3 and Typescript. |
+| Application Services | API Backend | Data API for managing user, dataset, annotation object etc., written in Java and Spring Boot. |
 | Application Services | Image Object Detection | AI auto detect objects in image, written in Python and PyTorch. |
 | Application Services | Point Cloud Object Detection | AI auto detect objects in point cloud, written in Python and PyTorch. |
 | Base Services | MySQL | Relational database for storing business data. |
@@ -25,18 +25,47 @@ X1 for community, free and open source, powered by [Basic AI](https://www.basic.
 
 ### Branches
 
-* **dev** Default branch, contains the newest feature and bug fix, but may not be stable, do not use in production.
-* **main** Stable release, well tested.
+* **dev** Contains the newest features and bug fixes, but may not be stable, do not use in production.
+* **main** Default branch, stable and well tested.
 
 ### Run with Docker Compose
+
+#### Quick Start
+
+##### Prerequisites 
+
+We use Docker Compose to simplify running multiple containers together, the latest [Docker Desktop](https://docs.docker.com/desktop/) already integrated `docker compose` subcommand. If you haven't installed Docker Desktop yet, you should install it first.
+
+##### Download release package
+
+Click the latest release on the right of repository home, select asset who's name likes `x1-community-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
+
+```bash
+wget https://github.com/basicai/x1/releases/download/v0.5/x1-community-v0.5.zip
+unzip -d x1-community x1-community-v0.5.zip
+```
+
+##### Start all services
+
+Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out X1.
+
+```bash
+docker compose up
+```
+
+#### Quick Start - Advanced
 
 It is recommended to use Compose V2 and the new `docker compose` command, not the old `docker-compose` command, you can see the differences between the two in the document [Overview of Docker Compose](https://docs.docker.com/compose/).
 
 > Docker Desktop(Mac, Win, Linux) will auto install Docker Compose. If you are on Linux server, you can install Docker Compose plugin following this article [Install Docker Compose CLI plugin](https://docs.docker.com/compose/install/compose-plugin/).
 
-Run the following command to start all services of X1, each service run in a docker container.
+Run the following command to clone repository and start all services of X1, each service running in a docker container.
 ```bash
+# Clone repository
+git clone https://github.com/basicai/x1.git
+
 # Start in forground.
+cd x1
 docker compose up
 
 # Or add -d option to run in background.
@@ -56,9 +85,9 @@ docker compose down
 docker compose down -v
 ```
 
-It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `basicai/x1-community-backend`, `basicai/x1-community-frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`, for example, you can access MinIO console at `http://localhost:8194`. We use Docker volume to save data, so you won't lose any data bwtween container recreating.
+It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `basicai/x1-community-backend`, `basicai/x1-community-frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
-After successfully started all services, you need to manually create a bucket named `x1-community` through MinIO console, the bucket name should be the same to `minio.bucketName` in `backend` service's configurtion file `backend/src/main/resouces/application.yml`.
+After successfully started all services, you can open `http://localhost:8190` to access web frontend, and access MinIO console at `http://localhost:8194`.
 
 > Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
 

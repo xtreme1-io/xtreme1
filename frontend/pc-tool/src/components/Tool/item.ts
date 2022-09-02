@@ -3,10 +3,11 @@ import Editor from '../../common/Editor';
 import { BsUIType as UIType } from '../../config/ui';
 import { Component } from 'vue';
 import ToolTip from './modelConfig.vue';
+import { ILocale } from './lang/type';
 export interface IItemConfig {
     action: string;
-    label: string;
-    title: string;
+    // label: string;
+    title: ($$: (name: keyof ILocale, args?: Record<string, any>) => string) => string;
     getStyle?: (editor: Editor) => any;
     extra?: () => Component;
     hasMsg?: (editor: Editor) => boolean;
@@ -17,8 +18,8 @@ export interface IItemConfig {
 export const allItems: IItemConfig[] = [
     {
         action: 'createRect',
-        label: 'Rect',
-        title: 'Create Rect',
+        // label: 'Rect',
+        title: ($$) => $$('title_rect'),
         getIcon: function (editor: Editor) {
             return 'iconfont icon-biaozhunkuang';
         },
@@ -37,8 +38,7 @@ export const allItems: IItemConfig[] = [
     },
     {
         action: 'create2DBox',
-        label: 'Box',
-        title: 'Create Box(2D)',
+        title: ($$) => $$('title_create2DBox'),
         getIcon: function (editor: Editor) {
             return 'iconfont icon-biaozhunkuang';
         },
@@ -57,8 +57,7 @@ export const allItems: IItemConfig[] = [
     },
     {
         action: 'create3DBox',
-        label: 'Box',
-        title: 'Create Box(3D)',
+        title: ($$) => $$('title_create3DBox'),
         getIcon: function (editor: Editor) {
             return 'iconfont icon-biaozhunkuang';
         },
@@ -73,8 +72,7 @@ export const allItems: IItemConfig[] = [
     },
     {
         action: 'translate',
-        label: 'Trans',
-        title: 'Translate',
+        title: ($$) => $$('title_translate'),
         getIcon: function (editor: Editor) {
             return 'iconfont icon-yidong';
         },
@@ -125,8 +123,7 @@ export const allItems: IItemConfig[] = [
     // },
     {
         action: 'track',
-        label: 'Track',
-        title: 'Track Line',
+        title: ($$) => $$('title_track'),
         getIcon: function (editor: Editor) {
             return 'iconfont icon-fuzhuxian';
         },
@@ -141,8 +138,8 @@ export const allItems: IItemConfig[] = [
     },
     {
         action: 'filter2D',
-        label: 'filter2D',
-        title: 'Filter other object in 2d view',
+        // label: 'filter2D',
+        title: ($$) => $$('title_filter2D'),
         getIcon: function (editor: Editor) {
             return 'iconfont icon-shaixuan';
         },
@@ -157,8 +154,8 @@ export const allItems: IItemConfig[] = [
     },
     {
         action: 'model',
-        label: 'Model',
-        title: 'Run Model',
+        // label: 'Model',
+        title: ($$) => $$('title_model'),
         hasMsg: function (editor: Editor) {
             let state = editor.state;
             let dataInfo = state.frames[state.frameIndex];

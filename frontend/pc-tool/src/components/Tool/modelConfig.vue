@@ -9,7 +9,7 @@
                 'padding-top': 0,
                 color: iState.visible ? 'rgb(23, 125, 220)' : '',
             }"
-            title="Setting"
+            :title="$$('model_setting')"
         >
             <EllipsisOutlined style="font-size: 14px; border-top: 1px solid #4e4e4e" />
         </span>
@@ -26,10 +26,12 @@
                         border-bottom: 1px solid gray;
                         padding-bottom: 4px;
                     "
-                    >AI Annotation Setting</div
+                    >{{ $$('model_title') }}</div
                 >
                 <div class="title2">
-                    <span style="vertical-align: middle; margin-right: 10px">Model</span>
+                    <span style="vertical-align: middle; margin-right: 10px">{{
+                        $$('model_name')
+                    }}</span>
                     <!-- <div class="divider"></div> -->
                 </div>
                 <div class="title2">
@@ -42,12 +44,12 @@
                     </a-select>
                 </div>
                 <div class="title2">
-                    <a-checkbox v-model:checked="modelConfig.predict"
-                        >Predict all in Model</a-checkbox
-                    >
+                    <a-checkbox v-model:checked="modelConfig.predict">{{
+                        $$('model_predict')
+                    }}</a-checkbox>
                 </div>
                 <div v-show="!modelConfig.predict">
-                    <div class="title2">Confidence</div>
+                    <div class="title2">{{ $$('model_predict') }}</div>
                     <div class="title2" style="display: flex; flex-direction: row">
                         <div>
                             <a-input-number
@@ -91,9 +93,9 @@
                         />
                     </div> -->
                     <div class="title2">
-                        <span style="margin-right: 10px">Classes</span>
+                        <span style="margin-right: 10px">{{$$('model_classes')}}</span>
                         <a @click.prevent.stop="() => onSelectAll()">{{
-                            flag ? 'Select all' : 'Unselect all'
+                            flag ? $$('model_select_all') : $$('model_unselect_all')
                         }}</a>
                     </div>
                     <div class="title2">
@@ -118,11 +120,11 @@
                         padding-top: 6px;
                     "
                 >
-                    <a-button size="small" @click="onReset" style="margin-right: 10px"
-                        >Reset</a-button
-                    >
+                    <a-button size="small" @click="onReset" style="margin-right: 10px">{{
+                        $$('model_reset')
+                    }}</a-button>
                     <a-button :loading="loading" size="small" @click="onModelRun" type="primary">{{
-                        complete ? 'Add Results' : 'Apply and Run'
+                        complete ? $$('model_add') : $$('model_run')
                     }}</a-button>
                 </div>
             </div>
@@ -130,13 +132,13 @@
     </a-tooltip>
 </template>
 <script lang="ts" setup>
-    import { CloseOutlined, CaretRightOutlined, EllipsisOutlined } from '@ant-design/icons-vue';
+    import { CloseOutlined, EllipsisOutlined } from '@ant-design/icons-vue';
     import { computed, watch, ref, reactive } from 'vue';
     import { useInjectEditor } from '../../state';
     import useTool from './useTool';
     import { IModel } from 'pc-editor';
+    import * as locale from './lang';
     // ***************Props and Emits***************
-    const emit = defineEmits(['cancel', 'ok']);
     const { onModel } = useTool();
     const containerRef = ref(null);
     const iState = reactive({
@@ -144,6 +146,7 @@
     });
     // ***************Props and Emits***************
     let editor = useInjectEditor();
+    let $$ = editor.bindLocale(locale);
     let modelConfig = editor.state.modelConfig;
     const loading = computed(() => {
         let state = editor.state;

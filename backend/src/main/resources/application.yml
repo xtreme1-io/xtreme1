@@ -60,10 +60,10 @@ minio:
 
 model:
   arithmetic:
-    preModel:
-      url: http://pcdet-open.basicai-algorithm/pointcloud/3dbox
     image80:
-      url: http://yolor-detection-coco80.basicai-algorithm/basic_predict
+      url: http://image-object-detection/basic_predict
+    preModel:
+      url: http://point-cloud-object-detection/3dbox
 
 management:
   endpoint:

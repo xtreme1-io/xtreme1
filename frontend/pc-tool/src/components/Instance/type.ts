@@ -39,8 +39,8 @@ export interface IClassify {
 }
 
 export interface IState {
-    activeClass: string[];
-    activeTrack: string[];
+    // activeClass: string[];
+    // activeTrack: string[];
     selectMap: Record<string, true>;
     // selectId: string;
     trackId: string;

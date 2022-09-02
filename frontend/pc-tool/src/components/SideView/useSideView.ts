@@ -82,6 +82,7 @@ export default function useSideView(dom: Ref<HTMLDivElement | null>, props: Side
         view.zoom = 1;
         view.enableFit = true;
         view.fitObject();
+        view.render();
     }
 
     function onAction(name: IActionName) {

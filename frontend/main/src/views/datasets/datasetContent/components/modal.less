@@ -1,0 +1,72 @@
+@prefix-cls: ~'@{namespace}-dataset-upload-modal';
+.@{prefix-cls} {
+  position: relative;
+  .action-list {
+    display: flex;
+    justify-content: center;
+    .card {
+      width: 150px;
+      height: 150px;
+      background: #ffffff;
+      border: 1px solid #57ccef;
+      box-sizing: border-box;
+      border-radius: 10px;
+      margin: 140px 10px 140px;
+      text-align: center;
+      line-height: 150px;
+      cursor: pointer;
+      &:hover {
+        box-shadow: 0px 0px 0px 6px rgba(87, 204, 239, 0.3);
+      }
+    }
+  }
+  .action-footer {
+    position: absolute;
+    bottom: 60px;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+    padding: 0 100px;
+  }
+}
+
+.localModal {
+  .locale-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 60px;
+    &-title {
+      margin: 35px 0 37px;
+      text-align: center;
+      font-size: 24px;
+      line-height: 28px;
+      color: #666;
+    }
+    &-content {
+      width: 520px;
+      height: 290px;
+      margin-bottom: 20px;
+      .upload-placeholder {
+        font-size: 16px;
+        text-align: center;
+        color: #aaa;
+      }
+
+      :global(.ant-upload.ant-upload-drag) {
+        border-radius: 8px;
+        border: 1px solid #cccccc;
+      }
+    }
+    &-footer {
+      width: 520px;
+      display: flex;
+      align-items: center;
+      // transform: translateX(-10px);
+      font-size: 16px;
+      color: #333;
+    }
+  }
+}

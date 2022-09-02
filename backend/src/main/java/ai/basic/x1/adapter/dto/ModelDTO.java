@@ -1,8 +1,8 @@
 package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
-import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
+import ai.basic.x1.entity.enums.ModelDatasetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -45,7 +45,7 @@ public class ModelDTO {
     /**
      * Supported dataset types
      */
-    private DatasetTypeEnum datasetType;
+    private ModelDatasetTypeEnum datasetType;
 
     /**
      * Determine the uniqueness of the model

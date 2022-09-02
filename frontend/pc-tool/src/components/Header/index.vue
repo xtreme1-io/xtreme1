@@ -2,7 +2,7 @@
     <div class="pc-flow">
         <div class="item-wrap">
             <span :class="blocking ? 'close disable' : 'close'" @click="blocking ? null : onClose()"
-                ><CloseOutlined /><span style="margin-left: 4px">Close</span></span
+                ><CloseOutlined /><span style="margin-left: 4px">{{ $$('btn-close') }}</span></span
             >
             <div class="header-info">
                 <span class="dataset-type">{{ bsState.datasetType }}</span>
@@ -49,14 +49,14 @@
                 @click="onSave"
             >
                 <template #icon><SaveOutlined /></template>
-                <div class="title">Save</div>
+                <div class="title">{{ $$('btn-save') }}</div>
             </a-button>
             <!-- shortcut -->
             <a-button class="basic-btn" size="large" @click="onHelp">
                 <template #icon
                     ><i style="font-size: 16px" class="iconfont icon-help"></i
                 ></template>
-                <div class="title">Shortcut</div>
+                <div class="title">{{ $$('btn-shortcut') }}</div>
             </a-button>
             <!-- full screen -->
             <a-button class="basic-btn" size="large" @click="onFullScreen">
@@ -68,21 +68,19 @@
                     ></i
                 ></template>
                 <div class="title">{{
-                    iState.fullScreen ? 'Exit Full Screen' : 'Full Screen'
+                    iState.fullScreen ? $$('btn-full-exit') : $$('btn-full')
                 }}</div>
             </a-button>
             <a-divider type="vertical" style="height: 32px; background-color: #57575c" />
-            <a-button class="basic mark" v-if="has(BsUIType.flowSave)" :disabled="blocking">
-                <!-- <template #icon><SaveOutlined /></template> -->
-                Mark as Invalid
+            <a-button class="basic mark" v-show="canEdit()" :disabled="blocking">
+                {{ $$('btn-invalid') }}
             </a-button>
-            <a-button class="basic skip" v-if="has(BsUIType.flowSave)" :disabled="blocking">
-                <!-- <template #icon><SaveOutlined /></template> -->
-                Skip
+            <a-button class="basic skip" v-show="canEdit()" :disabled="blocking">
+                {{ $$('btn-skip') }}
             </a-button>
-            <a-button class="basic submit" v-if="has(BsUIType.flowSave)" :disabled="blocking">
+            <a-button class="basic submit" v-show="canEdit()" :disabled="blocking">
                 <template #icon><SaveOutlined /></template>
-                Submit
+                {{ $$('btn-submit') }}
             </a-button>
         </div>
     </div>
@@ -105,6 +103,7 @@
     import { BsUIType } from '../../config/ui';
 
     let {
+        $$,
         onFullScreen,
         iState,
         blocking,
@@ -117,7 +116,7 @@
         onNext,
         onClose,
     } = useHeader();
-    let { has } = useUI();
+    let { has, canEdit } = useUI();
     let { init } = useFlow();
     let editor = useInjectEditor();
     let { state, bsState } = editor;

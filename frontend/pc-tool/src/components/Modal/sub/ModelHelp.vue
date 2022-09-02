@@ -1,22 +1,5 @@
 <template>
     <div class="model-help">
-        <!-- <div style="margin: 12px 0">
-            <a-input
-                style="width: 200px"
-                v-model:value="searchInput"
-                placeholder="Please enter a keyword"
-            >
-                <template #suffix>
-                    <SearchOutlined style="color: rgba(255, 255, 255, 0.75)" />
-                </template>
-            </a-input>
-            <span style="line-height: 32px; float: right"
-                >Can't find?
-                <a target="_blank" href="http://www.baidu.com">
-                    Please enter the help center
-                </a></span
-            >
-        </div> -->
         <div class="i-help-body">
             <a-row v-for="action in Actions" :gutter="8">
                 <a-col :span="24" class="i-flex i-header"
@@ -37,103 +20,105 @@
                         </a-row>
                     </a-col>
                 </template>
-                <a-col v-else :span="24" style="text-align: center">No matching results</a-col>
             </a-row>
         </div>
     </div>
 </template>
 <script lang="ts" setup>
-    import { SearchOutlined } from '@ant-design/icons-vue';
     import { computed } from '@vue/reactivity';
     import { ref, ComputedRef } from 'vue';
+    import { useInjectEditor } from '../../../state';
+    import * as locale from '../lang';
+    let editor = useInjectEditor();
+    let $$ = editor.bindLocale(locale);
     type hotAction = {
         key: string[] | string;
         action: string;
     };
-    const resultActions: hotAction[] = [
-        {
-            key: ['F'],
-            action: 'Create Object',
-        },
-        {
-            key: ['Del'],
-            action: 'Delete Object',
-        },
-        {
-            key: ['Ctrl/⌘', '+', 'Z'],
-            action: 'Undo',
-        },
-        {
-            key: ['Ctrl/⌘', '+', 'Shift', '+', 'Z'],
-            action: 'Redo',
-        },
-    ];
-    const editActions: hotAction[] = [
-        {
-            key: ['W', '/', 'S'],
-            action: 'Move cuboid up/down',
-        },
-        {
-            key: ['A', '/', 'D'],
-            action: 'Move cuboid backward/forward',
-        },
-        {
-            key: ['Q', '/', 'E'],
-            action: 'Move cuboid left/right',
-        },
-        {
-            key: ['Z', '/', 'X'],
-            action: 'Rotate cuboid left/right',
-        },
-        {
-            key: ['T'],
-            action: 'Show/hide classes and attributes pad',
-        },
-        {
-            key: ['M'],
-            action: 'Show/Hide Label',
-        },
-        {
-            key: ['C'],
-            action: 'Rotate Head',
-        },
-    ];
-    const displayActions: hotAction[] = [
-        {
-            key: ['G'],
-            action: 'Show/hide Coordinate Axis',
-        },
-        {
-            key: ['N'],
-            action: 'Show/hide 2D results outside the selected object',
-        },
-        {
-            key: ['B'],
-            action: 'Show/hide Distance Measure',
-        },
-    ];
-    const searchInput = ref('');
-    function computeAction(hotkeyConfigs: hotAction[]) {
-        return computed(() => {
-            const reg = new RegExp(searchInput.value, 'i');
-            return hotkeyConfigs.filter((item) => reg.test(item.action));
-        });
-    }
+    const resultActions = computed<hotAction[]>(() => {
+        return [
+            {
+                key: ['F'],
+                action: $$('hk-create'),
+            },
+            {
+                key: ['Del'],
+                action: $$('hk-del'),
+            },
+            {
+                key: ['Ctrl/⌘', '+', 'Z'],
+                action: $$('hk-undo'),
+            },
+            {
+                key: ['Ctrl/⌘', '+', 'Shift', '+', 'Z'],
+                action: $$('hk-redo'),
+            },
+        ];
+    });
+    const editActions = computed<hotAction[]>(() => {
+        return [
+            {
+                key: ['W', '/', 'S'],
+                action: $$('hk-move-ws'),
+            },
+            {
+                key: ['A', '/', 'D'],
+                action: $$('hk-move-ad'),
+            },
+            {
+                key: ['Q', '/', 'E'],
+                action: $$('hk-move-qe'),
+            },
+            {
+                key: ['Z', '/', 'X'],
+                action: $$('hk-rotate'),
+            },
+            {
+                key: ['T'],
+                action: $$('hk-attribute'),
+            },
+            {
+                key: ['M'],
+                action: $$('hk-label'),
+            },
+            {
+                key: ['C'],
+                action: $$('hk-rotate-head'),
+            },
+        ];
+    });
+    const displayActions = computed<hotAction[]>(() => {
+        return [
+            {
+                key: ['G'],
+                action: $$('hk-axis'),
+            },
+            {
+                key: ['B'],
+                action: $$('hk-filter'),
+            },
+            {
+                key: ['N'],
+                action: $$('hk-measure'),
+            },
+        ];
+    });
+
     function isSign(key: string) {
         return key === '/' || key === '+' || key === '~';
     }
     const Actions: { title: string; action: ComputedRef<hotAction[]> }[] = [
         {
             title: 'Actions',
-            action: computeAction(resultActions),
+            action: resultActions,
         },
         {
             title: 'Edit Cuboid',
-            action: computeAction(editActions),
+            action: editActions,
         },
         {
             title: 'Display',
-            action: computeAction(displayActions),
+            action: displayActions,
         },
     ];
 </script>

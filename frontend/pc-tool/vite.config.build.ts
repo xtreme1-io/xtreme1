@@ -4,7 +4,7 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default mergeConfig(baseConfig, {
-    base: '/pc-tool/',
+    base: '/tool/pc/',
     build: {
         outDir: '../dist/pc-tool',
     },
