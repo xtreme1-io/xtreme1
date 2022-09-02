@@ -161,7 +161,6 @@ public class DatasetUseCase {
      * @param datasetId Dataset id
      * @return True means exists
      */
-
     public Boolean findOntologyIsExistByDatasetId(Long datasetId) {
         var datasetClassLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClass.class);
         datasetClassLambdaQueryWrapper.eq(DatasetClass::getDatasetId, datasetId);
