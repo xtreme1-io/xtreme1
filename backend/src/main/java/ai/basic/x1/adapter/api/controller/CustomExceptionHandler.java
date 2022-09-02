@@ -59,7 +59,7 @@ public class CustomExceptionHandler {
             String message = constraint.getPropertyPath() + ":" + constraint.getMessage();
             builder.append(message);
         }
-        return new ResponseEntity<>(new ApiResult<>(UsecaseCode.PARAM_ERROR, builder.toString()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ApiResult<>(UsecaseCode.PARAM_ERROR, builder.toString()), HttpStatus.OK);
     }
 
     @ExceptionHandler(BindException.class)
@@ -73,7 +73,7 @@ public class CustomExceptionHandler {
                 errorMsgList.add(objectError.getObjectName() + " " + objectError.getDefaultMessage());
             }
         }
-        return new ResponseEntity(new ApiResult(UsecaseCode.PARAM_ERROR, JSONUtil.toJsonStr(errorMsgList)), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(new ApiResult(UsecaseCode.PARAM_ERROR, JSONUtil.toJsonStr(errorMsgList)), HttpStatus.OK);
     }
 
 }
