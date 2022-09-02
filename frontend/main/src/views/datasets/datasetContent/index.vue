@@ -125,15 +125,17 @@
             <Radio.Group v-model:value="annotationStatus">
               <Radio value="ANNOTATED">
                 <SvgIcon name="annotated" />
-                <span class="ml-2">Annotated(999+)</span>
+                <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
               </Radio>
               <Radio value="NOT_ANNOTATED">
                 <SvgIcon name="notAnnotated" />
-                <span class="ml-2">Not Annotated(999+)</span>
+                <span class="ml-2"
+                  >Not Annotated({{ countFormat(statusInfo.notAnnotatedCount) }})</span
+                >
               </Radio>
               <Radio value="INVALID">
                 <SvgIcon name="invalid" />
-                <span class="ml-2">Invalid(999+)</span>
+                <span class="ml-2">Invalid({{ countFormat(statusInfo.invalidCount) }})</span>
               </Radio>
             </Radio.Group>
           </CollContainer>
@@ -158,6 +160,7 @@
     datasetApi,
     deleteBatchDataset,
     getLockedByDataset,
+    getStatusNum,
     makeFrameSeriesApi,
     takeRecordByData,
     ungroupFrameSeriesApi,
@@ -192,10 +195,9 @@
   import WarningModalVue from './components/WarningModal.vue';
   import { ModelRun } from '/@@/ModelRun';
   import { PreModelParam } from '/@/api/business/model/modelsModel';
-  import { goToTool, setDatasetBreadcrumb } from '/@/utils/business';
+  import { countFormat, goToTool, setDatasetBreadcrumb } from '/@/utils/business';
   import { useLoading } from '/@/components/Loading';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
-
   // import { VScroll } from '/@/components/VirtualScroll/index';
   const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
     useModal();
@@ -230,6 +232,7 @@
   const title = t('business.models.run.runModel');
   const modelId = ref<number>();
   const selectOptions = ref<any>();
+  const statusInfo = ref<any>({});
   const groundTruthsOption = ref([
     {
       label: 'Without Project',
@@ -271,6 +274,7 @@
     });
     getLockedData();
     fetchList(filterForm);
+    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
     document.addEventListener('visibilitychange', getLockedData);
   });
 
