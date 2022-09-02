@@ -212,14 +212,19 @@ export const unLock = (params) =>
   });
 
 export const takeRecordByData = (params: takeRecordParams) =>
-  defHttp.post<null>({
-    url: `${Api.DATA}/annotate`,
-    params,
-    headers: {
-      // @ts-ignore
-      ignoreCancelToken: true,
+  defHttp.post<null>(
+    {
+      url: `${Api.DATA}/annotate`,
+      params,
+      headers: {
+        // @ts-ignore
+        ignoreCancelToken: true,
+      },
     },
-  });
+    {
+      errorMessageMode: 'none',
+    },
+  );
 
 export const exportData = (params: any) =>
   defHttp.get<null>({
@@ -266,6 +271,26 @@ export const findUploadRecordBySerialNumbers = (params: string, signal?: any) =>
   defHttp.get<ResponseUploadRecord[]>({
     url: `${Api.DATA}/findUploadRecordBySerialNumbers?serialNumbers=${params}`,
     signal: signal,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getStatusNum = (params: { datasetId: number }) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATA}/getAnnotationStatusStatisticsByDatasetId`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const hasOntologyApi = (params: { datasetId: number }) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATASET}/findOntologyIsExistByDatasetId`,
+    params,
     headers: {
       // @ts-ignore
       ignoreCancelToken: true,

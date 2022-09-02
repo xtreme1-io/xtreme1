@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,8 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
 
     @Autowired
     private ModelDAO modelDAO;
+
+    private final static Object RESULT = new Object();
 
     private final ModelRunSuccessHandler successHandler = new DefaultModelRunSuccessHandler();
     private final ModelRunFailureHandler failureHandler = (message, ex) -> {
@@ -133,9 +136,12 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
     private class DefaultModelRunSuccessHandler implements ModelRunSuccessHandler {
 
         private final Set<String> selectedClasses = new ConcurrentHashSet<>();
-        private final Map<String, ModelClass> systemModelClassMap = new ConcurrentHashMap<>();
+        private final Map<String, ModelClass> systemModelClassMap = new HashMap<>();
 
         private void initSystemModelClass() {
+            if (!systemModelClassMap.isEmpty()) {
+                return;
+            }
             Model model = modelDAO.getOne(new LambdaQueryWrapper<Model>().eq(Model::getModelCode,
                     getModelCodeEnum()));
             if (model == null) {
@@ -146,17 +152,19 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                 throw new IllegalArgumentException(
                         String.format("%s model not have any class", getModelCodeEnum()));
             }
-            for (var modelClass : model.getClasses()) {
-                if (CollUtil.isNotEmpty(modelClass.getSubClasses())) {
-                    for (var subModelClass : modelClass.getSubClasses()) {
-                        if (subModelClass == null) {
-                            continue;
-                        }
-                        if (systemModelClassMap.containsKey(subModelClass.getCode())) {
-                            throw new IllegalArgumentException("subModelClass is duplicate. " +
-                                    "code:" + subModelClass.getCode());
-                        } else {
-                            systemModelClassMap.put(subModelClass.getCode(), subModelClass);
+            synchronized (RESULT) {
+                for (var modelClass : model.getClasses()) {
+                    if (CollUtil.isNotEmpty(modelClass.getSubClasses())) {
+                        for (var subModelClass : modelClass.getSubClasses()) {
+                            if (subModelClass == null) {
+                                continue;
+                            }
+                            if (systemModelClassMap.containsKey(subModelClass.getCode())) {
+                                throw new IllegalArgumentException("subModelClass is duplicate. " +
+                                        "code:" + subModelClass.getCode());
+                            } else {
+                                systemModelClassMap.put(subModelClass.getCode(), subModelClass);
+                            }
                         }
                     }
                 }
