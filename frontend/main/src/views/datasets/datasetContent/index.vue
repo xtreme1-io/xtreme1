@@ -7,6 +7,7 @@
         :lockedNum="lockedNum"
         :type="(info?.type as datasetTypeEnum)"
       />
+      <TipModal @register="tipRegister" />
       <ModelRun
         @register="registerRunModel"
         :selectName="selectName"
@@ -161,6 +162,7 @@
     deleteBatchDataset,
     getLockedByDataset,
     getStatusNum,
+    hasOntologyApi,
     makeFrameSeriesApi,
     takeRecordByData,
     ungroupFrameSeriesApi,
@@ -198,9 +200,11 @@
   import { countFormat, goToTool, setDatasetBreadcrumb } from '/@/utils/business';
   import { useLoading } from '/@/components/Loading';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
+  import TipModal from './components/TipModal.vue';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
     useModal();
+  const [tipRegister, { openModal: openTipModal, closeModal: closeTipModal }] = useModal();
   const [registerRunModel, { openModal: openRunModal }] = useModal();
   const [open, close] = useLoading({});
   const { query } = useRoute();
@@ -445,16 +449,26 @@
       type = dataTypeEnum.FRAME_SERIES;
       templist = selectedList.value;
     }
+    const flag = handleEmpty(templist.map((item) => item.id || item) as string[], type);
+    if (flag) {
+      return;
+    }
+
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
       dataType: type,
     });
     goToTool({ recordId: res }, info.value?.type);
+
     // fixedFetchList();
   };
 
   const handleSingleAnnotate = async (dataId) => {
+    const flag = handleEmpty([dataId], dataTypeEnum.SINGLE_DATA);
+    if (!flag) {
+      return;
+    }
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: [dataId],
@@ -462,6 +476,23 @@
     });
     goToTool({ recordId: res }, info.value?.type);
     // fixedFetchList();
+  };
+
+  const handleEmpty = async (list, type) => {
+    const res = await hasOntologyApi({ datasetId: id as unknown as number });
+    if (!res) {
+      openTipModal(true, {
+        callback: async () => {
+          const res = await takeRecordByData({
+            datasetId: id as unknown as number,
+            dataIds: list,
+            dataType: type,
+          });
+          goToTool({ recordId: res }, info.value?.type);
+        },
+      });
+    }
+    return res;
   };
 
   const handleAnotateFrame = async (dataId) => {
