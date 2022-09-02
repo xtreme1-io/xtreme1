@@ -14,8 +14,6 @@ export function useProvideEditor() {
     window.editor = editor;
 
     editor.state = reactive(editor.state);
-    editor.state.config.enableShowAttr = true;
-    editor.state.config.showAttr = true;
 
     initRegistry(editor);
 
@@ -44,8 +42,8 @@ export function getDefault(): IBSState {
             id: '',
             nickname: '',
         },
-        datasetName:'',
-        datasetType:'',
+        datasetName: '',
+        datasetType: '',
         datasetId: '',
         recordId: '',
     };

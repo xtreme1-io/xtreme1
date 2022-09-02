@@ -2,7 +2,7 @@ import { get, post } from './base';
 import { IModel } from 'pc-editor';
 
 export async function getModelList() {
-    let url = '/api/dataset/model/findAll';
+    let url = '/api/model/list';
     let data = await get(url);
     data = data.data || [];
 

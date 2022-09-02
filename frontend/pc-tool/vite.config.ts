@@ -12,7 +12,8 @@ export default defineConfig({
         proxy: {
             '/api': {
                 changeOrigin: true,
-                target: 'https://app.alidev.beisai.com',
+                target: 'https://x1-community.alidev.beisai.com/',
+                // target: 'https://app.alidev.beisai.com',
             },
         },
     },

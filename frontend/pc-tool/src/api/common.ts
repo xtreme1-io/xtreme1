@@ -22,7 +22,7 @@ export async function getUrl(url: string) {
 }
 
 export async function saveObject(config: any) {
-    let url = '/api/dataset/annotation/object/save';
+    let url = '/api/annotate/object/save';
     let data = await post(url, config);
     data = data.data || [];
 
@@ -39,14 +39,14 @@ export async function saveObject(config: any) {
 export async function getDataObject(dataIds: string[] | string) {
     if (!Array.isArray(dataIds)) dataIds = [dataIds];
 
-    let url = '/api/dataset/annotation/object/listByDataIds';
+    let url = '/api/annotate/object/listByDataIds';
     let argsStr = queryStr({ dataIds });
     let data = await get(`${url}?${argsStr}`);
     data = data.data || [];
 
     let objectsMap = {} as Record<string, IObject[]>;
     // let objects = [] as IObject[];
-    (data.dataAnnotationObjects || []).forEach((e: any) => {
+    data.forEach((e: any) => {
         let dataId = e.dataId;
         objectsMap[dataId] = objectsMap[dataId] || [];
 
@@ -64,7 +64,7 @@ export async function getDataObject(dataIds: string[] | string) {
 export async function getDataClassification(dataIds: string[] | string) {
     if (!Array.isArray(dataIds)) dataIds = [dataIds];
 
-    let url = `/api/dataset/annotation/data/listByDataIds`;
+    let url = `/api/annotate/data/listByDataIds`;
     let argsStr = queryStr({ dataIds });
     let data = await get(`${url}?${argsStr}`);
     data = data.data || {};
@@ -85,7 +85,7 @@ export async function unlockRecord(recordId: string) {
 }
 
 export async function getInfoByRecordId(recordId: string) {
-    let url = `/api/dataset/data/findDataAnnotationRecord/${recordId}`;
+    let url = `/api/data/findDataAnnotationRecord/${recordId}`;
     let data = await get(url);
     data = data.data;
     // 没有结果
@@ -130,12 +130,12 @@ export async function getInfoByRecordId(recordId: string) {
 }
 
 export async function saveDataClassification(config: any) {
-    let url = `/api/dataset/annotation/data/save`;
+    let url = `/api/annotate/data/save`;
     await post(url, config);
 }
 
 export async function getDataSetClassification(datasetId: string) {
-    let url = `api/annotation/datasetClassification/findAll/${datasetId}`;
+    let url = `api/datasetClassification/findAll/${datasetId}`;
     let data = await get(url);
     data = data.data || [];
 
@@ -145,7 +145,7 @@ export async function getDataSetClassification(datasetId: string) {
 }
 
 export async function getDataSetClass(datasetId: string) {
-    let url = `/api/annotation/datasetClass/findAll/${datasetId}`;
+    let url = `/api/datasetClass/findAll/${datasetId}`;
     let data = await get(url);
     data = data.data || [];
 
@@ -207,7 +207,7 @@ export async function getDataSetClass(datasetId: string) {
 }
 
 export async function getDataFile(dataId: string) {
-    let url = `/api/dataset/data/listByIds`;
+    let url = `/api/data/listByIds`;
     let data = await get(url, { dataIds: dataId });
 
     data = data.data || [];
@@ -271,7 +271,7 @@ export async function getUserInfo() {
     return user;
 }
 export async function getDataSetInfo(datasetId: string) {
-    let url = `/api/dataset/dataset/info/${datasetId}`;
+    let url = `/api/dataset/info/${datasetId}`;
     let { data } = await get(url);
     return data;
 }
