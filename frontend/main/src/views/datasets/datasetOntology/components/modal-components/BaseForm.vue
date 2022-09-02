@@ -607,7 +607,7 @@
         if (props.activeTab == ClassTypeEnum.CLASS) {
           try {
             const res = await validateClassNameApi(params);
-            if (res) {
+            if (!res) {
               afterValid(true, value);
               return Promise.resolve();
             } else {
@@ -623,7 +623,7 @@
         } else {
           try {
             const res = await validateClassificationNameApi(params);
-            if (res) {
+            if (!res) {
               afterValid(true, value);
               return Promise.resolve();
             } else {

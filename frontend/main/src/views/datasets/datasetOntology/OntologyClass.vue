@@ -7,10 +7,6 @@
       </div>
       <div class="classes__left--header inline-flex">
         <!-- 按钮 -->
-        <Button class="mr-10px" type="default" @click="handleCopy" :size="ButtonSize.LG">
-          {{ t('business.ontology.copy.copyFrom') }}
-        </Button>
-        <!-- 按钮 -->
         <Button gradient @click="handleCreate" :size="ButtonSize.LG" noBorder>
           {{ t('common.createText') }}
         </Button>
@@ -65,12 +61,6 @@
       :classId="classId"
       :classificationId="classificationId"
     />
-    <CopyModal
-      @register="copyRegister"
-      @copy="handleCopyFrom"
-      :activeTab="activeTab"
-      :datasetType="datasetType"
-    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -83,7 +73,6 @@
   import ClassCard from './components/ClassCard.vue';
   import FormModal from './components/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
-  import CopyModal from './copy-from/CopyModal.vue';
   // 工具
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
@@ -101,10 +90,6 @@
     getClassificationByIdApi,
   } from '/@/api/business/datasetOntology';
   import {
-    getClassByIdApi as getOntologyClassByIdApi,
-    getClassificationByIdApi as getOntologyClassificationByIdApi,
-  } from '/@/api/business/ontologyClasses';
-  import {
     GetListParams,
     ClassItem,
     ClassificationItem,
@@ -117,7 +102,6 @@
   import OntologyActive from '/@/assets/svg/tags/classActive.svg';
   import { setDatasetBreadcrumb } from '/@/utils/business';
   const [register, { openModal }] = useModal();
-  const [copyRegister, { openModal: openCopyModal }] = useModal();
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('datasetOntology');
@@ -183,33 +167,6 @@
   // const activeTab = ref<ClassTypeEnum>(ClassTypeEnum.CLASS);
   // const activeTab = ref<ClassTypeEnum>(ClassTypeEnum.CLASSIFICATION);
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
-  // 复制
-  const handleCopy = () => {
-    openCopyModal(true, {});
-  };
-  const handleCopyFrom = async (id) => {
-    // console.log(id);
-
-    // 根据 id 获取 ontology 内部的 class | classification
-    try {
-      if (pageType == ClassTypeEnum.CLASS) {
-        detail.value = (await getOntologyClassByIdApi({ id: id })) as any;
-        // class
-        classId.value = detail.value?.id;
-      } else {
-        detail.value = await getOntologyClassificationByIdApi({ id: id });
-        // classification
-        classificationId.value = detail.value?.id;
-      }
-      ontologyId.value = detail.value?.ontologyId;
-      // console.log(detail.value);
-
-      detail.value!.id = undefined as any;
-      openModal();
-    } catch (error: any) {
-      createMessage.error(String(error));
-    }
-  };
   // 新建
   const handleCreate = () => {
     // 重置一些可能来自编辑、继承的修改了的数据
