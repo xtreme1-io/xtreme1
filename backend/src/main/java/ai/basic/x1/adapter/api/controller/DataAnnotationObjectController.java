@@ -3,6 +3,7 @@ package ai.basic.x1.adapter.api.controller;
 import ai.basic.x1.adapter.dto.DataAnnotationObjectDTO;
 import ai.basic.x1.adapter.dto.request.ObjectResultDTO;
 import ai.basic.x1.adapter.dto.response.DataAnnotationObjectResponseDTO;
+import ai.basic.x1.adapter.dto.response.DataAnnotationObjectResultDTO;
 import ai.basic.x1.entity.DataAnnotationObjectBO;
 import ai.basic.x1.usecase.DataAnnotationObjectUseCase;
 import ai.basic.x1.util.DefaultConverter;
@@ -41,10 +42,10 @@ public class DataAnnotationObjectController {
     }
 
     @GetMapping("/listByDataIds")
-    public List<DataAnnotationObjectDTO> listByDataIds(@RequestParam List<Long> dataIds) {
+    public DataAnnotationObjectResultDTO listByDataIds(@RequestParam List<Long> dataIds) {
         var dataAnnotationObjects = DefaultConverter.convert(
                 dataAnnotationObjectUseCase.findByDataIds(dataIds), DataAnnotationObjectDTO.class);
-        return dataAnnotationObjects;
+        return DataAnnotationObjectResultDTO.builder().dataAnnotationObjects(dataAnnotationObjects).build();
     }
 
     private List<DataAnnotationObjectDTO> convertToDataAnnotationObject(ObjectResultDTO objectResultDTO) {
