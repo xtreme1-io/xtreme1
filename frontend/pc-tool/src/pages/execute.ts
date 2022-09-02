@@ -32,7 +32,7 @@ export function execute(): IPageHandler {
         try {
             // 更加流水号加载数据列表
             await loadRecord();
-            await loadUserInfo();
+            // await loadUserInfo();
             await loadDataSetInfo();
             await Promise.all([
                 // 加载dataset Classification

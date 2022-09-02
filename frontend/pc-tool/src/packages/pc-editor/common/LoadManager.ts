@@ -91,7 +91,7 @@ export default class LoadManager {
         this.editor.state.filterActive = [];
         this.editor.dataManager.setFilterFromData();
         this.editor.dataManager.loadDataFromManager();
-        // if (!isSeriesFrame) this.editor.updateIDCounter();
+        this.editor.updateIDCounter();
         // this.editor.pc.addObject(annotates);
     }
 
