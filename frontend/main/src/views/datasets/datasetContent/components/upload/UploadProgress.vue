@@ -225,8 +225,8 @@
                 uploadParams,
                 fileItem.controller.signal,
               );
-              console.log('serialNumbers', serialNumbers);
               const uploadStatus = ref<UploadStatusEnum>(UploadStatusEnum.DOWNLOADING);
+              console.log('upload local serialNumbers', serialNumbers);
               // 根据流水号查询
               // -- 定义方法
               const findUploadRecord = async () => {
@@ -252,13 +252,14 @@
                   uploadStatus.value = status;
 
                   // 进度 -- 目前为各占 50%
-                  const downloadPercent = parseInt(
-                    (Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50,
-                  );
-                  const parsedPercent = parseInt(
-                    (Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50,
-                  );
-                  temp[0].percent = downloadPercent || 0 + parsedPercent || 0;
+                  const downloadPercent =
+                    parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50) ||
+                    0;
+                  const parsedPercent =
+                    parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50) || 0;
+
+                  console.log(downloadPercent, '==', parsedPercent);
+                  temp[0].percent = downloadPercent + parsedPercent;
 
                   if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
                     clearInterval(processTimer.value);
@@ -356,6 +357,7 @@
       // 获取流水号 serialNumbers
       const serialNumbers = await uploadDatasetApi(uploadParams, fileItem.controller.signal);
       const uploadStatus = ref<UploadStatusEnum>(UploadStatusEnum.DOWNLOADING);
+      console.log('upload url serialNumbers', serialNumbers);
       // 根据流水号查询
       // -- 定义方法
       const findUploadRecord = async () => {
@@ -381,13 +383,13 @@
           uploadStatus.value = status;
 
           // 进度 -- 目前为各占 50%
-          const downloadPercent = parseInt(
-            (Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50,
-          );
-          const parsedPercent = parseInt(
-            (Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50,
-          );
-          temp[0].percent = downloadPercent || 0 + parsedPercent || 0;
+          const downloadPercent =
+            parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50) || 0;
+          const parsedPercent =
+            parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50) || 0;
+
+          console.log(downloadPercent, '==', parsedPercent);
+          temp[0].percent = downloadPercent + parsedPercent;
 
           if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
             clearInterval(processTimer.value);

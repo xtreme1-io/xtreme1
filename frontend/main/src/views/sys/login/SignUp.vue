@@ -126,7 +126,7 @@
         ...formData,
       });
       if (subscribe.value) {
-        mixpanel.track('signUp', formData);
+        mixpanel.track('signUp', { email: formData.username });
       }
       userStore.setToken(res.token);
       // isSuccess.value = true;

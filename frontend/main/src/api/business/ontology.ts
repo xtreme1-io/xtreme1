@@ -10,7 +10,7 @@ import {
 } from './model/ontologyModel';
 
 enum Api {
-  ONTOLOGY = '/annotation/ontology',
+  ONTOLOGY = '/ontology',
 }
 
 /**
