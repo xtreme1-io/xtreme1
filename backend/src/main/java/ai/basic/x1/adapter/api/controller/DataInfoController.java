@@ -45,11 +45,6 @@ public class DataInfoController extends DatasetBaseController {
     @Autowired
     protected DataAnnotationRecordUseCase dataAnnotationRecordUseCase;
 
-    /**
-     * 上传data数据
-     *
-     * @param dto data数据对象
-     */
     @PostMapping("upload")
     public Long upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);
@@ -149,9 +144,7 @@ public class DataInfoController extends DatasetBaseController {
     @PostMapping("annotate")
     public Long annotate(@Validated @RequestBody DataAnnotateDTO dataAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
         return dataInfoUsecase.annotate(
-                DefaultConverter.convert(dataAnnotateDTO, DataPreAnnotationBO.class),
-                loggedUserDTO.getId()
-        );
+                DefaultConverter.convert(dataAnnotateDTO, DataPreAnnotationBO.class));
     }
 
     @PostMapping("annotateWithModel")
@@ -159,7 +152,7 @@ public class DataInfoController extends DatasetBaseController {
         var resultFilterParam = dataModelAnnotateDTO.getResultFilterParam();
         var modelCode = EnumUtil.fromString(ModelCodeEnum.class, dataModelAnnotateDTO.getModelCode());
         ModelParamUtils.valid(resultFilterParam, modelCode);
-        return dataInfoUsecase.annotate(
+        return dataInfoUsecase.annotateWithModel(
                 DefaultConverter.convert(dataModelAnnotateDTO, DataPreAnnotationBO.class),
                 loggedUserDTO.getId()
         );

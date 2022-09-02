@@ -7,8 +7,14 @@ import useTool from '../hook/useTool';
 export function execute(): IPageHandler {
     let editor = useInjectEditor();
 
-    let { loadClasses, loadRecord, loadUserInfo,loadDataSetInfo, loadModels, loadDateSetClassification } =
-        useTool();
+    let {
+        loadClasses,
+        loadRecord,
+        loadUserInfo,
+        loadDataSetInfo,
+        loadModels,
+        loadDateSetClassification,
+    } = useTool();
 
     // datasetId=30093&dataId=352734&type=readOnly
 
@@ -26,7 +32,7 @@ export function execute(): IPageHandler {
         try {
             // 更加流水号加载数据列表
             await loadRecord();
-            await loadUserInfo();
+            // await loadUserInfo();
             await loadDataSetInfo();
             await Promise.all([
                 // 加载dataset Classification
@@ -36,12 +42,6 @@ export function execute(): IPageHandler {
                 // 加载模型信息
                 loadModels(),
             ]);
-
-            // 连续帧 需要加载所有的数据
-            // if (state.isSeriesFrame) {
-            //     await editor.loadManager.loadAllObjects();
-            //     await editor.loadManager.loadAllClassification();
-            // }
 
             // 加载第一帧data
             await editor.loadFrame(0, false);

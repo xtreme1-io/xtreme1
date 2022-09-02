@@ -115,6 +115,12 @@ public class DataInfoUseCase {
     @Autowired
     private UploadRecordDAO uploadRecordDAO;
 
+    @Autowired
+    private DatasetClassDAO datasetClassDAO;
+
+    @Autowired
+    private DatasetClassificationDAO datasetClassificationDAO;
+
     @Value("${file.tempPath:/tmp/x1/}")
     private String tempPath;
 
@@ -122,13 +128,13 @@ public class DataInfoUseCase {
     private String version;
 
     @Value("${file.size.large:400}")
-    private int largeFileSise;
+    private int largeFileSize;
 
     @Value("${file.size.medium:200}")
-    private int mediumFileSise;
+    private int mediumFileSize;
 
     @Value("${file.size.small:100}")
-    private int smallFileSise;
+    private int smallFileSize;
 
     @Value("${file.prefix.large:large}")
     private String large;
@@ -142,7 +148,7 @@ public class DataInfoUseCase {
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
 
     /**
-     * 过滤掉文件后缀不是image的文件，当返回为false时则丢弃文件
+     * Filter out files whose file suffix is not image, and discard the file when it returns false
      */
     private final FileFilter filefilter = file -> {
         //if the file extension is image return true, else false
@@ -150,9 +156,9 @@ public class DataInfoUseCase {
     };
 
     /**
-     * 批量删除
+     * Batch delete
      *
-     * @param ids 数据id集合
+     * @param ids Data id collection
      */
     @Transactional(rollbackFor = Exception.class)
     public void deleteBatch(List<Long> ids) {
@@ -167,10 +173,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 分页查询dataInfo
+     * Paging query dataInfo
      *
-     * @param queryBO 查询参数对象
-     * @return dataInfo page
+     * @param queryBO Query parameter object
+     * @return DataInfo page
      */
     public Page<DataInfoBO> findByPage(DataInfoQueryBO queryBO) {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
@@ -188,8 +194,6 @@ public class DataInfoUseCase {
         if (StrUtil.isNotBlank(queryBO.getSortField())) {
             lambdaQueryWrapper.last(" order by " + queryBO.getSortField().toLowerCase() + " " + queryBO.getAscOrDesc());
         }
-
-
         var dataInfoPage = dataInfoDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()), lambdaQueryWrapper);
         var dataInfoBOPage = DefaultConverter.convert(dataInfoPage, DataInfoBO.class);
         var dataInfoBOList = dataInfoBOPage.getList();
@@ -209,10 +213,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 获取文件信息根据datasetId进行分组
+     * Get file information to group according to dataset id
      *
-     * @param dataInfoBOList 数据集合
-     * @return dataset与数据集合Map
+     * @param dataInfoBOList Data collection
+     * @return Dataset and data collection map
      */
     public Map<Long, List<DataInfoBO>> getDataInfoListFileMap(List<DataInfoBO> dataInfoBOList) {
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
@@ -224,10 +228,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 根据id查询详情
+     * Query details by id
      *
-     * @param id 数据id
-     * @return 数据对象
+     * @param id Data id
+     * @return Data information
      */
     public DataInfoBO findById(Long id) {
         var dataInfoBO = DefaultConverter.convert(dataInfoDAO.getById(id), DataInfoBO.class);
@@ -245,10 +249,10 @@ public class DataInfoUseCase {
 
 
     /**
-     * 根据id集合查询数据对象list
+     * Query data object list according to id collection
      *
-     * @param ids id集合
-     * @return 数据对象集合
+     * @param ids id collection
+     * @return Collection of data objects
      */
     public List<DataInfoBO> listByIds(List<Long> ids) {
         var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
@@ -260,10 +264,10 @@ public class DataInfoUseCase {
 
 
     /**
-     * 根据数据集id集合查询数据集统计
+     * Query dataset statistics based on dataset id collection
      *
-     * @param datasetIds 数据集id集合
-     * @return 数据集统计数据
+     * @param datasetIds dataset id collection
+     * @return Dataset Statistics
      */
     public Map<Long, DatasetStatisticsBO> getDatasetStatisticsByDatasetIds(List<Long> datasetIds) {
         var datasetStatisticsList = dataInfoDAO.getBaseMapper().getDatasetStatisticsByDatasetIds(datasetIds);
@@ -271,6 +275,12 @@ public class DataInfoUseCase {
                 .collect(Collectors.toMap(DatasetStatistics::getDatasetId, datasetStatistics -> DefaultConverter.convert(datasetStatistics, DatasetStatisticsBO.class), (k1, k2) -> k1));
     }
 
+    /**
+     * Get dataset statistics based on dataset id
+     *
+     * @param datasetId Dataset id
+     * @return Dataset statistics
+     */
     public DatasetStatisticsBO getDatasetStatisticsByDatasetId(Long datasetId) {
         var datasetStatisticsList = dataInfoDAO.getBaseMapper().getDatasetStatisticsByDatasetIds(Collections.singletonList(datasetId));
         return DefaultConverter.convert(datasetStatisticsList.stream().findFirst()
@@ -278,7 +288,7 @@ public class DataInfoUseCase {
     }
 
     /**
-     * generate pre-signed url
+     * Generate pre-signed url
      *
      * @param fileName  file name
      * @param datasetId dataset id
@@ -295,9 +305,9 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 批量插入
+     * Batch insert
      *
-     * @param dataInfoBOList 数据详情集合
+     * @param dataInfoBOList Collection of data details
      */
     public List<DataInfoBO> insertBatch(List<DataInfoBO> dataInfoBOList) {
         List<DataInfo> infos = DefaultConverter.convert(dataInfoBOList, DataInfo.class);
@@ -306,9 +316,9 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 往dataset中上传数据
+     * Upload data
      *
-     * @param dataInfoUploadBO 上传数据对象 包含文件信息集合
+     * @param dataInfoUploadBO Upload data object Contains a collection of file information
      */
     @Transactional(rollbackFor = RuntimeException.class)
     public Long upload(DataInfoUploadBO dataInfoUploadBO) {
@@ -348,6 +358,13 @@ public class DataInfoUseCase {
 
     }
 
+    /**
+     * Verify url file suffix
+     *
+     * @param dataInfoUploadBO Upload data object
+     * @param mimeType         Mime type
+     * @return boolean
+     */
     private boolean validateUrlFileSuffix(DataInfoUploadBO dataInfoUploadBO, String mimeType) {
         boolean boo;
         boo = COMPRESSED_DATA_TYPE.contains(mimeType);
@@ -358,10 +375,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 导出data数据
+     * Export data
      *
-     * @param dataInfoQueryBO 查询参数
-     * @return 流水号
+     * @param dataInfoQueryBO Query parameters
+     * @return Serial number
      */
     public Long export(DataInfoQueryBO dataInfoQueryBO) {
         var dataset = datasetDAO.getById(dataInfoQueryBO.getDatasetId());
@@ -541,58 +558,77 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 数据标注
+     * Data annotation
      *
-     * @param dataPreAnnotationBO 数据预标注对象
-     * @return 标注记录ID
+     * @param dataPreAnnotationBO Data pre-annotation parameter
+     * @return Annotation record id
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO) {
+        try {
+            var datasetClassLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClass.class);
+            datasetClassLambdaQueryWrapper.eq(DatasetClass::getDatasetId, dataPreAnnotationBO.getDatasetId());
+            var datasetClassCount = datasetClassDAO.count(datasetClassLambdaQueryWrapper);
+
+            var datasetClassificationLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClassification.class);
+            datasetClassificationLambdaQueryWrapper.eq(DatasetClassification::getDatasetId, dataPreAnnotationBO.getDatasetId());
+            var datasetClassificationCount = datasetClassificationDAO.count(datasetClassificationLambdaQueryWrapper);
+            if (datasetClassCount == 0 && datasetClassificationCount == 0) {
+                throw new UsecaseException(UsecaseCode.DATASET_CLASS_CLASSIFICATION_EMPTY);
+            }
+            return annotateCommon(dataPreAnnotationBO, null);
+        } catch (DuplicateKeyException duplicateKeyException) {
+            log.error("Data edit duplicate", duplicateKeyException);
+            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+        }
+    }
+
+    private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo) {
+        var dataAnnotationRecord = DataAnnotationRecord.builder()
+                .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+        dataAnnotationRecordDAO.getBaseMapper().insertIgnore(dataAnnotationRecord);
+        var dataIds = dataPreAnnotationBO.getDataIds();
+        batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+        return dataAnnotationRecord.getId();
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public Long annotateWithModel(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
         try {
             Long serialNo = IdUtil.getSnowflakeNextId();
-            DataAnnotationRecord dataAnnotationRecord;
-            ModelBO modelBO = null;
-            DataAnnotationRecord.DataAnnotationRecordBuilder builder = DataAnnotationRecord.builder();
-            if (ObjectUtil.isNotNull(dataPreAnnotationBO.getModelId())) {
-                modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
-                builder.serialNo(serialNo);
-                if (ObjectUtil.isNull(modelBO)) {
-                    throw new UsecaseException(UsecaseCode.MODEL_DOES_NOT_EXIST);
-                }
+            ModelBO modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
+            if (ObjectUtil.isNull(modelBO)) {
+                throw new UsecaseException(UsecaseCode.MODEL_DOES_NOT_EXIST);
             }
-            builder.datasetId(dataPreAnnotationBO.getDatasetId());
-            dataAnnotationRecord = builder.build();
-            dataAnnotationRecordDAO.getBaseMapper().insertIgnore(dataAnnotationRecord);
-            List<Long> dataIds = dataPreAnnotationBO.getDataIds();
-            batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
             if (ObjectUtil.isNotNull(modelBO)) {
                 batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
             }
-            return dataAnnotationRecord.getId();
+            return annotateCommon(dataPreAnnotationBO, serialNo);
         } catch (DuplicateKeyException duplicateKeyException) {
+            log.error("Data edit duplicate", duplicateKeyException);
             throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
         }
     }
 
     /**
-     * 批量插入锁定数据
+     * Batch insert lock data
      *
-     * @param dataIds              数据ID集合
-     * @param dataAnnotationRecord 数据标注记录对象
+     * @param dataIds              Data id collection
+     * @param dataAnnotationRecord Data annotation record
      */
     private void batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord) {
         if (CollectionUtil.isEmpty(dataIds)) {
             return;
         }
-        List<DataEdit> dataEditSubList = new ArrayList<>();
+        var dataEditSubList = new ArrayList<DataEdit>();
         int i = 1;
-        DataEdit.DataEditBuilder dataEditBuilder = DataEdit.builder()
+        var dataEditBuilder = DataEdit.builder()
                 .annotationRecordId(dataAnnotationRecordId)
                 .datasetId(dataAnnotationRecord.getDatasetId())
                 .modelId(dataAnnotationRecord.getModelId())
                 .modelVersion(dataAnnotationRecord.getModelVersion());
-        for (Long dataId : dataIds) {
-            DataEdit dataEdit = dataEditBuilder.dataId(dataId).build();
+        for (var dataId : dataIds) {
+            var dataEdit = dataEditBuilder.dataId(dataId).build();
             dataEditSubList.add(dataEdit);
             if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
                 dataEditDAO.getBaseMapper().insertBatch(dataEditSubList);
@@ -602,38 +638,45 @@ public class DataInfoUseCase {
         }
     }
 
+    /**
+     * Model annotate
+     *
+     * @param dataPreAnnotationBO Data pre-annotation parameter
+     * @param userId              User id
+     * @return Serial number
+     */
     @Transactional(rollbackFor = Throwable.class)
     public Long modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
-        ModelBO modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
-        Long serialNo = IdUtil.getSnowflakeNextId();
+        var modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
+        var serialNo = IdUtil.getSnowflakeNextId();
         batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
         return serialNo;
     }
 
     /**
-     * 批量插入data模型结果
+     * Batch insert data model results
      *
-     * @param dataPreAnnotationBO 数据预标注对象
-     * @param modelBO             模型对象
-     * @param userId              用户ID
+     * @param dataPreAnnotationBO Data pre-annotation parameter
+     * @param modelBO             Model information
+     * @param userId              User id
      */
     private void batchInsertModelDataResult(DataPreAnnotationBO dataPreAnnotationBO, ModelBO modelBO, Long userId, Long serialNo) {
-        List<ModelDataResult> modelDataResultList = new ArrayList<>();
-        List<Long> dataIds = dataPreAnnotationBO.getDataIds();
-        ModelMessageBO modelMessageBO = DefaultConverter.convert(dataPreAnnotationBO, ModelMessageBO.class);
+        var modelDataResultList = new ArrayList<ModelDataResult>();
+        var dataIds = dataPreAnnotationBO.getDataIds();
+        var modelMessageBO = DefaultConverter.convert(dataPreAnnotationBO, ModelMessageBO.class);
         modelMessageBO.setCreatedBy(userId);
         modelMessageBO.setModelSerialNo(serialNo);
         modelMessageBO.setModelId(modelBO.getId());
         modelMessageBO.setModelVersion(modelBO.getVersion());
         int i = 1;
-        ModelDataResult.ModelDataResultBuilder modelDataResultBuilder = ModelDataResult.builder()
+        var modelDataResultBuilder = ModelDataResult.builder()
                 .modelId(modelBO.getId())
                 .modelVersion(modelBO.getVersion())
                 .datasetId(dataPreAnnotationBO.getDatasetId())
                 .modelSerialNo(serialNo)
                 .resultFilterParam(JSONUtil.toJsonStr(dataPreAnnotationBO.getResultFilterParam()));
-        for (Long dataId : dataIds) {
-            ModelDataResult modelDataResult = modelDataResultBuilder.dataId(dataId).build();
+        for (var dataId : dataIds) {
+            var modelDataResult = modelDataResultBuilder.dataId(dataId).build();
             modelDataResultList.add(modelDataResult);
             if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
                 modelDataResultDAO.getBaseMapper().insertIgnoreBatch(modelDataResultList);
@@ -641,8 +684,8 @@ public class DataInfoUseCase {
             }
             i++;
         }
-        List<DataInfoBO> dataInfoBOList = listByIds(dataIds);
-        Map<Long, DataInfoBO> dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
+        var dataInfoBOList = listByIds(dataIds);
+        var dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
         for (var dataId : dataIds) {
             modelMessageBO.setDataId(dataId);
             modelMessageBO.setDataInfo(dataMap.get(dataId));
@@ -651,6 +694,13 @@ public class DataInfoUseCase {
         }
     }
 
+    /**
+     * Get model annotation results
+     *
+     * @param serialNo Serial number
+     * @param dataIds  Data id collection
+     * @return Model annotation result
+     */
     public ModelObjectBO getModelAnnotateResult(Long serialNo, List<Long> dataIds) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<ModelDataResult>();
         lambdaQueryWrapper.eq(ModelDataResult::getModelSerialNo, serialNo);
@@ -658,7 +708,7 @@ public class DataInfoUseCase {
             lambdaQueryWrapper.in(ModelDataResult::getDataId, dataIds);
         }
         lambdaQueryWrapper.isNotNull(ModelDataResult::getModelResult);
-        List<ModelDataResult> modelDataResultList = modelDataResultDAO.getBaseMapper().selectList(lambdaQueryWrapper);
+        var modelDataResultList = modelDataResultDAO.getBaseMapper().selectList(lambdaQueryWrapper);
         if (CollectionUtil.isNotEmpty(modelDataResultList)) {
             var modelId = modelDataResultList.stream().findFirst().orElse(new ModelDataResult()).getModelId();
             var modelBO = modelUseCase.findById(modelId);
@@ -668,7 +718,12 @@ public class DataInfoUseCase {
         return new ModelObjectBO();
     }
 
-
+    /**
+     * Download the file and unzip the file
+     *
+     * @param dataInfoUploadBO Upload data parameter
+     * @param function         function
+     */
     private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
@@ -676,7 +731,7 @@ public class DataInfoUseCase {
         var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
         var savePath = baseSavePath + FileUtil.getName(path);
         FileUtil.mkParentDirs(savePath);
-        //将压缩包下载到本地
+        // Download the compressed package locally
         log.info("Get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
         HttpUtil.downloadFileFromUrl(fileUrl, FileUtil.newFile(savePath), new StreamProgress() {
             @Override
@@ -704,13 +759,13 @@ public class DataInfoUseCase {
         log.info("Get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
         dataInfoUploadBO.setSavePath(savePath);
         dataInfoUploadBO.setBaseSavePath(baseSavePath);
-        //A single image does not need to be decompressed
+        // A single image does not need to be decompressed
         if (IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(path))) {
             function.accept(dataInfoUploadBO);
             FileUtil.clean(baseSavePath);
             return;
         }
-        //解压文件
+        // Unzip files
         log.info("Start decompression,datasetId:{},filePath:{}", datasetId, savePath);
         DecompressionFileUtils.decompress(savePath, baseSavePath);
         function.accept(dataInfoUploadBO);
@@ -718,9 +773,9 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 获取文件信息，并往data list设置文件信息
+     * Get the file information and set the file information to the data list
      *
-     * @param dataInfoBOList 数据集合
+     * @param dataInfoBOList Data collection
      */
     private void setDataInfoBOListFile(List<DataInfoBO> dataInfoBOList) {
         var fileIds = new ArrayList<Long>();
@@ -732,10 +787,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 往content中设置文件信息
+     * Set file information in content
      *
-     * @param fileNodeBOList data文件信息
-     * @param fileMap        文件map
+     * @param fileNodeBOList Data file information
+     * @param fileMap        File map
      */
     private void setFile(List<DataInfoBO.FileNodeBO> fileNodeBOList, Map<Long, RelationFileBO> fileMap) {
         if (CollectionUtil.isEmpty(fileNodeBOList)) {
@@ -751,10 +806,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 根据数据id查询文件信息
+     * Query file information based on file ID collection
      *
-     * @param fileIds 文件id集合
-     * @return 文件对象map
+     * @param fileIds File id collection
+     * @return Relation file map
      */
     private Map<Long, RelationFileBO> findFileByFileIds(List<Long> fileIds) {
         var relationFileBOList = fileUseCase.findByIds(fileIds);
@@ -764,10 +819,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 从content中循环获取文件ID
+     * Loop to get file ID from content
      *
-     * @param fileNodeBOList 数据集合
-     * @return 文件ID集合
+     * @param fileNodeBOList File node List
+     * @return File id collection
      */
     private List<Long> getFileIds(List<DataInfoBO.FileNodeBO> fileNodeBOList) {
         var fileIds = new ArrayList<Long>();
@@ -785,9 +840,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 查找所有点云的文件夹
+     * Find folders for all point clouds
      *
-     * @param path path
+     * @param path           path
+     * @param pointCloudList point clouds
      */
     private void findPointCloudList(String path, List<File> pointCloudList) {
         var file = new File(path);
@@ -802,10 +858,11 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 根据固定的文件夹获取文件夹下的文件夹或者文件的名称 用于判断该压缩包中有多少贞数据
+     * Obtain the name of the folder or file under the folder according to the fixed folder,
+     * which is used to determine how much data there is in the compressed package
      *
      * @param file           file
-     * @param pointCloudList point_cloud文件夹集合
+     * @param pointCloudList point clouds
      */
     private void getPointCloudFile(File file, List<File> pointCloudList) {
         var fileName = file.getName();
@@ -815,12 +872,12 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 验证文件格式。
-     * 如果 type 是 LIDAR_FUSION 类型, 文件目录必须包含：image、point_cloud、camera_config.
-     * 如果 type 是 LIDAR_BASIC 类型, 文件目录必须包含：point_cloud
+     * Verify folder format
+     * If type is LIDAR_FUSION type, the file directory must contain image,point_cloud,camera_config.
+     * If type is LIDAR_BASIC, the file directory must contain  point_cloud
      *
-     * @param pointCloudParentFile point_cloud目录的父目录
-     * @param type                 上传类型
+     * @param pointCloudParentFile Point cloud parent file
+     * @param type                 Dataset type
      */
     private boolean validDirectoryFormat(File pointCloudParentFile, DatasetTypeEnum type) {
         var dirNames = Arrays.stream(Objects.requireNonNull(pointCloudParentFile.listFiles()))
@@ -851,7 +908,7 @@ public class DataInfoUseCase {
             missDirs.addAll(Sets.difference(basicDirNames, dirNames));
         }
         if (!allMatchDirFormat) {
-            log.error("压缩文件格式缺失: " + missDirs);
+            log.error("Compressed file format is missing: {}", missDirs);
         }
         return !allMatchDirFormat;
     }
@@ -859,7 +916,8 @@ public class DataInfoUseCase {
     /**
      * Get the name collection of data
      *
-     * @param pointCloudParentFile point_cloud parent file
+     * @param pointCloudParentFile Point cloud parent file
+     * @param type                 Dataset type
      */
     private List<String> getDataNames(File pointCloudParentFile, DatasetTypeEnum type) {
         var dataNames = new LinkedHashSet<String>();
@@ -874,10 +932,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 获取文件名称 去掉后缀
+     * Get file name remove suffix
      *
-     * @param file 文件或者文件夹
-     * @return 文件名称
+     * @param file File or folder
+     * @return File name
      */
     private String getFileName(File file) {
         var fileName = file.getName();
@@ -888,9 +946,11 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 查找某一个data的文件
+     * Find a file of data
      *
-     * @param file file
+     * @param file     File
+     * @param dataName Data name
+     * @param type     Dataset type
      */
     private List<File> getDataFiles(File file, String dataName, DatasetTypeEnum type) {
         var dataFiles = new ArrayList<File>();
@@ -919,12 +979,12 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 处理 data 对应的标注结果
+     * Process the annotation results corresponding to data
      *
-     * @param file                       图片为data父级，点云文件为point_cloud
-     * @param dataName                   数据名称
-     * @param dataAnnotationObjectBO     数据标注
-     * @param dataAnnotationObjectBOList 数据标注结果数据集
+     * @param file                       The image is the parent of data, and the point cloud file is point_cloud
+     * @param dataName                   Data name
+     * @param dataAnnotationObjectBO     Data annotation object
+     * @param dataAnnotationObjectBOList Data annotation object list
      */
     public void handleDataResult(File file, String dataName, DataAnnotationObjectBO dataAnnotationObjectBO, List<DataAnnotationObjectBO> dataAnnotationObjectBOList) {
         var resultFile = FileUtil.loopFiles(file).stream()
@@ -946,11 +1006,11 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 组装单帧的content
+     * Assemble the content of a single frame
      *
-     * @param dataFiles 单帧组成文件
-     * @param rootPath  根路径
-     * @return 单帧content
+     * @param dataFiles Data composition file
+     * @param rootPath  Root path
+     * @return content
      */
     private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath) {
         var nodeList = new ArrayList<DataInfoBO.FileNodeBO>();
@@ -971,7 +1031,7 @@ public class DataInfoUseCase {
         return nodeList;
     }
 
-    public List<DataInfoBO.FileNodeBO> getDirList(File node, String rootPath, List<File> files) {
+    private List<DataInfoBO.FileNodeBO> getDirList(File node, String rootPath, List<File> files) {
         List<DataInfoBO.FileNodeBO> nodeList = new ArrayList<>();
         if (node.isDirectory()) {
             for (File n : Objects.requireNonNull(node.listFiles())) {
@@ -983,7 +1043,7 @@ public class DataInfoUseCase {
         return nodeList;
     }
 
-    public DataInfoBO.FileNodeBO getNode(File node, String rootPath, List<File> files) {
+    private DataInfoBO.FileNodeBO getNode(File node, String rootPath, List<File> files) {
         if (node.isDirectory()) {
             return DataInfoBO.FileNodeBO.builder()
                     .name(StrUtil.toCamelCase(node.getName()))
@@ -1001,10 +1061,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 将content中的fileId替换为真实的fileId
+     * Replace the fileId in content with the real fileId
      *
-     * @param nodeList  nodeList
-     * @param fileIdMap 文件ID Map
+     * @param nodeList  File node list
+     * @param fileIdMap File id map
      */
     private void replaceFileId(List<DataInfoBO.FileNodeBO> nodeList, Map<Long, Long> fileIdMap) {
         nodeList.forEach(fileNodeBO -> {
@@ -1017,10 +1077,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 保存数据结果
+     * Batch save data results
      *
-     * @param dataInfoBOList             已经保存的数据集合
-     * @param dataAnnotationObjectBOList 需要保存的数据结果集合
+     * @param dataInfoBOList             Data list
+     * @param dataAnnotationObjectBOList Data annotation object list
      */
     public void saveBatchDataResult(List<DataInfoBO> dataInfoBOList, List<DataAnnotationObjectBO> dataAnnotationObjectBOList) {
         var dataIdMap = dataInfoBOList.stream()
@@ -1033,11 +1093,11 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 上传文件list
+     * Batch upload files
      *
-     * @param rootPath 路径前缀
-     * @param files    文件列表
-     * @return 上传后的文件对象集合
+     * @param rootPath Path prefix
+     * @param files    File list
+     * @return File information list
      */
     public List<FileBO> uploadFileList(Long userId, String rootPath, String tempPath, List<File> files) {
         var bucketName = minioProp.getBucketName();
@@ -1060,28 +1120,28 @@ public class DataInfoUseCase {
 
 
     /**
-     * 根据上传压缩包类型验证文件名称是否正确
+     * Verify that the file name is correct based on the dataset type
      *
-     * @param f    压缩包中文件
-     * @param type 上传类型
-     * @return 文件名称是否正确
+     * @param file Zip file
+     * @param type Dataset type
+     * @return boolean
      */
-    private boolean validateFileNameByType(File f, DatasetTypeEnum type) {
-        var fileName = f.getName();
+    private boolean validateFileNameByType(File file, DatasetTypeEnum type) {
+        var fileName = file.getName();
         var boo = false;
         if (type.equals(LIDAR_FUSION)) {
-            boo = f.isDirectory() && (fileName.startsWith(POINT_CLOUD_IMG) || fileName.equals(POINT_CLOUD) || fileName.equals(CAMERA_CONFIG));
+            boo = file.isDirectory() && (fileName.startsWith(POINT_CLOUD_IMG) || fileName.equals(POINT_CLOUD) || fileName.equals(CAMERA_CONFIG));
         } else if (type.equals(DatasetTypeEnum.LIDAR_BASIC)) {
-            boo = f.isDirectory() && fileName.equals(POINT_CLOUD);
+            boo = file.isDirectory() && fileName.equals(POINT_CLOUD);
         }
         return boo;
     }
 
     /**
-     * 验证文件格式是否正确
+     * Verify that the file format is correct
      *
-     * @param file 文件对象
-     * @return 文件格式是否正确
+     * @param file file
+     * @return Is the file format correct
      */
     private boolean validateFileFormat(File file) {
         var boo = false;
@@ -1094,6 +1154,13 @@ public class DataInfoUseCase {
         return boo;
     }
 
+    /**
+     * Data process
+     *
+     * @param dataList Data list
+     * @param queryBO  Data query parameters
+     * @return Data export collection
+     */
     private List<DataExportBO> processData(List<DataInfoBO> dataList, DataInfoQueryBO queryBO) {
         if (CollectionUtil.isEmpty(dataList)) {
             return List.of();
@@ -1128,9 +1195,9 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 组装导出data数据
+     * Assemble the export data content
      *
-     * @param content data下内容
+     * @param content File node list
      * @return content map
      */
     private Map<String, Object> assembleExportDataContent(List<DataInfoBO.FileNodeBO> content, DatasetTypeEnum datasetType) {
@@ -1152,10 +1219,10 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 组装point_content下面的内容，可能为文件夹
+     * Assemble the content below point_content
      *
-     * @param list 文件节点集合
-     * @return 文件信息集合
+     * @param list File node list
+     * @return File information collection
      */
     private List<Object> handlePointCloudContent(List<DataInfoBO.FileNodeBO> list) {
         var pointCloudList = new ArrayList<>();
@@ -1172,10 +1239,11 @@ public class DataInfoUseCase {
     }
 
     /**
-     * 生成缩略图并上传
+     * Generate thumbnail and upload
      *
-     * @param userId  用户ID集合
-     * @param fileBOS 文件对象集合
+     * @param userId   User id
+     * @param fileBOS  File collection
+     * @param rootPath Root path
      */
     private void createUploadThumbnail(Long userId, List<FileBO> fileBOS, String rootPath) {
         try {
@@ -1195,9 +1263,9 @@ public class DataInfoUseCase {
                     var largeFile = FileUtil.file(baseSavePath, String.format("%s/%s", large, fileName));
                     var mediumFile = FileUtil.file(baseSavePath, String.format("%s/%s", medium, fileName));
                     var smallFile = FileUtil.file(baseSavePath, String.format("%s/%s", small, fileName));
-                    Thumbnails.of(file).size(largeFileSise, largeFileSise).toFile(largeFile);
-                    Thumbnails.of(file).size(mediumFileSise, mediumFileSise).toFile(mediumFile);
-                    Thumbnails.of(file).size(smallFileSise, smallFileSise).toFile(smallFile);
+                    Thumbnails.of(file).size(largeFileSize, largeFileSize).toFile(largeFile);
+                    Thumbnails.of(file).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
+                    Thumbnails.of(file).size(smallFileSize, smallFileSize).toFile(smallFile);
                     // 大压缩图
                     var largePath = String.format("%s%s/%s", basePath, large, fileName);
                     var largeFileBO = fileBOBuilder.path(largePath).relation(LARGE_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
@@ -1214,7 +1282,7 @@ public class DataInfoUseCase {
             try {
                 minioService.uploadFileList(minioProp.getBucketName(), rootPath, tempPath, files);
             } catch (Exception e) {
-                log.error("batch upload file error,filesPath:{}", JSONUtil.parseArray(files.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
+                log.error("Batch upload file error,filesPath:{}", JSONUtil.parseArray(files.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
             }
             fileUseCase.saveBatchFile(userId, thumbnailFileBOS);
         } catch (IOException e) {

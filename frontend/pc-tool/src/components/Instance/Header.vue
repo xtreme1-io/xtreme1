@@ -1,8 +1,8 @@
 <template>
     <div>
         <span class="collapse-title">
-            <span>{{ $$('result-pre') }}</span>
-            <span class="result-classify-name limit" :title="data.name">{{ data.name }}</span>
+            <!-- <span>{{ $$('result-pre') }}</span> -->
+            <span class="result-classify-name limit">Instances</span>
             ({{ data.objectN }})
         </span>
         <div class="tool">

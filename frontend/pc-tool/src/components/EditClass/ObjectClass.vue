@@ -1,17 +1,12 @@
 <template>
-    <div class="sub-header">{{ $$('class-title') }}</div>
+    <div class="sub-header">
+        {{ $$('class-title') }}
+        <span class="class-help" v-show="classInfo">
+            <QuestionCircleOutlined />
+            <div class="class-info">{{ classInfo }}</div>
+        </span>
+    </div>
     <div class="class-list">
-        <!-- :getPopupContainer="(node:HTMLElement)=>node.parentNode" -->
-        <!-- <SelectClass
-            ref="select"
-            :attr="{
-                size: 'small',
-                disabled: !canEdit() || state.isInvisible,
-            }"
-            @change="onClassChange"
-            v-model:value="iState.classType"
-        /> -->
-
         <div class="classType-tag-container">
             <a-tag
                 class="classType-tag"
@@ -23,11 +18,6 @@
                 {{ item.label }}
             </a-tag>
         </div>
-
-        <span class="class-help" v-show="classInfo">
-            <QuestionCircleOutlined />
-            <div class="class-info">{{ classInfo }}</div>
-        </span>
     </div>
     <MsgInfo
         v-show="state.showMsgType === 'class' || state.showMsgType === 'class-standard'"
@@ -200,8 +190,11 @@
 </script>
 
 <style lang="less" scoped>
-    .classType-tag{
+    .classType-tag {
         margin-bottom: 8px;
+        display: inline-block;
+        min-width: 50px;
+        text-align: center;
     }
     .class-label {
         display: inline-block;
@@ -223,14 +216,14 @@
             display: none;
             width: 250px;
             background: #3e3e3e;
-            padding: 2px px;
+            padding: 2px;
             color: #b5b5b5;
             font-size: 12px;
             word-wrap: break-word;
             position: absolute;
             top: 23px;
-            left: -256px;
             z-index: 10;
+            left: -40px;
         }
         &:hover .class-info {
             display: inline-block;

@@ -104,16 +104,8 @@ export const usePermissionStore = defineStore({
       // const roleList = toRaw(userStore.getRoleList) || [];
       const { permissionMode = projectSetting.permissionMode } = appStore.getProjectConfig;
 
-      const routeFilter = (route: AppRouteRecordRaw) => {
-        const { meta } = route;
-        const { roles } = meta || {};
-        if (!roles) return true;
+      const routeFilter = () => {
         return true;
-        // const { permCode } = meta || {};
-        // if (!permCode) return true;
-        // const allCodeList = this.getPermCodeList as string[];
-        // console.log(allCodeList, permCode);
-        // return allCodeList.some((item) => permCode.includes(item));
       };
 
       const routeRemoveIgnoreFilter = (route: AppRouteRecordRaw) => {

@@ -52,7 +52,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /main/$2
+    nginx.ingress.kubernetes.io/rewrite-target: /main/$1
   name: frontend-main
 spec:
   ingressClassName: nginx
@@ -65,7 +65,7 @@ spec:
                 name: frontend
                 port:
                   number: 80
-            path: /(/|$)(.*)
+            path: /(.*)
             pathType: Prefix
   tls:
     - hosts:
