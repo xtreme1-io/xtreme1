@@ -1,7 +1,11 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
+import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
 import ai.basic.x1.adapter.port.dao.DatasetDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Dataset;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
 import ai.basic.x1.entity.DatasetBO;
 import ai.basic.x1.entity.DatasetQueryBO;
 import ai.basic.x1.usecase.exception.UsecaseCode;
@@ -25,6 +29,12 @@ public class DatasetUseCase {
 
     @Autowired
     private IDistributedLock distributedLock;
+
+    @Autowired
+    private DatasetClassDAO datasetClassDAO;
+
+    @Autowired
+    private DatasetClassificationDAO datasetClassificationDAO;
 
 
     /**
@@ -143,6 +153,24 @@ public class DatasetUseCase {
      */
     public DatasetBO findById(Long id) {
         return DefaultConverter.convert(datasetDAO.getById(id), DatasetBO.class);
+    }
+
+    /**
+     * Query whether an Ontology exists in the dataset
+     *
+     * @param datasetId Dataset id
+     * @return True means exists
+     */
+
+    public Boolean findOntologyIsExistByDatasetId(Long datasetId) {
+        var datasetClassLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClass.class);
+        datasetClassLambdaQueryWrapper.eq(DatasetClass::getDatasetId, datasetId);
+        var datasetClassCount = datasetClassDAO.count(datasetClassLambdaQueryWrapper);
+
+        var datasetClassificationLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClassification.class);
+        datasetClassificationLambdaQueryWrapper.eq(DatasetClassification::getDatasetId, datasetId);
+        var datasetClassificationCount = datasetClassificationDAO.count(datasetClassificationLambdaQueryWrapper);
+        return datasetClassCount > 0 || datasetClassificationCount > 0;
     }
 
 }

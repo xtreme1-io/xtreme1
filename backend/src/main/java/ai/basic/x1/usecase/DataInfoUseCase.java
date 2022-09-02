@@ -115,12 +115,6 @@ public class DataInfoUseCase {
     @Autowired
     private UploadRecordDAO uploadRecordDAO;
 
-    @Autowired
-    private DatasetClassDAO datasetClassDAO;
-
-    @Autowired
-    private DatasetClassificationDAO datasetClassificationDAO;
-
     @Value("${file.tempPath:/tmp/x1/}")
     private String tempPath;
 
@@ -576,16 +570,6 @@ public class DataInfoUseCase {
     @Transactional(rollbackFor = Throwable.class)
     public Long annotate(DataPreAnnotationBO dataPreAnnotationBO) {
         try {
-            var datasetClassLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClass.class);
-            datasetClassLambdaQueryWrapper.eq(DatasetClass::getDatasetId, dataPreAnnotationBO.getDatasetId());
-            var datasetClassCount = datasetClassDAO.count(datasetClassLambdaQueryWrapper);
-
-            var datasetClassificationLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClassification.class);
-            datasetClassificationLambdaQueryWrapper.eq(DatasetClassification::getDatasetId, dataPreAnnotationBO.getDatasetId());
-            var datasetClassificationCount = datasetClassificationDAO.count(datasetClassificationLambdaQueryWrapper);
-            if (datasetClassCount == 0 && datasetClassificationCount == 0) {
-                throw new UsecaseException(UsecaseCode.DATASET_CLASS_CLASSIFICATION_EMPTY);
-            }
             return annotateCommon(dataPreAnnotationBO, null);
         } catch (DuplicateKeyException duplicateKeyException) {
             log.error("Data edit duplicate", duplicateKeyException);
