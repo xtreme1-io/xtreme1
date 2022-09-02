@@ -186,7 +186,7 @@ export interface IAnnotationInfo {
 
 export interface IPointInfo {
     count: number;
-    vCount:number;
+    vCount: number;
     min: Vector3;
     max: Vector3;
     hasIntensity: boolean;
@@ -273,6 +273,10 @@ export interface IFrame {
     needSave: boolean;
     resultExist?: boolean;
     // [k: string]: any;
+    // flow
+    dataStatus: 'INVALID' | 'VALID';
+    annotationStatus: 'ANNOTATED' | 'NOT_ANNOTATED' | 'INVALID';
+    skipped: boolean;
 }
 
 export interface IFilter {

@@ -4,13 +4,14 @@ import { createVNode } from 'vue';
 
 export default function injectConfirm(editor: Editor) {
     editor.showConfirm = (config = {} as IConfirmOption) => {
-        let { title = '', subTitle = '', okText, okDanger, cancelText } = config;
+        let { title = '', subTitle = '', okText, okDanger, cancelText, centered } = config;
         editor.state.status = StatusType.Confirm;
         return new Promise<void>((resolve, reject) => {
             Modal.confirm({
                 title: () => title,
                 okText,
                 cancelText,
+                centered,
                 okButtonProps: {
                     danger: okDanger,
                 },

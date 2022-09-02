@@ -14,6 +14,7 @@ export function useProvideEditor() {
     window.editor = editor;
 
     editor.state = reactive(editor.state);
+    editor.bsState = reactive(editor.bsState);
 
     initRegistry(editor);
 
@@ -36,6 +37,8 @@ export function getDefault(): IBSState {
         query: {},
         // flow
         saving: false,
+        validing: false,
+        submitting: false,
         //
         // user
         user: {

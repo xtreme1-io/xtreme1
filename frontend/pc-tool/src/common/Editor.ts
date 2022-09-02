@@ -1,4 +1,4 @@
-import { Editor as BaseEditor } from 'pc-editor';
+import { Editor as BaseEditor, IFrame } from 'pc-editor';
 import { IBSState } from '../type';
 import { getDefault } from '../state';
 import { utils, AttrType, IClassificationAttr, IUserData } from 'pc-editor';
@@ -17,18 +17,21 @@ export default class Editor extends BaseEditor {
         this.dataManager = new DataManager(this);
     }
 
-    needSave() {
-        let needSaveData = this.state.frames.filter((e) => e.needSave);
+    needSave(frames?: IFrame[]) {
+        frames = frames || this.state.frames;
+        let needSaveData = frames.filter((e) => e.needSave && !e.skipped);
         return needSaveData.length > 0;
     }
 
-    async saveObject() {
+    async saveObject(frames?: IFrame[], force?: boolean) {
         let { bsState } = this;
-        let { classTypes, frames } = this.state;
+        let { classTypes } = this.state;
         // let dataMeta = state.dataList[state.dataIndex];
         if (bsState.saving) return;
 
-        if (!this.needSave()) return;
+        frames = frames || this.state.frames;
+
+        if (!force && !this.needSave(frames)) return;
 
         let classMap = {};
         classTypes.forEach((e) => {
@@ -38,7 +41,7 @@ export default class Editor extends BaseEditor {
         let classValueInfos = [] as any[];
         let queryTime = frames[0].queryTime;
         frames.forEach((dataMeta) => {
-            if (!dataMeta.needSave) return;
+            if (dataMeta.skipped) return;
             let annotates = this.dataManager.getFrameObject(dataMeta.id) || [];
             if (new Date(dataMeta.queryTime).getTime() > new Date(queryTime).getTime())
                 queryTime = dataMeta.queryTime;
