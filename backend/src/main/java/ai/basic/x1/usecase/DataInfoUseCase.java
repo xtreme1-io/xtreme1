@@ -256,6 +256,16 @@ public class DataInfoUseCase {
         return dataInfoBOList;
     }
 
+    /**
+     * Query data object list according to id collection
+     *
+     * @param ids id collection
+     * @return Collection of data objects
+     */
+    public List<DataInfoBO> getDataStatusByIds(List<Long> ids) {
+        return DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
+    }
+
 
     /**
      * Query dataset statistics based on dataset id collection
@@ -271,6 +281,7 @@ public class DataInfoUseCase {
 
     /**
      * Get dataset statistics based on dataset id
+     *
      * @param datasetId Dataset id
      * @return Dataset statistics
      */
@@ -557,29 +568,38 @@ public class DataInfoUseCase {
      * @return Annotation record id
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO) {
+        try {
+            return annotateCommon(dataPreAnnotationBO, null);
+        } catch (DuplicateKeyException duplicateKeyException) {
+            log.error("Data edit duplicate", duplicateKeyException);
+            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+        }
+    }
+
+    private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo) {
+        var dataAnnotationRecord = DataAnnotationRecord.builder()
+                .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+        dataAnnotationRecordDAO.getBaseMapper().insertIgnore(dataAnnotationRecord);
+        var dataIds = dataPreAnnotationBO.getDataIds();
+        batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+        return dataAnnotationRecord.getId();
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public Long annotateWithModel(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
         try {
             Long serialNo = IdUtil.getSnowflakeNextId();
-            DataAnnotationRecord dataAnnotationRecord;
-            ModelBO modelBO = null;
-            DataAnnotationRecord.DataAnnotationRecordBuilder builder = DataAnnotationRecord.builder();
-            if (ObjectUtil.isNotNull(dataPreAnnotationBO.getModelId())) {
-                modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
-                builder.serialNo(serialNo);
-                if (ObjectUtil.isNull(modelBO)) {
-                    throw new UsecaseException(UsecaseCode.MODEL_DOES_NOT_EXIST);
-                }
+            ModelBO modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
+            if (ObjectUtil.isNull(modelBO)) {
+                throw new UsecaseException(UsecaseCode.MODEL_DOES_NOT_EXIST);
             }
-            builder.datasetId(dataPreAnnotationBO.getDatasetId());
-            dataAnnotationRecord = builder.build();
-            dataAnnotationRecordDAO.getBaseMapper().insertIgnore(dataAnnotationRecord);
-            List<Long> dataIds = dataPreAnnotationBO.getDataIds();
-            batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
             if (ObjectUtil.isNotNull(modelBO)) {
                 batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
             }
-            return dataAnnotationRecord.getId();
+            return annotateCommon(dataPreAnnotationBO, serialNo);
         } catch (DuplicateKeyException duplicateKeyException) {
+            log.error("Data edit duplicate", duplicateKeyException);
             throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
         }
     }
@@ -594,15 +614,15 @@ public class DataInfoUseCase {
         if (CollectionUtil.isEmpty(dataIds)) {
             return;
         }
-        List<DataEdit> dataEditSubList = new ArrayList<>();
+        var dataEditSubList = new ArrayList<DataEdit>();
         int i = 1;
-        DataEdit.DataEditBuilder dataEditBuilder = DataEdit.builder()
+        var dataEditBuilder = DataEdit.builder()
                 .annotationRecordId(dataAnnotationRecordId)
                 .datasetId(dataAnnotationRecord.getDatasetId())
                 .modelId(dataAnnotationRecord.getModelId())
                 .modelVersion(dataAnnotationRecord.getModelVersion());
-        for (Long dataId : dataIds) {
-            DataEdit dataEdit = dataEditBuilder.dataId(dataId).build();
+        for (var dataId : dataIds) {
+            var dataEdit = dataEditBuilder.dataId(dataId).build();
             dataEditSubList.add(dataEdit);
             if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
                 dataEditDAO.getBaseMapper().insertBatch(dataEditSubList);
@@ -621,8 +641,8 @@ public class DataInfoUseCase {
      */
     @Transactional(rollbackFor = Throwable.class)
     public Long modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
-        ModelBO modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
-        Long serialNo = IdUtil.getSnowflakeNextId();
+        var modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
+        var serialNo = IdUtil.getSnowflakeNextId();
         batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
         return serialNo;
     }
@@ -635,22 +655,22 @@ public class DataInfoUseCase {
      * @param userId              User id
      */
     private void batchInsertModelDataResult(DataPreAnnotationBO dataPreAnnotationBO, ModelBO modelBO, Long userId, Long serialNo) {
-        List<ModelDataResult> modelDataResultList = new ArrayList<>();
-        List<Long> dataIds = dataPreAnnotationBO.getDataIds();
-        ModelMessageBO modelMessageBO = DefaultConverter.convert(dataPreAnnotationBO, ModelMessageBO.class);
+        var modelDataResultList = new ArrayList<ModelDataResult>();
+        var dataIds = dataPreAnnotationBO.getDataIds();
+        var modelMessageBO = DefaultConverter.convert(dataPreAnnotationBO, ModelMessageBO.class);
         modelMessageBO.setCreatedBy(userId);
         modelMessageBO.setModelSerialNo(serialNo);
         modelMessageBO.setModelId(modelBO.getId());
         modelMessageBO.setModelVersion(modelBO.getVersion());
         int i = 1;
-        ModelDataResult.ModelDataResultBuilder modelDataResultBuilder = ModelDataResult.builder()
+        var modelDataResultBuilder = ModelDataResult.builder()
                 .modelId(modelBO.getId())
                 .modelVersion(modelBO.getVersion())
                 .datasetId(dataPreAnnotationBO.getDatasetId())
                 .modelSerialNo(serialNo)
                 .resultFilterParam(JSONUtil.toJsonStr(dataPreAnnotationBO.getResultFilterParam()));
-        for (Long dataId : dataIds) {
-            ModelDataResult modelDataResult = modelDataResultBuilder.dataId(dataId).build();
+        for (var dataId : dataIds) {
+            var modelDataResult = modelDataResultBuilder.dataId(dataId).build();
             modelDataResultList.add(modelDataResult);
             if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
                 modelDataResultDAO.getBaseMapper().insertIgnoreBatch(modelDataResultList);
@@ -658,8 +678,8 @@ public class DataInfoUseCase {
             }
             i++;
         }
-        List<DataInfoBO> dataInfoBOList = listByIds(dataIds);
-        Map<Long, DataInfoBO> dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
+        var dataInfoBOList = listByIds(dataIds);
+        var dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
         for (var dataId : dataIds) {
             modelMessageBO.setDataId(dataId);
             modelMessageBO.setDataInfo(dataMap.get(dataId));
@@ -682,7 +702,7 @@ public class DataInfoUseCase {
             lambdaQueryWrapper.in(ModelDataResult::getDataId, dataIds);
         }
         lambdaQueryWrapper.isNotNull(ModelDataResult::getModelResult);
-        List<ModelDataResult> modelDataResultList = modelDataResultDAO.getBaseMapper().selectList(lambdaQueryWrapper);
+        var modelDataResultList = modelDataResultDAO.getBaseMapper().selectList(lambdaQueryWrapper);
         if (CollectionUtil.isNotEmpty(modelDataResultList)) {
             var modelId = modelDataResultList.stream().findFirst().orElse(new ModelDataResult()).getModelId();
             var modelBO = modelUseCase.findById(modelId);
@@ -712,6 +732,7 @@ public class DataInfoUseCase {
             public void start() {
                 uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOADING, null);
             }
+
             @Override
             public void progress(long total, long progressSize) {
                 if (progressSize % 1000 == 0 || total == progressSize) {
@@ -723,6 +744,7 @@ public class DataInfoUseCase {
                     uploadRecordDAO.updateById(uploadRecord);
                 }
             }
+
             @Override
             public void finish() {
                 uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOAD_COMPLETED, null);

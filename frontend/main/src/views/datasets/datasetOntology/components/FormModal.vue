@@ -139,8 +139,10 @@
   } from '/@/api/business/model/ontologyClassesModel';
   import { createEditClassApi, createEditClassificationApi } from '/@/api/business/ontologyClasses';
   import {
-    createEditClassApi as createEditClassApiForDataset,
-    createEditClassificationApi as createEditClassificationApiForDataset,
+    createDatasetClassApi,
+    updateDatasetClassApi,
+    createDatasetClassificationApi,
+    updateDatasetClassificationApi,
   } from '/@/api/business/datasetOntology';
 
   const { t } = useI18n();
@@ -504,7 +506,12 @@
             await createEditClassApi(params);
           } else {
             // DatasetOntology
-            await createEditClassApiForDataset(params);
+            // await createEditClassApiForDataset(params);
+            if (params.id) {
+              await updateDatasetClassApi(params);
+            } else {
+              await createDatasetClassApi(params);
+            }
           }
 
           classDataSchema.value = getInitClassData();
@@ -520,7 +527,12 @@
             await createEditClassificationApi(params);
           } else {
             // DatasetOntology
-            await createEditClassificationApiForDataset(params);
+            // await createEditClassificationApiForDataset(params);
+            if (params.id) {
+              await updateDatasetClassificationApi(params);
+            } else {
+              await createDatasetClassificationApi(params);
+            }
           }
 
           dataSchema.value = getInitClassificationData();

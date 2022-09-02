@@ -13,8 +13,8 @@ import {
 import { BasicIdParams } from '/@/api/model/baseModel';
 
 enum Api {
-  CLASS = '/annotation/datasetClass',
-  ClASSIFICATION = '/annotation/datasetClassification',
+  CLASS = '/datasetClass',
+  ClASSIFICATION = '/datasetClassification',
 }
 
 /**
@@ -32,9 +32,20 @@ export const getClassApi = (params: GetListParams) =>
   });
 
 /** 添加修改 class */
-export const createEditClassApi = (params: SaveEditClassParams) =>
+export const createDatasetClassApi = (params: SaveEditClassParams) =>
   defHttp.post<null>({
-    url: `${Api.CLASS}/save`,
+    url: `${Api.CLASS}/create`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** 添加修改 class */
+export const updateDatasetClassApi = (params: SaveEditClassParams) =>
+  defHttp.post<null>({
+    url: `${Api.CLASS}/update/${params.id}`,
     params,
     headers: {
       // @ts-ignore
@@ -114,9 +125,20 @@ export const getClassificationApi = (params: GetListParams) =>
   });
 
 /** 添加修改 classification */
-export const createEditClassificationApi = (params: SaveEditClassificationParams) =>
+export const createDatasetClassificationApi = (params: SaveEditClassificationParams) =>
   defHttp.post<null>({
-    url: `${Api.ClASSIFICATION}/save`,
+    url: `${Api.ClASSIFICATION}/create`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** 添加修改 classification */
+export const updateDatasetClassificationApi = (params: SaveEditClassificationParams) =>
+  defHttp.post<null>({
+    url: `${Api.ClASSIFICATION}/update/${params.id}`,
     params,
     headers: {
       // @ts-ignore

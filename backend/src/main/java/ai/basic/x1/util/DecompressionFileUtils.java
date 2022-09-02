@@ -44,7 +44,7 @@ public class DecompressionFileUtils {
             if (dir.contains(MACOSX)) {
                 continue;
             }
-            log.info("正在解压......{}", dir);
+            log.info("Decompressing......{}", dir);
             var file = new File(dir);
             if (zae.isDirectory()) {
                 file.mkdir();
@@ -78,7 +78,7 @@ public class DecompressionFileUtils {
                     continue;
                 }
                 var file = new File(dir);
-                log.info("正在解压......{}", dir);
+                log.info("Decompressing......{}", dir);
                 if (nte.isDirectory()) {
                     file.mkdirs();
                 } else {
@@ -111,19 +111,19 @@ public class DecompressionFileUtils {
             //解压的.ZIP包
             zipDecompress(filePath, decompressPath);
         } else {
-            throw new UsecaseException("暂不支持该种格式文件的解压");
+            throw new UsecaseException("The decompression of files in this format is not currently supported");
         }
     }
 
     /**
-     * 验证url地址是否能连接
+     * Verify that the url address can be connected
      *
-     * @param urlString
-     * @return
+     * @param urlStr url
+     * @return boolean
      */
-    public static boolean validateUrl(String urlString) {
+    public static boolean validateUrl(String urlStr) {
         try {
-            var url = new URL(urlString);
+            var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
             // 设置超时时间
