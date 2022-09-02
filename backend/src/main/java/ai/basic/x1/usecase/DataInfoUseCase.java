@@ -262,6 +262,16 @@ public class DataInfoUseCase {
         return dataInfoBOList;
     }
 
+    /**
+     * Query data object list according to id collection
+     *
+     * @param ids id collection
+     * @return Collection of data objects
+     */
+    public List<DataInfoBO> getDataStatusByIds(List<Long> ids) {
+        return DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
+    }
+
 
     /**
      * Query dataset statistics based on dataset id collection

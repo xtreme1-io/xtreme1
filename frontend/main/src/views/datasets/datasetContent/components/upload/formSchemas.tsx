@@ -24,7 +24,7 @@ export const validateUrl = async (_rule: RuleObject, value: string) => {
     /^(((ht|f)tps?):\/\/)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-z]{2,6}\/?/;
 
   // zip校验
-  const zipRegex = /\.zip$/;
+  const zipRegex = /\.zip/;
 
   if (!urlRegex.test(newValue)) {
     // 校验 url
