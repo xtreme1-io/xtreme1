@@ -14,20 +14,23 @@ import org.springframework.stereotype.Component;
 public class MinioProp {
 
     /**
-     * 连接url
+     * endpoint
      */
     private String endpoint;
+
     /**
-     * 用户名
+     * User name
      */
     private String accessKey;
+
     /**
-     * 密码
+     * Password
      */
     private String secretKey;
 
     /**
-     * 桶名称
+     * Bucket name
      */
     private String bucketName;
+
 }

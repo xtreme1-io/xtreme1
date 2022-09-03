@@ -19,84 +19,69 @@ import java.util.List;
 @AllArgsConstructor
 public class DatasetBO {
 
+    /**
+     * Dataset id
+     */
     private Long id;
 
     /**
-     * 数据集名称
+     * Dataset name
      */
     private String name;
 
     /**
-     * 数据类型
+     * Dataset type
      */
     private DatasetTypeEnum type;
 
     /**
-     * 描述
+     * Dataset description
      */
     private String description;
 
     /**
-     * data数量
-     */
-    private Long itemCount;
-
-    /**
-     * 标注数量
-     */
-    private Long annotationCount;
-
-    /**
-     * class数量
-     */
-    private Long classCount;
-
-    /**
-     * 团队ID
-     */
-    private Long  teamId;
-
-    /**
-     * 是否删除 1：是 0：否
+     * Is deleted
      */
     private Boolean isDeleted;
 
     /**
-     * 创建时间
+     * Create time
      */
     private OffsetDateTime createdAt;
 
     /**
-     * 创建人ID
+     * Creator id
      */
     private Long createdBy;
 
     /**
-     * 更新时间
+     * Update time
      */
     private OffsetDateTime updatedAt;
 
     /**
-     * 更改人ID
+     * Modify person id
      */
     private Long updatedBy;
 
     /**
-     * 删除时间
+     * The first 6 pieces of data information
      */
-    private OffsetDateTime deletedAt;
-
-    /**
-     * 删除人ID
-     */
-    private Long  deletedBy;
-
     private List<DataInfoBO> datas;
 
+    /**
+     * Annotated data count
+     */
     private Integer notAnnotatedDataCount;
 
+    /**
+     * Not annotate data count
+     */
     private Integer annotatedDataCount;
 
+    /**
+     * Invalid data count
+     */
     private Integer invalidDataCount;
 
 }

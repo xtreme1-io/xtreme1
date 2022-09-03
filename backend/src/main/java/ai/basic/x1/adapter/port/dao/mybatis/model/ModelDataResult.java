@@ -25,51 +25,51 @@ public class ModelDataResult {
     private Long id;
 
     /**
-     * 模型id
+     * Model id
      */
     private Long modelId;
     /**
-     * 模型版本
+     * Model version
      */
     private String modelVersion;
     /**
-     * 数据集id
+     * Dataset id
      */
     private Long datasetId;
     /**
-     * 数据id
+     * Data id
      */
     private Long dataId;
     /**
-     * 模型过滤参数
+     * Model results filtering parameters
      */
-
     private String resultFilterParam;
     /**
-     * 模型结果
+     * Model result
      */
     @TableField(value = "model_result", typeHandler = JacksonTypeHandler.class)
     private JsonNode modelResult;
-
-    private Long modelSerialNo;
-
     /**
-     * 创建时间
+     * Model serial number
+     */
+    private Long modelSerialNo;
+    /**
+     * Create time
      */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
     /**
-     * 创建者
+     * Creator id
      */
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
     /**
-     * 更新时间
+     * Update time
      */
     @TableField(fill = FieldFill.UPDATE)
     private OffsetDateTime updatedAt;
     /**
-     * 更新者
+     * Modify person id
      */
     @TableField(fill = FieldFill.UPDATE)
     private Long updatedBy;

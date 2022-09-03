@@ -42,10 +42,19 @@ public class DataInfoUploadBO {
      */
     private DatasetTypeEnum type;
 
+    /**
+     * Save path
+     */
     private String savePath;
 
+    /**
+     * Base save path
+     */
     private String baseSavePath;
 
+    /**
+     * Upload record id
+     */
     private Long uploadRecordId;
 
 }

@@ -30,9 +30,9 @@ public class MinioService {
     private MinioClient client;
 
     /**
-     * 创建bucket
+     * Create bucket
      *
-     * @param bucketName bucket名称
+     * @param bucketName Bucket name
      */
     @SneakyThrows
     private void createBucket(String bucketName) {
@@ -43,16 +43,19 @@ public class MinioService {
     }
 
     /**
-     * minio文件上传
+     * Upload file
      *
-     * @param bucketName  存储桶
-     * @param fileName    文件名
-     * @param inputStream 输入流
-     * @param contentType 文件类型
-     * @param size        文件大小
-     * @return 文件路径
+     * @param bucketName  Bucket name
+     * @param fileName    File name
+     * @param inputStream Input stream
+     * @param contentType File content type
+     * @param size        File size
+     * @return File url
      */
-    public String uploadFile(String bucketName, String fileName, InputStream inputStream, String contentType, long size) throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public String uploadFile(String bucketName, String fileName, InputStream inputStream, String contentType, long size)
+            throws IOException, ServerException, InsufficientDataException, ErrorResponseException,
+            NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
+            InternalException {
         createBucket(bucketName);
         //objectSize已知，partSize设为-1意为自动设置
         long partSize = -1;
@@ -67,25 +70,26 @@ public class MinioService {
     }
 
     /**
-     * *批量上传文件
-     * @param bucketName 存储桶*
-     * @param rootPath 根路径
-     * @param tempPath 临时存储路径
-     * @param fileList 文件集合
+     * batch upload files
+     *
+     * @param bucketName Bucket name
+     * @param rootPath   Root path
+     * @param tempPath   Temp path
+     * @param fileList   File list
      */
-    public void uploadFileList( String bucketName,String rootPath, String tempPath, List<File> fileList)
+    public void uploadFileList(String bucketName, String rootPath, String tempPath, List<File> fileList)
             throws ErrorResponseException, InsufficientDataException, InternalException,
             InvalidKeyException, InvalidResponseException, IOException, NoSuchAlgorithmException,
             ServerException, XmlParserException {
         createBucket(bucketName);
         List<SnowballObject> objects = new ArrayList<>(fileList.size());
         fileList.forEach(file ->
-            objects.add(
-                    new SnowballObject(
-                            rootPath + file.getAbsolutePath().replace(tempPath, ""),
-                            FileUtil.getInputStream(file),
-                            file.length(),
-                            null)));
+                objects.add(
+                        new SnowballObject(
+                                rootPath + file.getAbsolutePath().replace(tempPath, ""),
+                                FileUtil.getInputStream(file),
+                                file.length(),
+                                null)));
         client.uploadSnowballObjects(UploadSnowballObjectsArgs.builder()
                 .bucket(bucketName)
                 .objects(objects)
@@ -93,13 +97,15 @@ public class MinioService {
     }
 
     /**
-     * 获取对象的临时访问url，有效期默认7天
+     * Get the temporary access url of the object, the default validity period is 7 days
      *
-     * @param bucketName 存储桶
-     * @param objectName 文件名
-     * @return url地址
+     * @param bucketName Bucket name
+     * @param objectName File path
+     * @return File url
      */
-    public String getUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public String getUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException,
+            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException,
+            InvalidResponseException, XmlParserException, InternalException {
         GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
                 .bucket(bucketName)
                 .object(objectName)
@@ -109,22 +115,24 @@ public class MinioService {
     }
 
     /**
-     * 获取预上传url与访问url
+     * Get pre-upload url and access url
      *
-     * @param bucketName 存储桶
-     * @param objectName 文件路径
-     * @return url地址
+     * @param bucketName Bucket name
+     * @param objectName File path
+     * @return Pre-signed url
      */
-    public PresignedUrlBO generatePresignedUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public PresignedUrlBO generatePresignedUrl(String bucketName, String objectName)
+            throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
+            InternalException {
         GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
                 .method(Method.PUT)
                 .bucket(bucketName)
                 .object(objectName)
                 .expiry(60 * 60 * 24 * 7)
                 .build();
-        //这里必须是PUT，如果是GET的话就是文件访问地址了。如果是POST上传会报错.
+        // This must be PUT, if it is GET, it is the file access address. If it is a POST upload, an error will be reported.
         String preUrl = client.getPresignedObjectUrl(args);
-        // 文件访问地址
         String accessUrl = getUrl(bucketName, objectName);
         return PresignedUrlBO.builder()
                 .accessUrl(accessUrl)

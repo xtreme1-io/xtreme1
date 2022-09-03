@@ -31,9 +31,6 @@ public class BaseAttributeTypeHandler<T> extends BaseTypeHandler<Object> {
      */
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    /**
-     * 构造方法
-     */
     public BaseAttributeTypeHandler() {
         ResolvableType resolvableType = ResolvableType.forClass(getClass());
         Type type = resolvableType.as(BaseAttributeTypeHandler.class).getGeneric().getType();

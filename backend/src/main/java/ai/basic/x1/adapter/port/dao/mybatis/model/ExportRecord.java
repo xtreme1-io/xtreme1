@@ -24,56 +24,56 @@ public class ExportRecord {
     private Long id;
 
     /**
-     * 流水号
+     * Serial number
      */
     private Long serialNumber;
 
     /**
-     * 文件ID
+     * File id
      */
     private Long fileId;
 
     /**
-     * 文件名称
+     * File name
      */
     private String fileName;
 
     /**
-     * 状态(UNSTARTED:未开始,GENERATING:生成中,COMPLETED:已完成,FAILED:失败)
+     * Export status(UNSTARTED,GENERATING,COMPLETED,FAILED)
      */
     private ExportStatusEnum status;
 
     /**
-     * 已生成数量
+     * Generated number
      */
     private Integer generatedNum;
 
     /**
-     * 总数
+     * Export total number
      */
     private Integer totalNum;
 
 
     /**
-     * 创建时间
+     * Create time
      */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
 
     /**
-     * 创建人ID
+     * Creator id
      */
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
 
     /**
-     * 更新时间
+     * Update time
      */
     @TableField(fill = FieldFill.UPDATE)
     private OffsetDateTime updatedAt;
 
     /**
-     * 更改人ID
+     * Modify person id
      */
     @TableField(fill = FieldFill.UPDATE)
     private Long updatedBy;

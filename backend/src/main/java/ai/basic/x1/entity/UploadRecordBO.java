@@ -19,7 +19,7 @@ import java.time.OffsetDateTime;
 public class UploadRecordBO {
 
     /**
-     * ID
+     * Upload record id
      */
     private Long id;
 
@@ -69,7 +69,7 @@ public class UploadRecordBO {
     private UploadStatusEnum status;
 
     /**
-     * Creation time
+     * Create time
      */
     private OffsetDateTime createdAt;
 
@@ -84,9 +84,8 @@ public class UploadRecordBO {
     private OffsetDateTime updatedAt;
 
     /**
-     * Change person ID
+     * Modify person id
      */
     private Long updatedBy;
-
 
 }
