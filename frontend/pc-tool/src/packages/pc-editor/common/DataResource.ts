@@ -220,7 +220,6 @@ export default class DataResource {
             hasLoader[e.data.id] = true;
         });
 
-        // 按顺序加载，在当前帧附近的权重最大
         let nextDataIndex = -1;
         let maxWeight = -1;
 

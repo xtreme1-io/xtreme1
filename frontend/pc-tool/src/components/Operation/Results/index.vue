@@ -27,25 +27,6 @@
     //     list: options,
     // });
 
-    // watch(
-    //     () => state.resultActive,
-    //     (pre, cur) => {
-    //         // 防止切换data的时候会触发两次
-    //         if (
-    //             pre.length === 1 &&
-    //             cur.length === 1 &&
-    //             pre[0] === cur[0] &&
-    //             tool.playManger.playing
-    //         )
-    //             return;
-
-    //         console.log('onChange', pre, cur);
-    //         if (state.resultActive.length === 0)
-    //             state.resultActive = [tool.config.FILTER_ALL];
-    //         tool.loadDataFromManager(true);
-    //     },
-    // );
-
     function onSelect(value: string) {
         let ALL = state.config.FILTER_ALL;
         if (value === ALL && state.filterActive.length > 1) {

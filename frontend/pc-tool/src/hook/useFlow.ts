@@ -26,7 +26,6 @@ export default function UseFlow() {
 
         if (!token) {
             editor.showMsg('error', editor.lang('not-login'));
-            console.log('未登录');
             return;
         }
         setToken(token);

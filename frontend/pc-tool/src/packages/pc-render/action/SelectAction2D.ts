@@ -7,7 +7,7 @@ import Box from '../objects/Box';
 
 type IFace = 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom';
 /**
- * 正面正X轴，右侧正Y轴，向上正Z轴
+ * front +X axis，right +Y axis，up +Z axis
  */
 let faces: IFace[] = ['front', 'back', 'left', 'right', 'top', 'bottom'];
 function getRect(

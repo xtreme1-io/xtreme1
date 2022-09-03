@@ -33,9 +33,7 @@ export default class HotkeyManager {
             this.bindConfig(config);
         });
 
-        // 特殊 快捷键
         this.bindEsc();
-        // this.bindTab();
     }
 
     bindEsc() {

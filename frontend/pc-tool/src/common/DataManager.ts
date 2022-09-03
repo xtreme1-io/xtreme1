@@ -73,9 +73,7 @@ export default class DataManager extends BaseDataManager {
                             }
 
                             if (objects.length > 0) {
-                                // 更新状态
                                 model.state = 'complete';
-                                // 过滤
                                 objects = objects.filter(
                                     (e) => e.confidence && e.confidence >= 0.5,
                                 );

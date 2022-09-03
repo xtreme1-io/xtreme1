@@ -2,7 +2,7 @@
     <div class="setting">
         <div class="title1 border-bottom">{{ $$('setting_display') }}</div>
         <div class="wrap">
-            <!-- 图片显示 -->
+            <!-- image -->
             <div class="title2">
                 <span style="vertical-align: middle; margin-right: 10px">{{
                     $$('setting_imgview')
@@ -10,7 +10,6 @@
                 <!-- <div class="divider"></div> -->
             </div>
             <div class="wrap">
-                <!-- <div class="title3">显示内容</div> -->
                 <div style="padding: 6px 0px">
                     <a-checkbox
                         v-if="state.config.projectPoint4"
@@ -22,9 +21,7 @@
                         v-model:checked="state.config.renderBox"
                         >{{ $$('setting_box') }}</a-checkbox
                     >
-                    <!-- <a-checkbox v-model:checked="state.config.renderProjectRect"
-                        >映射矩形框</a-checkbox
-                    > -->
+
                     <a-checkbox
                         v-if="state.config.projectMap3d"
                         v-model:checked="state.config.renderProjectBox"
@@ -35,7 +32,7 @@
                     }}</a-checkbox>
                 </div>
             </div>
-            <!-- 点云背景色 -->
+            <!-- pointCloud background color-->
             <div class="title2">
                 <span style="vertical-align: middle; margin-right: 10px">{{
                     $$('setting_backgroundColor')
@@ -69,7 +66,7 @@
                     $$('setting_pointreset')
                 }}</a-button>
             </div>
-            <!-- 点云显示 -->
+            <!-- show point -->
             <div class="title2">
                 <span style="vertical-align: middle; margin-right: 10px">{{
                     $$('setting_pointview')
@@ -199,7 +196,6 @@
                 ></div> -->
                 <ColorSlider />
             </div>
-            <!--  结果显示-->
             <div class="title2">
                 <span style="vertical-align: middle; margin-right: 10px">{{
                     $$('setting_resultview')
@@ -215,14 +211,14 @@
                         v-model:checked="state.config.showLabel"
                     />
                 </div>
-                <div v-if="!_config.noAnnotate" class="title3"
+                <!-- <div v-if="!_config.noAnnotate" class="title3"
                     >{{ $$('setting_showannotate') }}
                     <a-switch
                         size="small"
                         style="float: right; margin-top: 5px"
                         v-model:checked="state.config.showAnnotation"
                     />
-                </div>
+                </div> -->
                 <slot name="object"></slot>
             </div>
 
@@ -414,12 +410,12 @@
         },
     );
 
-    watch(
-        () => [config.showAnnotation, config.showLabel],
-        () => {
-            pc.render();
-        },
-    );
+    // watch(
+    //     () => [config.showAnnotation, config.showLabel],
+    //     () => {
+    //         pc.render();
+    //     },
+    // );
 
     watch(
         () => [

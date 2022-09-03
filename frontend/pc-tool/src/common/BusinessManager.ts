@@ -24,7 +24,7 @@ export default class BusinessManager extends BaseBusinessManager {
 
         let cameraConfig = fileConfig.find((e) => e.dirName === 'cameraConfig') as IFileConfig;
 
-        // 有相机配置信息
+        // no camera config
         let cameraInfo = [];
         if (cameraConfig) {
             cameraInfo = await api.getUrl(cameraConfig.url);

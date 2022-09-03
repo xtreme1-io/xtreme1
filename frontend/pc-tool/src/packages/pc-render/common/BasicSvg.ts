@@ -39,7 +39,7 @@ export interface IRectEvent extends IBaseEvent {
         center?: THREE.Vector2;
         size?: THREE.Vector2;
         detailAngle?: number;
-        offsetAngle?: number; // -PI ~ PI, 逆时针+ ， 顺时针 -;
+        offsetAngle?: number; // -PI ~ PI, inverse + ， clockwise -;
     };
 }
 export interface IBoxEvent extends IBaseEvent {
@@ -63,7 +63,7 @@ export function createRectTag(
     info: Info,
     attrsMap: Record<string, string> = {},
 ): Element {
-    var ns = 'http://www.w3.org/2000/svg'; //命名空间
+    var ns = 'http://www.w3.org/2000/svg';
     var element = document.createElementNS(ns, tag);
     Object.keys(attrsMap).forEach((attr) => {
         element.setAttributeNS(null, attr, attrsMap[attr]);

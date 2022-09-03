@@ -39,33 +39,12 @@ export interface IState {
     recentClass: IClassType[];
     // user: IUserInfo;
 
-    // checkConfig: ICheckConfig;
-
-    // 批注
-    // annotations: IAnnotationItem[];
-    // annotationTags: IAnnotationTag[];
-    // annotationInfos: IAnnotationInfo[];
-    // 视图显示配置
     config: IConfig;
-    // 2D视图配置
     imgViews: IImgViewConfig[];
-    // 编辑器模式
-    // mode: string;
     modeConfig: IModeConfig;
-    // 编辑器状态
     status: StatusType;
-    // 当前模式的hotkey
     classTypes: IClassType[];
 }
-
-const tags: IAnnotationTag[] = [
-    { label: '漏标', value: 'result_empty', id: 'result_empty' },
-    { label: '错标', value: 'result_error', id: 'result_error' },
-    { label: '标签错误', value: 'lable_error', id: 'lable_error' },
-    { label: '不贴合', value: 'not_fit', id: 'not_fit' },
-    { label: '多标', value: 'more_error', id: 'more_error' },
-    { label: '其他', value: 'other', id: 'other' },
-];
 
 export function getDefaultState(): IState {
     const defaultState: IState = {
@@ -94,24 +73,6 @@ export function getDefaultState(): IState {
         // annotations: [],
         recentClass: [],
 
-        // checkConfig: {
-        //     type: '3d',
-        //     axis: 'z',
-        //     trackId: '',
-        //     imageIndex: 0,
-        //     imageMaxIndex: 0,
-        //     showImageMax: false,
-        //     showAttr: false,
-        //     showAttrType: 'single',
-        //     status3D: [],
-        //     status2D: [],
-        //     subViewHeight: 200,
-        //     subViewWidth: 140,
-        //     subViewScale: 1,
-        // },
-
-        // annotationTags: tags,
-        // annotationInfos: [],
         config: getDefaultConfig(),
         imgViews: [],
         // mode: 'empty',
@@ -173,6 +134,7 @@ function getDefaultConfig(): IConfig {
             intensityRange: new THREE.Vector2(),
             min: new THREE.Vector3(),
             max: new THREE.Vector3(),
+            vCount: 0,
         },
         renderRect: true,
         // renderProjectRect: true,
