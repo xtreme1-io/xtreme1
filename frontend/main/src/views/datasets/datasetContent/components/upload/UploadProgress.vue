@@ -72,9 +72,7 @@
   const emits = defineEmits(['fetchList']);
 
   /** Progress */
-  // 进度值数组
   const uploadProgress = ref<any[]>([]);
-  // 设置进度
   const setProgress = (e, fileItem) => {
     const temp = uploadProgress.value.filter((item) => item.uuid === fileItem.uuid);
     if (temp.length > 0) {
@@ -86,7 +84,6 @@
       });
     }
   };
-  // 获取进度
   const getProgress = (item) => {
     const res = uploadProgress.value.filter((record) => record.uuid === item.uuid);
     return res?.[0]?.percent ?? 0;
@@ -135,7 +132,6 @@
   watch(
     () => props.uploadUrl,
     () => {
-      // https://basicai-dataset-tmp-minio-endpoint.alidev.beisai.com/x1-community/1002/750011/84836d71b69e4a8bb600f4d70c3dca24/6dc9504723914a14b95764a5c211b3b0%21400x400.zip?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=admin%2F20220831%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220831T105243Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=3d67eff53e455bd9d884f39d537f75bc986493f297b199e65f4114ae346bbf83
       const urlFileNameRegEx = /(?<=\/)[^\/\?#]+(?=[^\/]*$)/;
       const list = [
         {
@@ -158,7 +154,7 @@
   /** Cancel Upload */
   const handleCancelUpload = (item: FileItem) => {
     console.log(item.status);
-    // processing阶段无法取消 || item.status == UploadResultStatus.PROCESSING
+    // processing can't cancel request
     if (item.status == UploadResultStatus.UPLOADING) {
       if (isUploading.value) {
         item.controller.abort();
@@ -169,8 +165,8 @@
   };
 
   /** Upload Start */
-  const processTimer = ref(); // 用于定时器
-  const isUploading = ref<boolean>(false); // 用于判断是否正在上传中
+  const processTimer = ref();
+  const isUploading = ref<boolean>(false);
   /** Local */
   const handleUploadLocal = async (list) => {
     const uploadFileList =
@@ -187,15 +183,13 @@
 
       const upload = async ({ file: resultImg }) => {
         try {
-          // 先生成预签名地址
           const result = await generatePresignedUrl({
             fileName: resultImg.name,
             datasetId: props.id as string,
           });
-          // 然后上传到 minIo
-          // -- 调整状态为 uploading
+
           fileItem.status = UploadResultStatus.UPLOADING;
-          // 取消请求
+          // cancel request
           fileItem.controller = new AbortController();
           try {
             await axios({
@@ -207,35 +201,28 @@
               },
               signal: fileItem.controller.signal,
             });
-            // 后台下载、解析 -- 合并到 processing 状态
-            // -- 调整状态为 processing, 并重置进度条
             fileItem.status = UploadResultStatus.PROCESSING;
             const temp = uploadProgress.value.filter((item) => item.uuid === fileItem.uuid);
             temp[0].percent = 0;
 
             try {
-              // 请求参数
               const uploadParams: UploadParams = {
                 fileUrl: result.accessUrl,
                 datasetId: props.id as string,
                 source: props.source,
               };
-              // 获取流水号 serialNumbers
+              // get serialNumbers
               const serialNumbers = await uploadDatasetApi(
                 uploadParams,
                 fileItem.controller.signal,
               );
               const uploadStatus = ref<UploadStatusEnum>(UploadStatusEnum.DOWNLOADING);
-              console.log('upload local serialNumbers', serialNumbers);
-              // 根据流水号查询
-              // -- 定义方法
               const findUploadRecord = async () => {
                 try {
                   const record = await findUploadRecordBySerialNumbers(
                     serialNumbers,
                     fileItem.controller.signal,
                   );
-                  console.log(record[0]);
                   const {
                     status,
                     errorMessage,
@@ -245,13 +232,12 @@
                     totalDataNum,
                   } = record[0];
 
-                  // 状态判断
                   if (status == UploadStatusEnum.FAILED) {
                     throw new Error(errorMessage as string);
                   }
                   uploadStatus.value = status;
 
-                  // 进度 -- 目前为各占 50%
+                  // process
                   const downloadPercent =
                     parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50) ||
                     0;
@@ -263,10 +249,8 @@
 
                   if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
                     clearInterval(processTimer.value);
-                    // -- 调整状态为 success
                     fileItem.status = UploadResultStatus.SUCCESS;
                     isUploading.value = false;
-                    // 刷新列表
                     emits('fetchList');
                   }
                 } catch (e: any) {
@@ -281,19 +265,15 @@
                   isUploading.value = false;
                 }
               };
-              // -- 调用一次
               findUploadRecord();
-              // -- 循环调用
               processTimer.value = setInterval(async () => {
                 await findUploadRecord();
               }, 3000);
             } catch (e: any) {
               if (e.message == 'canceled') {
-                // 被取消
                 fileItem.status = UploadResultStatus.CANCELED;
                 fileItem.error = String(e.message);
               } else {
-                // 其它错误
                 fileItem.status = UploadResultStatus.ERROR;
                 fileItem.error = String(e);
               }
@@ -301,11 +281,9 @@
             }
           } catch (e: any) {
             if (e.message == 'canceled') {
-              // 被取消
               fileItem.status = UploadResultStatus.CANCELED;
               fileItem.error = String(e.message);
             } else {
-              // 其它错误
               fileItem.status = UploadResultStatus.ERROR;
               fileItem.error = String(e);
             }
@@ -335,8 +313,6 @@
 
     if (!fileItem) return;
 
-    // 后台下载、解析 -- 合并到 processing 状态
-    // -- 调整状态为 processing, 并重置进度条
     fileItem.status = UploadResultStatus.PROCESSING;
     uploadProgress.value.push({
       uuid: fileItem.uuid,
@@ -346,27 +322,22 @@
     temp[0].percent = 0;
 
     try {
-      // 取消请求
+      // cancel request
       fileItem.controller = new AbortController();
-      // 请求参数
       const uploadParams: UploadParams = {
         fileUrl: props.uploadUrl,
         datasetId: props.id as string,
         source: props.source,
       };
-      // 获取流水号 serialNumbers
+      // get serialNumbers
       const serialNumbers = await uploadDatasetApi(uploadParams, fileItem.controller.signal);
       const uploadStatus = ref<UploadStatusEnum>(UploadStatusEnum.DOWNLOADING);
-      console.log('upload url serialNumbers', serialNumbers);
-      // 根据流水号查询
-      // -- 定义方法
       const findUploadRecord = async () => {
         try {
           const record = await findUploadRecordBySerialNumbers(
             serialNumbers,
             fileItem.controller.signal,
           );
-          console.log(record[0]);
           const {
             status,
             errorMessage,
@@ -376,13 +347,11 @@
             totalDataNum,
           } = record[0];
 
-          // 状态判断
           if (status == UploadStatusEnum.FAILED) {
             throw new Error(errorMessage as string);
           }
           uploadStatus.value = status;
 
-          // 进度 -- 目前为各占 50%
           const downloadPercent =
             parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50) || 0;
           const parsedPercent =
@@ -393,10 +362,8 @@
 
           if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
             clearInterval(processTimer.value);
-            // -- 调整状态为 success
             fileItem.status = UploadResultStatus.SUCCESS;
             isUploading.value = false;
-            // 刷新列表
             emits('fetchList');
           }
         } catch (e: any) {
@@ -411,19 +378,15 @@
           isUploading.value = false;
         }
       };
-      // -- 调用一次
       findUploadRecord();
-      // -- 循环调用
       processTimer.value = setInterval(async () => {
         await findUploadRecord();
       }, 3000);
     } catch (e: any) {
       if (e.message == 'canceled') {
-        // 被取消
         fileItem.status = UploadResultStatus.CANCELED;
         fileItem.error = String(e.message);
       } else {
-        // 其它错误
         fileItem.status = UploadResultStatus.ERROR;
         fileItem.error = String(e);
       }
@@ -434,7 +397,6 @@
 
   defineExpose({
     fileList,
-    // cancelUpload,
     reset,
   });
 </script>

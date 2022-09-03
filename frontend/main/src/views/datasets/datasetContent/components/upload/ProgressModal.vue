@@ -68,7 +68,6 @@
         item.status != UploadResultStatus.PENDING &&
         item.status != UploadResultStatus.UPLOADING,
     );
-    console.log('isCompleted', isCompleted);
     if (isCompleted) {
       closeModal();
       reset();
