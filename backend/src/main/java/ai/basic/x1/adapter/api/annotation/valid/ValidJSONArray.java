@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, ANNOTATION_TYPE, PARAMETER, CONSTRUCTOR})
 @Retention(RUNTIME)
 public @interface ValidJSONArray {
-    String message() default "{ai.basic.basicai.common.adapter.api.annotation.valid.ValidJSONArray.message}";
+    String message() default "{ai.basic.x1.common.adapter.api.annotation.valid.ValidJSONArray.message}";
 
     Class<?>[] groups() default {};
 
