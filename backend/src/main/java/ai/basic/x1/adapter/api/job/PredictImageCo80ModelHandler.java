@@ -188,7 +188,7 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                         .map(item -> convert(item, systemModelClassMap.get(String.valueOf(item.getClsid()))))
                         .collect(Collectors.toList());
 
-                modelObject = PredImageModelObjectBO.builder().code(1)
+                modelObject = PredImageModelObjectBO.builder().code(0)
                         .message("success")
                         .dataId(message.getDataId())
                         .objects(predObjects).build();
