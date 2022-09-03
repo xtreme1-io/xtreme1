@@ -25,26 +25,23 @@ public class DatasetRequestDTO {
     private Long id;
 
     /**
-     * 数据集名称
+     * Dataset name
      */
     @NotEmpty(message = "name cannot be null")
     private String name;
 
     /**
-     * 数据类型
+     * Dataset type LIDAR_FUSION, LIDAR_BASIC, IMAGE
      */
     @NotEmpty(message = "dataset type cannot be null", groups = GroupInsert.class)
     @ValidStringEnum(message = "dataset type must be one of LIDAR_FUSION, LIDAR_BASIC, IMAGE", enumClass = DatasetTypeEnum.class)
     private String type;
 
     /**
-     * 描述
+     * Dataset description
      */
     private String description;
 
-    /**
-     * 定义专属的业务逻辑分组
-     */
     public interface GroupInsert extends Default {
     }
 

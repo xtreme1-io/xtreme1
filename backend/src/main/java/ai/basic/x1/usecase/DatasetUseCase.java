@@ -36,7 +36,6 @@ public class DatasetUseCase {
     @Autowired
     private DatasetClassificationDAO datasetClassificationDAO;
 
-
     /**
      * Save dataset
      *
@@ -101,7 +100,6 @@ public class DatasetUseCase {
         }
         return datasetDAO.getBaseMapper().exists(datasetLambdaQueryWrapper);
     }
-
 
     /**
      * Delete dataset

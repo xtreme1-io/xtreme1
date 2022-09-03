@@ -33,7 +33,7 @@ export const generalActions: IBsActionName[] = [
     'toggleShowMeasure',
     'pickObject',
     'resultExpandToggle',
-    'filter2DByTrack',
+    // 'filter2DByTrack',
 ];
 
 export const executeActions: IBsActionName[] = [

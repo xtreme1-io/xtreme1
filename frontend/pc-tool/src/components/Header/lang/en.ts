@@ -8,6 +8,7 @@ const en = {
     'btn-skipped': 'Skipped',
     'btn-submit': 'Submit',
     'btn-update': 'Update',
+    'btn-modify': 'Modify',
     'btn-full': 'Full Screen',
     'btn-full-exit': 'Exit Full Screen',
 };

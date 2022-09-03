@@ -26,12 +26,12 @@ export async function getModelList() {
 }
 
 export async function clearModel(dataIds: number[], recordId: string) {
-    let url = `/api/dataset/data/removeModelDataResult`;
+    let url = `/api/data/removeModelDataResult`;
     let data = await post(url, { serialNo: recordId, dataIds });
 }
 
 export async function getModelResult(dataIds: string[], recordId: string) {
-    let url = '/api/dataset/data/modelAnnotationResult';
+    let url = '/api/data/modelAnnotationResult';
     let args = [];
     dataIds.forEach((e) => {
         args.push(`dataIds=${e}`);
@@ -41,11 +41,6 @@ export async function getModelResult(dataIds: string[], recordId: string) {
 }
 
 export async function runModel(config: any) {
-    let url = '/api/dataset/data/modelAnnotate';
-    return await post(url, config);
-}
-
-export async function runModelTrack(config: any) {
-    let url = '/api/dataset/data/modelTracing';
+    let url = '/api/data/modelAnnotate';
     return await post(url, config);
 }

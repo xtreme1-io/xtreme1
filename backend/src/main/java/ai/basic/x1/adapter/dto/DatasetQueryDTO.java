@@ -1,6 +1,9 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
+import ai.basic.x1.entity.enums.DatasetSortFieldEnum;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.entity.enums.SortEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,33 +22,36 @@ import java.time.OffsetDateTime;
 public class DatasetQueryDTO {
 
     /**
-     * 数据名称
+     * Dataset name
      */
     private String name;
 
     /**
-     * 创建开始时间
+     * Dataset create start time
      */
     private OffsetDateTime createStartTime;
 
     /**
-     * 创建结束时间
+     * Dataset create end time
      */
     private OffsetDateTime createEndTime;
 
     /**
-     * 排序字段
+     * Sort field
      */
+    @ValidStringEnum(message = "sort field must be one of NAME,CREATED_AT,UPDATED_AT", enumClass = DatasetSortFieldEnum.class)
     private String sortField;
 
     /**
-     * 升序或者降序
+     * Ascending or descending order
      */
+    @ValidStringEnum(message = "ascOrDesc must be one of ASC,DESC", enumClass = SortEnum.class)
     private String ascOrDesc;
 
     /**
-     * 数据类型
+     * Dataset type
      */
-    private DatasetTypeEnum type;
+    @ValidStringEnum(message = "type must be one of LIDAR_FUSION,LIDAR_BASIC,IMAGE", enumClass = DatasetTypeEnum.class)
+    private String type;
 
 }

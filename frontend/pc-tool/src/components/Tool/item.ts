@@ -136,22 +136,22 @@ export const allItems: IItemConfig[] = [
             return state.config.activeTrack;
         },
     },
-    {
-        action: 'filter2D',
-        // label: 'filter2D',
-        title: ($$) => $$('title_filter2D'),
-        getIcon: function (editor: Editor) {
-            return 'iconfont icon-shaixuan';
-        },
-        isDisplay: function (editor: Editor) {
-            let state = editor.state;
-            return state.modeConfig.ui[UIType.filter2D];
-        },
-        isActive: function (editor: Editor) {
-            let state = editor.state;
-            return state.config.filter2DByTrack;
-        },
-    },
+    // {
+    //     action: 'filter2D',
+    //     // label: 'filter2D',
+    //     title: ($$) => $$('title_filter2D'),
+    //     getIcon: function (editor: Editor) {
+    //         return 'iconfont icon-shaixuan';
+    //     },
+    //     isDisplay: function (editor: Editor) {
+    //         let state = editor.state;
+    //         return state.modeConfig.ui[UIType.filter2D];
+    //     },
+    //     isActive: function (editor: Editor) {
+    //         let state = editor.state;
+    //         return state.config.filter2DByTrack;
+    //     },
+    // },
     {
         action: 'model',
         // label: 'Model',

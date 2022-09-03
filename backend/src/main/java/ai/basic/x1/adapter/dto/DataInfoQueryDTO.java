@@ -22,41 +22,42 @@ import javax.validation.constraints.NotNull;
 public class DataInfoQueryDTO {
 
     /**
-     * 数据集ID
+     * Dataset id
      */
     @NotNull(message = "datasetId cannot be null")
     private Long datasetId;
 
     /**
-     * 数据名称
+     * Data name
      */
     private String name;
 
     /**
-     * 创建开始时间
+     * Data create start time
      */
     private String createStartTime;
 
     /**
-     * 创建结束时间
+     * Data create end time
      */
     private String createEndTime;
 
     /**
-     * 排序字段
+     * Sort field
      */
     @ValidStringEnum(message = "sort field must be one of NAME,CREATED_AT", enumClass = DataInfoSortFieldEnum.class)
     private String sortField;
 
     /**
-     * 升序或者降序
+     * Ascending or descending order
      */
     @ValidStringEnum(message = "ascOrDesc must be one of ASC,DESC", enumClass = SortEnum.class)
     private String ascOrDesc;
 
     /**
-     * 数据标注状态 ANNOTATED,NOT_ANNOTATED,INVALID
+     * Data annotation status ANNOTATED,NOT_ANNOTATED,INVALID
      */
-    private DataAnnotationStatusEnum annotationStatus;
+    @ValidStringEnum(message = "annotationStatus must be one of ANNOTATED, NOT_ANNOTATED, INVALID", enumClass = DataAnnotationStatusEnum.class)
+    private String annotationStatus;
 
 }

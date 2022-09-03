@@ -122,6 +122,7 @@ export default function useTool() {
             return;
         }
         let toolState = editor.state;
+        let bsState = editor.bsState;
         let data = toolState.frames[toolState.frameIndex];
         let model = toolState.models.find((e) => e.name === modelConfig.model) as IModel;
         const resultFilterParam = {
@@ -148,6 +149,7 @@ export default function useTool() {
             resultFilterParam.classes = selectedClasses;
         }
         let config = {
+            datasetId: bsState.datasetId,
             dataIds: [+data.id],
             modelId: +model.id,
             modelVersion: model?.version,

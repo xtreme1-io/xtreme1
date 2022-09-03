@@ -249,42 +249,6 @@ export async function getDataFile(dataId: string) {
     return configs;
 }
 
-export async function getFrameSeriesData(
-    datasetId: string,
-    frameSeriesId: string,
-    pageNo: string = '1',
-    pageSize: string = '300',
-) {
-    let url = `/api/data/findByPage`;
-    let data = await get(url, {
-        datasetId,
-        frameSeriesId,
-        pageNo,
-        pageSize,
-        type: 'SINGLE_DATA',
-        // sortFiled: 'ID',
-        // ascOrDesc: 'ASC',
-    });
-
-    let list = data.data.list || [];
-    (list as any[]).reverse();
-    if (list.length === 0) throw '';
-
-    let dataList = [] as IFrame[];
-    list.forEach((e: any) => {
-        dataList.push({
-            id: e.id,
-            datasetId: e.datasetId,
-            pointsUrl: '',
-            queryTime: '',
-            loadState: '',
-            needSave: false,
-            classifications: [],
-        });
-    });
-    return dataList;
-    // return configs;
-}
 export async function getUserInfo() {
     let url = `/api/user/user/logged`;
     let {
@@ -295,5 +259,17 @@ export async function getUserInfo() {
 export async function getDataSetInfo(datasetId: string) {
     let url = `/api/dataset/info/${datasetId}`;
     let { data } = await get(url);
+    return data;
+}
+
+export async function annotateData(config: any) {
+    let url = `/api/data/annotate`;
+    let data = await post(url, config);
+    return data;
+}
+
+export async function getLockRecord(datasetId: string) {
+    let url = `/api/data/findLockRecordIdByDatasetId`;
+    let data = await get(url, { datasetId });
     return data;
 }

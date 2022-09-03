@@ -10,7 +10,7 @@
         <div class="classType-tag-container">
             <a-tag
                 class="classType-tag"
-                @click="() => onClassChange(item.name, item)"
+                @click="canEdit() ? onClassChange(item.name, item) : null"
                 v-for="item in editor.state.classTypes"
                 :style="style(item)"
                 :key="item.name"

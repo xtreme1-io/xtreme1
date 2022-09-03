@@ -35,7 +35,7 @@ public class DataInfoUploadDTO {
     private Long datasetId;
 
     /**
-     * 来源
+     * Upload source LOCAL, URL
      */
     @ValidStringEnum(message = "source must be one of LOCAL, URL", enumClass = DataUploadSourceEnum.class)
     @NotNull(message = "source cannot be null")

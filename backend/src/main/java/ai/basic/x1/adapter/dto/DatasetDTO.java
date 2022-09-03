@@ -16,45 +16,48 @@ import java.util.List;
 @AllArgsConstructor
 public class DatasetDTO {
 
+    /**
+     * Dataset id
+     */
     private Long id;
 
     /**
-     * 数据集名称
+     * Dataset name
      */
     private String name;
 
     /**
-     * 数据类型
+     * Dataset type
      */
     private String type;
 
     /**
-     * 描述
+     * Dataset description
      */
     private String description;
 
     /**
-     * 已经标注数量
+     * Annotated data count
      */
     private Integer annotatedCount;
 
     /**
-     * 未标注数量
+     * Not annotate data count
      */
     private Integer notAnnotatedCount;
 
     /**
-     * 无效数据标注数量
+     * Invalid data count
      */
     private Integer invalidCount;
 
     /**
-     * data count
+     * Data count
      */
     private Integer itemCount;
 
     /**
-     * 每一个dataset下面的数据
+     * Data details under dataset
      */
     private List<DataInfoDTO> datas;
 }

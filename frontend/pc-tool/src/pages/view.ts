@@ -9,12 +9,7 @@ export function view(): IPageHandler {
     let editor = useInjectEditor();
     let { state } = editor;
 
-    let { loadClasses, loadDataFromFrameSeries, loadDateSetClassification, loadUserInfo } =
-        useTool();
-
-    // datasetId=30093&dataId=352722&type=readOnly
-    // datasetId=30093&dataId=2370323&type=readOnly&dataType=frame
-    // recordId=215768
+    let { loadClasses, loadDataSetInfo, loadDateSetClassification, loadUserInfo } = useTool();
 
     async function init() {
         let { query } = editor.bsState;
@@ -23,19 +18,13 @@ export function view(): IPageHandler {
             return;
         }
 
-        // 设置模式
+        // set mode
         editor.setMode(modes.view);
 
         editor.showLoading(true);
         try {
-            // await loadUserInfo();
+            await loadDataSetInfo();
             await Promise.all([loadDateSetClassification(), loadClasses(), loadDataInfo()]);
-
-            // 连续帧 需要加载所有的数据
-            // if (state.isSeriesFrame) {
-            //     await editor.loadManager.loadAllObjects();
-            //     await editor.loadManager.loadAllClassification();
-            // }
 
             await editor.loadFrame(0, false);
         } catch (error: any) {
@@ -47,14 +36,6 @@ export function view(): IPageHandler {
 
     async function loadDataInfo() {
         let { query } = editor.bsState;
-
-        // let dataId = query.dataId;
-        // if (query.dataType === 'frame') {
-        //     // 连续帧
-        //     editor.state.isSeriesFrame = true;
-        //     await loadDataFromFrameSeries(dataId);
-        // } else {
-        // }
         createSingleData();
     }
 
@@ -71,6 +52,9 @@ export function view(): IPageHandler {
             loadState: '',
             needSave: false,
             classifications: [],
+            dataStatus: 'VALID',
+            annotationStatus: 'NOT_ANNOTATED',
+            skipped: false,
         };
 
         editor.state.frames = [data];
