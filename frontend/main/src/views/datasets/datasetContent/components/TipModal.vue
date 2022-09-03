@@ -9,6 +9,7 @@
     :minHeight="0"
     @ok="handleGo"
     @cancel="handleSuccess"
+    :closable="false"
   >
     <div class="p-50px">
       You don't have any class or classification for your annotation, do you want to create them at

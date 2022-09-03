@@ -1,5 +1,5 @@
 <template>
-  <BetaTip />
+  <!-- <BetaTip /> -->
   <div :style="getPlaceholderDomStyle" v-if="getIsShowPlaceholderDom"></div>
   <div :style="getWrapStyle" :class="getClass">
     <LayoutHeader v-if="getShowInsetHeaderRef" />
@@ -11,7 +11,7 @@
 
   import LayoutHeader from './index.vue';
   import MultipleTabs from '../tabs/index.vue';
-  import BetaTip from '../feature/BetaTip.vue';
+  // import BetaTip from '../feature/BetaTip.vue';
 
   import { useHeaderSetting } from '/@/hooks/setting/useHeaderSetting';
   import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
@@ -26,7 +26,7 @@
   const TABS_HEIGHT = 32;
   export default defineComponent({
     name: 'LayoutMultipleHeader',
-    components: { LayoutHeader, MultipleTabs, BetaTip },
+    components: { LayoutHeader, MultipleTabs },
     setup() {
       const { setHeaderHeight } = useLayoutHeight();
       const { prefixCls } = useDesign('layout-multiple-header');
