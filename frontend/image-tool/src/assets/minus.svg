@@ -1,0 +1,17 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    aria-hidden="true"
+    role="img"
+    id="footer-sample-full"
+    width="1em"
+    height="1em"
+    preserveAspectRatio="xMidYMid meet"
+    viewBox="0 0 24 24"
+    class="iconify iconify--akar-icons"
+>
+    <g fill="none" stroke="#ffffff" stroke-width="2">
+        <path stroke-linecap="round" d="M16 12H8"></path>
+        <circle cx="12" cy="12" r="10"></circle>
+    </g>
+</svg>

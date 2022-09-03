@@ -1,0 +1,196 @@
+import type { FormInstance } from 'ant-design-vue';
+export interface IUser {
+    id: string;
+    nickname: string;
+    // ....其他属性
+}
+export interface IModelConfig {
+    confidence: number[];
+    predict: boolean;
+    classes: { [key: string]: IModelClass[] };
+    model: string;
+    loading: boolean;
+}
+export interface IToolConfig {
+    FILTER_ALL: string;
+}
+export interface IToolState {
+    query: Record<string, string>;
+    // flow
+    saving: boolean;
+    //
+    models: IModel[];
+    //流水号
+    recordId: string;
+    // 数据集
+    datasetId: string;
+    //
+    user: IUser;
+    // data
+    dataList: IDataMeta[];
+    dataIndex: number;
+    // classification config
+    classifications: IClassification[];
+    classificationForm: FormInstance | null;
+    showVerify?: boolean;
+    // run model config
+    modelConfig: IModelConfig;
+    resultActive?: any;
+    seriesFrameId?: any;
+    resultFilter?: any;
+}
+
+export interface IDataMeta {
+    datasetId: string;
+    // id
+    dataId: string;
+    // uuid
+    // id: string;
+    teamId?: string;
+    imageUrl: string;
+    queryTime: string;
+    // 自动加载
+    loadState: LoadStatus;
+    // model
+    model?: IModelResult;
+    // classification values
+    classifications: IClassification[];
+    // save
+    needSave: boolean;
+    resultExist?: boolean;
+    dataConfig: IFileConfig;
+    validStatus: any;
+    annotationStatus: any;
+    isAnnotated: boolean;
+}
+
+export interface IFileConfig {
+    // dirName: string;
+    name: string;
+    size: number;
+    url: string;
+}
+
+export type IAction = 'save';
+
+export interface IPageHandler {
+    init: () => void;
+    onAction: (e: IAction) => void;
+}
+
+export type LoadStatus = '' | 'loading' | 'complete' | 'error';
+
+export interface IModelResult {
+    recordId: string;
+    id: string;
+    version: string;
+    state?: LoadStatus;
+}
+export type PointAttr = 'position' | 'color' | string;
+export interface IDataResource {
+    time: number;
+    // position
+    image: HTMLImageElement | string;
+}
+
+export interface IResourceLoader {
+    data: IDataMeta;
+    getResource: () => Promise<IDataResource>;
+    onProgress?: (percent: number) => void;
+}
+
+export enum ObjectType {
+    TYPE_3D = '3d',
+    TYPE_RECT = 'rect',
+    TYPE_BOX2D = 'box2d',
+}
+export interface IObject {
+    frontId?: string;
+    uuid?: string;
+    objType: string;
+    id: string;
+    classType: string;
+    attrs: Record<string, any>;
+    // model
+    confidence?: number;
+    modelClass?: string;
+    modelRun?: string;
+    //
+    coordinate: THREE.Vector2[];
+    color: string;
+}
+
+export interface IResultFilter {
+    value?: string;
+    label: string;
+    type: '' | 'project' | 'model';
+    options?: { value: string; label: string }[];
+}
+
+export interface IModel {
+    id: string;
+    name: string;
+    version: string;
+    classes: IModelClass[];
+    code: string;
+}
+export interface IModelClass {
+    code: string;
+    name: string;
+    label: string;
+    value: string;
+    selected?: boolean;
+    subClasses?: IModelClass;
+    url: string;
+}
+export interface IClassificationAttr {
+    classificationId: string;
+    parent: string;
+    parentAttr: string;
+    parentValue: any;
+    id: string;
+    type: AttrType;
+    name: string;
+    label?: string;
+    required: boolean;
+    options: { value: any; label: string }[];
+    value: any;
+}
+
+export interface IClassification {
+    id: string;
+    name: string;
+    label?: string;
+    attrs: IClassificationAttr[];
+}
+
+export interface IModel {
+    id: string;
+    name: string;
+    version: string;
+    classes: IModelClass[];
+    code: string;
+}
+
+export enum AttrType {
+    RADIO = 'RADIO',
+    MULTI_SELECTION = 'MULTI_SELECTION',
+    DROPDOWN = 'DROPDOWN',
+    TEXT = 'TEXT',
+}
+
+export interface Point {
+    x: number;
+    y: number;
+}
+export interface Box2D {
+    type: ObjectType;
+    uuid: string;
+    intId: number;
+    classType: string;
+    attrs: Record<string, any>;
+    points: Point[];
+}
+export type AnnotateObject = Box2D;
+
+export type IClassType = any;

@@ -35,9 +35,9 @@ build-frontend-package:
     - cd frontend/main
     - npm install
     - npm run build
-    # - cd ../image-tool
-    # - npm install
-    # - npm run build
+    - cd ../image-tool
+    - npm install
+    - npm run build
     - cd ../pc-tool
     - npm install
     - npm run build
