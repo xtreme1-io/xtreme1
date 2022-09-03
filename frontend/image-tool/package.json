@@ -3,12 +3,10 @@
     "private": true,
     "version": "0.0.0",
     "scripts": {
-        "prepare": "husky install",
         "dev": "vite",
         "build": "vite build --config vite.config.build.ts",
         "eslint": "eslint --fix",
         "lint:eslint": "eslint --cache --max-warnings 0  \"{src,mock}/**/*.{vue,ts,tsx}\" --fix",
-        "lint:lint-staged": "lint-staged -c ./.husky/lintstagedrc.js",
         "preview": "vite preview"
     },
     "dependencies": {
@@ -63,7 +61,6 @@
         "@types/ua-parser-js": "^0.7.36",
         "@typescript-eslint/parser": "^5.17.0",
         "@vitejs/plugin-vue": "^2.3.3",
-        "husky": "^7.0.4",
         "lint-staged": "^12.3.7",
         "typescript": "^4.5.4",
         "vite": "^2.9.9",
