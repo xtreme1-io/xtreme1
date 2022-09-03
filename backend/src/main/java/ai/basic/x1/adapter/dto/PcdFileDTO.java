@@ -11,17 +11,17 @@ import lombok.Data;
 public class PcdFileDTO extends FileDTO {
 
     /**
-     * pcd二进制文件对象
+     * Pcd binary file object
      */
     private FileDTO binary;
 
     /**
-     * pcd二进制压缩文件对象
+     * Pcd binary compressed file object
      */
     private FileDTO binaryCompressed;
 
     /**
-     * pcd渲染图片
+     * Pcd render image file object
      */
     private FileDTO renderImage;
 }

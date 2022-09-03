@@ -17,42 +17,42 @@ import lombok.NoArgsConstructor;
 public class ExportRecordDTO {
 
     /**
-     *
+     * Export record id
      */
     private Long id;
 
     /**
-     * 流水号
+     * Serial number
      */
     private Long serialNumber;
 
     /**
-     * 文件ID
+     * File id
      */
     private Long fileId;
 
     /**
-     * 文件名称
+     * File name
      */
     private String fileName;
 
     /**
-     * 状态(UNSTARTED:未开始,GENERATING:生成中,COMPLETED:已完成,FAILED:失败)
+     * Export status(UNSTARTED,GENERATING,COMPLETED,FAILED)
      */
     private ExportStatusEnum status;
 
     /**
-     * 已生成数量
+     * Generated number
      */
     private Integer generatedNum;
 
     /**
-     * 总数
+     * Export total number
      */
     private Integer totalNum;
 
     /**
-     * 文件路径
+     * File path
      */
     private String filePath;
 }
