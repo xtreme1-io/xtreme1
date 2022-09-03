@@ -46,7 +46,6 @@ export enum ObjectType {
 // }
 
 export interface IUserData {
-    // 结果id
     id?: string;
     // track id
     trackId?: string;
@@ -60,15 +59,7 @@ export interface IUserData {
     modelClass?: string;
     modelRunLabel?: string;
     project?: string;
-    // 标签
     classType?: string;
-    // 结果类型
-    // resultType?: ResultType;
-    // 结果状态
-    // resultStatus?: ResultStatus;
-    // 不可见标记
-    // invisibleFlag?: Boolean;
-    // 属性
     attrs?: Record<string, any>;
     // info
     pointN?: number;
@@ -195,15 +186,10 @@ export interface IPointInfo {
 
 export enum StatusType {
     Default = '',
-    // 创建
     Create = 'Create',
-    // 拾取
     Pick = 'Pick',
-    // 加载框
     Loading = 'Loading',
-    // 弹窗
     Modal = 'Modal',
-    // 确认框
     Confirm = 'Confirm',
     // play
     Play = 'Play',
@@ -263,7 +249,6 @@ export interface IFrame {
     teamId?: string;
     pointsUrl: string;
     queryTime: string;
-    // 自动加载
     loadState: LoadStatus;
     // model
     model?: IModelResult;

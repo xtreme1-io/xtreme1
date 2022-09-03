@@ -66,7 +66,6 @@ import { setIdInfo } from './create';
 //                 newUserData.pointN = undefined;
 //                 // newUserData.resultStatus = Const.Copied;
 
-//                 // 北京 业务字段
 //                 // newUserData.cBy = '';
 
 //                 object = editor.createAnnotate3D(
@@ -152,7 +151,6 @@ export function addModelTrackData(editor: Editor, objectsMap: Record<string, IOb
                     e.rotation3D.y,
                     e.rotation3D.z,
                 );
-                // 标准框忽略模型结果的size
                 // if (!oldUserData.isStandard && oldUserData.resultType !== Const.Fixed) {
                 //     transform.scale = new THREE.Vector3(e.size3D.x, e.size3D.y, e.size3D.z);
                 // }
@@ -194,8 +192,8 @@ export function addModelTrackData(editor: Editor, objectsMap: Record<string, IOb
             editor.cmdManager.execute('update-object-user-data', updateDatas);
         }
 
-        if (updateTrans.objects.length > 0) {
-            editor.cmdManager.execute('update-transform-batch', updateTrans);
-        }
+        // if (updateTrans.objects.length > 0) {
+        //     editor.cmdManager.execute('update-transform-batch', updateTrans);
+        // }
     });
 }

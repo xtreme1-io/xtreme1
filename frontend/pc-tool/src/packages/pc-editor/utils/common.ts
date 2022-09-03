@@ -10,13 +10,12 @@ export function isMatrixColumnMajor(elements: number[]) {
 }
 
 export function translateCameraConfig(info: any) {
-    // 兼容
     let cameraExternal = info.cameraExternal || info.camera_external;
     let cameraInternal = info.cameraInternal || info.camera_internal;
 
     if (!info || !cameraExternal || cameraExternal.length !== 16) return null;
 
-    // 列序转换成行序
+    // to rowMajor
     if (info.rowMajor === false || isMatrixColumnMajor(cameraExternal)) {
         let matrix = new THREE.Matrix4();
         matrix.elements = cameraExternal;
@@ -42,6 +41,7 @@ export function createViewConfig(fileConfig: IFileConfig[], cameraInfo: any[]) {
                 imgSize: [0, 0],
                 imgUrl: e.url,
                 name: e.name,
+                imgObject: null as any,
             };
         }
     });
@@ -89,7 +89,6 @@ export function queryStr(data: Record<string, any> = {}) {
 }
 
 export function getTrackObject(dataInfos: IFrame[], dataManager: DataManager) {
-    // 保证排序，小的在前面
     let trackObjects = {} as Record<string, { id: string; name: string }[]>;
     let idMap = {} as Record<string, boolean>;
 

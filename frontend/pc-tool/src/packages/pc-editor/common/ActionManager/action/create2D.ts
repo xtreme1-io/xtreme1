@@ -55,7 +55,7 @@ export const create2DRect = define({
                             return resolve(null);
                         }
 
-                        // 图片坐标系
+                        // image coordinate
                         let imgSize = view.imgSize;
                         data.forEach((pos) => {
                             pos.x = (pos.x / view.width) * imgSize.x;
@@ -142,7 +142,7 @@ export const create2DBox = define({
                         //     return resolve(null);
                         // }
 
-                        // // 图片坐标系
+                        // // image coordinate
                         let imgSize = view.imgSize;
                         data.forEach((pos) => {
                             pos.x = (pos.x / view.width) * imgSize.x;
@@ -205,7 +205,7 @@ export const projectObject2D = define({
             (e) => e.name.startsWith(`${config.imgViewPrefix}`),
         ) as Image2DRenderView[];
 
-        // 映射选中的Box
+        // project select box
         if (selectFlag && selection.length === 1 && selection[0] instanceof Box) {
             annotate3D = [selection[0]];
         }
@@ -293,7 +293,6 @@ export const projectObject2D = define({
         if (addObjects.length > 0) {
             editor.cmdManager.execute('add-object', [{ objects: addObjects }]);
 
-            // 更新class编辑
             let selection = editor.pc.selection;
             if (editor.state.config.showClassView && selection.length > 0) {
                 let object = selection[0];

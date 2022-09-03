@@ -63,7 +63,6 @@ export default class Points extends THREE.Points implements IPoints {
         geometry.dispose();
         this.geometry = createGeometry(data);
 
-        // 重新分配大小
         // if (oldPosition.count < position.length / oldPosition.itemSize) {
         //     geometry.dispose();
         //     geometry = createGeometry(data);
@@ -93,7 +92,6 @@ export default class Points extends THREE.Points implements IPoints {
             this.loader.load(
                 url,
                 (data: any) => {
-                    // 防止多次加载
                     if (timeStamp !== this.timeStamp) {
                         reject();
                         return;

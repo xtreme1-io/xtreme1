@@ -24,7 +24,6 @@
                             $$('header-Operation')
                         }}</div>
                         <a-menu @click="onMenuClick" :selectable="false">
-                            <!-- <a-menu-item key="edit"> 修改标签 </a-menu-item> -->
                             <a-menu-item key="delete"> {{ $$('header-remove-all') }} </a-menu-item>
                         </a-menu>
                     </div>
