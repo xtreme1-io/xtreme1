@@ -212,19 +212,14 @@ export const unLock = (params) =>
   });
 
 export const takeRecordByData = (params: takeRecordParams) =>
-  defHttp.post<null>(
-    {
-      url: `${Api.DATA}/annotate`,
-      params,
-      headers: {
-        // @ts-ignore
-        ignoreCancelToken: true,
-      },
+  defHttp.post<null>({
+    url: `${Api.DATA}/annotate`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
     },
-    {
-      errorMessageMode: 'none',
-    },
-  );
+  });
 
 export const exportData = (params: any) =>
   defHttp.get<null>({
