@@ -2,12 +2,8 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
-import ai.basic.x1.adapter.port.dao.DataEditDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
 import ai.basic.x1.entity.DataAnnotationObjectBO;
-import ai.basic.x1.usecase.exception.UsecaseCode;
-import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
@@ -34,7 +30,7 @@ public class DataAnnotationObjectUseCase {
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 
     @Autowired
-    private DataEditDAO dataEditDAO;
+    private DataEditUseCase dataEditUseCase;
 
     /**
      * query results of annotation
@@ -54,18 +50,12 @@ public class DataAnnotationObjectUseCase {
      */
     @Transactional(rollbackFor = Exception.class)
     public List<DataAnnotationObjectBO> saveDataAnnotationObject(List<DataAnnotationObjectBO> dataAnnotationObjectBOs, Set<Long> deleteDataIds) {
-        checkPermission(dataAnnotationObjectBOs, deleteDataIds);
+        Set<Long> dataIds = dataAnnotationObjectBOs.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toSet());
+        dataIds.addAll(deleteDataIds);
+        dataEditUseCase.checkLock(dataIds);
         removeAllObjectByDataIds(deleteDataIds);
         List<DataAnnotationObjectBO> dataAnnotationObjectBOS = updateDataAnnotationObject(dataAnnotationObjectBOs);
         return dataAnnotationObjectBOS;
-    }
-
-    private void checkPermission(List<DataAnnotationObjectBO> dataAnnotationObjectBOs, Set<Long> deleteDataIds) {
-        Set<Long> lockedDataIdList = getLockedDataIdList(RequestContextHolder.getContext().getUserInfo().getId());
-        Set<Long> dataIds = dataAnnotationObjectBOs.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toSet());
-        if (!lockedDataIdList.containsAll(deleteDataIds) || !lockedDataIdList.containsAll(dataIds)) {
-            throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
-        }
     }
 
     private List<DataAnnotationObjectBO> updateDataAnnotationObject(List<DataAnnotationObjectBO> dataAnnotationObjectBOs) {
@@ -114,13 +104,6 @@ public class DataAnnotationObjectUseCase {
         oldIds.removeIf(dataAnnotationIds::contains);
         dataAnnotationObjectDAO.removeBatchByIds(oldIds);
         return insertObjectBOs;
-    }
-
-    private Set<Long> getLockedDataIdList(Long userId) {
-        var dataEditQueryWrapper = Wrappers.lambdaQuery(DataEdit.class)
-                .eq(DataEdit::getCreatedBy, userId);
-        List<DataEdit> dataEdits = dataEditDAO.list(dataEditQueryWrapper);
-        return dataEdits.stream().map(DataEdit::getDataId).collect(Collectors.toSet());
     }
 
     private void removeAllObjectByDataIds(Set<Long> dataIds) {

@@ -2,12 +2,8 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.DataAnnotationDAO;
-import ai.basic.x1.adapter.port.dao.DataEditDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotation;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
 import ai.basic.x1.entity.DataAnnotationBO;
-import ai.basic.x1.usecase.exception.UsecaseCode;
-import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -30,9 +26,8 @@ public class DataAnnotationUseCase {
     @Autowired
     private DataAnnotationDAO dataAnnotationDAO;
 
-
     @Autowired
-    private DataEditDAO dataEditDAO;
+    private DataEditUseCase dataEditUseCase;
 
     /**
      * query classifications annotation results
@@ -55,8 +50,7 @@ public class DataAnnotationUseCase {
     @Transactional(rollbackFor = Exception.class)
     public void saveDataAnnotation(List<DataAnnotationBO> dataAnnotationBOs) {
 
-        checkPermission(dataAnnotationBOs);
-
+        dataEditUseCase.checkLock(dataAnnotationBOs.stream().map(DataAnnotationBO::getDataId).collect(Collectors.toSet()));
         if (ObjectUtil.isEmpty(dataAnnotationBOs)) {
             return;
         }
@@ -87,20 +81,5 @@ public class DataAnnotationUseCase {
         // and delete what is not in the new data. The function of this method is to obtain the difference set
         oldIds.removeIf(annotationIds::contains);
         dataAnnotationDAO.removeBatchByIds(oldIds);
-    }
-
-    private void checkPermission(List<DataAnnotationBO> dataAnnotationBOs) {
-        Set<Long> lockedDataIdList = getLockedDataIdList(RequestContextHolder.getContext().getUserInfo().getId());
-        Set<Long> dataIds = dataAnnotationBOs.stream().map(DataAnnotationBO::getDataId).collect(Collectors.toSet());
-        if (!lockedDataIdList.containsAll(dataIds)) {
-            throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
-        }
-    }
-
-    public Set<Long> getLockedDataIdList(Long userId) {
-        var dataEditQueryWrapper = Wrappers.lambdaQuery(DataEdit.class)
-                .eq(DataEdit::getCreatedBy, userId);
-        List<DataEdit> dataEdits = dataEditDAO.list(dataEditQueryWrapper);
-        return dataEdits.stream().map(DataEdit::getDataId).collect(Collectors.toSet());
     }
 }
