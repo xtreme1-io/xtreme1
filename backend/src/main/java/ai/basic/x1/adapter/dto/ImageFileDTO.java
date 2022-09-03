@@ -4,24 +4,24 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Data;
 
 /**
- * @author Jagger Wang
+ * @author fyb
  */
 @Data
 @JsonTypeName("imageFile")
 public class ImageFileDTO extends FileDTO {
 
     /**
-     * 大缩略图对象
+     * Large thumbnail file object
      */
     private FileDTO largeThumbnail;
 
     /**
-     * 中缩略图对象
+     * Medium thumbnail file object
      */
     private FileDTO mediumThumbnail;
 
     /**
-     * 小缩略图对象
+     * Small thumbnail file object
      */
     private FileDTO smallThumbnail;
 }

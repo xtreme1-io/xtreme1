@@ -17,27 +17,27 @@ import lombok.NoArgsConstructor;
 public class DataInfoStatusDTO {
 
     /**
-     * 单个dataID
+     * Data id
      */
     private Long id;
 
     /**
-     * 数据集ID
+     * Dataset id
      */
     private Long datasetId;
 
     /**
-     * 数据名称
+     * Data name
      */
     private String name;
 
     /**
-     * 数据状态 INVALID,VALID
+     * Data status INVALID,VALID
      */
     private DataStatusEnum status;
 
     /**
-     * 数据标注状态 ANNOTATED, NOT_ANNOTATED, INVALID
+     * Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
 

@@ -14,17 +14,17 @@ import java.util.List;
 public class DataAnnotationRecordDTO {
 
     /**
-     * 数据集id
+     * Dataset id
      */
     private Long datasetId;
 
     /**
-     * 流水号
+     * Serial number
      */
     private Long serialNo;
 
     /**
-     * 被锁定的数据
+     * Locked data
      */
     private List<DataEditDTO> datas;
 

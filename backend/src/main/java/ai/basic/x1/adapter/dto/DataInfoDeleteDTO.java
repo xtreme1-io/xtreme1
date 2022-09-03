@@ -19,7 +19,7 @@ import java.util.List;
 public class DataInfoDeleteDTO {
 
     /**
-     *需要刪除的数据id集合
+     * The collection of data ids that need to be deleted
      */
     @NotNull(message = "ids cannot be null")
     private List<Long> ids;

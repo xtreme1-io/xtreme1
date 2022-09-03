@@ -18,32 +18,32 @@ import lombok.NoArgsConstructor;
 public class DataEditDTO {
 
    /**
-    * 主键id
+    * ID
     */
    private Long  id;
 
    /**
-    * 标注记录表
+    * Data annotation record id
     */
    private Long  annotationRecordId;
 
    /**
-    * 数据id
+    * Data id
     */
    private Long  dataId;
 
    /**
-    * 数据集id
+    * Dataset id
     */
    private Long  datasetId;
 
    /**
-    * 模型id
+    * Model id
     */
    private Long  modelId;
 
    /**
-    * 模型版本
+    * Model version
     */
    private String  modelVersion;
 

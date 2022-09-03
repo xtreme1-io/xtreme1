@@ -22,36 +22,37 @@ import java.util.List;
 public class DataInfoDTO {
 
     /**
-     * 单个dataID
+     * Data id
      */
     private Long id;
 
     /**
-     * 数据集ID
+     * Dataset id
      */
     private Long datasetId;
 
     /**
-     * 数据名称
+     * Data name
      */
     private String name;
 
     /**
-     * 内容（文件夹路径、版本信息）
+     * Content (folder path, version information)
      */
     private List<FileNodeDTO> content;
 
     /**
-     * 数据状态 INVALID,VALID
+     * Data status INVALID,VALID
      */
     private DataStatusEnum status;
 
     /**
-     * 数据标注状态 ANNOTATED, NOT_ANNOTATED, INVALID
+     * Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
+
     /**
-     * 锁定人员的名称
+     * Locked Person's Name
      */
     private String lockedBy;
 
@@ -59,32 +60,32 @@ public class DataInfoDTO {
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     public static class FileNodeDTO {
         /**
-         * 名称
+         * File name
          */
         private String name;
 
         /**
-         * 文件ID
+         * File id
          */
         private Long fileId;
 
         /**
-         * 类型
+         * File type(directory,file)
          */
         private String type;
 
         /**
-         * 文件信息
+         * File information
          */
         private FileDTO file;
 
         /**
-         * 子文件
+         * Sub file
          */
         private List<FileNodeDTO> files;
 
         /**
-         * 文件夹类型（标识下面的文件是什么类型）
+         * Folder Type (Identifies what type of file is below)
          */
         private String directoryType;
 

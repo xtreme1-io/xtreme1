@@ -14,12 +14,12 @@ import java.util.List;
 public class RemoveModelDataResultDTO {
 
     /**
-     * 模型流水号
+     * Serial number
      */
     private Long serialNo;
 
     /**
-     * 数据集合
+     * The collection of data ids that need to remove model results
      */
     private List<Long> dataIds;
 }

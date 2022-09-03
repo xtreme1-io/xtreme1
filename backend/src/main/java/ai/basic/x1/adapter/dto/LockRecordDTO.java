@@ -16,12 +16,12 @@ import lombok.NoArgsConstructor;
 public class LockRecordDTO {
 
     /**
-     * 锁定记录ID
+     * Lock record id
      */
     private Long recordId;
 
     /**
-     * 锁定数据数量
+     * Locked data number
      */
     private Long lockedNum;
 }
