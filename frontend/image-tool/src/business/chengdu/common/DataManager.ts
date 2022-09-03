@@ -5,6 +5,8 @@ import * as utils from '../utils';
 import { Event, ICmdName, ICmdOption } from 'editor';
 import { isArray } from 'lodash';
 
+let timer: any;
+
 export default class DataManager {
     tool: Tool;
     dataMap: Record<string, any[]> = {};
@@ -190,7 +192,6 @@ export default class DataManager {
 
         setTimeout(this.pollDataModelResult.bind(this), 1000);
 
-        let timer: any;
         function createRequest(recordId: string, dataList: IDataMeta[]) {
             let ids = dataList.map((e) => e.dataId);
             let request = api
@@ -210,10 +211,12 @@ export default class DataManager {
                     console.log(hasErrorMessage);
 
                     if (hasErrorMessage) {
+                        console.log('Interval');
                         timer = setInterval(() => {
                             return createRequest(recordId, dataList);
                         }, 1000);
                     } else {
+                        console.log('clearInterval');
                         clearInterval(timer);
                     }
 
@@ -233,6 +236,7 @@ export default class DataManager {
                                 dataMeta.model = undefined;
                                 if (dataMeta.dataId === curData.dataId)
                                     editor.showMsg('error', 'Model Run Error.');
+                                clearInterval(timer);
                                 return;
                             }
                             if (objects.length > 0) {
@@ -257,7 +261,9 @@ export default class DataManager {
 
                     // data.forEach((info: any) => {
                 })
-                .catch(() => {});
+                .catch(() => {
+                    clearInterval(timer);
+                });
 
             return request;
         }
