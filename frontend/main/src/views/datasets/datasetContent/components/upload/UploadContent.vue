@@ -12,7 +12,9 @@
         <Icon class="icon" icon="eva:info-fill" size="16" />
         <div class="text">
           <span>The total files size should be limit of 500 mb.For more details, get our </span>
-          <span>open data or check documentation </span>
+          <a href="https://docs.basic.ai/docs/upload" target="_blank">
+            open data or check documentation
+          </a>
           <span>for supported 3D format and how to upload data with results.</span>
         </div>
       </div>
