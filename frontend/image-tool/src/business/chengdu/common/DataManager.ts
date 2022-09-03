@@ -205,20 +205,20 @@ export default class DataManager {
                     let resultList = data.modelDataResults;
                     if (!resultList) return;
 
-                    let hasErrorMessage = resultList.some((item: any) =>
-                        item.modelResult.message.includes('UnknownHostException'),
-                    );
-                    console.log(hasErrorMessage);
+                    // let hasErrorMessage = resultList.some((item: any) =>
+                    //     item.modelResult.message.includes('UnknownHostException'),
+                    // );
+                    // console.log(hasErrorMessage);
 
-                    if (hasErrorMessage) {
-                        console.log('Interval');
-                        timer = setInterval(() => {
-                            return createRequest(recordId, dataList);
-                        }, 1000);
-                    } else {
-                        console.log('clearInterval');
-                        clearInterval(timer);
-                    }
+                    // if (hasErrorMessage) {
+                    //     console.log('Interval');
+                    //     timer = setInterval(() => {
+                    //         return createRequest(recordId, dataList);
+                    //     }, 1000);
+                    // } else {
+                    //     console.log('clearInterval');
+                    //     clearInterval(timer);
+                    // }
 
                     let resultMap = {} as Record<string, any>;
                     resultList.forEach((e: any) => {
