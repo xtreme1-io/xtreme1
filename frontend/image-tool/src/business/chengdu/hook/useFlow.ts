@@ -31,10 +31,6 @@ export default function UseFlow() {
         }
         setToken(token);
 
-        const localToken =
-            'Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxMDAyIn0.rUOeGrFLGAPrM441wfbOd_ewK3KHy8OzLcGQtL10fs7lsND7V3v8HxOpft3BP6WjhKETpoqJsYh_0hHD0XSngQ';
-        setToken(localToken);
-
         initFlowEvent();
         handleUnload();
         enableEscOnFullScreen();

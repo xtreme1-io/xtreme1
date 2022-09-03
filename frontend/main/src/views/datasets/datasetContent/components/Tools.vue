@@ -141,15 +141,7 @@
       <div v-if="collState" class="list-wrapper">
         <div v-for="item in exportList" :key="item.id" class="item">
           <div class="name">{{ item.fileName }}</div>
-          <!-- 成功 -->
           <div v-if="item.status === ExportStatus.COMPLETED" class="status">
-            <!-- <Button
-              type="primary"
-              :size="ButtonSize.SM"
-              @click="handleDownload(item.filePath, item.fileName)"
-            >
-              {{ t('component.upload.download') }}
-            </Button> -->
             <Tooltip placement="top" color="rgba(0, 0, 0, 0.6)">
               <template #title>
                 <span>Download</span>
@@ -163,14 +155,12 @@
             </Tooltip>
             <CheckCircleFilled style="color: #7ff0b3" />
           </div>
-          <!-- 失败 -->
           <div v-else-if="item.status === ExportStatus.FAILED" class="status">
             <span class="mr-6px text-12px" style="color: #f8827b">
               {{ t('business.datasetContent.process.invalidFormat') }}
             </span>
             <CloseCircleFilled style="color: #f8827b" />
           </div>
-          <!-- 进行中 -->
           <Progress
             v-else
             style="width: 58px"
@@ -180,10 +170,6 @@
             :showInfo="false"
             trailColor="#F3F3F3"
           />
-          <!-- <div v-if="!item.status || item.status !== ExportStatus.COMPLETED" class="status">
-            <Spin :indicator="indicator" />
-            <span v-if="exportProgress < 100"> {{ exportProgress }}% </span>
-          </div> -->
         </div>
       </div>
     </div>
@@ -316,7 +302,7 @@
 
     closeUploadModal();
   };
-  // 监听 ProgressModal 关闭, 置空 fileList
+  // Reset fileList after ProgressModal closed
   const handleProgressVisible = (visible: boolean) => {
     if (!visible) {
       fileList.value = [];
@@ -354,25 +340,21 @@
   const exportProgress = ref<any>(0);
   let exportTimer;
   const exportFunc = async (list) => {
-    // 当前状态为 要下载 的文件
+    // Current file
     const exportFileList =
       list.filter(
         (item) => item.status !== ExportStatus.COMPLETED && item.status !== ExportStatus.FAILED,
       ) || [];
-    // const exportResult = exportResultList.value;
     if (exportFileList.length > 0) {
       clearTimeout(exportTimer);
-      // 当前需要下载的文件
       let fileItem = exportFileList[0];
-      // 获取状态
       const getStatus = async () => {
         if (exportFileList.length === 0) {
           clearTimeout(exportTimer);
           return;
         }
         try {
-          // NOTE 注：接口成功后才能获取到文件的相关信息
-          // -- 如果接口失败，则文件信息无法获取，页面上文件名会显示 pending
+          // If the interface fails, the file information cannot be obtained, and the file name on the page will display pending
           const res = await exportDataRecordCallBack({
             serialNumbers: [fileItem.serialNumber] + '',
           });
@@ -380,19 +362,17 @@
           exportList.value = exportList.value.map((item) =>
             item.serialNumber === res[0].serialNumber ? res[0] : item,
           );
-          // 计算进度 -- 单独变量存放进度
+          // Calculate progress
           let { generatedNum, totalNum } = res[0];
           generatedNum = (generatedNum ?? 0) * 100;
           totalNum = totalNum ?? 1;
           exportProgress.value = parseInt(generatedNum / totalNum);
 
-          // 如果状态未改变但进度到100了，需要调整进度
           if (res[0].status !== ExportStatus.COMPLETED) {
             exportProgress.value = exportProgress.value == 100 ? 99 : exportProgress.value;
             QueryExport();
           }
         } catch (e) {
-          // 设置为失败状态
           fileItem.status = ExportStatus.FAILED;
         }
       };
@@ -407,12 +387,10 @@
 
   const setExportRecord = (res) => {
     console.log('setExportRecord', res);
-    // 此处无法获取到文件信息，当前信息为自定义
+    // File information cannot be obtained here. The current information is custom
     exportList.value = exportList.value.concat([
       { serialNumber: res, status: ExportStatus.GENERATING, fileName: 'pending...' },
     ]);
-    // exportList.value = exportList.value.concat([res]);
-    // console.log(exportList.value);
   };
 
   const exportList = ref<any>([]);
@@ -433,13 +411,12 @@
       (item) => item.status === ExportStatus.COMPLETED || item.status === ExportStatus.FAILED,
     ).length;
   });
-  // download
+  // Download
   let downloadTimer;
   const handleDownload = (url, fileName) => {
     clearTimeout(downloadTimer);
     downloadTimer = setTimeout(() => {
       downloadByCorsUrl({ url, fileName });
-      // downloadByUrl({ url, fileName });
     }, 300);
   };
 

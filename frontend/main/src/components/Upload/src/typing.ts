@@ -1,14 +1,14 @@
 import { UploadApiResult } from '/@/api/sys/model/uploadModel';
 
 export enum UploadResultStatus {
-  PENDING = 'pending',
-  UPLOADING = 'uploading',
-  PROCESSING = 'processing',
+  PENDING = 'Pending',
+  UPLOADING = 'Uploading',
+  PROCESSING = 'Processing',
   // COMPLETED = 'completed',
-  SUCCESS = 'completed',
-  CANCELED = 'canceled',
+  SUCCESS = 'Completed',
+  CANCELED = 'Canceled',
   // FAILED = 'failed',
-  ERROR = 'failed',
+  ERROR = 'Failed',
 }
 
 export interface FileItem {
