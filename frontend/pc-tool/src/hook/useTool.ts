@@ -42,9 +42,7 @@ export default function useTool() {
 
     async function loadRecord() {
         try {
-            let { dataInfos, seriesFrameId } = await api.getInfoByRecordId(
-                bsState.recordId,
-            );
+            let { dataInfos, seriesFrameId } = await api.getInfoByRecordId(bsState.recordId);
             // state.isSeriesFrame = isSeriesFrame;
             bsState.seriesFrameId = seriesFrameId;
 
@@ -67,18 +65,6 @@ export default function useTool() {
         }
     }
 
-    async function loadDataFromFrameSeries(frameSeriesId: string) {
-        try {
-            let { datasetId } = editor.bsState;
-            let frames = await api.getFrameSeriesData(datasetId, frameSeriesId);
-            if (frames.length === 0) throw '';
-            // state.frames = frames;
-            editor.setFrames(frames);
-        } catch (error) {
-            throw new BSError('', editor.lang('load-frame-series-error'), error);
-        }
-    }
-
     async function loadUserInfo() {
         try {
             const data = await api.getUserInfo();
@@ -95,13 +81,13 @@ export default function useTool() {
     }
 
     async function loadDataSetInfo() {
-        try{
-        let datasetId = editor.bsState.datasetId;
-        let data = await api.getDataSetInfo(datasetId);
-        bsState.datasetName = data.name;
-        bsState.datasetType = data.type;
-        }catch(error){
-            throw new BSError('','load data-set info error', error);
+        try {
+            let datasetId = editor.bsState.datasetId;
+            let data = await api.getDataSetInfo(datasetId);
+            bsState.datasetName = data.name;
+            bsState.datasetType = data.type;
+        } catch (error) {
+            throw new BSError('', 'load data-set info error', error);
         }
     }
 
@@ -112,6 +98,5 @@ export default function useTool() {
         loadDataSetInfo,
         loadRecord,
         loadDateSetClassification,
-        loadDataFromFrameSeries,
     };
 }

@@ -44,9 +44,7 @@ Service.interceptors.response.use(
         if (response.status === 200) {
             let data = response.data;
             if (!isResource(response.config.headers || {}) && data.message) {
-                return Promise.reject(
-                    new BSError(Code.NETWORK_ERROR, data.message || 'Network Error'),
-                );
+                return Promise.reject(new BSError('', data.message || 'Network Error'));
             }
             return data;
         } else {

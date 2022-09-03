@@ -39,6 +39,7 @@ export function getDefault(): IBSState {
         saving: false,
         validing: false,
         submitting: false,
+        modifying: false,
         //
         // user
         user: {

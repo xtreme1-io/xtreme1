@@ -115,6 +115,7 @@ export default function useHeader() {
             bsState.saving ||
             bsState.validing ||
             bsState.submitting ||
+            bsState.modifying ||
             editorState.status === StatusType.Loading ||
             editorState.status === StatusType.Create ||
             editorState.status === StatusType.Play
@@ -152,6 +153,7 @@ export default function useHeader() {
         let { frameIndex, frames } = editor.state;
         let frame = frames[frameIndex];
 
+        if (frame.skipped) return;
         bsState.submitting = true;
         try {
             await editor.saveObject([frame], true);
@@ -207,6 +209,40 @@ export default function useHeader() {
         return -1;
     }
 
+    async function onModify() {
+        let { bsState } = editor;
+        let frame = editor.getCurrentFrame();
+        let config = {
+            dataIds: [frame.id],
+            dataType: 'SINGLE_DATA',
+            datasetId: bsState.datasetId,
+        };
+
+        bsState.modifying = true;
+        try {
+            let recordInfo = await api.getLockRecord(bsState.datasetId);
+            if (recordInfo.data && recordInfo.data.recordId) {
+                editor.showMsg('warning', 'You have 1 data occupied');
+                bsState.modifying = false;
+                return;
+            }
+
+            let data = await api.annotateData(config);
+            if (data.code === 'OK' && data.data) {
+                let recordId = data.data;
+                let host = location.host || location.hostname;
+                let pathname = location.pathname;
+                let protocol = location.protocol;
+                location.href = `${protocol}//${host + pathname}?recordId=${recordId}`;
+            } else {
+                editor.showMsg('warning', data.message || `Operation Failed`);
+            }
+        } catch (error: any) {
+            editor.handleErr(error, 'Operation Failed');
+        }
+        bsState.modifying = false;
+    }
+
     return {
         $$,
         iState,
@@ -224,5 +260,6 @@ export default function useHeader() {
         onToggleValid,
         onToggleSkip,
         onSubmit,
+        onModify,
     };
 }

@@ -9,6 +9,7 @@ const zh: ILocale = {
     'btn-skipped': '已跳过',
     'btn-submit': '提交',
     'btn-update': '更新',
+    'btn-modify': '编辑',
     'btn-full': '全屏',
     'btn-full-exit': '退出全屏',
 };

@@ -18,6 +18,7 @@ export interface IBSState {
     saving: boolean;
     validing: boolean;
     submitting: boolean;
+    modifying: boolean;
     //流水号
     recordId: string;
     // 数据集
