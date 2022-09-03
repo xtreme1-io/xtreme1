@@ -16,7 +16,6 @@ import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -28,11 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -139,13 +137,7 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
 
     private class DefaultModelRunSuccessHandler implements ModelRunSuccessHandler<PredImageRespDTO> {
 
-        private final Set<String> selectedClasses = new ConcurrentHashSet<>();
-        private final Map<String, ModelClass> systemModelClassMap = new ConcurrentHashMap<>();
-
-        private void initSystemModelClass() {
-            if (!systemModelClassMap.isEmpty()) {
-                return;
-            }
+        private Map<String, ModelClass> loadSystemModelClass() {
             Model model = modelDAO.getOne(new LambdaQueryWrapper<Model>().eq(Model::getModelCode,
                     getModelCodeEnum()));
             if (model == null) {
@@ -156,14 +148,14 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                 throw new IllegalArgumentException(
                         String.format("%s model not have any class", getModelCodeEnum()));
             }
-            Set<String> codes = new HashSet<>();
+            Map<String, ModelClass> systemModelClassMap = new HashMap<>();
             for (var modelClass : model.getClasses()) {
                 if (CollUtil.isNotEmpty(modelClass.getSubClasses())) {
                     for (var subModelClass : modelClass.getSubClasses()) {
                         if (subModelClass == null) {
                             continue;
                         }
-                        if (!codes.add(subModelClass.getCode())) {
+                        if (systemModelClassMap.containsKey(subModelClass.getCode())) {
                             throw new IllegalArgumentException("subModelClass is duplicate. " +
                                     "code:" + subModelClass.getCode());
                         } else {
@@ -172,6 +164,7 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                     }
                 }
             }
+            return systemModelClassMap;
         }
 
         @Override
@@ -183,13 +176,17 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                         .dataId(message.getDataId())
                         .objects(List.of()).build();
             } else {
-                this.initSystemModelClass();
+                var systemModelClassMap = this.loadSystemModelClass();
                 var filterPredItemCondition = JSONUtil.toBean(message.getResultFilterParam(),
                         PreModelParamDTO.class);
                 log.info("start filter predItem. filter condition: " + JSONUtil.toJsonStr(filterPredItemCondition));
                 var predObjects = responseData.getPredictItems()
-                        .stream().filter(item -> filter(item, filterPredItemCondition))
-                        .map(this::convert).collect(Collectors.toList());
+                        .stream()
+                        .filter(item -> matchSystemModelClass(item.getClsid(), systemModelClassMap)
+                                && matchSelectedClassAndConfidence(item, filterPredItemCondition)
+                        )
+                        .map(item -> convert(item, systemModelClassMap.get(String.valueOf(item.getClsid()))))
+                        .collect(Collectors.toList());
 
                 modelObject = PredImageModelObjectBO.builder().code(1)
                         .message("success")
@@ -200,7 +197,8 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
             PredictImageCo80ModelHandler.this.updateModelDataResult(modelObject, message);
         }
 
-        private PredImageModelObjectBO.ObjectBO convert(PredImageRespDTO.PredictItem predictItem) {
+        private PredImageModelObjectBO.ObjectBO convert(PredImageRespDTO.PredictItem predictItem,
+                                                        ModelClass modelClass) {
             var topLeft = PredImageModelObjectBO.Point
                     .builder()
                     .x(predictItem.getLeftTopX())
@@ -210,7 +208,6 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                     .x(predictItem.getRightBottomX())
                     .y(predictItem.getRightBottomY()).build();
 
-            var modelClass = systemModelClassMap.get(String.valueOf(predictItem.getClsid()));
             return PredImageModelObjectBO
                     .ObjectBO.builder()
                     .confidence(predictItem.getScore())
@@ -221,8 +218,12 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                     .build();
         }
 
-        private boolean filter(PredImageRespDTO.PredictItem predictItem,
-                               PreModelParamDTO filterPredItem) {
+        private boolean matchSystemModelClass(Integer clsid, Map<String, ModelClass> systemModelClassMap) {
+            return systemModelClassMap.containsKey(String.valueOf(clsid));
+        }
+
+        private boolean matchSelectedClassAndConfidence(PredImageRespDTO.PredictItem predictItem,
+                                                        PreModelParamDTO filterPredItem) {
             if (filterPredItem == null || CollUtil.isEmpty(filterPredItem.getClasses())) {
                throw new IllegalArgumentException("model param is empty");
             }
@@ -231,11 +232,10 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
             }
             var maxConfidence = getMaxConfidence(filterPredItem.getMaxConfidence());
             var minConfidence = getMinConfidence(filterPredItem.getMinConfidence());
-            if (selectedClasses.isEmpty()) {
-                selectedClasses.addAll(filterPredItem.getClasses());
-            }
+            var selectedClasses = new HashSet<>(filterPredItem.getClasses());
+
             String clsId = String.valueOf(predictItem.getClsid());
-            return systemModelClassMap.containsKey(clsId) && selectedClasses.contains(clsId) &&
+            return selectedClasses.contains(clsId) &&
                     betweenConfidence(predictItem.getScore(), minConfidence, maxConfidence);
         }
 

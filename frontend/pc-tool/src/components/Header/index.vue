@@ -7,7 +7,9 @@
             <div class="header-info">
                 <span class="dataset-type">{{ bsState.datasetType }}</span>
                 <span>-</span>
-                <span class="dataset-name">{{ bsState.datasetName }}</span>
+                <span class="dataset-name limit" :title="bsState.datasetName">{{
+                    bsState.datasetName
+                }}</span>
             </div>
         </div>
         <div class="item-wrap data-index" v-if="state.frames.length > 0">
@@ -73,6 +75,15 @@
             </a-button>
             <a-divider type="vertical" style="height: 32px; background-color: #57575c" />
             <template v-if="editor.state.frameIndex >= 0">
+                <a-button
+                    class="basic modify"
+                    :disabled="blocking"
+                    :loading="bsState.modifying"
+                    v-show="!canEdit()"
+                    @click="onModify"
+                >
+                    {{ $$('btn-modify') }}
+                </a-button>
                 <a-button
                     :class="
                         currentFrame.dataStatus === 'VALID'
@@ -146,6 +157,7 @@
         onToggleValid,
         onToggleSkip,
         onSubmit,
+        onModify,
     } = useHeader();
     let { has, canEdit } = useUI();
     let { init } = useFlow();
@@ -189,6 +201,7 @@
                 margin-left: 20px;
                 padding: 5px 15px;
                 color: #bec1ca;
+                display: flex;
             }
 
             .icon {
@@ -245,7 +258,8 @@
             &.skip {
                 background-color: #98b0d2;
             }
-            &.skipped {
+            &.skipped,
+            &.modify {
                 background-color: #ff6906;
             }
             &.submit {
@@ -274,6 +288,11 @@
             // &:hover {
             //     background: #3a393e;
             // }
+        }
+
+        .dataset-name {
+            display: inline-block;
+            max-width: 100px;
         }
     }
 </style>
