@@ -14,6 +14,18 @@
           {{ t('routes.profile.profile') }}
         </p>
         <Divider style="margin: 0" />
+        <p
+          class="cursor-pointer p-3 m-0 hover:bg-blue-50"
+          @click="
+            () => {
+              handleGo(RouteEnum.TEAM);
+            }
+          "
+        >
+          <Icon style="color: #aaa" size="16" icon="ion:person-circle" />
+          My Team
+        </p>
+        <Divider style="margin: 0" />
         <p class="cursor-pointer p-3 hover:bg-blue-50" @click="handleLoginOut">
           <Icon style="color: #aaa" icon="icomoon-free:exit" />
           {{ t('layout.header.dropdownItemLoginOut') }}
