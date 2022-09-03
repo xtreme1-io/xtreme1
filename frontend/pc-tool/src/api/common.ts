@@ -46,7 +46,7 @@ export async function getDataObject(dataIds: string[] | string) {
 
     let objectsMap = {} as Record<string, IObject[]>;
     // let objects = [] as IObject[];
-    data.forEach((e: any) => {
+    data.dataAnnotationObjects.forEach((e: any) => {
         let dataId = e.dataId;
         objectsMap[dataId] = objectsMap[dataId] || [];
 
@@ -80,8 +80,20 @@ export async function getDataClassification(dataIds: string[] | string) {
 }
 
 export async function unlockRecord(recordId: string) {
-    let url = `/api/dataset/data/unLock/${recordId}`;
+    let url = `/api/data/unLock/${recordId}`;
     return await post(url);
+}
+
+export async function getDataStatus(dataIds: string[]) {
+    let url = '/api/data/getDataStatusByIds';
+    let argsStr = queryStr({ dataIds });
+    let data = await get(`${url}?${argsStr}`);
+
+    let statusMap = {};
+    data.data.forEach((e: any) => {
+        statusMap[e.id] = e;
+    });
+    return statusMap;
 }
 
 export async function getInfoByRecordId(recordId: string) {
@@ -89,7 +101,8 @@ export async function getInfoByRecordId(recordId: string) {
     let data = await get(url);
     data = data.data;
     // 没有结果
-    if (!data) return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
+    if (!data || !data.datas || data.datas.length === 0)
+        return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
 
     let isSeriesFrame = data.dataType === 'FRAME_SERIES';
     let seriesFrameId = data.frameSeriesId ? data.frameSeriesId + '' : '';
@@ -115,15 +128,24 @@ export async function getInfoByRecordId(recordId: string) {
             // viewConfig: [],
             pointsUrl: '',
             queryTime: '',
-            // loadErr: false,
-            // loaded: false,
             loadState: '',
             model: model,
-            // modelId: config.modelId,
-            // modelVersion: config.modelVersion,
             needSave: false,
             classifications: [],
+            dataStatus: 'VALID',
+            annotationStatus: 'NOT_ANNOTATED',
+            skipped: false,
         });
+    });
+
+    let ids = dataInfos.map((e) => e.id);
+    let stateMap = await getDataStatus(ids);
+
+    dataInfos.forEach((data) => {
+        let status = stateMap[data.id];
+        if (!status) return;
+        data.dataStatus = status.status || 'VALID';
+        data.annotationStatus = status.annotationStatus || 'NOT_ANNOTATED';
     });
 
     return { dataInfos, isSeriesFrame, seriesFrameId };
@@ -233,7 +255,7 @@ export async function getFrameSeriesData(
     pageNo: string = '1',
     pageSize: string = '300',
 ) {
-    let url = `/api/dataset/data/findByPage`;
+    let url = `/api/data/findByPage`;
     let data = await get(url, {
         datasetId,
         frameSeriesId,

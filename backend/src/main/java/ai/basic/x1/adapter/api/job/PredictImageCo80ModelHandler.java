@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,27 +50,22 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
     @Autowired
     private ModelDAO modelDAO;
 
-    private final static Object RESULT = new Object();
-
-    private final ModelRunSuccessHandler successHandler = new DefaultModelRunSuccessHandler();
-    private final ModelRunFailureHandler failureHandler = (message, ex) -> {
+    private ModelRunSuccessHandler<PredImageRespDTO> successHandler = new DefaultModelRunSuccessHandler();
+    private ModelRunFailureHandler failureHandler = (message, ex) -> {
        var modelObject = PredImageModelObjectBO.builder().code(-1)
                 .message(ex.getMessage())
                 .dataId(message.getDataId())
                 .objects(null).build();
-        try {
-            modelDataResultDAO.update(ModelDataResult.builder()
-                            .updatedAt(OffsetDateTime.now())
-                            .updatedBy(message.getCreatedBy())
-                            .modelResult(objectMapper.readValue(JSONUtil.toJsonStr(modelObject), JsonNode.class))
-                            .build(),
-                    Wrappers.lambdaUpdate(ModelDataResult.class)
-                            .eq(ModelDataResult::getModelSerialNo, message.getModelSerialNo())
-                            .eq(ModelDataResult::getDataId, message.getDataId()));
-        } catch (JsonProcessingException e) {
-            log.error("ModelRunFailureHandler convert jsonNode error. ", e);
-        }
+        this.updateModelDataResult(modelObject, message);
     };
+
+    public void setSuccessHandler(ModelRunSuccessHandler<PredImageRespDTO> successHandler) {
+        this.successHandler = successHandler;
+    }
+
+    public void setFailureHandler(ModelRunFailureHandler failureHandler) {
+        this.failureHandler = failureHandler;
+    }
 
     @Override
     boolean modelRun(ModelMessageBO message) {
@@ -127,16 +122,25 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                 .imageId(dataInfo.getId()).imgUrl(url).build())).params("").build();
     }
 
-    private interface ModelRunSuccessHandler {
-
-        void onModelRunSuccess(PredImageRespDTO responseData, ModelMessageBO message);
-
+    private void updateModelDataResult(PredImageModelObjectBO modelObject, ModelMessageBO message) {
+        try {
+            modelDataResultDAO.update(ModelDataResult.builder()
+                            .updatedAt(OffsetDateTime.now())
+                            .updatedBy(message.getCreatedBy())
+                            .modelResult(objectMapper.readValue(JSONUtil.toJsonStr(modelObject), JsonNode.class))
+                            .build(),
+                    Wrappers.lambdaUpdate(ModelDataResult.class)
+                            .eq(ModelDataResult::getModelSerialNo, message.getModelSerialNo())
+                            .eq(ModelDataResult::getDataId, message.getDataId()));
+        } catch (JsonProcessingException e) {
+            log.error("UpdateModelDataResult convert jsonNode error. ", e);
+        }
     }
 
-    private class DefaultModelRunSuccessHandler implements ModelRunSuccessHandler {
+    private class DefaultModelRunSuccessHandler implements ModelRunSuccessHandler<PredImageRespDTO> {
 
         private final Set<String> selectedClasses = new ConcurrentHashSet<>();
-        private final Map<String, ModelClass> systemModelClassMap = new HashMap<>();
+        private final Map<String, ModelClass> systemModelClassMap = new ConcurrentHashMap<>();
 
         private void initSystemModelClass() {
             if (!systemModelClassMap.isEmpty()) {
@@ -152,19 +156,18 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                 throw new IllegalArgumentException(
                         String.format("%s model not have any class", getModelCodeEnum()));
             }
-            synchronized (RESULT) {
-                for (var modelClass : model.getClasses()) {
-                    if (CollUtil.isNotEmpty(modelClass.getSubClasses())) {
-                        for (var subModelClass : modelClass.getSubClasses()) {
-                            if (subModelClass == null) {
-                                continue;
-                            }
-                            if (systemModelClassMap.containsKey(subModelClass.getCode())) {
-                                throw new IllegalArgumentException("subModelClass is duplicate. " +
-                                        "code:" + subModelClass.getCode());
-                            } else {
-                                systemModelClassMap.put(subModelClass.getCode(), subModelClass);
-                            }
+            Set<String> codes = new HashSet<>();
+            for (var modelClass : model.getClasses()) {
+                if (CollUtil.isNotEmpty(modelClass.getSubClasses())) {
+                    for (var subModelClass : modelClass.getSubClasses()) {
+                        if (subModelClass == null) {
+                            continue;
+                        }
+                        if (!codes.add(subModelClass.getCode())) {
+                            throw new IllegalArgumentException("subModelClass is duplicate. " +
+                                    "code:" + subModelClass.getCode());
+                        } else {
+                            systemModelClassMap.put(subModelClass.getCode(), subModelClass);
                         }
                     }
                 }
@@ -194,18 +197,7 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
                         .objects(predObjects).build();
             }
 
-            try {
-                modelDataResultDAO.update(ModelDataResult.builder()
-                                .updatedAt(OffsetDateTime.now())
-                                .updatedBy(message.getCreatedBy())
-                                .modelResult(objectMapper.readValue(JSONUtil.toJsonStr(modelObject), JsonNode.class))
-                                .build(),
-                        Wrappers.lambdaUpdate(ModelDataResult.class)
-                                .eq(ModelDataResult::getModelSerialNo, message.getModelSerialNo())
-                                .eq(ModelDataResult::getDataId, message.getDataId()));
-            } catch (JsonProcessingException e) {
-                log.error("ModelRunSuccessHandler convert jsonNode error. ", e);
-            }
+            PredictImageCo80ModelHandler.this.updateModelDataResult(modelObject, message);
         }
 
         private PredImageModelObjectBO.ObjectBO convert(PredImageRespDTO.PredictItem predictItem) {
@@ -259,11 +251,6 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
         private BigDecimal getMinConfidence(BigDecimal confidence) {
             return confidence == null ? new BigDecimal(0) : confidence;
         }
-    }
-
-    private interface ModelRunFailureHandler {
-
-        void onModelRunFailure(ModelMessageBO message, Exception exception);
 
     }
 
