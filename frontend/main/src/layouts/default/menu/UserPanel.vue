@@ -21,37 +21,52 @@
       </template>
       <template #title>
         <div>
-          <div class="text-center">
-            <img class="mb-2 mt-4 inline-block" width="36" :src="user?.avatarUrl || ava" alt="" />
-            <div class="mb-2 w-60">{{ user?.nickname }}</div>
+          <div class="text-center flex flex-col items-center">
+            <!-- <img class="mb-2 mt-4 inline-block" width="36" :src="avatarUrl || ava" alt="" /> -->
+            <ProfileAvatar
+              class="mb-2 mt-4"
+              :avatarUrl="avatarUrl"
+              :nickname="nickname"
+              :size="36"
+            />
+            <div class="w-60">{{ nickname }}</div>
             <!-- <div class="text-dark-50">{{ team?.name }}</div> -->
           </div>
         </div>
       </template>
       <div class="panel flex items-center">
-        <img class="mr-2" width="36" :src="user?.avatarUrl || ava" alt="" />
-        <div v-if="!type" class="panel-name">{{ user?.nickname }}</div>
+        <!-- <img class="mr-2" width="36" :src="avatarUrl || ava" alt="" /> -->
+        <ProfileAvatar class="mr-2" :avatarUrl="avatarUrl" :nickname="nickname" :size="36" />
+        <div v-if="!type" class="panel-name">{{ nickname }}</div>
       </div>
     </Popover>
   </div>
 </template>
 <script lang="ts" setup>
-  import { defineProps, onMounted } from 'vue';
+  import { defineProps, onMounted, computed } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import ava from '/@/assets/images/common/default-ava.png';
+  // import ava from '/@/assets/images/common/default-ava.png';
   import { useUserStore } from '/@/store/modules/user';
   import { useGo } from '/@/hooks/web/usePage';
   import { RouteEnum } from '/@/enums/routeEnum';
   import { Popover } from 'ant-design-vue';
+  import { ProfileAvatar } from '/@@/ProfileAvatar';
   const userStore = useUserStore();
   const { prefixCls } = useDesign('user-panel');
   const { t } = useI18n();
-  const user = userStore.getUserInfo || null;
+  // const user = userStore.getUserInfo || null;
   defineProps<{ type: boolean }>();
   function handleLoginOut() {
     userStore.confirmLoginOut();
   }
+
+  const avatarUrl = computed(() => {
+    return userStore.getUserInfo?.avatarUrl;
+  });
+  const nickname = computed(() => {
+    return userStore.getUserInfo?.nickname;
+  });
 
   onMounted(async () => {});
 
