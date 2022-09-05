@@ -11,10 +11,6 @@
         <div class="card__text" :style="{ backgroundColor: item.color }">
           <span>{{ item.name }}</span>
         </div>
-        <!-- <div class="card__type">
-          <span>{{ t('business.class.attributes') + '：' }}</span>
-          <span>{{ getAttributeLength(item.attributes) }}</span>
-        </div> -->
         <div class="card__attribute">
           <span>{{ t('business.class.attributes') + '：' }}</span>
           <span>{{ getAttributeLength(item.attributes) }}</span>
@@ -22,14 +18,12 @@
       </template>
       <template v-if="props.activeTab == ClassTypeEnum.CLASSIFICATION">
         <div class="card__title">
-          <!-- <img :src="classificationSvg" /> -->
           <img :src="inputItemImg[item.inputType]" />
           <Tooltip placement="topLeft" :title="item.name">
             <span>{{ item.name }}</span>
           </Tooltip>
         </div>
         <div class="card__img">
-          <!-- <img :src="CardImage" alt="" /> -->
           <div :style="{ backgroundImage: 'url(' + CardImage + ')' }"></div>
         </div>
       </template>
@@ -37,7 +31,6 @@
         <span>{{ t('business.class.createdDate') + '：' }}</span>
         <span>{{ getDate(item.createdAt) }}</span>
       </div>
-      <!-- mask -->
       <div class="card__mask animate-fadeIn animate-animated">
         <div class="delete">
           <EllipsisOutlined style="color: #57ccef" />
@@ -49,9 +42,9 @@
           </div>
         </div>
         <div class="edit">
-          <a-button type="primary" block @click="handleEdit(item.id)">
+          <Button type="primary" block @click="handleEdit(item.id)">
             {{ t('common.editText') }}
-          </a-button>
+          </Button>
         </div>
       </div>
     </div>
@@ -63,43 +56,28 @@
     :activeTab="props.activeTab"
     :isCenter="props.isCenter"
   />
-  <!-- <SyncModal @register="syncRegister" :id="itemId" @sync="handleSync" /> -->
 </template>
 <script lang="ts" setup>
   import { ref } from 'vue';
-  // 工具
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useModal } from '/@/components/Modal';
-  // import { useMessage } from '/@/hooks/web/useMessage';
-  // import { handleMutiTabAction } from './modal-components/utils';
   import { getDate } from '/@/utils/business/timeFormater';
-  // 接口
-  // import {
-  //   syncClassToOntologyApi,
-  //   syncClassificationToOntologyApi,
-  // } from '/@/api/business/datasetOntology';
+
   import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
-  // 组件
   import { EllipsisOutlined } from '@ant-design/icons-vue';
   import { Button, Tooltip } from 'ant-design-vue';
   import DeleteModal from './DeleteModal.vue';
-  // import SyncModal from './SyncModal.vue';
-  // 图片
   import { toolTypeImg, inputItemImg } from './modal-components/data';
   import deleteSvg from '/@/assets/icons/delete.svg';
-  // import classificationSvg from '/@/assets/svg/classification.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';
-  const AButton = Button;
+
   const { t } = useI18n();
   const { prefixCls } = useDesign('cardItem');
-  // const { createMessage } = useMessage();
   const [deleteRegister, { openModal: openDeleteModal }] = useModal();
-  // const [syncRegister, { openModal: openSyncModal, closeModal: closeSyncModal }] = useModal();
 
   const props = withDefaults(
     defineProps<{
-      // cardList: ResponseClassificationParams[] | ResponseClassParams[];
       type?: 'dataset' | undefined;
       cardList: any[];
       activeTab: ClassTypeEnum;
@@ -110,12 +88,14 @@
     },
   );
 
-  // 编辑
-  const emits = defineEmits(['edit', 'sync']);
+  const emits = defineEmits(['edit']);
+
+  /** Edit */
   const handleEdit = (id) => {
     emits('edit', id);
   };
-  // 删除
+
+  /** Delete */
   const itemId = ref('');
   const itemName = ref('');
   const handleDelete = (item) => {
@@ -123,13 +103,11 @@
     itemName.value = item.name;
     openDeleteModal();
   };
-  // 获取 attributes 长度
+
   const getAttributeLength = (attributes) => {
     const res = attributes ?? [];
     return res.length;
   };
-
-  // 同步请求
 </script>
 <style lang="less" scoped>
   @import '/@/design/function/gridLayout.less';
@@ -179,7 +157,6 @@
         justify-content: center;
         align-items: center;
         width: 100%;
-        // height: 80px;
         padding: 7% 0;
         margin-bottom: 6px;
 
@@ -200,7 +177,6 @@
         margin-bottom: 6px;
 
         div {
-          // height: 102px;
           width: 100%;
           padding-top: 49%;
           background-color: #fff;
@@ -208,10 +184,6 @@
           background-repeat: no-repeat;
           background-size: cover;
         }
-        // img {
-        //   width: 100%;
-        //   height: 100%;
-        // }
       }
 
       .card__attribute {

@@ -1,5 +1,5 @@
 <template>
-  <a-tree
+  <Tree
     v-if="showTree"
     v-model:selectedKeys="selectedKeys"
     :show-line="showLine"
@@ -14,19 +14,14 @@
     <template #title="{ type, name }">
       <span :class="[type, props.activeTab]">{{ name }}</span>
     </template>
-  </a-tree>
+  </Tree>
 </template>
 <script lang="ts" setup>
   import { ref, unref, reactive, watch, computed } from 'vue';
-  // 组件
   import { Tree } from 'ant-design-vue';
   import emitter from 'tiny-emitter/instance';
-  // 工具
   import { clone } from '/@/utils/business/deepClone';
   import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
-
-  // 注册组件
-  const ATree = Tree;
 
   const showLine = ref<boolean>(true);
   const showIcon = ref<boolean>(false);
@@ -38,17 +33,17 @@
     indexList?: number[];
   }>();
 
-  // 节点名称, 默认为 Root
+  // Node name, default is Root
   const rootName = ref('Root');
-  // 由 baseForm 触发，改变 rootName
+  // Triggered by baseForm, to change the rootName
   emitter.off('changeRootName');
   emitter.on('changeRootName', (newName) => {
     rootName.value = newName;
   });
 
-  // 处理前的树形数据
+  // tree data before processing
   let TreeData = ref<any>({});
-  // 监听到 attributes | options 改变就处理树形数据
+  // Listening to changes in attributes | options to process tree data
   watch(
     props,
     (newVal) => {
@@ -60,7 +55,8 @@
       immediate: true,
     },
   );
-  // 监听树形数据变化 -- 切换树形组件显示
+
+  // Monitor tree data changes -- switch the display of tree components
   const showTree = ref<boolean>(true);
   watch(TreeData, () => {
     showTree.value = false;
@@ -68,7 +64,7 @@
       showTree.value = true;
     });
   });
-  // 处理后的树形数据 -- 用于显示
+  // processed tree data -- for display
   const treeData = computed(() => {
     return [
       {
@@ -80,7 +76,7 @@
     ];
   });
 
-  // 用于处理 TreeData ，加上 children 字段
+  // For processing TreeData , plus the children field
   function handleTreeData(treeData, indexKey: string) {
     if (!treeData) treeData = {};
     treeData.children = [];
@@ -101,9 +97,9 @@
     }
   }
 
-  // 选中的节点，默认为 root
+  // The selected node, defaults to root
   const selectedKeys = ref(['root']);
-  // 监听 indexList,处理选中
+  // Monitor indexList, process selection
   watch(
     () => props.indexList,
     (newVal) => {
@@ -123,18 +119,12 @@
     },
   );
 
-  // 点击节点事件
+  // click node event
   const emits = defineEmits(['select']);
   const handleSelect = (selectedKeys: string[]) => {
-    // 先提交当前表单
-    // emitter.emit('handleSaveForm', { type: 'tree', selectedKeys: selectedKeys });
     emits('select', unref(selectedKeys));
-    // if (selectedKeys[0] == 'root') {
-    //   emits('select', ['']);
-    // } else {
-    // }
   };
-  // 改变节点
+  // change node
   emitter.off('changeSelected');
   emitter.on('changeSelected', (newSelectedKeys) => {
     console.log('tree changeSelected', newSelectedKeys);
@@ -146,7 +136,7 @@
     width: 100%;
     height: 100%;
     overflow: auto;
-    // 节点容器
+    // node container
     li {
       .ant-tree-node-content-wrapper {
         display: inline-flex;
@@ -219,14 +209,14 @@
         }
       }
     }
-    // 子节点
+    // child node
     .ant-tree-child-tree {
       position: relative;
 
       & > li {
         padding-top: 8px;
         position: relative;
-        // 子节点左边连线
+        // child node left
         &:not(:last-child)::before {
           left: -6px;
           height: 100%;
@@ -248,18 +238,18 @@
         }
       }
     }
-    // 图标
+    // icon
     .ant-tree-switcher {
       background-color: transparent !important;
       z-index: 2;
-      // 隐藏默认图标
+      // hide default icon
       .anticon {
         svg {
           display: none;
         }
       }
 
-      //打开图标的更换
+      // Open icon replacement
       &.ant-tree-switcher_open {
         background: url('/@/assets/svg/ontology/minus.svg') no-repeat center center !important;
 
@@ -275,7 +265,7 @@
           display: none !important;
         }
       }
-      // 把之前的默认图标隐藏
+      // Hide the previous default icon
       &.ant-tree-switcher-noop {
         // width: 0 !important;
         i {
