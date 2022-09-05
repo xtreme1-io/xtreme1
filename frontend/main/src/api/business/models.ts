@@ -12,7 +12,7 @@ import {
 } from './model/modelsModel';
 
 enum Api {
-  Model = '/dataset/model',
+  Model = '/model',
   ModelRun = '/dataset/modelRun',
 }
 
