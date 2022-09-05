@@ -15,12 +15,12 @@ import java.util.List;
 public class ModelObjectBO {
 
     /**
-     * 模型CODE
+     * Model code PRE_LABEL,COCO_80
      */
     private ModelCodeEnum modelCode;
 
     /**
-     * 模型结果列表
+     * Data model results
      */
     private List<ModelDataResultBO> modelDataResults;
 

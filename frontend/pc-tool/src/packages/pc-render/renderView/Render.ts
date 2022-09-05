@@ -27,7 +27,6 @@ export default class Render extends THREE.EventDispatcher {
     destroy() {}
 
     /**
-     * 控制视图是否渲染
      * @param enabled
      */
     toggle(enabled: boolean) {

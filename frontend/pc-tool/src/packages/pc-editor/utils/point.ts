@@ -127,7 +127,7 @@ export function getMiniBox1(
     let box = new THREE.Box3(new THREE.Vector3(-0.5, -0.5, -0.5), new THREE.Vector3(0.5, 0.5, 0.5));
     // let newBox = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
     // let pointN = 0;
-    let offsetFloor = 0.15; // 地面偏移
+    let offsetFloor = 0.15; // ground offset
     let preData: THREE.Vector3[] = [];
 
     setPreData();
@@ -138,7 +138,7 @@ export function getMiniBox1(
     let info = statisticPositionVInfo(preData);
     let infoRange = getMaxMinInfo(info);
     // console.log('info', info, infoRange);
-    // 地面偏移
+    // ground offset
     if (infoRange.infoMin + offsetFloor < infoRange.infoMax) {
         infoRange.infoMin += offsetFloor;
     }

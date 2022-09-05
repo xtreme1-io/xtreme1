@@ -20,19 +20,19 @@ public class Page<T> implements Serializable {
 
     private final static int DEFAULT_PAGE_SIZE = 10;
     /**
-     * 页宽
+     * page size
      */
     private int pageSize = DEFAULT_PAGE_SIZE;
     /**
-     * 页码
+     * Page number
      */
     private int pageNo;
     /**
-     * 总条数
+     * Total number
      */
     private int total;
     /**
-     * 数据
+     * Data list
      */
     private List<T> list;
 

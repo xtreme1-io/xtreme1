@@ -9,8 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
-
 /**
  * @author fyb
  * @date 2022/4/8 16:17
@@ -29,12 +27,12 @@ public class DatasetQueryDTO {
     /**
      * Dataset create start time
      */
-    private OffsetDateTime createStartTime;
+    private String createStartTime;
 
     /**
      * Dataset create end time
      */
-    private OffsetDateTime createEndTime;
+    private String createEndTime;
 
     /**
      * Sort field

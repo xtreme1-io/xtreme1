@@ -109,7 +109,6 @@ export default class Editor extends THREE.EventDispatcher {
             this.dispatchEvent({ type: Event.ANNOTATE_SELECT, data: { ...data.data } });
         });
 
-        // 双击选中trackId的所有结果
         this.pc.addEventListener(RenderEvent.OBJECT_DBLCLICK, (data) => {
             let object = data.data as AnnotateObject;
             let trackId = object.userData.trackId;
@@ -350,39 +349,6 @@ export default class Editor extends THREE.EventDispatcher {
         }
     }
 
-    // toggleInvisible(trackId: string, invisible: boolean) {
-    //     let { frames, frameIndex } = this.state;
-
-    //     let curData = frames[frameIndex];
-    //     curData.needSave = true;
-
-    //     let annotate3D = this.pc.getAnnotate3D();
-    //     let annotate2D = this.pc.getAnnotate2D();
-    //     let objects = [...annotate3D, ...annotate2D].filter((e) => e.userData.trackId === trackId);
-
-    //     if (objects.length === 0) return;
-
-    //     this.cmdManager.withGroup(() => {
-    //         if (invisible) {
-    //             // 保留一个
-    //             if (objects.length > 1) {
-    //                 this.cmdManager.execute('delete-object', objects.slice(1));
-    //             }
-    //             this.cmdManager.execute('update-object-user-data', {
-    //                 objects: objects[0],
-    //                 data: { invisibleFlag: true },
-    //             });
-    //         } else {
-    //             this.cmdManager.execute('update-object-user-data', {
-    //                 objects: objects,
-    //                 data: { invisibleFlag: false },
-    //             });
-    //         }
-
-    //         this.cmdManager.execute('select-object', objects[0]);
-    //     });
-    // }
-
     blurPage() {
         if (document.activeElement && document.activeElement !== document.body) {
             (document.activeElement as any).blur();
@@ -406,27 +372,4 @@ export default class Editor extends THREE.EventDispatcher {
         let filterSelection = selection.filter((e) => selectionMap[e.uuid]);
         this.pc.selectObject(filterSelection);
     }
-
-    // reset(config: { data: boolean; view: boolean } = { data: true, view: true }) {
-    //     if (config.data) this.pc.clearData();
-    //     this.pc.selectObject();
-
-    //     this.cmdManager.reset();
-
-    //     // 清楚相机角度
-    //     this.state.config.imgRegionIndex = -1;
-    //     this.pc.material.setUniforms({
-    //         hasCameraRegion: -1,
-    //     });
-
-    //     // 清楚当前操作行为
-    //     this.actionManager.stopCurrentAction();
-
-    //     this.state.config.activeTranslate = false;
-    //     this.state.config.activeTrack = false;
-
-    //     if (this.state.config.showSingleImgView) {
-    //         this.viewManager.showImgView();
-    //     }
-    // }
 }

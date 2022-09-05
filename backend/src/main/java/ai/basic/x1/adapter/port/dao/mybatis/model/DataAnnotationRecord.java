@@ -23,23 +23,23 @@ public class DataAnnotationRecord {
     private Long id;
 
     /**
-     * 数据集id
+     * Dataset id
      */
     private Long datasetId;
 
     /**
-     * 流水号
+     * Serial number
      */
     private Long serialNo;
 
     /**
-     * 创建者
+     * Creator id
      */
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
 
     /**
-     * 创建时间
+     * Create time
      */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;

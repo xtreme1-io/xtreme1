@@ -25,25 +25,25 @@ export function execute(): IPageHandler {
             return;
         }
 
-        // 设置模式
+        // set mode
         editor.setMode(modes.execute);
 
         editor.showLoading(true);
         try {
-            // 更加流水号加载数据列表
+            // get data list by record id
             await loadRecord();
             // await loadUserInfo();
             await loadDataSetInfo();
             await Promise.all([
-                // 加载dataset Classification
+                // load dataset Classification
                 loadDateSetClassification(),
-                // 加载class
+                // load class
                 loadClasses(),
-                // 加载模型信息
+                // load model
                 loadModels(),
             ]);
 
-            // 加载第一帧data
+            // load first data
             await editor.loadFrame(0, false);
         } catch (error: any) {
             editor.handleErr(error, editor.lang('load-error'));

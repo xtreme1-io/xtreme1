@@ -6,8 +6,10 @@ import java.util.List;
 
 @Data
 public class RelationFileBO extends FileBO {
+
     /**
-     * 关联文件集合
+     * Relation files
      */
     private List<FileBO> relationFiles;
+    
 }

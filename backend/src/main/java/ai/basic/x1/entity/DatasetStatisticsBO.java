@@ -12,27 +12,27 @@ import lombok.NoArgsConstructor;
 public class DatasetStatisticsBO {
 
     /**
-     * 数据集ID
+     * Dataset id
      */
     private Long datasetId;
 
     /**
-     * 已经标注数量
+     * Annotated data count
      */
     private Integer annotatedCount;
 
     /**
-     * 未标注数量
+     * Not annotate data count
      */
     private Integer notAnnotatedCount;
 
     /**
-     * 无效数据标注数量
+     * Invalid data count
      */
     private Integer invalidCount;
 
     /**
-     * data count
+     * Data count
      */
     private Integer itemCount;
 

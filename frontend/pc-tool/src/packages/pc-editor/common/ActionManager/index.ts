@@ -112,7 +112,6 @@ export default class ActionManager {
             let action = this.currentAction;
             let actionName = action.name as IActionName;
 
-            // 只处理 特定的几种创建行为
             if (createActions.indexOf(actionName) < 0) return;
 
             this.stopCurrentAction();

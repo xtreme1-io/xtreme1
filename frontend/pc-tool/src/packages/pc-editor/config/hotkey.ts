@@ -1,6 +1,5 @@
 import { IHotkeyConfig } from '../type';
 import UAParser from 'ua-parser-js';
-// import { SideRenderView } from 'pc-render';
 
 const parser = new UAParser();
 let osInfo = parser.getResult();
@@ -16,9 +15,6 @@ const hotkeyConfig: IHotkeyConfig[] = [
     { key: isMac ? '⌘+shift+z' : 'ctrl+shift+z', action: 'redo' },
 
     // side view
-    // 【AWSD】 以物体行进方向，向后向上向下向前平移结果
-    // 【QE】以物体行进方向，向左向右平移结果
-    // 【ZX】 俯视图 视角下，向左向右旋转点云图
     { key: 'e', action: 'translateYMinus' },
     { key: 'q', action: 'translateYPlus' },
     { key: 'a', action: 'translateXMinus' },

@@ -5,14 +5,6 @@ import { IActionName } from 'pc-editor';
 import { useInjectEditor } from '../../state';
 import * as locale from './lang';
 
-// let titleMap = {
-//     z: '俯视图',
-//     // y: 'Side view',
-//     '-y': '侧视图',
-//     // x: 'Rear view',
-//     '-x': '后视图',
-// };
-
 interface SideViewProps {
     axis: axisType;
 }
@@ -54,7 +46,6 @@ export default function useSideView(dom: Ref<HTMLDivElement | null>, props: Side
                 axis: state.axis,
             });
 
-            // 后视图和侧视图禁用旋转
             // let action = view.getAction('resize-translate') as ResizeTransAction;
             // if (action && (state.axis === '-y' || state.axis === '-x')) action.rotatable = false;
 

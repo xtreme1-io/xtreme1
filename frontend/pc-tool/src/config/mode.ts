@@ -8,7 +8,7 @@ function toMap<T extends string>(arr: T[]) {
     return map;
 }
 
-// 执行
+// execute mode
 const execute: IModeConfig<IBsUIType, IBsActionName> = {
     name: 'execute',
     op: OPType.EXECUTE,
@@ -16,7 +16,7 @@ const execute: IModeConfig<IBsUIType, IBsActionName> = {
     actions: toMap<IBsActionName>([...executeActions]),
 };
 
-// 查看
+// view mode
 const view: IModeConfig<IBsUIType, IBsActionName> = {
     name: 'view',
     op: OPType.VIEW,

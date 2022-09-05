@@ -16,12 +16,12 @@ import java.util.List;
 public class DataExportBO {
 
     /**
-     * 名称
+     * name
      */
     private String name;
 
     /**
-     * 数据信息
+     * Data information
      */
     private JSON data;
 
@@ -29,12 +29,12 @@ public class DataExportBO {
     public static class Result {
 
         /**
-         * 类别
+         * Classifications
          */
         private List<JSON> classifications;
 
         /**
-         * 标注结果
+         * Annotation results
          */
         private List<JSONObject> objects;
     }

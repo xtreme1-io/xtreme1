@@ -19,32 +19,32 @@ import java.time.OffsetDateTime;
 public class DatasetQueryBO {
 
     /**
-     * 数据名称
+     * Dataset name
      */
     private String name;
 
     /**
-     * 创建开始时间
+     * Dataset create start time
      */
     private OffsetDateTime createStartTime;
 
     /**
-     * 创建结束时间
+     * Dataset create end time
      */
     private OffsetDateTime createEndTime;
 
     /**
-     * 排序字段
+     * Sort field
      */
     private String sortField;
 
     /**
-     * 升序或者降序
+     * Ascending or descending order
      */
     private String ascOrDesc;
 
     /**
-     * 数据类型
+     * Dataset type
      */
     private DatasetTypeEnum type;
 

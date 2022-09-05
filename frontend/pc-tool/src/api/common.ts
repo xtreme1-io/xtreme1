@@ -100,7 +100,7 @@ export async function getInfoByRecordId(recordId: string) {
     let url = `/api/data/findDataAnnotationRecord/${recordId}`;
     let data = await get(url);
     data = data.data;
-    // 没有结果
+    // no data
     if (!data || !data.datas || data.datas.length === 0)
         return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
 
