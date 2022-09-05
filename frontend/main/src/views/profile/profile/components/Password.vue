@@ -124,7 +124,7 @@
 
       if (data.confirmPassword !== data.newPassword) {
         console.log(data);
-        return createMessage.error('输入的两次密码不同');
+        return createMessage.error('The two passwords entered are different');
       }
 
       delete data.confirmPassword;

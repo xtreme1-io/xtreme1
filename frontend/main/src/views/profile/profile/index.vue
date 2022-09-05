@@ -138,7 +138,6 @@
     try {
       isUpdating.value = true;
 
-      // 调整传参
       const res = await updateUser({
         ...params,
       });
