@@ -580,7 +580,7 @@ public class DataInfoUseCase {
     private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo) {
         var dataAnnotationRecord = DataAnnotationRecord.builder()
                 .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
-        dataAnnotationRecordDAO.getBaseMapper().insertIgnore(dataAnnotationRecord);
+        dataAnnotationRecordDAO.saveOrUpdate(dataAnnotationRecord);
         var dataIds = dataPreAnnotationBO.getDataIds();
         batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
         return dataAnnotationRecord.getId();
