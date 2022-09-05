@@ -237,18 +237,18 @@
                   }
                   uploadStatus.value = status;
 
-                  // process
                   const downloadPercent =
                     parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50) ||
                     0;
                   const parsedPercent =
                     parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50) || 0;
 
-                  console.log(downloadPercent, '==', parsedPercent);
                   temp[0].percent = downloadPercent + parsedPercent;
+                  console.log(status, '==>', downloadPercent, '==', parsedPercent);
 
                   if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
                     clearInterval(processTimer.value);
+                    temp[0].percent = 100;
                     fileItem.status = UploadResultStatus.SUCCESS;
                     isUploading.value = false;
                     emits('fetchList');
@@ -357,11 +357,12 @@
           const parsedPercent =
             parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50) || 0;
 
-          console.log(downloadPercent, '==', parsedPercent);
           temp[0].percent = downloadPercent + parsedPercent;
+          console.log(status, '==>', downloadPercent, '==', parsedPercent);
 
           if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
             clearInterval(processTimer.value);
+            temp[0].percent = 100;
             fileItem.status = UploadResultStatus.SUCCESS;
             isUploading.value = false;
             emits('fetchList');
