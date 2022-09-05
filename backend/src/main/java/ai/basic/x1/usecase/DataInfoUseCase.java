@@ -565,20 +565,24 @@ public class DataInfoUseCase {
      * Data annotation
      *
      * @param dataPreAnnotationBO Data pre-annotation parameter
+     * @param userId User id
      * @return Annotation record id
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO) {
-        return annotateCommon(dataPreAnnotationBO, null);
+    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO,Long userId) {
+        return annotateCommon(dataPreAnnotationBO, null,userId);
     }
 
-    private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo) {
-        var dataAnnotationRecord = DataAnnotationRecord.builder()
-                .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
-        var lambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationRecord.class);
-        lambdaUpdateWrapper.eq(DataAnnotationRecord::getDatasetId,dataPreAnnotationBO.getDatasetId());
-        lambdaUpdateWrapper.eq(DataAnnotationRecord::getSerialNo,serialNo);
-        dataAnnotationRecordDAO.saveOrUpdate(dataAnnotationRecord,lambdaUpdateWrapper);
+    private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo,Long userId) {
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationRecord.class);
+        lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId,dataPreAnnotationBO.getDatasetId());
+        lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy,userId);
+        var dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+        if(ObjectUtil.isNull(dataAnnotationRecord)){
+            dataAnnotationRecord = DataAnnotationRecord.builder()
+                    .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+            dataAnnotationRecordDAO.save(dataAnnotationRecord);
+        }
         var dataIds = dataPreAnnotationBO.getDataIds();
         try {
             batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
@@ -589,6 +593,13 @@ public class DataInfoUseCase {
         return dataAnnotationRecord.getId();
     }
 
+    /**
+     * Data annotation with model
+     *
+     * @param dataPreAnnotationBO Data pre-annotation parameter
+     * @param userId User id
+     * @return Annotation record id
+     */
     @Transactional(rollbackFor = Throwable.class)
     public Long annotateWithModel(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
         Long serialNo = IdUtil.getSnowflakeNextId();
@@ -599,7 +610,7 @@ public class DataInfoUseCase {
         if (ObjectUtil.isNotNull(modelBO)) {
             batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
         }
-        return annotateCommon(dataPreAnnotationBO, serialNo);
+        return annotateCommon(dataPreAnnotationBO, serialNo,userId);
     }
 
     /**
@@ -986,7 +997,7 @@ public class DataInfoUseCase {
             try {
                 var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
                 var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
-                result.getResults().forEach(resultBO -> resultBO.getObjects().forEach(object -> {
+                result.getResult().forEach(resultBO -> resultBO.getObjects().forEach(object -> {
                     var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
                     Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(object);
                     dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);

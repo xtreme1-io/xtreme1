@@ -46,6 +46,11 @@
           </div>
         </div>
       </template>
+      <div class="docs-wrapper">
+        <img v-if="!type" :src="docs" @click="handleGoDocs" />
+        <img v-else :src="docsMini" @click="handleGoDocs" />
+      </div>
+      <Divider />
       <div class="panel flex items-center">
         <!-- <img class="mr-2" width="36" :src="avatarUrl || ava" alt="" /> -->
         <ProfileAvatar class="mr-2" :avatarUrl="avatarUrl" :nickname="nickname" :size="36" />
@@ -62,8 +67,12 @@
   import { useUserStore } from '/@/store/modules/user';
   import { useGo } from '/@/hooks/web/usePage';
   import { RouteEnum } from '/@/enums/routeEnum';
-  import { Popover } from 'ant-design-vue';
+  import { Divider, Popover } from 'ant-design-vue';
   import { ProfileAvatar } from '/@@/ProfileAvatar';
+  import Icon from '/@/components/Icon';
+  import docs from '/@/assets/images/doc_bg.png';
+  import docsMini from '/@/assets/images/doc_mini.png';
+
   const userStore = useUserStore();
   const { prefixCls } = useDesign('user-panel');
   const { t } = useI18n();
@@ -85,6 +94,10 @@
   const go = useGo();
   const handleGo = (route: RouteEnum) => {
     go(route);
+  };
+
+  const handleGoDocs = () => {
+    window.location.href = 'https://docs.basic.ai/docs';
   };
 </script>
 <style lang="less" scoped>
@@ -124,7 +137,15 @@
         }
       }
     }
-
+    .docs-wrapper {
+      .normal {
+        background: url(../../../assets/images/doc_bg.png);
+        width: 160px;
+        height: 60px;
+      }
+      .mini {
+      }
+    }
     .panel {
       width: 100%;
 
