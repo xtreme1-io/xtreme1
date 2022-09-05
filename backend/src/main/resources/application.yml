@@ -40,7 +40,7 @@ mybatis-plus:
 
 export:
   data:
-    version: x1/v1
+    version: Basic AI Community V1.0
 file:
   tempPath: /tmp/x1/
   size:
