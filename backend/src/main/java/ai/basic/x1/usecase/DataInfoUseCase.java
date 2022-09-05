@@ -474,9 +474,9 @@ public class DataInfoUseCase {
                     i++;
                 }
             }
-            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
-            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
         });
+        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
+        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
     }
 
     private void parseImageUploadFile(DataInfoUploadBO dataInfoUploadBO) {
