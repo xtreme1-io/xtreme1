@@ -27,7 +27,7 @@ import java.util.List;
 public class MinioService {
 
     @Autowired
-    private MinioClient client;
+    private ExtendMinioClient client;
 
     /**
      * Create bucket
@@ -83,13 +83,12 @@ public class MinioService {
             ServerException, XmlParserException {
         createBucket(bucketName);
         List<SnowballObject> objects = new ArrayList<>(fileList.size());
-        fileList.forEach(file ->
-                objects.add(
-                        new SnowballObject(
-                                rootPath + file.getAbsolutePath().replace(tempPath, ""),
-                                FileUtil.getInputStream(file),
-                                file.length(),
-                                null)));
+        fileList.forEach(file -> objects.add(
+                new SnowballObject(
+                        rootPath + file.getAbsolutePath().replace(tempPath, ""),
+                        FileUtil.getInputStream(file),
+                        file.length(),
+                        null)));
         client.uploadSnowballObjects(UploadSnowballObjectsArgs.builder()
                 .bucket(bucketName)
                 .objects(objects)
