@@ -6,6 +6,7 @@ import ai.basic.x1.usecase.ModelUseCase;
 import ai.basic.x1.util.DefaultConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,5 +26,10 @@ public class ModelController {
     @GetMapping("/list")
     public List<ModelDTO> findAll(ModelDTO modelDTO){
         return DefaultConverter.convert(modelUseCase.findAll(DefaultConverter.convert(modelDTO, ModelBO.class)), ModelDTO.class);
+    }
+
+    @GetMapping("info/{id}")
+    public ModelDTO info(@PathVariable Long id) {
+        return DefaultConverter.convert(modelUseCase.findById(id), ModelDTO.class);
     }
 }

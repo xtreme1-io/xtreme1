@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -109,6 +110,28 @@ public class MinioService {
                 .bucket(bucketName)
                 .object(objectName)
                 .method(Method.GET)
+                .build();
+        return client.getPresignedObjectUrl(args);
+    }
+
+    /**
+     * Get file path based on file name - signature path
+     *
+     * @param bucketName Bucket name
+     * @param objectName File path
+     * @return File url
+     */
+    public String getPresignedUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException,
+            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException {
+        var queryParams = new HashMap<String ,String>();
+        queryParams.put("response-content-type", "application/octet-stream");
+        GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
+                .method(Method.GET)
+                .bucket(bucketName)
+                .object(objectName)
+                .extraQueryParams(queryParams)
+                .expiry(60 * 60 * 24 * 7)
                 .build();
         return client.getPresignedObjectUrl(args);
     }
