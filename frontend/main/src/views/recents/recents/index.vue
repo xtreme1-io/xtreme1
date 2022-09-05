@@ -28,14 +28,7 @@
           <img :src="userImg" alt="" />
           <div class="item-name">{{ t('routes.profile.profile') }}</div>
         </div>
-        <div
-          class="card-item"
-          @click="
-            () => {
-              handleGo(RouteEnum.TEAM);
-            }
-          "
-        >
+        <div class="card-item" @click="handleGoDocs">
           <img :src="documentImg" alt="" />
           <div class="item-name">Docs</div>
         </div>
@@ -61,6 +54,10 @@
   const { prefixCls } = useDesign('recents');
   const handleGo = (route: RouteEnum) => {
     go(route);
+  };
+
+  const handleGoDocs = () => {
+    window.location.href = 'https://docs.basic.ai/docs';
   };
 </script>
 <style lang="less" scoped>
