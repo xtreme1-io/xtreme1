@@ -41,7 +41,7 @@ We use Docker Compose to simplify running multiple containers together, the late
 Click the latest release on the right of repository home, select asset who's name likes `x1-community-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
 
 ```bash
-wget https://github.com/basicai/x1/releases/download/v0.5/x1-community-v0.5.zip
+wget https://github.com/basicai/xtreme1/releases/download/v0.5/x1-community-v0.5.zip
 unzip -d x1-community-v0.5 x1-community-v0.5.zip
 ```
 

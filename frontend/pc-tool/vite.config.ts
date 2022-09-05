@@ -9,6 +9,7 @@ export default defineConfig({
         open: true,
         port: 8000,
         host: 'localhost-tool-pc.alidev.beisai.com',
+        // api proxy when development
         proxy: {
             '/api': {
                 changeOrigin: true,
@@ -22,4 +23,3 @@ export default defineConfig({
         { find: 'pc-editor', replacement: path.resolve(__dirname, './src/packages/pc-editor') },
     ],
 });
- 

@@ -17,9 +17,7 @@ function isResource(headers: AxiosRequestHeaders) {
 }
 
 // Service
-let host = location.hostname || location.host;
-const BaseURL = host.indexOf('localhost') >= 0 ? '' : 'https://' + host.replace('tool', 'app');
-// const BaseURL = 'https://app.alidev.beisai.com';
+const BaseURL = '';
 export const Service = axios.create({
     timeout: 1000 * 60 * 20,
     baseURL: BaseURL,

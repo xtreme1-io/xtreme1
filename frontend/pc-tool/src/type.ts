@@ -1,8 +1,3 @@
-import { ObjectType } from 'pc-editor';
-import DataManager from './common/DataManager';
-import * as THREE from 'three';
-import { Vector2Of4 } from 'pc-render';
-
 export interface IUser {
     id: string;
     nickname: string;
