@@ -280,7 +280,7 @@
     /* ... */
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-      fetchList(filterForm);
+      fetchFilterFun(filterForm);
     }, 400);
   });
 
@@ -319,9 +319,9 @@
     }
   };
 
-  const fetchFilterFun = async () => {
+  const fetchFilterFun = async (filter) => {
     handleReset();
-    fetchList({}, false);
+    fetchList(filter, false);
   };
 
   const resetFilter = () => {
@@ -377,7 +377,7 @@
   };
 
   const fixedFetchList = () => {
-    fetchFilterFun();
+    fetchFilterFun(filterForm);
   };
 
   const handleMakeFrame = async () => {

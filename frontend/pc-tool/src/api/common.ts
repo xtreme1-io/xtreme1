@@ -157,7 +157,7 @@ export async function saveDataClassification(config: any) {
 }
 
 export async function getDataSetClassification(datasetId: string) {
-    let url = `api/datasetClassification/findAll/${datasetId}`;
+    let url = `/api/datasetClassification/findAll/${datasetId}`;
     let data = await get(url);
     data = data.data || [];
 
