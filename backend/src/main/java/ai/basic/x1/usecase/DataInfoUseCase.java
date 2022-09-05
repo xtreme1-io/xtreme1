@@ -569,39 +569,37 @@ public class DataInfoUseCase {
      */
     @Transactional(rollbackFor = Throwable.class)
     public Long annotate(DataPreAnnotationBO dataPreAnnotationBO) {
-        try {
-            return annotateCommon(dataPreAnnotationBO, null);
-        } catch (DuplicateKeyException duplicateKeyException) {
-            log.error("Data edit duplicate", duplicateKeyException);
-            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
-        }
+        return annotateCommon(dataPreAnnotationBO, null);
     }
 
     private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo) {
         var dataAnnotationRecord = DataAnnotationRecord.builder()
                 .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
-        dataAnnotationRecordDAO.saveOrUpdate(dataAnnotationRecord);
+        var lambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationRecord.class);
+        lambdaUpdateWrapper.eq(DataAnnotationRecord::getDatasetId,dataPreAnnotationBO.getDatasetId());
+        lambdaUpdateWrapper.eq(DataAnnotationRecord::getSerialNo,serialNo);
+        dataAnnotationRecordDAO.saveOrUpdate(dataAnnotationRecord,lambdaUpdateWrapper);
         var dataIds = dataPreAnnotationBO.getDataIds();
-        batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+        try {
+            batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+        } catch (DuplicateKeyException duplicateKeyException) {
+            log.error("Data edit duplicate", duplicateKeyException);
+            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+        }
         return dataAnnotationRecord.getId();
     }
 
     @Transactional(rollbackFor = Throwable.class)
     public Long annotateWithModel(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
-        try {
-            Long serialNo = IdUtil.getSnowflakeNextId();
-            ModelBO modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
-            if (ObjectUtil.isNull(modelBO)) {
-                throw new UsecaseException(UsecaseCode.MODEL_DOES_NOT_EXIST);
-            }
-            if (ObjectUtil.isNotNull(modelBO)) {
-                batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
-            }
-            return annotateCommon(dataPreAnnotationBO, serialNo);
-        } catch (DuplicateKeyException duplicateKeyException) {
-            log.error("Data edit duplicate", duplicateKeyException);
-            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+        Long serialNo = IdUtil.getSnowflakeNextId();
+        ModelBO modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
+        if (ObjectUtil.isNull(modelBO)) {
+            throw new UsecaseException(UsecaseCode.MODEL_DOES_NOT_EXIST);
         }
+        if (ObjectUtil.isNotNull(modelBO)) {
+            batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
+        }
+        return annotateCommon(dataPreAnnotationBO, serialNo);
     }
 
     /**
