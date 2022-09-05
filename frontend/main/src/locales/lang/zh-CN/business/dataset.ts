@@ -13,5 +13,5 @@ export default {
   data: 'Data',
   analytics: 'Analytics',
 
-  nameError: '不超过20',
+  nameError: '不超过255',
 };

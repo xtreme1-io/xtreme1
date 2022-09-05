@@ -13,5 +13,5 @@ export default {
   data: 'Data',
   analytics: 'Analytics',
 
-  nameError: 'Character length should be no more than 20',
+  nameError: 'Character length should be no more than 255',
 };

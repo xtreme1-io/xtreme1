@@ -13,7 +13,7 @@ export const createForm: FormSchema[] = [
     rules: [
       { required: true, message: 'Please enter a dataset name' },
       {
-        max: 20,
+        max: 255,
         message: `${t('business.dataset.datasetName')} ${t('business.dataset.nameError')}`,
         trigger: 'change',
       },

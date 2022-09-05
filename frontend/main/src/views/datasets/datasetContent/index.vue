@@ -136,6 +136,10 @@
           </CollContainer>
           <CollContainer icon="mdi:calendar-month" title="Status">
             <Radio.Group v-model:value="annotationStatus">
+              <Radio :value="undefined">
+                <SvgIcon name="annotated" />
+                <span class="ml-2">All</span>
+              </Radio>
               <Radio value="ANNOTATED">
                 <SvgIcon name="annotated" />
                 <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
@@ -215,11 +219,11 @@
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
   import TipModal from './components/TipModal.vue';
   import { Button } from '/@/components/BasicCustom/Button';
-  import { getModelAllApi, getReportByDataset } from '/@/api/business/models';
+  import { getModelAllApi } from '/@/api/business/models';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
   //   useModal();
-  const [tipRegister, { openModal: openTipModal, closeModal: closeTipModal }] = useModal();
+  const [tipRegister, { openModal: openTipModal }] = useModal();
   const [registerRunModel, { openModal: openRunModal }] = useModal();
   const [open, close] = useLoading({});
   const { query } = useRoute();
