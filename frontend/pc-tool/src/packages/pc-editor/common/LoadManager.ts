@@ -25,13 +25,11 @@ export default class LoadManager {
         showLoading && this.editor.showLoading(true);
         try {
             await Promise.all([this.loadObject(), this.loadResource(), this.loadClassification()]);
-            // 自动加载数据
             // if (!this.editor.playManager.playing) this.editor.dataResource.load();
         } catch (error: any) {
             this.editor.handleErr(error);
         }
 
-        // 更新选中状态
         // if (currentTrack) this.editor.selectByTrackId(currentTrack);
         this.editor.pc.selectObject();
 

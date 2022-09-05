@@ -1,9 +1,7 @@
 <template>
   <div class="upload__content">
-    <!-- 拖拽上传 -->
     <div class="upload__content--dragger">
       <UploadDragger :multiple="true" :showUploadList="false" :beforeUpload="beforeUpload">
-        <!-- 上传框内部内容 -->
         <Icon icon="ant-design:cloud-upload-outlined" size="50" color="#57CCEF" />
         <div class="dragger-placeholder">
           <span>{{ t('business.group.create.drop') }}</span>
@@ -14,14 +12,14 @@
         <Icon class="icon" icon="eva:info-fill" size="16" />
         <div class="text">
           <span>The total files size should be limit of 500 mb.For more details, get our </span>
-          <span>open data or check documentation </span>
+          <a href="https://docs.basic.ai/docs/upload" target="_blank">
+            open data or check documentation
+          </a>
           <span>for supported 3D format and how to upload data with results.</span>
         </div>
       </div>
     </div>
-    <!-- 分割线 -->
     <Divider class="upload__content--divider">Or</Divider>
-    <!-- URL上传 -->
     <div class="upload__content--url">
       <div class="url-input mb-15px flex items-center gap-10px">
         <Form name="custom-validation" ref="formRef" :model="formState" :rules="rules">
@@ -36,7 +34,6 @@
             />
           </Form.Item>
         </Form>
-        <!-- <Input class="flex-1 h-36px" autocomplete="off" v-model:value="path" @blur="handleBlur" /> -->
         <Button
           type="primary"
           style="background: #60a9fe; border-radius: 8px"
@@ -46,22 +43,7 @@
           Upload data by URL
         </Button>
       </div>
-      <!-- <div v-if="showValid" class="url-verify animate-fadeIn animate-animated">
-        <Icon
-          class="transform rotate-180 translate-y-1px mr-5px"
-          icon="carbon:warning-filled"
-          :color="isValid ? '#7FF0B3' : '#F8827B'"
-          rotate="180deg"
-        />
-        <span :style="{ color: isValid ? '#7FF0B3' : '#F8827B' }">{{ showInvalidText }}</span>
-      </div> -->
     </div>
-    <!-- ProgressModal -->
-    <!-- <ProgressModal
-      @register="registerProgressModal"
-      :datasetType="props.datasetType"
-      :id="props.id"
-    /> -->
   </div>
 </template>
 <script lang="ts" setup>
@@ -71,11 +53,8 @@
   import { Button } from '/@@/Button';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
-  // import { useModal } from '/@/components/Modal';
   import { datasetTypeEnum, UploadSourceEnum } from '/@/api/business/model/datasetModel';
-  // import { verifyCompress, verifyImage } from './utils';
   import { validateUrl } from './formSchemas';
-  // import ProgressModal from './ProgressModal.vue';
 
   const UploadDragger = Upload.Dragger;
   const { t } = useI18n();
@@ -83,10 +62,8 @@
 
   const props = defineProps<{ id: number; datasetType: datasetTypeEnum | undefined }>();
   const emits = defineEmits(['closeUpload']);
-  // const [registerProgressModal, { openModal: openProgressModal }] = useModal();
 
   /** Upload */
-  // const fileList = ref<any[]>([]);
   const beforeUpload = (file: File) => {
     const compressType = [
       'application/zip',
@@ -100,71 +77,33 @@
     if (props.datasetType == datasetTypeEnum.IMAGE) {
       const isImage = [...imageType, ...compressType].includes(file.type);
       if (!isImage) {
-        // TODO 提示文案
         return createMessage.error('You can only upload zip/gzip/tar/jpg/jpeg/png file!');
       }
     } else {
       const isCompress = compressType.includes(file.type);
       if (!isCompress) {
-        // TODO 提示文案
         return createMessage.error('You can only upload zip/gzip/tar file!');
       }
     }
 
     const isLimit = file.size / 1024 / 1024 < 500;
     if (!isLimit) {
-      // TODO 提示文案
       return createMessage.error('file must smaller than 500MB!');
     }
 
-    // fileList.value.push(file);
-    console.log(file);
     emits('closeUpload', file, UploadSourceEnum.LOCAL);
-    // openProgressModal(true, { file: fileList.value });
 
     return false;
   };
 
   /** URL */
-
-  // 表单
   const formRef = ref();
   const formState = reactive({
     url: '',
   });
   const rules = {
-    url: [
-      { validator: validateUrl, trigger: 'change' },
-      { max: 255, message: t('business.ontology.maxLength') },
-    ],
+    url: [{ validator: validateUrl, trigger: 'change' }],
   };
-
-  // const path = ref<string>('');
-  // const showValid = ref<boolean>(false);
-  // // blur 时开启 校验文字
-  // const handleBlur = () => {
-  //   showValid.value = true;
-  // };
-  // // 是否合法
-  // const isValid = computed<boolean>(() => {
-  //   return verifyCompress(path.value);
-  // });
-  // // 显示校验文字
-  // const showInvalidText = computed<string>(() => {
-  //   let str = '';
-
-  //   if (isValid.value) {
-  //     str = t('business.datasetContent.uploadModel.validUrl');
-  //   } else if (verifyImage(path.value)) {
-  //     str =
-  //       t('business.datasetContent.uploadModel.invalidUrl') +
-  //       t('business.datasetContent.uploadModel.supported');
-  //   } else {
-  //     str = t('business.datasetContent.uploadModel.invalidUrl');
-  //   }
-
-  //   return str;
-  // });
 
   // Submit
   const isLoading = ref<boolean>(false);

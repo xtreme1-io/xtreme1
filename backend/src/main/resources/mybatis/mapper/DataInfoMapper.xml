@@ -27,6 +27,6 @@
         <foreach collection="datasetIds" item="datasetId" open="(" separator="," close=")">
             #{datasetId}
         </foreach> AND is_deleted = FALSE
-        GROUP BY dataset_id,annotation_status
+        GROUP BY dataset_id
     </select>
 </mapper>

@@ -17,12 +17,12 @@ import lombok.NoArgsConstructor;
 public class PresignedUrlDTO {
 
     /**
-     * 访问地址
+     * Access url
      */
     private String accessUrl;
 
     /**
-     * 预签名上传地址
+     * Pre-signed upload address
      */
     private String presignedUrl;
 

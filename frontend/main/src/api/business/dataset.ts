@@ -271,3 +271,23 @@ export const findUploadRecordBySerialNumbers = (params: string, signal?: any) =>
       ignoreCancelToken: true,
     },
   });
+
+export const getStatusNum = (params: { datasetId: number }) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATA}/getAnnotationStatusStatisticsByDatasetId`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const hasOntologyApi = (params: { datasetId: number }) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATASET}/findOntologyIsExistByDatasetId`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });

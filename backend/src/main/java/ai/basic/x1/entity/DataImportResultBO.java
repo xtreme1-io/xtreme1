@@ -9,20 +9,20 @@ import java.util.List;
 public class DataImportResultBO {
 
     /**
-     * 数据信息
+     * Data result information
      */
-    private List<ResultBO> results;
+    private ResultBO result;
 
     @Data
     public static class ResultBO {
 
         /**
-         * 结果名称
+         * Result name
          */
         private String resultName;
 
         /**
-         * 标注结果
+         * Annotation results
          */
         private List<JSONObject> objects;
     }

@@ -11,6 +11,7 @@ export interface IConfirmOption {
     okText?: string;
     cancelText?: string;
     okDanger?: boolean;
+    centered?: boolean;
 }
 
 export interface ILoadingOption {

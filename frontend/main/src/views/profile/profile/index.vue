@@ -11,7 +11,7 @@
           :nickname="(userInfo?.nickname as string)"
         />
         <Upload :customRequest="handleUpload" :showUploadList="false">
-          <div class="edit-btn text-primary">{{ t('common.editText') }}</div>
+          <div class="edit-btn text-primary cursor-pointer">{{ t('common.editText') }}</div>
         </Upload>
       </div>
       <div class="w-420px">

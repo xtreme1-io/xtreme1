@@ -46,7 +46,7 @@ export async function getDataObject(dataIds: string[] | string) {
 
     let objectsMap = {} as Record<string, IObject[]>;
     // let objects = [] as IObject[];
-    data.forEach((e: any) => {
+    data.dataAnnotationObjects.forEach((e: any) => {
         let dataId = e.dataId;
         objectsMap[dataId] = objectsMap[dataId] || [];
 
@@ -80,16 +80,29 @@ export async function getDataClassification(dataIds: string[] | string) {
 }
 
 export async function unlockRecord(recordId: string) {
-    let url = `/api/dataset/data/unLock/${recordId}`;
+    let url = `/api/data/unLock/${recordId}`;
     return await post(url);
+}
+
+export async function getDataStatus(dataIds: string[]) {
+    let url = '/api/data/getDataStatusByIds';
+    let argsStr = queryStr({ dataIds });
+    let data = await get(`${url}?${argsStr}`);
+
+    let statusMap = {};
+    data.data.forEach((e: any) => {
+        statusMap[e.id] = e;
+    });
+    return statusMap;
 }
 
 export async function getInfoByRecordId(recordId: string) {
     let url = `/api/data/findDataAnnotationRecord/${recordId}`;
     let data = await get(url);
     data = data.data;
-    // 没有结果
-    if (!data) return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
+    // no data
+    if (!data || !data.datas || data.datas.length === 0)
+        return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
 
     let isSeriesFrame = data.dataType === 'FRAME_SERIES';
     let seriesFrameId = data.frameSeriesId ? data.frameSeriesId + '' : '';
@@ -115,15 +128,24 @@ export async function getInfoByRecordId(recordId: string) {
             // viewConfig: [],
             pointsUrl: '',
             queryTime: '',
-            // loadErr: false,
-            // loaded: false,
             loadState: '',
             model: model,
-            // modelId: config.modelId,
-            // modelVersion: config.modelVersion,
             needSave: false,
             classifications: [],
+            dataStatus: 'VALID',
+            annotationStatus: 'NOT_ANNOTATED',
+            skipped: false,
         });
+    });
+
+    let ids = dataInfos.map((e) => e.id);
+    let stateMap = await getDataStatus(ids);
+
+    dataInfos.forEach((data) => {
+        let status = stateMap[data.id];
+        if (!status) return;
+        data.dataStatus = status.status || 'VALID';
+        data.annotationStatus = status.annotationStatus || 'NOT_ANNOTATED';
     });
 
     return { dataInfos, isSeriesFrame, seriesFrameId };
@@ -135,7 +157,7 @@ export async function saveDataClassification(config: any) {
 }
 
 export async function getDataSetClassification(datasetId: string) {
-    let url = `api/datasetClassification/findAll/${datasetId}`;
+    let url = `/api/datasetClassification/findAll/${datasetId}`;
     let data = await get(url);
     data = data.data || [];
 
@@ -227,42 +249,6 @@ export async function getDataFile(dataId: string) {
     return configs;
 }
 
-export async function getFrameSeriesData(
-    datasetId: string,
-    frameSeriesId: string,
-    pageNo: string = '1',
-    pageSize: string = '300',
-) {
-    let url = `/api/dataset/data/findByPage`;
-    let data = await get(url, {
-        datasetId,
-        frameSeriesId,
-        pageNo,
-        pageSize,
-        type: 'SINGLE_DATA',
-        // sortFiled: 'ID',
-        // ascOrDesc: 'ASC',
-    });
-
-    let list = data.data.list || [];
-    (list as any[]).reverse();
-    if (list.length === 0) throw '';
-
-    let dataList = [] as IFrame[];
-    list.forEach((e: any) => {
-        dataList.push({
-            id: e.id,
-            datasetId: e.datasetId,
-            pointsUrl: '',
-            queryTime: '',
-            loadState: '',
-            needSave: false,
-            classifications: [],
-        });
-    });
-    return dataList;
-    // return configs;
-}
 export async function getUserInfo() {
     let url = `/api/user/user/logged`;
     let {
@@ -273,5 +259,17 @@ export async function getUserInfo() {
 export async function getDataSetInfo(datasetId: string) {
     let url = `/api/dataset/info/${datasetId}`;
     let { data } = await get(url);
+    return data;
+}
+
+export async function annotateData(config: any) {
+    let url = `/api/data/annotate`;
+    let data = await post(url, config);
+    return data;
+}
+
+export async function getLockRecord(datasetId: string) {
+    let url = `/api/data/findLockRecordIdByDatasetId`;
+    let data = await get(url, { datasetId });
     return data;
 }

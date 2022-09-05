@@ -15,12 +15,12 @@ import java.util.List;
 public class ModelObjectDTO {
 
     /**
-     * 模型CODE
+     * Model code
      */
     private ModelCodeEnum modelCode;
 
     /**
-     * 模型结果列表
+     * Data model results
      */
     private List<ModelDataResultDTO> modelDataResults;
 }

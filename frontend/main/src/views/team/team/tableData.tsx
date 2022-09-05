@@ -1,8 +1,8 @@
 import { BasicColumn } from '/@/components/Table/src/types/table';
 import Icon, { SvgIcon } from '/@/components/Icon';
 import { Button } from '/@@/Button';
-import { Avatar } from 'ant-design-vue';
 import ava from '/@/assets/images/common/default-ava.png';
+import { ProfileAvatar } from '/@/components/BasicCustom/ProfileAvatar';
 
 // const { t } = useI18n();
 export function getBasicColumns(funcObj: {
@@ -19,7 +19,7 @@ export function getBasicColumns(funcObj: {
         return (
           <div class="flex">
             <div class="mr-2 ava">
-              <Avatar size="large" src={record.avatarUrl || ava} />
+              <ProfileAvatar size="24" avatarUrl={record.avatarUrl} nickname={record.nickname} />
             </div>
             <div class="text-left info">
               <div class=" text-primary">{record.nickname}</div>

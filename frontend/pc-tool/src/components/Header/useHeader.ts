@@ -1,11 +1,13 @@
 import { computed, nextTick, reactive, ref, watch } from 'vue';
 import { useInjectEditor } from '../../state';
-import { StatusType } from 'pc-editor';
+import { IFrame, StatusType } from 'pc-editor';
 import * as _ from 'lodash';
 import * as api from '../../api';
 import * as locale from './lang';
 import screenFull from 'screenfull';
+import { Modal } from 'ant-design-vue';
 import { SideRenderView } from 'pc-render';
+
 export default function useHeader() {
     let editor = useInjectEditor();
     let $$ = editor.bindLocale(locale);
@@ -21,6 +23,11 @@ export default function useHeader() {
             if (dataIndex.value !== state.frameIndex + 1) dataIndex.value = state.frameIndex + 1;
         },
     );
+
+    let currentFrame = computed(() => {
+        let { frameIndex, frames } = editor.state;
+        return frames[frameIndex];
+    });
 
     let onIndexChange = _.debounce(() => {
         console.log('change', dataIndex.value);
@@ -42,7 +49,7 @@ export default function useHeader() {
                 if (view instanceof SideRenderView) view.fitObject();
                 view.render();
             });
-        },400);
+        }, 400);
     }
     function onSave() {
         editor.saveObject();
@@ -88,21 +95,27 @@ export default function useHeader() {
             return;
         }
 
+        await unlockData();
+    }
+
+    async function unlockData() {
         if (editor.state.modeConfig.name !== 'view') {
             await api.unlockRecord(editor.bsState.recordId);
         }
-
         closeTab();
+    }
 
-        function closeTab() {
-            let win = window.open('about:blank', '_self');
-            win && win.close();
-        }
+    function closeTab() {
+        let win = window.open('about:blank', '_self');
+        win && win.close();
     }
 
     let blocking = computed(() => {
         return (
             bsState.saving ||
+            bsState.validing ||
+            bsState.submitting ||
+            bsState.modifying ||
             editorState.status === StatusType.Loading ||
             editorState.status === StatusType.Create ||
             editorState.status === StatusType.Play
@@ -113,9 +126,127 @@ export default function useHeader() {
         editor.showModal('ModelHelp', { title: 'Help', width: 1000 }).catch(() => {});
     }
 
+    function onToggleValid() {
+        let { frameIndex, frames } = editor.state;
+        let frame = frames[frameIndex];
+
+        bsState.validing = true;
+        try {
+            if (frame.dataStatus === 'INVALID') {
+                api.validData(frame.id);
+                frame.dataStatus = 'VALID';
+            } else {
+                api.invalidData(frame.id);
+                frame.dataStatus = 'INVALID';
+            }
+        } catch (error: any) {
+            editor.handleErr(error, 'Operation Error');
+        }
+        bsState.validing = false;
+    }
+
+    function onToggleSkip() {
+        let frame = editor.getCurrentFrame();
+        frame.skipped = !frame.skipped;
+    }
+    async function onSubmit() {
+        let { frameIndex, frames } = editor.state;
+        let frame = frames[frameIndex];
+
+        if (frame.skipped) return;
+        bsState.submitting = true;
+        try {
+            await editor.saveObject([frame], true);
+            await api.submitData(frame.id);
+            await updateDataStatus(frame);
+            editor.showMsg('success', 'Submit Success');
+        } catch (error: any) {
+            editor.handleErr(error, 'Operation Error');
+        }
+        bsState.submitting = false;
+
+        // not last frame
+        if (frameIndex !== frames.length - 1) {
+            editor.loadFrame(frameIndex + 1);
+        } else {
+            // last frame
+            let next = nextNotAnnotate();
+            if (next < 0) {
+                editor
+                    .showConfirm({
+                        title: 'Well Done!',
+                        subTitle: 'You have finish all the annotation!',
+                        okText: 'Close and release those data',
+                        centered: true,
+                    })
+                    .then(() => {
+                        unlockData();
+                    })
+                    .catch(() => {});
+            } else {
+                editor.loadFrame(next);
+            }
+        }
+    }
+
+    async function updateDataStatus(frame: IFrame) {
+        let statusMap = await api.getDataStatus([frame.id]);
+
+        if (statusMap[frame.id]) {
+            let status = statusMap[frame.id];
+            frame.dataStatus = status.status || 'VALID';
+            frame.annotationStatus = status.annotationStatus || 'NOT_ANNOTATED';
+        }
+    }
+
+    function nextNotAnnotate() {
+        let { frames } = editor.state;
+
+        let frame = frames.find((e) => {
+            return e.annotationStatus === 'NOT_ANNOTATED';
+        });
+        if (frame) return editor.getFrameIndex(frame.id);
+        return -1;
+    }
+
+    async function onModify() {
+        let { bsState } = editor;
+        let frame = editor.getCurrentFrame();
+        let config = {
+            dataIds: [frame.id],
+            dataType: 'SINGLE_DATA',
+            datasetId: bsState.datasetId,
+        };
+
+        bsState.modifying = true;
+        try {
+            let recordInfo = await api.getLockRecord(bsState.datasetId);
+            if (recordInfo.data && recordInfo.data.recordId) {
+                editor.showMsg('warning', 'You have 1 data occupied');
+                bsState.modifying = false;
+                return;
+            }
+
+            let data = await api.annotateData(config);
+            if (data.code === 'OK' && data.data) {
+                let recordId = data.data;
+                let host = location.host || location.hostname;
+                let pathname = location.pathname;
+                let protocol = location.protocol;
+                location.href = `${protocol}//${host + pathname}?recordId=${recordId}`;
+            } else {
+                editor.showMsg('warning', data.message || `Operation Failed`);
+            }
+        } catch (error: any) {
+            editor.handleErr(error, 'Operation Failed');
+        }
+        bsState.modifying = false;
+    }
+
     return {
         $$,
         iState,
+        currentFrame,
         blocking,
         dataIndex,
         onIndexChange,
@@ -126,5 +257,9 @@ export default function useHeader() {
         onPre,
         onNext,
         onClose,
+        onToggleValid,
+        onToggleSkip,
+        onSubmit,
+        onModify,
     };
 }

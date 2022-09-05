@@ -1,6 +1,5 @@
 import { IHotkeyConfig } from '../type';
 import UAParser from 'ua-parser-js';
-// import { SideRenderView } from 'pc-render';
 
 const parser = new UAParser();
 let osInfo = parser.getResult();
@@ -10,19 +9,12 @@ let isMac = osName.indexOf('mac') >= 0;
 
 const hotkeyConfig: IHotkeyConfig[] = [
     { key: 'f', action: 'createObjectWith3' },
-    // { key: 'f', action: ['createObjectWith3', 'create2DRect', 'create2DBox', 'createAnnotation'] },
     // mac or window
-    isMac ? { key: 'backspace', action: 'deleteObject' } : { key: 'del', action: 'deleteObject' },
-    { key: 'ctrl+z', action: 'undo' },
-    { key: 'ctrl+shift+z', action: 'redo' },
-
-    // { key: 'Alt+right', action: 'copyForward' },
-    // { key: 'Alt+left', action: 'copyBackWard' },
+    { key: isMac ? 'backspace' : 'del', action: 'deleteObject' },
+    { key: isMac ? '⌘+z' : 'ctrl+z', action: 'undo' },
+    { key: isMac ? '⌘+shift+z' : 'ctrl+shift+z', action: 'redo' },
 
     // side view
-    // 【AWSD】 以物体行进方向，向后向上向下向前平移结果
-    // 【QE】以物体行进方向，向左向右平移结果
-    // 【ZX】 俯视图 视角下，向左向右旋转点云图
     { key: 'e', action: 'translateYMinus' },
     { key: 'q', action: 'translateYPlus' },
     { key: 'a', action: 'translateXMinus' },

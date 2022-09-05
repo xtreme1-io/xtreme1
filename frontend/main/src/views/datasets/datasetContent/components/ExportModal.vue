@@ -34,18 +34,22 @@
   import { useRoute } from 'vue-router';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
+  import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
 
   import { Select } from 'ant-design-vue';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Icon } from '/@/components/Icon';
 
   import { exportData } from '/@/api/business/dataset';
+  import { dataTypeEnum } from '/@/api/business/model/datasetModel';
 
   const { query } = useRoute();
   const { id } = query;
   const { prefixCls } = useDesign('exportModal');
   const { t } = useI18n();
   const [register, { closeModal }] = useModalInner();
+
+  const props = defineProps<{ filterForm: any }>();
   const emit = defineEmits(['setExportRecord']);
 
   const selectValue = ref<string>('');
@@ -58,9 +62,35 @@
 
   const isLoading = ref<boolean>(false);
   const handleSubmit = async () => {
+    const data = Object.assign(
+      {
+        datasetId: id,
+      },
+      {
+        ...props.filterForm,
+        createStartTime:
+          props.filterForm.createStartTime && props.filterForm.createEndTime
+            ? setStartTime(props.filterForm.createStartTime)
+            : undefined,
+        createEndTime:
+          props.filterForm.createEndTime && props.filterForm.createStartTime
+            ? setEndTime(props.filterForm.createEndTime)
+            : undefined,
+        projectIds: props.filterForm.projectIds && props.filterForm.projectIds + '',
+        modelRunIds: props.filterForm.modelRunIds && props.filterForm.modelRunIds + '',
+      },
+    );
+    if (data.type !== dataTypeEnum.SINGLE_DATA) {
+      delete data.annotationCountMin;
+      delete data.annotationCountMax;
+    }
+    if (data.type === dataTypeEnum.ALL) {
+      data.type = undefined;
+    }
+
     try {
       isLoading.value = true;
-      const res = await exportData({ datasetId: id });
+      const res = await exportData(data);
       emit('setExportRecord', res);
       closeModal();
     } catch (e) {}

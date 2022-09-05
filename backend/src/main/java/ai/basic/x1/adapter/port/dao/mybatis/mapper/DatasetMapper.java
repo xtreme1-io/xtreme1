@@ -9,7 +9,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * mapper类
  *
  * @author fyb
  * @date 2022-02-16 10:17:54

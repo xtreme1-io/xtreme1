@@ -48,8 +48,8 @@
 
   const fileList = ref<any[]>([]);
   const uploadUrl = ref<string>('');
+
   const [register, { closeModal }] = useModalInner((data: any) => {
-    console.log('inner', fileList);
     source.value = data.source;
     if (source.value == UploadSourceEnum.LOCAL) {
       fileList.value = data.fileList;
@@ -68,10 +68,10 @@
         item.status != UploadResultStatus.PENDING &&
         item.status != UploadResultStatus.UPLOADING,
     );
-    console.log('isCompleted', isCompleted);
     if (isCompleted) {
       closeModal();
       reset();
+      handleReset();
     } else {
       ModalConfirmCustom({
         title: 'Reminder',
@@ -81,8 +81,13 @@
           console.log('modal discard');
           closeModal();
           reset();
+          handleReset();
         },
       });
     }
+  };
+  const handleReset = () => {
+    fileList.value = [];
+    uploadUrl.value = '';
   };
 </script>

@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * mapper类
  *
  * @author fyb
  * @date 2022-02-16 10:19:06

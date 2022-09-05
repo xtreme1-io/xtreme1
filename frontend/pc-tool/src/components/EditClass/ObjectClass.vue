@@ -10,7 +10,7 @@
         <div class="classType-tag-container">
             <a-tag
                 class="classType-tag"
-                @click="() => onClassChange(item.name, item)"
+                @click="canEdit() ? onClassChange(item.name, item) : null"
                 v-for="item in editor.state.classTypes"
                 :style="style(item)"
                 :key="item.name"
@@ -116,7 +116,6 @@
 
         iState.newClassType = value;
         iState.newClassName = item.label;
-        // 没有标签时不提示
         if (!props.state.classType) {
             props.state.classType = iState.newClassType;
             props.state.showMsgType = '';

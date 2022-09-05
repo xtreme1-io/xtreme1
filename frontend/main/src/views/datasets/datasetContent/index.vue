@@ -1,12 +1,25 @@
 <template>
   <div>
     <div :class="`${prefixCls}`">
-      <WarningModalVue
+      <!-- <WarningModalVue
         @register="warningRegister"
         :lockedId="lockedId"
         :lockedNum="lockedNum"
         :type="(info?.type as datasetTypeEnum)"
-      />
+      /> -->
+      <div class="lockedMask" v-if="lockedNum > 0">
+        <div class="flex-1 flex">
+          <Icon icon="ant-design:info-circle-outlined" color="#FCB17A" class="mt-1" />
+          <span class="ml-2">
+            You have {{ lockedNum }} data occupied,please unlock them or continue your annotation
+          </span>
+        </div>
+        <div class="actions">
+          <Button type="default" @click="handleContinue">Annotate</Button>
+          <Button type="primary" @click="handleUnlock">Unlock</Button>
+        </div>
+      </div>
+      <TipModal @register="tipRegister" />
       <ModelRun
         @register="registerRunModel"
         :selectName="selectName"
@@ -125,15 +138,17 @@
             <Radio.Group v-model:value="annotationStatus">
               <Radio value="ANNOTATED">
                 <SvgIcon name="annotated" />
-                <span class="ml-2">Annotated(999+)</span>
+                <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
               </Radio>
               <Radio value="NOT_ANNOTATED">
                 <SvgIcon name="notAnnotated" />
-                <span class="ml-2">Not Annotated(999+)</span>
+                <span class="ml-2"
+                  >Not Annotated({{ countFormat(statusInfo.notAnnotatedCount) }})</span
+                >
               </Radio>
               <Radio value="INVALID">
                 <SvgIcon name="invalid" />
-                <span class="ml-2">Invalid(999+)</span>
+                <span class="ml-2">Invalid({{ countFormat(statusInfo.invalidCount) }})</span>
               </Radio>
             </Radio.Group>
           </CollContainer>
@@ -158,9 +173,12 @@
     datasetApi,
     deleteBatchDataset,
     getLockedByDataset,
+    getStatusNum,
+    hasOntologyApi,
     makeFrameSeriesApi,
     takeRecordByData,
     ungroupFrameSeriesApi,
+    unLock,
   } from '/@/api/business/dataset';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { useRoute } from 'vue-router';
@@ -189,16 +207,19 @@
   import FrameMultipleModal from './components/FrameMultipleModal.vue';
   import { handleScroll } from '/@/utils/business/scrollListener';
   import datasetEmpty from '/@/assets/images/dataset/data_empty.png';
-  import WarningModalVue from './components/WarningModal.vue';
+  // import WarningModalVue from './components/WarningModal.vue';
   import { ModelRun } from '/@@/ModelRun';
   import { PreModelParam } from '/@/api/business/model/modelsModel';
-  import { goToTool, setDatasetBreadcrumb } from '/@/utils/business';
+  import { countFormat, goToTool, setDatasetBreadcrumb } from '/@/utils/business';
   import { useLoading } from '/@/components/Loading';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
-
+  import TipModal from './components/TipModal.vue';
+  import { Button } from '/@/components/BasicCustom/Button';
+  import { getModelAllApi, getReportByDataset } from '/@/api/business/models';
   // import { VScroll } from '/@/components/VirtualScroll/index';
-  const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
-    useModal();
+  // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
+  //   useModal();
+  const [tipRegister, { openModal: openTipModal, closeModal: closeTipModal }] = useModal();
   const [registerRunModel, { openModal: openRunModal }] = useModal();
   const [open, close] = useLoading({});
   const { query } = useRoute();
@@ -230,6 +251,7 @@
   const title = t('business.models.run.runModel');
   const modelId = ref<number>();
   const selectOptions = ref<any>();
+  const statusInfo = ref<any>({});
   const groundTruthsOption = ref([
     {
       label: 'Without Project',
@@ -242,6 +264,7 @@
     // endCount.value = max.value;
     info.value = await datasetItemDetail({ id: id as string });
     setDatasetBreadcrumb(info.value.name, info.value.type);
+    getSelectOptions();
   });
 
   let filterForm = reactive({
@@ -257,7 +280,7 @@
     /* ... */
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-      fetchList(filterForm);
+      fetchFilterFun(filterForm);
     }, 400);
   });
 
@@ -271,6 +294,7 @@
     });
     getLockedData();
     fetchList(filterForm);
+    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
     document.addEventListener('visibilitychange', getLockedData);
   });
 
@@ -285,19 +309,19 @@
       datasetId: id,
     });
     if (res) {
-      openWarningModal();
+      // openWarningModal();
       lockedId.value = res.recordId;
       lockedNum.value = res.lockedNum;
       // fixedFetchList();
     } else {
-      closeWarningModal();
+      // closeWarningModal();
       // fixedFetchList();
     }
   };
 
-  const fetchFilterFun = async () => {
+  const fetchFilterFun = async (filter) => {
     handleReset();
-    fetchList({}, false);
+    fetchList(filter, false);
   };
 
   const resetFilter = () => {
@@ -307,6 +331,16 @@
     filterForm.ascOrDesc = SortTypeEnum.ASC;
     filterForm.createEndTime = null;
     filterForm.annotationStatus = undefined;
+  };
+
+  const getSelectOptions = async () => {
+    const res = await getModelAllApi({
+      pageSize: 999,
+      isInteractive: 0,
+      datasetType: info.value?.type as datasetTypeEnum,
+    });
+    selectOptions.value = res;
+    modelId.value = selectOptions.value?.[0]?.id;
   };
 
   const fetchList = async (filter?, fetchType?) => {
@@ -343,7 +377,7 @@
   };
 
   const fixedFetchList = () => {
-    fetchFilterFun();
+    fetchFilterFun(filterForm);
   };
 
   const handleMakeFrame = async () => {
@@ -395,6 +429,16 @@
     if (callback) callback();
   };
 
+  const handleUnlock = async () => {
+    await unLock({ id: lockedId.value });
+    window.location.reload();
+  };
+
+  const handleContinue = async () => {
+    goToTool({ recordId: lockedId.value }, type.value as any);
+    window.location.reload();
+  };
+
   // const getWidth = computed(() => {
   //   return 100 / unref(sliderValue);
   // });
@@ -441,23 +485,51 @@
       type = dataTypeEnum.FRAME_SERIES;
       templist = selectedList.value;
     }
+    const flag = await handleEmpty(templist.map((item) => item.id || item) as string[], type);
+    if (!flag) {
+      return;
+    }
+
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
       dataType: type,
     });
     goToTool({ recordId: res }, info.value?.type);
+
     // fixedFetchList();
   };
 
   const handleSingleAnnotate = async (dataId) => {
+    const flag = await handleEmpty([dataId], dataTypeEnum.SINGLE_DATA);
+    if (!flag) {
+      return;
+    }
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
     });
+    getLockedData();
     goToTool({ recordId: res }, info.value?.type);
     // fixedFetchList();
+  };
+
+  const handleEmpty = async (list, type) => {
+    const res = await hasOntologyApi({ datasetId: id as unknown as number });
+    if (!res) {
+      openTipModal(true, {
+        callback: async () => {
+          const res = await takeRecordByData({
+            datasetId: id as unknown as number,
+            dataIds: list,
+            dataType: type,
+          });
+          goToTool({ recordId: res }, info.value?.type);
+        },
+      });
+    }
+    return res;
   };
 
   const handleAnotateFrame = async (dataId) => {

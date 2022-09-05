@@ -20,42 +20,42 @@ import java.time.OffsetDateTime;
 public class DataInfoQueryBO extends BaseQueryBO {
 
     /**
-     * 数据集ID
+     * Dataset id
      */
     private Long datasetId;
 
     /**
-     * 数据名称
+     * Data name
      */
     private String name;
 
     /**
-     * 创建开始时间
+     * Data create start time
      */
     private OffsetDateTime createStartTime;
 
     /**
-     * 创建结束时间
+     * Data create end time
      */
     private OffsetDateTime createEndTime;
 
     /**
-     * 排序字段
+     * Sort field
      */
     private String sortField;
 
     /**
-     * 排序规则 升序或者降序 asc、desc
+     * Ascending or descending order
      */
     private String ascOrDesc;
 
     /**
-     * 数据标注状态 ANNOTATED,NOT_ANNOTATED,INVALID
+     * Data annotation status ANNOTATED,NOT_ANNOTATED,INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
 
     /**
-     * Dataset type
+     * Dataset type LIDAR_FUSION,LIDAR_BASIC,IMAGE
      */
     private DatasetTypeEnum datasetType;
 

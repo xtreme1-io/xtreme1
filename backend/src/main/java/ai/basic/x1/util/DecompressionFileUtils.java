@@ -25,10 +25,10 @@ import static cn.hutool.core.util.CharsetUtil.GBK;
 public class DecompressionFileUtils {
 
     /**
-     * 对zip文件进行解压。
+     * Unzip the zip file
      *
-     * @param filePath  需要解压的zip文件的完成路径。
-     * @param unZipPath 解压过后生成文件的存放路径
+     * @param filePath  File path。
+     * @param unZipPath The storage path of the generated files after decompression
      */
     public static void zipDecompress(String filePath, String unZipPath) throws IOException {
         var zfile = FileUtil.file(filePath);
@@ -44,7 +44,7 @@ public class DecompressionFileUtils {
             if (dir.contains(MACOSX)) {
                 continue;
             }
-            log.info("正在解压......{}", dir);
+            log.info("Decompressing......{}", dir);
             var file = new File(dir);
             if (zae.isDirectory()) {
                 file.mkdir();
@@ -64,10 +64,10 @@ public class DecompressionFileUtils {
     }
 
     /**
-     * 解压TAR类文件，包括.TAR .TAR.BZ2 .TAR.GZ
+     * Extract TAR class files, including .TAR .TAR.BZ2 .TAR.GZ
      *
-     * @param inputStream 每种TAR文件用不同的输入流，unCompress方法中已注明
-     * @param unTarPath   TAR文件解压后的存放路径
+     * @param inputStream Each TAR file uses a different input stream, which is indicated in the unCompress method
+     * @param unTarPath   The storage path of the decompressed TAR file
      */
     public static void tarDecompress(InputStream inputStream, String unTarPath) {
         try (var tis = new TarArchiveInputStream(inputStream)) {
@@ -78,7 +78,7 @@ public class DecompressionFileUtils {
                     continue;
                 }
                 var file = new File(dir);
-                log.info("正在解压......{}", dir);
+                log.info("Decompressing......{}", dir);
                 if (nte.isDirectory()) {
                     file.mkdirs();
                 } else {
@@ -99,31 +99,31 @@ public class DecompressionFileUtils {
     public static void decompress(String filePath, String decompressPath) throws IOException {
         String fileType = filePath.toUpperCase();
         if (fileType.endsWith(TAR)) {
-            //解压的.TAR包 .TAR包用一般的FileInputStream流读取
+            // Decompressed .TAR package The .TAR package is read with a normal FileInputStream stream
             tarDecompress(new FileInputStream(filePath), decompressPath);
         } else if (fileType.endsWith(TAR_GZ)) {
-            //解压的.TAR.GZ包 .TAR.GZ包要用GzipCompressorInputStream读取
+            // Decompressed .TAR.GZ package .TAR.GZ package should be read with GzipCompressorInputStream
             tarDecompress(new GzipCompressorInputStream(new FileInputStream(filePath)), decompressPath);
         } else if (fileType.endsWith(TAR_BZ2)) {
-            //解压的.TAR.BZ2包
+            // Decompressed .TAR.BZ2 package
             tarDecompress(new BZip2CompressorInputStream(new FileInputStream(filePath)), decompressPath);
         } else if (fileType.endsWith(ZIP)) {
-            //解压的.ZIP包
+            // Decompressed .ZIP package
             zipDecompress(filePath, decompressPath);
         } else {
-            throw new UsecaseException("暂不支持该种格式文件的解压");
+            throw new UsecaseException("The decompression of files in this format is not currently supported");
         }
     }
 
     /**
-     * 验证url地址是否能连接
+     * Verify that the url address can be connected
      *
-     * @param urlString
-     * @return
+     * @param urlStr url
+     * @return boolean
      */
-    public static boolean validateUrl(String urlString) {
+    public static boolean validateUrl(String urlStr) {
         try {
-            var url = new URL(urlString);
+            var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
             // 设置超时时间

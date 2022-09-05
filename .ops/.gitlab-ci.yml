@@ -12,11 +12,9 @@ variables:
 
   FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/frontend"
   BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/backend"
-  IMAGE_OBJECT_DETECTION_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/image-object-detection"
 
   DOCKER_HUB_FRONTEND_IMAGE_NAME: "basicai/${APP_NAME}-frontend"
   DOCKER_HUB_BACKEND_IMAGE_NAME: "basicai/${APP_NAME}-backend"
-  DOCKER_HUB_IMAGE_OBJECT_DETECTION_IMAGE_NAME: "basicai/${APP_NAME}-image-object-detection"
 
   KUBERNETES_NAMESPACE: "x1-community"
 
@@ -35,9 +33,9 @@ build-frontend-package:
     - cd frontend/main
     - npm install
     - npm run build
-    # - cd ../image-tool
-    # - npm install
-    # - npm run build
+    - cd ../image-tool
+    - npm install
+    - npm run build
     - cd ../pc-tool
     - npm install
     - npm run build
@@ -152,24 +150,6 @@ build-frontend-image:
     - cp ../.ops/frontend.dockerignore ./.dockerignore
     - sed -i 's/$FRONTEND_PACKAGE_DIR/'"$FRONTEND_PACKAGE_DIR"'/g' Dockerfile
 
-build-image-object-detection-image:
-  extends: .build-image
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
-      changes:
-        - .ops/*
-        - .ops/**/*
-        - model/image-object-detection/*
-        - model/image-object-detection/**/*
-  variables:
-    WORKING_DIR: model/image-object-detection
-    IMAGE_NAME: $IMAGE_OBJECT_DETECTION_IMAGE_NAME
-    DOCKER_HUB_IMAGE_NAME: $DOCKER_HUB_IMAGE_OBJECT_DETECTION_IMAGE_NAME
-  script:
-    - cd $WORKING_DIR
-    - cp ../../.ops/image-object-detection.dockerfile ./Dockerfile
-    - cp ../../.ops/image-object-detection.dockerignore ./.dockerignore
-
 .deploy:
   stage: deploy
   tags:
@@ -212,22 +192,6 @@ deploy-frontend-to-alidev:
     - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
     - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
 
-deploy-image-object-detection-to-alidev:
-  extends: .deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
-      changes:
-        - .ops/*
-        - .ops/**/*
-        - model/image-object-detection/*
-        - model/image-object-detection/**/*
-  variables:
-    ENV: alidev
-    DEPLOYMENT: image-object-detection-deployment.yml
-  script:
-    - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' $DEPLOYMENT
-    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
-
 deploy-backend-to-alitest:
   extends: .deploy
   rules:
@@ -260,21 +224,4 @@ deploy-frontend-to-alitest:
     DEPLOYMENT: frontend-deployment.yml
   script:
     - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
-    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING
-
-deploy-image-object-detection-to-alitest:
-  extends: .deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
-      changes:
-        - .ops/*
-        - .ops/**/*
-        - model/image-object-detection/*
-        - model/image-object-detection/**/*
-  when: manual
-  variables:
-    ENV: alitest
-    DEPLOYMENT: image-object-detection-deployment.yml
-  script:
-    - sed -i 's|$IMAGE_OBJECT_DETECTION_IMAGE_NAME|'"$IMAGE_OBJECT_DETECTION_IMAGE_NAME"'|g' $DEPLOYMENT
     - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING

@@ -108,7 +108,7 @@ export default class SelectAction extends Action {
 
         let findObject;
         let tempPos = get(THREE.Vector2, 0);
-        // 转换到图片坐标系
+        // to image coord
         tempPos.x = ((pos.x + 1) / 2) * imgSize.x;
         tempPos.y = ((-pos.y + 1) / 2) * imgSize.y;
 

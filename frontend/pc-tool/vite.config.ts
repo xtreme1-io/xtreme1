@@ -8,12 +8,12 @@ export default defineConfig({
     server: {
         open: true,
         port: 8000,
-        host: 'localhosttool.alidev.beisai.com',
+        host: 'localhost-tool-pc.alidev.beisai.com',
+        // api proxy when development
         proxy: {
             '/api': {
                 changeOrigin: true,
                 target: 'https://x1-community.alidev.beisai.com/',
-                // target: 'https://app.alidev.beisai.com',
             },
         },
     },

@@ -14,20 +14,13 @@ export const UIType = {
     create3dBox: 'create3dBox',
     create2dRect: 'create2dRect',
     create2dBox: 'create2dBox',
-    // 位移
     translate: 'translate',
-    // 批注
     annotate: 'annotate',
-    // 映射
     project: 'project',
-    // 重映射
     reProject: 'reProject',
-    // 参考线
     track: 'track',
     filter2D: 'filter2D',
-    // 设置
     setting: 'setting',
-    // 信息
     info: 'info',
 
     // *******side view**********

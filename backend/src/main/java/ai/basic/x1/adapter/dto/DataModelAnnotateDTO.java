@@ -18,20 +18,38 @@ import java.util.List;
 @AllArgsConstructor
 public class DataModelAnnotateDTO {
 
+    /**
+     * Dataset id
+     */
     @NotNull(message = "not allow null")
     private Long datasetId;
 
+    /**
+     * Data id collection
+     */
     @NotEmpty(message = "not allow null")
     private List<Long> dataIds;
 
-    @ValidStringEnum(message = "modelCode must be one of PRE_LABEL,TRACKING,FRONT_MIRROR_47,FRONT_MIRROR_16,COCO_80", enumClass = ModelCodeEnum.class)
+    /**
+     * Model code PRE_LABEL,COCO_80
+     */
+    @ValidStringEnum(message = "modelCode must be one of PRE_LABEL,COCO_80", enumClass = ModelCodeEnum.class)
     private String modelCode;
 
+    /**
+     * Model id
+     */
     @NotNull(message = "not allow null")
     private Long modelId;
 
+    /**
+     * Model version
+     */
     private String modelVersion;
 
+    /**
+     * Model results filtering parameters
+     */
     private JSONObject resultFilterParam;
 
 }

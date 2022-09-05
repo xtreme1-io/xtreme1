@@ -7,7 +7,9 @@
             <div class="header-info">
                 <span class="dataset-type">{{ bsState.datasetType }}</span>
                 <span>-</span>
-                <span class="dataset-name">{{ bsState.datasetName }}</span>
+                <span class="dataset-name limit" :title="bsState.datasetName">{{
+                    bsState.datasetName
+                }}</span>
             </div>
         </div>
         <div class="item-wrap data-index" v-if="state.frames.length > 0">
@@ -72,23 +74,59 @@
                 }}</div>
             </a-button>
             <a-divider type="vertical" style="height: 32px; background-color: #57575c" />
-            <a-button class="basic mark" v-show="canEdit()" :disabled="blocking">
-                {{ $$('btn-invalid') }}
-            </a-button>
-            <a-button class="basic skip" v-show="canEdit()" :disabled="blocking">
-                {{ $$('btn-skip') }}
-            </a-button>
-            <a-button class="basic submit" v-show="canEdit()" :disabled="blocking">
-                <template #icon><SaveOutlined /></template>
-                {{ $$('btn-submit') }}
-            </a-button>
+            <template v-if="editor.state.frameIndex >= 0">
+                <a-button
+                    class="basic modify"
+                    :disabled="blocking"
+                    :loading="bsState.modifying"
+                    v-show="!canEdit()"
+                    @click="onModify"
+                >
+                    {{ $$('btn-modify') }}
+                </a-button>
+                <a-button
+                    :class="
+                        currentFrame.dataStatus === 'VALID'
+                            ? 'basic mark-invalid'
+                            : 'basic mark-valid'
+                    "
+                    v-show="canEdit()"
+                    :disabled="blocking"
+                    :loading="bsState.validing"
+                    @click="onToggleValid"
+                >
+                    {{ currentFrame.dataStatus === 'VALID' ? $$('btn-invalid') : $$('btn-valid') }}
+                </a-button>
+                <a-button
+                    :class="currentFrame.skipped ? 'basic skipped' : 'basic skip'"
+                    v-show="canEdit()"
+                    @click="onToggleSkip"
+                    :disabled="blocking"
+                >
+                    {{ currentFrame.skipped ? $$('btn-skipped') : $$('btn-skip') }}
+                </a-button>
+                <a-button
+                    class="basic submit"
+                    v-show="canEdit()"
+                    :loading="bsState.submitting"
+                    :disabled="blocking"
+                    @click="onSubmit"
+                >
+                    <template #icon><SaveOutlined /></template>
+                    {{
+                        currentFrame.annotationStatus === 'ANNOTATED'
+                            ? $$('btn-update')
+                            : $$('btn-submit')
+                    }}
+                </a-button>
+            </template>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
     // import { PointCloud } from '../lib';
-    import { reactive, onMounted } from 'vue';
+    import { computed, onMounted } from 'vue';
     import {
         RightOutlined,
         LeftOutlined,
@@ -107,6 +145,7 @@
         onFullScreen,
         iState,
         blocking,
+        currentFrame,
         dataIndex,
         onIndexChange,
         onHelp,
@@ -115,6 +154,10 @@
         onPre,
         onNext,
         onClose,
+        onToggleValid,
+        onToggleSkip,
+        onSubmit,
+        onModify,
     } = useHeader();
     let { has, canEdit } = useUI();
     let { init } = useFlow();
@@ -158,6 +201,7 @@
                 margin-left: 20px;
                 padding: 5px 15px;
                 color: #bec1ca;
+                display: flex;
             }
 
             .icon {
@@ -205,11 +249,18 @@
             border-radius: 30px;
             // background: #3a393e;
 
-            &.mark {
+            &.mark-invalid {
                 background-color: #fcb17a;
+            }
+            &.mark-valid {
+                background-color: #49aa19;
             }
             &.skip {
                 background-color: #98b0d2;
+            }
+            &.skipped,
+            &.modify {
+                background-color: #ff6906;
             }
             &.submit {
                 background-color: #60a9fe99;
@@ -237,6 +288,11 @@
             // &:hover {
             //     background: #3a393e;
             // }
+        }
+
+        .dataset-name {
+            display: inline-block;
+            max-width: 100px;
         }
     }
 </style>

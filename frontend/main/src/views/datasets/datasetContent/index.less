@@ -1,7 +1,26 @@
 @prefix-cls: ~'@{namespace}-datasetContent';
 .@{prefix-cls} {
   display: flex;
-
+  .lockedMask{
+    position:absolute;
+    left: 50%;
+    transform: translate(-50%,0);
+    background: #FFFFFF;
+    width: 565px;
+    height: 84px;
+    border: 1px solid #CCCCCC;
+    border-radius: 14px;
+    display: flex;
+    padding-top: 20px;
+    padding-left: 14px;
+    padding-right: 17px;
+    z-index: 999;
+    .actions{
+      width:176px;
+      display: flex;
+      justify-content: space-around;
+    }
+  }
   .sider {
     width: 220px;
     padding: 10px;

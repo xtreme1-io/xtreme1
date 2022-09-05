@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 public class ModelDataResultDTO {
 
     /**
-     * 数据id
+     * Data id
      */
     private Long dataId;
 
     /**
-     * 模型结果
+     * Data model result
      */
     private JsonNode modelResult;
 }

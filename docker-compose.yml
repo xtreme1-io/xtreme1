@@ -56,8 +56,6 @@ services:
       - 8181:8080
   image-object-detection:
     image: basicai/x1-community-image-object-detection
-    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
-    # build: ./model/image-object-detection
     ports:
       - 8182:8080
     # You need to explicitly specify model profile to start this service.

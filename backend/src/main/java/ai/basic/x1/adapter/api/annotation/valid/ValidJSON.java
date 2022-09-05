@@ -16,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({METHOD, FIELD, ANNOTATION_TYPE, PARAMETER, CONSTRUCTOR})
 @Retention(RUNTIME)
 public @interface ValidJSON {
-    String message() default "{ai.basic.basicai.common.adapter.api.annotation.valid.ValidJSON.message}";
+    String message() default "{ai.basic.x1.common.adapter.api.annotation.valid.ValidJSON.message}";
 
     Class<?>[] groups() default {};
 

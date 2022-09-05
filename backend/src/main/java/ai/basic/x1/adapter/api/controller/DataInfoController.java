@@ -55,7 +55,7 @@ public class DataInfoController extends DatasetBaseController {
 
     @GetMapping("findUploadRecordBySerialNumbers")
     public List<UploadRecordDTO> findUploadRecordBySerialNumbers(
-            @NotEmpty(message = "SerialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
+            @NotEmpty(message = "serialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
         var uploadRecordBOList = uploadUseCase.findBySerialNumbers(serialNumbers);
         return DefaultConverter.convert(uploadRecordBOList, UploadRecordDTO.class);
     }
@@ -78,12 +78,18 @@ public class DataInfoController extends DatasetBaseController {
     }
 
     @GetMapping("listByIds")
-    public List<DataInfoDTO> listByIds(@NotEmpty(message = "DataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
+    public List<DataInfoDTO> listByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
         var dataInfoBos = dataInfoUsecase.listByIds(dataIds);
         if (CollectionUtil.isNotEmpty(dataInfoBos)) {
             return dataInfoBos.stream().map(this::convertDataInfoDTO).collect(Collectors.toList());
         }
         return List.of();
+    }
+
+    @GetMapping("getDataStatusByIds")
+    public List<DataInfoStatusDTO> getDataStatusByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
+        var dataInfoBOS = dataInfoUsecase.getDataStatusByIds(dataIds);
+        return DefaultConverter.convert(dataInfoBOS, DataInfoStatusDTO.class);
     }
 
     @GetMapping("getAnnotationStatusStatisticsByDatasetId")
@@ -93,7 +99,7 @@ public class DataInfoController extends DatasetBaseController {
     }
 
     @GetMapping("findLockRecordIdByDatasetId")
-    public LockRecordDTO findLockRecordIdByDatasetId(@NotNull(message = "DatasetId cannot be null") @RequestParam(required = false) Long datasetId,
+    public LockRecordDTO findLockRecordIdByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
                                                      @LoggedUser LoggedUserDTO userDTO) {
         var lockRecordBO = dataAnnotationRecordUseCase.findLockRecordIdByDatasetId(datasetId, userDTO.getId());
         return DefaultConverter.convert(lockRecordBO, LockRecordDTO.class);
@@ -136,7 +142,7 @@ public class DataInfoController extends DatasetBaseController {
 
     @GetMapping("findExportRecordBySerialNumbers")
     public List<ExportRecordDTO> findExportRecordBySerialNumber(
-            @NotEmpty(message = "SerialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
+            @NotEmpty(message = "serialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
         var exportRecordList = exportUsecase.findExportRecordBySerialNumbers(serialNumbers);
         return DefaultConverter.convert(exportRecordList, ExportRecordDTO.class);
     }
@@ -145,8 +151,7 @@ public class DataInfoController extends DatasetBaseController {
     public Long annotate(@Validated @RequestBody DataAnnotateDTO dataAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
         return dataInfoUsecase.annotate(
                 DefaultConverter.convert(dataAnnotateDTO, DataPreAnnotationBO.class),
-                loggedUserDTO.getId()
-        );
+                loggedUserDTO.getId());
     }
 
     @PostMapping("annotateWithModel")
@@ -154,7 +159,7 @@ public class DataInfoController extends DatasetBaseController {
         var resultFilterParam = dataModelAnnotateDTO.getResultFilterParam();
         var modelCode = EnumUtil.fromString(ModelCodeEnum.class, dataModelAnnotateDTO.getModelCode());
         ModelParamUtils.valid(resultFilterParam, modelCode);
-        return dataInfoUsecase.annotate(
+        return dataInfoUsecase.annotateWithModel(
                 DefaultConverter.convert(dataModelAnnotateDTO, DataPreAnnotationBO.class),
                 loggedUserDTO.getId()
         );

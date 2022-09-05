@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -100,6 +101,11 @@ public class DatasetController extends DatasetBaseController {
             throw new ApiException(UsecaseCode.NOT_FOUND);
         }
         return DefaultConverter.convert(datasetBO, DatasetDTO.class);
+    }
+
+    @GetMapping("findOntologyIsExistByDatasetId")
+    public Boolean findOntologyIsExistByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId) {
+        return datasetUsecase.findOntologyIsExistByDatasetId(datasetId);
     }
 
 }

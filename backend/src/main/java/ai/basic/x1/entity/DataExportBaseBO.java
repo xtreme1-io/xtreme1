@@ -16,22 +16,22 @@ import java.util.List;
 public class DataExportBaseBO {
 
     /**
-     * 版本
+     * Export version
      */
     private String version;
 
     /**
-     * 数据集名称
+     * Dataset name
      */
     private String datasetName;
 
     /**
-     * 导出时间
+     * Export time
      */
     private String exportTime;
 
     /**
-     * 导出内容
+     * Export content
      */
     private List<JSONObject> contents;
 }

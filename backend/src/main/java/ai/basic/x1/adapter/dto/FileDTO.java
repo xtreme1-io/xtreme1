@@ -23,50 +23,54 @@ import lombok.NoArgsConstructor;
         @JsonSubTypes.Type(value = PcdFileDTO.class, name = "pcdFile")
 })
 public class FileDTO {
+
+    /**
+     * File id
+     */
     private Long id;
 
     /**
-     * 文件名称（上传后的新名称）
+     * File name
      */
     private String name;
 
     /**
-     * 原名称
+     * File original name
      */
     private String originalName;
 
     /**
-     * 文件上传后的路径
+     * File upload path
      */
     private String path;
 
     /**
-     * 文件类型MIME
+     * File type
      */
     private String type;
 
     /**
-     * 文件大小
+     * File size
      */
     private Long size;
 
     /**
-     * 文件存储的桶名称
+     * Bucket name
      */
     private String bucketName;
 
     /**
-     * 外网URL
+     * File  url
      */
     private String url;
 
     /**
-     * path MD5后 Hash值
+     * Hash value after path MD5
      */
     private Long pathHash;
 
     /**
-     * 文件扩展信息
+     * File extension information
      */
     private JSONObject extraInfo;
 

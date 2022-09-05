@@ -1,7 +1,11 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
+import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
 import ai.basic.x1.adapter.port.dao.DatasetDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Dataset;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
 import ai.basic.x1.entity.DatasetBO;
 import ai.basic.x1.entity.DatasetQueryBO;
 import ai.basic.x1.usecase.exception.UsecaseCode;
@@ -12,11 +16,7 @@ import ai.basic.x1.util.lock.IDistributedLock;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 /**
  * @author fyb
@@ -24,20 +24,22 @@ import java.util.List;
  */
 public class DatasetUseCase {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatasetUseCase.class);
-
     @Autowired
     private DatasetDAO datasetDAO;
 
     @Autowired
     private IDistributedLock distributedLock;
 
+    @Autowired
+    private DatasetClassDAO datasetClassDAO;
 
+    @Autowired
+    private DatasetClassificationDAO datasetClassificationDAO;
 
     /**
-     * 保存dataset
+     * Save dataset
      *
-     * @param bo 数据集
+     * @param bo Dataset information
      */
     public DatasetBO create(DatasetBO bo) {
         var lockKey = String.format("%s/%s", "datasetName", bo.getName());
@@ -56,10 +58,10 @@ public class DatasetUseCase {
     }
 
     /**
-     * 更新数据集
+     * Dataset update
      *
-     * @param id       数据集ID
-     * @param updateBO 数据集对象
+     * @param id       Dataset id
+     * @param updateBO Dataset update information
      */
     public void update(Long id, DatasetBO updateBO) {
         var lockKey = String.format("%s/%s", "datasetName", updateBO.getName());
@@ -85,10 +87,10 @@ public class DatasetUseCase {
     }
 
     /**
-     * 判断名称是否存在
+     * Determine if the dataset name exists
      *
-     * @param name 名称
-     * @param id   数据集ID
+     * @param name Dataset name
+     * @param id   Dataset id
      */
     private boolean nameExists(String name, Long id) {
         var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
@@ -99,11 +101,10 @@ public class DatasetUseCase {
         return datasetDAO.getBaseMapper().exists(datasetLambdaQueryWrapper);
     }
 
-
     /**
-     * 删除数据集
+     * Delete dataset
      *
-     * @param id     数据集ID
+     * @param id Dataset id
      */
     public void delete(Long id) {
         var datasetLambdaUpdateWrapper = Wrappers.lambdaUpdate(Dataset.class);
@@ -113,12 +114,12 @@ public class DatasetUseCase {
     }
 
     /**
-     * 分页查询dataset
+     * Paging query dataset
      *
-     * @param pageNo   当前查询页码
-     * @param pageSize 每一页条数
-     * @param queryBO  查询参数对象
-     * @return dataset page
+     * @param pageNo   Page number
+     * @param pageSize Page size
+     * @param queryBO  query parameters object
+     * @return Dataset page
      */
     public Page<DatasetBO> findByPage(Integer pageNo, Integer pageSize, DatasetQueryBO queryBO) {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
@@ -143,22 +144,30 @@ public class DatasetUseCase {
     }
 
     /**
-     * 根据数据集id查询详情
+     * Query details based on dataset id
      *
-     * @param id 数据集id
-     * @return 数据集对象
+     * @param id Dataset id
+     * @return Dataset detail
      */
     public DatasetBO findById(Long id) {
         return DefaultConverter.convert(datasetDAO.getById(id), DatasetBO.class);
     }
 
     /**
-     * 根据id集合查询数据集对象list
+     * Query whether an Ontology exists in the dataset
      *
-     * @param ids id集合
-     * @return 数据集对象list
+     * @param datasetId Dataset id
+     * @return True means exists
      */
-    public List<DatasetBO> listByIds(List<Long> ids) {
-        return DefaultConverter.convert(datasetDAO.listByIds(ids), DatasetBO.class);
+    public Boolean findOntologyIsExistByDatasetId(Long datasetId) {
+        var datasetClassLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClass.class);
+        datasetClassLambdaQueryWrapper.eq(DatasetClass::getDatasetId, datasetId);
+        var datasetClassCount = datasetClassDAO.count(datasetClassLambdaQueryWrapper);
+
+        var datasetClassificationLambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClassification.class);
+        datasetClassificationLambdaQueryWrapper.eq(DatasetClassification::getDatasetId, datasetId);
+        var datasetClassificationCount = datasetClassificationDAO.count(datasetClassificationLambdaQueryWrapper);
+        return datasetClassCount > 0 || datasetClassificationCount > 0;
     }
+
 }

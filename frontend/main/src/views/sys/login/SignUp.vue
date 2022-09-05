@@ -24,7 +24,7 @@
         @keypress.enter="handleSignUp"
         validateFirst
       >
-        <FormItem :label="t('sys.login.email')" name="email" class="enter-x" validateFirst>
+        <FormItem :label="t('sys.login.email')" name="username" class="enter-x" validateFirst>
           <Input
             autocomplete="off"
             size="large"
@@ -126,7 +126,7 @@
         ...formData,
       });
       if (subscribe.value) {
-        mixpanel.track('signUp', formData);
+        mixpanel.track('signUp', { email: formData.username });
       }
       userStore.setToken(res.token);
       // isSuccess.value = true;
