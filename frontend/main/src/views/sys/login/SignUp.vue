@@ -24,7 +24,7 @@
         @keypress.enter="handleSignUp"
         validateFirst
       >
-        <FormItem :label="t('sys.login.email')" name="email" class="enter-x" validateFirst>
+        <FormItem :label="t('sys.login.email')" name="username" class="enter-x" validateFirst>
           <Input
             autocomplete="off"
             size="large"

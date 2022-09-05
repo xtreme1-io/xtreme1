@@ -63,7 +63,7 @@ model:
     image80:
       url: http://image-object-detection/basic_predict
     preModel:
-      url: http://point-cloud-object-detection/3dbox
+      url: http://pointcloud-object-detection/3dbox
 
 management:
   endpoint:

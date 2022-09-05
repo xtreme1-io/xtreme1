@@ -1,5 +1,10 @@
 <template>
   <div :class="`${prefixCls}`">
+    <div class="docs-wrapper">
+      <img class="cursor-pointer" v-if="!type" :src="docs" @click="handleGoDocs" />
+      <img class="cursor-pointer" v-else :src="docsMini" @click="handleGoDocs" />
+    </div>
+    <Divider />
     <Popover placement="rightBottom">
       <template #content>
         <p
@@ -46,11 +51,7 @@
           </div>
         </div>
       </template>
-      <div class="docs-wrapper">
-        <img v-if="!type" :src="docs" @click="handleGoDocs" />
-        <img v-else :src="docsMini" @click="handleGoDocs" />
-      </div>
-      <Divider />
+
       <div class="panel flex items-center">
         <!-- <img class="mr-2" width="36" :src="avatarUrl || ava" alt="" /> -->
         <ProfileAvatar class="mr-2" :avatarUrl="avatarUrl" :nickname="nickname" :size="36" />
