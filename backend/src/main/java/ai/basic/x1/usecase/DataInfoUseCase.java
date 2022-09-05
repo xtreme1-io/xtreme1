@@ -574,12 +574,15 @@ public class DataInfoUseCase {
     }
 
     private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo,Long userId) {
-        var dataAnnotationRecord = DataAnnotationRecord.builder()
-                .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
-        var lambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationRecord.class);
-        lambdaUpdateWrapper.eq(DataAnnotationRecord::getDatasetId,dataPreAnnotationBO.getDatasetId());
-        lambdaUpdateWrapper.eq(DataAnnotationRecord::getCreatedBy,userId);
-        dataAnnotationRecordDAO.saveOrUpdate(dataAnnotationRecord,lambdaUpdateWrapper);
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationRecord.class);
+        lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId,dataPreAnnotationBO.getDatasetId());
+        lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy,userId);
+        var dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+        if(ObjectUtil.isNull(dataAnnotationRecord)){
+            dataAnnotationRecord = DataAnnotationRecord.builder()
+                    .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+            dataAnnotationRecordDAO.save(dataAnnotationRecord);
+        }
         var dataIds = dataPreAnnotationBO.getDataIds();
         try {
             batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
