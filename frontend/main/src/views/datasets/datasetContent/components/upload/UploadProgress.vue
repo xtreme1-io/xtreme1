@@ -76,11 +76,11 @@
   const setProgress = (e, fileItem) => {
     const temp = uploadProgress.value.filter((item) => item.uuid === fileItem.uuid);
     if (temp.length > 0) {
-      temp[0].percent = parseInt((e.loaded / e.total) * 100);
+      temp[0].percent = parseInt((e.loaded / e.total) * 80);
     } else {
       uploadProgress.value.push({
         uuid: fileItem.uuid,
-        percent: parseInt((e.loaded / e.total) * 100),
+        percent: parseInt((e.loaded / e.total) * 80),
       });
     }
   };
@@ -203,7 +203,6 @@
             });
             fileItem.status = UploadResultStatus.PROCESSING;
             const temp = uploadProgress.value.filter((item) => item.uuid === fileItem.uuid);
-            temp[0].percent = 0;
 
             try {
               const uploadParams: UploadParams = {
@@ -238,12 +237,12 @@
                   uploadStatus.value = status;
 
                   const downloadPercent =
-                    parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50) ||
+                    parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 10) ||
                     0;
                   const parsedPercent =
-                    parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50) || 0;
+                    parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 10) || 0;
 
-                  temp[0].percent = downloadPercent + parsedPercent;
+                  temp[0].percent = 80 + downloadPercent + parsedPercent;
                   console.log(status, '==>', downloadPercent, '==', parsedPercent);
 
                   if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
@@ -313,14 +312,17 @@
 
     if (!fileItem) return;
 
-    fileItem.status = UploadResultStatus.PROCESSING;
+    fileItem.status = UploadResultStatus.UPLOADING;
     uploadProgress.value.push({
       uuid: fileItem.uuid,
       percent: 0,
     });
     const temp = uploadProgress.value.filter((item) => item.uuid === fileItem.uuid);
     temp[0].percent = 0;
-
+    setTimeout(() => {
+      fileItem.status = UploadResultStatus.PROCESSING;
+      temp[0].percent = 80;
+    }, 500);
     try {
       // cancel request
       fileItem.controller = new AbortController();
@@ -353,11 +355,11 @@
           uploadStatus.value = status;
 
           const downloadPercent =
-            parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 50) || 0;
+            parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 10) || 0;
           const parsedPercent =
-            parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 50) || 0;
+            parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 10) || 0;
 
-          temp[0].percent = downloadPercent + parsedPercent;
+          temp[0].percent = 80 + downloadPercent + parsedPercent;
           console.log(status, '==>', downloadPercent, '==', parsedPercent);
 
           if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
