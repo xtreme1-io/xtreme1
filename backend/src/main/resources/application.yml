@@ -40,7 +40,7 @@ mybatis-plus:
 
 export:
   data:
-    version: x1/v1
+    version: Basic AI Community V1.0
 file:
   tempPath: /tmp/x1/
   size:
@@ -63,7 +63,7 @@ model:
     image80:
       url: http://image-object-detection/basic_predict
     preModel:
-      url: http://point-cloud-object-detection/3dbox
+      url: http://pointcloud-object-detection/3dbox
 
 management:
   endpoint:

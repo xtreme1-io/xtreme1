@@ -474,9 +474,9 @@ public class DataInfoUseCase {
                     i++;
                 }
             }
-            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
-            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
         });
+        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
+        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
     }
 
     private void parseImageUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -997,11 +997,11 @@ public class DataInfoUseCase {
             try {
                 var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
                 var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
-                result.getResults().forEach(resultBO -> resultBO.getObjects().forEach(object -> {
+                result.getResult().getObjects().forEach(object -> {
                     var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
                     Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(object);
                     dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
-                }));
+                });
             } catch (Exception e) {
                 log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
             }
