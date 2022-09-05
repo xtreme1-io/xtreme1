@@ -3,23 +3,26 @@ package ai.basic.x1.adapter.api.context;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
 
+/**
+ * @author andy
+ */
 public class ThreadLocalRequestContextHolderStrategy implements RequestContextHolderStrategy {
-    private static final TransmittableThreadLocal<RequestContext> contextHolder = new TransmittableThreadLocal<>();
+    private static final TransmittableThreadLocal<RequestContext> CONTEXT_HOLDER = new TransmittableThreadLocal<>();
 
     @Override
     public void cleanContext() {
-        contextHolder.remove();
+        CONTEXT_HOLDER.remove();
     }
 
     @Override
     public RequestContext getContext() {
-        RequestContext ctx = contextHolder.get();
+        RequestContext ctx = CONTEXT_HOLDER.get();
         return ctx;
     }
 
     @Override
     public void setContext(RequestContext context) {
-        contextHolder.set(context);
+        CONTEXT_HOLDER.set(context);
     }
 
     @Override

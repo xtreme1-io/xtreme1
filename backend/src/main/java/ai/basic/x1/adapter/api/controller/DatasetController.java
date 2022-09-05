@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/dataset/")
 @Validated
-public class DatasetController extends DatasetBaseController {
+public class DatasetController extends BaseDatasetController {
 
     @Autowired
     private DatasetUseCase datasetUsecase;
