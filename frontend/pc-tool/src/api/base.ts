@@ -21,14 +21,13 @@ let host = location.hostname || location.host;
 const BaseURL = host.indexOf('localhost') >= 0 ? '' : 'https://' + host.replace('tool', 'app');
 // const BaseURL = 'https://app.alidev.beisai.com';
 export const Service = axios.create({
-    timeout: 1000 * 60 * 20, // 请求超时时间
+    timeout: 1000 * 60 * 20,
     baseURL: BaseURL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// 添加请求拦截器
 Service.interceptors.request.use((config) => {
     config.headers = config.headers || {};
     if (!isResource(config.headers)) {
@@ -38,7 +37,6 @@ Service.interceptors.request.use((config) => {
     return config;
 });
 
-// 添加响应拦截器
 Service.interceptors.response.use(
     (response) => {
         if (response.status === 200) {
@@ -60,7 +58,6 @@ Service.interceptors.response.use(
     },
 );
 
-// 工具方法
 export function get<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
     return Service.request<any, T>({
         url,

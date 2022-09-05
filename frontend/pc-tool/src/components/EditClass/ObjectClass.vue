@@ -116,7 +116,6 @@
 
         iState.newClassType = value;
         iState.newClassName = item.label;
-        // 没有标签时不提示
         if (!props.state.classType) {
             props.state.classType = iState.newClassType;
             props.state.showMsgType = '';

@@ -24,6 +24,9 @@ import lombok.NoArgsConstructor;
 })
 public class FileDTO {
 
+    /**
+     * File id
+     */
     private Long id;
 
     /**
@@ -32,7 +35,7 @@ public class FileDTO {
     private String name;
 
     /**
-     * File name
+     * File original name
      */
     private String originalName;
 

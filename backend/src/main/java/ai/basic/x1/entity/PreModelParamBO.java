@@ -12,7 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PreModelParamBO {
+
     private BigDecimal minConfidence;
+
     private BigDecimal maxConfidence;
+
     private List<String> classes;
+    
 }

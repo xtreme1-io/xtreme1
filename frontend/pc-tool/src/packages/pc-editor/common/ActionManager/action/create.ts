@@ -57,7 +57,6 @@ export const createObjectWith3 = define({
                         userData,
                     );
 
-                    // 追踪对象
                     let trackObject: Partial<IObject> = {
                         trackId: userData.trackId,
                         trackName: userData.trackName,
@@ -137,7 +136,7 @@ export const createAnnotation = define({
 
             try {
                 result = await editor.showModal('annotation', {
-                    title: '添加批注',
+                    title: '',
                     data: { type: isObject ? 'object' : 'position', custom },
                 });
             } catch (e) {

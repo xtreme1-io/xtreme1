@@ -87,7 +87,7 @@
         return attrs.vnodes;
     }
     function addRecentClass(value: any) {
-        // 先移除，在添加
+        // first remove and add
         const item = TState.classTypes.find((e) => e.name === value);
         if (!item) return;
         let newRecentClass = TState.recentClass.filter((e) => e.name !== value);

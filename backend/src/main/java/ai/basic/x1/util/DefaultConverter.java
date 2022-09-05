@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class DefaultConverter {
 
     /**
-     * 通过自定义convert方式进行分页转换
+     * Pagination conversion by custom convert method
      *
      * @param page
      * @param mapper
@@ -35,7 +35,7 @@ public class DefaultConverter {
     }
 
     /**
-     * 通过bean拷贝的方式进行分页转换
+     * Paging conversion by bean copy
      *
      * @param page
      * @param target
@@ -67,7 +67,7 @@ public class DefaultConverter {
     }
 
     /***
-     * 通过自定义converter进行列表转换
+     * List conversion via custom converter
      * @param sourceList
      * @param converter
      * @param <S>
@@ -120,7 +120,7 @@ public class DefaultConverter {
     }
 
     /**
-     * 通过Bean拷贝的方式进行对象转换
+     * Object conversion by bean copy
      *
      * @param source
      * @param target

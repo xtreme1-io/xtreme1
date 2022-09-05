@@ -580,7 +580,7 @@ public class DataInfoUseCase {
     private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo) {
         var dataAnnotationRecord = DataAnnotationRecord.builder()
                 .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
-        dataAnnotationRecordDAO.getBaseMapper().insertIgnore(dataAnnotationRecord);
+        dataAnnotationRecordDAO.saveOrUpdate(dataAnnotationRecord);
         var dataIds = dataPreAnnotationBO.getDataIds();
         batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
         return dataAnnotationRecord.getId();
@@ -1098,7 +1098,7 @@ public class DataInfoUseCase {
         try {
             minioService.uploadFileList(bucketName, rootPath, tempPath, files);
         } catch (Exception e) {
-            log.error("batch upload file error,filesPath:{}", JSONUtil.parseArray(files.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
+            log.error("Batch upload file error,filesPath:{}", JSONUtil.parseArray(files.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
         }
 
         var fileBOS = new ArrayList<FileBO>();

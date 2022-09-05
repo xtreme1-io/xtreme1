@@ -21,67 +21,67 @@ import java.util.List;
 public class DataInfoBO {
 
     /**
-     * 单个dataID
+     * Data id
      */
     private Long id;
 
     /**
-     * 数据集ID
+     * Dataset id
      */
     private Long datasetId;
 
     /**
-     * 数据名称
+     * Data name
      */
     private String name;
 
     /**
-     * 内容（文件夹路径、版本信息）
+     * Content (folder path, version information)
      */
     private List<FileNodeBO> content;
 
     /**
-     * 数据状态 INVALID,VALID
+     * Data status INVALID,VALID
      */
     private DataStatusEnum status;
 
     /**
-     * 数据标注状态 ANNOTATED, NOT_ANNOTATED, INVALID
+     * Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
 
     /**
-     * 是否删除 0 否 1是
+     * Is deleted
      */
     private Boolean isDeleted;
 
     /**
-     * 创建时间
+     * Create time
      */
     private OffsetDateTime createdAt;
 
     /**
-     * 创建人ID
+     * Creator id
      */
     private Long createdBy;
 
     /**
-     * 更新时间
+     * Update time
      */
     private OffsetDateTime updatedAt;
 
     /**
-     * 更改人ID
+     * Modify person id
      */
     private Long updatedBy;
 
     /**
-     * 锁定人员的名称
+     * Locked Person's Name
      */
     private String lockedBy;
 
     /**
-     * 临时数据ID 用于关联获取ID
+     * Temporary data ID is used to associate the ID
      */
     private Long tempDataId;
 
@@ -93,27 +93,27 @@ public class DataInfoBO {
     public static class FileNodeBO {
 
         /**
-         * 名称
+         * File name
          */
         private String name;
 
         /**
-         * 文件ID
+         * File id
          */
         private Long fileId;
 
         /**
-         * 类型
+         * File type(directory,file)
          */
         private String type;
 
         /**
-         * 文件对象
+         * File information
          */
         private RelationFileBO file;
 
         /**
-         * 子文件
+         * Sub file
          */
         private List<FileNodeBO> files;
     }

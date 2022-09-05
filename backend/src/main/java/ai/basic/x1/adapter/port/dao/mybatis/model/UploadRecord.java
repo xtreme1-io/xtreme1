@@ -65,7 +65,7 @@ public class UploadRecord {
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
     /**
-     * Creator ID
+     * Creator id
      */
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
@@ -75,7 +75,7 @@ public class UploadRecord {
     @TableField(fill = FieldFill.UPDATE)
     private OffsetDateTime updatedAt;
     /**
-     * Change person ID
+     * Modify person id
      */
     @TableField(fill = FieldFill.UPDATE)
     private Long updatedBy;

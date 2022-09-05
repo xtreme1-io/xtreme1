@@ -9,7 +9,6 @@ export interface IUser {
     email?: string;
     status?: string;
     username?: string;
-    // ....其他属性
 }
 
 export interface IBSState {
@@ -19,9 +18,8 @@ export interface IBSState {
     validing: boolean;
     submitting: boolean;
     modifying: boolean;
-    //流水号
     recordId: string;
-    // 数据集
+    // dataset info
     datasetId: string;
     datasetName: string;
     datasetType: string;

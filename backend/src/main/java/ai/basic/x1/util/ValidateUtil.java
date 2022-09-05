@@ -11,7 +11,7 @@ import java.util.Set;
 
 
 /**
- * hibernate validator的校验工具
+ * Validation tool for hibernate validator
  */
 public class ValidateUtil {
 
@@ -19,7 +19,7 @@ public class ValidateUtil {
             Validation.buildDefaultValidatorFactory().getValidator();
 
     /**
-     * 校验实体类
+     * Validating entity classes
      */
     public static <T> void validate(T t) {
         Set<ConstraintViolation<T>> constraintViolations = validator.validate(t);
@@ -34,7 +34,7 @@ public class ValidateUtil {
     }
 
     /**
-     * 通过组来校验实体类
+     * Validating entity classes by group
      */
     public static <T> void validate(T t, Class<?>... groups) {
         Set<ConstraintViolation<T>> constraintViolations = validator.validate(t, groups);

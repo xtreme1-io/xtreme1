@@ -387,7 +387,6 @@ export default function useEditClass() {
 
     // attr
     let updateTrackAttr = _.debounce(() => {
-        // 防止edit class 修改属性触发自己重新更新
         editor.withEventSource(SOURCE_CLASS, () => {
             let attrs = JSON.parse(JSON.stringify(trackAttrs));
             editor.cmdManager.execute('update-object-user-data', {

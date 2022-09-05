@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * mapper类
  *
  * @author fyb
  * @date 2022-02-07 12:19:34

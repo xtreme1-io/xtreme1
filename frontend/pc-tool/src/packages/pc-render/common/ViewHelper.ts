@@ -371,12 +371,12 @@ export class ViewHelper extends THREE.Object3D {
             this.q1.copy(this.dummy.quaternion);
             this.dummy.lookAt(this.targetPosition);
             this.q2.copy(this.dummy.quaternion);
-            // clock 处理
+            // clock
             this.clock = new THREE.Clock();
             this._animate(resolve);
         });
 
-        // tween 处理
+        // tween
         // if (this.tween) this.tween.stop();
         // var preelapsed = 0;
         // this.tween = new TWEEN.Tween({ time: 0 })

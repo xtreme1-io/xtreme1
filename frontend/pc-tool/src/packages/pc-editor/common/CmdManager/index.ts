@@ -78,7 +78,7 @@ export default class CmdManager extends THREE.EventDispatcher {
     }
 
     withGroup(groupFn: () => void) {
-        // 处理嵌套withGroup
+        // handle nested withGroup
         if (this._group) {
             groupFn();
             return;
