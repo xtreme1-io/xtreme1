@@ -12,14 +12,14 @@ import {
 } from './model/modelsModel';
 
 enum Api {
-  Model = '/dataset/model',
+  Model = '/model',
   ModelRun = '/dataset/modelRun',
 }
 
 /** 查询全部 Models */
 export const getModelAllApi = (params: GetModelParams) =>
   defHttp.get<ResponseModelParams>({
-    url: `${Api.Model}/findAll`,
+    url: `${Api.Model}/list`,
     params,
     headers: {
       // @ts-ignore
