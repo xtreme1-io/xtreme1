@@ -997,7 +997,7 @@ public class DataInfoUseCase {
             try {
                 var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
                 var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
-                result.getResults().forEach(resultBO -> resultBO.getObjects().forEach(object -> {
+                result.getResult().forEach(resultBO -> resultBO.getObjects().forEach(object -> {
                     var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
                     Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(object);
                     dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
