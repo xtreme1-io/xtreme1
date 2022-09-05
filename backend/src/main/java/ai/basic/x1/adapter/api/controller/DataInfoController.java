@@ -150,7 +150,8 @@ public class DataInfoController extends DatasetBaseController {
     @PostMapping("annotate")
     public Long annotate(@Validated @RequestBody DataAnnotateDTO dataAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
         return dataInfoUsecase.annotate(
-                DefaultConverter.convert(dataAnnotateDTO, DataPreAnnotationBO.class));
+                DefaultConverter.convert(dataAnnotateDTO, DataPreAnnotationBO.class),
+                loggedUserDTO.getId());
     }
 
     @PostMapping("annotateWithModel")
