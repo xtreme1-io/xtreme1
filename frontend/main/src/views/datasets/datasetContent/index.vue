@@ -215,6 +215,7 @@
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
   import TipModal from './components/TipModal.vue';
   import { Button } from '/@/components/BasicCustom/Button';
+  import { getModelAllApi, getReportByDataset } from '/@/api/business/models';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
   //   useModal();
@@ -263,6 +264,7 @@
     // endCount.value = max.value;
     info.value = await datasetItemDetail({ id: id as string });
     setDatasetBreadcrumb(info.value.name, info.value.type);
+    getSelectOptions();
   });
 
   let filterForm = reactive({
@@ -329,6 +331,16 @@
     filterForm.ascOrDesc = SortTypeEnum.ASC;
     filterForm.createEndTime = null;
     filterForm.annotationStatus = undefined;
+  };
+
+  const getSelectOptions = async () => {
+    const res = await getModelAllApi({
+      pageSize: 999,
+      isInteractive: 0,
+      datasetType: info.value?.type as datasetTypeEnum,
+    });
+    selectOptions.value = res;
+    modelId.value = selectOptions.value?.[0]?.id;
   };
 
   const fetchList = async (filter?, fetchType?) => {
@@ -474,7 +486,7 @@
       templist = selectedList.value;
     }
     const flag = await handleEmpty(templist.map((item) => item.id || item) as string[], type);
-    if (flag) {
+    if (!flag) {
       return;
     }
 
