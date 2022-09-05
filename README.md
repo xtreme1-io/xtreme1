@@ -1,8 +1,8 @@
-# X1
+# Xtreme1
 
-X1 for community, free and open source, powered by [Basic AI](https://www.basic.ai/).
+Xtreme1 for community, free and open source, powered by [Basic AI](https://www.basic.ai/).
 
-## What is X1
+## What is Xtreme1
 
 ## Components and Architecture
 
@@ -18,7 +18,7 @@ X1 for community, free and open source, powered by [Basic AI](https://www.basic.
 | Base Services | Redis | Cache hot data, and schedule background tasks. |
 | Base Services | MinIO | Store unstructured data like image and point cloud files. |
 
-## Try out X1
+## Try out Xtreme1
 
 * [Run with Docker Compose](#run-with-docker-compose)
 * [Local development](#local-development)
@@ -47,7 +47,7 @@ unzip -d x1-community-v0.5 x1-community-v0.5.zip
 
 ##### Start all services
 
-Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out X1.
+Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1.
 
 ```bash
 docker compose up
@@ -59,13 +59,13 @@ It is recommended to use Compose V2 and the new `docker compose` command, not th
 
 > Docker Desktop(Mac, Win, Linux) will auto install Docker Compose. If you are on Linux server, you can install Docker Compose plugin following this article [Install Docker Compose CLI plugin](https://docs.docker.com/compose/install/compose-plugin/).
 
-Run the following command to clone repository and start all services of X1, each service running in a docker container.
+Run the following command to clone repository and start all services of Xtreme1, each service running in a docker container.
 ```bash
 # Clone repository
-git clone https://github.com/basicai/x1.git
+git clone https://github.com/basicai/xtreme1.git
 
 # Start in forground.
-cd x1
+cd xtreme1
 docker compose up
 
 # Or add -d option to run in background.
@@ -74,7 +74,7 @@ docker compose up -d
 # You need to explicitly specify model profile to start all model related services.
 docker compose --profile model up
 
-# When up finished, you can start or stop all or specified services.
+# When up finished, you can start or stop all or specific service.
 docker compose start
 docker compose stop
 
