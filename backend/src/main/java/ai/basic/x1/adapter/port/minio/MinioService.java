@@ -127,7 +127,7 @@ public class MinioService {
         var queryParams = new HashMap<String ,String>();
         queryParams.put("response-content-type", "application/octet-stream");
         GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
-                .method(Method.PUT)
+                .method(Method.GET)
                 .bucket(bucketName)
                 .object(objectName)
                 .extraQueryParams(queryParams)
