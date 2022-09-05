@@ -45,7 +45,7 @@ public class ModelDataResult {
      */
     private String resultFilterParam;
     /**
-     * Model result
+     * The result returned by running the model
      */
     @TableField(value = "model_result", typeHandler = JacksonTypeHandler.class)
     private JsonNode modelResult;
