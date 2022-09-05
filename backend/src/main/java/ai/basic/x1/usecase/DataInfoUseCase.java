@@ -997,11 +997,11 @@ public class DataInfoUseCase {
             try {
                 var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
                 var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
-                result.getResult().forEach(resultBO -> resultBO.getObjects().forEach(object -> {
+                result.getResult().getObjects().forEach(object -> {
                     var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
                     Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(object);
                     dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
-                }));
+                });
             } catch (Exception e) {
                 log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
             }

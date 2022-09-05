@@ -11,7 +11,7 @@ public class DataImportResultBO {
     /**
      * Data result information
      */
-    private List<ResultBO> result;
+    private ResultBO result;
 
     @Data
     public static class ResultBO {
