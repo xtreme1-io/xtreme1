@@ -104,7 +104,7 @@ export function useFormRules(formData?: Recordable) {
       // register form rules
       case LoginStateEnum.REGISTER:
         return {
-          email: [
+          username: [
             ...emailFormRule,
             {
               validator: validateEmail,
