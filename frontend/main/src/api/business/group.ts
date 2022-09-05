@@ -17,7 +17,7 @@ enum Api {
   GROUP = '/user/group',
 }
 
-/** 分页查询分组 */
+/** get group list */
 export const getGroupApi = (params: getGroupParams) =>
   defHttp.get<responseGroupParams>({
     url: `${Api.GROUP}/findByPage`,
@@ -28,7 +28,7 @@ export const getGroupApi = (params: getGroupParams) =>
     },
   });
 
-/** 查询分组详情 */
+/** get group detail */
 export const getGroupInfoApi = (params: BasicIdParams) =>
   defHttp.get<responseGroupInfoParams>({
     url: `${Api.GROUP}/info/${params.id}`,
@@ -38,7 +38,7 @@ export const getGroupInfoApi = (params: BasicIdParams) =>
     },
   });
 
-/** 保存分组 */
+/** save group */
 export const saveGroupApi = (params: groupItem) =>
   defHttp.post<null>({
     url: `${Api.GROUP}/add`,
@@ -49,7 +49,7 @@ export const saveGroupApi = (params: groupItem) =>
     },
   });
 
-/** 编辑分组 */
+/** edit group */
 export const editGroupApi = (params: groupItem) =>
   defHttp.post<null>({
     url: `${Api.GROUP}/update/${params.id}`,
@@ -60,7 +60,7 @@ export const editGroupApi = (params: groupItem) =>
     },
   });
 
-/** 删除分组 */
+/** delete group */
 export const deleteGroupApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.GROUP}/delete/${params.id}`,
@@ -70,7 +70,7 @@ export const deleteGroupApi = (params: BasicIdParams) =>
     },
   });
 
-/** 添加成员 */
+/** add member */
 export const addMemberApi = (params: addMemberParams) =>
   defHttp.post<null>({
     url: `${Api.GROUP}/addMembers`,
@@ -81,7 +81,7 @@ export const addMemberApi = (params: addMemberParams) =>
     },
   });
 
-/** 移除人员 */
+/** remove member */
 export const removeMemberApi = (params: removeMemberParams) =>
   defHttp.post<null>({
     url: `${Api.GROUP}/removeMembers`,
@@ -92,7 +92,7 @@ export const removeMemberApi = (params: removeMemberParams) =>
     },
   });
 
-/** 查询所有分组信息 */
+/** get all group */
 export const getGroupAllApi = () =>
   defHttp.get<responseGroupItem[]>({
     url: `${Api.GROUP}/findAll`,
@@ -102,7 +102,7 @@ export const getGroupAllApi = () =>
     },
   });
 
-/** 查询用户分组 */
+/** get user group */
 export const getUserGroupApi = (params: { userIds: string }) =>
   defHttp.get<UserGroup[]>({
     url: `${Api.GROUP}/userGroup/list`,
@@ -113,7 +113,7 @@ export const getUserGroupApi = (params: { userIds: string }) =>
     },
   });
 
-/** 分配分组 */
+/** assign group */
 export const assignGroupApi = (params: AssignGroup[]) =>
   defHttp.post<null>({
     url: `${Api.GROUP}/assignGroups`,
@@ -124,7 +124,7 @@ export const assignGroupApi = (params: AssignGroup[]) =>
     },
   });
 
-/** 检查名称是否存在 */
+/** validate name */
 export const checkGroupNameExistApi = (params: CheckGroup) =>
   defHttp.get<boolean>({
     url: `${Api.GROUP}/checkGroupNameExist`,

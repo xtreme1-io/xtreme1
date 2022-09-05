@@ -1,11 +1,11 @@
 import { BasicPageParams, BasicFetchResult } from '/@/api/model/baseModel';
 
-/** 获取角色列表 请求参数 */
+/** userList request params */
 export interface getRoleParams extends BasicPageParams {
   name?: string;
 }
 
-/** 获取角色列表 响应参数 */
+/** userList response params */
 export interface roleItem {
   id: number;
   name: string;
@@ -20,18 +20,18 @@ export interface roleItem {
 }
 export type responseRoleParams = BasicFetchResult<roleItem>;
 
-/** 修改用户角色 请求参数 */
+/** change role params */
 export interface changeRoleParams {
   userId: number;
   roleId: string;
 }
-/** 批量修改用户角色 请求参数 */
+/** change role batch params */
 export interface changeRoleBatchParams {
   userIds: number[];
   roleId: string;
 }
 
-/** 创建\修改角色 请求参数 */
+/** create/save role params */
 export interface createEditParams {
   id?: number;
   name: string;
@@ -39,7 +39,7 @@ export interface createEditParams {
   privilegeIds: number[];
 }
 
-/** 查询所有权限 响应参数 */
+/** get all privilege params */
 export interface responsePrivilegeParams {
   id: number;
   children: responsePrivilegeItem[];

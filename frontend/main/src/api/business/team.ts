@@ -209,7 +209,7 @@ export const disbandTeamApi = (params) =>
 
 /** ------- Tag Start ------- */
 
-/** 获取标签树 */
+/** get tag tree */
 export const getTagTreeApi = () =>
   defHttp.get<CategoryItem[]>({
     url: `${Api.TAG}/tree`,
@@ -219,7 +219,7 @@ export const getTagTreeApi = () =>
     },
   });
 
-/** 添加修改 TagTree */
+/** create/save TagTree */
 export const createEditTagApi = (params: TagItem) =>
   defHttp.post<TagItem | CategoryItem>({
     url: `${Api.TAG}/save`,
@@ -230,7 +230,7 @@ export const createEditTagApi = (params: TagItem) =>
     },
   });
 
-/** 删除 Tag | Category */
+/** delete Tag | Category */
 export const deleteTagApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.TAG}/delete/${params.id}`,
@@ -240,7 +240,7 @@ export const deleteTagApi = (params: BasicIdParams) =>
     },
   });
 
-/** 查询用户标签 */
+/** get userTag */
 export const getUserTagListApi = (params: { userIds: string }) =>
   defHttp.get<UserTag[]>({
     url: `${Api.TAG}/userTag/list`,
@@ -251,7 +251,7 @@ export const getUserTagListApi = (params: { userIds: string }) =>
     },
   });
 
-/** 分配标签 */
+/** assign tag */
 export const assignTagApi = (params: AssignTag[]) =>
   defHttp.post<null>({
     url: `${Api.TAG}/assignTags`,
@@ -264,7 +264,7 @@ export const assignTagApi = (params: AssignTag[]) =>
 
 /** ------- Tag End ------- */
 
-/** 查询用户、分组、标签 */
+/** get user | group | tag */
 export const getUserGroupTagApi = (params: { userId: string }) =>
   defHttp.get<responseUserGroupTagParams>({
     url: `${UserApi.USER}/groupTagInfo`,

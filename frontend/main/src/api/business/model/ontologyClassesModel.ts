@@ -1,13 +1,13 @@
 import { BasicPageParams, BasicFetchResult, SortTypeEnum } from '/@/api/model/baseModel';
 import type { Dayjs } from 'dayjs';
 
-/** classType 枚举 */
+/** classType */
 export enum ClassTypeEnum {
   CLASS = 'CLASS',
   CLASSIFICATION = 'CLASSIFICATION',
 }
 
-/** toolType 枚举 */
+/** toolType */
 export enum ToolTypeEnum {
   POLYGON = 'POLYGON',
   BOUNDING_BOX = 'BOUNDING_BOX',
@@ -17,13 +17,13 @@ export enum ToolTypeEnum {
   CUBOID = 'CUBOID',
 }
 
-/** sort 枚举 */
+/** sort */
 export enum SortFieldEnum {
   NAME = 'NAME',
   CREATE_TIME = 'CREATE_TIME',
 }
 
-/** inputType 枚举 */
+/** inputType */
 export enum inputTypeEnum {
   RADIO = 'RADIO',
   MULTI_SELECTION = 'MULTI_SELECTION',
@@ -31,14 +31,14 @@ export enum inputTypeEnum {
   TEXT = 'TEXT',
 }
 
-/** datasetType 枚举 */
+/** datasetType */
 export enum datasetTypeEnum {
   IMAGE = 'IMAGE',
   LIDAR_BASIC = 'LIDAR_BASIC',
   LIDAR_FUSION = 'LIDAR_FUSION',
 }
 
-/** 搜索表单参数 */
+/** searchForm params */
 export interface SearchItem {
   name?: string;
   sortBy?: SortFieldEnum;
@@ -49,12 +49,12 @@ export interface SearchItem {
   inputType?: inputTypeEnum;
 }
 
-/** 分页查询 - 请求参数 */
+/** request params */
 export interface GetListParams extends BasicPageParams, SearchItem {
   ontologyId: number;
 }
 
-/** 响应参数 */
+/** response params */
 export interface ResponseItem {
   id: number;
   ontologyId: number;
@@ -69,30 +69,28 @@ export interface ToolTypeOptionsItem {
   minHeight: string;
   minPoints: string;
 }
-/** class 列表项 */
+/** class list item */
 export interface ClassItem extends ResponseItem {
-  // attributes: Nullable<string>;
   attributes: any[];
   datasetType: datasetTypeEnum;
   toolType: ToolTypeEnum;
   toolTypeOptions: ToolTypeOptionsItem;
 }
 
-/** class 响应参数 */
+/** class response params */
 export type ClassResponse = BasicFetchResult<ClassItem>;
 
-/** classification 列表项 */
+/** classification list item */
 export interface ClassificationItem extends ResponseItem {
-  // options: Nullable<string>;
   options: any[];
   inputType: inputTypeEnum;
   isRequired: boolean;
 }
 
-/** classification 响应参数 */
+/** classification response params */
 export type ClassificationResponse = BasicFetchResult<ClassificationItem>;
 
-/** 添加修改 class */
+/** create/save class */
 export interface SaveEditClassParams {
   id?: number;
   ontologyId: string | number;
@@ -102,16 +100,9 @@ export interface SaveEditClassParams {
   toolType: ToolTypeEnum;
   toolTypeOptions: ToolTypeOptionsItem;
   attributes: any[];
-  // attributes: Nullable<string>;
-  // toolTypeOptions?: {
-  //   isConstraints: boolean;
-  //   defaultHeight?: string;
-  //   minHeight?: string;
-  //   minPoints?: string;
-  // };
 }
 
-/** 添加修改 Classification */
+/** create/save Classification */
 export interface SaveEditClassificationParams {
   id?: number;
   ontologyId: string | number;
@@ -119,10 +110,9 @@ export interface SaveEditClassificationParams {
   inputType: inputTypeEnum;
   isRequired: boolean;
   options: any[];
-  // options: Nullable<string>;
 }
 
-/** 根据 team 查询 Classification */
+/** get Classification by team name */
 export interface FindClassificationByTeamParams {
   name: string;
 }

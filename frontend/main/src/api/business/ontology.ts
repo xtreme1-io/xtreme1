@@ -14,8 +14,7 @@ enum Api {
 }
 
 /**
- * 分页查询 ontology，
- * 搜索
+ * get/search ontology list
  */
 export const getOntologyApi = (params: GetOntologyParams) =>
   defHttp.get<ResponseOntologyParams>({
@@ -27,7 +26,7 @@ export const getOntologyApi = (params: GetOntologyParams) =>
     },
   });
 
-/** 添加修改 ontology */
+/** create/save ontology */
 export const createEditOntologyApi = (params: SaveOntologyParams | UpdateOntologyParams) =>
   defHttp.post<null>({
     url: `${Api.ONTOLOGY}/save`,
@@ -38,7 +37,7 @@ export const createEditOntologyApi = (params: SaveOntologyParams | UpdateOntolog
     },
   });
 
-/** 删除 ontology */
+/** delete ontology */
 export const deleteOntologyApi = (params: DeleteOntologyParams) =>
   defHttp.post<null>({
     url: `${Api.ONTOLOGY}/delete/${params.id}`,
@@ -49,8 +48,7 @@ export const deleteOntologyApi = (params: DeleteOntologyParams) =>
   });
 
 /**
- * 根据 team 查询 ontology，
- * datasetOntology 页面的 copy、sync
+ * get ontology by team
  */
 export const getOntologyByTeamApi = (params: FindOntologyByTeamParams) =>
   defHttp.get<OntologyListItem[]>({
@@ -63,8 +61,7 @@ export const getOntologyByTeamApi = (params: FindOntologyByTeamParams) =>
   });
 
 /**
- * 查询 ontology 详情
- * 详情页面获取类型
+ * get ontology detail
  */
 export const getOntologyInfoApi = (params: { id: string }) =>
   defHttp.get<OntologyListItem>({
@@ -75,7 +72,7 @@ export const getOntologyInfoApi = (params: { id: string }) =>
     },
   });
 
-/** 验证 ontology 名称是否重复 */
+/** validate ontology name */
 export const validateNameApi = (params: { name: string }) =>
   defHttp.post<boolean>({
     url: `${Api.ONTOLOGY}/validateName/${params.name}`,

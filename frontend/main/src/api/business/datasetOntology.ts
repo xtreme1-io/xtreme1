@@ -17,10 +17,7 @@ enum Api {
   ClASSIFICATION = '/datasetClassification',
 }
 
-/**
- * 根据 datasetId 分页查询 class，
- * 搜索
- */
+/** get class by datasetId */
 export const getClassApi = (params: GetListParams) =>
   defHttp.get<ClassResponse>({
     url: `${Api.CLASS}/findByPage`,
@@ -31,7 +28,7 @@ export const getClassApi = (params: GetListParams) =>
     },
   });
 
-/** 添加修改 class */
+/** create class */
 export const createDatasetClassApi = (params: SaveEditClassParams) =>
   defHttp.post<null>({
     url: `${Api.CLASS}/create`,
@@ -42,7 +39,7 @@ export const createDatasetClassApi = (params: SaveEditClassParams) =>
     },
   });
 
-/** 添加修改 class */
+/** update class */
 export const updateDatasetClassApi = (params: SaveEditClassParams) =>
   defHttp.post<null>({
     url: `${Api.CLASS}/update/${params.id}`,
@@ -53,7 +50,7 @@ export const updateDatasetClassApi = (params: SaveEditClassParams) =>
     },
   });
 
-/** 删除 class */
+/** delete class */
 export const deleteClassApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.CLASS}/delete/${params.id}`,
@@ -63,10 +60,7 @@ export const deleteClassApi = (params: BasicIdParams) =>
     },
   });
 
-/**
- * 根据 id 查询 class 详情，
- * 编辑回显
- */
+/** get class detail by id */
 export const getClassByIdApi = (params: BasicIdParams) =>
   defHttp.get<ClassItem>({
     url: `${Api.CLASS}/info/${params.id}`,
@@ -76,7 +70,7 @@ export const getClassByIdApi = (params: BasicIdParams) =>
     },
   });
 
-/** 根据 name 查询 class -- 目前未使用 */
+/** get class by name */
 export const getClassByNameApi = (params: { ontologyId: string; name?: string }) =>
   defHttp.get<any>({
     url: `${Api.CLASS}/find/${params.ontologyId}?&`,
@@ -86,7 +80,7 @@ export const getClassByNameApi = (params: { ontologyId: string; name?: string })
     },
   });
 
-/** 同步 datasetClass 到 ontology */
+/** sync datasetClass to ontology */
 export const syncClassToOntologyApi = (params: SyncParams) =>
   defHttp.post<null>({
     url: `${Api.CLASS}/synchronizeToOntology`,
@@ -97,7 +91,7 @@ export const syncClassToOntologyApi = (params: SyncParams) =>
     },
   });
 
-/** 校验 dataset class 重名 */
+/** validate dataset class name */
 export const validateClassNameApi = (params: ValidateNameParams) =>
   defHttp.get<boolean>({
     url: `${Api.CLASS}/validateName`,
@@ -110,10 +104,7 @@ export const validateClassNameApi = (params: ValidateNameParams) =>
 
 // -------------
 
-/**
- * 根据 datasetId 分页查询 classification，
- * 搜索
- */
+/** get classification by datasetId */
 export const getClassificationApi = (params: GetListParams) =>
   defHttp.get<ClassificationResponse>({
     url: `${Api.ClASSIFICATION}/findByPage`,
@@ -124,7 +115,7 @@ export const getClassificationApi = (params: GetListParams) =>
     },
   });
 
-/** 添加修改 classification */
+/** create classification */
 export const createDatasetClassificationApi = (params: SaveEditClassificationParams) =>
   defHttp.post<null>({
     url: `${Api.ClASSIFICATION}/create`,
@@ -135,7 +126,7 @@ export const createDatasetClassificationApi = (params: SaveEditClassificationPar
     },
   });
 
-/** 添加修改 classification */
+/** update classification */
 export const updateDatasetClassificationApi = (params: SaveEditClassificationParams) =>
   defHttp.post<null>({
     url: `${Api.ClASSIFICATION}/update/${params.id}`,
@@ -146,7 +137,7 @@ export const updateDatasetClassificationApi = (params: SaveEditClassificationPar
     },
   });
 
-/** 删除 classification */
+/** delete classification */
 export const deleteClassificationApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.ClASSIFICATION}/delete/${params.id}`,
@@ -156,10 +147,7 @@ export const deleteClassificationApi = (params: BasicIdParams) =>
     },
   });
 
-/**
- * 根据 id 查询 classification 详情，
- * 编辑回显
- */
+/** get classification detail by id */
 export const getClassificationByIdApi = (params: BasicIdParams) =>
   defHttp.get<ClassificationItem>({
     url: `${Api.ClASSIFICATION}/info/${params.id}`,
@@ -169,7 +157,7 @@ export const getClassificationByIdApi = (params: BasicIdParams) =>
     },
   });
 
-/** 根据 name 查询 classification -- 目前未使用 */
+/** get classification by name */
 export const getClassificationByNameApi = (params: { ontologyId: string; name?: string }) =>
   defHttp.get<any>({
     url: `${Api.ClASSIFICATION}/find/${params.ontologyId}?&`,
@@ -179,7 +167,7 @@ export const getClassificationByNameApi = (params: { ontologyId: string; name?: 
     },
   });
 
-/** 同步 datasetClassification 到 ontology */
+/** sync datasetClassification to ontology */
 export const syncClassificationToOntologyApi = (params: SyncParams) =>
   defHttp.post<null>({
     url: `${Api.ClASSIFICATION}/synchronizeToOntology`,
@@ -190,7 +178,7 @@ export const syncClassificationToOntologyApi = (params: SyncParams) =>
     },
   });
 
-/** 校验 datasetClassification 重名 */
+/** validate datasetClassification name */
 export const validateClassificationNameApi = (params: ValidateNameParams) =>
   defHttp.get<boolean>({
     url: `${Api.ClASSIFICATION}/validateName`,

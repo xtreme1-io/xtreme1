@@ -8,7 +8,7 @@ export type CreateParams = {
 
 // export type TeamListParams = BasicPageParams;
 
-/** 查询团队成员列表 请求参数 */
+/** team member request params */
 export interface TeamListParams extends BasicPageParams {
   isIncludeCurrentUser?: boolean;
   nickname?: string;
@@ -71,7 +71,7 @@ export enum ETagType {
   CATEGORY = 'CATEGORY',
 }
 
-/** 保存修改Tag 请求参数 */
+/** create/save tag params */
 export interface TagItem {
   id?: string | number;
   name: string;
@@ -83,7 +83,7 @@ export interface TagItem {
   key?: string;
 }
 
-/** 获取标签树 响应参数 */
+/** get tagTree response params */
 export interface CategoryItem {
   id?: string | number;
   name: string;
@@ -97,23 +97,23 @@ export interface CategoryItem {
 
 export type TagResultModel = BasicFetchResult<CategoryItem>;
 
-/** 查询用户标签 响应参数 */
+/** get user tag response params */
 export interface UserTagList {
   userId: string;
 }
 
-/** 获取用户标签 响应参数 */
+/** get user tag response params */
 export interface UserTag {
   userId: number | string;
   tagIds: number[];
 }
 
-/** 分配标签 请求参数 */
+/** assign tag params */
 export type AssignTag = UserTag;
 
 /** ------- Tag End ------- */
 
-/** 查询用户、分组、标签 响应参数 */
+/** search user | group | tag response */
 
 export interface responseUserGroupTagParams {
   userDTO: User;
