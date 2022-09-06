@@ -14,7 +14,7 @@ enum Api {
   PRIVILEGE = '/user/privilege',
 }
 
-/** 获取角色列表 表格*/
+/** get role list */
 export const getRoleApi = (params: getRoleParams) =>
   defHttp.get<responseRoleParams>({
     url: `${Api.ROLE}/findAll`,
@@ -25,7 +25,7 @@ export const getRoleApi = (params: getRoleParams) =>
     },
   });
 
-/** 获取角色列表 下拉框 */
+/** get role select list */
 export const getRoleSelectApi = () =>
   defHttp.get<roleItem[]>({
     url: `${Api.ROLE}/find`,
@@ -35,7 +35,7 @@ export const getRoleSelectApi = () =>
     },
   });
 
-/** 修改单个用户角色 */
+/** change role */
 export const changeRoleApi = (params: changeRoleParams) =>
   defHttp.post<null>({
     url: `${Api.ROLE}/changeRole`,
@@ -46,7 +46,7 @@ export const changeRoleApi = (params: changeRoleParams) =>
     },
   });
 
-/** 修改多个用户角色 */
+/** change roles */
 export const changeRoleBatchApi = (params: changeRoleBatchParams) =>
   defHttp.post<null>({
     url: `${Api.ROLE}/changeRoleBatch`,
@@ -57,7 +57,7 @@ export const changeRoleBatchApi = (params: changeRoleBatchParams) =>
     },
   });
 
-/** 创建角色 */
+/** create role */
 export const createRoleApi = (params: createEditParams) =>
   defHttp.post<null>({
     url: `${Api.ROLE}/create`,
@@ -68,7 +68,7 @@ export const createRoleApi = (params: createEditParams) =>
     },
   });
 
-/** 修改角色 */
+/** edit role */
 export const editRoleApi = (params: createEditParams) =>
   defHttp.post<null>({
     url: `${Api.ROLE}/edit`,
@@ -79,7 +79,7 @@ export const editRoleApi = (params: createEditParams) =>
     },
   });
 
-/** 删除角色 */
+/** delete role */
 export const deleteRoleApi = (params: { roleId: number }) =>
   defHttp.post<null>({
     url: `${Api.ROLE}/delete/${params.roleId}`,
@@ -89,7 +89,7 @@ export const deleteRoleApi = (params: { roleId: number }) =>
     },
   });
 
-/** 查询已存在的角色的权限 */
+/** get privilege by role */
 export const getPrivilegeByRoleApi = (params: { roleId: string | number }) =>
   defHttp.get<number[]>({
     url: `${Api.ROLE}/getPrivilegeByRole/${params.roleId}`,
@@ -99,7 +99,7 @@ export const getPrivilegeByRoleApi = (params: { roleId: string | number }) =>
     },
   });
 
-/** 查询角色的权限树 */
+/** get privilege tree */
 export const getPrivilegeTreeByRoleApi = (params: { roleId: string | number }) =>
   defHttp.get<responsePrivilegeParams>({
     url: `${Api.ROLE}/getPrivilegeTreeByRole/${params.roleId}`,
@@ -109,7 +109,7 @@ export const getPrivilegeTreeByRoleApi = (params: { roleId: string | number }) =
     },
   });
 
-/** 查询所有权限 */
+/** get all privilege */
 export const getAllPrivilegesApi = () =>
   defHttp.get<responsePrivilegeParams>({
     url: `${Api.PRIVILEGE}/findAll`,
@@ -119,7 +119,7 @@ export const getAllPrivilegesApi = () =>
     },
   });
 
-/** 转移团队所有人 */
+/** transfer owner */
 export const transferOwnerApi = (params: changeRoleParams) =>
   defHttp.post<null>({
     url: `${Api.ROLE}/transferOwner`,

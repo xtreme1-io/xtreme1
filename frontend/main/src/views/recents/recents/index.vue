@@ -57,7 +57,7 @@
   };
 
   const handleGoDocs = () => {
-    window.location.href = 'https://docs.basic.ai/docs';
+    window.open('https://docs.basic.ai/docs');
   };
 </script>
 <style lang="less" scoped>

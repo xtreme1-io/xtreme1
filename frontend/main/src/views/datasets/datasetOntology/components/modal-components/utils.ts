@@ -6,7 +6,8 @@ import {
   ClassTypeEnum,
   inputTypeEnum,
 } from '/@/api/business/model/ontologyClassesModel';
-/** 创建一个 option */
+
+/** create an option */
 export const optionFactory = (name) => {
   class OptionClass {
     name: string;
@@ -19,7 +20,7 @@ export const optionFactory = (name) => {
   return new OptionClass(name);
 };
 
-/** 创建一个 attribute */
+/** create an attribute */
 export const attributeFactory = (name) => {
   class AttributeClass {
     name: string;
@@ -36,18 +37,16 @@ export const attributeFactory = (name) => {
   return new AttributeClass(name);
 };
 
-/** 深拷贝 */
+/** deep copy */
 export function cloneDeep(parent, child) {
   child = child || {};
   for (const i in parent) {
     if (parent.hasOwnProperty(i)) {
-      //检测当前属性是否为对象
+      // Check if the current property is an object
       if (typeof parent[i] === 'object') {
-        //如果当前属性为对象，还要检测它是否为数组
-        //这是因为数组的字面量表示和对象的字面量表示不同
-        //前者是[],而后者是{}
+        // If the current property is an object, also check if it is an array
         child[i] = Object.prototype.toString.call(parent[i]) === '[object Array]' ? [] : {};
-        //递归调用extend
+        // recursively call extend
         cloneDeep(parent[i], child[i]);
       } else {
         child[i] = parent[i];
@@ -57,7 +56,7 @@ export function cloneDeep(parent, child) {
   return child;
 }
 
-/** 获取当前的 数据 */
+/** get current data */
 export const getSchema = (schema, index) => {
   let data = unref(schema);
   const indexList = index.concat([]);
@@ -73,12 +72,12 @@ export const getSchema = (schema, index) => {
   return getSchema(data, indexList);
 };
 
-/** 根据 classification 奇偶获取属性 */
+/** Get attributes based on classification parity */
 export const getClassificationSchemaName = (index) => {
   return index % 2 === 0 ? 'attributes' : 'options';
 };
 
-/** 根据 class 奇偶获取属性 */
+/** Get attributes based on class parity */
 export const getClassSchemaName = (index) => {
   if (index === 0) {
     return 'attributes';
@@ -86,7 +85,7 @@ export const getClassSchemaName = (index) => {
   return index % 2 === 0 ? 'attributes' : 'options';
 };
 
-/** 设置 classification   */
+/** set classification   */
 export const setSchema = (
   schema,
   index,
@@ -118,7 +117,7 @@ export const setSchema = (
       getItem(tempData, i);
     }
     if (list.length == 0) {
-      // 表明在 basic info 下
+      // under basic info
       tempData['options'] = [];
     } else {
       tempData[getClassificationSchemaName(list.length)][indexList[indexList.length - 1]] = {
@@ -130,7 +129,7 @@ export const setSchema = (
   return tempData;
 };
 
-/** 设置 class */
+/** set class */
 export const setClassSchema = (
   schema,
   index,
@@ -169,7 +168,7 @@ export const setClassSchema = (
   return tempData;
 };
 
-/** 根据 class | classification 执行回调函数 */
+/** Execute callback function according to class | classification */
 export const handleMutiTabAction = (type, callback1, callback2) => {
   if (type === ClassTypeEnum.CLASS) {
     callback1();
@@ -178,7 +177,7 @@ export const handleMutiTabAction = (type, callback1, callback2) => {
   }
 };
 
-/** 返回面包屑导航 */
+/** Back to breadcrumbs */
 export const getBreadcrumb = (schema, index, name: string[]) => {
   let data = unref(schema);
   const breadcrumbName: string[] = [...name];
@@ -200,14 +199,12 @@ export const getBreadcrumb = (schema, index, name: string[]) => {
   return getBreadcrumb(data, indexList, breadcrumbName);
 };
 
-// 尝试抽离 FormModal 内部方法
-
 const activeTab = ref<ClassTypeEnum>(ClassTypeEnum.CLASS);
-/** 获取当前 activeTab */
+/** get current activeTab */
 export const setActiveTab = (type: ClassTypeEnum) => {
   activeTab.value = type;
 };
-// 创建空的 attributes | options
+// create empty attributes | options
 type dataType = {
   attributes?: any[];
   options?: any[];
@@ -221,10 +218,10 @@ export const getInitClassificationData = (): dataType => {
 export const classDataSchema = ref(getInitClassData());
 export const dataSchema = ref(getInitClassificationData());
 
-// 存储当前层级
+// save the current level
 export const indexList = ref<number[]>([]);
 
-// 设置值
+// setValue
 export const handleSet = (setOption) => {
   handleMutiTabAction(
     activeTab,
@@ -237,28 +234,28 @@ export const handleSet = (setOption) => {
   );
 };
 
-// 下一层
+// Next level
 export const handleAddIndex = (index: number) => {
   unref(indexList).push(index);
 };
-// 上一层
+// Previous level
 export const handleRemoveIndex = () => {
   unref(indexList).pop();
 };
 
-// formModal 初始化
+// initial formModal
 export const handleDetail = (detail, activeTab) => {
   if (detail?.id) {
     handleMutiTabAction(
       activeTab,
       () => {
-        // 回显 attributes
+        // echo attributes
         classDataSchema.value = {
           attributes: (detail as ClassItem)?.attributes ? (detail as ClassItem)!.attributes : [],
         };
       },
       () => {
-        // 回显 options
+        // echo options
         dataSchema.value = {
           options: (detail as ClassificationItem)?.options
             ? (detail as ClassificationItem)!.options
@@ -272,20 +269,16 @@ export const handleDetail = (detail, activeTab) => {
   }
 };
 
-// 抽离 FormEditor 内部方法
-// 新增 options | attributes
+// New options | attributes
 export const handleSaveForm = (value, type) => {
-  // 新增
   handleSet({
     setType: 'add',
     setValue: type === 'attributes' ? attributeFactory(value) : optionFactory(value),
   });
-  // -- 保存之后，如果是 AttrForm ，则立即进入
   if (type === 'attributes') {
     handleGo(0);
   }
 };
-// 前往点击项
 export const handleGo = (index) => {
   handleAddIndex(index);
 };

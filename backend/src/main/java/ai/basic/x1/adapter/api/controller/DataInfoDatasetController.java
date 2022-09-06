@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/data/")
 @Validated
-public class DataInfoController extends DatasetBaseController {
+public class DataInfoDatasetController extends BaseDatasetController {
 
     @Autowired
     protected DataInfoUseCase dataInfoUsecase;

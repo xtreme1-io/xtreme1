@@ -26,11 +26,11 @@
   });
 
   const emits = defineEmits(['cancel', 'discard']);
-  // 取消 -- 继续编辑当前 attribute
+  // Cancel -- Continue editing the current attribute
   const handleCancel = () => {
     emits('cancel');
   };
-  // 确认 -- 放弃当前 attribute
+  // Confirm -- discard the current attribute
   const handleDiscard = () => {
     emits('discard');
     changeShowEdit(false);

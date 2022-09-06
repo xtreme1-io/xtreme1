@@ -45,8 +45,9 @@ public class ModelResultConverter {
         List<ObjectBO> list = new ArrayList<>(CollUtil.isNotEmpty(labelInfos) ? labelInfos.size() : 0);
         for (LabelInfo labelInfo : labelInfos) {
             ObjectBO objectBO = buildObjectBO(labelInfo, preModelParamBO, modelClassMap);
-            if (ObjectUtil.isNotNull(objectBO))
+            if (ObjectUtil.isNotNull(objectBO)) {
                 list.add(objectBO);
+            }
         }
         return list;
     }

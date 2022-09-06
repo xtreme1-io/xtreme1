@@ -4,24 +4,32 @@ package ai.basic.x1.adapter.port.dao.mybatis.extension;
 import lombok.Getter;
 
 /**
- * MybatisPlus自定义SQL方法枚举
+ * MybatisPlus customer sql method enum
  *
- * @author chqiu
+ * @author andy
  */
 @Getter
 public enum CustomerSqlMethod {
 
-    MYSQL_INSERT_OR_UPDATE("mysqlInsertOrUpdateBatch","MYSQL系批量更新或插入","<script>INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s</script>"),
+    /**
+     * MYSQL_INSERT_OR_UPDATE
+     */
+    MYSQL_INSERT_OR_UPDATE("mysqlInsertOrUpdateBatch", "MYSQL batch insert on duplicate key", "<script>INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s</script>"),
 
-    INSERT_BATCH("insertBatch","批量插入","<script>\nINSERT INTO %s %s VALUES %s\n</script>"),
     /**
-     * Insert
+     * INSERT_BATCH
      */
-    INSERT_IGNORE_ONE("insertIgnore", "插入一条数据（选择字段插入），如果中已经存在相同的记录，则忽略当前新数据", "<script>\nINSERT IGNORE INTO %s %s VALUES %s\n</script>"),
+    INSERT_BATCH("insertBatch", "Batch insert ", "<script>\nINSERT INTO %s %s VALUES %s\n</script>"),
+
     /**
-     * Replace
+     * INSERT_IGNORE_ONE
      */
-    REPLACE_ONE("replace", "替换一条数据（选择字段插入），存在则替换，不存在则插入", "<script>\nREPLACE INTO %s %s VALUES %s\n</script>");
+    INSERT_IGNORE_ONE("insertIgnore", "Insert ignore repeat data", "<script>\nINSERT IGNORE INTO %s %s VALUES %s\n</script>"),
+
+    /**
+     * REPLACE_ONE
+     */
+    REPLACE_ONE("replace", "Replace data", "<script>\nREPLACE INTO %s %s VALUES %s\n</script>");
 
     private final String method;
     private final String desc;

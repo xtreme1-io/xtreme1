@@ -1,7 +1,7 @@
 import { BasicPageParams, BasicIdParams, BasicFetchResult } from '/@/api/model/baseModel';
 import { datasetTypeEnum } from './ontologyClassesModel';
 
-/** 列表项 */
+/** list item */
 export interface OntologyListItem {
   id: number;
   teamId: number;
@@ -13,29 +13,29 @@ export interface OntologyListItem {
   type: datasetTypeEnum;
 }
 
-/** 分页查询 - 请求参数 */
+/** list request params */
 export interface GetOntologyParams extends BasicPageParams {
   name?: string;
 }
 
-/** 分页查询 - 响应参数 */
+/** list response params */
 export type ResponseOntologyParams = BasicFetchResult<OntologyListItem>;
 
-/** 添加 ontology */
+/** create ontology */
 export interface SaveOntologyParams {
   name: string;
   type: datasetTypeEnum;
 }
 
-/** 修改 ontology */
+/** update ontology */
 export interface UpdateOntologyParams extends SaveOntologyParams {
   id: string;
 }
 
-/** 删除 ontology */
+/** delete ontology */
 export type DeleteOntologyParams = BasicIdParams;
 
-/** 根据 team 查询 ontology */
+/** get ontology by team name */
 export interface FindOntologyByTeamParams {
   name: string;
   type: datasetTypeEnum;

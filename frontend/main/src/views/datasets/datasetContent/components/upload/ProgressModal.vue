@@ -6,7 +6,6 @@
     :height="450"
     :showCancelBtn="false"
     okText="Done"
-    :okButtonProps="{ danger: true }"
     destroyOnClose
     @register="register"
     @ok="handleDone"

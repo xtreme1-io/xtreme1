@@ -1,4 +1,4 @@
-// 图片
+// Import image
 import polygon from '/@/assets/images/class/polygon.png';
 import bounding_box from '/@/assets/images/class/bounding_box.png';
 import polyline from '/@/assets/images/class/polyline.png';
@@ -8,10 +8,8 @@ import radioIcon from '/@/assets/images/class/radio_icon.png';
 import checkIcon from '/@/assets/images/class/check_icon.png';
 import dropdownIcon from '/@/assets/images/class/dropdown_icon.png';
 import textIcon from '/@/assets/images/class/text_icon.png';
-// 工具
+
 import { useI18n } from '/@/hooks/web/useI18n';
-const { t } = useI18n();
-// 枚举类型
 import { SortTypeEnum } from '/@/api/model/baseModel';
 import {
   SortFieldEnum,
@@ -20,7 +18,9 @@ import {
   inputTypeEnum,
 } from '/@/api/business/model/ontologyClassesModel';
 
-/** 排序字段 */
+const { t } = useI18n();
+
+/** Sort field */
 export const dataSortOption = [
   {
     label: t('business.ontology.sort.creationTime'),
@@ -32,7 +32,7 @@ export const dataSortOption = [
   },
 ];
 
-/** 正序反序 */
+/** Forward order reverse order */
 export const SortTypeOption = [
   {
     label: t('common.sort.Asc'),

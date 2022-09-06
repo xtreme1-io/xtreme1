@@ -16,7 +16,7 @@ enum Api {
   ModelRun = '/dataset/modelRun',
 }
 
-/** 查询全部 Models */
+/** get all Models */
 export const getModelAllApi = (params: GetModelParams) =>
   defHttp.get<ResponseModelParams>({
     url: `${Api.Model}/list`,
@@ -27,7 +27,7 @@ export const getModelAllApi = (params: GetModelParams) =>
     },
   });
 
-/** 根据 ID 查询 model */
+/** get model by id */
 export const getModelByIdApi = (params: BasicIdParams) =>
   defHttp.get<ModelListItem>({
     url: `${Api.Model}/info/${params.id}`,
@@ -37,7 +37,7 @@ export const getModelByIdApi = (params: BasicIdParams) =>
     },
   });
 
-/** 添加修改 Models */
+/** create/save Models */
 export const createEditModelApi = (params: SaveModelParams) =>
   defHttp.post<null>({
     url: `${Api.Model}/save`,
@@ -50,7 +50,7 @@ export const createEditModelApi = (params: SaveModelParams) =>
 
 // ModelRun
 
-/** 分页查询 model run 表格 */
+/** get model run table */
 export const getModelRunApi = (params: GetModelRunParams) =>
   defHttp.get<ResponseModelRunParams>({
     url: `${Api.ModelRun}/findModelRunRecordByPage`,
@@ -61,7 +61,7 @@ export const getModelRunApi = (params: GetModelRunParams) =>
     },
   });
 
-/** 查询team内所有model run记录*/
+/** get model run by team*/
 export const getAllModelRunRecordApi = (params: GetModelRunParams) =>
   defHttp.get<ResponseModelRunParams>({
     url: `${Api.ModelRun}/findAllModelRunRecord`,
@@ -72,7 +72,7 @@ export const getAllModelRunRecordApi = (params: GetModelRunParams) =>
     },
   });
 
-/** 创建一个 model run 任务 */
+/** create model run */
 export const createModelRunApi = (params: runModelRunParams) =>
   defHttp.post<null>({
     url: `${Api.Model}/modelRun`,
@@ -83,7 +83,7 @@ export const createModelRunApi = (params: runModelRunParams) =>
     },
   });
 
-/** 重新执行 model run */
+/** reRun model */
 export const rerunModelRunApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.Model}/reRun`,
@@ -94,7 +94,7 @@ export const rerunModelRunApi = (params: BasicIdParams) =>
     },
   });
 
-/** 根据 ID 删除 models */
+/** delete models by id */
 export const deleteModelRunByIdApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.ModelRun}/delete/${params.id}`,

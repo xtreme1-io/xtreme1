@@ -6,6 +6,7 @@ venv/
 __pycache__/
 log/
 out/
+docker-compose.develop.yml
 docker-compose.override.yml
 
 ### STS ###

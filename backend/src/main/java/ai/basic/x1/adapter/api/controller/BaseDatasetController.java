@@ -16,7 +16,10 @@ import java.util.List;
 
 import static ai.basic.x1.util.Constants.*;
 
-public abstract class DatasetBaseController {
+/**
+ * @author andy
+ */
+public abstract class BaseDatasetController {
 
     /**
      * Data info convert dataInfo dto

@@ -6,12 +6,10 @@
         <VirtualTab :list="tabListOntology" />
       </div>
       <div class="classes__left--header inline-flex">
-        <!-- 按钮 -->
         <Button gradient @click="handleCreate" :size="ButtonSize.LG" noBorder>
           {{ t('common.createText') }}
         </Button>
       </div>
-      <!-- 卡片式列表 -->
       <div v-show="cardList.length > 0" style="height: calc(100vh - 154px)">
         <ScrollContainer ref="scrollRef">
           <ClassCard
@@ -23,7 +21,6 @@
           />
         </ScrollContainer>
       </div>
-      <!-- 空页面 -->
       <div class="empty" v-if="cardList.length == 0">
         <div class="empty-wrapper">
           <img src="../../../assets/images/class/empty-place.png" alt="" />
@@ -39,7 +36,6 @@
         </div>
       </div>
     </div>
-    <!-- v-show="cardList.length > 0" -->
     <div class="classes__right">
       <SearchForm
         @search="handleSearch"
@@ -48,7 +44,6 @@
         :datasetType="datasetType"
       />
     </div>
-    <!-- 弹窗 -->
     <FormModal
       @register="register"
       @fetchList="handleRefresh"
@@ -64,23 +59,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-  // vue
   import { ref, unref, provide, onBeforeMount } from 'vue';
-  // 组件
   import { Button, ButtonSize } from '/@@/Button';
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from './components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
   import FormModal from './components/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
-  // 工具
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRoute } from 'vue-router';
   import { useModal } from '/@/components/Modal';
   import { handleScroll } from '/@/utils/business/scrollListener';
-  // 接口
   import { RouteChildEnum } from '/@/enums/routeEnum';
   import { ClassTypeEnum, datasetTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import {
@@ -95,7 +86,6 @@
     ClassificationItem,
   } from '/@/api/business/model/datasetOntologyModel';
   import { datasetItemDetail } from '/@/api/business/dataset';
-  // 图标
   import Data from '/@/assets/svg/tags/data.svg';
   import DataActive from '/@/assets/svg/tags/dataActive.svg';
   import Ontology from '/@/assets/svg/tags/class.svg';
@@ -110,14 +100,13 @@
 
   const route = useRoute();
   const pathArr = route.path.split('/');
-  // 这里页面 path 要和 ClassTypeEnum 保持一致
+  // The page path should be consistent with ClassTypeEnum
   const pageType = pathArr[pathArr.length - 1].toLocaleUpperCase();
-  // console.log('pageType', pageType);
 
   const datasetId = Number(route.query.id);
   const ontologyId = ref<Nullable<number>>();
   // class
-  const datasetType = ref<datasetTypeEnum>(datasetTypeEnum.IMAGE); // dataset的type
+  const datasetType = ref<datasetTypeEnum>(datasetTypeEnum.IMAGE);
   const classId = ref<Nullable<number>>();
   // classification
   const classificationId = ref<Nullable<number>>();
@@ -164,19 +153,18 @@
   };
   provide('updateDetail', updateDetail);
 
-  // const activeTab = ref<ClassTypeEnum>(ClassTypeEnum.CLASS);
-  // const activeTab = ref<ClassTypeEnum>(ClassTypeEnum.CLASSIFICATION);
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
-  // 新建
+
+  /** Create */
   const handleCreate = () => {
-    // 重置一些可能来自编辑、继承的修改了的数据
+    // reset before
     ontologyId.value = null;
     classificationId.value = null;
     classId.value = null;
     (detail.value as any) = null;
     openModal();
   };
-  // 编辑
+  /** Edit */
   const handleEdit = async (id) => {
     try {
       if (pageType == ClassTypeEnum.CLASS) {
@@ -199,14 +187,13 @@
   const total = ref<number>(0);
   const pageNo = ref<number>(1);
 
-  // 搜索表单
+  /** Search */
   const searchFormValue = ref({});
-  // 搜索事件
   const handleSearch = (formValue?) => {
     searchFormValue.value = formValue?.value;
     getList();
   };
-  // 获取列表
+
   const getList = async (isConcat = false) => {
     loadingRef.value = true;
     const postData: GetListParams = {
@@ -238,11 +225,10 @@
     }
     loadingRef.value = false;
   };
-  // 获取 datasetType
+
   const getDatasetType = async () => {
     const res = await datasetItemDetail({ id: datasetId });
     datasetType.value = res.type;
-    // NOTE 面包屑
     setDatasetBreadcrumb(res.name, res.type);
   };
 
@@ -255,13 +241,10 @@
       }
     });
     getList();
-    // 0.3调整为都获取 datasetType, 因为 copy from 需要 datasetType
-    // if (pageType == ClassTypeEnum.CLASS) {
-    //   getDatasetType();
-    // }
     getDatasetType();
   });
-  // 刷新列表
+
+  /** Refresh */
   const handleRefresh = () => {
     unref(scrollRef)?.scrollTo(0);
     pageNo.value = 1;

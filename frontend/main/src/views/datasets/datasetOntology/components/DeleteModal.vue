@@ -20,9 +20,7 @@
   import { ref, inject } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
-  // 组件
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  // 接口
   import { handleMutiTabAction } from './modal-components/utils';
   import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import { deleteClassApi, deleteClassificationApi } from '/@/api/business/ontologyClasses';
@@ -43,7 +41,7 @@
     isCenter?: boolean;
   }>();
 
-  // 删除
+  /** Confirm Delete */
   const isLoading = ref<boolean>(false);
   const handleDelete = async () => {
     isLoading.value = true;

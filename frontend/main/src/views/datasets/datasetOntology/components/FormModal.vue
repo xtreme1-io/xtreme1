@@ -55,7 +55,6 @@
             @submit="handleSubmit"
             @changed="hasChanged"
           />
-          <!-- toggle - 在切换组件时，先销毁组件再创建，防止数据混乱 -->
           <template v-if="toggle">
             <component
               v-if="activeTab === ClassTypeEnum.CLASS"
@@ -116,12 +115,12 @@
     inject,
     provide,
   } from 'vue';
-  // 工具
+
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { setSchema, setClassSchema, handleMutiTabAction } from './modal-components/utils';
   import emitter from 'tiny-emitter/instance';
-  // 组件
+
   import { Button } from 'ant-design-vue';
   import { BasicModal, useModalInner, useModal } from '/@/components/Modal';
   import Icon from '/@/components/Icon';
@@ -130,7 +129,7 @@
   import AttrForm from './modal-components/AttrForm.vue';
   import OptionForm from './modal-components/OptionForm.vue';
   import DiscardModal from './modal-components/DiscardModal.vue';
-  // 接口
+
   import {
     ClassItem,
     ClassificationItem,
@@ -149,10 +148,9 @@
   const { prefixCls } = useDesign('form-drawer');
   const modalTitle = ref<string>('');
 
-  // const [register, { closeDrawer }] = useDrawerInner();
   const [register, { closeModal }] = useModalInner();
   const [discardRegister, { openModal: openDiscardModal }] = useModal();
-  // 遮罩层样式
+
   const maskStyle = reactive({
     background:
       'linear-gradient(180deg, rgba(87, 204, 239, 0.12) 0%, rgba(134, 229, 201, 0.12) 100%), #FFFFFF',
@@ -180,9 +178,9 @@
 
   const indexList = ref<number[]>([]);
 
-  // 渲染组件 baseForm ,v-show切换，防止数据丢失
   const baseFormRef = ref<InstanceType<typeof BaseForm>>();
-  // 通过 indexList 长度判断是否显示 BasicInfo
+
+  // Determine whether to display BasicInfo by the length of indexList
   const showBaseForm = computed(() => {
     if (unref(indexList).length === 0) {
       return true;
@@ -190,7 +188,7 @@
       return false;
     }
   });
-  // attributes | options 组件
+  // The Components: attributes | options
   const component = computed(() => {
     if (unref(indexList).length === 0) {
       return null;
@@ -215,7 +213,7 @@
     return null;
   });
 
-  // 创建空的 attributes | options
+  // The empty attributes | options
   type dataType = {
     attributes?: any[];
     options?: any[];
@@ -226,7 +224,8 @@
   const getInitClassificationData = (): dataType => {
     return { options: [] };
   };
-  // 初始化
+
+  // initial
   const classDataSchema = ref(getInitClassData());
   const dataSchema = ref(getInitClassificationData());
 
@@ -245,7 +244,7 @@
     },
   );
 
-  // optionEditor 输入框
+  // optionEditor input
   const isShowEdit = ref<boolean>(false);
   provide('isShowEdit', isShowEdit);
   const changeShowEdit = (value: boolean) => {
@@ -253,22 +252,21 @@
   };
   provide('changeShowEdit', changeShowEdit);
   const isChangedByUser = ref<boolean>(false);
-  // 用户改变了某些数据会触发这个事件
+
+  // The user changes  will trigger this event
   const hasChanged = () => {
-    console.log('触发 hasChanged');
-    // 改变状态
+    console.log('Trigger hasChanged');
     isChangedByUser.value = true;
-    // 停止监听 -- 状态已经改变不需要再监听了
-    // watchChangedByUser();
   };
-  // 关闭弹窗事件
+
+  /** Close Popup */
   const updateDetail = inject('updateDetail', Function, true);
   const handleCancel = () => {
-    // 先判断是编辑
+    // Judgment is Edit
     if (props.detail?.id) {
       console.log(isChangedByUser, isShowEdit);
-      // 判断用户是否改变
-      // -- 同时判断 isShowEdit 是否未填
+      // Determine if the user has changed
+      // -- judge whether isShowEdit is not filled
       if (isChangedByUser.value) {
         openDiscardModal();
       } else if (isShowEdit.value) {
@@ -277,7 +275,7 @@
         handleClose();
       }
     } else if (props?.classId || props?.classificationId) {
-      // copy from 的情况
+      // The copy from
       openDiscardModal();
     } else {
       openDiscardModal();
@@ -289,8 +287,6 @@
     closeModal();
   };
 
-  // 调整为监听 detail 变化 调用
-  // -- 在 updated 里面 会导致修改 baseForm 数据时也会调用
   watch(
     () => props.detail,
     () => {
@@ -298,14 +294,11 @@
     },
   );
 
-  // 数据初始渲染
+  // Data initial rendering
   const handleDetail = async () => {
-    // 异步请求的数据，在这里无法获取
-    // console.log('handleDetail', props.detail, props.activeTab);
-    // 判断是否是编辑
-    // -- 但 copy 时也是没有 id 的
+    // isEdit
     if (props.detail?.id) {
-      // 当前为 编辑回显状态
+      // Edit Echo
       modalOkText.value = t('common.saveText');
       modalTitle.value =
         props.activeTab == ClassTypeEnum.CLASS
@@ -313,11 +306,11 @@
           : t('business.class.editClassification');
       handleValid(false);
 
-      // 回显 Attribute | Option
+      // Echo Attribute | Option
       handleMutiTabAction(
         props.activeTab,
         () => {
-          // 回显 attributes
+          // Echo attributes
           classDataSchema.value = {
             attributes: (props.detail as ClassItem)?.attributes
               ? (props.detail as ClassItem).attributes
@@ -325,7 +318,7 @@
           };
         },
         () => {
-          // 回显 options
+          // Echo options
           dataSchema.value = {
             options: (props.detail as ClassificationItem)?.options
               ? (props.detail as ClassificationItem)!.options
@@ -334,7 +327,7 @@
         },
       );
     } else if (props?.classId || props?.classificationId) {
-      // 当前为 DatasetOntology 里的 copy from 状态
+      // Copy From
       modalOkText.value = t('common.createText');
       modalTitle.value =
         props.activeTab == ClassTypeEnum.CLASS
@@ -342,7 +335,7 @@
           : t('business.ontology.copy.copyClassification');
       handleValid(false);
 
-      // copy Attribute | Option
+      // Copy Attribute | Option
       handleMutiTabAction(
         props.activeTab,
         () => {
@@ -363,7 +356,7 @@
         },
       );
     } else {
-      // 当前为 新建状态
+      // Create
       // class - classification
       modalOkText.value = t('common.createText');
       modalTitle.value =
@@ -371,21 +364,21 @@
           ? t('business.class.createNewClass')
           : t('business.class.createNewClassification');
       handleValid(true);
-      // create - 空
+      // create - empty
       classDataSchema.value = getInitClassData();
       dataSchema.value = getInitClassificationData();
     }
-    // 初始化 indexList
+    // initial indexList
     indexList.value = [];
   };
 
-  // 按钮状态
+  // The button state
   const isValid = ref<boolean>(true);
   const handleValid = (value: boolean) => {
     isValid.value = value;
   };
 
-  // 点击 tree node
+  // tree node event
   const toggle = ref<boolean>(true);
   const handleTreeSelect = (selectList: String[]) => {
     let newIndexList = [''];
@@ -402,19 +395,20 @@
       oldSelectList = ['0' + indexList.value.join('')];
     }
 
-    // 首次加载 formModal 不会加载 AttrForm | OptionForm
+    // Loading formModal for the first time does not load AttrForm | OptionForm
     if (emitter.e.handleSaveForm && oldSelectList[0] != 'root') {
-      // 提交表单
+      // Submit Form
       emitter.emit('handleSaveForm', {
         type: 'tree',
-        indexList: newIndexList, // 新
-        selectList: oldSelectList, // 旧
+        indexList: newIndexList, // new
+        selectList: oldSelectList, // old
       });
     } else {
       handleChangeIndexList(newIndexList);
     }
   };
-  // 调整当前 indexList
+
+  // Adjust the current indexList
   const handleChangeIndexList = (newIndexList) => {
     toggle.value = false;
     setTimeout(() => {
@@ -423,9 +417,8 @@
     });
   };
 
-  // 设置值
+  // Set value for class | classification
   const handleSet = (setOption) => {
-    // isChanged.value = true;
     handleMutiTabAction(
       props.activeTab,
       () => {
@@ -436,20 +429,20 @@
       },
     );
   };
-  // 下一层
+
+  // Next level
   const handleAddIndex = (index: number) => {
     unref(indexList).push(index);
   };
-  // 上一层
+  // Previous level
   const handleRemoveIndex = () => {
     unref(indexList).pop();
   };
-  // 保存
+  // Save
   const handleDone = () => {
-    // emitter.emit('handleSaveForm');
     handleRemoveIndex();
   };
-  // 删除
+  // Delete
   const handleDel = () => {
     if (props.activeTab === ClassTypeEnum.CLASS) {
       setClassSchema(classDataSchema, indexList.value, { setType: 'delete' });
@@ -459,21 +452,16 @@
     unref(indexList).pop();
   };
 
-  // 确认创建、保存
+  // Confirm to create or save
   const handleCall = () => {
-    // 先去提交表单
+    // Submit the form first
     emitter.emit('handleSubmitForm');
   };
-  // 提交 -- 由 baseForm 中触发提交
+  // Submit -- trigger by baseForm
   const handleSubmit = async (data) => {
     console.log('调用 formModal handleSubmit');
-    // 这里，要对 form 的 name 作校验
-    // -- 包括 BaseForm | AttrForm | OptionForm
-    // -- baseForm 校验成功才会执行这里
-
-    // 校验 AttrForm | OptionForm
+    // To verify the name of the form, includes BaseForm | AttrForm | OptionForm
     if (indexList.value.length > 0) {
-      console.log('校验 AttrForm | OptionForm');
       emitter.emit('handleSaveForm', {
         type: 'create',
         data: data,
@@ -482,9 +470,9 @@
       handleCreateSave(data);
     }
   };
-  // 创建、保存 -- 由 Form 里校验通过后提交
+  // Create & Save -- After passing the verification in the Form
   const handleCreateSave = async (data) => {
-    // 获取所有数据
+    // get all data
     const temp = {
       ...data,
       datasetId: props.datasetId,
@@ -492,28 +480,26 @@
       classId: props.classId,
       classificationId: props.classificationId,
     };
-    // 处理参数
+    // To handle params
     const params: any = handleParams(temp);
-    console.log('------>', params);
-    // 如果当前是 attributes, 需要判断其 options 是否有值
+    console.log('The create/save params is :', params);
+    // If it is currently attributes, you need to determine whether its options have a value
     handleMutiTabAction(
       props.activeTab,
       async () => {
         try {
-          // 判断 OntologyCenter | DatasetOntology
+          // To judge is OntologyCenter or DatasetOntology
           if (props.isCenter) {
             // OntologyCenter
             await createEditClassApi(params);
           } else {
             // DatasetOntology
-            // await createEditClassApiForDataset(params);
             if (params.id) {
               await updateDatasetClassApi(params);
             } else {
               await createDatasetClassApi(params);
             }
           }
-
           classDataSchema.value = getInitClassData();
           handleClose();
           emits('fetchList');
@@ -521,20 +507,15 @@
       },
       async () => {
         try {
-          // 判断 OntologyCenter | DatasetOntology
           if (props.isCenter) {
-            // OntologyCenter
             await createEditClassificationApi(params);
           } else {
-            // DatasetOntology
-            // await createEditClassificationApiForDataset(params);
             if (params.id) {
               await updateDatasetClassificationApi(params);
             } else {
               await createDatasetClassificationApi(params);
             }
           }
-
           dataSchema.value = getInitClassificationData();
           handleClose();
           emits('fetchList');
@@ -542,7 +523,7 @@
       },
     );
   };
-  // 处理参数
+  // To handle params
   const handleParams = (temp: any) => {
     if (!temp) return {};
 
@@ -554,25 +535,22 @@
         name: temp.name,
         color: temp.color,
         toolType: temp.toolType,
-        // 0.3 版本修改为直传,不需要 stringify
-        toolTypeOptions: {}, // 0.5 修改为根据 datasetType 判断传参
+        toolTypeOptions: {},
         attributes: unref(classDataSchema).attributes,
       };
-      // 判断 OntologyCenter | DatasetOntology
+      //  OntologyCenter or DatasetOntology
       if (props.isCenter) {
         // OntologyCenter
-        // 0.3 版本不需要传 datasetType
-        // params.datasetType = temp.datasetType;
       } else {
         // DatasetOntology
         params.datasetId = temp.datasetId;
         params.classId = temp.classId;
       }
-      // 是否为编辑
+      // isEdit
       if (props.detail?.id) {
         params.id = props.detail.id;
       }
-      // 判断 datasetType
+      // To judge datasetType, Image or Lidar
       if (temp.datasetType != datasetTypeEnum.IMAGE) {
         params.toolTypeOptions = {
           isConstraints: temp.isConstraints ?? false,
@@ -597,19 +575,15 @@
         name: temp.name,
         inputType: temp.inputType,
         isRequired: temp.isRequired,
-        // options: JSON.stringify(unref(dataSchema).options),
-        // 0.3 版本修改为直传
         options: unref(dataSchema).options,
       };
-      // 判断 OntologyCenter | DatasetOntology
+
       if (props.isCenter) {
-        // OntologyCenter
       } else {
-        // DatasetOntology
         params.datasetId = temp.datasetId;
         params.classificationId = temp.classificationId;
       }
-      // 是否为编辑
+
       if (props.detail?.id) {
         params.id = props.detail.id;
       }
@@ -628,7 +602,6 @@
     .modal__left {
       width: 270px;
       height: 100%;
-      // overflow: auto;
       padding: 15px;
       padding-right: 5px;
 
@@ -647,8 +620,6 @@
       width: 270px;
       overflow: auto;
       padding: 15px;
-      // border-left: 1px solid #ccc;
-      // padding-right: 15px;
       &::before {
         content: '';
         position: absolute;
@@ -663,7 +634,6 @@
   }
 </style>
 <style lang="less">
-  // 需要在全局中写样式
   .ontology-class-modal {
     .ant-modal {
       height: 100vh;

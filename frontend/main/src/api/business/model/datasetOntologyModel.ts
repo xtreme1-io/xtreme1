@@ -6,15 +6,15 @@ import {
   ResponseItem as OntologyResponseItem,
 } from './ontologyClassesModel';
 
-/** 搜索表单参数 */
+/** searchForm params */
 export type SearchItem = OntologySearchItem;
 
-/** 请求参数 */
+/** request params */
 export interface GetListParams extends BasicPageParams, SearchItem {
   datasetId: number;
 }
 
-/** 响应参数 */
+/** response params */
 export interface ResponseItem extends OntologyResponseItem {
   datasetId?: number;
   classId?: Nullable<number>;
@@ -22,7 +22,7 @@ export interface ResponseItem extends OntologyResponseItem {
   type?: string;
 }
 
-/** class 列表项 */
+/** class list item */
 export interface ClassItem extends ResponseItem {
   toolType: ToolTypeEnum;
   toolTypeOptions: string;
@@ -30,10 +30,10 @@ export interface ClassItem extends ResponseItem {
   // attributes: Nullable<string>;
 }
 
-/** class 响应参数 */
+/** class response params */
 export type ClassResponse = BasicFetchResult<ClassItem>;
 
-/** classification 列表项 */
+/** classification list item */
 export interface ClassificationItem extends ResponseItem {
   inputType: inputTypeEnum;
   isRequired: boolean;
@@ -41,7 +41,7 @@ export interface ClassificationItem extends ResponseItem {
   // options: Nullable<string>;
 }
 
-/** classification 响应参数 */
+/** classification response params */
 export type ClassificationResponse = BasicFetchResult<ClassificationItem>;
 
 export interface SaveEditItem {
@@ -53,7 +53,7 @@ export interface SaveEditItem {
   color: string;
 }
 
-/** 添加修改 class */
+/** create/save class */
 export interface SaveEditClassParams extends SaveEditItem {
   classId?: Nullable<number>;
   toolType: ToolTypeEnum;
@@ -64,7 +64,7 @@ export interface SaveEditClassParams extends SaveEditItem {
   // toolTypeOptions: Nullable<string>;
 }
 
-/** 添加修改 classification */
+/** create/save classification */
 export interface SaveEditClassificationParams extends SaveEditItem {
   classificationId?: Nullable<number>;
   inputType: inputTypeEnum;
@@ -73,13 +73,13 @@ export interface SaveEditClassificationParams extends SaveEditItem {
   // options: string;
 }
 
-/** 同步 class | classification*/
+/** sync class | classification*/
 export interface SyncParams {
   id: string | number;
   ontologyId: string | number;
 }
 
-/** 重名校验 */
+/** validate name */
 export interface ValidateNameParams {
   name: string;
   datasetId: number;
