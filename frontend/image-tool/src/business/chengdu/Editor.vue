@@ -48,12 +48,6 @@
                                             sizeData.type === UIType.polygon && !sizeData.isDrawing
                                         "
                                     >
-                                        <!-- <span class="size-item">
-                                            width:{{ sizeData.width.toFixed(0) }}px
-                                        </span>
-                                        <span class="size-item">
-                                            height:{{ sizeData.height.toFixed(0) }}px
-                                        </span> -->
                                         <span class="size-item">
                                             area: {{ sizeData.area.toFixed(0) }}px
                                         </span>
@@ -120,7 +114,7 @@
         length: 0,
         area: 0,
         type: null,
-        isDrawing: false, // 正在绘制中的 多边形只显示长度
+        isDrawing: false, // The polygon being drawn only shows the length
     });
     function zoomChange(e: any) {
         if (zoomTimerId) {
@@ -147,7 +141,6 @@
     }
 
     function sizeChangeBefore(e: any) {
-        // e可以解析出type
         // console.log(e);
         sizeChange(e);
         let ele = shapeSize.value;
@@ -169,15 +162,12 @@
         return state.showMask;
     });
     onMounted(async () => {
-        //  init  ImageLabel Tool  required DOM element
         editor.initTool({ container: container.value });
         editor.registerModal('modelRun', ModelRun);
-        // editor.registerModal('ModalConfirm', ModalConfirm);
         editor.on(Event.ZOOM_CHANGE, zoomChange);
         editor.on(Event.DIMENSION_CHANGE, sizeChange);
         editor.on(Event.DIMENSION_CHANGE_BEFORE, sizeChangeBefore);
         editor.on(Event.DIMENSION_CHANGE_AFTER, sizeChangeAfter);
-        // console.log(shapeSize.value);
     });
 </script>
 
@@ -282,7 +272,7 @@
         }
     }
 
-    // 遮罩层
+    // mask
     .interactive-mask {
         position: absolute;
         z-index: 999;

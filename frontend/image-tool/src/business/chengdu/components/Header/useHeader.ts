@@ -46,7 +46,6 @@ export default function useHeader() {
                     async () => {},
                 );
         } else {
-            // 加上判断
             if (state.dataIndex > 0) {
                 editor.emit(Event.IMAGE_CHANGE);
                 state.showVerify = false;
@@ -91,7 +90,7 @@ export default function useHeader() {
     async function onClose() {
         if (editor.state.mode !== 'view') {
             await saveChange();
-            //  有错误验证时
+            //  has error
             if (tool.state.showVerify) {
                 return;
             }
@@ -267,12 +266,12 @@ export default function useHeader() {
         }
     }
 
-    // 快捷键相关
+    // Shortcut
     const toggleKeyboard = _.debounce(() => {
         editorState.showKeyboard = !editorState.showKeyboard;
     }, 150);
 
-    // 绑定方法到 editor 上，方便快捷键获取
+    // Bind the method to the editor for easy access to shortcut keys
     editor.handlePageUp = onPre;
     editor.handlePageDown = onNext;
     editor.handleToggleKeyboard = toggleKeyboard;
@@ -300,9 +299,7 @@ export default function useHeader() {
         onPre,
         onNext,
         onClose,
-        // 快捷键
         toggleKeyboard,
-        // 流转
         onMark,
         onSubmit,
         onSkip,

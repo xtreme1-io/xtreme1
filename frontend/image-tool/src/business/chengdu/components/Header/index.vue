@@ -134,13 +134,8 @@
                     Modify
                 </a-button>
             </div>
-            <!-- 提交 -->
         </div>
     </div>
-    <!-- Modal -->
-    <!-- <div v-show="showKeyboard" class="shortcutsClass">
-        <TheKeyboard />
-    </div> -->
     <a-drawer
         placement="right"
         :width="268"
@@ -213,7 +208,7 @@
         init();
     });
 
-    // 搜索 --
+    // Search --
     const searchValue = ref<string>('');
     const handleSearch = () => {
         console.log('search ', searchValue);

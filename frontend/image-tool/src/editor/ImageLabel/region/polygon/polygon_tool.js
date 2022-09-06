@@ -31,7 +31,6 @@ export class PolygonTool extends BaseTool {
             this.poly.pushPoint(point);
         }
     }
-    // 取消绘制
     cancel() {
         if (this.poly) {
             this.poly.destroy();
@@ -43,7 +42,6 @@ export class PolygonTool extends BaseTool {
             this.view.emit(Event.DIMENSION_CHANGE_AFTER);
         }
     }
-    // 撤回绘制的一步
     back() {
         console.log(this);
         super.back();
@@ -53,7 +51,6 @@ export class PolygonTool extends BaseTool {
             // let length = points.length;
             this.backPoint.push(points[points.length - 1]);
             this.poly.removePoint({ index: points.length - 1, interiorIndex: -1 });
-            // 删除所有点 销毁poly
             if (points.length === 0) {
                 this.cancel();
                 return;
@@ -84,12 +81,10 @@ export class PolygonTool extends BaseTool {
         }
     }
     mousedownHandler(e, point) {
-        // 确定是鼠标左键按下
         if (e.evt.button > 0) return;
 
         if (this.view.mode === MODETYPE.draw) {
             this.view.editor.state.status = StatusType.Create;
-            // 如果重新打点，则清除备份数组
             if (this.backPoint.length > 0) {
                 this.backPoint = [];
             }

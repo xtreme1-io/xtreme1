@@ -18,7 +18,6 @@ export const UIType = {
     model: 'model',
     interactive: 'interactive',
     setting: 'setting',
-    // 信息
     info: 'info',
 };
 

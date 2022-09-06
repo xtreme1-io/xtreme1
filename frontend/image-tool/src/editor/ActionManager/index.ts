@@ -15,7 +15,6 @@ interface IActionArgs {
 }
 
 export default class ActionManager {
-    // static Actions = Actions;
     editor: Editor;
     actions: Record<string, IAction>;
     currentAction: IAction | null = null;
@@ -28,7 +27,6 @@ export default class ActionManager {
         this.actions[name] = action;
     }
 
-    // 方法名 + 参数?
     async execute<T extends IActionName>(name: T | T[], args?: IActionArgs[T]): Promise<any> {
         let action = null;
         if (Array.isArray(name)) {
@@ -41,21 +39,15 @@ export default class ActionManager {
 
         if (this.isBlocked()) {
             console.log(`action ${name} blocked`);
-            // if (this.editor.toolConfig.isDrawing) {
-            //     this.editor.showMsg('error', 'Please finish drawing first');
-            // }
             return;
         }
 
         let result;
         if (action.valid(this.editor)) {
-            // console.log('action start:', action.name);
-
             this.currentAction = action;
 
             const { showKeyboard } = this.editor.state;
             if (showKeyboard) {
-                // console.log('Keyboard is show, block');
                 this.currentAction = null;
                 return;
             }
@@ -68,7 +60,6 @@ export default class ActionManager {
             }
             this.currentAction = null;
             action.end(this.editor);
-            // console.log('action end:', name);
         }
 
         return result;
