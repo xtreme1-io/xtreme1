@@ -46,7 +46,6 @@ export default class Tool {
 
         showLoading && this.editor.showLoading(false);
 
-        // 自动加载数据
         this.dataResource.load();
     }
     async loadClassification() {

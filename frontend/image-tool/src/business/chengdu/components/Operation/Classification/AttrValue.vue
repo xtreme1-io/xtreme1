@@ -58,22 +58,22 @@
         visible: Boolean;
     }
 
-    // 保存时候的校验
+    // Validate
     const checkValue = (_: any, target: IClassificationAttr) => {
-        // console.log('isVisiible: ', props.visible);
-        // 判断是否显示，不显示则判断为校验通过
+        // console.log('isVisible: ', props.visible);
+        // If it's not displayed, Verification passed
         if (!props.visible) return Promise.resolve();
-        // 非必填
+
         if (!target.required) {
             emit('validate', true);
             return Promise.resolve();
         }
-        // 必填已填
+
         if (target.required && target.value.length) {
             emit('validate', true);
             return Promise.resolve();
         }
-        // 必填未填
+
         emit('validate', false);
         return Promise.reject(new Error(props.item.name + ' is Required'));
     };
@@ -93,7 +93,6 @@
         }, 500);
     }
 
-    // 找到点击项 判断第一项
     const handleToggle = (item: any, e: any) => {
         // console.log('get', item, e);
         const parent = item.parent;

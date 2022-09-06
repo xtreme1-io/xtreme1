@@ -48,7 +48,6 @@
     let state = tool.state;
     const formRef = ref<FormInstance>();
     onMounted(() => {
-        // 绑定 form 实例
         state.classificationForm = formRef.value;
     });
     let attrMap = computed(() => {
@@ -73,11 +72,8 @@
         let dataInfo = tool.state.dataList[tool.state.dataIndex];
         dataInfo.needSave = true;
 
-        // 改变之后 重置校验结果， 重新触发校验
         validateArr.value = [];
         state.classificationForm.validate();
-        // checkValueForIcon();
-        // state.classificationForm.clearValidate();
     }
 
     function isItemVisible(attr: IClassificationAttr): boolean {
@@ -93,10 +89,9 @@
         return isItemVisible(attr) && isAttrVisible(parentAttr);
     }
 
-    // 切换 classification 显示
     const classificationWrap = ref(null);
     const handleToggle = (id: string | number) => {
-        return; // 不需要了
+        return;
         const index = getDataClassification().findIndex((item) => item.id == id);
         // console.log(index);
         // return;
@@ -121,21 +116,20 @@
         state.showVerify = showVerify.value as any;
     });
 
-    // 用于 图标
     const checkValueForIcon = () => {
         const res = getDataClassification();
         res.forEach((item) => {
             item.attrs.forEach((target) => {
                 if (!isAttrVisible(target)) return;
-                // 非必填
+
                 if (!target.required) {
                     handleValidate(true);
                 }
-                // 必填已填
+
                 if (target.required && target.value.length) {
                     handleValidate(true);
                 }
-                // 必填未填
+
                 handleValidate(false);
             });
         });

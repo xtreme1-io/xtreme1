@@ -60,20 +60,14 @@ export interface IClassEditStyle {
 export interface IEditorState {
     imageUrl: string;
     user: IUserInfo;
-    // 批注
     annotationTags: IAnnotationTag[];
     annotations: IAnnotationInfo[];
-    // 编辑器模式
     mode: string;
-    // 当前模式的config
     modeConfig: IModeConfig;
-    // 编辑器状态
     status: StatusType;
     activeItem: string;
-    // 当前模式的hotkey
     // hotkeyConfig: IHotkeyConfig[];
     classTypes: IClassType[];
-    // 作业属性
     workInfo: (IAttr & { value: any })[];
     // i18n: I18N;
     showClassView: boolean;
@@ -88,10 +82,8 @@ export interface IEditorState {
     showSize: boolean;
     showSizeTips: boolean;
     allVisible: boolean;
-    // 显示快捷键 -- 后面看是否挂载到这里吧
     showKeyboard: boolean;
-    showMask: boolean; // 显示遮罩层
-    // 流转
+    showMask: boolean;
     validStatus: ValidStatus;
     annotationStatus: AnnotateStatus;
     isAnnotated: boolean;

@@ -17,19 +17,10 @@ export class SingleImage {
         this._destoryed = false;
         this.layer = layer;
     }
-    // 判断是否在图片上 获取图片上的坐标需要减去图片的position值
     checkInImage(point: IPoint) {
         let imagepos = this.image?.position() as IPoint;
         let dim = this.dim;
         let isInImage = false;
-        // if (
-        //     point.x >= imagepos.x &&
-        //     point.x <= imagepos.x + dim.width &&
-        //     point.y >= imagepos.y &&
-        //     point.y <= imagepos.y + dim.height
-        // ) {
-        //     isInImage = true;
-        // }
         if (
             isGreatOrEqual(point.x, imagepos.x) &&
             isLessOrEqual(point.x, imagepos.x + dim.width) &&
@@ -52,9 +43,8 @@ export class SingleImage {
     ) {
         this._destoryed = false;
         if (image instanceof HTMLImageElement) {
-            this._oriImage = image; // 图片或者 其它元素
+            this._oriImage = image;
             this._setImage(this._oriImage);
-            // onload
             setTimeout(() => {
                 if (this._destoryed) return;
                 onLoad && onLoad(this);
@@ -62,7 +52,7 @@ export class SingleImage {
         } else if (typeof image === 'string') {
             let img = document.createElement('img');
             img.src = image;
-            this._oriImage = img; // 图片或者 其它元素
+            this._oriImage = img;
             if (~image.indexOf('api.') || ~image.indexOf('data:image')) {
                 img.crossOrigin = 'anonymous';
             }
@@ -91,10 +81,6 @@ export class SingleImage {
         }
     }
     _center() {
-        // if (this._centered) {
-        //     return;
-        // }
-        // this._centered = true;
         let bbox = this.view.bbox;
         let dim = this.dim as IDim;
         let pos = {
@@ -127,7 +113,6 @@ export class SingleImage {
         }
     }
     resize() {
-        // this._centered = false;
         let ret = computeScaleDim(this._oriImage, this.view.bbox);
         this.dim = ret as IDim;
         this.setScale(this.dim.scale);
@@ -138,7 +123,6 @@ export class SingleImage {
         if (this.image) {
             this.image.remove();
         }
-        // this.image = null;
         if (this._oriImage) {
             this._oriImage.onload = this._oriImage.onerror = null;
         }

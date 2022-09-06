@@ -2,8 +2,6 @@ import { UIType } from 'editor';
 
 export const BsUIType = {
     ...UIType,
-    // *******flow**********
-    // 保存
     flowSave: 'flowSave',
 };
 export type IBsUIType = keyof typeof BsUIType;

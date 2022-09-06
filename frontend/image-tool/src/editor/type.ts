@@ -10,24 +10,18 @@ export type { IEditorState, I18N } from './state';
 export type { IModalOption, IConfirmOption, MsgType, ILoadingOption } from './Editor';
 
 export interface IUserData {
-    // 结果id
     id?: string;
-    // track id
     trackId?: string;
-    // 关联结果
     refId?: string;
     refType?: AnnotateType;
     backId?: string;
-    // 是否是映射生成的
     isProjection?: boolean;
     // model
     confidence?: number;
     modelClass?: string;
     modelRun?: string;
     project?: string;
-    // 标签
     classType?: string;
-    // 属性
     attrs?: Record<string, any>;
     // info
     pointN?: number;
@@ -134,20 +128,15 @@ export interface IRenderConfig {
     renderBox: boolean;
     renderProjectBox: boolean;
     renderProjectPoint: boolean;
-    // 结果
     showLabel: boolean;
     showAnnotation: boolean;
 }
 
 export enum StatusType {
     Default = '',
-    // 创建
     Create = 'Create',
-    // 加载框
     Loading = 'Loading',
-    // 弹窗
     Modal = 'Modal',
-    // 确认框
     Confirm = 'Confirm',
 }
 

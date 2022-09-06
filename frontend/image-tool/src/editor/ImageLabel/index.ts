@@ -106,9 +106,7 @@ export class ImageLabel extends EventEmitter {
             x: this.bbox.width / 2,
             y: this.bbox.height / 2,
         });
-        // 绘制的图形渲染到这一层
         this.shapelayer = new Konva.Layer();
-        // 渲染标签 以及一些辅助线
         this.helplayer = new Konva.Layer();
         this.Stage.add(this.shapelayer, this.helplayer);
         this.limitBbox = {
@@ -145,7 +143,6 @@ export class ImageLabel extends EventEmitter {
             y: this.bbox.height / 2,
         });
     }
-    // 背景图
     setBackground(
         image: string | HTMLImageElement,
         onBackgroundReady: (t: BackGround) => void,
@@ -202,7 +199,6 @@ export class ImageLabel extends EventEmitter {
         });
     }
 
-    // 缩放
     resetZoom() {
         let position = {
             x: this.bbox.width / 2,
@@ -265,7 +261,6 @@ export class ImageLabel extends EventEmitter {
                         current.highLight(true);
                         current.selectShape(true);
                     }
-                    // 绘制模式
                     break;
                 }
                 case MODETYPE.edit: {
@@ -279,7 +274,6 @@ export class ImageLabel extends EventEmitter {
                         current.highLight(true);
                         current.selectShape(true);
                     }
-                    // 编辑模式
                     break;
                 }
             }
@@ -292,8 +286,7 @@ export class ImageLabel extends EventEmitter {
         e.evt.preventDefault();
         e.evt.stopPropagation();
         let delta = (e.evt as any).wheelDelta ? (e.evt as any).wheelDelta : e.evt.deltaY * -40;
-        // console.log(delta)
-        let scale = this.scalefactor + delta * 0.002; //放缩系数
+        let scale = this.scalefactor + delta * 0.002;
         let limitBbox = this.limitBbox;
         let imageScale = limitBbox.scale * scale;
         if (imageScale < 0.2 || imageScale > 10) return;
@@ -312,7 +305,6 @@ export class ImageLabel extends EventEmitter {
         if (!this.ready) return;
         if (evt.button === 1 || config.spaceKeyIsPressed) {
             evt.preventDefault();
-            // 拖动时禁用图形自身的拖动
             this.Stage.find(SHAPEANCHORSELECTOR).forEach((shape) => {
                 shape.draggable(false);
             });
@@ -324,7 +316,6 @@ export class ImageLabel extends EventEmitter {
         if (target instanceof Konva.Tag) return;
         if (evt.button === 0) {
             if (this.mode !== MODETYPE.draw) {
-                // 点击空白处 取消选中
                 if (target === this.Stage) {
                     this.unSelectAll();
                     return;
@@ -353,7 +344,6 @@ export class ImageLabel extends EventEmitter {
         if (!this.ready) return;
         this.mouseDown = false;
         if (this.mode === MODETYPE.edit) {
-            // 拖动结束恢复图形自身的拖动
             this.Stage.find(SHAPEANCHORSELECTOR).forEach((shape) => {
                 shape.draggable(true);
             });
@@ -410,10 +400,8 @@ export class ImageLabel extends EventEmitter {
         }
     }
     bindHotkey() {
-        // 绑定 可在绘制中进行的 操作
         drawingConfig.forEach((item) => {
             hotkeys(item.key, { keyup: true }, (event, handler) => {
-                // 如果快捷键列表显示，则阻止所有快捷键事件
                 if (this.editor.state.showKeyboard) return;
 
                 if (event.type === 'keydown') {
@@ -424,19 +412,13 @@ export class ImageLabel extends EventEmitter {
             });
         });
 
-        // 排除掉不需要有错误提示的快捷键
         const excludes = ['⌘ + z', '⌘ + Shift + z', 'Ctrl + z', 'Ctrl + Shift + z'];
         const interactiveExcludes = ['Delete', 'Backspace'];
-        // 绑定 不可在绘制中使用快捷键 的错误提示操作
         hotkeyConfig.forEach((config) => {
             hotkeys(config.key, () => {
-                // 如果快捷键列表显示，则阻止所有快捷键事件
                 if (this.editor.state.showKeyboard) return;
-                // 如果不是绘制状态，则返回
                 if (this.editor.state.status != StatusType.Create) return;
 
-                // 单独对 AI工具 判断
-                // -- 当前选择的是 AI工具 且是 绘制模式， 则全部快捷键都有 错误提示
                 console.log(this);
                 if (
                     this.mode == MODETYPE.edit &&
@@ -447,14 +429,12 @@ export class ImageLabel extends EventEmitter {
                     return;
                 }
 
-                // 在 excludes 里不需要错误提示, 其它的都需要
                 if (!excludes.includes(config.key)) {
                     this.editor.showMsg('error', 'Please finish drawing first');
                 }
             });
         });
     }
-    // 处理一些快捷键按下后 窗口失焦后释放按键 导致的问题
     _onWindowBlur() {
         DomEventHandle.KeySpaceUp.call(this, config);
     }
@@ -690,7 +670,6 @@ export class ImageLabel extends EventEmitter {
         let polygons = shapes.filter((shape) => {
             return shape.type === 'polygon' && shape.interior.length > 0;
         });
-        // todo  取消错误提示 待产品确定细节
         if (polygons.length) {
             polygons.forEach((polygon) => {
                 polygon.removeInterior();
@@ -699,9 +678,7 @@ export class ImageLabel extends EventEmitter {
             this.editor.showMsg('warning', 'This result cannot cancel hollowing');
         }
     }
-    // firstisClip 是否裁剪第一个
     clipPolygon(firstisClip: boolean = true) {
-        // 该操作影响的图形 可用于撤销重做的数据
         let diff = {
             removed: [],
             add: [],

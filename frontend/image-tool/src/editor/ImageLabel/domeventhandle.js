@@ -14,9 +14,7 @@ export default {
     KeySpaceUp(config, e) {
         config.spaceKeyIsPressed = false;
     },
-    // Esc 取消绘制 取消正在绘制的图形  或取消 选中
     KeyEscDown(config, e) {
-        // 取消弹窗
         // this.editor.state.showClassView = false;
         this.editor.showModal(false);
         Modal.destroyAll();
@@ -32,14 +30,14 @@ export default {
             return;
         }
     },
-    // Enter 完成绘制
+    // Enter: Finish drawing
     KeyEnterDown(config, e) {
         e.preventDefault();
         e.stopPropagation();
 
         this.toolmanager.done(config);
     },
-    // Ctrl + Z  撤销一步 undo
+    // Ctrl + Z  undo
     KeyBackDown(config, e) {
         e.preventDefault();
         if (this.editor.state.status !== StatusType.Default) {
@@ -47,7 +45,7 @@ export default {
             this.toolmanager.back(config);
         }
     },
-    // Ctrl + Shift + Z 回退一步 redo
+    // Ctrl + Shift + Z  redo
     KeyForwardDown(config, e) {
         e.preventDefault();
         if (this.editor.state.status !== StatusType.Default) {

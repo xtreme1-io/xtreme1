@@ -274,7 +274,6 @@ export class Polygon extends BaseShape {
             this.anchorOnClick(e);
         });
 
-        // 临时通过右键删除 后续接入快捷键
         // anchor.on('contextmenu', (e) => {
         //     e.evt.preventDefault();
         //     this.anchorOnContextmenu(e);
@@ -324,7 +323,7 @@ export class Polygon extends BaseShape {
         let interiorIndex = anchor.interiorIndex;
         let bbox = this.view.limitBbox;
         let limit = config.limitInBackgroud;
-        // todo 限制 只能在外环内拖动
+
         let position = fixedPointPositionIfNeed(anchor.position(), bbox, limit);
         if (interiorIndex < 0) {
             this.replacePoint(position, anchor.idx);
@@ -444,7 +443,6 @@ export class Polygon extends BaseShape {
     }
     pushPoint(point) {
         let [last] = this.points.slice(-1);
-        // 避免相邻的重复坐标
         if (!(last && isEqualPoint(last, point))) {
             this.points.push(point);
             this._pointsChange();
@@ -475,7 +473,6 @@ export class Polygon extends BaseShape {
         this._pointsChange();
     }
     _pointsChange() {
-        // 其它类型的 工具 需要用 xytoArr 处理一下
         // this.shape.points(xytoArr(this.points));
         this.shape.points(this.points);
         if (this.selected && this.view.mode === MODETYPE.edit) {
@@ -496,7 +493,6 @@ export class Polygon extends BaseShape {
         this.shape.interior(points);
         this._pointsChange();
     }
-    // 更新长度信息位置;
     updateDistanceText(point) {
         this._clacDimension(point);
     }

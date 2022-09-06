@@ -1,5 +1,3 @@
-// 等分辅助线
-
 import Konva from 'konva';
 import { xytoArr, getScaleFactor, HELPNAME } from '../util';
 class BisectrixLine {
@@ -10,7 +8,7 @@ class BisectrixLine {
         this.hidden = false;
         this.lines = [];
         this.Stage = this.view.Stage;
-        //设置等分最大值
+        // Set aliquot maximum value
         this.verticalCountMax = 50;
         this.horizontalCountMax = 50;
         this.bisectrixConfig = {
@@ -19,7 +17,7 @@ class BisectrixLine {
             hidden: true,
         };
         this.hidden = this.bisectrixConfig.hidden;
-        //读取初始值
+        // read initial value
         this.verticalCount = this.bisectrixConfig.verticalCount || 2;
         this.horizontalCount = this.bisectrixConfig.horizontalCount || 2;
         this.render();

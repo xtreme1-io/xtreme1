@@ -31,7 +31,6 @@ export class PolylineTool extends BaseTool {
         this.backPoint = [];
         this.clickCount = 0;
     }
-    // 取消绘制
     cancel() {
         if (this.poly) {
             console.log('????');
@@ -52,7 +51,6 @@ export class PolylineTool extends BaseTool {
             let length = points.length;
             this.backPoint.push(points[points.length - 1]);
             this.poly.removePoint(points.length - 1);
-            // 删除所有点 销毁poly
             if (points.length === 0) {
                 this.cancel();
                 return;
@@ -116,7 +114,6 @@ export class PolylineTool extends BaseTool {
         this.circles = [];
     }
     mousedownHandler(e, point) {
-        // 确定是鼠标左键按下
         // if (e.evt.button > 0) return;
         // if (this.view.mode === MODETYPE.draw) {
         //     this.view.editor.state.status = StatusType.Create;

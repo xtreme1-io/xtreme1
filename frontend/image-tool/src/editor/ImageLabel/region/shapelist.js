@@ -59,7 +59,6 @@ export default class ShapeList {
             return a._index - b._index;
         });
     }
-    // 返回平铺的结果 和 组信息
     getFlatListAndGroupInfo() {
         return flatList(this.toArray());
     }
