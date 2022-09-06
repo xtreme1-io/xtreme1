@@ -439,7 +439,7 @@
   };
 
   const handleContinue = async () => {
-    goToTool({ recordId: lockedId.value }, type.value as any);
+    goToTool({ recordId: lockedId.value }, info.value?.type as datasetTypeEnum);
     window.location.reload();
   };
 
