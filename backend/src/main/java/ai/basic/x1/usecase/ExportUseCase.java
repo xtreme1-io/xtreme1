@@ -64,9 +64,9 @@ public class ExportUseCase {
     }
 
     /**
-     * 创建导出记录
+     * create export record
      *
-     * @return 流水号
+     * @return serial number
      */
     public Long createExportRecord(String fileName) {
         var serialNumber = IdUtil.getSnowflakeNextId();
@@ -79,14 +79,14 @@ public class ExportUseCase {
     }
 
     /**
-     * 异步导出文件 根据返回流水号获取文件路径
+     * Asynchronous export files obtain the file path according to the return flow number number
      *
-     * @param fileName     文件名称
-     * @param firstContent 文件最开始写入内容
-     * @param lastContent  文件最后写入内容
-     * @param query        查询条件
-     * @param fun          查询数据函数
-     * @param processData  需要对查询回来的数据进行处理
+     * @param fileName     filename
+     * @param firstContent first content
+     * @param lastContent  last content
+     * @param query        query condition
+     * @param fun          query method
+     * @param processData  data processor
      * @return 流水号
      */
     public <T, Q extends BaseQueryBO, T1> Long asyncExportJson(String fileName, Long serialNumber,

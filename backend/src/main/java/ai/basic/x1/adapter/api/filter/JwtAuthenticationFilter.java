@@ -35,7 +35,6 @@ public class JwtAuthenticationFilter implements Filter {
             token = authorization.split(" ")[1].trim();
         }
 
-        // 为方便调试，如果从请求头里获取 Token 失败，会再尝试从 Query 参数获取
         if (token == null) {
             token = req.getParameter("token");
         }
@@ -60,7 +59,6 @@ public class JwtAuthenticationFilter implements Filter {
         var loggedUserDTO = new LoggedUserDTO(userBO.getUsername(), userBO.getPassword(), userBO.getId());
         var authentication = new UsernamePasswordAuthenticationToken(
                 loggedUserDTO, loggedUserDTO.getPassword(), loggedUserDTO.getAuthorities());
-        // 显示创建 SecutiryContext，避免多线程之间的条件竞争
         var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);

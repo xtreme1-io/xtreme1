@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 分页类
+ * page
  *
  * @author fyb
  */

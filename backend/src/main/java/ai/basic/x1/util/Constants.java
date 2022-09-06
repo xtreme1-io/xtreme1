@@ -69,9 +69,6 @@ public interface Constants {
 
     String RESULT = "result";
 
-    /**
-     * 斜杠
-     */
     String SLANTING_BAR = "/";
 
     Integer BATCH_SIZE = 1000;

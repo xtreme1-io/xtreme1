@@ -19,15 +19,18 @@ import org.apache.ibatis.mapping.SqlSource;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * @author andy
+ */
 public class MysqlInsertOrUpdateBatch extends AbstractMethod {
 
     /**
-     * mapper 对应的方法名
+     * mapper method name
      */
     private static final String MAPPER_METHOD = "mysqlInsertOrUpdateBatch";
 
     /**
-     * 字段筛选条件
+     * filed filter condition
      */
     @Setter
     @Accessors(chain = true)
@@ -57,10 +60,8 @@ public class MysqlInsertOrUpdateBatch extends AbstractMethod {
         String valuesScript = SqlScriptUtils.convertForeach(insertSqlProperty, "list", null, ENTITY, COMMA);
         String keyProperty = null;
         String keyColumn = null;
-        // 表包含主键处理逻辑,如果不包含主键当普通字段处理
         if (tableInfo.havePK()) {
             if (tableInfo.getIdType() == IdType.AUTO) {
-                /* 自增主键 */
                 keyGenerator = Jdbc3KeyGenerator.INSTANCE;
                 keyProperty = tableInfo.getKeyProperty();
                 keyColumn = tableInfo.getKeyColumn();
@@ -98,7 +99,7 @@ public class MysqlInsertOrUpdateBatch extends AbstractMethod {
     }
 
     /**
-     * 准备属性名
+     * prepare field
      *
      * @param tableInfo
      * @return

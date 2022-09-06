@@ -28,10 +28,10 @@ public class DataEditUseCase {
     private DataEditDAO dataEditDAO;
 
     /**
-     * 获取数据锁定人员ID
+     * get dataEdit creator
      *
-     * @param dataIds 数据集合
-     * @return 锁定数据与人员MAP
+     * @param dataIds dataIds
+     * @return creator
      */
     public Map<Long, Long> getDataEditByDataIds(List<Long> dataIds) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();
@@ -45,11 +45,11 @@ public class DataEditUseCase {
     }
 
     /**
-     * 根据锁定记录ID查询锁定数据
+     * get dataEdit by recordId
      *
-     * @param recordId 锁定记录ID
-     * @param userId   用户ID
-     * @return 锁定数据集合
+     * @param recordId recordId
+     * @param userId   userId
+     * @return dataEditList
      */
     public List<DataEditBO> findDataEditByRecordId(Long recordId, Long userId) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();

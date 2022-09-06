@@ -17,6 +17,10 @@ import org.apache.ibatis.mapping.SqlSource;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * InsertIgnoreBatchMethod
+ * @author andy
+ */
 public class InsertIgnoreBatchMethod extends AbstractMethod {
 
     public InsertIgnoreBatchMethod(String name){
@@ -24,12 +28,12 @@ public class InsertIgnoreBatchMethod extends AbstractMethod {
     }
 
     /**
-     * mapper 对应的方法名
+     * mapper method name
      */
     private static final String MAPPER_METHOD = "insertIgnoreBatch";
 
     /**
-     * 字段筛选条件
+     * filed filter condition
      */
     @Setter
     @Accessors(chain = true)
@@ -49,10 +53,8 @@ public class InsertIgnoreBatchMethod extends AbstractMethod {
         String valuesScript = SqlScriptUtils.convertForeach(insertSqlProperty, "list", null, ENTITY, COMMA);
         String keyProperty = null;
         String keyColumn = null;
-        // 表包含主键处理逻辑,如果不包含主键当普通字段处理
         if (tableInfo.havePK()) {
             if (tableInfo.getIdType() == IdType.AUTO) {
-                /* 自增主键 */
                 keyGenerator = new Jdbc3KeyGenerator();
                 keyProperty = tableInfo.getKeyProperty();
                 keyColumn = tableInfo.getKeyColumn();
