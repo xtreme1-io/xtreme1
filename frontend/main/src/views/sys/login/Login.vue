@@ -9,7 +9,8 @@
       </div>
       <img class="rect-mask" :src="rectMask" alt="" />
       <img class="bg-tip" :src="bgTip" alt="" />
-      <img class="show-img" :src="showImg" alt="" />
+      <!-- <img class="show-img" :src="showImg" alt="" /> -->
+      <div id="show-img" class="show-img"></div>
     </div>
     <!-- <SignIn />
     <SignUp /> -->
@@ -52,10 +53,11 @@
   import SignUpFeed from './SignUpFeed.vue';
   import { loginErrorType } from './typing';
   import bgTip from '/@/assets/images/bg-tip.png';
-  import showImg from '/@/assets/images/show-img.png';
+  // import showImg from '/@/assets/images/show-img.png';
   import logoImg from '/@/assets/images/logo-img.png';
   import rectMask from '/@/assets/images/rect-mask.png';
   import { handleGoPortal } from '/@/utils/business';
+  import lottie from 'lottie-web';
   const { query } = useRoute();
   // const { token: tokenStr, teamId, teamName, email } = query;
   const { token: tokenStr, errorType } = query;
@@ -63,7 +65,15 @@
   const go = useGo();
   const userStore = useUserStore();
   const info = ref<Nullable<Team>>(null);
+
   onMounted(async () => {
+    const animate = lottie.loadAnimation({
+      container: document.getElementById('show-img') as HTMLElement,
+      renderer: 'svg',
+      loop: true,
+      path: '/resource/animate/login/data.json',
+    });
+    animate.play();
     const token = getToken();
     console.log(errorType);
     if (errorType) {
