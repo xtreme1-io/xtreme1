@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 /**
- * @author wangjiaping
+ * @author andy
  * @date 2022-04-02 15:49:34
  */
 @Data
@@ -24,35 +24,35 @@ public class Ontology {
     private Long id;
 
     /**
-     * 本体名称
+     * name
      */
     private String name;
 
     /**
-     * 数据集类型
+     * type
      */
     private DatasetTypeEnum type;
     /**
-     * 是否删除 1：是 0：否
+     * deleted: 1 yes,0 no
      */
     private Boolean isDeleted;
     /**
-     * 创建时间
+     * create time
      */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
     /**
-     * 创建者
+     * creator
      */
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
     /**
-     * 更新时间
+     * update time
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private OffsetDateTime updatedAt;
     /**
-     * 更新者
+     * updater
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updatedBy;

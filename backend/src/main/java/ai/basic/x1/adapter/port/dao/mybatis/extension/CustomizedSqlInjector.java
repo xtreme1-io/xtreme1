@@ -7,6 +7,9 @@ import com.baomidou.mybatisplus.extension.injector.methods.LogicDeleteBatchByIds
 
 import java.util.List;
 
+/**
+ * @author andy
+ */
 public class CustomizedSqlInjector extends DefaultSqlInjector {
     @Override
     public List<AbstractMethod> getMethodList(Class<?> mapperClass, TableInfo tableInfo) {

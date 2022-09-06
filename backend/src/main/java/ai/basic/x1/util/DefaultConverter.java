@@ -83,7 +83,7 @@ public class DefaultConverter {
     }
 
     /**
-     * 通过Bean拷贝的方式进行列表转换
+     * By bean copy for converting list
      *
      * @param sourceList
      * @param target

@@ -20,7 +20,7 @@ import java.time.Duration;
 public class CacheConfig extends CachingConfigurerSupport {
 
     /**
-     * 配置各个 Cache，包括 TTL、Prefix 等
+     * config Cache，include TTL、Prefix etc.
      * @param jsonRedisSerializer
      * @return
      */

@@ -16,13 +16,6 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class UserBO {
 
-    public enum Status {
-        // 正常
-        NORMAL,
-        // 禁用
-        FORBIDDEN
-    }
-
     private Long id;
 
     private String username;

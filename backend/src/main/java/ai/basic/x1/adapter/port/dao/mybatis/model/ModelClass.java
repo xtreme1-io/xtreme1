@@ -17,22 +17,22 @@ import java.util.List;
 @AllArgsConstructor
 public class ModelClass {
     /**
-     * 名称
+     * name
      */
     private String name;
 
     /**
-     * 和算法交互的code
+     * code
      */
     private String code;
 
     /**
-     * icon的url
+     * icon url
      */
     private String url;
 
     /**
-     * 子类别
+     * sub class
      */
     private List<ModelClass> subClasses;
 }
