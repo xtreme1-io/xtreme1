@@ -38,6 +38,7 @@
     "graphql": "^16.2.0",
     "graphql-tag": "^2.12.6",
     "lodash-es": "^4.17.21",
+    "lottie-web": "^5.9.6",
     "mixpanel-browser": "^2.45.0",
     "mockjs": "^1.1.0",
     "moment": "^2.29.1",
