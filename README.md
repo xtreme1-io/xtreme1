@@ -122,6 +122,9 @@ services:
   backend:
     # image: basicai/x1-community-backend
     build: ./backend
+  frontend:
+    # image: basicai/x1-community-frontend
+    build: ./frontend
 ```
 
 > Be sure to run `docker compose build` before running `docker compose up`, as up command will only build image when it not exist.
