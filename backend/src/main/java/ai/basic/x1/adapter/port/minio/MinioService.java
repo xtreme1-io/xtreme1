@@ -168,7 +168,6 @@ public class MinioService {
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
         createBucket(bucketName);
-        GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
         var builder = GetPresignedObjectUrlArgs.builder()
                 .method(Method.PUT)
                 .bucket(bucketName)
