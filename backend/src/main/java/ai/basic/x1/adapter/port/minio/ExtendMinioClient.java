@@ -147,4 +147,12 @@ public class ExtendMinioClient extends MinioClient {
                     args.extraQueryParams());
         }
     }
+
+    public String getRegion(GetPresignedObjectUrlArgs args)
+            throws ErrorResponseException, InsufficientDataException, InternalException,
+            InvalidKeyException, InvalidResponseException, IOException, NoSuchAlgorithmException,
+            XmlParserException, ServerException {
+        String region = getRegion(args.bucket(), args.region());
+        return region;
+    }
 }

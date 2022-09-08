@@ -406,7 +406,7 @@ public class DataInfoUseCase {
         return serialNumber;
     }
 
-    private void parsePointCloudUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+    public void parsePointCloudUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         var datasetId = dataInfoUploadBO.getDatasetId();
         var userId = dataInfoUploadBO.getUserId();
         var datasetType = dataInfoUploadBO.getType();

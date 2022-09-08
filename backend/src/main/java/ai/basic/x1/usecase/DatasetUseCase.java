@@ -1,27 +1,47 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
+import ai.basic.x1.adapter.api.context.UserInfo;
 import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
 import ai.basic.x1.adapter.port.dao.DatasetDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Dataset;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
+import ai.basic.x1.entity.DataInfoUploadBO;
 import ai.basic.x1.entity.DatasetBO;
+import ai.basic.x1.entity.DatasetClassBO;
 import ai.basic.x1.entity.DatasetQueryBO;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
+import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import ai.basic.x1.util.lock.IDistributedLock;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.LIDAR_FUSION;
 
 /**
  * @author fyb
  * @date 2022/2/16 15:03
  */
+@Slf4j
 public class DatasetUseCase {
 
     @Autowired
@@ -35,6 +55,58 @@ public class DatasetUseCase {
 
     @Autowired
     private DatasetClassificationDAO datasetClassificationDAO;
+
+    @Value("${file.tempPath:/tmp/x1/}")
+    private String tempPath;
+
+    @Autowired
+    private DataInfoUseCase dataInfoUseCase;
+
+    @Autowired
+    private UserUseCase userUseCase;
+
+    @Autowired
+    private DatasetInitialInfo datasetInitialInfo;
+
+    private static final ExecutorService executorService = ThreadUtil.newExecutor(1);
+
+    @PostConstruct
+    public void init() {
+        var file = FileUtil.file(".",datasetInitialInfo.getFileName());
+        if (file.isFile()) {
+            executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+                var datasetName = datasetInitialInfo.getName();
+                var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
+                datasetLambdaQueryWrapper.eq(Dataset::getName, datasetName);
+                var dataset = datasetDAO.getOne(datasetLambdaQueryWrapper);
+                if (ObjectUtil.isNull(dataset)) {
+                    var userBO = userUseCase.findByUsername(datasetInitialInfo.getUserName());
+                    var requestContext = RequestContextHolder.createEmptyContent();
+                    requestContext.setUserInfo(UserInfo.builder().id(userBO.getId()).build());
+                    RequestContextHolder.setContext(requestContext);
+                    var datasetBO = DatasetBO.builder().name(datasetName).type(datasetInitialInfo.getType()).build();
+                    dataset = DefaultConverter.convert(datasetBO, Dataset.class);
+                    datasetDAO.save(dataset);
+                    var datasetId = dataset.getId();
+                    var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
+                    var filePath = baseSavePath + FileUtil.getName(file);
+                    FileUtil.copy(file.getAbsolutePath(), filePath, true);
+                    try {
+                        DecompressionFileUtils.decompress(filePath, baseSavePath);
+                    } catch (IOException e) {
+                        log.error("Decompression file error", e);
+                    }
+                    var dataInfoUploadBO = DataInfoUploadBO.builder().datasetId(datasetId).type(LIDAR_FUSION)
+                            .userId(userBO.getId()).savePath(filePath).baseSavePath(baseSavePath).build();
+                    dataInfoUseCase.parsePointCloudUploadFile(dataInfoUploadBO);
+                    var datasetClassPropertiesList = datasetInitialInfo.getClasses();
+                    var datasetClassBOList = DefaultConverter.convert(datasetClassPropertiesList, DatasetClassBO.class);
+                    datasetClassBOList.forEach(datasetClassBO -> datasetClassBO.setDatasetId(datasetId));
+                    datasetClassDAO.saveBatch(DefaultConverter.convert(datasetClassBOList, DatasetClass.class));
+                }
+            })));
+        }
+    }
 
     /**
      * Save dataset

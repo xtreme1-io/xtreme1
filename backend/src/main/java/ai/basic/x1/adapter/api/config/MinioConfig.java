@@ -25,9 +25,14 @@ public class MinioConfig {
      *
      * @return minioClient
      */
-    @Bean
+    @Bean(value = "extendMinioClient")
     public ExtendMinioClient extendMinioClient() {
         return new ExtendMinioClient(ExtendMinioClient.builder().endpoint(minioProp.getEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build());
+    }
+
+    @Bean(value = "extendMinioClientInternal")
+    public ExtendMinioClient extendMinioClientInternal() {
+        return new ExtendMinioClient(ExtendMinioClient.builder().endpoint(minioProp.getInternalEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build());
     }
 
 }
