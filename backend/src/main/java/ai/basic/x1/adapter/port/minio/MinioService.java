@@ -58,7 +58,7 @@ public class MinioService {
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
         createBucket(bucketName);
-        //objectSize已知，partSize设为-1意为自动设置
+        //partSize:-1 is auto setting
         long partSize = -1;
         PutObjectArgs putArgs = PutObjectArgs.builder()
                 .bucket(bucketName)
@@ -124,7 +124,7 @@ public class MinioService {
     public String getPresignedUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException,
             ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
             XmlParserException, InternalException {
-        var queryParams = new HashMap<String ,String>();
+        var queryParams = new HashMap<String, String>();
         queryParams.put("response-content-type", "application/octet-stream");
         GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)
