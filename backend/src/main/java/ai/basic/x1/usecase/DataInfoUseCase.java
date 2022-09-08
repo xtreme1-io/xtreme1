@@ -528,7 +528,6 @@ public class DataInfoUseCase {
         var uploadRecordBOBuilder = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
         if (CollectionUtil.isNotEmpty(files)) {
-            //10为一段
             var list = ListUtil.split(files, 10);
             list.forEach(fl -> {
                 parsedDataNum.set(parsedDataNum.get() + fl.size());
@@ -1271,13 +1270,13 @@ public class DataInfoUseCase {
                     Thumbnails.of(file).size(largeFileSize, largeFileSize).toFile(largeFile);
                     Thumbnails.of(file).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
                     Thumbnails.of(file).size(smallFileSize, smallFileSize).toFile(smallFile);
-                    // 大压缩图
+                    // large thumbnail
                     var largePath = String.format("%s%s/%s", basePath, large, fileName);
                     var largeFileBO = fileBOBuilder.path(largePath).relation(LARGE_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
-                    // 中等缩略图
+                    // medium thumbnail
                     var mediumPath = String.format("%s%s/%s", basePath, medium, fileName);
                     var mediumFileBO = fileBOBuilder.path(mediumPath).relation(MEDIUM_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
-                    // 小缩略图
+                    // small thumbnail
                     var smallPath = String.format("%s%s/%s", basePath, small, fileName);
                     var smallFileBO = fileBOBuilder.path(smallPath).relation(SMALL_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
                     thumbnailFileBOS.addAll(ListUtil.toList(largeFileBO, mediumFileBO, smallFileBO));

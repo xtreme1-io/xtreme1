@@ -52,12 +52,12 @@ public enum UsecaseCode {
     // Storage
 
     /**
-     * 枚举编码
+     * code
      */
     private String code;
 
     /**
-     * 枚举描述
+     * description
      */
     private String message;
 

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * * minio 核心配置类
+ * * minio config
  *
  * @author fyb
  * @date 2022/3/30 10:49
@@ -21,7 +21,7 @@ public class MinioConfig {
     private MinioProp minioProp;
 
     /**
-     * 获取 MinioClient
+     * get MinioClient
      *
      * @return minioClient
      */
