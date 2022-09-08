@@ -1,3 +1,4 @@
+![](https://img.shields.io/badge/Apache--2.0-license-green)
 # Xtreme1
 
 Xtreme1 for community, free and open source, powered by [Basic AI](https://www.basic.ai/).
