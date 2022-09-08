@@ -49,7 +49,7 @@ export class Polyline extends BaseShape {
             closed: false,
             stroke: this.stroke,
             strokeWidth: CONSTANT.STROKEWIDTH * this._getScaleFactor(),
-            hitStrokeWidth: CONSTANT.HITSTROKEWIDTH * this._getScaleFactor(), // 更容易让鼠标点击到
+            hitStrokeWidth: CONSTANT.HITSTROKEWIDTH * this._getScaleFactor(),
             draggable: false,
         });
         // this.edge = new Konva.Line({
@@ -164,9 +164,7 @@ export class Polyline extends BaseShape {
         points.reduce((pre, cur, i) => {
             let edge = this.edges[index];
             if (edge) {
-                // Konva.DD 是 Konva 实现拖动的核心部分
                 if (Konva.DD.node !== edge) {
-                    // 正在拖动中的 不可以修改其坐标, dragend的时候再处理
                     edge.points(xytoArr([pre, cur]));
                 }
             } else {
@@ -263,7 +261,6 @@ export class Polyline extends BaseShape {
         this.points = points.slice();
         this._pointsChange();
     }
-    // 更新长度信息位置;
     updateDistanceText(points) {
         this._clacDimension(points);
     }
@@ -284,7 +281,6 @@ export class Polyline extends BaseShape {
     // }
     pushPoint(point) {
         let [last] = this.points.slice(-1);
-        // 避免相邻的重复坐标
         if (!(last && isEqualPoint(last, point))) {
             this.points.push(point);
             this._pointsChange();
@@ -300,7 +296,6 @@ export class Polyline extends BaseShape {
     edgeOnDragMove(e) {
         let edge = e.target;
         let index = edge.idx;
-        // 当前位置
         let curPosition = edge.position();
         let diff = {
             x: curPosition.x - this._edgePosition.x,

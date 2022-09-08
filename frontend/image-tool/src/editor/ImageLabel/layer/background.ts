@@ -18,8 +18,6 @@ export class BackGround {
         this.content = null;
         this.view = view;
         this.view.Stage.add(this._layer);
-        // this.setBackground(image, onReady, onError);
-        // 色彩调整 todo
         this.blur = 1;
         this.brightness = 1;
         this.contrast = 1;
@@ -30,7 +28,6 @@ export class BackGround {
         onReady: (t: BackGround) => void,
         onError: () => void,
     ) {
-        // debugger;
         if (this.content) {
             this.content.setImage(
                 image,
@@ -55,7 +52,6 @@ export class BackGround {
                 (content: SingleImage) => {
                     if (this.view._destoryed) return;
                     this.position = content.image.position();
-                    // this._layer.add(content.image);
                     this._layer.moveToBottom();
                     this.view.Stage.batchDraw();
                     this.ready = true;
@@ -84,7 +80,6 @@ export class BackGround {
     }
     clearBackground() {
         if (this.ready && this.content) {
-            // this._layer.destroy();
             this.content.destroy();
         }
     }

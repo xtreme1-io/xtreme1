@@ -1,7 +1,7 @@
 package ai.basic.x1.entity.enums;
 
 /**
- * 输入类型enum
+ * input type enum
  * @author fyb
  * @date 2022/3/15 14:13
  */

@@ -5,9 +5,6 @@ import { traverseClassification2Arr, empty } from '../utils';
 enum Api {
     API = '/api',
     DATA = '/api/data',
-    // DATASET_ANNOTATION = '/api/dataset/annotation',
-    // DATASET_DATA = '/api/dataset/data',
-    // ANNOTATION = '/api/annotation',
     DATASET_ANNOTATION = '/api/annotate',
     DATASET_DATA = '/api/data',
     ANNOTATION = '/api',
@@ -17,11 +14,6 @@ export async function getUrl(url: string) {
     return get(url, null, { headers: { 'x-request-type': 'resource' } });
 }
 // annotation -------
-/**
- * 保存data的object数据　✓
- * /annotation/object/save
- * /annotate/object/save
- *  */
 export async function saveObject(config: any) {
     let url = `${Api.DATASET_ANNOTATION}/object/save`;
     let data = await post(url, config);
@@ -37,17 +29,12 @@ export async function saveObject(config: any) {
     return keyMap;
 }
 
-/**
- * 根据 dataIds 查询数据标注详情（class）　✓
- * /annotation/object/listByDataIds
- * /annotate/object/listByDataIds
- *  */
 export async function getDataObject(dataId: string) {
     let url = `${Api.DATASET_ANNOTATION}/object/listByDataIds`;
     let data = await get(url, { dataIds: dataId });
     data = data.data || [];
 
-    let objects = [] as IObject[];
+    let objects = [] as any[];
     (data.dataAnnotationObjects || []).forEach((e: any) => {
         e.classAttributes.uuid = e.id + '';
         e.classAttributes.modelRun = empty(e.modelRunId) ? '' : e.modelRunId + '';
@@ -59,21 +46,11 @@ export async function getDataObject(dataId: string) {
     };
 }
 
-/**
- * 保存 data 的 classification 数据　✓
- * /annotation/data/save
- * /annotate/data/save
- *  */
 export async function saveDataClassification(config: any) {
     let url = `${Api.DATASET_ANNOTATION}/data/save`;
     await post(url, config);
 }
 
-/**
- * 根据 dataIds 查询 data 的 classification 数据　✓
- * /annotation/data/listByDataIds
- * /annotate/data/listByDataIds
- *  */
 export async function getDataClassification(dataId: string) {
     let url = `${Api.DATASET_ANNOTATION}/data/listByDataIds`;
     let data = await get(url, { dataIds: dataId });
@@ -88,10 +65,6 @@ export async function getDataClassification(dataId: string) {
 }
 
 // data -------
-/**
- * 根据ids查询数据详情　✓
- * /data/listByIds
- *  */
 export async function getDataFile(dataId: string) {
     let url = `${Api.DATASET_DATA}/listByIds`;
     let data = await get(url, { dataIds: dataId });
@@ -117,23 +90,15 @@ export async function getDataFile(dataId: string) {
         validStatus,
     };
 }
-/**
- * 解除数据锁定　✓
- * /data/unLock/
- */
 export async function unlockRecord(recordId: string) {
     let url = `${Api.DATASET_DATA}/unLock/${recordId}`;
     return await post(url);
 }
-/**
- * 根据锁定记录ID查询数据锁定记录　✓
- * /data/findDataAnnotationRecord
- *  */
 export async function getInfoByRecordId(recordId: string) {
     let url = `${Api.DATASET_DATA}/findDataAnnotationRecord/${recordId}`;
     let data = await get(url);
     data = data.data;
-    // 没有结果
+    // no result
     if (!data) return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
 
     let isSeriesFrame = data.dataType === 'FRAME_SERIES';
@@ -162,10 +127,6 @@ export async function getInfoByRecordId(recordId: string) {
     return { dataInfos, isSeriesFrame, seriesFrameId };
 }
 
-/**
- * 根据 dataset 的 id 查询该 dataset 下所有 Classification　✓
- * /datasetClassification/findAll
- *  */
 export async function getDataSetClassification(datasetId: string) {
     let url = `${Api.ANNOTATION}/datasetClassification/findAll/${datasetId}`;
     let data = await get(url);
@@ -175,10 +136,7 @@ export async function getDataSetClassification(datasetId: string) {
 
     return classifications;
 }
-/**
- * 根据 datasetID 查询全部 class　✓
- * /datasetClass/findAll/
- *  */
+
 export async function getDataSetClass(datasetId: string) {
     let url = `${Api.ANNOTATION}/datasetClass/findAll/${datasetId}`;
     let data = await get(url);
@@ -217,36 +175,20 @@ export async function getDataSetClass(datasetId: string) {
     return classTypes;
 }
 
-/** 数据流转 */
-/**
- * 根据dataId将data的状态置为无效
- * /data/flow/markAsInvalid/
- *  */
+/** Data flow */
 export async function setInvalid(dataId: string) {
     const url = `${Api.API}/data/flow/markAsInvalid/${dataId}`;
     await post(url);
 }
-/**
- * 据dataId将data的状态置为有效
- * /data/flow/markAsInvalid
- *  */
 export async function setValid(dataId: string) {
     const url = `${Api.API}/data/flow/markAsValid/${dataId}`;
     await post(url);
 }
-/**
- * 更新数据的标注状态
- * /data/flow/submit/
- * */
 export async function submit(dataId: string) {
     const url = `${Api.API}/data/flow/submit/${dataId}`;
     await post(url);
 }
 
-/**
- * modify
- * /data/annotate
- */
 export async function takeRecordByData(params: any) {
     const url = `${Api.DATASET_DATA}/annotate`;
     console.log(123);
@@ -254,9 +196,6 @@ export async function takeRecordByData(params: any) {
     return res;
 }
 
-/** 根据数据集ID查询标注状态数量
- * /data/getAnnotationStatusStatisticsByDatasetId
- */
 export async function getAnnotationStatus(datasetId: string) {
     let url = `${Api.DATASET_DATA}/getAnnotationStatusStatisticsByDatasetId`;
     let data = await get(url, { datasetId: datasetId });
@@ -266,9 +205,6 @@ export async function getAnnotationStatus(datasetId: string) {
     return data;
 }
 
-/**
- * 根据数据ID集合查询数据状态
- */
 export async function getDataStatusByIds(dataId: string) {
     let url = `${Api.DATASET_DATA}/getDataStatusByIds`;
     let data = await get(url, { dataIds: dataId });

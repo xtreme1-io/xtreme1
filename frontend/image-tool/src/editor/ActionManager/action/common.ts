@@ -50,7 +50,7 @@ export const KeyEscDown = define({
     },
 });
 
-// space - 空方法占位
+// space -
 export const KeySpaceDown = define({
     valid() {
         return true;
@@ -63,7 +63,7 @@ export const KeySpaceUp = define({
     },
     execute() {},
 });
-// ctrl + z 空方法占位
+// ctrl + z
 export const KeyBackDown = define({
     valid() {
         return true;
@@ -71,7 +71,7 @@ export const KeyBackDown = define({
     execute() {},
 });
 
-// ctrl + shift + z 空方法占位
+// ctrl + shift + z
 export const KeyForwardDown = define({
     valid() {
         return true;

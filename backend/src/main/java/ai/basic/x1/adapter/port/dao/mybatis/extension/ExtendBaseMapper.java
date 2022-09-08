@@ -7,51 +7,54 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * 扩展
+ * extend sql method
+ * @author andy
  */
 public interface ExtendBaseMapper<T> extends BaseMapper<T> {
 
     /**
-     * 批量插入
-     * @param list 需要插入对象集合
-     *  @return 新增条数
+     * batchInsert
+     * @param list dataList
+     *  @return success count
      */
     int insertBatch(@Param(Constants.LIST) List<T> list);
 
     /**
-     * 自定义批量新增或更新
-     * @param list 需要插入更新对象集合
-     * @return 更新新增条数
+     * mysql batch insert or update
+     * @param list dataList
+     * @return success count
      */
     int mysqlInsertOrUpdateBatch(@Param(Constants.LIST) List<T> list);
 
     /**
-     * 带填充的逻辑删除
-     * @param list 需要删除对象集合
-     * @return 删除条数
+     * logic deleted
+     * @param list dataList
+     * @return success count
      */
     int logicDeleteBatchByIdsWithFill(@Param(Constants.COLLECTION) List<T> list);
 
     /**
-     * 插入数据，如果中已经存在相同的记录，则忽略当前新数据
+     * insert ignore
 
-     * @param entity 实体类
-     * @return 影响条数
+     * @param entity data
+     * @return success count
      */
     int insertIgnore(T entity);
 
     /**
-     * 批量插入数据，如果中已经存在相同的记录，则忽略当前新数据
-     * @param entityList 实体类列表
-     * @return 影响条数
+     * batch insert ignore
+     * @param entityList dataList
+     * @return success count
      */
     int insertIgnoreBatch(List<T> entityList);
 
     /**
-     * 替换数据
-     * replace into表示插入替换数据，需求表中有PrimaryKey，或者unique索引，如果数据库已经存在数据，则用新数据替换，如果没有数据效果则和insert into一样；
-     * @param entity 实体类
-     * @return 影响条数
+     * replace
+     * Replace Into means inserting the replacement data. The demand table is PrimaryKey, or the Unique index.
+     * If the database already exists in data, replace it with new data.
+     * If there is no data effect, it is the same as Insert into;
+     * @param entity data
+     * @return success count
      */
     int replace(T entity);
 

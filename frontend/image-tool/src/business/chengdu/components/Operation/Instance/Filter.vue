@@ -31,23 +31,19 @@
     const userCheckedKeys = ref<string[]>([FilterEnum.class]);
     const modelCheckedKeys = ref<string[]>([FilterEnum.predictedClass]);
 
-    // 用于 Header 获取
     defineExpose({
         userCheckedKeys,
         modelCheckedKeys,
     });
 
-    // 根据用户数据生成树
     const userTree = computed(() => {
         // const state = this.state;
-        // 获取非模型标注结果
         const classList = state.list.filter((item: any) => !item.isModel);
         const noClassList = state.noClassList.data.filter((item: any) => !item.isModel);
         const objectN = classList.length + noClassList.length;
 
         const children = [];
 
-        // 无标签
         if (noClassList.length > 0) {
             const obj = {
                 title: `Class Required(${noClassList.length})`,
@@ -56,7 +52,6 @@
             children.push(obj);
         }
 
-        // 有标签
         classList.forEach((item: any) => {
             const obj = {
                 title: `${item.classType} (${item.data.length})`,
@@ -77,14 +72,12 @@
     });
     const modelTree = computed(() => {
         // const state = this.state;
-        // 获取非模型标注结果
         const classList = state.list.filter((item: any) => item.isModel);
         const noClassList = state.noClassList.data.filter((item: any) => item.isModel);
         const objectN = classList.length + noClassList.length;
 
         const children = [];
 
-        // 无标签
         if (noClassList.length > 0) {
             const obj = {
                 title: `Class Required (${noClassList.length})`,
@@ -93,7 +86,6 @@
             children.push(obj);
         }
 
-        // 有标签
         classList.forEach((item: any) => {
             const obj = {
                 title: `${item.classType} (${item.data.length})`,

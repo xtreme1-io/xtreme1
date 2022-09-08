@@ -1,7 +1,7 @@
 package ai.basic.x1.entity.enums;
 
 /**
- * 导出状态枚举
+ * export status enums
  *
  * @author fyb
  * @date 2022/4/21 14:50

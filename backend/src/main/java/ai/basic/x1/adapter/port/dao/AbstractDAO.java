@@ -56,9 +56,9 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     protected Class<M> mapperClass = currentMapperClass();
 
     /**
-     * 判断数据库操作是否成功
+     * Determine whether the database operation is successful
      *
-     * @param result 数据库操作返回影响条数
+     * @param result success count
      * @return boolean
      * @deprecated 3.3.1
      */
@@ -77,7 +77,7 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
 
 
     /**
-     * 批量操作 SqlSession
+     * batch sql SqlSession
      *
      * @deprecated 3.3.0
      */
@@ -87,7 +87,7 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * 释放sqlSession
+     * close sqlSession
      *
      * @param sqlSession session
      * @deprecated 3.3.0
@@ -98,7 +98,7 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * 获取 SqlStatement
+     * get SqlStatement
      *
      * @param sqlMethod ignore
      * @return ignore
@@ -115,7 +115,7 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * 批量插入
+     * batch insert
      *
      * @param entityList ignore
      * @param batchSize  ignore
@@ -127,10 +127,10 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * 获取mapperStatementId
+     * get mapperStatementId
      *
-     * @param sqlMethod 方法名
-     * @return 命名id
+     * @param sqlMethod method name
+     * @return named id
      * @since 3.4.0
      */
     protected String getSqlStatement(SqlMethod sqlMethod) {
@@ -138,9 +138,9 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * TableId 注解存在更新记录，否插入一条记录
+     * TableId save or update
      *
-     * @param entity 实体对象
+     * @param entity
      * @return boolean
      */
     public boolean saveOrUpdate(T entity) {
@@ -232,11 +232,11 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * 执行批量操作
+     * execute batch
      *
      * @param consumer consumer
      * @since 3.3.0
-     * @deprecated 3.3.1 后面我打算移除掉 {@link #executeBatch(Collection, int, BiConsumer)} }.
+     * @deprecated 3.3.1
      */
     @Deprecated
     protected boolean executeBatch(Consumer<SqlSession> consumer) {
@@ -244,13 +244,13 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * 执行批量操作
+     * execute batch
      *
-     * @param list      数据集合
-     * @param batchSize 批量大小
-     * @param consumer  执行方法
-     * @param <E>       泛型
-     * @return 操作结果
+     * @param list      data list
+     * @param batchSize size
+     * @param consumer  method
+     * @param <E>       generics type
+     * @return Operation result
      * @since 3.3.1
      */
     protected <E> boolean executeBatch(Collection<E> list, int batchSize, BiConsumer<SqlSession, E> consumer) {
@@ -260,9 +260,9 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     /**
      * 执行批量操作（默认批次提交数量）
      *
-     * @param list     数据集合
-     * @param consumer 执行方法
-     * @param <E>      泛型
+     * @param list     data list
+     * @param consumer method
+     * @param <E>       generics type
      * @return 操作结果
      * @since 3.3.1
      */

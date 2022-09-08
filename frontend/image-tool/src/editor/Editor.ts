@@ -117,7 +117,6 @@ export class Editor extends EventEmitter {
     }
     setMode(modeConfig: IModeConfig) {
         console.log('editor - setMode', modeConfig);
-        // TODO
         // let config = Modes[mode];
         // if (!config) return;
         this.state.mode = modeConfig.name || '';
@@ -127,8 +126,6 @@ export class Editor extends EventEmitter {
             this.state.activeItem = 'edit';
         }
 
-        // 从这里根据模式去重新设置的快捷键和方法
-        // -- 如果不根据模式，则默认为 ActionManager 下的所有方法
         this.hotkeyManager.setHotKeyFromAction(this.state.modeConfig.actions);
 
         // this.pc.renderViews.forEach((view) => {
@@ -167,13 +164,11 @@ export class Editor extends EventEmitter {
     setVisible(ids: string[], visible: boolean) {
         this.tool?.setVisible(ids, visible);
     }
-    // 新增方法
     handleToggleKeyboard() {}
     handlePageUp() {}
     handlePageDown() {}
     handleSaveObject() {}
     handleSelectTool(name: string, args?: any) {}
-    // 删除形状、点
     handleDelete() {
         console.log('this.view:', this.tool);
         const activeAnchor = this?.tool?.activeAnchor;

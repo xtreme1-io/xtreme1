@@ -2,13 +2,7 @@
     <div class="header-content">
         <span>{{ props.title }}</span>
         <div class="tool">
-            <!-- <i
-                v-if="canEdit()"
-                title="Filter"
-                class="iconfont icon-filter icon"
-                @click.stop="filterVisible = !filterVisible"
-            /> -->
-            <!-- 筛选 -->
+            <!-- Filter -->
             <Popover
                 title="Filter"
                 placement="bottomRight"
@@ -84,17 +78,6 @@
             </a-popover>
         </div>
         <div v-show="!canOperate()" class="over-not-allowed"></div>
-        <!-- <div v-if="filterVisible" class="filter" @click.stop="">
-            <div class="filter__title">Filter</div>
-            <div class="filter__body">
-                <Filter ref="filterRef" />
-            </div>
-            <div class="filter__divider"></div>
-            <div class="filter__footer">
-                <a-button size="small" @click="handleReset">Reset</a-button>
-                <a-button size="small" type="primary" @click="handleConfirm"> Confirm </a-button>
-            </div>
-        </div> -->
     </div>
 </template>
 
@@ -126,7 +109,6 @@
     const editor = tool.editor;
     const editorState = editor.state;
 
-    // 删除所有
     function onDelete() {
         editor.showConfirm({ title: 'Delete', subTitle: 'Delete All Results?' }).then(
             () => {
@@ -139,31 +121,23 @@
             () => {},
         );
     }
-    // 切换所有形状
+
     function toggleVisible() {
         editorState.allVisible = !editorState.allVisible;
-        // 然后设置所有形状
-        // -- 这里应该将当前筛选出来的形状遍历设置，处理方法应该同 类的切换 的处理一致
-        // editor.setVisible([], editorState.allVisible);
         console.log(editorState.allVisible);
         editor.emit(Event.FILTER_TOGGLE, editorState.allVisible);
     }
 
     // filter --------------------------
     const filterValue: any = inject('filterValue');
-    // 主要用于满足 切换当前画布时，要重置筛选项
     watch(filterValue, (newVal) => {
-        // 先判断值是否存在
         lastUserChecked.value = lastUserChecked.value ?? [FilterEnum.class];
         lastModelChecked.value = lastModelChecked.value ?? [FilterEnum.predictedClass];
-        // 如果新值同默认全选一样，则将勾选项设置为全选
         if (_.isEqual(newVal, [FilterEnum.class, FilterEnum.predictedClass])) {
             lastUserChecked.value = [FilterEnum.class];
             lastModelChecked.value = [FilterEnum.predictedClass];
         }
-        // 判断子组件实例
         if (filterRef.value) {
-            // warning错误，还没解决
             lastUserChecked.value = lastUserChecked.value.filter((item) => newVal.includes(item));
             lastModelChecked.value = lastModelChecked.value.filter((item) => newVal.includes(item));
 
@@ -171,13 +145,11 @@
             (filterRef.value as any).modelCheckedKeys = lastModelChecked.value;
         }
     });
-    // 用于控制 popover 的显隐
     const filterVisible = ref<boolean>(false);
     watch(filterVisible, (newVal) => {
         if (!newVal) {
             resetFilter();
         } else {
-            // true 即重新打开 popover ,那么这里进行反向操作
             console.log('State:', props.state);
             const tempUser: any[] = [];
             const tempModel: any[] = [];
@@ -194,9 +166,7 @@
                     tempUser.push(item.classType);
                 }
             });
-            // 判断有没有 model
             const isAllModel = props.state?.list.every((item: any) => item.isModel);
-            // 空数据要默认选上
             if (props.state.list.length == 0 || isAllModel) {
                 tempUser.push(FilterEnum.class);
             }
@@ -206,15 +176,13 @@
             }
         }
     });
-    // 重置
     const handleReset = () => {
         resetFilter(true);
         handleFilter();
         filterVisible.value = false;
     };
-    // 确认
     const handleConfirm = () => {
-        props.state.select = []; // 取消选中
+        props.state.select = [];
         if (editor.tool) editor.tool.selectedShape = null;
         editor.state.showClassView = false;
         console.log(editor);
@@ -223,7 +191,6 @@
         handleFilter();
         filterVisible.value = false;
     };
-    // 改变
     const handleFilter = () => {
         nextTick(() => {
             editor.emit(Event.FILTER_CHANGE, defaultSelectedKeys.value);
@@ -231,31 +198,25 @@
         });
     };
 
-    // 默认选中项
     const defaultSelectedKeys = ref<string[]>([FilterEnum.class, FilterEnum.predictedClass]);
-    // 用于存储上次勾选项
     const lastUserChecked = ref<string[]>([FilterEnum.class]);
     const lastModelChecked = ref<string[]>([FilterEnum.predictedClass]);
-    // 获取 Filter 实例
     const filterRef = ref(null);
     const confirmFilter = () => {
         defaultSelectedKeys.value = [];
         defaultSelectedKeys.value.push(...(filterRef.value as any).userCheckedKeys);
         defaultSelectedKeys.value.push(...(filterRef.value as any).modelCheckedKeys);
-        // 保存当前勾选项
         lastUserChecked.value = (filterRef.value as any).userCheckedKeys;
         lastModelChecked.value = (filterRef.value as any).modelCheckedKeys;
     };
     const resetFilter = (isDefault?: boolean) => {
         if (isDefault) {
-            // 点击 reset 重置
             defaultSelectedKeys.value = [FilterEnum.class, FilterEnum.predictedClass];
             (filterRef.value as any).userCheckedKeys = [FilterEnum.class];
             (filterRef.value as any).modelCheckedKeys = [FilterEnum.predictedClass];
             lastUserChecked.value = [FilterEnum.class];
             lastModelChecked.value = [FilterEnum.predictedClass];
         } else {
-            // 点击遮罩层，需要重置勾选项
             (filterRef.value as any).userCheckedKeys = lastUserChecked.value;
             (filterRef.value as any).modelCheckedKeys = lastModelChecked.value;
         }

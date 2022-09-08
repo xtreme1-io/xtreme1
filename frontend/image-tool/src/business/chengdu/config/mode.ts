@@ -15,14 +15,12 @@ function toMap<T extends string>(arr: T[]) {
     return map;
 }
 
-// 执行
 const execute: IModeConfig<IBsUIType, IBsActionName> = {
     op: OPType.EXECUTE,
     ui: toMap([...executeUI]),
-    actions: toMap<IBsActionName>(allActions), // 这里暂时直接把所有方法都作为初始值配置
+    actions: toMap<IBsActionName>(allActions), // For the time being, all methods are directly configured as initial values.
 };
 
-// 查看
 const view: IModeConfig<IBsUIType, IBsActionName> = {
     op: OPType.VIEW,
     ui: toMap([...verifyUI]),
@@ -53,7 +51,6 @@ const interactive: IModeConfig<IBsUIType, IBsActionName> = {
 let modes = {
     execute,
     view,
-    // 以下待定，后面在选择左侧工具栏时调用editor.setMode来设置actions
     rect,
     polygon,
     polyline,

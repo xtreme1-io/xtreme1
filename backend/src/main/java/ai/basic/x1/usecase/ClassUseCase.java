@@ -54,7 +54,6 @@ public class ClassUseCase {
     }
 
     private void addOrderRule(LambdaQueryWrapper<Class> classificationLambdaQueryWrapper, String sortBy, String ascOrDesc) {
-        //默认按升序排列
         boolean isAsc = StrUtil.isBlank(ascOrDesc) || SortEnum.ASC.name().equals(ascOrDesc);
         if (StrUtil.isNotBlank(sortBy)) {
             classificationLambdaQueryWrapper.orderBy(SortByEnum.NAME.name().equals(sortBy), isAsc, Class::getName);

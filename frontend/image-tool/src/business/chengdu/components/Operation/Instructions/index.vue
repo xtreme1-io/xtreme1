@@ -1,41 +1,12 @@
 <template>
     <Collapse header="Instructions">
-        <div class="operation-instructions">
-            <!-- <a-select
-            v-model:value="toolState.resultActive"
-            mode="multiple"
-            :maxTagCount="1"
-            :maxTagTextLength="60"
-            style="width: 180px"
-            :options="toolState.resultFilter"
-            @select="onSelect"
-        >
-        </a-select> -->
-        </div>
+        <div class="operation-instructions"> </div>
         <div class="no-info" style="padding: 8px 10px; text-align: left">No Data</div>
     </Collapse>
 </template>
 
 <script setup lang="ts">
-    import { reactive, watch } from 'vue';
     import Collapse from '../../Collapse/index.vue';
-    // import { useInjectTool } from '../../../state';
-
-    // let tool = useInjectTool();
-    // let toolState = tool.state;
-    // let state = reactive({
-    //     active: [] as string[],
-    //     list: options,
-    // });
-
-    // watch(
-    //     () => toolState.resultActive,
-    //     () => {
-    //         console.log('onChange', toolState.resultActive);
-    //         if (toolState.resultActive.length === 0) toolState.resultActive = [tool.config.FILTER_ALL];
-    //         tool.loadDataFromManager(true);
-    //     },
-    // );
 
     function onSelect(value: string) {
         let ALL = tool.config.FILTER_ALL;

@@ -207,13 +207,11 @@ export function getArea(points: IPoint[]) {
     area = Math.abs(s / 2);
     return area;
 }
-// 两点间距离，按缩放比例转换到原图上
 export function getDistance(p0: IPoint, p1: IPoint, zoom = 1) {
     let dis = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
-    return dis / zoom; //转为图片中的距离
+    return dis / zoom;
 }
 
-// 计算一组点的折线长度
 export function getLineLength(points: IPoint[], zoom: number) {
     let ret = 0;
     let length = points.length;
@@ -224,7 +222,6 @@ export function getLineLength(points: IPoint[], zoom: number) {
     return ret;
 }
 
-// 暂时没用
 export function getEqualDiversionPoint(points: IPoint[], share: number) {
     let length = getLineLength(points);
     let num = points.length;
@@ -260,8 +257,6 @@ export function getEqualDiversionPoint(points: IPoint[], share: number) {
     return result;
 }
 
-// 旋转一个点
-// params 旋转角度，要旋转的点，参考点
 export function rotatePoint(alpha: number, point: IPoint, base: IPoint) {
     let cosa = Math.cos(alpha);
     let sina = Math.sin(alpha);
@@ -271,14 +266,12 @@ export function rotatePoint(alpha: number, point: IPoint, base: IPoint) {
     };
 }
 
-// 创建drag的点
 export function createAnchor(opt: Konva.CircleConfig) {
     return new Konva.Circle({
         ...opt,
     });
 }
 
-// 取两点间的中间点
 export function getMidPoints(points: IPoint[] = [], boundary: boolean = false) {
     let i = 0,
         len = points.length,
@@ -301,7 +294,6 @@ export function getMidPoints(points: IPoint[] = [], boundary: boolean = false) {
     return result;
 }
 
-// 由任意的两个点 生成矩形上的四个点
 export function getRectPoints(p1: IPoint, p2: IPoint) {
     let width = Math.abs(p1.x - p2.x);
     let height = Math.abs(p1.y - p2.y);
@@ -326,7 +318,7 @@ export function getRectPoints(p1: IPoint, p2: IPoint) {
         },
     ];
 }
-// 有中心点 宽高的矩形四坐标点
+
 export function getRectPointsByCenterAndWH(
     center: IPoint,
     width: number,
@@ -369,7 +361,7 @@ export function getRectPointsByCenterAndWH(
         },
     ];
 }
-// 暂时不关注
+
 export function fixRectsCenter(
     center: IPoint,
     limitBbox: IDim,
@@ -397,7 +389,7 @@ export function fixRectsCenter(
     }
     return center;
 }
-// 限制点在画布区域内，点位格式化方法
+
 export function fixedPointPositionIfNeed(point: IPoint, bbox: IDim, limit = true) {
     if (!limit) return point;
     if (point.x < bbox.x) {
@@ -414,7 +406,7 @@ export function fixedPointPositionIfNeed(point: IPoint, bbox: IDim, limit = true
     }
     return point;
 }
-//by wuhao@basicfinder.com
+
 export function calculateRectPoints(p0: IPoint, p2: IPoint, angle: number, index: number) {
     if (!(p0 && p2)) {
         return;
@@ -448,8 +440,7 @@ export function calculateRectPoints(p0: IPoint, p2: IPoint, angle: number, index
     }
     return [...result];
 }
-// 先判断是否是顺时针  如果是逆时针 第二 四个点 对换
-// 针对rect 类型
+
 function clockWise(points: IPoint[]) {
     points = points.slice();
     let sum = 0;
@@ -459,18 +450,14 @@ function clockWise(points: IPoint[]) {
     }
     sum += (points[0].x - points[i].x) * (points[0].y + points[i].y);
     if (sum > 0) {
-        // 逆时针的时候调整顺序
         let last = points[1];
         points[1] = points[3];
         points[3] = last;
     }
     return points;
 }
-// 暂时不用
-export function sortPolygonPointClockwise(pointsArr: IPoint[], angle = 0) {
-    // angle 表示倾斜角度 大于0 向右  小于0 向左
 
-    // 排序后的点顺序 见 asset/rect-points-order.png
+export function sortPolygonPointClockwise(pointsArr: IPoint[], angle = 0) {
     let points = pointsArr.slice() as IPoint[];
     let center = getPolygonCenter(points);
     points.forEach((a, i) => {
@@ -480,11 +467,7 @@ export function sortPolygonPointClockwise(pointsArr: IPoint[], angle = 0) {
     points.sort((a, b) => {
         return (a.angle as number) - (b.angle as number);
     });
-    // 以上顺时针排序
-    // 以下找到左上角的坐标
-    // 找出最小的
     let minIndex: number | undefined = -1;
-    // 向左倾斜 按x坐标 向右倾斜 按y坐标排序
     let pointscopy = points.slice().sort((a, b) => {
         return angle >= 0 ? a.y - b.y : a.x - b.x;
     });
@@ -492,7 +475,6 @@ export function sortPolygonPointClockwise(pointsArr: IPoint[], angle = 0) {
     let minYPoint = pointscopy[0];
     let minYPoint2 = pointscopy[1];
     if (angle >= 0) {
-        // 向右倾斜 或非倾斜框
         if (minYPoint.y === minYPoint2.y) {
             if (minYPoint.x < minYPoint2.x) {
                 minIndex = minYPoint.index;
@@ -503,7 +485,6 @@ export function sortPolygonPointClockwise(pointsArr: IPoint[], angle = 0) {
             minIndex = minYPoint.index;
         }
     } else {
-        // 向左倾斜
         if (minYPoint.x === minYPoint2.x) {
             if (minYPoint.y < minYPoint2.y) {
                 minIndex = minYPoint.index;
@@ -517,7 +498,7 @@ export function sortPolygonPointClockwise(pointsArr: IPoint[], angle = 0) {
     let result = pointsArr.slice(minIndex);
     return clockWise(result.concat(pointsArr.slice(0, minIndex)));
 }
-// 获取逻辑中心点
+
 export function getPolygonCenter(points: IPoint[]) {
     return {
         x:
@@ -542,7 +523,7 @@ export function getPolygonCenter(points: IPoint[]) {
             ).y / points.length,
     };
 }
-// 盒子限制区域
+
 export function limitInBBoxIfNeed(
     curPosition: IPoint,
     limitBbox: IDim,
@@ -566,7 +547,7 @@ export function limitInBBoxIfNeed(
     }
     return curPosition;
 }
-// 是不是同一个点
+
 export function isEqualPoint(p1: IPoint, p2: IPoint) {
     return Math.abs(p1.x - p2.x) < Number.EPSILON && Math.abs(p1.y - p2.y) < Number.EPSILON;
 }
@@ -580,22 +561,20 @@ export function isGreatOrEqual(a: number, b: number) {
 export function isLessOrEqual(a: number, b: number) {
     return isEuqalFloatNumber(a, b) || a < b;
 }
-// 设置颜色
+
 export function setColorAlpha(color: string, alpha = 1) {
     let colorObj = Konva.Util.getRGB(color);
     return `rgba(${colorObj.r},${colorObj.g},${colorObj.b},${alpha})`;
 }
-// 获取缩放比例
+
 export function getScaleFactor(view: ImageLabel) {
     return 1 / ((view && view.scalefactor) || 1);
 }
-// 兼容处理画布上图形的比例
+
 export function updateShapeScale(view: ImageLabel) {
-    // 乘以画布缩放的倒数 保持图形和文本在不同的缩放等级保持一致
     let shapes = view.Stage.find(SHAPELABELHELPNAME);
     let scale = getScaleFactor(view);
     shapes.forEach((shape: Konva.Shape) => {
-        // 图形
         if (shape.hasName(SHAPENAME) || shape.hasName(HELPNAME)) {
             let strokeWidth = shape.hasName('bisectrixline') ? 1 : CONSTANT.STROKEWIDTH;
             if (shape.hasStroke()) {
@@ -603,7 +582,6 @@ export function updateShapeScale(view: ImageLabel) {
                 shape.hitStrokeWidth(CONSTANT.HITSTROKEWIDTH * scale);
             }
             if (shape.hasName(ANCHORNAME) || shape.hasName(POINTNAME)) {
-                // 排除 circler 类型
                 !shape.hasName('circler') && shape.radius(CONSTANT.ANCHORRADIUS * scale);
                 shape.hitStrokeWidth(CONSTANT.HITSTROKEWIDTH * scale);
                 if (typeof shape.active !== 'undefined') {
@@ -613,7 +591,6 @@ export function updateShapeScale(view: ImageLabel) {
                 }
             }
         }
-        // 标签文本
         if (shape.hasName(LABELNAME)) {
             let text = shape.getText();
             let tag = shape.getTag();
@@ -633,15 +610,14 @@ export function updateShapeScale(view: ImageLabel) {
     view.shapelayer.batchDraw();
     view.helplayer.batchDraw();
 }
-// 将target等比展示缩放内容到bbox
+
 export function computeScaleDim(target: IDim, bbox: IDim) {
-    // 等比例放缩 target 以适应容器大小
     let w = target.width,
         h = target.height,
-        a = w / h, // target 宽高比
+        a = w / h,
         w_ = bbox.width,
         h_ = bbox.height,
-        a_ = w_ / h_; //bbox 宽高比
+        a_ = w_ / h_;
     if (Math.abs(a - a_) < 0.00000001) {
         w = w_;
         h = h_;
@@ -675,7 +651,6 @@ export function xytoArr(points: IPoint[]) {
     return ret;
 }
 
-// 切换 mask 图显示
 export function updateShapeMask(shapelayer: Konva.Layer) {
     let objects = shapelayer.find(SHAPESELCTOR);
     let shapeObject: Konva.Node[] = [];
@@ -705,10 +680,8 @@ export function updateLabelVisibility(view: ImageLabel) {
     });
     view.Stage.batchDraw();
 }
-// 图形显示隐藏
 export function updateShapeVisibility(view: ImageLabel, showPoly: boolean) {
     let allObjects = view.Stage.find('.shape');
-    // E 键 按下隐藏图形 放开显示 图形  还有看背景是黑色的mask图的情况
     if (config.EisPressed) {
         view.background.show();
     } else {
@@ -747,9 +720,7 @@ export function updateShapeVisibility(view: ImageLabel, showPoly: boolean) {
     });
     view.Stage.batchDraw();
 }
-// 结果去重
 export function uniqueArr(arr: any[]) {
-    // 此去重方法不通用 适合当前需求而已 后续可以实现满足多种情况的去重
     let temp = arr.slice();
     temp = temp.map((v) => {
         return JSON.stringify(v);
@@ -760,7 +731,6 @@ export function uniqueArr(arr: any[]) {
     });
     return temp;
 }
-// 把相邻坐标不相同的结果去掉
 export function uniqueNexteArr(arr: any[]) {
     let temp = arr.slice();
     let len = temp.length;
@@ -786,7 +756,6 @@ export function getRandomId() {
 export function isUndefined(v) {
     return typeof v === 'undefined';
 }
-// 画布的图形点转成图片坐标
 export function toImageCord(p: IPoint, limitBbox: IDim) {
     return {
         ...p,
@@ -794,7 +763,6 @@ export function toImageCord(p: IPoint, limitBbox: IDim) {
         y: +((p.y - limitBbox.y) / limitBbox.scale).toFixed(6),
     };
 }
-// 图片的坐标变换到画布坐标
 export function transformPoints(points: IPoint[], dim: IDim) {
     return points.map((p) => {
         return {
@@ -804,7 +772,6 @@ export function transformPoints(points: IPoint[], dim: IDim) {
         };
     });
 }
-// 图片的坐标变换到画布坐标的单个方法
 export function transformPoint(p: IPoint, dim: IDim) {
     return {
         x: p.x * dim.scale + dim.x,
@@ -812,7 +779,6 @@ export function transformPoint(p: IPoint, dim: IDim) {
     };
 }
 
-// 获取最大ID
 export function getMaxIntId(shapeList) {
     let intIds = [1];
     let len = shapeList.length;
@@ -831,7 +797,6 @@ export function getMaxIntId(shapeList) {
     return Math.max(...intIds);
 }
 
-// 判断某个点是否再线段之间
 export function onSegment(p1: IPoint, p2: IPoint, q: IPoint) {
     p1 = { x: p1.x, y: p1.y };
     p2 = { x: p2.x, y: p2.y };
@@ -898,19 +863,15 @@ export function onSegment2(p1: IPoint, p2: IPoint, q: IPoint, lineSize = 1) {
 
     return dis <= lineSize;
 }
-// 检查 target 是否完全包含在 source内部
 export function polygonContains(source: Polygon, target: Polygon) {
-    // target 必须是 Polygon 实例
     if (!(target instanceof Polygon)) {
         return false;
     }
-    // target 的面积 需要小于等于 source的面积
     if (source.area <= target.area) {
         return false;
     }
     let points = source.shape.points();
     let checkPoitns = target.points;
-    // target 的 点 全部在 source内部
     for (let i = 0; i < checkPoitns.length; i++) {
         let p = checkPoitns[i];
         if (!pointInPolygon([p.x, p.y], xytoArr(points))) {
@@ -919,7 +880,6 @@ export function polygonContains(source: Polygon, target: Polygon) {
     }
     return true;
 }
-// 通过当前工具类确定当前形状类
 export function getSelectedShapByCurrentTool(editor: any) {
     const selectedShape = editor?.tool?.selectedShape;
     const currentTool = editor?.tool?.toolmanager?.currentTool;
@@ -927,33 +887,25 @@ export function getSelectedShapByCurrentTool(editor: any) {
     else return selectedShape;
 }
 
-// 获取AI交互工具矩形框坐标点
 export function getInteractivePoint(points: IPoint[]) {
-    // 防止用户从其它方向拉去矩形框，确保最小点为左上角
     const { x: x1, y: y1 } = points[0];
     const { x: x2, y: y2 } = points[2];
-    // 通过判断大小来调整
     points[0] = { x: Math.min(x1, x2), y: Math.min(y1, y2) };
     points[1] = { x: Math.max(x1, x2), y: Math.min(y1, y2) };
     points[2] = { x: Math.max(x1, x2), y: Math.max(y1, y2) };
     points[3] = { x: Math.min(x1, x2), y: Math.max(y1, y2) };
     return points;
 }
-// 根据传入的点 获取 X,Y 最大最小坐标点
 export function getMinMaxPoint(points: IPoint[], limitBbox: IDim) {
-    // 获取矩形框的 关键坐标点
     let { x: x1, y: y1 } = points[0];
     let { x: x2, y: y2 } = points?.[2] ?? points[0];
-    // 获取画布区域的 坐标
     let { x: minX, y: minY, width: maxX, height: maxY } = limitBbox;
     maxX = minX + maxX;
     maxY = minY + maxY;
-    // 判断边界情况 -- 取三者之间的中间数
     x1 = Math.min(Math.max(x1, minX), maxX);
     x2 = Math.min(Math.max(x2, minX), maxX);
     y1 = Math.min(Math.max(y1, minY), maxY);
     y2 = Math.min(Math.max(y2, minY), maxY);
-    // 判断点坐标,确保左上角最小，右下角最大
     x1 > x2 && ([x1, x2] = [x2, x1]);
     y1 > y2 && ([y1, y2] = [y2, y1]);
 

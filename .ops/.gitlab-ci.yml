@@ -18,17 +18,43 @@ variables:
 
   KUBERNETES_NAMESPACE: "x1-community"
 
+build-backend-package:
+  stage: build-package
+  tags:
+    - openjdk-11
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+      changes:
+        - .ops/*
+        - .ops/**/*
+        - backend/*
+        - backend/**/*
+    - if: $CI_COMMIT_TAG =~ /^v/
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"
+    MAVEN_ARGS: "--batch-mode"
+  script:
+    - cd backend
+    - mvn $MAVEN_ARGS package
+  artifacts:
+    paths:
+      - backend/target/$BACKEND_PACKAGE_NAME
+  cache:
+    paths:
+      - backend/.m2/repository
+
 build-frontend-package:
   stage: build-package
   tags:
     - nodejs-16
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
       changes:
         - .ops/*
         - .ops/**/*
         - frontend/*
         - frontend/**/*
+    - if: $CI_COMMIT_TAG =~ /^v/
   script:
     - cd frontend/main
     - npm install
@@ -48,36 +74,19 @@ build-frontend-package:
       - frontend/image-tool/node_modules
       - frontend/pc-tool/node_modules
 
-build-backend-package:
-  stage: build-package
-  tags:
-    - openjdk-11
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
-      changes:
-        - .ops/*
-        - .ops/**/*
-        - backend/*
-        - backend/**/*
-  variables:
-    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/backend/.m2/repository"
-    MAVEN_ARGS: "--batch-mode"
-  script:
-    - cd backend
-    - mvn $MAVEN_ARGS package
-  artifacts:
-    paths:
-      - backend/target/$BACKEND_PACKAGE_NAME
-  cache:
-    paths:
-      - backend/.m2/repository
-
-build-deploy-package:
+build-release-package:
   stage: build-package
   tags:
     - ubuntu
   rules:
-    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
+      changes:
+        - .ops/*
+        - .ops/**/*
+        - deploy/*
+        - deploy/**/*
+        - docker-compose.yml
+    - if: $CI_COMMIT_TAG =~ /^v/
   script:
     - ls
   artifacts:
@@ -115,12 +124,13 @@ build-deploy-package:
 build-backend-image:
   extends: .build-image
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
       changes:
         - .ops/*
         - .ops/**/*
         - backend/*
         - backend/**/*
+    - if: $CI_COMMIT_TAG =~ /^v/
   variables:
     WORKING_DIR: backend
     IMAGE_NAME: $BACKEND_IMAGE_NAME
@@ -134,12 +144,13 @@ build-backend-image:
 build-frontend-image:
   extends: .build-image
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG =~ /^v/
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
       changes:
         - .ops/*
         - .ops/**/*
         - frontend/*
         - frontend/**/*
+    - if: $CI_COMMIT_TAG =~ /^v/
   variables:
     WORKING_DIR: frontend
     IMAGE_NAME: $FRONTEND_IMAGE_NAME

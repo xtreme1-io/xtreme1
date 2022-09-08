@@ -35,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -565,29 +564,30 @@ public class DataInfoUseCase {
      * Data annotation
      *
      * @param dataPreAnnotationBO Data pre-annotation parameter
-     * @param userId User id
+     * @param userId              User id
      * @return Annotation record id
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO,Long userId) {
-        return annotateCommon(dataPreAnnotationBO, null,userId);
+    public Long annotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+        return annotateCommon(dataPreAnnotationBO, null, userId);
     }
 
-    private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo,Long userId) {
+    private Long annotateCommon(DataPreAnnotationBO dataPreAnnotationBO, Long serialNo, Long userId) {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationRecord.class);
-        lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId,dataPreAnnotationBO.getDatasetId());
-        lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy,userId);
+        lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId, dataPreAnnotationBO.getDatasetId());
+        lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
         var dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
-        if(ObjectUtil.isNull(dataAnnotationRecord)){
+        var boo = true;
+        if (ObjectUtil.isNull(dataAnnotationRecord)) {
+            boo = false;
             dataAnnotationRecord = DataAnnotationRecord.builder()
                     .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
             dataAnnotationRecordDAO.save(dataAnnotationRecord);
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
-        try {
-            batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
-        } catch (DuplicateKeyException duplicateKeyException) {
-            log.error("Data edit duplicate", duplicateKeyException);
+        var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+        // Indicates that no new data is locked and there is no old lock record
+        if(insertCount == 0 && !boo){
             throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
         }
         return dataAnnotationRecord.getId();
@@ -597,7 +597,7 @@ public class DataInfoUseCase {
      * Data annotation with model
      *
      * @param dataPreAnnotationBO Data pre-annotation parameter
-     * @param userId User id
+     * @param userId              User id
      * @return Annotation record id
      */
     @Transactional(rollbackFor = Throwable.class)
@@ -610,7 +610,7 @@ public class DataInfoUseCase {
         if (ObjectUtil.isNotNull(modelBO)) {
             batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
         }
-        return annotateCommon(dataPreAnnotationBO, serialNo,userId);
+        return annotateCommon(dataPreAnnotationBO, serialNo, userId);
     }
 
     /**
@@ -619,9 +619,10 @@ public class DataInfoUseCase {
      * @param dataIds              Data id collection
      * @param dataAnnotationRecord Data annotation record
      */
-    private void batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord) {
+    private Integer batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord) {
+        var insertCount = 0;
         if (CollectionUtil.isEmpty(dataIds)) {
-            return;
+            return insertCount;
         }
         var dataEditSubList = new ArrayList<DataEdit>();
         int i = 1;
@@ -634,11 +635,12 @@ public class DataInfoUseCase {
             var dataEdit = dataEditBuilder.dataId(dataId).build();
             dataEditSubList.add(dataEdit);
             if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
-                dataEditDAO.getBaseMapper().insertBatch(dataEditSubList);
+                insertCount += dataEditDAO.getBaseMapper().insertIgnoreBatch(dataEditSubList);
                 dataEditSubList.clear();
             }
             i++;
         }
+        return insertCount;
     }
 
     /**
