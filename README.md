@@ -1,3 +1,4 @@
+![](https://img.shields.io/badge/Apache--2.0-license-green)
 # Xtreme1
 
 Xtreme1 for community, free and open source, powered by [Basic AI](https://www.basic.ai/).
@@ -53,6 +54,14 @@ Enter into the release package directory, and execute the following command to s
 docker compose up
 ```
 
+> Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
+
+```yaml
+services:
+  mysql:
+    platform: linux/amd64
+```
+
 #### Quick Start - Advanced
 
 It is recommended to use Compose V2 and the new `docker compose` command, not the old `docker-compose` command, you can see the differences between the two in the document [Overview of Docker Compose](https://docs.docker.com/compose/).
@@ -89,14 +98,6 @@ It'll pull all needed service images from Docker Hub, including basic services `
 
 After successfully started all services, you can open `http://localhost:8190` to access web frontend, and access MinIO console at `http://localhost:8194`.
 
-> Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
-
-```yaml
-services:
-  mysql:
-    platform: linux/amd64
-```
-
 ### Local development
 
 #### Enable Docker BuildKit
@@ -105,12 +106,14 @@ We are using Docker BuildKit to accelerate the building speed, such as cache Mav
 
 ```bash
 # Set environment variable to enable BuildKit just for once.
-$ DOCKER_BUILDKIT=1 docker build .
-$ DOCKER_BUILDKIT=1 docker compose up
+DOCKER_BUILDKIT=1 docker build .
+DOCKER_BUILDKIT=1 docker compose up
 
-# Or edit Docker daemon.json to enable BuildKit by default.
-$ vi /etc/docker/daemon.json
- { "features": { "buildkit": true } }
+# Or edit Docker daemon.json to enable BuildKit by default, the content can be something like '{ "features": { "buildkit": true } }'.
+vi /etc/docker/daemon.json
+
+# You can clear builder cache if you encounter some package version related problem.
+docker builder prune
  ```
 
 #### Develop with Docker Compose

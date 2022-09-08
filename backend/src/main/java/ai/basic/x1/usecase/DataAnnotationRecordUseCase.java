@@ -40,11 +40,11 @@ public class DataAnnotationRecordUseCase {
     private ModelDataResultDAO modelDataResultDAO;
 
     /**
-     * 查询当前登录人在dataset下的锁定数据
+     * get locked record by user id
      *
-     * @param datasetId 数据集ID
-     * @param userId    用户ID
-     * @return 锁定记录对象
+     * @param datasetId dataset id
+     * @param userId    user id
+     * @return locked records
      */
     public LockRecordBO findLockRecordIdByDatasetId(Long datasetId, Long userId) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataAnnotationRecord>();
@@ -62,14 +62,13 @@ public class DataAnnotationRecordUseCase {
     }
 
     /**
-     * 对数据进行解锁
+     * unlock data by record id
      *
-     * @param recordId 锁定记录ID
-     * @param userId   用户ID
+     * @param recordId record id
+     * @param userId   user id
      */
     public void unLockByRecordId(Long recordId, Long userId) {
         var dataAnnotationRecord = dataAnnotationRecordDAO.getById(recordId);
-        //暂时没有查询到记录 认为已经解锁
         if (ObjectUtil.isNull(dataAnnotationRecord)) {
             return;
         }
@@ -77,17 +76,16 @@ public class DataAnnotationRecordUseCase {
             throw new UsecaseException(DATASET_DATA_UNLOCK_ID_ERROR);
         }
         dataAnnotationRecordDAO.removeById(recordId);
-        //删除data_edit中锁定数据
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();
         lambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, recordId);
         dataEditDAO.remove(lambdaQueryWrapper);
     }
 
     /**
-     * 清除模型结果信息
+     * clean model running result
      *
-     * @param serialNo 模型流水号
-     * @param dataIds  数据ID集合
+     * @param serialNo serial number
+     * @param dataIds  data ids
      */
     @Transactional(rollbackFor = Exception.class)
     public void removeModelDataResult(Long serialNo, List<Long> dataIds) {
@@ -110,11 +108,11 @@ public class DataAnnotationRecordUseCase {
 
 
     /**
-     * 根据锁定记录ID查询锁定记录
+     * get locked record by record id
      *
-     * @param recordId 锁定记录ID
-     * @param userId   用户ID
-     * @return 数据锁定对象
+     * @param recordId record id
+     * @param userId   user id
+     * @return locked record
      */
     public DataAnnotationRecordBO findDataAnnotationRecordById(Long recordId, Long userId) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataAnnotationRecord>();
