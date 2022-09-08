@@ -258,12 +258,12 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     }
 
     /**
-     * 执行批量操作（默认批次提交数量）
+     * batch execute
      *
      * @param list     data list
      * @param consumer method
      * @param <E>       generics type
-     * @return 操作结果
+     * @return execute result
      * @since 3.3.1
      */
     protected <E> boolean executeBatch(Collection<E> list, BiConsumer<SqlSession, E> consumer) {
