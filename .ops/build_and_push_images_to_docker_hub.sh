@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This script used to build all app images of X1 community, and push them to Docker Hub.
+# This script used to build all app images of Xtreme1 community, and push them to Docker Hub.
 # Be sure in main branch!
 
 BACKEND_IMAGE=basicai/x1-community-backend

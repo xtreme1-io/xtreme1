@@ -3,7 +3,7 @@
     <div class="content">
       <img class="logo-img" :src="logoImg" alt="" />
       <div class="info">
-        <span class="link cursor-pointer" @click="handleGoPortal">BasicAI</span> X1 Community
+        <span class="link cursor-pointer" @click="handleGoPortal">BasicAI</span> Xtreme1 Community
         Edition is an open-source platform optimizing your data labeling and accelerating AI and
         machine learning with MLOps
       </div>
