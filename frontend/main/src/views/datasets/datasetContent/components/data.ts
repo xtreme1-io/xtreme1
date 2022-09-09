@@ -144,10 +144,10 @@ export const dataSortOption = [
     label: t('business.datasetContent.sort.createDate'),
     value: SortFieldEnum.CREATED_AT,
   },
-  {
-    label: t('business.datasetContent.sort.annotateCount'),
-    value: SortFieldEnum.ANNOTATION_COUNT,
-  },
+  // {
+  //   label: t('business.datasetContent.sort.annotateCount'),
+  //   value: SortFieldEnum.ANNOTATION_COUNT,
+  // },
 ];
 
 export const datasetListSortOption = [

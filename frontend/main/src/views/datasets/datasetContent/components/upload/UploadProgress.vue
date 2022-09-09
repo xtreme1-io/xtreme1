@@ -145,7 +145,7 @@
   );
   const reset = () => {
     fileList.value.forEach((item) => {
-      item?.controller.abort();
+      item?.controller?.abort();
     });
     fileList.value = [];
     clearInterval(processTimer.value);
@@ -157,7 +157,7 @@
     // processing can't cancel request
     if (item.status == UploadResultStatus.UPLOADING) {
       if (isUploading.value) {
-        item.controller.abort();
+        item?.controller?.abort();
       }
     } else if (item.status == UploadResultStatus.PENDING) {
       item.status = UploadResultStatus.CANCELED;
