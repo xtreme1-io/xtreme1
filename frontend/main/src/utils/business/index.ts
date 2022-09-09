@@ -8,7 +8,7 @@ export const goToTool = (query: any, type?: datasetTypeEnum) => {
   console.log(type);
   const BaseURL =
     host.indexOf('local') >= 0
-      ? '//' + host.replace('app', 'tool-image') + ':8000'
+      ? '//' + host.replace('app', 'tool-image') + ':8090'
       : '//' + host.replace('app', 'tool');
 
   // window.open(BaseURL + toolPath + '?' + qs.stringify(query));
