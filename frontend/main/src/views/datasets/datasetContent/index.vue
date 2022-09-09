@@ -7,7 +7,7 @@
         :lockedNum="lockedNum"
         :type="(info?.type as datasetTypeEnum)"
       /> -->
-      <div class="lockedMask" v-if="lockedNum > 0">
+      <div class="lockedMask" v-if="lockedNum && lockedNum > 0">
         <div class="flex-1 flex">
           <Icon icon="ant-design:info-circle-outlined" color="#FCB17A" class="mt-1" />
           <span class="ml-2">
@@ -319,7 +319,7 @@
     if (res) {
       // openWarningModal();
       lockedId.value = res.recordId;
-      lockedNum.value = res.lockedNum;
+      lockedNum.value = res.lockedNum || 0;
       // fixedFetchList();
     } else {
       // closeWarningModal();
@@ -378,6 +378,7 @@
         list.value = res.list;
         total.value = res.total;
       }
+      fetchStatusNum();
     } catch (error) {
       console.log(error);
     }
