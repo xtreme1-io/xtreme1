@@ -15,6 +15,7 @@
                 :style="style(item)"
                 :key="item.name"
             >
+                <i class="iconfont icon-lifangti" style="font-size: 14px"></i>
                 {{ item.label }}
             </a-tag>
         </div>

@@ -221,6 +221,16 @@ export const takeRecordByData = (params: takeRecordParams) =>
     },
   });
 
+export const takeRecordByDataModel = (params: takeRecordParams) =>
+  defHttp.post<null>({
+    url: `${Api.DATA}/annotateWithModel`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 export const exportData = (params: any) =>
   defHttp.get<null>({
     url: `${Api.DATA}/export`,
