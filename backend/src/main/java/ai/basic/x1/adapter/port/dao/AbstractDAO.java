@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
     protected Log log = LogFactory.getLog(getClass());
 
-    int DEFAULT_BATCH_SIZE = 1000;
+    private static final int DEFAULT_BATCH_SIZE = 1000;
 
     @Autowired
     protected M baseMapper;
@@ -262,7 +262,7 @@ public abstract class AbstractDAO<M extends BaseMapper<T>, T> {
      *
      * @param list     data list
      * @param consumer method
-     * @param <E>       generics type
+     * @param <E>      generics type
      * @return execute result
      * @since 3.3.1
      */
