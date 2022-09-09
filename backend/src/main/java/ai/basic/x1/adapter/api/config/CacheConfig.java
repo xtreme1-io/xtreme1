@@ -33,11 +33,11 @@ public class CacheConfig extends CachingConfigurerSupport {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(jsonRedisSerializer))
                 .computePrefixWith(new CacheKeyPrefix() {
-                    String SEPARATOR = ":";
+                    String separator = ":";
 
                     @Override
                     public String compute(String cacheName) {
-                        return "basicai" + SEPARATOR + "x1" + SEPARATOR + cacheName + SEPARATOR;
+                        return "basicai" + separator + "x1" + separator + cacheName + separator;
                     }
                 });
 

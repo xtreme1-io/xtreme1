@@ -7,6 +7,21 @@ package ai.basic.x1.entity.enums;
  */
 public enum InputTypeEnum {
 
-    RADIO, MULTI_SELECTION, DROPDOWN, TEXT
+    /**
+     * RADIO
+     */
+    RADIO,
+    /**
+     * MULTI_SELECTION
+     */
+    MULTI_SELECTION,
+    /**
+     * DROPDOWN
+     */
+    DROPDOWN,
+    /**
+     * TEXT
+     */
+    TEXT
 
 }

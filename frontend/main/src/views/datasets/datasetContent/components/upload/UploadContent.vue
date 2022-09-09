@@ -64,7 +64,7 @@
   const emits = defineEmits(['closeUpload']);
 
   /** Upload */
-  const beforeUpload = (file: File) => {
+  const beforeUpload = (_, fileList: File[]) => {
     const compressType = [
       'application/zip',
       'application/x-tar',
@@ -75,23 +75,26 @@
     const imageType = ['image/jpeg', 'image/png'];
 
     if (props.datasetType == datasetTypeEnum.IMAGE) {
-      const isImage = [...imageType, ...compressType].includes(file.type);
+      const isImage = fileList.every((file) => [...imageType, ...compressType].includes(file.type));
       if (!isImage) {
         return createMessage.error('You can only upload zip/gzip/tar/jpg/jpeg/png file!');
       }
     } else {
-      const isCompress = compressType.includes(file.type);
+      const isCompress = fileList.every((file) => compressType.includes(file.type));
       if (!isCompress) {
         return createMessage.error('You can only upload zip/gzip/tar file!');
       }
     }
 
-    const isLimit = file.size / 1024 / 1024 < 500;
+    const totalSize = fileList.reduce(
+      (previousValue, currenValue) => previousValue + currenValue.size,
+      0,
+    );
+    const isLimit = totalSize / 1024 / 1024 < 500;
     if (!isLimit) {
       return createMessage.error('file must smaller than 500MB!');
     }
-
-    emits('closeUpload', file, UploadSourceEnum.LOCAL);
+    emits('closeUpload', fileList, UploadSourceEnum.LOCAL);
 
     return false;
   };

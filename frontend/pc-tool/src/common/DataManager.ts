@@ -18,7 +18,6 @@ export default class DataManager extends BaseDataManager {
         let modelMap = {} as Record<string, IFrame[]>;
 
         let dataList = this.editor.state.frames;
-
         dataList.forEach((data) => {
             if (data.model && data.model.state !== 'complete') {
                 let id = data.model.recordId;
@@ -28,8 +27,6 @@ export default class DataManager extends BaseDataManager {
         });
 
         if (Object.keys(modelMap).length === 0) return;
-
-        console.log('pollModel');
 
         let requests = [] as Promise<any>[];
         Object.keys(modelMap).forEach((recordId) => {

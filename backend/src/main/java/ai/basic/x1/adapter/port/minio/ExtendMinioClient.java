@@ -46,16 +46,17 @@ public class ExtendMinioClient extends MinioClient {
      * }</pre>
      *
      * @param args {@link UploadSnowballObjectsArgs} object.
-     * @throws ErrorResponseException thrown to indicate S3 service returned an error response.
+     * @throws ErrorResponseException    thrown to indicate S3 service returned an error response.
      * @throws InsufficientDataException thrown to indicate not enough data available in InputStream.
-     * @throws InternalException thrown to indicate internal library error.
-     * @throws InvalidKeyException thrown to indicate missing of HMAC SHA-256 library.
-     * @throws InvalidResponseException thrown to indicate S3 service returned invalid or no error
-     *     response.
-     * @throws IOException thrown to indicate I/O error on S3 operation.
-     * @throws NoSuchAlgorithmException thrown to indicate missing of MD5 or SHA-256 digest library.
-     * @throws XmlParserException thrown to indicate XML parsing error.
+     * @throws InternalException         thrown to indicate internal library error.
+     * @throws InvalidKeyException       thrown to indicate missing of HMAC SHA-256 library.
+     * @throws InvalidResponseException  thrown to indicate S3 service returned invalid or no error
+     *                                   response.
+     * @throws IOException               thrown to indicate I/O error on S3 operation.
+     * @throws NoSuchAlgorithmException  thrown to indicate missing of MD5 or SHA-256 digest library.
+     * @throws XmlParserException        thrown to indicate XML parsing error.
      */
+    @Override
     public ObjectWriteResponse uploadSnowballObjects(UploadSnowballObjectsArgs args)
             throws ErrorResponseException, InsufficientDataException, InternalException,
             InvalidKeyException, InvalidResponseException, IOException, NoSuchAlgorithmException,
@@ -105,14 +106,30 @@ public class ExtendMinioClient extends MinioClient {
             }
             tarOutputStream.finish();
         } finally {
-            if (tarOutputStream != null) tarOutputStream.flush();
-            if (sos != null) sos.flush();
-            if (bos != null) bos.flush();
-            if (fos != null) fos.flush();
-            if (tarOutputStream != null) tarOutputStream.close();
-            if (sos != null) sos.close();
-            if (bos != null) bos.close();
-            if (fos != null) fos.close();
+            if (tarOutputStream != null) {
+                tarOutputStream.flush();
+            }
+            if (sos != null) {
+                sos.flush();
+            }
+            if (bos != null) {
+                bos.flush();
+            }
+            if (fos != null) {
+                fos.flush();
+            }
+            if (tarOutputStream != null) {
+                tarOutputStream.close();
+            }
+            if (sos != null) {
+                sos.close();
+            }
+            if (bos != null) {
+                bos.close();
+            }
+            if (fos != null) {
+                fos.close();
+            }
         }
 
         Multimap<String, String> headers = newMultimap(args.extraHeaders());
