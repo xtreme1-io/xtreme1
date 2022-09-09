@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * * minio 核心配置类
+ * Minio config
  *
  * @author fyb
  * @date 2022/3/30 10:49
@@ -21,13 +21,23 @@ public class MinioConfig {
     private MinioProp minioProp;
 
     /**
-     * 获取 MinioClient
+     * Get minioClient
      *
-     * @return minioClient
+     * @return extendMinioClient
      */
-    @Bean
+    @Bean(value = "extendMinioClient")
     public ExtendMinioClient extendMinioClient() {
         return new ExtendMinioClient(ExtendMinioClient.builder().endpoint(minioProp.getEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build());
+    }
+
+    /**
+     * Get extendMinioClientInternal
+     *
+     * @return extendMinioClientInternal
+     */
+    @Bean(value = "extendMinioClientInternal")
+    public ExtendMinioClient extendMinioClientInternal() {
+        return new ExtendMinioClient(ExtendMinioClient.builder().endpoint(minioProp.getInternalEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build());
     }
 
 }

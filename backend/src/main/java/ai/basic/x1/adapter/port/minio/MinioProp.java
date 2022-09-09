@@ -14,7 +14,12 @@ import org.springframework.stereotype.Component;
 public class MinioProp {
 
     /**
-     * endpoint
+     * Internal endpoint
+     */
+    private String internalEndpoint;
+
+    /**
+     * Endpoint
      */
     private String endpoint;
 
