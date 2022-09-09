@@ -181,6 +181,7 @@
     hasOntologyApi,
     makeFrameSeriesApi,
     takeRecordByData,
+    takeRecordByDataModel,
     ungroupFrameSeriesApi,
     unLock,
   } from '/@/api/business/dataset';
@@ -567,7 +568,7 @@
       templist = selectedList.value;
     }
 
-    const res = await takeRecordByData({
+    const res = await takeRecordByDataModel({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
       dataType: type,
