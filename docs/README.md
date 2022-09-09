@@ -1,1 +1,1 @@
-# Xtreme1 Community Docs
+# Xtreme1 Docs

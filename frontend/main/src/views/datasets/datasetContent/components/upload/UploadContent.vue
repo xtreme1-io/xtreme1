@@ -12,7 +12,7 @@
         <Icon class="icon" icon="eva:info-fill" size="16" />
         <div class="text">
           <span>The total files size should be limit of 500 mb.For more details, get our </span>
-          <a href="https://docs.basic.ai/docs/upload" target="_blank">
+          <a class="highlight" href="https://docs.basic.ai/docs/upload" target="_blank">
             open data or check documentation
           </a>
           <span>for supported 3D format and how to upload data with results.</span>
@@ -64,7 +64,7 @@
   const emits = defineEmits(['closeUpload']);
 
   /** Upload */
-  const beforeUpload = (file: File) => {
+  const beforeUpload = (_, fileList: File[]) => {
     const compressType = [
       'application/zip',
       'application/x-tar',
@@ -75,23 +75,26 @@
     const imageType = ['image/jpeg', 'image/png'];
 
     if (props.datasetType == datasetTypeEnum.IMAGE) {
-      const isImage = [...imageType, ...compressType].includes(file.type);
+      const isImage = fileList.every((file) => [...imageType, ...compressType].includes(file.type));
       if (!isImage) {
         return createMessage.error('You can only upload zip/gzip/tar/jpg/jpeg/png file!');
       }
     } else {
-      const isCompress = compressType.includes(file.type);
+      const isCompress = fileList.every((file) => compressType.includes(file.type));
       if (!isCompress) {
         return createMessage.error('You can only upload zip/gzip/tar file!');
       }
     }
 
-    const isLimit = file.size / 1024 / 1024 < 500;
+    const totalSize = fileList.reduce(
+      (previousValue, currenValue) => previousValue + currenValue.size,
+      0,
+    );
+    const isLimit = totalSize / 1024 / 1024 < 500;
     if (!isLimit) {
       return createMessage.error('file must smaller than 500MB!');
     }
-
-    emits('closeUpload', file, UploadSourceEnum.LOCAL);
+    emits('closeUpload', fileList, UploadSourceEnum.LOCAL);
 
     return false;
   };
@@ -177,6 +180,12 @@
         }
 
         .text {
+          .highlight {
+            color: #60a9fe;
+            &:hover {
+              color: #60a9fe;
+            }
+          }
           span {
             font-weight: 400;
             font-size: 14px;

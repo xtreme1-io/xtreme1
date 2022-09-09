@@ -55,8 +55,8 @@
   const selectValue = ref<string>('');
   const selectOption = [
     {
-      value: 'Basic AI Community V1.0',
-      label: 'Basic AI Community V1.0',
+      value: 'Xtreme1 v0.5',
+      label: 'Xtreme1 v0.5',
     },
   ];
 

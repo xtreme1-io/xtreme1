@@ -316,10 +316,10 @@
       // openWarningModal();
       lockedId.value = res.recordId;
       lockedNum.value = res.lockedNum;
-      // fixedFetchList();
+      fixedFetchList();
     } else {
       // closeWarningModal();
-      // fixedFetchList();
+      fixedFetchList();
     }
   };
 

@@ -1,4 +1,4 @@
-# Xtreme1 Community Backend
+# Xtreme1 Backend
 
 ## Application Architecture and Framework
 
