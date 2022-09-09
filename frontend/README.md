@@ -1,4 +1,4 @@
-# Xtreme1 Community Frontend
+# Xtreme1 Frontend
 
 ## Application Architecture and Framework
 
