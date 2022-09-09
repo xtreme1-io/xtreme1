@@ -298,9 +298,13 @@
     });
     getLockedData();
     fetchList(filterForm);
-    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
+    fetchStatusNum();
     document.addEventListener('visibilitychange', getLockedData);
   });
+
+  const fetchStatusNum = async () => {
+    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
+  };
 
   onUnmounted(async () => {
     document.removeEventListener('visibilitychange', getLockedData);
@@ -316,10 +320,10 @@
       // openWarningModal();
       lockedId.value = res.recordId;
       lockedNum.value = res.lockedNum;
-      fixedFetchList();
+      // fixedFetchList();
     } else {
       // closeWarningModal();
-      fixedFetchList();
+      // fixedFetchList();
     }
   };
 
@@ -500,8 +504,7 @@
       dataType: type,
     });
     goToTool({ recordId: res }, info.value?.type);
-
-    // fixedFetchList();
+    fixedFetchList();
   };
 
   const handleSingleAnnotate = async (dataId) => {
@@ -516,7 +519,7 @@
     });
     getLockedData();
     goToTool({ recordId: res }, info.value?.type);
-    // fixedFetchList();
+    fixedFetchList();
   };
 
   const handleEmpty = async (list, type) => {
