@@ -7,3 +7,4 @@ Xtreme1, developed width Vue 3 + Typescript + Vite.
 [vue](https://vuejs.org/)
 [vite](https://vitejs.dev/)
 [vue](https://www.typescriptlang.org/)
+[vben admin](https://github.com/vbenjs/vue-vben-admin/)

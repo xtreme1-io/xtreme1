@@ -62,6 +62,13 @@ main application of Xtreme1, developed width Vue 3 + Typescript + Vite.
 
 > yarn dev
 
-### Build
+## Build
 
 > yarn build
+
+## Set proxy config in `.env.development`
+
+```
+// api proxy when development
+VITE_PROXY = [["/api",'your api address']]
+```
