@@ -8,6 +8,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.OffsetDateTime;
 
+/**
+ * @author fyb
+ */
 @Data
 @SuperBuilder
 @NoArgsConstructor

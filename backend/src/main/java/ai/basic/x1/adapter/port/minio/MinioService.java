@@ -144,7 +144,7 @@ public class MinioService {
     public String getPresignedUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException,
             ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
             XmlParserException, InternalException {
-        var queryParams = new HashMap<String, String>();
+        var queryParams = new HashMap<String, String>(1);
         queryParams.put("response-content-type", "application/octet-stream");
         var builder = GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)

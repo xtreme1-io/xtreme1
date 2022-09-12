@@ -3,6 +3,9 @@ package ai.basic.x1.util;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author fyb
+ */
 public interface Constants {
 
     String X_REAL_IP = "X-Real-Ip";
