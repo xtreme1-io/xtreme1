@@ -70,7 +70,6 @@ services:
     depends_on:
       mysql:
         # The java container will not start until the mysql container status is healthy.
-        # It should be noted that: condition: service_healthy, which is deprecated in the V3 version of Compose
         condition: service_healthy
       redis:
         condition: service_healthy
