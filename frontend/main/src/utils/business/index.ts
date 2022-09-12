@@ -3,13 +3,8 @@ import qs from 'qs';
 import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 export const goToTool = (query: any, type?: datasetTypeEnum) => {
-  const host = location.hostname || location.host;
   const toolPath = type === datasetTypeEnum.IMAGE ? '/tool/image' : '/tool/pc';
-  console.log(type);
-  const BaseURL =
-    host.indexOf('local') >= 0
-      ? '//' + host.replace('app', 'tool-image') + ':8090'
-      : '//' + host.replace('app', 'tool');
+  const BaseURL = location.host;
 
   // window.open(BaseURL + toolPath + '?' + qs.stringify(query));
   const oA = document.createElement('a'); //创建a标签
