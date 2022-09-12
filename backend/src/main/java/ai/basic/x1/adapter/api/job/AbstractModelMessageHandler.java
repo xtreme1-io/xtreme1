@@ -14,6 +14,9 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * @author andy
+ */
 @Slf4j
 public abstract class AbstractModelMessageHandler<T> {
 
@@ -31,10 +34,24 @@ public abstract class AbstractModelMessageHandler<T> {
 
     private static final Integer RETRY_COUNT = 3;
 
+    /**
+     * model run implement by subClass
+     * @param modelMessageBO
+     * @return
+     */
     abstract boolean modelRun(ModelMessageBO modelMessageBO);
 
+    /**
+     * call remote model service implement by subClass
+     * @param modelMessageBO
+     * @return
+     */
     abstract ApiResult<T> callRemoteService(ModelMessageBO modelMessageBO);
 
+    /**
+     * model code implement by subClass
+     * @return
+     */
     abstract ModelCodeEnum getModelCodeEnum();
 
     public ApiResult<T> getRetryAbleApiResult(ModelMessageBO modelMessageBO) {
@@ -57,9 +74,9 @@ public abstract class AbstractModelMessageHandler<T> {
         if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
             return apiResult;
         } else {
-            if (apiResult != null)
+            if (apiResult != null) {
                 return new ApiResult<>(apiResult.getCode(), apiResult.getMessage());
-            else {
+            } else {
                 return new ApiResult<>(UsecaseCode.UNKNOWN, "service is busy");
             }
         }

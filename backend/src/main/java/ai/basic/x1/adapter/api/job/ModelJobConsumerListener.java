@@ -3,15 +3,16 @@ package ai.basic.x1.adapter.api.job;
 import ai.basic.x1.entity.ModelMessageBO;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.stream.StreamListener;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author andy
+ */
 @Slf4j
 public class ModelJobConsumerListener implements StreamListener<String, ObjectRecord<String, String>> {
 

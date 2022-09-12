@@ -1,13 +1,10 @@
-// 作业
 export const dataConfig = [
-    // 上一页
     {
-        textValue: 'Previous', // 文案
-        textHelp: '', // 提示文字
+        textValue: 'Previous',
+        textHelp: '',
         actionValue: ['Page Up'],
         wrap: false,
     },
-    // 下一页
     {
         textValue: 'Next',
         textHelp: '',
@@ -15,7 +12,7 @@ export const dataConfig = [
         wrap: false,
     },
 ];
-// 结果
+
 export const instanceConfig = [
     {
         textValue: 'Save',
@@ -127,7 +124,6 @@ export const instanceConfig = [
     // },
 ];
 
-// 工具
 export const toolConfig = [
     // {
     //     textValue: 'Annotation Tool',
@@ -178,16 +174,14 @@ export const toolConfig = [
         wrap: false,
     },
 ];
-// 图片
+
 export const imageConfig = [
-    // 放大缩小
     {
         textValue: 'Zoom in、Zoom Out',
         textHelp: '',
         actionValue: ['wheel'],
         wrap: false,
     },
-    // 拖拽图片
     {
         textValue: 'Drag',
         textHelp: '',
@@ -195,9 +189,8 @@ export const imageConfig = [
         wrap: false,
     },
 ];
-// 其它
+
 export const elseConfig = [
-    // 取消弹框
     {
         textValue: 'Cancel window',
         textHelp: '',

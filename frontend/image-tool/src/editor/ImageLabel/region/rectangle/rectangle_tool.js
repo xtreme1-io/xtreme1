@@ -21,7 +21,6 @@ export class RectangleTool extends BaseTool {
         this.circles = [];
         this.clickCount = 0;
     }
-    // 取消绘制
     cancel() {
         if (this.poly) {
             this.poly.destroy();
@@ -72,7 +71,6 @@ export class RectangleTool extends BaseTool {
         this.circles = [];
     }
     mousedownHandler(e, point) {
-        // 确定是鼠标左键按下
         if (e.evt.button > 0) return;
         if (this.view.mode === MODETYPE.draw) {
             this.view.editor.state.status = StatusType.Create;

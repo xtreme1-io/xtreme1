@@ -264,6 +264,7 @@
             }
             &.submit {
                 background-color: #60a9fe99;
+                padding-left: 15px !important;
                 .anticon {
                     background: #60a9fe;
                     height: 30px;

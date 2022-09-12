@@ -10,17 +10,13 @@ export class BaseTool {
     _getScaleFactor() {
         return getScaleFactor(this.view);
     }
-    //取消绘制
     cancel() {}
-    // 完成绘制
     done() {}
-    // 撤销一步
     back() {
         if (!this.poly) {
             this?.view?.editor.showMsg('error', 'No record yet');
         }
     }
-    // 回复一步
     forward() {
         if (!this.poly || this?.backPoint?.length == 0 || !this?.backPoint) {
             this?.view?.editor.showMsg('error', 'No record yet');

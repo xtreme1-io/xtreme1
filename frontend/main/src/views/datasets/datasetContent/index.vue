@@ -7,7 +7,7 @@
         :lockedNum="lockedNum"
         :type="(info?.type as datasetTypeEnum)"
       /> -->
-      <div class="lockedMask" v-if="lockedNum > 0">
+      <div class="lockedMask" v-if="lockedNum && lockedNum > 0">
         <div class="flex-1 flex">
           <Icon icon="ant-design:info-circle-outlined" color="#FCB17A" class="mt-1" />
           <span class="ml-2">
@@ -136,6 +136,10 @@
           </CollContainer>
           <CollContainer icon="mdi:calendar-month" title="Status">
             <Radio.Group v-model:value="annotationStatus">
+              <Radio :value="undefined">
+                <SvgIcon name="annotated" />
+                <span class="ml-2">All</span>
+              </Radio>
               <Radio value="ANNOTATED">
                 <SvgIcon name="annotated" />
                 <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
@@ -177,6 +181,7 @@
     hasOntologyApi,
     makeFrameSeriesApi,
     takeRecordByData,
+    takeRecordByDataModel,
     ungroupFrameSeriesApi,
     unLock,
   } from '/@/api/business/dataset';
@@ -215,11 +220,11 @@
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
   import TipModal from './components/TipModal.vue';
   import { Button } from '/@/components/BasicCustom/Button';
-  import { getModelAllApi, getReportByDataset } from '/@/api/business/models';
+  import { getModelAllApi } from '/@/api/business/models';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
   //   useModal();
-  const [tipRegister, { openModal: openTipModal, closeModal: closeTipModal }] = useModal();
+  const [tipRegister, { openModal: openTipModal }] = useModal();
   const [registerRunModel, { openModal: openRunModal }] = useModal();
   const [open, close] = useLoading({});
   const { query } = useRoute();
@@ -294,9 +299,13 @@
     });
     getLockedData();
     fetchList(filterForm);
-    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
+    fetchStatusNum();
     document.addEventListener('visibilitychange', getLockedData);
   });
+
+  const fetchStatusNum = async () => {
+    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
+  };
 
   onUnmounted(async () => {
     document.removeEventListener('visibilitychange', getLockedData);
@@ -311,7 +320,7 @@
     if (res) {
       // openWarningModal();
       lockedId.value = res.recordId;
-      lockedNum.value = res.lockedNum;
+      lockedNum.value = res.lockedNum || 0;
       // fixedFetchList();
     } else {
       // closeWarningModal();
@@ -370,6 +379,7 @@
         list.value = res.list;
         total.value = res.total;
       }
+      fetchStatusNum();
     } catch (error) {
       console.log(error);
     }
@@ -435,7 +445,7 @@
   };
 
   const handleContinue = async () => {
-    goToTool({ recordId: lockedId.value }, type.value as any);
+    goToTool({ recordId: lockedId.value }, info.value?.type as datasetTypeEnum);
     window.location.reload();
   };
 
@@ -496,8 +506,7 @@
       dataType: type,
     });
     goToTool({ recordId: res }, info.value?.type);
-
-    // fixedFetchList();
+    fixedFetchList();
   };
 
   const handleSingleAnnotate = async (dataId) => {
@@ -512,7 +521,7 @@
     });
     getLockedData();
     goToTool({ recordId: res }, info.value?.type);
-    // fixedFetchList();
+    fixedFetchList();
   };
 
   const handleEmpty = async (list, type) => {
@@ -559,7 +568,7 @@
       templist = selectedList.value;
     }
 
-    const res = await takeRecordByData({
+    const res = await takeRecordByDataModel({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
       dataType: type,

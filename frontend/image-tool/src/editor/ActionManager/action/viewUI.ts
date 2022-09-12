@@ -13,9 +13,6 @@ export const toggleClassView = define({
 
         const state = editor.state;
 
-        // state.showClassView = !state.showClassView;
-
-        // 解决 T 的切换时，浮层不跟随形状显示
         if (!state.showClassView) {
             editor.emit(Event.SHOW_CLASS_INFO, {
                 data: {

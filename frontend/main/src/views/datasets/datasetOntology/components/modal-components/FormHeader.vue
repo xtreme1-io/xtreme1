@@ -21,17 +21,15 @@
     dataSchema?: any;
     indexList?: number[];
   }>();
-  // 面包屑
+
   const breadcrumb = computed(() => {
     return getBreadcrumb(unref(props.dataSchema), unref(props.indexList), []);
   });
 
   const emits = defineEmits(['back', 'del']);
-  // 返回
   const handleBack = () => {
     emits('back');
   };
-  // 删除
   const handleDelete = () => {
     emits('del');
   };

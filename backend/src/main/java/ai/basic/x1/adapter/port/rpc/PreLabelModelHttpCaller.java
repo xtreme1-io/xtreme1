@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * @author andy
+ */
 @Component
 @Slf4j
 public class PreLabelModelHttpCaller {

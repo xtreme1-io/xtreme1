@@ -2,9 +2,12 @@ package ai.basic.x1.entity;
 
 import lombok.Data;
 
+/**
+ * @author fyb
+ */
 @Data
 public class BaseQueryBO {
-    private Integer pageNo = 1;
+    private Integer pageNo;
 
-    private Integer pageSize = 1000;
+    private Integer pageSize;
 }

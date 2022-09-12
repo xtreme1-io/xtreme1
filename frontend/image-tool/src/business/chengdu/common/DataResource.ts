@@ -133,7 +133,7 @@ export default class DataResource {
             hasLoader[e.data.dataId] = true;
         });
 
-        // 当前帧附近的数据优先加载 前后两帧
+        // The data near the current frame is preferentially loaded into the previous two frames
         let indexData = [] as number[];
         dataList.forEach((data, index) => {
             if (

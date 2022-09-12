@@ -95,7 +95,7 @@
   const formRef = ref();
   const loading = ref(false);
   const isSuccess = ref(false);
-  const subscribe = ref(false);
+  const subscribe = ref(true);
   const { t } = useI18n();
   const userStore = useUserStore();
   const FormItem = Form.Item;

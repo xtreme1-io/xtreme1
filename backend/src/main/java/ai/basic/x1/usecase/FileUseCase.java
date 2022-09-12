@@ -32,10 +32,10 @@ public class FileUseCase {
     private MinioService minioService;
 
     /**
-     * 文件id
+     * fileId
      *
      * @param id id
-     * @return 文件对象
+     * @return RelationFileBO
      */
     public RelationFileBO findById(Long id) {
         var file = fileDAO.getById(id);
@@ -53,10 +53,10 @@ public class FileUseCase {
     }
 
     /**
-     * 文件对象list
+     * file object list
      *
-     * @param ids 文件id集合
-     * @return 文件对象list
+     * @param ids file object ids
+     * @return file object list
      */
     public List<RelationFileBO> findByIds(List<Long> ids) {
         var files = fileDAO.listByIds(ids);
@@ -87,10 +87,10 @@ public class FileUseCase {
     }
 
     /**
-     * 批量保存文件信息
+     * batch save file
      *
-     * @param fileBOS 文件信息对象
-     * @return 文件信息集合
+     * @param fileBOS fileBOs
+     * @return fileList
      */
     public List<FileBO> saveBatchFile(Long userId, List<FileBO> fileBOS) {
         var files = DefaultConverter.convert(fileBOS, File.class);

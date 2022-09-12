@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -27,7 +28,10 @@ import java.util.List;
 public class MinioService {
 
     @Autowired
-    private ExtendMinioClient client;
+    private ExtendMinioClient extendMinioClient;
+
+    @Autowired
+    private ExtendMinioClient extendMinioClientInternal;
 
     /**
      * Create bucket
@@ -37,8 +41,8 @@ public class MinioService {
     @SneakyThrows
     private void createBucket(String bucketName) {
         var bucketExistsArgs = BucketExistsArgs.builder().bucket(bucketName).build();
-        if (!client.bucketExists(bucketExistsArgs)) {
-            client.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+        if (!extendMinioClientInternal.bucketExists(bucketExistsArgs)) {
+            extendMinioClientInternal.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
         }
     }
 
@@ -57,15 +61,15 @@ public class MinioService {
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
         createBucket(bucketName);
-        //objectSize已知，partSize设为-1意为自动设置
+        //partSize:-1 is auto setting
         long partSize = -1;
-        PutObjectArgs putArgs = PutObjectArgs.builder()
+        var putArgs = PutObjectArgs.builder()
                 .bucket(bucketName)
                 .object(fileName)
                 .stream(inputStream, size, partSize)
                 .contentType(contentType)
                 .build();
-        client.putObject(putArgs);
+        extendMinioClientInternal.putObject(putArgs);
         return getUrl(bucketName, fileName);
     }
 
@@ -89,7 +93,7 @@ public class MinioService {
                         FileUtil.getInputStream(file),
                         file.length(),
                         null)));
-        client.uploadSnowballObjects(UploadSnowballObjectsArgs.builder()
+        extendMinioClientInternal.uploadSnowballObjects(UploadSnowballObjectsArgs.builder()
                 .bucket(bucketName)
                 .objects(objects)
                 .build());
@@ -105,12 +109,51 @@ public class MinioService {
     public String getUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException,
             ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException,
             InvalidResponseException, XmlParserException, InternalException {
-        GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
+        var builder = GetPresignedObjectUrlArgs.builder()
                 .bucket(bucketName)
                 .object(objectName)
+                .method(Method.GET);
+        var region = extendMinioClientInternal.getRegion(builder.build());
+        return extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
+    }
+
+    /**
+     * Get the temporary access url of the object, the default validity period is 7 days
+     *
+     * @param bucketName Bucket name
+     * @param objectName File path
+     * @return Internal file url
+     */
+    public String getInternalUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException,
+            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException,
+            InvalidResponseException, XmlParserException, InternalException {
+        var builder = GetPresignedObjectUrlArgs.builder()
+                .bucket(bucketName)
+                .object(objectName)
+                .method(Method.GET);
+        return extendMinioClientInternal.getPresignedObjectUrl(builder.build());
+    }
+
+    /**
+     * Get file path based on file name - signature path
+     *
+     * @param bucketName Bucket name
+     * @param objectName File path
+     * @return File url
+     */
+    public String getPresignedUrl(String bucketName, String objectName) throws ServerException, InsufficientDataException,
+            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException,
+            XmlParserException, InternalException {
+        var queryParams = new HashMap<String, String>(1);
+        queryParams.put("response-content-type", "application/octet-stream");
+        var builder = GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)
-                .build();
-        return client.getPresignedObjectUrl(args);
+                .bucket(bucketName)
+                .object(objectName)
+                .extraQueryParams(queryParams)
+                .expiry(60 * 60 * 24 * 7);
+        var region = extendMinioClientInternal.getRegion(builder.build());
+        return extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
     }
 
     /**
@@ -124,15 +167,16 @@ public class MinioService {
             throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
-        GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
+        createBucket(bucketName);
+        var builder = GetPresignedObjectUrlArgs.builder()
                 .method(Method.PUT)
                 .bucket(bucketName)
                 .object(objectName)
-                .expiry(60 * 60 * 24 * 7)
-                .build();
+                .expiry(60 * 60 * 24 * 7);
+        var region = extendMinioClientInternal.getRegion(builder.build());
         // This must be PUT, if it is GET, it is the file access address. If it is a POST upload, an error will be reported.
-        String preUrl = client.getPresignedObjectUrl(args);
-        String accessUrl = getUrl(bucketName, objectName);
+        var preUrl = extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
+        var accessUrl = getInternalUrl(bucketName, objectName);
         return PresignedUrlBO.builder()
                 .accessUrl(accessUrl)
                 .presignedUrl(preUrl).build();

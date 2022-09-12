@@ -292,8 +292,9 @@
   const fileList = ref<any[]>([]);
   const uploadUrl = ref<string>('');
   const handleCloseUploadModal = (data, source) => {
+    console.log('handleCloseUploadModal', data);
     if (source == UploadSourceEnum.LOCAL) {
-      fileList.value = unref(fileList).concat([data] as any);
+      fileList.value = data;
       openProgressModal(true, { fileList: fileList.value, source: source });
     } else if (source == UploadSourceEnum.URL) {
       uploadUrl.value = data;

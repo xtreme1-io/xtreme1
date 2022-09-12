@@ -17,6 +17,11 @@ import java.util.List;
 @Mapper
 public interface DataInfoMapper extends ExtendBaseMapper<DataInfo> {
 
+    /**
+     * Get dataset statistics
+     * @param datasetIds datasetId collection
+     * @return Dataset statistics
+     */
     List<DatasetStatistics> getDatasetStatisticsByDatasetIds(@Param("datasetIds") List<Long> datasetIds);
 
 }

@@ -9,7 +9,6 @@ export const goToTool = (query: any, type?: datasetTypeEnum) => {
 
   const isLocal = host.indexOf('local') >= 0;
   toolPath = isLocal ? '' : toolPath;
-
   const BaseURL = isLocal
     ? '//' + host.replace('app', 'tool-image') + ':8000'
     : '//' + host.replace('app', 'tool');

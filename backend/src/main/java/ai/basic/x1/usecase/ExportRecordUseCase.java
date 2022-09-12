@@ -53,7 +53,7 @@ public class ExportRecordUseCase {
                     var fileBO = fileMap.get(exportRecordBO.getFileId());
                     if (ObjectUtil.isNotNull(fileBO)) {
                         try {
-                            exportRecordBO.setFilePath(minioService.getUrl(fileBO.getBucketName(), fileBO.getPath()));
+                            exportRecordBO.setFilePath(minioService.getPresignedUrl(fileBO.getBucketName(), fileBO.getPath()));
                         } catch (Exception e) {
                             logger.error("Get url error", e);
                             throw new UsecaseException("Get url error");

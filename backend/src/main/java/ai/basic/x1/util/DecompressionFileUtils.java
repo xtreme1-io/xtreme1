@@ -9,6 +9,7 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.springframework.http.HttpStatus;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -51,7 +52,7 @@ public class DecompressionFileUtils {
                 continue;
             }
             FileUtil.mkParentDirs(file);
-            //写文件
+            //write file
             try (var zis = zipFile.getInputStream(zae);
                  var fos = new FileOutputStream(file);
                  var bos = new BufferedOutputStream(fos)) {
@@ -126,9 +127,8 @@ public class DecompressionFileUtils {
             var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
-            // 设置超时时间
             oc.setConnectTimeout(1000);
-            if (200 == oc.getResponseCode()) {
+            if (HttpStatus.OK.value() == oc.getResponseCode()) {
                 return true;
             }
             return false;
@@ -144,8 +144,8 @@ public class DecompressionFileUtils {
      * @return File url
      */
     public static String removeUrlParameter(String fileUrl) {
-        if (fileUrl.contains("?")) {
-            fileUrl = fileUrl.substring(0, fileUrl.indexOf("?"));
+        if (fileUrl.contains(QUESTION_MARK)) {
+            fileUrl = fileUrl.substring(0, fileUrl.indexOf(QUESTION_MARK));
         }
         return fileUrl;
     }

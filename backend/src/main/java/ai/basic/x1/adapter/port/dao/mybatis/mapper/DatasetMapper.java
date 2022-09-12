@@ -16,5 +16,11 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface DatasetMapper extends BaseMapper<Dataset> {
 
+    /**
+     * Paging query dataset according to query conditions
+     * @param page Pagination information
+     * @param queryWrapper Query conditions
+     * @return Dataset paging information
+     */
     Page<Dataset> selectDatasetPage(Page<Dataset> page, @Param(Constants.WRAPPER) Wrapper<Dataset> queryWrapper);
 }

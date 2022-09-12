@@ -54,7 +54,6 @@
           </div>
         </div>
       </Form.Item>
-      <!-- 0.3 版本取消，由外部传入 -->
       <Form.Item v-if="isCenter" :label="t('business.ontology.ontologyType')">
         <Select v-model:value="formState.datasetType" :options="datasetTypeList" disabled />
       </Form.Item>
@@ -435,12 +434,10 @@
 </template>
 <script lang="ts" setup>
   import { ref, reactive, unref, computed, watch, onMounted } from 'vue';
-  // 组件
   import { Form, Divider, Input, Select, Switch, InputNumber, Radio } from 'ant-design-vue';
   import { RuleObject } from 'ant-design-vue/es/form/interface';
   import OptionEditor from './OptionEditor.vue';
   import randomSvg from '/@/assets/svg/ontology/random.svg';
-  // 工具
   import emitter from 'tiny-emitter/instance';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -453,14 +450,12 @@
     datasetTypeList,
     imageConstraintsEnum,
   } from './data';
-  // 类型
   import {
     ClassTypeEnum,
     ToolTypeEnum,
     datasetTypeEnum,
     inputTypeEnum,
   } from '/@/api/business/model/ontologyClassesModel';
-  // 接口
   import { ValidateNameParams } from '/@/api/business/model/datasetOntologyModel';
   import {
     validateClassNameApi,
@@ -486,11 +481,10 @@
   }>();
   const { handleSet, handleAddIndex } = unref(props);
 
-  // form 表单
+  /** FormState */
   const labelCol = { span: 11 };
   const wrapperCol = { span: 12, offset: 1 };
   const formRef = ref();
-  // 类型
   let formState: BaseForm = reactive({
     name: undefined,
     color: '#7dfaf2',
@@ -500,13 +494,11 @@
     isConstraintsForImage: false,
     inputType: inputTypeEnum.RADIO,
     isRequired: false,
-    // 0.3.5 add
     isStandard: false,
     length: [undefined, undefined],
     width: [undefined, undefined],
     height: [undefined, undefined],
     points: undefined,
-    // 0.5 add
     imageLimit: imageConstraintsEnum.SIZE,
     imageLength: [undefined, undefined],
     imageWidth: [undefined, undefined],
@@ -514,6 +506,7 @@
   });
   defineExpose({ formState });
 
+  /** Standard Input */
   const minStandard = 0;
   const maxStandard = 10000;
   const stepStandard = 0.1;
@@ -526,23 +519,21 @@
     const left = formState[target][0];
     const right = formState[target][1];
 
-    // 判断值是否存在
+    // haValue?
     if (left == null || right == null) return;
 
     if (!flag) {
-      // 离开左侧框
-      // 判断改变右侧最小值
+      // Leave the left box and judge to change the minimum value on the right
       if (right == minStandard) formState[target][1] += 0.1;
-      // 改变左侧值
+      // Change the left value
       if (left >= right) {
         formState[target][0] = right - 0.1;
         createMessage.error(t('business.ontology.modal.standardValidateMin'));
       }
     } else {
-      // 离开右侧框
-      // 判断改变左侧最大值
+      // Leave the box on the right and judge to change the maximum value on the left
       if (left == maxStandard) formState[target][0] -= 0.1;
-      // 改变右框值
+      // Change the right value
       if (left >= right) {
         formState[target][1] = left + 0.1;
         createMessage.error(t('business.ontology.modal.standardValidateMax'));
@@ -556,23 +547,16 @@
       const left = formState[target][0];
       const right = formState[target][1];
 
-      // 判断值是否存在
       if (left == null || right == null) return;
 
       if (!flag) {
-        // 离开左侧框
-        // 判断改变右侧最小值
         if (right == minStandard) formState[target][1] += 0.1;
-        // 改变左侧值
         if (left >= right) {
           formState[target][0] = right - 0.1;
           // createMessage.error(t('business.ontology.modal.standardValidateMin'));
         }
       } else {
-        // 离开右侧框
-        // 判断改变左侧最大值
         if (left == maxStandard) formState[target][0] -= 0.1;
-        // 改变右框值
         if (left >= right) {
           formState[target][1] = left + 0.1;
           // createMessage.error(t('business.ontology.modal.standardValidateMax'));
@@ -581,21 +565,16 @@
     }, 500);
   };
 
-  // 校验 name 方法
+  /** Validate Name */
   const validateName = async (_rule: RuleObject, value: string) => {
     if (!value) {
       afterValid(false);
       return Promise.reject(t('business.ontology.modal.nameRequired'));
     } else {
-      // 判断 OntologyCenter | DatasetOntology
+      // OntologyCenter | DatasetOntology
       if (!props.isCenter) {
-        // console.log('dataset - valid');
-
-        // OntologyCenter
-        // -- 在 dataset 下面，需要进行重名校验
-        // -- 在 mounted 里获取 name ，这里进行比较
         if (value === baseFormName.value) {
-          // name 未改变，不进行重名校验
+          // name has not changed, no duplicate name verification
           afterValid(true, value);
           return Promise.resolve();
         }
@@ -639,38 +618,38 @@
         }
       } else {
         // DatasetOntology
-        // -- 在 ontology 下面，不进行重名校验
+        // -- no duplicate name verification
         afterValid(true, value);
         return Promise.resolve();
       }
     }
   };
-  // 校验后的方法
+
+  // method after verification
   const afterValid = (isValid: boolean, newName?: string) => {
     if (isValid) {
-      emits('valid', false); // 通过校验，提交给 formModal ，控制按钮禁用
-      emitter.emit('changeRootName', newName); // 改变 tree 的根节点
+      emits('valid', false); // Pass validation, submit to formModal , control buttons are disabled
+      emitter.emit('changeRootName', newName); // Change the root node of tree
     } else {
       emits('valid', true);
     }
   };
-  // 校验规则
+  // Check rules
   const rules = {
     name: [
       { required: true, validator: validateName, trigger: 'blur' },
       { max: 256, message: t('business.ontology.maxLength') },
     ],
   };
-  // 失焦校验
+  // Out of focus check
   const handleBlur = () => {
     formRef.value.validate();
   };
   const handleNameChange = () => {
-    // console.log(formState.name);
     if (!formState.name) emits('valid', true);
     else emits('valid', false);
   };
-  // 主动校验
+  // Active check
   const handleValid = async () => {
     try {
       await formRef.value.validate();
@@ -681,9 +660,7 @@
     }
   };
 
-  // 0.3版本不需要 datasetType 下拉框了，但这里还是需要监听 datasetType 来设置 toolType 的值
-  // 监听 datasetType 改变事件
-  // datasetType -> ontologyType
+  // Need to monitor datasetType to set the value of toolType
   watch(
     () => formState.datasetType,
     (newVal, oldVal) => {
@@ -693,31 +670,23 @@
         formState.toolType = ToolTypeEnum.POLYGON;
         formState.isConstraints = false;
         formState.isConstraintsForImage = false;
-        // 0.3.5 add
-        // formState.defaultHeight = '';
-        // formState.minHeight = '';
-        // formState.minPoints = '';
+
         formState.isStandard = false;
         formState.length = undefined;
         formState.width = undefined;
         formState.height = undefined;
         formState.points = undefined;
-        // 0.5 add
+
         formState.imageLength = [undefined, undefined];
         formState.imageWidth = [undefined, undefined];
         formState.imageArea = [undefined, undefined];
       } else if (oldVal == datasetTypeEnum.IMAGE || !oldVal) {
         formState.toolType = ToolTypeEnum.CUBOID;
       }
-
-      // if (newVal == datasetTypeEnum.LIDAR_BASIC || newVal == datasetTypeEnum.LIDAR_FUSION) {
-      //   formState.isConstraints = true;
-      //   formState.isConstraintsForImage = false;
-      // }
     },
   );
 
-  // toolType下拉选项
+  // toolType drop down options
   const toolTypeOption = computed(() => {
     if (formState.datasetType != datasetTypeEnum.IMAGE) {
       return toolTypeList.filter((item) => item.type === ToolTypeEnum.CUBOID);
@@ -725,8 +694,8 @@
       return toolTypeList.filter((item) => item.type !== ToolTypeEnum.CUBOID);
     }
   });
-  // Lidar ----------------------------------------
-  // 是否显示 constraints
+  // Lidar Start
+  // whether to display constraints
   const showConstraintsForLidar = computed(() => {
     if (formState.toolType == ToolTypeEnum.CUBOID) {
       return true;
@@ -734,13 +703,12 @@
       return false;
     }
   });
-  // 是否显示 标准框  字段
+  // whether to display standard box
   const showStandard = computed(() => {
-    // console.log('showStandard', formState);
     return showConstraintsForLidar.value && formState.isConstraints;
   });
-  // ----------------------------------------------
-  // Image ----------------------------------------
+
+  // Image Start
   const showConstraintsForImage = computed(() => {
     return false;
     if (formState.toolType != ToolTypeEnum.CUBOID) {
@@ -752,7 +720,8 @@
   const showImageInfo = computed(() => {
     return showConstraintsForImage.value && formState.isConstraintsForImage;
   });
-  // 监听 isConstraints 变化，重置 isStandard
+
+  // Watch isConstraints changes and reset isStandard
   watch(
     () => formState.isConstraints,
     (newVal) => {
@@ -766,7 +735,7 @@
       }
     },
   );
-  // 监听 isConstraintsForImage 变化，重置 isStandard
+  // Watch isConstraintsForImage changes and reset isStandard
   watch(
     () => formState.isConstraintsForImage,
     (newVal) => {
@@ -778,17 +747,16 @@
       }
     },
   );
-  // 监听 standard 变化，重置 字段值
+  // Watch standard changes and reset field values
   const standardEcho = ref<number>(0);
   watch(
     () => formState.isStandard,
     (newVal) => {
       if (standardEcho.value == 0) {
-        // 去除 回显时 isStandard 为 true 的第一次监听
+        // Remove the first listener whose isStandard is true when echoing
         standardEcho.value++;
         return;
       }
-      // console.log(newVal, formState);
       console.log('isStandard changed');
       if (newVal) {
         formState.length = undefined;
@@ -802,7 +770,7 @@
       formState.points = undefined;
     },
   );
-  // 监听 imageLimit 变化， 重置 字段值
+  // Watch imageLimit changes and reset field values
   watch(
     () => formState.imageLimit,
     (newVal) => {
@@ -814,26 +782,25 @@
       }
     },
   );
-  // 显示选取颜色
+  // Show selected color
   const showColor = ref<boolean>(false);
-  // 获取颜色
   const handleGetColor = (color: string) => {
     formState.color = color;
     showColor.value = false;
   };
-  // 随机颜色
+  // get random color
   const handleRandomColor = () => {
     const num: number = Math.round(Math.random() * 8);
     formState.color = colorOption.filter((item) => item != formState.color)[num];
   };
-  // 监听 inputType 变化
+  // Watch inputType changes
   watch(
     () => formState.inputType,
     (newVal) => {
       // console.log('BaseForm inputType changed');
       if (newVal === inputTypeEnum.TEXT) {
         isShow.value = false;
-        // 需要清空 options
+        // need clear options
         props.handleSet &&
           props.handleSet({
             setType: 'update',
@@ -845,68 +812,59 @@
     },
   );
 
-  // 默认的 FormState
+  // The default FormState
   const defaultFormState = ref<any>({});
-  // 监听数据变化
+  // Watch data changes
   const stopWatchFormState = watch(formState, (value) => {
     const flag = isObjectChange(unref(defaultFormState), unref(value));
 
-    // console.log('BaseForm formState changed', flag);
     if (!flag) {
-      // console.log('emits, stop');
-      // 抛出改变状态事件
+      // Throws a change state event
       emits('changed');
-      // 停止监听
+      // Stop Watch
       stopWatchFormState();
       // emitter.emit('handleSaveForm', { type: 'change' });
     }
   });
 
-  // 判断对象是否相等
+  // Check if objects are equal
   const isObjectChange = (source, comparison): boolean => {
-    // 后台返回的 string 数据比当前 stringify 多了空格
-    // -- 所以这里无法比较
     const _source = JSON.stringify(source);
     const _comparison = JSON.stringify({ ...source, ...comparison });
-    // console.log(_source);
-    // console.log(_comparison);
 
     return _source == _comparison;
   };
 
   const isShow = ref<boolean>(true);
 
-  // 页面初始加载
+  // Initial page load
   const baseFormName = ref<string>('');
   onMounted(() => {
-    // console.log('onMounted');
-    // edit -- 回显
+    // edit -- Echo
     if (props.detail) {
       console.log('detail ===> ', props.detail);
-      // copy 的时候也有回显，这里对是否有 id 进行判断，有则是 edit，否则是 copy
+      // Is there has an id, is Edit, otherwise it is copy
       if (props?.detail?.id) {
         baseFormName.value = props.detail.name;
       }
 
-      // 改变 tree 的根节点
+      // Change the root node of tree
       emitter.emit('changeRootName', props.detail.name);
 
       const formData: BaseForm = reactive(Object.assign(formState, props.detail));
       handleMutiTabAction(
         props.activeTab,
         () => {
-          // 0.3版本改为： datasetType都是传进来的
           formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
           if (props.detail?.toolTypeOptions) {
             const toolTypeOptions = JSON.parse(JSON.stringify(props.detail.toolTypeOptions));
             console.log('props.datasetType', props.datasetType);
-            // 0.5 调整为根据 datasetType 来回显 toolTypeOptions
+            // echo toolTypeOptions based on datasetType
             if (props.datasetType != datasetTypeEnum.IMAGE) {
               formData.isConstraints = toolTypeOptions.isConstraints;
-              // 0.3.5 add
               formData.isStandard = toolTypeOptions?.isStandard;
               if (!formData.isStandard) {
-                // isStandard 为 false 需要手动结束 非第一次监听
+                // If isStandard is false, you need to manually end the non-first listening
                 standardEcho.value++;
                 formData.length = toolTypeOptions?.length;
                 formData.width = toolTypeOptions?.width;
@@ -918,7 +876,6 @@
               }
               formData.points = toolTypeOptions?.points;
             } else {
-              // 0.5 add
               formData.isConstraintsForImage = toolTypeOptions.isConstraintsForImage;
               formData.imageLimit = toolTypeOptions?.imageLimit;
               formData.imageLength = toolTypeOptions?.imageLength;
@@ -929,46 +886,38 @@
         },
         () => {},
       );
-      // 赋值
+      // Assign a value
       formState = reactive(formData);
       defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
     } else {
-      // 非回显 isStandard 为 false 需要手动结束 非第一次监听
+      // Non-echo isStandard is false, you need to manually end it. Not the first monitoring
       standardEcho.value++;
-      // 非 center 页面, datasetType是传进来的
+      // For non-center pages, datasetType is passed in
       const formData: BaseForm = reactive(Object.assign(formState));
-
-      // if (!props.isCenter) {
-      //   formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
-      // }
-      // 0.3版本改为： datasetType都是传进来的
       formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
-      // 赋值
       formState = reactive(formData);
       defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
     }
   });
 
-  // 提交
+  // Submit
   const handleSubmit = async () => {
-    // 先校验
+    // Validate first
     const isValid = await handleValid();
     if (isValid) {
-      // let data = props.activeTab === ClassTypeEnum.CLASS ? { ...formState } : { ...formState };
       let data: BaseForm = { ...formState };
-      // 传值给父组件，触发父组件的总提交
+      // Pass a value to the parent component to trigger the total submission of the parent component
       console.log('baseForm--', data);
       emits('submit', data);
     }
   };
-  // 由 formModal 来触发
+  // Triggered by formModal
   emitter.off('handleSubmitForm');
   emitter.on('handleSubmitForm', function () {
-    // 调用当前表单的提交，去校验表单
+    // Call the submit of the current form to validate the form
     handleSubmit();
   });
-
-  // 传给子组件，判断显示字段
+  // Pass it to the child component to judge the display field
   const editorType = computed(() => {
     return props.activeTab === ClassTypeEnum.CLASS ? 'attributes' : 'options';
   });
@@ -994,9 +943,6 @@
 
     &-item {
       cursor: pointer;
-      // &.active {
-      //   color: @primary-color;
-      // }
     }
   }
 

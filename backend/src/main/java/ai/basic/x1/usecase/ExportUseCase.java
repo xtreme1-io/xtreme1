@@ -35,6 +35,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * @author fyb
+ */
 public class ExportUseCase {
 
 
@@ -60,13 +63,19 @@ public class ExportUseCase {
 
     @FunctionalInterface
     public interface Function2<A, B, R> {
+        /**
+         * Applies this function to the given argument.
+         * @param a the function argument
+         * @param b the function argument
+         * @return  the function result
+         */
         R apply(A a, B b);
     }
 
     /**
-     * 创建导出记录
+     * create export record
      *
-     * @return 流水号
+     * @return serial number
      */
     public Long createExportRecord(String fileName) {
         var serialNumber = IdUtil.getSnowflakeNextId();
@@ -79,15 +88,15 @@ public class ExportUseCase {
     }
 
     /**
-     * 异步导出文件 根据返回流水号获取文件路径
+     * Asynchronous export files obtain the file path according to the return flow number
      *
-     * @param fileName     文件名称
-     * @param firstContent 文件最开始写入内容
-     * @param lastContent  文件最后写入内容
-     * @param query        查询条件
-     * @param fun          查询数据函数
-     * @param processData  需要对查询回来的数据进行处理
-     * @return 流水号
+     * @param fileName     filename
+     * @param firstContent first content
+     * @param lastContent  last content
+     * @param query        query condition
+     * @param fun          query method
+     * @param processData  data processor
+     * @return flow number
      */
     public <T, Q extends BaseQueryBO, T1> Long asyncExportJson(String fileName, Long serialNumber,
                                                                String firstContent, String lastContent,
@@ -112,7 +121,7 @@ public class ExportUseCase {
                 .updatedBy(record.getCreatedBy())
                 .updatedAt(OffsetDateTime.now());
         try (var write = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
-            //往文件最开始位置写入内容
+            //Write to the beginning of the file
             if (StrUtil.isNotBlank(firstContent)) {
                 write.write(firstContent);
                 write.flush();
@@ -122,7 +131,7 @@ public class ExportUseCase {
                 query.setPageNo(i);
                 var page = fun.apply(query);
                 if (ObjectUtil.isNull(page) || CollectionUtil.isEmpty(page.getList())) {
-                    //往文件结束位置写入内容
+                    //Write to the end of the file
                     if (StrUtil.isNotBlank(lastContent)) {
                         write.write(lastContent);
                         write.flush();
@@ -174,10 +183,10 @@ public class ExportUseCase {
     }
 
     /**
-     * 根据流水号查询导出记录
+     * get export record by serial numbers
      *
-     * @param serialNumbers 流水号
-     * @return 导出记录
+     * @param serialNumbers serial numbers
+     * @return export records
      */
     public List<ExportRecordBO> findExportRecordBySerialNumbers(List<String> serialNumbers) {
         Assert.notEmpty(serialNumbers, "serial number cannot be null");

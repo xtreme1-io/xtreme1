@@ -9,10 +9,6 @@ export function view(): IPageHandler {
 
     let { loadClasses, loadDataFromFrameSeries, loadDateSetClassification } = useTool();
 
-    // datasetId=30093&dataId=352722&type=readOnly
-    // datasetId=30093&dataId=2370323&type=readOnly&dataType=frame
-    // recordId=215768
-
     async function init() {
         let { query } = tool.state;
         if (!query.datasetId || !query.dataId) {
@@ -20,7 +16,6 @@ export function view(): IPageHandler {
             return;
         }
 
-        // 设置模式
         tool.editor.setMode(modes.view);
 
         tool.editor.showLoading(true);
@@ -39,7 +34,6 @@ export function view(): IPageHandler {
 
         let dataId = query.dataId;
         if (query.dataType === 'frame') {
-            // 连续帧
             tool.state.isSeriesFrame = true;
             await loadDataFromFrameSeries(dataId);
         } else {

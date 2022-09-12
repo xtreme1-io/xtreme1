@@ -57,6 +57,7 @@ public class DataInfoDTO {
     private String lockedBy;
 
 
+    @Data
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     public static class FileNodeDTO {
         /**
@@ -88,50 +89,6 @@ public class DataInfoDTO {
          * Folder Type (Identifies what type of file is below)
          */
         private String directoryType;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Long getFileId() {
-            return fileId;
-        }
-
-        public void setFileId(Long fileId) {
-            this.fileId = fileId;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public FileDTO getFile() {
-            return file;
-        }
-
-        public void setFile(FileDTO file) {
-            this.file = file;
-        }
-
-        public List<FileNodeDTO> getFiles() {
-            return files;
-        }
-
-        public void setFiles(List<FileNodeDTO> files) {
-            this.files = files;
-        }
-
-        public void setDirectoryType(String directoryType) {
-            this.directoryType = directoryType;
-        }
 
         public String getDirectoryType() {
             if (CollectionUtil.isNotEmpty(files)) {

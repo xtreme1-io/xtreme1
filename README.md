@@ -1,57 +1,66 @@
-# Xtreme1
 
-Xtreme1 for community, free and open source, powered by [Basic AI](https://www.basic.ai/).
+![](https://img.shields.io/badge/release-v0.5-blue)
+ <a href="https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag">
+    <img src="https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social" alt="Join Xtreme1 Slack" />
+  </a>
 
-## What is Xtreme1
 
-## Components and Architecture
+# Intro #
+BasicAI Xtreme1 is an open source suite that speedily develops and iterates your datasets and models. The built in AI-assisted tools take your labeling efforts to the next level of efficiency. Your full data-centric MLOps lifecycle is taken care of with reproducibility, manageability, and automation.
 
-![Layer Architecture](/docs/images/layer-architecture.png?raw=true)
+Xtreme1 was released under the open-source Apache License 2.0 in September 2022.
 
-| Layer | Component | Description |
-| --- | --- | --- |
-| Application Services | Web Frontend | Web user interface, written in Vue3 and Typescript. |
-| Application Services | API Backend | Data API for managing user, dataset, annotation object etc., written in Java and Spring Boot. |
-| Application Services | Image Object Detection | AI auto detect objects in image, written in Python and PyTorch. |
-| Application Services | Point Cloud Object Detection | AI auto detect objects in point cloud, written in Python and PyTorch. |
-| Base Services | MySQL | Relational database for storing business data. |
-| Base Services | Redis | Cache hot data, and schedule background tasks. |
-| Base Services | MinIO | Store unstructured data like image and point cloud files. |
+# Support #
+Website | Slack | Twitter |  [Issues](#https://github.com/basicai/xtreme1/issues)
 
-## Try out Xtreme1
+A community is important for the company. We are very open to feedback and encourage you to create Issues and help us grow!
 
-* [Run with Docker Compose](#run-with-docker-compose)
-* [Local development](#local-development)
+# :six: Key features #
 
-### Branches
+- Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
+- Built-in models for object detection, instance segmentation and classification
+- Configurable Ontology for label, attributes, and more
+- Data management and quality control
+- Data debug and model-training
+- AI-powered tools for model performance evaluation
 
-* **dev** Contains the newest features and bug fixes, but may not be stable, do not use in production.
-* **main** Default branch, stable and well tested.
+# Quick start
+Get early access to Xtreme1 [SaaS version](https://app.basic.ai/#/login/) for 30 days free.
+
+## Install Xtreme1
+* [Run with Docker Compose](#Run with Docker Compose)
+* [Install for local development](#local-development)
 
 ### Run with Docker Compose
+#### Prerequisites
+- Install [Docker Desktop](https://docs.docker.com/desktop/)
+- Check the requirements for hardware and software prior to your installation.
 
-#### Quick Start
-
-##### Prerequisites 
-
-We use Docker Compose to simplify running multiple containers together, the latest [Docker Desktop](https://docs.docker.com/desktop/) already integrated `docker compose` subcommand. If you haven't installed Docker Desktop yet, you should install it first.
-
-##### Download release package
-
-Click the latest release on the right of repository home, select asset who's name likes `x1-community-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
+#### Building an image
+- Clone the repository from the [GitHub repository](https://github.com/basicai/xtreme1)
 
 ```bash
-wget https://github.com/basicai/x1/releases/download/v0.5/x1-community-v0.5.zip
+wget https://github.com/basicai/xtreme1/releases/download/v0.5/x1-community-v0.5.zip
 unzip -d x1-community-v0.5 x1-community-v0.5.zip
 ```
 
 ##### Start all services
-
-Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1.
+Enter into the release package directory, and execute the following command to start all services.
+Next, open the installed Google Chrome browser and go to `http://localhost:8190`.
 
 ```bash
 docker compose up
 ```
+
+Apple M1 ???????
+```yaml
+services:
+  mysql:
+    platform: linux/amd64
+```
+
+
+下面的准备都拉到别处去
 
 #### Quick Start - Advanced
 
@@ -89,14 +98,6 @@ It'll pull all needed service images from Docker Hub, including basic services `
 
 After successfully started all services, you can open `http://localhost:8190` to access web frontend, and access MinIO console at `http://localhost:8194`.
 
-> Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
-
-```yaml
-services:
-  mysql:
-    platform: linux/amd64
-```
-
 ### Local development
 
 #### Enable Docker BuildKit
@@ -105,12 +106,14 @@ We are using Docker BuildKit to accelerate the building speed, such as cache Mav
 
 ```bash
 # Set environment variable to enable BuildKit just for once.
-$ DOCKER_BUILDKIT=1 docker build .
-$ DOCKER_BUILDKIT=1 docker compose up
+DOCKER_BUILDKIT=1 docker build .
+DOCKER_BUILDKIT=1 docker compose up
 
-# Or edit Docker daemon.json to enable BuildKit by default.
-$ vi /etc/docker/daemon.json
- { "features": { "buildkit": true } }
+# Or edit Docker daemon.json to enable BuildKit by default, the content can be something like '{ "features": { "buildkit": true } }'.
+vi /etc/docker/daemon.json
+
+# You can clear builder cache if you encounter some package version related problem.
+docker builder prune
  ```
 
 #### Develop with Docker Compose
@@ -122,11 +125,16 @@ services:
   backend:
     # image: basicai/x1-community-backend
     build: ./backend
+  frontend:
+    # image: basicai/x1-community-frontend
+    build: ./frontend
 ```
 
 > Be sure to run `docker compose build` before running `docker compose up`, as up command will only build image when it not exist.
 
 Also you can run each application service in your favorite IDE, like IDEA or Visual Studio Code. For `backend` service which need `mysql`, `redia` and `minio`, you can start this services using Docker Compose, and connect these services using host binding port. You can use the same method for `frontend` service which need `backend` service.
+
+> You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already add into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
 
 #### Develop with your own base services
 
@@ -134,8 +142,25 @@ If you already have an MySQL, Redis, or MinIO base service, you can use it direc
 
 To get more development guides, you can read the README doc in each application service's directory.
 
-## Features
+## Doc
+Tutorial (video)
+User Guide
+License
+API references (coming soon...)
 
 ## Roadmap
 
 ## License
+
+# License #
+This software is licensed under the Apache 2.0 LICENSE © BasicAI.
+
+If Xtreme1 is part of your development process / project / publication, please cite us ❤️ :
+```bash
+@misc{BasicAI,
+title = {Xtreme1 - The Next GEN Platform For Multisensory Training Data},
+year = {2022},
+note = {Software available from https://github.com/basicai/xtreme1/},
+url={https://basic.ai/},
+author = {BasicAI},
+}

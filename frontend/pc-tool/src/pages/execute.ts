@@ -50,9 +50,8 @@ export function execute(): IPageHandler {
         }
 
         editor.showLoading(false);
-
         if (bsState.query.type === 'modelRun') {
-            // editor.dataManager.pollDataModelResult();
+            editor.dataManager.pollDataModelResult();
         }
     }
 

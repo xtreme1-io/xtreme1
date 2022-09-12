@@ -15,10 +15,7 @@ enum Api {
   CLASSIFICATION = '/classification',
 }
 
-/**
- * 根据 ontologyId 分页查询 class，
- * 搜索
- */
+/** get class by ontologyId */
 export const getClassApi = (params: GetListParams) =>
   defHttp.get<ClassResponse>({
     url: `${Api.CLASS}/findByPage`,
@@ -29,7 +26,7 @@ export const getClassApi = (params: GetListParams) =>
     },
   });
 
-/** 添加修改 class */
+/** create/save class */
 export const createEditClassApi = (params: SaveEditClassParams) =>
   defHttp.post<null>({
     url: `${Api.CLASS}/save`,
@@ -40,7 +37,7 @@ export const createEditClassApi = (params: SaveEditClassParams) =>
     },
   });
 
-/** 删除 class */
+/** delete class */
 export const deleteClassApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.CLASS}/delete/${params.id}`,
@@ -50,10 +47,7 @@ export const deleteClassApi = (params: BasicIdParams) =>
     },
   });
 
-/**
- * 根据 id 查询 class 详情，
- * 编辑回显
- */
+/** get class detail by id */
 export const getClassByIdApi = (params: BasicIdParams) =>
   defHttp.get<ClassItem>({
     url: `${Api.CLASS}/info/${params.id}`,
@@ -63,9 +57,7 @@ export const getClassByIdApi = (params: BasicIdParams) =>
     },
   });
 
-/**
- * 根据 name 查询 class -- 目前未使用
- */
+/** get class by name */
 export const getClassByNameApi = (params: { ontologyId: string; name?: string }) =>
   defHttp.get<any>({
     url: `${Api.CLASS}/find/${params.ontologyId}?&`,
@@ -75,10 +67,7 @@ export const getClassByNameApi = (params: { ontologyId: string; name?: string })
     },
   });
 
-/**
- * 根据 ontologyId 分页查询 classification，
- * 搜索
- */
+/** get classification by ontologyId */
 export const getClassificationApi = (params: GetListParams) =>
   defHttp.get<ClassificationResponse>({
     url: `${Api.CLASSIFICATION}/findByPage`,
@@ -89,7 +78,7 @@ export const getClassificationApi = (params: GetListParams) =>
     },
   });
 
-/** 添加修改 classification */
+/** create/save classification */
 export const createEditClassificationApi = (params: SaveEditClassificationParams) =>
   defHttp.post<null>({
     url: `${Api.CLASSIFICATION}/save`,
@@ -100,7 +89,7 @@ export const createEditClassificationApi = (params: SaveEditClassificationParams
     },
   });
 
-/** 删除 classification */
+/** delete classification */
 export const deleteClassificationApi = (params: BasicIdParams) =>
   defHttp.post<null>({
     url: `${Api.CLASSIFICATION}/delete/${params.id}`,
@@ -110,10 +99,7 @@ export const deleteClassificationApi = (params: BasicIdParams) =>
     },
   });
 
-/**
- * 根据 id 查询 classification 详情，
- * 编辑回显
- */
+/** get classification detail by id */
 export const getClassificationByIdApi = (params: BasicIdParams) =>
   defHttp.get<ClassificationItem>({
     url: `${Api.CLASSIFICATION}/info/${params.id}`,
@@ -122,5 +108,3 @@ export const getClassificationByIdApi = (params: BasicIdParams) =>
       ignoreCancelToken: true,
     },
   });
-
-/** 根据 name 查询 classification */

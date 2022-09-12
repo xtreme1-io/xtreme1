@@ -66,7 +66,7 @@
         },
     );
 
-    // 搜索 --
+    // Search --
     const emits = defineEmits(['updateSearchValue']);
     const props = defineProps<{
         searchValue: string;
@@ -75,7 +75,7 @@
         return props.searchValue;
     });
 
-    // 快捷键数据
+    // Shortcut key data
     const dataList = computed(() => {
         return dataConfig.filter((item) => {
             const lowerTextValue = item.textValue.toLowerCase();
@@ -172,17 +172,6 @@
         height: 100%;
         overflow: hidden;
         background: #3a3a3e;
-        // .search {
-        //     position: absolute;
-        //     top: 5px;
-        //     margin: 5px 8px;
-        //     background: #3e4047;
-        //     .ant-input-search {
-        //         border: 1px solid #cccccc;
-        //         border-radius: 4px;
-        //         color: #bec1ca;
-        //     }
-        // }
         .table {
             .body {
                 margin: 5px 8px;
@@ -207,14 +196,14 @@
                     padding: 10px;
                     overflow: hidden;
                     &__text {
-                        // 换行不换行在 config 里面配置
-                        // 换行的
+                        // Configure in config
+                        // wrap
                         &--wrap {
                             display: grid;
                             grid-template-columns: repeat(auto-fill, minmax(50%, 100%));
                             align-items: center;
                         }
-                        // 不换行的
+                        // no-pwrap
                         &--nowrap {
                             display: grid;
                             grid-template-columns: repeat(2, 1fr);

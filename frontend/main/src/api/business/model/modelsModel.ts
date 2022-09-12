@@ -2,7 +2,7 @@ import { BasicPageParams, BasicFetchResult } from '/@/api/model/baseModel';
 import { datasetTypeEnum } from './ontologyClassesModel';
 
 /** Models List Start */
-/** 卡片列表项 */
+/** list item */
 export interface ModelListItem {
   id: number;
   teamId: Nullable<string>;
@@ -21,23 +21,23 @@ export interface ModelListItem {
   isInteractive: boolean;
   img: string;
 }
-/** 分页查询 - 请求参数 */
+/** list request params */
 export interface GetModelParams extends BasicPageParams {
   datasetType?: datasetTypeEnum;
   isInteractive?: 0 | 1;
 }
 
-/** 分页查询 - 响应参数 */
+/** list response params */
 export type ResponseModelParams = BasicFetchResult<ModelListItem>;
 
-/** 添加 Models */
+/** add Models */
 export interface SaveModelParams {
   name: string;
 }
 /** Models List End */
 
 /** Runs Start */
-/** status 状态枚举 */
+/** status Enum */
 export enum statusEnum {
   started = 'STARTED',
   running = 'RUNNING',
@@ -45,7 +45,7 @@ export enum statusEnum {
   failure = 'FAILURE',
   SUCCESS_WITH_ERROR = 'SUCCESS_WITH_ERROR',
 }
-/** run表格项 */
+/** run table ite, */
 export interface ModelRunItem {
   id: number;
   teamId: number;
@@ -58,22 +58,22 @@ export interface ModelRunItem {
   errorReason: Nullable<string>;
   parameter: string;
 }
-/** 请求 run表格 参数 */
+/** table request params */
 export interface GetModelRunParams extends BasicPageParams {
   modelId?: number;
 }
 
-/** 响应 run表格 参数 */
+/** table response params */
 export type ResponseModelRunParams = BasicFetchResult<ModelRunItem>;
 
-/** PreModel 参数 */
+/** PreModel params */
 export interface PreModelParam {
   minConfidence: number;
   maxConfidence: number;
   classes: string[];
 }
 
-/** 执行 modelRun任务 参数 */
+/** model run params */
 export interface runModelRunParams {
   datasetId: number;
   modelId: number;

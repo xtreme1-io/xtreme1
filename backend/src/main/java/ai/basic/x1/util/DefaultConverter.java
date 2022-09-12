@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * @author andy
+ */
 public class DefaultConverter {
 
     /**
@@ -83,7 +86,7 @@ public class DefaultConverter {
     }
 
     /**
-     * 通过Bean拷贝的方式进行列表转换
+     * By bean copy for converting list
      *
      * @param sourceList
      * @param target

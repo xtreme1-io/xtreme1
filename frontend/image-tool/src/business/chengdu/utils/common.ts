@@ -15,7 +15,7 @@ export function enableEscOnFullScreen() {
     }
 }
 
-// 是否是 mac 系统
+// Is it a mac system
 export function isMac() {
     const parser = new UAParser();
     const osInfo = parser.getResult();

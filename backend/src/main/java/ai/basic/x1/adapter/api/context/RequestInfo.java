@@ -4,6 +4,9 @@ package ai.basic.x1.adapter.api.context;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * @author andy
+ */
 @Builder
 @Data
 public class RequestInfo {

@@ -2,17 +2,12 @@ import { IHotkeyConfig } from '../type';
 import { UITypeEnum } from '../../enum/UITypeEnum';
 import UAParser from 'ua-parser-js';
 
-// 获取系统
 const parser = new UAParser();
 const osInfo = parser.getResult();
 const osName = (osInfo.os.name || '').toLowerCase();
 const isMac = osName.indexOf('mac') >= 0;
 console.log('isMac:', isMac);
 
-// 这里定义快捷键和方法
-// -- 方法要和 action 里面的方法名保持一致
-
-// Mac系统的快捷键
 const macConfig: IHotkeyConfig[] = [
     { key: 'Backspace', action: 'onDelete' },
     { key: '⌘ + s', action: 'onSave' },
@@ -29,7 +24,6 @@ const macConfig: IHotkeyConfig[] = [
     { key: '⌘ + x', action: 'clipPolygon', args: { firstisClip: true } },
     { key: '⌘ + Shift + x', action: 'cancelClip' },
 ];
-// Windows系统的快捷键
 const windowsConfig: IHotkeyConfig[] = [
     { key: 'Delete', action: 'onDelete' },
     { key: 'Ctrl + s', action: 'onSave' },
@@ -50,7 +44,6 @@ const windowsConfig: IHotkeyConfig[] = [
     { key: 'Ctrl + x', action: 'clipPolygon', args: { firstisClip: true } },
     { key: 'Ctrl + Shift + x', action: 'cancelClip' },
 ];
-// 通用快捷键
 const commonConfig: IHotkeyConfig[] = [
     // { key: 'Esc', action: 'KeyEscDown' },
     // { key: 'Enter', action: 'KeyEnterDown' },
@@ -67,12 +60,10 @@ const commonConfig: IHotkeyConfig[] = [
     { key: '7', action: 'selectTool', args: UITypeEnum.model },
     { key: '8', action: 'selectTool', args: UITypeEnum.interactive },
 ];
-// 所有快捷键：根据系统获取
 const hotkeyConfig: IHotkeyConfig[] = isMac
     ? commonConfig.concat(macConfig)
     : commonConfig.concat(windowsConfig);
 
-// 可在绘制中使用的快捷键
 export const drawingConfig: IHotkeyConfig[] = [
     { key: 'Space', action: 'KeySpaceDown', upAction: 'KeySpaceUp' },
     { key: 'Esc', action: 'KeyEscDown' },
@@ -83,10 +74,4 @@ export const drawingConfig: IHotkeyConfig[] = [
         : { key: 'Ctrl + Shift + z', action: 'KeyForwardDown' },
     // isMac ? { key: 'Backspace', action: 'onDelete' } : { key: 'Delete', action: 'onDelete' },
 ];
-// // 不可在绘制中使用的快捷键
-// export const forbiddenConfig = hotkeyConfig.filter(
-//     (hotkey) => !drawingConfig.some((drawingKey) => hotkey.key == drawingKey.key),
-// );
-// // console.log('forbiddenConfig:', forbiddenConfig);
-
 export default hotkeyConfig;

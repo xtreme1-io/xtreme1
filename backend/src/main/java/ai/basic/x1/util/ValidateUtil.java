@@ -12,17 +12,18 @@ import java.util.Set;
 
 /**
  * Validation tool for hibernate validator
+ * @author andy
  */
 public class ValidateUtil {
 
-    private static final Validator validator =
+    private static final Validator VALIDATOR =
             Validation.buildDefaultValidatorFactory().getValidator();
 
     /**
      * Validating entity classes
      */
     public static <T> void validate(T t) {
-        Set<ConstraintViolation<T>> constraintViolations = validator.validate(t);
+        Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(t);
         if (constraintViolations.size() > 0) {
             StringBuilder validateError = new StringBuilder();
             for (ConstraintViolation<T> constraintViolation : constraintViolations) {
@@ -37,7 +38,7 @@ public class ValidateUtil {
      * Validating entity classes by group
      */
     public static <T> void validate(T t, Class<?>... groups) {
-        Set<ConstraintViolation<T>> constraintViolations = validator.validate(t, groups);
+        Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(t, groups);
         if (constraintViolations.size() > 0) {
             StringBuilder validateError = new StringBuilder();
             for (ConstraintViolation<T> constraintViolation : constraintViolations) {

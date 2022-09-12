@@ -18,9 +18,9 @@ export function getDefault(): IToolState {
         saving: false,
         //
         models: [],
-        //流水号
+        // serial number
         recordId: '',
-        // 数据集
+        // dataset
         datasetId: '',
         //
         // data

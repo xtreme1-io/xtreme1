@@ -22,7 +22,6 @@ import {
 } from '../../util';
 import { config } from '../../config';
 import { UIType } from '../../../config/mode';
-// import { UITypeEnum } from '/@/enum/UITypeEnum'
 import { cloneDeep } from 'lodash';
 export class BaseShape {
     constructor(view, opt = {}) {
@@ -31,11 +30,8 @@ export class BaseShape {
         this.intId = typeof opt.intId !== 'undefined' ? opt.intId : this._getIntId();
         this.shapelayer = view.shapelayer;
         this.helplayer = view.helplayer;
-        // 图形name属性 用于获取所有相关的图形 更新属性
         this.name = CONSTANT.SHAPENAME;
-        // konva 图形实例
         this.shape = null;
-        // 标签 文本 konva 实例
         this._label = null;
         this.closed = opt.closed || false;
         this.finish = opt.finish || false;
@@ -43,27 +39,26 @@ export class BaseShape {
         this.stroke = opt.color || config.defaultCorlor;
         // this.classType = opt.classType || '';
         // this.attrs = opt.attrs || {};
-        this.points = opt.points || []; // 坐标点
+        this.points = opt.points || [];
         this.userData = opt.userData || {};
-        this.controlPoints = null; // 一些特殊的控制点
-        this.anchors = []; // 顶点控制点
-        this.edges = []; // 边, 用于调整
-        this.interior = []; // 闭合图形 内环, 多边形
-        this.selected = false; // 是否选中
+        this.controlPoints = null;
+        this.anchors = [];
+        this.edges = [];
+        this.interior = [];
+        this.selected = false;
         this.highlight = false;
-        this.hasAnchor = false; // 是否需要显示调整的句柄(圆)
-        this.needMidAnchor = false; // 暂时没用
+        this.hasAnchor = false;
+        this.needMidAnchor = false;
 
         this._fromJson = opt.fromJson || false;
 
-        // 图形包围盒最大最小宽高
         this.width = 0;
         this.height = 0;
         this.area = 0;
         this.length = 0;
         this.visibility = true;
         this.isInside = true;
-        // 关联的批注
+
         // this._markers = new Set();
     }
     static fromJSON(view, item, fromJson = true) {
@@ -170,7 +165,7 @@ export class BaseShape {
             this.endEdgeEdit && this.endEdgeEdit();
         }
         this.updateAnchors(this.controlPoints || this.points);
-        // 锚点不显示时销毁, 提高性能
+
         if (!this.showAnchor) {
             this._removeAnchor();
         }
@@ -184,18 +179,6 @@ export class BaseShape {
     initEdgeEdit() {}
     endEdgeEdit() {}
     _getShapeColor() {
-        // 选中
-        // 自定义颜色
-        // 正常颜色
-        // if (!this._valid) {
-        //     return 'red';
-        // }
-        // if (this.highlight) {
-        //     return CONSTANT.HIGHLIGHTCOLOR;
-        // }
-        // if (this.selected) {
-        //     return CONSTANT.SELECTEDCOLOR;
-        // } else
         if (config.userColor) {
             return config.userColor;
         } else {
@@ -240,7 +223,6 @@ export class BaseShape {
         this.view.addShape(this, !this._fromJson);
         this.updateLabelPosition();
         this.updateDistanceText();
-        // 性能优化
         if (!this._fromJson) {
             this.view.unSelectAll();
             this.view._addMulSelectionItem(this);
@@ -249,16 +231,13 @@ export class BaseShape {
                 data: this,
             });
             const currentShape = getSelectedShapByCurrentTool(this.view.editor);
-            // 添加判断
             // console.log('finish currentShape', currentShape);
 
-            // 如果是由 AI 工具触发的finishDraw，则不加入撤销撤回中
             if (currentShape.type != UIType.interactive) {
                 this.view.editor.cmdManager.execute('add-object', {
                     uuid: this.uuid,
                 });
             }
-            // 添加形状数据
             this.view.emit(Event.ADD_OBJECT, {
                 data: {
                     object: this,
@@ -310,7 +289,6 @@ export class BaseShape {
             this.view.emit(Event.DIMENSION_CHANGE_BEFORE, {
                 data: this,
             });
-            // this.activeAnchor(anchor.idx);
         });
         anchor.on('dragmove', (e) => {
             this.view.updateCursor(CURSOR.none);
@@ -319,7 +297,6 @@ export class BaseShape {
         });
         anchor.on('dragend', () => {
             this.view.updateCursor(CURSOR.move);
-            // this.activeAnchor(anchor);
             this.anchorOnDragEnd(anchor);
             anchor._moved = false;
         });
@@ -350,7 +327,6 @@ export class BaseShape {
             this.view.activeAnchor = null;
         }
         if (anchor) {
-            // console.log(anchor);
             this.view.activeAnchor = anchor;
             anchor.stroke(CONSTANT.ANCHORFILL);
             anchor.strokeWidth(CONSTANT.STROKEWIDTH * this._getScaleFactor());
@@ -364,7 +340,6 @@ export class BaseShape {
         let bbox = this.view.limitBbox;
         let limit = config.limitInBackgroud;
         let position = fixedPointPositionIfNeed(anchor.position(), bbox, limit);
-        // console.log(this.points);
         this.view.editor.cmdManager.execute('move-point', {
             uuid: this.uuid,
             index: anchor.idx,
@@ -373,7 +348,6 @@ export class BaseShape {
         });
         this.replacePoint(position, anchor.idx);
         this.updateLabelPosition();
-        // console.log(this.points);
     }
     anchorOnDragEnd() {
         console.log('anchorOnDragEnd', this);
@@ -386,12 +360,10 @@ export class BaseShape {
         let anchor = e.target;
         this.activeAnchor(anchor);
     }
-    // 顶点控制点 用于拖动调整
     updateAnchors(points = this.points) {
         if (this.hasAnchor) {
             let visible = this.shape.isVisible() && this.showAnchor;
             if (visible) {
-                // 移除可能多余的锚点
                 this.anchors.splice(points.length).forEach((anchor) => {
                     anchor.off();
                     anchor.destroy();
@@ -448,7 +420,6 @@ export class BaseShape {
     }
     pushPoint(point) {
         let [last] = this.points.slice(-1);
-        // 避免相邻的重复坐标
         if (!(last && isEqualPoint(last, point))) {
             this.points.push(point);
             this._pointsChange();
@@ -480,7 +451,6 @@ export class BaseShape {
             });
         }
         this.points.splice(index, 1);
-        // console.log(this.points, index);
         this._pointsChange();
     }
     replacePoint(point, index) {
@@ -514,11 +484,9 @@ export class BaseShape {
         this.height = height;
         this.area = area;
     }
-    // 更新长度信息位置
     updateDistanceText(points) {
         this._clacDimension();
     }
-    // 更新 图形以及标签文本的颜色
     updateShapeColor() {
         if (!this.shape) return;
         let color = this._getShapeColor();
@@ -619,7 +587,6 @@ export class BaseShape {
         }
         this.draw();
     }
-    // 拖动相关事件 具体某个图形 拖动时处理 需要在每个具体的图形原型上实现
     bindDragEvent() {
         this.shape.on('dragstart', () => {
             this.onDragStart();
@@ -644,12 +611,8 @@ export class BaseShape {
         });
     }
     onDragMove(e) {
-        // 当前位置
         let curPosition = this.shape.position();
-        // 受限制的区域， 目前是图片内， 也许可以配置绘制在图片局部。
         let limitBbox = this.view.limitBbox;
-        // 当前图形的包围盒
-        // point类型 比较特殊 只需要处理中心点的位置
         let rect = {
             x: 0,
             y: 0,
@@ -821,7 +784,6 @@ export class BaseShape {
         let isInmulSelShapes = this.view._isInMulSelection(this);
         this.view.removeShape(this, notify);
         if (isInmulSelShapes) {
-            // 多选 的某一个被删除通知外部
             this.view.emit(Event.SELECT, {
                 data: {
                     curSelection: Array.from(this.view.mulSelShapes),
@@ -845,7 +807,6 @@ export class BaseShape {
         this.helplayer = null;
     }
 
-    // 移动微调方法
     translate(direction, distance) {
         console.log('translate', this);
         const selectedShape = this.view?.selectedShape;
@@ -866,7 +827,6 @@ export class BaseShape {
                 diff = { x: distance, y: 0 };
                 break;
         }
-        // console.log(diff);
         this.oldPoints = cloneDeep(this.points);
         this.points = this.points.map((point) => {
             return {
@@ -896,10 +856,8 @@ export class BaseShape {
             oldPoints: cloneDeep(this.oldPoints),
         });
 
-        // 更新点坐标
         this.setInterior(this.interior);
         this.setPoints(this.points);
-        // 更新辅助边
         if (this.selected) {
             this.initEdgeEdit();
         }

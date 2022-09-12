@@ -3,6 +3,9 @@ package ai.basic.x1.util;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author fyb
+ */
 public interface Constants {
 
     String X_REAL_IP = "X-Real-Ip";
@@ -69,10 +72,12 @@ public interface Constants {
 
     String RESULT = "result";
 
-    /**
-     * 斜杠
-     */
     String SLANTING_BAR = "/";
+
+
+    String QUESTION_MARK = "?";
+
+    Integer PROCESS_VALUE_SIZE = 1000;
 
     Integer BATCH_SIZE = 1000;
 

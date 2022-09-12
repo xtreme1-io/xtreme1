@@ -1,23 +1,23 @@
 <template>
   <div class="upload__content">
     <div class="upload__content--dragger">
+      <div class="dragger-tips">
+        <Icon class="icon" icon="eva:info-fill" size="24" />
+        <div class="text">
+          <span>Get our </span>
+          <a class="highlight" href="https://docs.basic.ai/docs/upload" target="_blank">
+            open data or check documentations
+          </a>
+          <span> for data formats and upload guides.</span>
+        </div>
+      </div>
       <UploadDragger :multiple="true" :showUploadList="false" :beforeUpload="beforeUpload">
-        <Icon icon="ant-design:cloud-upload-outlined" size="50" color="#57CCEF" />
+        <SvgIcon size="60" name="upload" />
         <div class="dragger-placeholder">
           <span>{{ t('business.group.create.drop') }}</span>
           <span>{{ t('business.group.create.browse') }}</span>
         </div>
       </UploadDragger>
-      <div class="dragger-tips">
-        <Icon class="icon" icon="eva:info-fill" size="16" />
-        <div class="text">
-          <span>The total files size should be limit of 500 mb.For more details, get our </span>
-          <a href="https://docs.basic.ai/docs/upload" target="_blank">
-            open data or check documentation
-          </a>
-          <span>for supported 3D format and how to upload data with results.</span>
-        </div>
-      </div>
     </div>
     <Divider class="upload__content--divider">Or</Divider>
     <div class="upload__content--url">
@@ -49,7 +49,7 @@
 <script lang="ts" setup>
   import { ref, reactive } from 'vue';
   import { Form, Input, Upload, Divider } from 'ant-design-vue';
-  import { Icon } from '/@/components/Icon';
+  import { Icon, SvgIcon } from '/@/components/Icon';
   import { Button } from '/@@/Button';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -64,7 +64,7 @@
   const emits = defineEmits(['closeUpload']);
 
   /** Upload */
-  const beforeUpload = (file: File) => {
+  const beforeUpload = (_, fileList: File[]) => {
     const compressType = [
       'application/zip',
       'application/x-tar',
@@ -75,23 +75,26 @@
     const imageType = ['image/jpeg', 'image/png'];
 
     if (props.datasetType == datasetTypeEnum.IMAGE) {
-      const isImage = [...imageType, ...compressType].includes(file.type);
+      const isImage = fileList.every((file) => [...imageType, ...compressType].includes(file.type));
       if (!isImage) {
         return createMessage.error('You can only upload zip/gzip/tar/jpg/jpeg/png file!');
       }
     } else {
-      const isCompress = compressType.includes(file.type);
+      const isCompress = fileList.every((file) => compressType.includes(file.type));
       if (!isCompress) {
         return createMessage.error('You can only upload zip/gzip/tar file!');
       }
     }
 
-    const isLimit = file.size / 1024 / 1024 < 500;
-    if (!isLimit) {
-      return createMessage.error('file must smaller than 500MB!');
-    }
-
-    emits('closeUpload', file, UploadSourceEnum.LOCAL);
+    // const totalSize = fileList.reduce(
+    //   (previousValue, currenValue) => previousValue + currenValue.size,
+    //   0,
+    // );
+    // const isLimit = totalSize / 1024 / 1024 < 500;
+    // if (!isLimit) {
+    //   return createMessage.error('file must smaller than 500MB!');
+    // }
+    emits('closeUpload', fileList, UploadSourceEnum.LOCAL);
 
     return false;
   };
@@ -108,31 +111,64 @@
   // Submit
   const isLoading = ref<boolean>(false);
   const handleSubmit = async () => {
-    isLoading.value = true;
-    setTimeout(() => {
-      isLoading.value = false;
-      emits('closeUpload', formState.url, UploadSourceEnum.URL);
-    }, 1000);
+    try {
+      await formRef.value.validate();
+
+      isLoading.value = true;
+      setTimeout(() => {
+        isLoading.value = false;
+        emits('closeUpload', formState.url, UploadSourceEnum.URL);
+      }, 1000);
+    } catch {}
   };
 </script>
 <style lang="less" scoped>
   .upload__content {
-    padding: 40px 0;
+    padding: 20px 0;
 
     &--dragger {
-      position: relative;
       margin-bottom: 20px;
+
+      .dragger-tips {
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 24px;
+
+        .icon {
+          // position: relative;
+          // top: 3px;
+          color: #57ccef;
+        }
+
+        .text {
+          font-weight: 400;
+          font-size: 12px;
+          line-height: 20px;
+          color: #666666;
+          .highlight {
+            color: #60a9fe;
+            cursor: pointer;
+            &:hover {
+              color: #60a9fe;
+            }
+          }
+        }
+      }
 
       :deep(.ant-upload-drag) {
         width: 500px;
-        height: 233px;
-        padding: 40px;
+        height: 208px;
 
         background: #f9fcff;
         border: 1px dashed #60a9fe;
         border-radius: 10px;
 
         .ant-upload-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
           padding: 0;
 
           .ant-upload-drag-container {
@@ -142,8 +178,6 @@
             gap: 10px;
 
             .dragger-placeholder {
-              margin-bottom: 15px;
-
               span {
                 font-weight: 500;
                 font-size: 16px;
@@ -151,41 +185,9 @@
                 color: #333333;
 
                 &:last-child {
-                  color: #57ccef;
+                  color: #60a9fe;
                 }
               }
-            }
-          }
-        }
-      }
-
-      .dragger-tips {
-        position: absolute;
-        display: flex;
-        gap: 10px;
-        // width: 388px;
-        width: 420px;
-        height: 60px;
-        top: 133px;
-        left: 50%;
-        transform: translateX(-50%);
-
-        .icon {
-          position: relative;
-          top: 3px;
-          color: #57ccef;
-        }
-
-        .text {
-          span {
-            font-weight: 400;
-            font-size: 14px;
-            line-height: 20px;
-            color: #666666;
-
-            &:nth-child(2) {
-              color: #60a9fe;
-              cursor: pointer;
             }
           }
         }

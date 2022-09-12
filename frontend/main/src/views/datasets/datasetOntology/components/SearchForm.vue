@@ -52,26 +52,6 @@
           <DatePicker v-model:start="formState.startTime" v-model:end="formState.endTime" />
         </CollContainer>
       </Form.Item>
-      <!-- 0.3版本取消 datasetType -->
-      <!-- <Form.Item v-if="props.isCenter && props.activeTab == ClassTypeEnum.CLASS">
-        <CollContainer
-          icon="mdi:calendar-month"
-          :title="t('business.ontology.searchForm.datasetType')"
-        >
-          <div class="select-inner">
-            <Select
-              size="small"
-              v-model:value="formState.datasetType"
-              :placeholder="t('business.ontology.searchForm.search')"
-              allowClear
-            >
-              <Select.Option v-for="item in datasetTypeList" :key="item.value" :value="item.value">
-                {{ item.label }}
-              </Select.Option>
-            </Select>
-          </div>
-        </CollContainer>
-      </Form.Item> -->
       <Form.Item v-if="props.activeTab == ClassTypeEnum.CLASS">
         <CollContainer icon="fa-solid:toolbox" :title="t('business.ontology.searchForm.toolType')">
           <div class="select-inner">
@@ -115,16 +95,13 @@
 </template>
 <script lang="ts" setup>
   import { reactive, computed, watch, defineExpose } from 'vue';
-  // 组件
   import { Form, Input, Select, Radio } from 'ant-design-vue';
   import CollContainer from '/@@/CollContainer/index.vue';
   import DatePicker from '/@@/DatePicker/index.vue';
   import Icon, { SvgIcon } from '/@/components/Icon';
-  // 工具
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
-  // 类型
   import { SortTypeEnum } from '/@/api/model/baseModel';
   import {
     SearchItem,
@@ -156,14 +133,12 @@
   );
   const emits = defineEmits(['search']);
 
-  // form 表单
   let formState: SearchItem = reactive({
     name: undefined,
     sortBy: SortFieldEnum.CREATE_TIME,
     ascOrDesc: SortTypeEnum.ASC,
     startTime: undefined,
     endTime: undefined,
-    // datasetType: undefined,
     toolType: undefined,
     inputType: undefined,
   });
@@ -177,7 +152,6 @@
       ascOrDesc: formState.ascOrDesc,
       startTime: formState.startTime ? setStartTime(formState.startTime as Dayjs) : undefined,
       endTime: formState.endTime ? setEndTime(formState.endTime as Dayjs) : undefined,
-      // datasetType: formState.datasetType,
       toolType: formState.toolType,
       inputType: formState.inputType,
     };
@@ -191,10 +165,8 @@
     }, 400);
   });
 
-  // toolType下拉选项
+  /**  ToolType Selection List */
   const toolTypeOption = computed(() => {
-    // NOTE 后续再判断如何区分
-    // return toolTypeList;
     if (props.datasetType != datasetTypeEnum.IMAGE) {
       return toolTypeList.filter((item) => item.type === ToolTypeEnum.CUBOID);
     } else {
@@ -208,7 +180,6 @@
     formState.ascOrDesc = SortTypeEnum.ASC;
     formState.startTime = undefined;
     formState.endTime = undefined;
-    // formState.datasetType= undefined
     formState.toolType = undefined;
     formState.inputType = undefined;
   };
@@ -222,7 +193,6 @@
     height: 100%;
     border: 1px solid #ccc;
     padding: 12px;
-    // border-radius: 12px;
     background-color: #fff;
     color: #333;
 
@@ -231,7 +201,6 @@
       justify-content: space-between;
 
       .ant-radio-wrapper {
-        // width: auto;
         height: 24px;
         font-size: 12px;
         color: #333;
@@ -240,10 +209,6 @@
 
     .select-inner {
       padding: 10px 0;
-
-      // .ant-select {
-      //   border: none;
-      // }
     }
 
     .ant-form-item {

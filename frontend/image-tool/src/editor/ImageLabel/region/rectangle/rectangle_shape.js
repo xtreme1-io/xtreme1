@@ -71,7 +71,6 @@ export class Rectangle extends BaseShape {
         this.initEdgeEdit();
         // updateRectSizeTips(e.evt, this, this.view);
     }
-    // 初始化按边调整
     initEdgeEdit() {
         if (this.points.length < 2) return;
         let points = this.points.slice();
@@ -129,7 +128,6 @@ export class Rectangle extends BaseShape {
         });
         this.draw();
     }
-    // 结束按边调整
     endEdgeEdit() {
         // this.shape.show();
         this.edges.forEach((edge) => {
@@ -148,7 +146,6 @@ export class Rectangle extends BaseShape {
     edgeOnDragMove(e) {
         let edge = e.target;
         let index = edge.idx;
-        // 当前位置
         let curPosition = edge.position();
         let diff = {
             x: curPosition.x - this._edgePosition.x,

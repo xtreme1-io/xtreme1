@@ -127,22 +127,18 @@
     // *********************************************
     provide('state', state);
     provide('filterValue', filterValue);
-    // 无 class 的列表
+
     const noClassList = ref<any>(state.noClassList.data);
-    // 有 class 的列表
     const hasClassList = ref<any>(state.list);
-    // 筛选结果数据
+
     const resultNum = ref<string>('');
-    // 是否有 数据
     const hasClass = ref<boolean>(false);
 
     watch(state, () => {
         console.log('finally --- ', state);
-        // 根据 filterVisible 筛选
         noClassList.value = state.noClassList.filterVisible ? state.noClassList.data : [];
         hasClassList.value = state.list.filter((item: any) => item.filterVisible);
 
-        // 获取头部显示
         const noClassListNum = noClassList.value.length;
         const hasClassListNum = hasClassList.value.reduce(
             (previousValue: any, currentValue: any) =>
@@ -153,7 +149,6 @@
         resultNum.value =
             state.objectN == showListNum ? state.objectN + '' : showListNum + '/' + state.objectN;
 
-        // 是否显示数据
         hasClass.value = hasClassList.value.length > 0 || noClassListNum > 0;
     });
 </script>
@@ -168,35 +163,15 @@
         overflow-x: hidden;
         padding: 8px 7px 10px;
 
-        // 组项
         .list {
-            // padding: 0 4px;
-            // 标题
             .class-title {
                 display: inline-block;
                 max-width: 100px;
                 line-height: 1;
                 vertical-align: middle;
             }
-            // 内部组
-            .item {
-                // &::after {
-                //     content: '';
-                //     display: block;
-                //     width: 224px;
-                //     height: 1px;
-                //     background: rgba(204, 204, 204, 0.3);
-                // }
-                // &:last-child {
-                //     color: red;
-                //     .item-header {
-                //         // border: 0;
-                //         color: blue !important;
-                //     }
-                // }
-            }
         }
-        // 工具
+        // tool
         .extra-tool {
             pointer-events: visible;
             height: 100%;

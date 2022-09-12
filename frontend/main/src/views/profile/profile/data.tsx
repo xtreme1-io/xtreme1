@@ -164,7 +164,6 @@ export const getTransSetSchemas = (hasPwd: boolean): FormSchema[] => {
   ];
 };
 
-// 基础设置 form
 export const baseSetschemas: FormSchema[] = [
   {
     field: 'name',

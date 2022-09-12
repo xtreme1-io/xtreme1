@@ -1,6 +1,6 @@
 import { BasicPageParams, BasicFetchResult } from '/@/api/model/baseModel';
 
-/** 保存修改分组 请求参数 */
+/** group item params */
 export interface groupItem {
   name: string;
   avatarId?: number;
@@ -8,12 +8,12 @@ export interface groupItem {
   id?: number;
 }
 
-/** 分页查询分组 请求参数 */
+/** search group params */
 export interface getGroupParams extends BasicPageParams {
   name?: string;
 }
 
-/** 分页查询分组 响应参数 */
+/** response params */
 export interface responseGroupItem {
   id: number;
   createdBy: number;
@@ -33,33 +33,33 @@ export interface memberItem {
 }
 export type responseGroupParams = BasicFetchResult<responseGroupItem>;
 
-/** 分组详情 响应参数 */
+/** group detail response params */
 export interface responseGroupInfoParams extends responseGroupItem {
   id: number;
 }
 
-/** 添加人员 请求参数 */
+/** add member request params */
 export interface addMemberParams {
   groupId: number;
   userIds: number[];
 }
 
-/** 移除人员 请求参数 */
+/** remove member request params */
 export interface removeMemberParams {
   groupId: number;
   userIds: number[];
 }
 
-/** 查询用户分组 响应参数 */
+/** userGroup response params */
 export interface UserGroup {
   userId: number;
   groupIds: number[];
 }
 
-/** 分配分组 请求参数 */
+/** assign group request params */
 export type AssignGroup = UserGroup;
 
-/** 检查名称重复 请求参数 */
+/** validate name request params */
 export interface CheckGroup {
   groupId?: string | number;
   groupName: string | undefined;

@@ -2,7 +2,6 @@ import type { FormInstance } from 'ant-design-vue';
 export interface IUser {
     id: string;
     nickname: string;
-    // ....其他属性
 }
 export interface IModelConfig {
     confidence: number[];
@@ -20,9 +19,9 @@ export interface IToolState {
     saving: boolean;
     //
     models: IModel[];
-    //流水号
+    // serial number
     recordId: string;
-    // 数据集
+    // dataset
     datasetId: string;
     //
     user: IUser;
@@ -49,7 +48,7 @@ export interface IDataMeta {
     teamId?: string;
     imageUrl: string;
     queryTime: string;
-    // 自动加载
+    // autoload
     loadState: LoadStatus;
     // model
     model?: IModelResult;

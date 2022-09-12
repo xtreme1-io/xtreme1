@@ -6,7 +6,6 @@
     :height="450"
     :showCancelBtn="false"
     okText="Done"
-    :okButtonProps="{ danger: true }"
     destroyOnClose
     @register="register"
     @ok="handleDone"
@@ -50,6 +49,7 @@
   const uploadUrl = ref<string>('');
 
   const [register, { closeModal }] = useModalInner((data: any) => {
+    console.log('ProgressModal: ', data);
     source.value = data.source;
     if (source.value == UploadSourceEnum.LOCAL) {
       fileList.value = data.fileList;
