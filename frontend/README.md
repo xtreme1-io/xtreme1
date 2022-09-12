@@ -12,9 +12,9 @@ Xtreme1 frontend mainly includes three parts, each part is a separate project an
 
 Each part is developed independently, and finally the static files are put together to `frontend/dist`.  
 
-`main` build to `/` -- nginx: `/`
-`pc-tool` build to `/pc-tool` -- nginx: `/tool/pc`
-`image-tool` build to `/image-tool` -- nginx: `/tool/image`
+`main` build to `/` -- nginx: `/`    
+`pc-tool` build to `/pc-tool` -- nginx: `/tool/pc`  
+`image-tool` build to `/image-tool` -- nginx: `/tool/image`  
 
 For more information, refer to `.ops/**/frontend-deployment.yml`
 
