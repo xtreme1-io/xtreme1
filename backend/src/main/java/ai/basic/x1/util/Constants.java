@@ -74,6 +74,11 @@ public interface Constants {
 
     String SLANTING_BAR = "/";
 
+
+    String QUESTION_MARK = "?";
+
+    Integer PROCESS_VALUE_SIZE = 1000;
+
     Integer BATCH_SIZE = 1000;
 
     Integer PAGE_NO = 1;

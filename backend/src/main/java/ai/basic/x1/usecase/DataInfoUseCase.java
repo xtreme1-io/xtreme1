@@ -745,7 +745,7 @@ public class DataInfoUseCase {
 
             @Override
             public void progress(long total, long progressSize) {
-                if (progressSize % 1000 == 0 || total == progressSize) {
+                if (progressSize % PROCESS_VALUE_SIZE == 0 || total == progressSize) {
                     var uploadRecord = UploadRecord.builder()
                             .id(dataInfoUploadBO.getUploadRecordId())
                             .status(DOWNLOADING)

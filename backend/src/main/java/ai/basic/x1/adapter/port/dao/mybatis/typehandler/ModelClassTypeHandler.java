@@ -1,4 +1,4 @@
-package ai.basic.x1.adapter.port.dao.mybatis.typeHandler;
+package ai.basic.x1.adapter.port.dao.mybatis.typehandler;
 
 import ai.basic.x1.adapter.port.dao.mybatis.extension.BaseAttributeTypeHandler;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
