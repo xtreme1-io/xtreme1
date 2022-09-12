@@ -32,3 +32,7 @@ Build
 ```bash
 npm run build
 ```
+
+## Related Information
+
+- [Camera parameter](./docs/camera_config.md)
