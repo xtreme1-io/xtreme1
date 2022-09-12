@@ -145,7 +145,7 @@
   );
   const reset = () => {
     fileList.value.forEach((item) => {
-      item?.controller.abort();
+      item?.controller?.abort();
     });
     fileList.value = [];
     clearInterval(processTimer.value);
@@ -157,7 +157,7 @@
     // processing can't cancel request
     if (item.status == UploadResultStatus.UPLOADING) {
       if (isUploading.value) {
-        item.controller.abort();
+        item?.controller?.abort();
       }
     } else if (item.status == UploadResultStatus.PENDING) {
       item.status = UploadResultStatus.CANCELED;
@@ -319,82 +319,83 @@
     });
     const temp = uploadProgress.value.filter((item) => item.uuid === fileItem.uuid);
     temp[0].percent = 0;
-    setTimeout(() => {
+    setTimeout(async () => {
       fileItem.status = UploadResultStatus.PROCESSING;
       temp[0].percent = 80;
-    }, 500);
-    try {
-      // cancel request
-      fileItem.controller = new AbortController();
-      const uploadParams: UploadParams = {
-        fileUrl: props.uploadUrl,
-        datasetId: props.id as string,
-        source: props.source,
-      };
-      // get serialNumbers
-      const serialNumbers = await uploadDatasetApi(uploadParams, fileItem.controller.signal);
-      const uploadStatus = ref<UploadStatusEnum>(UploadStatusEnum.DOWNLOADING);
-      const findUploadRecord = async () => {
-        try {
-          const record = await findUploadRecordBySerialNumbers(
-            serialNumbers,
-            fileItem.controller.signal,
-          );
-          const {
-            status,
-            errorMessage,
-            downloadedFileSize,
-            totalFileSize,
-            parsedDataNum,
-            totalDataNum,
-          } = record[0];
 
-          if (status == UploadStatusEnum.FAILED) {
-            throw new Error(errorMessage as string);
-          }
-          uploadStatus.value = status;
+      try {
+        // cancel request
+        fileItem.controller = new AbortController();
+        const uploadParams: UploadParams = {
+          fileUrl: props.uploadUrl,
+          datasetId: props.id as string,
+          source: props.source,
+        };
+        // get serialNumbers
+        const serialNumbers = await uploadDatasetApi(uploadParams, fileItem.controller.signal);
+        const uploadStatus = ref<UploadStatusEnum>(UploadStatusEnum.DOWNLOADING);
+        const findUploadRecord = async () => {
+          try {
+            const record = await findUploadRecordBySerialNumbers(
+              serialNumbers,
+              fileItem.controller.signal,
+            );
+            const {
+              status,
+              errorMessage,
+              downloadedFileSize,
+              totalFileSize,
+              parsedDataNum,
+              totalDataNum,
+            } = record[0];
 
-          const downloadPercent =
-            parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 10) || 0;
-          const parsedPercent =
-            parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 10) || 0;
+            if (status == UploadStatusEnum.FAILED) {
+              throw new Error(errorMessage as string);
+            }
+            uploadStatus.value = status;
 
-          temp[0].percent = 80 + downloadPercent + parsedPercent;
-          console.log(status, '==>', downloadPercent, '==', parsedPercent);
+            const downloadPercent =
+              parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 10) || 0;
+            const parsedPercent =
+              parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 10) || 0;
 
-          if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
+            temp[0].percent = 80 + downloadPercent + parsedPercent;
+            console.log(status, '==>', downloadPercent, '==', parsedPercent);
+
+            if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
+              clearInterval(processTimer.value);
+              temp[0].percent = 100;
+              fileItem.status = UploadResultStatus.SUCCESS;
+              isUploading.value = false;
+              emits('fetchList');
+            }
+          } catch (e: any) {
             clearInterval(processTimer.value);
-            temp[0].percent = 100;
-            fileItem.status = UploadResultStatus.SUCCESS;
+            if (e.message == 'canceled') {
+              fileItem.status = UploadResultStatus.CANCELED;
+              fileItem.error = String(e.message);
+            } else {
+              fileItem.status = UploadResultStatus.ERROR;
+              fileItem.error = String(e);
+            }
             isUploading.value = false;
-            emits('fetchList');
           }
-        } catch (e: any) {
-          clearInterval(processTimer.value);
-          if (e.message == 'canceled') {
-            fileItem.status = UploadResultStatus.CANCELED;
-            fileItem.error = String(e.message);
-          } else {
-            fileItem.status = UploadResultStatus.ERROR;
-            fileItem.error = String(e);
-          }
-          isUploading.value = false;
+        };
+        findUploadRecord();
+        processTimer.value = setInterval(async () => {
+          await findUploadRecord();
+        }, 3000);
+      } catch (e: any) {
+        if (e.message == 'canceled') {
+          fileItem.status = UploadResultStatus.CANCELED;
+          fileItem.error = String(e.message);
+        } else {
+          fileItem.status = UploadResultStatus.ERROR;
+          fileItem.error = String(e);
         }
-      };
-      findUploadRecord();
-      processTimer.value = setInterval(async () => {
-        await findUploadRecord();
-      }, 3000);
-    } catch (e: any) {
-      if (e.message == 'canceled') {
-        fileItem.status = UploadResultStatus.CANCELED;
-        fileItem.error = String(e.message);
-      } else {
-        fileItem.status = UploadResultStatus.ERROR;
-        fileItem.error = String(e);
+        isUploading.value = false;
       }
-      isUploading.value = false;
-    }
+    }, 500);
   };
   /** Upload End */
 

@@ -10,6 +10,9 @@ import javax.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * @author fyb
+ */
 @Data
 @Builder
 @NoArgsConstructor

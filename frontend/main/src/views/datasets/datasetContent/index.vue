@@ -7,7 +7,7 @@
         :lockedNum="lockedNum"
         :type="(info?.type as datasetTypeEnum)"
       /> -->
-      <div class="lockedMask" v-if="lockedNum > 0">
+      <div class="lockedMask" v-if="lockedNum && lockedNum > 0">
         <div class="flex-1 flex">
           <Icon icon="ant-design:info-circle-outlined" color="#FCB17A" class="mt-1" />
           <span class="ml-2">
@@ -181,6 +181,7 @@
     hasOntologyApi,
     makeFrameSeriesApi,
     takeRecordByData,
+    takeRecordByDataModel,
     ungroupFrameSeriesApi,
     unLock,
   } from '/@/api/business/dataset';
@@ -298,9 +299,13 @@
     });
     getLockedData();
     fetchList(filterForm);
-    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
+    fetchStatusNum();
     document.addEventListener('visibilitychange', getLockedData);
   });
+
+  const fetchStatusNum = async () => {
+    statusInfo.value = await getStatusNum({ datasetId: id as unknown as number });
+  };
 
   onUnmounted(async () => {
     document.removeEventListener('visibilitychange', getLockedData);
@@ -315,7 +320,7 @@
     if (res) {
       // openWarningModal();
       lockedId.value = res.recordId;
-      lockedNum.value = res.lockedNum;
+      lockedNum.value = res.lockedNum || 0;
       // fixedFetchList();
     } else {
       // closeWarningModal();
@@ -374,6 +379,7 @@
         list.value = res.list;
         total.value = res.total;
       }
+      fetchStatusNum();
     } catch (error) {
       console.log(error);
     }
@@ -500,8 +506,7 @@
       dataType: type,
     });
     goToTool({ recordId: res }, info.value?.type);
-
-    // fixedFetchList();
+    fixedFetchList();
   };
 
   const handleSingleAnnotate = async (dataId) => {
@@ -516,7 +521,7 @@
     });
     getLockedData();
     goToTool({ recordId: res }, info.value?.type);
-    // fixedFetchList();
+    fixedFetchList();
   };
 
   const handleEmpty = async (list, type) => {
@@ -563,7 +568,7 @@
       templist = selectedList.value;
     }
 
-    const res = await takeRecordByData({
+    const res = await takeRecordByDataModel({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
       dataType: type,

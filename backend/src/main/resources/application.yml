@@ -38,6 +38,13 @@ mybatis-plus:
   mapper-locations: classpath:/mybatis/mapper/*.xml
   type-aliases-package: ai.basic.x1.adapter.port.dao.mybatis.model
 
+minio:
+  internalEndpoint: http://minio:9000/
+  endpoint: http://localhost:8193/
+  accessKey: admin
+  secretKey: 1tQB970y
+  bucketName: x1-community
+
 export:
   data:
     version: Basic AI Community V1.0
@@ -51,12 +58,31 @@ file:
     large: large
     medium: medium
     small: small
+dataset-initial:
+  dataset:
+    name: LiDAR Fusion Trial
+    fileName: x1-point-cloud-result.zip
+    type: LIDAR_FUSION
+    userName: admin@xtreme1.io
+    classes[0]:
+      name: Car
+      color: "#f39c12"
+      toolType: CUBOID
+      toolTypeOptions: "{defaultHeight:\"\",isConstraints:false,minHeight:\"\",minPoints:\"\"}"
+      attributes: "[{\"name\":\"Occlusion\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"Yes\",\"attributes\":[]},{\"name\":\"No\",\"attributes\":[]}]},{\"name\":\"Confidence\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"High\",\"attributes\":[]},{\"name\":\"Medium\",\"attributes\":[]},{\"name\":\"Low\",\"attributes\":[]}]}]"
+    classes[1]:
+      name: Van
+      color: "#2ecc71"
+      toolType: CUBOID
+      toolTypeOptions: "{defaultHeight:\"\",isConstraints:false,minHeight:\"\",minPoints:\"\"}"
+      attributes: "[{\"name\":\"Occlusion\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"Yes\",\"attributes\":[]},{\"name\":\"No\",\"attributes\":[]}]},{\"name\":\"Confidence\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"High\",\"attributes\":[]},{\"name\":\"Medium\",\"attributes\":[]},{\"name\":\"Low\",\"attributes\":[]}]}]"
+    classes[2]:
+      name: Truck
+      color: "#d1ccc0"
+      toolType: CUBOID
+      toolTypeOptions: "{defaultHeight:\"\",isConstraints:false,minHeight:\"\",minPoints:\"\"}"
+      attributes: "[{\"name\":\"Occlusion\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"Yes\",\"attributes\":[]},{\"name\":\"No\",\"attributes\":[]}]},{\"name\":\"Confidence\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"High\",\"attributes\":[]},{\"name\":\"Medium\",\"attributes\":[]},{\"name\":\"Low\",\"attributes\":[]}]}]"
 
-minio:
-  endpoint: http://minio:9000/
-  accessKey: admin
-  secretKey: 1tQB970y
-  bucketName: x1-community
 
 model:
   arithmetic:

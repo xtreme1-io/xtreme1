@@ -8,6 +8,9 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 
+/**
+ * @author andy
+ */
 public class JSONArrayValidator implements ConstraintValidator<ValidJSONArray, String> {
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private boolean allowNull;

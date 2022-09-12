@@ -7,5 +7,28 @@ package ai.basic.x1.entity.enums;
  * @date 2022/4/21 14:50
  */
 public enum UploadStatusEnum {
-    UNSTARTED,DOWNLOADING,DOWNLOAD_COMPLETED,PARSING,PARSE_COMPLETED,FAILED
+    /**
+     * UNSTARTED
+     */
+    UNSTARTED,
+    /**
+     * DOWNLOADING
+     */
+    DOWNLOADING,
+    /**
+     * DOWNLOAD_COMPLETED
+     */
+    DOWNLOAD_COMPLETED,
+    /**
+     * PARSING
+     */
+    PARSING,
+    /**
+     * PARSE_COMPLETED
+     */
+    PARSE_COMPLETED,
+    /**
+     * FAILED
+     */
+    FAILED
 }

@@ -2,7 +2,6 @@ package ai.basic.x1.adapter.api.job;
 
 import ai.basic.x1.adapter.api.job.converter.ModelResultConverter;
 import ai.basic.x1.adapter.dto.ApiResult;
-import ai.basic.x1.adapter.dto.PcdFileDTO;
 import ai.basic.x1.adapter.port.dao.ModelDataResultDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDataResult;
@@ -17,15 +16,11 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -35,6 +30,9 @@ import java.util.Map;
 
 import static ai.basic.x1.util.Constants.*;
 
+/**
+ * @author andy
+ */
 @Slf4j
 public class PreLabelModelMessageHandler extends AbstractModelMessageHandler<List<PreModelRespDTO>> {
 

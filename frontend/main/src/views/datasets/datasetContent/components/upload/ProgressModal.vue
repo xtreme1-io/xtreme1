@@ -49,6 +49,7 @@
   const uploadUrl = ref<string>('');
 
   const [register, { closeModal }] = useModalInner((data: any) => {
+    console.log('ProgressModal: ', data);
     source.value = data.source;
     if (source.value == UploadSourceEnum.LOCAL) {
       fileList.value = data.fileList;

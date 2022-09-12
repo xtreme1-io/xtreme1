@@ -217,7 +217,7 @@ public class DataInfoUseCase {
             return dataInfoBOList.stream().collect(
                     Collectors.groupingBy(DataInfoBO::getDatasetId));
         }
-        return new HashMap<>();
+        return Map.of();
     }
 
     /**
@@ -406,7 +406,7 @@ public class DataInfoUseCase {
         return serialNumber;
     }
 
-    private void parsePointCloudUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+    public void parsePointCloudUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         var datasetId = dataInfoUploadBO.getDatasetId();
         var userId = dataInfoUploadBO.getUserId();
         var datasetType = dataInfoUploadBO.getType();
@@ -528,7 +528,6 @@ public class DataInfoUseCase {
         var uploadRecordBOBuilder = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
         if (CollectionUtil.isNotEmpty(files)) {
-            //10为一段
             var list = ListUtil.split(files, 10);
             list.forEach(fl -> {
                 parsedDataNum.set(parsedDataNum.get() + fl.size());
@@ -587,7 +586,7 @@ public class DataInfoUseCase {
         var dataIds = dataPreAnnotationBO.getDataIds();
         var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
         // Indicates that no new data is locked and there is no old lock record
-        if(insertCount == 0 && !boo){
+        if (insertCount == 0 && !boo) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
         }
         return dataAnnotationRecord.getId();
@@ -746,7 +745,7 @@ public class DataInfoUseCase {
 
             @Override
             public void progress(long total, long progressSize) {
-                if (progressSize % 1000 == 0 || total == progressSize) {
+                if (progressSize % PROCESS_VALUE_SIZE == 0 || total == progressSize) {
                     var uploadRecord = UploadRecord.builder()
                             .id(dataInfoUploadBO.getUploadRecordId())
                             .status(DOWNLOADING)
@@ -819,7 +818,7 @@ public class DataInfoUseCase {
     private Map<Long, RelationFileBO> findFileByFileIds(List<Long> fileIds) {
         var relationFileBOList = fileUseCase.findByIds(fileIds);
         return CollectionUtil.isNotEmpty(relationFileBOList) ?
-                relationFileBOList.stream().collect(Collectors.toMap(RelationFileBO::getId, relationFileBO -> relationFileBO, (k1, k2) -> k1)) : new HashMap<>();
+                relationFileBOList.stream().collect(Collectors.toMap(RelationFileBO::getId, relationFileBO -> relationFileBO, (k1, k2) -> k1)) : Map.of();
 
     }
 
@@ -1173,12 +1172,12 @@ public class DataInfoUseCase {
         var dataInfoExportBOList = new ArrayList<DataExportBO>();
         var dataIds = dataList.stream().map(DataInfoBO::getId).collect(Collectors.toList());
         var dataAnnotationList = dataAnnotationUseCase.findByDataIds(dataIds);
-        var dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
-                Collectors.groupingBy(DataAnnotationBO::getDataId)) : new HashMap<Long, List<DataAnnotationBO>>();
+        Map<Long, List<DataAnnotationBO>> dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
+                Collectors.groupingBy(DataAnnotationBO::getDataId)) : Map.of();
         var dataAnnotationObjectList = dataAnnotationObjectUseCase.findByDataIds(dataIds);
-        var dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
+        Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
                 dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
-                : new HashMap<Long, List<DataAnnotationObjectBO>>();
+                : Map.of();
         dataList.forEach(dataInfoBO -> {
             var dataId = dataInfoBO.getId();
             var map = assembleExportDataContent(dataInfoBO.getContent(), queryBO.getDatasetType());
@@ -1271,13 +1270,13 @@ public class DataInfoUseCase {
                     Thumbnails.of(file).size(largeFileSize, largeFileSize).toFile(largeFile);
                     Thumbnails.of(file).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
                     Thumbnails.of(file).size(smallFileSize, smallFileSize).toFile(smallFile);
-                    // 大压缩图
+                    // large thumbnail
                     var largePath = String.format("%s%s/%s", basePath, large, fileName);
                     var largeFileBO = fileBOBuilder.path(largePath).relation(LARGE_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
-                    // 中等缩略图
+                    // medium thumbnail
                     var mediumPath = String.format("%s%s/%s", basePath, medium, fileName);
                     var mediumFileBO = fileBOBuilder.path(mediumPath).relation(MEDIUM_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
-                    // 小缩略图
+                    // small thumbnail
                     var smallPath = String.format("%s%s/%s", basePath, small, fileName);
                     var smallFileBO = fileBOBuilder.path(smallPath).relation(SMALL_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
                     thumbnailFileBOS.addAll(ListUtil.toList(largeFileBO, mediumFileBO, smallFileBO));

@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import static ai.basic.x1.util.Constants.*;
 
+/**
+ * @author andy
+ */
 public class RequestContextInterceptor implements HandlerInterceptor {
 
     @Override

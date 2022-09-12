@@ -7,11 +7,15 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
+/**
+ * @author andy
+ */
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LabelInfo {
+
     private String label;
     private BigDecimal confidence;
     private BigDecimal x;
@@ -23,4 +27,5 @@ public class LabelInfo {
     private BigDecimal rotX;
     private BigDecimal rotY;
     private BigDecimal rotZ;
+
 }
