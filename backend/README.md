@@ -96,6 +96,8 @@ mvn package
 java -Dspring.profiles.active=local -jar target/x1-community-backend-0.5-SNAPSHOT.jar
 ```
 
+Now you can access the backend service at `http://localhost:8280/`.
+
 ## Coding Standards
 
-The code you contribute should follow the guidelines of [Alibaba Java Coding Guidelines](https://github.com/alibaba/Alibaba-Java-Coding-Guidelines). There also have checking plugins for most popular IDEs, such as Intellij IDEA, VS Code etc., you can search "Alibaba Java Coding Guidelines" in each's IDE's plugin repository.
+The code you contribute should follow the guidelines of [Alibaba Java Coding Guidelines](https://github.com/alibaba/Alibaba-Java-Coding-Guidelines). There also have checking plugins for most popular IDEs, such as Intellij IDEA, VS Code etc., you can search "Alibaba Java Coding Guidelines" in each's IDE's plugin repository. There should be no `BLOCKER` and `CRITICAL` error in the code you contribute, excepting for naming error like `DTO`, `BO` etc.
