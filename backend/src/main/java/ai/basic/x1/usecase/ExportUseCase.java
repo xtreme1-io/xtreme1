@@ -35,6 +35,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * @author fyb
+ */
 public class ExportUseCase {
 
 
@@ -60,6 +63,12 @@ public class ExportUseCase {
 
     @FunctionalInterface
     public interface Function2<A, B, R> {
+        /**
+         * Applies this function to the given argument.
+         * @param a the function argument
+         * @param b the function argument
+         * @return  the function result
+         */
         R apply(A a, B b);
     }
 

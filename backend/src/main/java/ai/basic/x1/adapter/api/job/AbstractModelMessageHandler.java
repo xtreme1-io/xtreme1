@@ -14,6 +14,9 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import javax.annotation.PostConstruct;
 
+/**
+ * @author andy
+ */
 @Slf4j
 public abstract class AbstractModelMessageHandler<T> {
 

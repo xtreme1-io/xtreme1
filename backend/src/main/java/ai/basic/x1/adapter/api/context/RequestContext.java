@@ -1,5 +1,8 @@
 package ai.basic.x1.adapter.api.context;
 
+/**
+ * @author andy
+ */
 public interface RequestContext {
 
     UserInfo getUserInfo();

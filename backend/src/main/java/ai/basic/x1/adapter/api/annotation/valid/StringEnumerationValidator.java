@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author andy
+ */
 public class StringEnumerationValidator implements ConstraintValidator<ValidStringEnum, String> {
 
     private Set<String> enumNames;

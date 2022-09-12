@@ -16,6 +16,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
+/**
+ * @author fyb
+ */
 public class ExtendMinioClient extends MinioClient {
 
     public ExtendMinioClient(MinioClient client) {

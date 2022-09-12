@@ -1,6 +1,9 @@
 package ai.basic.x1.adapter.api.context;
 
 
+/**
+ * @author andy
+ */
 public class RequestContextImpl implements RequestContext {
 
     private UserInfo userInfo;

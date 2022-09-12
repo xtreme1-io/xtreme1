@@ -1,5 +1,8 @@
 package ai.basic.x1.util.lock;
 
+/**
+ * @author fyb
+ */
 public interface IDistributedLock {
     boolean tryLock(String lockKey);
 

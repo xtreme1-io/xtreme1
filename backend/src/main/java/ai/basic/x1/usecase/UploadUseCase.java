@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+/**
+ * @author fyb
+ */
 public class UploadUseCase {
 
     @Autowired

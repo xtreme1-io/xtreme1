@@ -2,6 +2,9 @@ package ai.basic.x1.adapter.api.job;
 
 import ai.basic.x1.entity.ModelMessageBO;
 
+/**
+ * @author butterflyzh
+ */
 public interface ModelRunSuccessHandler<T> {
 
     /**

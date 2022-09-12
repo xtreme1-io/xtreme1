@@ -10,7 +10,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * base redis reentrant lock
+ * @author fyb
+ *
+ * Base redis reentrant lock
  */
 @Slf4j
 public class DistributedLock implements IDistributedLock {

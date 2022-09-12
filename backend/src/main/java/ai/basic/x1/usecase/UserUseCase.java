@@ -166,7 +166,7 @@ public class UserUseCase {
             return users;
         }
 
-        var avatarIdMap = new HashMap<Long, String>();
+        var avatarIdMap = new HashMap<Long, String>(avatarIds.size());
         fileUseCase.findByIds(avatarIds).forEach(file -> avatarIdMap.put(file.getId(), file.getUrl()));
         users.forEach(user -> user.setAvatarUrl(avatarIdMap.get(user.getAvatarId())));
         return users;

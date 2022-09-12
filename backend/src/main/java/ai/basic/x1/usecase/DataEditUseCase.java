@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +40,7 @@ public class DataEditUseCase {
             return dataEditList.stream()
                     .collect(Collectors.toMap(DataEdit::getDataId, DataEdit::getCreatedBy, (k1, k2) -> k1));
         }
-        return new HashMap<>();
+        return Map.of();
     }
 
     /**
