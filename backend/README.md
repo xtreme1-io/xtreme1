@@ -56,7 +56,7 @@ docker compose up
 
 ###  Prepare local configuration
 
-For using base services started by Docker Compose, you can save the following content in a local configuration file to path `backend/src/main/resources/application-local.ymlapplication-local.yml`. You can change the address, username and password of any base service as your need, such as using an existing one.
+For using base services started by Docker Compose, you can save the following content in a local configuration file to path `backend/src/main/resources/application-local.yml`. You can change the address, username and password of any base service as your need, such as using an existing one.
 
 ```yaml
 debug: false
