@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+/**
+ * @author andy
+ */
 public class JSONValidator implements ConstraintValidator<ValidJSON, String> {
 
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
