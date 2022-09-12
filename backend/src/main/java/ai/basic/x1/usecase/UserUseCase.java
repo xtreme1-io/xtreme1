@@ -10,6 +10,7 @@ import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ai.basic.x1.util.Constants.IMAGE_DATA_TYPE;
 
 /**
  * @author Jagger Wang、Zhujh
@@ -131,22 +134,22 @@ public class UserUseCase {
     }
 
     public Long uploadAvatar(MultipartFile multipartFile, Long userId) {
-        var contentType = multipartFile.getContentType();
+        var mimeType = FileUtil.getMimeType(multipartFile.getOriginalFilename());
         var originalFilename = multipartFile.getOriginalFilename();
         var path = String.format("/user/avatar/%s/%s-%s", userId, System.currentTimeMillis(),
                 originalFilename);
         var bucketName = minioProp.getBucketName();
         var fileSize = multipartFile.getSize();
-        if (contentType == null || !contentType.contains("image")) {
-            log.error("not support avatar type upload: " + contentType);
+        if (mimeType == null || !IMAGE_DATA_TYPE.contains(mimeType)) {
+            log.error("not support avatar type upload: " + mimeType);
             throw new UsecaseException(UsecaseCode.FILE_TYPE_NOT_SUPPORT, "Only support image type upload");
         }
         try(InputStream inputStream = multipartFile.getInputStream()) {
-            log.info("start uploadAvatar. path: {}, contentType: {}", path, contentType);
-            minioService.uploadFile(bucketName, path, inputStream, contentType, fileSize);
+            log.info("start uploadAvatar. path: {}, contentType: {}", path, mimeType);
+            minioService.uploadFile(bucketName, path, inputStream, mimeType, fileSize);
 
             var fileBO = FileBO.builder().bucketName(bucketName).name(originalFilename)
-                    .originalName(originalFilename).path(path).type(contentType).size(fileSize)
+                    .originalName(originalFilename).path(path).type(mimeType).size(fileSize)
                     .build();
             return fileUseCase.saveBatchFile(userId, List.of(fileBO)).get(0).getId();
         } catch (Exception e) {
