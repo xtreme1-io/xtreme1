@@ -62,19 +62,26 @@ public class ModelResultConverter {
                 .size3D(buildSize3D(labelInfo)).build();
         if (ObjectUtil.isNull(preModelParamBO)) {
             return objectBO;
-        } else if (((CollUtil.isNotEmpty(preModelParamBO.getClasses())
-                && preModelParamBO.getClasses().contains(labelInfo.getLabel().toUpperCase()))
-                || CollUtil.isEmpty(preModelParamBO.getClasses()))
-                && ((ObjectUtil.isNotNull(preModelParamBO.getMinConfidence())
-                && preModelParamBO.getMinConfidence().compareTo(labelInfo.getConfidence()) <= 0)
-                || ObjectUtil.isNull(preModelParamBO.getMinConfidence()))
-                && ((ObjectUtil.isNotNull(preModelParamBO.getMaxConfidence())
-                && preModelParamBO.getMaxConfidence().compareTo(labelInfo.getConfidence()) >= 0)
-                || ObjectUtil.isNull(preModelParamBO.getMaxConfidence())
-        )) {
+        } else if (matchResult(labelInfo, preModelParamBO)) {
             return objectBO;
         }
         return null;
+    }
+
+    private static boolean matchResult(LabelInfo labelInfo, PreModelParamBO preModelParamBO) {
+        boolean matchClassResult = ((CollUtil.isNotEmpty(preModelParamBO.getClasses())
+                && preModelParamBO.getClasses().contains(labelInfo.getLabel().toUpperCase()))
+                || CollUtil.isEmpty(preModelParamBO.getClasses()));
+
+        boolean matchMinConfidence = ((ObjectUtil.isNotNull(preModelParamBO.getMinConfidence())
+                && preModelParamBO.getMinConfidence().compareTo(labelInfo.getConfidence()) <= 0)
+                || ObjectUtil.isNull(preModelParamBO.getMinConfidence()));
+
+        boolean matchMaxConfidence = ((ObjectUtil.isNotNull(preModelParamBO.getMaxConfidence())
+                && preModelParamBO.getMaxConfidence().compareTo(labelInfo.getConfidence()) >= 0)
+                || ObjectUtil.isNull(preModelParamBO.getMaxConfidence()));
+
+        return matchClassResult && matchMinConfidence && matchMaxConfidence;
     }
 
     private static PointBO buildCenter3D(LabelInfo labelInfo) {
