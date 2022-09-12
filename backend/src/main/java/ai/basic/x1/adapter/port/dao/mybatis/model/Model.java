@@ -1,6 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
-import ai.basic.x1.adapter.port.dao.mybatis.typeHandler.ModelClassTypeHandler;
+import ai.basic.x1.adapter.port.dao.mybatis.typehandler.ModelClassTypeHandler;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ModelDatasetTypeEnum;
 import com.baomidou.mybatisplus.annotation.*;

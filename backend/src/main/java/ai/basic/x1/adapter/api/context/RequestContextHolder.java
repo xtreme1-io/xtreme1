@@ -1,5 +1,8 @@
 package ai.basic.x1.adapter.api.context;
 
+/**
+ * @author andy
+ */
 public class RequestContextHolder {
     private static RequestContextHolderStrategy strategy;
 

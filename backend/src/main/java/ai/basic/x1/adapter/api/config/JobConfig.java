@@ -4,7 +4,6 @@ import ai.basic.x1.adapter.api.job.ModelJobConsumerListener;
 import ai.basic.x1.adapter.api.job.ModelRunErrorHandler;
 import ai.basic.x1.adapter.api.job.PreLabelModelMessageHandler;
 import ai.basic.x1.adapter.api.job.PredictImageCo80ModelHandler;
-import ai.basic.x1.entity.ModelMessageBO;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +27,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ai.basic.x1.util.Constants.*;
 
+/**
+ * @author andy
+ */
 @Configuration
 public class JobConfig {
     @Bean

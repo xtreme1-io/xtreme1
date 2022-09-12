@@ -144,8 +144,8 @@ public class DecompressionFileUtils {
      * @return File url
      */
     public static String removeUrlParameter(String fileUrl) {
-        if (fileUrl.contains("?")) {
-            fileUrl = fileUrl.substring(0, fileUrl.indexOf("?"));
+        if (fileUrl.contains(QUESTION_MARK)) {
+            fileUrl = fileUrl.substring(0, fileUrl.indexOf(QUESTION_MARK));
         }
         return fileUrl;
     }
