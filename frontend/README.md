@@ -17,3 +17,9 @@ Each part is developed independently, and finally the static files are put toget
 `image-tool` build to `/image-tool` -- nginx: `/tool/image`
 
 For more information, refer to `.ops/**/frontend-deployment.yml`
+
+## Related Information
+- [vue](https://vuejs.org/)
+- [vite](https://vitejs.dev/)
+- [typescript](https://www.typescriptlang.org/)
+- [vben admin](https://github.com/vbenjs/vue-vben-admin/)
