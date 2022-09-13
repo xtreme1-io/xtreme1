@@ -3,22 +3,21 @@ import qs from 'qs';
 import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 export const goToTool = (query: any, type?: datasetTypeEnum) => {
-  const toolPath = type === datasetTypeEnum.IMAGE ? '/tool/image' : '/tool/pc';
-  let BaseURL = '';
+  let toolPath = type === datasetTypeEnum.IMAGE ? '/tool/image' : '/tool/pc';
   if (import.meta.env.DEV) {
     switch (type) {
       case datasetTypeEnum.IMAGE:
-        BaseURL = 'http://localhost:3300';
+        toolPath = 'http://localhost:3300/tool/image';
         break;
       default:
-        BaseURL = 'http://localhost:3200';
+        toolPath = 'http://localhost:3200/tool/pc';
         break;
     }
   }
 
   // window.open(BaseURL + toolPath + '?' + qs.stringify(query));
   const oA = document.createElement('a'); //创建a标签
-  oA.href = BaseURL + toolPath + '?' + qs.stringify(query); //添加 href 属性
+  oA.href = toolPath + '?' + qs.stringify(query); //添加 href 属性
   oA.target = '_blank'; //添加 target 属性
   oA.click(); //模拟点击
 };
