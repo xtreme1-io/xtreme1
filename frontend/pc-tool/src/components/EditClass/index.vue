@@ -42,7 +42,7 @@
                     </template>
                     <ObjectAttr :state="state" @change="onAttChange" @copy-from="copyAttrFrom" />
                 </a-collapse-panel>
-                <a-collapse-panel key="objects">
+                <a-collapse-panel key="objects" v-if="TState.imgViews.length > 0">
                     <template #header="{ isActive }">
                         <span class="item-header">
                             <span class="title1">
