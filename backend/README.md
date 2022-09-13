@@ -82,6 +82,8 @@ minio:
 
 ```
 
+If you choose to use your existing services, be sure to init these services, for MySQL you need to create tables and init data, for MinIO you need to create the default bucket. For more infomation you can reference the top level Docker Compose file, it will auto do these jobs when starting these services by Docker Compose.
+
 ### Build and run
 
 You can build and run this application in your favorite IDE, such as Intellij IDEA, or exetute the following commands in terminal. 
