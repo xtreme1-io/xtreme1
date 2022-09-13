@@ -61,7 +61,7 @@ file:
 dataset-initial:
   dataset:
     name: LiDAR Fusion Trial
-    fileName: x1-point-cloud-result.zip
+    fileName: xtreme1-lidar-fusion-trial.zip
     type: LIDAR_FUSION
     userName: admin@xtreme1.io
     classes[0]:
