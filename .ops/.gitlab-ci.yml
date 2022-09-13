@@ -4,14 +4,14 @@ stages:
   - deploy
 
 variables:
-  APP_NAME: "x1-community"
+  APP_NAME: "xtreme1"
   APP_VERSION: "0.5"
 
   FRONTEND_PACKAGE_DIR: "dist"
   BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
 
-  FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/frontend"
-  BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/${APP_NAME}/backend"
+  FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/x1-community/frontend"
+  BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/x1-community/backend"
 
   DOCKER_HUB_FRONTEND_IMAGE_NAME: "basicai/${APP_NAME}-frontend"
   DOCKER_HUB_BACKEND_IMAGE_NAME: "basicai/${APP_NAME}-backend"
