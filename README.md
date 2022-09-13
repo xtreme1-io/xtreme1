@@ -146,7 +146,7 @@ Also you can run each application service in your favorite IDE, like IDEA or Vis
 
 #### Develop with your own base services
 
-If you already have an MySQL, Redis, or MinIO base service, you can use it directly, and not depend on Docker Compose to manage these services, but you need to change `backend` service's configuration. You can change configurations in default configuration file at `backend/src/main/resources/application.yml`, or using command argument `--spring.config.additional-location` to specify another configuration file to override the default.
+If you already have an MySQL, Redis, or MinIO base service, you can use it directly, and not depend on Docker Compose to manage these services, but you need to change `backend` service's configuration. You can change configurations in default configuration file at `backend/src/main/resources/application.yml`, or using command option `-Dspring.profiles.active=local` to specify a local configuration file to override the default one.
 
 To get more development guides, you can read the README doc in each application service's directory.
 
