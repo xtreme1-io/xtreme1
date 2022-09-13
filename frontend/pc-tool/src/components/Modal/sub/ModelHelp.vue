@@ -93,10 +93,10 @@
                 key: ['G'],
                 action: $$('hk-axis'),
             },
-            {
-                key: ['B'],
-                action: $$('hk-filter'),
-            },
+            // {
+            //     key: ['B'],
+            //     action: $$('hk-filter'),
+            // },
             {
                 key: ['N'],
                 action: $$('hk-measure'),

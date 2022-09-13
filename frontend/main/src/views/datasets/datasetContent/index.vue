@@ -323,6 +323,7 @@
       lockedNum.value = res.lockedNum || 0;
       // fixedFetchList();
     } else {
+      lockedNum.value = 0;
       // closeWarningModal();
       // fixedFetchList();
     }
