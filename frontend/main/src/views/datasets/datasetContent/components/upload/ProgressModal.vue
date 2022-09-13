@@ -64,9 +64,7 @@
 
     const isCompleted = file.every(
       (item) =>
-        item.status != UploadResultStatus.PROCESSING &&
-        item.status != UploadResultStatus.PENDING &&
-        item.status != UploadResultStatus.UPLOADING,
+        item.status != UploadResultStatus.PENDING && item.status != UploadResultStatus.UPLOADING,
     );
     if (isCompleted) {
       closeModal();

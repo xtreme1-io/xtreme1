@@ -145,15 +145,21 @@ export default function useHeader() {
         bsState.validing = false;
     }
 
-    function onToggleSkip() {
-        let frame = editor.getCurrentFrame();
-        frame.skipped = !frame.skipped;
+    async function onToggleSkip() {
+        let { frameIndex, frames } = editor.state;
+        // frame.skipped = !frame.skipped;
+        await editor.saveObject([frames[frameIndex]]);
+        if (frameIndex < frames.length - 1) {
+            await editor.loadFrame(frameIndex + 1);
+        } else {
+            editor.showMsg('warning', 'This is last data');
+        }
     }
     async function onSubmit() {
         let { frameIndex, frames } = editor.state;
         let frame = frames[frameIndex];
 
-        if (frame.skipped) return;
+        // if (frame.skipped) return;
         bsState.submitting = true;
         try {
             await editor.saveObject([frame], true);
