@@ -85,42 +85,34 @@ export const allItems: IItemConfig[] = [
             return state.config.activeTranslate;
         },
     },
-    // {
-    //     action: 'projection',
-    //     label: 'Project',
-    //     title: 'Projection',
-    //     getIcon: function (editor: Editor) {
-    //         return 'iconfont icon-yingshe';
-    //     },
-    //     isDisplay: function (editor: Editor) {
-    //         let state = editor.state;
-    //         return (
-    //             state.modeConfig.ui[UIType.project] &&
-    //             (state.config.projectPoint4 === true || state.config.projectPoint8 === true)
-    //         );
-    //     },
-    //     isActive: function (editor: Editor) {
-    //         return false;
-    //     },
-    // },
-    // {
-    //     action: 'reProjection',
-    //     label: 'Re-Projection',
-    //     title: 'Re-Projection',
-    //     getIcon: function (editor: Editor) {
-    //         return 'iconfont icon-xuanzhuan';
-    //     },
-    //     isDisplay: function (editor: Editor) {
-    //         let state = editor.state;
-    //         return (
-    //             state.modeConfig.ui[UIType.reProject] &&
-    //             (state.config.projectPoint4 === true || state.config.projectPoint8 === true)
-    //         );
-    //     },
-    //     isActive: function (editor: Editor) {
-    //         return false;
-    //     },
-    // },
+    {
+        action: 'projection',
+        title: () => 'Projection',
+        getIcon: function (editor: Editor) {
+            return 'iconfont icon-yingshe';
+        },
+        isDisplay: function (editor: Editor) {
+            let state = editor.state;
+            return state.modeConfig.ui[UIType.project] && state.imgViews.length > 0;
+        },
+        isActive: function (editor: Editor) {
+            return false;
+        },
+    },
+    {
+        action: 'reProjection',
+        title: () => 'Re-Projection',
+        getIcon: function (editor: Editor) {
+            return 'iconfont icon-xuanzhuan';
+        },
+        isDisplay: function (editor: Editor) {
+            let state = editor.state;
+            return state.modeConfig.ui[UIType.reProject] && state.imgViews.length > 0;
+        },
+        isActive: function (editor: Editor) {
+            return false;
+        },
+    },
     {
         action: 'track',
         title: ($$) => $$('title_track'),
