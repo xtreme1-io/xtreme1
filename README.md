@@ -52,15 +52,13 @@ Next, open the installed Google Chrome browser and go to `http://localhost:8190`
 docker compose up
 ```
 
-Apple M1 ???????
+> Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
+
 ```yaml
 services:
   mysql:
     platform: linux/amd64
 ```
-
-
-下面的准备都拉到别处去
 
 #### Quick Start - Advanced
 
