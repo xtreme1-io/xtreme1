@@ -98,12 +98,12 @@
                     {{ currentFrame.dataStatus === 'VALID' ? $$('btn-invalid') : $$('btn-valid') }}
                 </a-button>
                 <a-button
-                    :class="currentFrame.skipped ? 'basic skipped' : 'basic skip'"
+                    class="basic skip"
                     v-show="canEdit()"
                     @click="onToggleSkip"
                     :disabled="blocking"
                 >
-                    {{ currentFrame.skipped ? $$('btn-skipped') : $$('btn-skip') }}
+                    {{ $$('btn-skip') }}
                 </a-button>
                 <a-button
                     class="basic submit"

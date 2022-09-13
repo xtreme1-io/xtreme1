@@ -19,7 +19,7 @@ export default class Editor extends BaseEditor {
 
     needSave(frames?: IFrame[]) {
         frames = frames || this.state.frames;
-        let needSaveData = frames.filter((e) => e.needSave && !e.skipped);
+        let needSaveData = frames.filter((e) => e.needSave);
         return needSaveData.length > 0;
     }
 
@@ -41,7 +41,7 @@ export default class Editor extends BaseEditor {
         let classValueInfos = [] as any[];
         let queryTime = frames[0].queryTime;
         frames.forEach((dataMeta) => {
-            if (dataMeta.skipped) return;
+            // if (dataMeta.skipped) return;
             let annotates = this.dataManager.getFrameObject(dataMeta.id) || [];
             if (new Date(dataMeta.queryTime).getTime() > new Date(queryTime).getTime())
                 queryTime = dataMeta.queryTime;
