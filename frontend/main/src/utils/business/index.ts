@@ -3,7 +3,12 @@ import qs from 'qs';
 import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 export const goToTool = (query: any, type?: datasetTypeEnum) => {
-  const toolPath = type === datasetTypeEnum.IMAGE ? '/tool/image' : '/tool/pc';
+  let toolPath = type === datasetTypeEnum.IMAGE ? '/tool/image' : '/tool/pc';
+
+  if (import.meta.env.DEV) {
+    const toolPort = type === datasetTypeEnum.IMAGE ? 3300 : 3200;
+    toolPath = `http://localhost:${toolPort}/`;
+  }
 
   const oA = document.createElement('a'); //创建a标签
   oA.href = toolPath + '?' + qs.stringify(query); //添加 href 属性

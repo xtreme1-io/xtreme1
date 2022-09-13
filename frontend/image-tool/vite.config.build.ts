@@ -1,8 +1,8 @@
-import { mergeConfig } from 'vite';
-import baseConfig from './vite.config';
+const { defineConfig, mergeConfig } = require('vite');
+const baseConfig = require('./vite.config');
 
 // https://vitejs.dev/config/
-export default mergeConfig(baseConfig, {
+module.exports = mergeConfig(baseConfig, {
     base: '/tool/image/',
     build: {
         outDir: '../dist/image-tool',
