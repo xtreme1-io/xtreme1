@@ -553,9 +553,6 @@ public class DataInfoUseCase {
                 parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
                     try {
                         var dataInfoBOList = new ArrayList<DataInfoBO>();
-                        parsedDataNum.set(parsedDataNum.get() + fl.size());
-                        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
-                        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
                         var fileBOS = uploadFileList(userId, rootPath, tempPath, fl);
                         createUploadThumbnail(userId, fileBOS, rootPath);
                         fileBOS.forEach(fileBO -> {
@@ -575,6 +572,9 @@ public class DataInfoUseCase {
                     } catch (Exception e) {
                         log.error("handle data error", e);
                     } finally {
+                        parsedDataNum.set(parsedDataNum.get() + fl.size());
+                        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
                         countDownLatch.countDown();
                     }
 
