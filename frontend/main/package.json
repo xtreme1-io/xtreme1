@@ -9,6 +9,7 @@
     "bootstrap": "yarn install",
     "serve": "npm run dev",
     "dev": "vite",
+    "dev:local": "vite --mode localDev",
     "test": "vite --mode test ",
     "build": "cross-env NODE_ENV=production vite build && esno ./build/script/postBuild.ts",
     "type:check": "vue-tsc --noEmit --skipLibCheck",
