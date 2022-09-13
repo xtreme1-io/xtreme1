@@ -90,7 +90,7 @@ build-release-package:
   script:
     - ls
   artifacts:
-    name: "${APP_NAME}-${CI_COMMIT_REF_NAME}"
+    name: "xtreme1-${CI_COMMIT_REF_NAME}"
     paths:
       - deploy/
       - docker-compose.yml
