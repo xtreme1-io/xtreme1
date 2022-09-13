@@ -196,11 +196,10 @@
                 ></div> -->
                 <ColorSlider />
             </div>
-            <div class="title2">
+            <!-- <div class="title2">
                 <span style="vertical-align: middle; margin-right: 10px">{{
                     $$('setting_resultview')
                 }}</span>
-                <!-- <div class="divider"></div> -->
             </div>
             <div class="wrap">
                 <div class="title3"
@@ -211,16 +210,8 @@
                         v-model:checked="state.config.showLabel"
                     />
                 </div>
-                <!-- <div v-if="!_config.noAnnotate" class="title3"
-                    >{{ $$('setting_showannotate') }}
-                    <a-switch
-                        size="small"
-                        style="float: right; margin-top: 5px"
-                        v-model:checked="state.config.showAnnotation"
-                    />
-                </div> -->
                 <slot name="object"></slot>
-            </div>
+            </div> -->
 
             <div class="title2" v-if="!_config.noUtility">
                 <span style="vertical-align: middle; margin-right: 10px">{{ $$('utility') }}</span>

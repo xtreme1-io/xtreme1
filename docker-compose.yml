@@ -66,7 +66,7 @@ services:
       retries: 5
       start_period: 2s
   backend:
-    image: basicai/x1-community-backend
+    image: basicai/xtreme1-backend
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./backend
     ports:
@@ -83,22 +83,22 @@ services:
       minio:
         condition: service_healthy
   frontend:
-    image: basicai/x1-community-frontend
+    image: basicai/xtreme1-frontend
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./frontend
     ports:
       - 8181:8080
   image-object-detection:
-    image: basicai/x1-community-image-object-detection
+    image: basicai/xtreme1-image-object-detection
     ports:
-      - 8182:8080
+      - 8182:5000
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
   point-cloud-object-detection:
-    image: basicai/x1-community-point-cloud-object-detection
+    image: basicai/xtreme1-point-cloud-object-detection
     ports:
-      - 8183:8080
+      - 8183:5000
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model

@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: x1-community
+    name: xtreme1
   datasource:
     url: jdbc:mysql://mysql:3306/x1_community
     username: x1_community
@@ -68,28 +68,27 @@ dataset-initial:
       name: Car
       color: "#f39c12"
       toolType: CUBOID
-      toolTypeOptions: "{defaultHeight:\"\",isConstraints:false,minHeight:\"\",minPoints:\"\"}"
-      attributes: "[{\"name\":\"Occlusion\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"Yes\",\"attributes\":[]},{\"name\":\"No\",\"attributes\":[]}]},{\"name\":\"Confidence\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"High\",\"attributes\":[]},{\"name\":\"Medium\",\"attributes\":[]},{\"name\":\"Low\",\"attributes\":[]}]}]"
+      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
     classes[1]:
       name: Van
       color: "#2ecc71"
       toolType: CUBOID
-      toolTypeOptions: "{defaultHeight:\"\",isConstraints:false,minHeight:\"\",minPoints:\"\"}"
-      attributes: "[{\"name\":\"Occlusion\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"Yes\",\"attributes\":[]},{\"name\":\"No\",\"attributes\":[]}]},{\"name\":\"Confidence\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"High\",\"attributes\":[]},{\"name\":\"Medium\",\"attributes\":[]},{\"name\":\"Low\",\"attributes\":[]}]}]"
+      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
     classes[2]:
       name: Truck
       color: "#d1ccc0"
       toolType: CUBOID
-      toolTypeOptions: "{defaultHeight:\"\",isConstraints:false,minHeight:\"\",minPoints:\"\"}"
-      attributes: "[{\"name\":\"Occlusion\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"Yes\",\"attributes\":[]},{\"name\":\"No\",\"attributes\":[]}]},{\"name\":\"Confidence\",\"type\":\"RADIO\",\"required\":false,\"options\":[{\"name\":\"High\",\"attributes\":[]},{\"name\":\"Medium\",\"attributes\":[]},{\"name\":\"Low\",\"attributes\":[]}]}]"
-
+      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
 
 model:
   arithmetic:
     image80:
-      url: http://image-object-detection/basic_predict
+      url: http://image-object-detection:5000/basic_predict
     preModel:
-      url: http://point-cloud-object-detection/3dbox
+      url: http://point-cloud-object-detection:5000/3dbox
 
 management:
   endpoint:

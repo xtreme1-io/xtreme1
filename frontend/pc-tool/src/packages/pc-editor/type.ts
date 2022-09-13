@@ -261,7 +261,7 @@ export interface IFrame {
     // flow
     dataStatus: 'INVALID' | 'VALID';
     annotationStatus: 'ANNOTATED' | 'NOT_ANNOTATED' | 'INVALID';
-    skipped: boolean;
+    // skipped: boolean;
 }
 
 export interface IFilter {

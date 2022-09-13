@@ -45,9 +45,9 @@ export class ResourceLoader {
                 }
 
                 // test resource
-                if (import.meta.env.DEV) {
-                    config.pointsUrl = '/case-padaset/00.pcd';
-                }
+                // if (import.meta.env.DEV) {
+                //     config.pointsUrl = '/case-padaset/00.pcd';
+                // }
 
                 if (config.viewConfig.length > 0) {
                     // if (!import.meta.env.DEV) {

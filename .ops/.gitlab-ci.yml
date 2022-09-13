@@ -90,7 +90,7 @@ build-release-package:
   script:
     - ls
   artifacts:
-    name: "${APP_NAME}-${CI_COMMIT_REF_NAME}"
+    name: "xtreme1-${CI_COMMIT_REF_NAME}"
     paths:
       - deploy/
       - docker-compose.yml
@@ -118,8 +118,8 @@ build-release-package:
     - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
     - docker push $IMAGE_NAME:latest
     # Push main and tag image to Docker Hub.
-    - if [[ $CI_COMMIT_REF_NAME == main ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:latest; docker push $DOCKER_HUB_IMAGE_NAME:latest; fi
-    - if [[ $CI_COMMIT_REF_NAME == v* ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; docker push $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; fi
+    # - if [[ $CI_COMMIT_REF_NAME == main ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:latest; docker push $DOCKER_HUB_IMAGE_NAME:latest; fi
+    # - if [[ $CI_COMMIT_REF_NAME == v* ]]; then docker tag $IMAGE_NAME:$CI_COMMIT_REF_NAME $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; docker push $DOCKER_HUB_IMAGE_NAME:$CI_COMMIT_REF_NAME; fi
 
 build-backend-image:
   extends: .build-image
