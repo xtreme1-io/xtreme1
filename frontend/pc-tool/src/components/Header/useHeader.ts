@@ -126,17 +126,17 @@ export default function useHeader() {
         editor.showModal('ModelHelp', { title: 'Help', width: 1000 }).catch(() => {});
     }
 
-    function onToggleValid() {
+    async function onToggleValid() {
         let { frameIndex, frames } = editor.state;
         let frame = frames[frameIndex];
 
         bsState.validing = true;
         try {
             if (frame.dataStatus === 'INVALID') {
-                api.validData(frame.id);
+                await api.validData(frame.id);
                 frame.dataStatus = 'VALID';
             } else {
-                api.invalidData(frame.id);
+                await api.invalidData(frame.id);
                 frame.dataStatus = 'INVALID';
             }
         } catch (error: any) {
@@ -169,7 +169,9 @@ export default function useHeader() {
                     subTitle:
                         "you don't have any annotation yet, are you sure you want to submit this data? If you can't annotate this data, you'd better mark this data as invalid. Cancel/ submit anyway",
                 })
-                .then(() => {})
+                .then(async () => {
+                    await onToggleValid();
+                })
                 .catch(() => {
                     continueFlag = false;
                 });
