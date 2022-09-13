@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@TableName(autoResultMap = true)
 public class DataAnnotation {
 
     @TableId(type = IdType.AUTO)
