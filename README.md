@@ -146,15 +146,6 @@ If you already have an MySQL, Redis, or MinIO base service, you can use it direc
 
 To get more development guides, you can read the README doc in each application service's directory.
 
-## Doc
-Tutorial (video)
-User Guide
-License
-API references (coming soon...)
-
-## Roadmap
-
-## License
 
 # License #
 This software is licensed under the Apache 2.0 LICENSE © BasicAI.
