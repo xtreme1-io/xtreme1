@@ -454,13 +454,12 @@ public class DataInfoUseCase {
                     .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
             CountDownLatch countDownLatch = new CountDownLatch(dataNameList.size());
             for (var dataName : dataNameList) {
-                parsedDataNum.set(parsedDataNum.get() + 1);
                 if (parsedDataNum.get() % 5 == 0) {
                     var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
                     uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
                 }
                 var dataFiles = getDataFiles(pointCloudFile.getParentFile(), dataName, datasetType);
-                parseExecutorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+                parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
                     try {
                         if (CollectionUtil.isNotEmpty(dataFiles)) {
                             var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
@@ -474,6 +473,7 @@ public class DataInfoUseCase {
                     } catch (Exception e) {
                         log.error("Handle data error", e);
                     } finally {
+                        parsedDataNum.set(parsedDataNum.get() + 1);
                         countDownLatch.countDown();
                     }
                 })));
