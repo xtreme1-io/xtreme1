@@ -61,7 +61,7 @@ file:
 dataset-initial:
   dataset:
     name: LiDAR Fusion Trial
-    fileName: x1-point-cloud-result.zip
+    fileName: xtreme1-lidar-fusion-trial.zip
     type: LIDAR_FUSION
     userName: admin@xtreme1.io
     classes[0]:
@@ -89,7 +89,7 @@ model:
     image80:
       url: http://image-object-detection/basic_predict
     preModel:
-      url: http://pointcloud-object-detection/3dbox
+      url: http://point-cloud-object-detection/3dbox
 
 management:
   endpoint:

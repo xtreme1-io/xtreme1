@@ -2,6 +2,7 @@
 
 ```javascript
  {
+        // or camera_internal
         "cameraInternal": {
             "fx": 933.4667,
             "fy": 934.6754,
@@ -10,6 +11,7 @@
         },
         "width": 1920,
         "height": 1080,
+        // or camera_external
         "cameraExternal": [
             -0.7209479393140598,
             -0.04004438206239668,
@@ -37,4 +39,4 @@
 * **cameraInternal** : Camera matrix with `4x4`.
 * **rowMajor** : Whether `cameraExternal` is the row-major order or not, default is `true`.
 
-Reference [ Camera Calibration and 3D Reconstruction ](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html)
+Refer to [ Camera Calibration and 3D Reconstruction ](https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html)
