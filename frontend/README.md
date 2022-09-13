@@ -1,10 +1,25 @@
 # Xtreme1 Frontend
 
-Xtreme1, developed width Vue 3 + Typescript + Vite.
+## Overview
 
-## Application Architecture and Framework
+Xtreme1 frontend mainly includes three parts, each part is a separate project and developed width Vue 3 + Typescript + Vite.
+- [main](./main/README.md) - Main web application
+- [pc-tool](./pc-tool/README.md) - Point cloud annotation tool
+- [image-tool](./image-tool/README.md) - Image annotation tool
 
-[vue](https://vuejs.org/)
-[vite](https://vitejs.dev/)
-[vue](https://www.typescriptlang.org/)
-[vben admin](https://github.com/vbenjs/vue-vben-admin/)
+
+## Deploy
+
+Each part is developed independently, and finally the static files are put together to `frontend/dist`.  
+
+`main` build to `/` -- nginx: `/`    
+`pc-tool` build to `/pc-tool` -- nginx: `/tool/pc`  
+`image-tool` build to `/image-tool` -- nginx: `/tool/image`  
+
+For more information, refer to `.ops/**/frontend-deployment.yml`
+
+## Related Information
+- [vue](https://vuejs.org/)
+- [vite](https://vitejs.dev/)
+- [typescript](https://www.typescriptlang.org/)
+- [vben admin](https://github.com/vbenjs/vue-vben-admin/)
