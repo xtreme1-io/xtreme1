@@ -91,14 +91,14 @@ services:
   image-object-detection:
     image: basicai/x1-community-image-object-detection
     ports:
-      - 8182:8080
+      - 8182:5000
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
   point-cloud-object-detection:
     image: basicai/x1-community-point-cloud-object-detection
     ports:
-      - 8183:8080
+      - 8183:5000
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
