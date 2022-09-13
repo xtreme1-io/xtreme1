@@ -1,7 +1,7 @@
 
 ![](https://img.shields.io/badge/release-v0.5-blue)
  <a href="https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag">
-    <img src="https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social" alt="Join Xtreme1 Slack" />
+    <img src="https://img.shields.io/badge/Slack-Join_Chat-white.svg?logo=slack&style=social" alt="Join Xtreme1 Slack" />
   </a>
 
 
@@ -11,24 +11,30 @@ BasicAI Xtreme1 is an open source suite that speedily develops and iterates your
 Xtreme1 was released under the open-source Apache License 2.0 in September 2022.
 
 # Support #
-Website | Slack | Twitter |  [Issues](#https://github.com/basicai/xtreme1/issues)
+[Website](https://basic.ai) | [Slack](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
 
 A community is important for the company. We are very open to feedback and encourage you to create Issues and help us grow!
 
-# :six: Key features #
+# Key features #
 
-- Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
-- Built-in models for object detection, instance segmentation and classification
-- Configurable Ontology for label, attributes, and more
-- Data management and quality control
-- Data debug and model-training
-- AI-powered tools for model performance evaluation
+ 1️⃣: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
+ 
+ :two: Built-in models for object detection, instance segmentation and classification
+ 
+ 3️⃣: Configurable Ontology for label, attributes, and more
+ 
+ :four: Data management and quality control
+ 
+ :five: Data debug and model-training
+ 
+ :six: AI-powered tools for model performance evaluation
+ 
 
 # Quick start
 Get early access to Xtreme1 [SaaS version](https://app.basic.ai/#/login/) for 30 days free.
 
 ## Install Xtreme1
-* [Run with Docker Compose](#Run with Docker Compose)
+* [Run with Docker Compose](#run-with-docker-compose)
 * [Install for local development](#local-development)
 
 ### Run with Docker Compose
