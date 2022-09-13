@@ -8,6 +8,9 @@ node_modules/
 docker-compose.develop.yml
 docker-compose.override.yml
 
+## local ##
+frontend/**/vite.config.local.*
+
 ### STS ###
 .apt_generated
 .classpath
