@@ -76,11 +76,11 @@
   const setProgress = (e, fileItem) => {
     const temp = uploadProgress.value.filter((item) => item.uuid === fileItem.uuid);
     if (temp.length > 0) {
-      temp[0].percent = parseInt((e.loaded / e.total) * 80);
+      temp[0].percent = parseInt((e.loaded / e.total) * 60);
     } else {
       uploadProgress.value.push({
         uuid: fileItem.uuid,
-        percent: parseInt((e.loaded / e.total) * 80),
+        percent: parseInt((e.loaded / e.total) * 60),
       });
     }
   };
@@ -237,12 +237,12 @@
                   uploadStatus.value = status;
 
                   const downloadPercent =
-                    parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 10) ||
+                    parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 20) ||
                     0;
                   const parsedPercent =
-                    parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 10) || 0;
+                    parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 20) || 0;
 
-                  temp[0].percent = 80 + downloadPercent + parsedPercent;
+                  temp[0].percent = 60 + downloadPercent + parsedPercent;
                   console.log(status, '==>', downloadPercent, '==', parsedPercent);
 
                   if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
@@ -321,7 +321,7 @@
     temp[0].percent = 0;
     setTimeout(async () => {
       fileItem.status = UploadResultStatus.PROCESSING;
-      temp[0].percent = 80;
+      temp[0].percent = 60;
 
       try {
         // cancel request
@@ -355,11 +355,11 @@
             uploadStatus.value = status;
 
             const downloadPercent =
-              parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 10) || 0;
+              parseInt((Number(downloadedFileSize ?? 0) / Number(totalFileSize ?? 1)) * 20) || 0;
             const parsedPercent =
-              parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 10) || 0;
+              parseInt((Number(parsedDataNum ?? 0) / Number(totalDataNum ?? 1)) * 20) || 0;
 
-            temp[0].percent = 80 + downloadPercent + parsedPercent;
+            temp[0].percent = 60 + downloadPercent + parsedPercent;
             console.log(status, '==>', downloadPercent, '==', parsedPercent);
 
             if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
