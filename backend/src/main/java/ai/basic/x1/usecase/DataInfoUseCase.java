@@ -453,11 +453,8 @@ public class DataInfoUseCase {
             var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                     .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
             CountDownLatch countDownLatch = new CountDownLatch(dataNameList.size());
+            AtomicReference<Long> insertNum = new AtomicReference<>(1L);
             for (var dataName : dataNameList) {
-                if (parsedDataNum.get() % 5 == 0) {
-                    var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
-                    uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
-                }
                 var dataFiles = getDataFiles(pointCloudFile.getParentFile(), dataName, datasetType);
                 parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
                     try {
@@ -473,15 +470,20 @@ public class DataInfoUseCase {
                     } catch (Exception e) {
                         log.error("Handle data error", e);
                     } finally {
-                        parsedDataNum.set(parsedDataNum.get() + 1);
                         countDownLatch.countDown();
+                        parsedDataNum.set(parsedDataNum.get() + 1);
+                        if (parsedDataNum.get() % 5 == 0) {
+                            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+                        }
+                        if (CollectionUtil.isNotEmpty(dataInfoBOList) && (dataInfoBOList.size() % BATCH_SIZE == 0 || dataInfoBOList.size() == insertNum.get())) {
+                            var dataInfoBOS = insertBatch(dataInfoBOList);
+                            saveBatchDataResult(dataInfoBOS, dataAnnotationObjectBOList);
+                            dataInfoBOList.clear();
+                        }
+                        insertNum.set(insertNum.get() + 1);
                     }
                 })));
-                if (CollectionUtil.isNotEmpty(dataInfoBOList) && dataInfoBOList.size() % BATCH_SIZE == 0) {
-                    var dataInfoBOS = insertBatch(dataInfoBOList);
-                    saveBatchDataResult(dataInfoBOS, dataAnnotationObjectBOList);
-                    dataInfoBOList.clear();
-                }
             }
             try {
                 countDownLatch.await();
@@ -553,9 +555,6 @@ public class DataInfoUseCase {
                 parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
                     try {
                         var dataInfoBOList = new ArrayList<DataInfoBO>();
-                        parsedDataNum.set(parsedDataNum.get() + fl.size());
-                        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
-                        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
                         var fileBOS = uploadFileList(userId, rootPath, tempPath, fl);
                         createUploadThumbnail(userId, fileBOS, rootPath);
                         fileBOS.forEach(fileBO -> {
@@ -575,6 +574,9 @@ public class DataInfoUseCase {
                     } catch (Exception e) {
                         log.error("handle data error", e);
                     } finally {
+                        parsedDataNum.set(parsedDataNum.get() + fl.size());
+                        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
                         countDownLatch.countDown();
                     }
 
