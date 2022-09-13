@@ -93,15 +93,17 @@
                 key: ['G'],
                 action: $$('hk-axis'),
             },
-            // {
-            //     key: ['B'],
-            //     action: $$('hk-filter'),
-            // },
+            editor.state.imgViews.length > 0
+                ? {
+                      key: ['B'],
+                      action: $$('hk-filter'),
+                  }
+                : null,
             {
                 key: ['N'],
                 action: $$('hk-measure'),
             },
-        ];
+        ].filter((e) => e) as hotAction[];
     });
 
     function isSign(key: string) {
