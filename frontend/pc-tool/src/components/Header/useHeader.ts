@@ -159,6 +159,24 @@ export default function useHeader() {
         let { frameIndex, frames } = editor.state;
         let frame = frames[frameIndex];
 
+        let objects = editor.dataManager.getFrameObject(frame.id) || [];
+
+        let continueFlag = true;
+        if (frame.dataStatus === 'VALID' && objects.length === 0) {
+            await editor
+                .showConfirm({
+                    title: 'Tip',
+                    subTitle:
+                        "you don't have any annotation yet, are you sure you want to submit this data? If you can't annotate this data, you'd better mark this data as invalid. Cancel/ submit anyway",
+                })
+                .then(() => {})
+                .catch(() => {
+                    continueFlag = false;
+                });
+        }
+
+        if (!continueFlag) return;
+
         // if (frame.skipped) return;
         bsState.submitting = true;
         try {
