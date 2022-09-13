@@ -38,21 +38,25 @@ Get early access to Xtreme1 [SaaS version](https://app.basic.ai/#/login/) for 30
 * [Install for local development](#local-development)
 
 ### Run with Docker Compose
-#### Prerequisites
-- Install [Docker Desktop](https://docs.docker.com/desktop/)
-- Check the requirements for hardware and software prior to your installation.
 
-#### Building an image
-- Clone the repository from the [GitHub repository](https://github.com/basicai/xtreme1)
+#### Quick Start
+
+##### Prerequisites 
+
+We use Docker Compose to simplify running multiple containers together, the latest [Docker Desktop](https://docs.docker.com/desktop/) already integrated `docker compose` subcommand. If you haven't installed Docker Desktop yet, you should install it first.
+
+##### Download release package
+
+Click the latest release on the right of repository home, select asset who's name likes `xtreme1-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
 
 ```bash
-wget https://github.com/basicai/xtreme1/releases/download/v0.5/x1-community-v0.5.zip
-unzip -d x1-community-v0.5 x1-community-v0.5.zip
+wget https://github.com/basicai/xtreme1/releases/download/v0.5/xtreme1-v0.5.zip
+unzip -d xtreme1-v0.5 xtreme1-v0.5.zip
 ```
 
 ##### Start all services
-Enter into the release package directory, and execute the following command to start all services.
-Next, open the installed Google Chrome browser and go to `http://localhost:8190`.
+
+Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1.
 
 ```bash
 docker compose up
@@ -98,7 +102,7 @@ docker compose down
 docker compose down -v
 ```
 
-It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `basicai/x1-community-backend`, `basicai/x1-community-frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
+It'll pull all needed service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
 After successfully started all services, you can open `http://localhost:8190` to access web frontend, and access MinIO console at `http://localhost:8194`.
 
@@ -127,10 +131,10 @@ The default `docker-compose.yml` will pull all images from Docker Hub, including
 ```yaml
 services:
   backend:
-    # image: basicai/x1-community-backend
+    # image: basicai/xtreme1-backend
     build: ./backend
   frontend:
-    # image: basicai/x1-community-frontend
+    # image: basicai/xtreme1-frontend
     build: ./frontend
 ```
 
