@@ -1,7 +1,7 @@
 
 ![](https://img.shields.io/badge/release-v0.5-blue) 
 ![](https://img.shields.io/badge/license-Apache%202.0-brightgreen)
- <a href="https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag">
+ <a href="https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz">
     <img src="https://img.shields.io/badge/Slack-Join_Chat-white.svg?logo=slack&style=social" alt="Join Xtreme1 Slack" />
   </a>
 
@@ -11,11 +11,11 @@ BasicAI Xtreme1 is an open-source suite that speedily develops and iterates your
 Xtreme1 was released under the open-source Apache License 2.0 in September 2022.
 
 # Support #
-[Website](https://basic.ai) | [Slack](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
+[Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
 
 A community is important for the company. We are very open to feedback and encourage you to create Issues and help us grow!
 
-[👉 Join us on Slack today!](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
+[👉 Join us on Slack today!](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz)
 
 # Key features #
 
@@ -36,9 +36,8 @@ A community is important for the company. We are very open to feedback and encou
 
 * Get early access to [Xtreme1 online version](https://app.basic.ai/#/login/) without any installation :rocket:
 
-
-* [Run with release package](#run-with-release-package)
-* [Run with source code](#run-with-source-code)
+* [Run with release package](#run-with-release-package) :cd:
+* [Run with source code](#run-with-source-code) :wrench:
 
 ## Run with release package
 
@@ -63,7 +62,7 @@ Enter into the release package directory, and execute the following command to s
 docker compose up
 ```
 
-> Some Docker images, such as `MySQL`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
+> :warning: Some Docker images, such as `MySQL`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
 
 ```yaml
 services:
@@ -154,7 +153,6 @@ Also you can run each application service in your favorite IDE, like IDEA or Vis
 If you already have MySQL, Redis, or MinIO base services, you can use it directly, and not depend on Docker Compose to manage these services, but you need to change `backend` service's configuration. You can change configurations in default configuration file at `backend/src/main/resources/application.yml`, or using command option `-Dspring.profiles.active=local` to specify a local configuration file to override the default one.
 
 To get more development guides, you can read the README in each application service's directory.
-
 
 # License #
 This software is licensed under the Apache 2.0 LICENSE © BasicAI.
