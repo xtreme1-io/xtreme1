@@ -2,6 +2,7 @@
 FROM node:16 as build
 WORKDIR /build
 COPY . .
+RUN apt update && apt install nasm
 RUN --mount=type=cache,target=main/node_modules \
     cd main && CPPFLAGS=-DPNG_ARM_NEON_OPT=0 npm install && npm run build
 RUN --mount=type=cache,target=image-tool/node_modules \
