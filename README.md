@@ -34,7 +34,7 @@ A community is important for the company. We are very open to feedback and encou
 
 # Quick start
 
-Get early access to Xtreme1 [SaaS version](https://app.basic.ai/#/login/) for 30 days free.
+Get early access to Xtreme1 [Online version](https://app.basic.ai/#/login/) without any installation :rocket:
 
 * [Run with release package](#run-with-release-package)
 * [Run with source code](#run-with-source-code)
