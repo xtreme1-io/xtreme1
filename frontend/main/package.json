@@ -11,7 +11,7 @@
     "dev": "vite",
     "dev:local": "vite --mode localDev",
     "test": "vite --mode test ",
-    "build": "cross-env NODE_ENV=production vite build && esno ./build/script/postBuild.ts",
+    "build": "cross-env NODE_ENV=production && node --max_old_space_size=16384 ./node_modules/vite/bin/vite.js build && esno ./build/script/postBuild.ts",
     "type:check": "vue-tsc --noEmit --skipLibCheck",
     "preview": "vite preview",
     "clean:cache": "rimraf node_modules/.cache/ && rimraf node_modules/.vite",
