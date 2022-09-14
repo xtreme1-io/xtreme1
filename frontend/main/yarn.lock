@@ -3066,19 +3066,7 @@
     "execa" "^1.0.0"
     "find-versions" "^3.0.0"
 
-"bin-wrapper@^4.0.0":
-  "integrity" "sha512-hfRmo7hWIXPkbpi0ZltboCMVrU+0ClXR/JgbCKKjlDjQf6igXa7OwdqNcFWQZPZTgiY7ZpzE3+LjjkLiTN2T7Q=="
-  "resolved" "https://registry.npmjs.org/bin-wrapper/-/bin-wrapper-4.1.0.tgz"
-  "version" "4.1.0"
-  dependencies:
-    "bin-check" "^4.1.0"
-    "bin-version-check" "^4.0.0"
-    "download" "^7.1.0"
-    "import-lazy" "^3.1.0"
-    "os-filter-obj" "^2.0.0"
-    "pify" "^4.0.1"
-
-"bin-wrapper@^4.0.1":
+"bin-wrapper@^4.0.0", "bin-wrapper@^4.0.1":
   "integrity" "sha512-hfRmo7hWIXPkbpi0ZltboCMVrU+0ClXR/JgbCKKjlDjQf6igXa7OwdqNcFWQZPZTgiY7ZpzE3+LjjkLiTN2T7Q=="
   "resolved" "https://registry.npmjs.org/bin-wrapper/-/bin-wrapper-4.1.0.tgz"
   "version" "4.1.0"
