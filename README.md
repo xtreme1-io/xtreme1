@@ -1,8 +1,10 @@
 
-![](https://img.shields.io/badge/release-v0.5-blue)
+![](https://img.shields.io/badge/release-v0.5-blue) 
+![](https://img.shields.io/badge/license-Apache%202.0-brightgreen)
  <a href="https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag">
     <img src="https://img.shields.io/badge/Slack-Join_Chat-white.svg?logo=slack&style=social" alt="Join Xtreme1 Slack" />
   </a>
+[![Documentation Status](https://docs.basic.ai/docs)
 
 
 # Intro #
@@ -14,6 +16,8 @@ Xtreme1 was released under the open-source Apache License 2.0 in September 2022.
 [Website](https://basic.ai) | [Slack](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
 
 A community is important for the company. We are very open to feedback and encourage you to create Issues and help us grow!
+
+[👉 Join us on Slack today!](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
 
 # Key features #
 
