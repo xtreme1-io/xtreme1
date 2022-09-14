@@ -6,7 +6,7 @@
 
 
 # Intro #
-BasicAI Xtreme1 is an open source suite that speedily develops and iterates your datasets and models. The built in AI-assisted tools take your labeling efforts to the next level of efficiency. Your full data-centric MLOps lifecycle is taken care of with reproducibility, manageability, and automation.
+BasicAI Xtreme1 is an open-source suite that speedily develops and iterates your datasets and models. The built-in AI-assisted tools take your labeling efforts to the next level of efficiency. Your full data-centric MLOps lifecycle is taken care of with reproducibility, manageability, and automation.
 
 Xtreme1 was released under the open-source Apache License 2.0 in September 2022.
 
@@ -17,11 +17,11 @@ A community is important for the company. We are very open to feedback and encou
 
 # Key features #
 
- 1️⃣: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
+ :one: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
  
  :two: Built-in models for object detection, instance segmentation and classification
  
- 3️⃣: Configurable Ontology for label, attributes, and more
+ :three: Configurable Ontology for general classes (hierarchies) and attributes for use in your model training
  
  :four: Data management and quality control
  
@@ -45,7 +45,7 @@ We use Docker Compose to simplify running multiple containers together, the late
 
 ### Download release package
 
-Click the latest release on the right of repository home, select asset who's name likes `xtreme1-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
+Click the latest release on the right of repository home, select asset whose name likes `xtreme1-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
 
 ```bash
 wget https://github.com/basicai/xtreme1/releases/download/v0.5/xtreme1-v0.5.zip
@@ -60,7 +60,7 @@ Enter into the release package directory, and execute the following command to s
 docker compose up
 ```
 
-> Some Docker images, such as `mysql`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
+> Some Docker images, such as `MySQL`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
 
 ```yaml
 services:
@@ -77,7 +77,7 @@ It is recommended to use Compose V2+ and the new `docker compose` command, not t
 Here is more advanced commands for Docker Compose.
 
 ```bash
-# Start in forground.
+# Start in foreground.
 docker compose up
 
 # Or add -d option to run in background.
@@ -128,7 +128,7 @@ cd xtreme1
 
 ### Build images and run services with Docker Compose
 
-The default `docker-compose.yml` will pull all images from Docker Hub, including application images like `backend`, `frontend` etc. If you changed the code, and want to known whether it works or not, you can comment service's image line and uncomment build line, like following.
+The default `docker-compose.yml` will pull all images from Docker Hub, including application images like `backend`, `frontend` etc. If you changed the code, and want to know whether it works or not, you can comment service's image line and uncomment build line, like following.
 
 ```yaml
 services:
@@ -140,11 +140,11 @@ services:
     build: ./frontend
 ```
 
-Then you can run `docker compose up` to build `backend` and `frontend` image from source code and start all services. Be sure to run `docker compose build` when code changed, as up command will only build image when it not exist.
+Then you can run `docker compose up` to build `backend` and `frontend` image from source code and start all services. Be sure to run `docker compose build` when code changes, as up command will only build image when it not exist.
 
 Also you can run each application service in your favorite IDE, like IDEA or Visual Studio Code. For `backend` service which need `mysql`, `redia` and `minio`, you can start these services with Docker Compose, and connect these services using host binding port.
 
-> You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already add into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
+> You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already added into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
 
 ### Using your existing base services
 
