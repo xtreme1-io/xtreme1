@@ -1,9 +1,16 @@
+<div align="center">
+<img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/release-v0.5-blue) 
-![](https://img.shields.io/badge/license-Apache%202.0-brightgreen)
- <a href="https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz">
-    <img src="https://img.shields.io/badge/Slack-Join_Chat-white.svg?logo=slack&style=social" alt="Join Xtreme1 Slack" />
-  </a>
+![](https://img.shields.io/badge/Release-v0.5-green) 
+![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
+<a href="https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz" alt="Join Slack">
+<img src="https://img.shields.io/static/v1?label=Join&message=Slack&color=ff69b4" /></a>
+<a href="https://twitter.com/BasicAIteam" alt="Follow Twitter"><img src="https://img.shields.io/badge/Follow-Twitter-blue" /></a>
+<a href="https://app.basic.ai/#/login" alt="app">
+<img src="https://img.shields.io/badge/Xtreme1-App-yellow" /></a>    
+[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/)
+</div>
+
 
 # Intro #
 BasicAI Xtreme1 is an open-source suite that speedily develops and iterates your datasets and models. The built-in AI-assisted tools take your labeling efforts to the next level of efficiency. Your full data-centric MLOps lifecycle is taken care of with reproducibility, manageability, and automation.
@@ -69,6 +76,7 @@ services:
   mysql:
     platform: linux/amd64
 ```
+<img src="https://www.basic.ai/_nuxt/img/4f457dd.png" alt="xtreme1_lidar_page">
 
 ### Docker Compose advanced
 
