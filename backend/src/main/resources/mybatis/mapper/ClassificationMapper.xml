@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.ClassificationMapper">
+
+    <!-- generic query result colum -->
+    <sql id="Base_Column_List">
+        id, ontology_id, name, color, dataset_type, is_required, input_type, options, is_deleted,created_at, created_by, updated_at, updated_by
+    </sql>
+
+
+</mapper>

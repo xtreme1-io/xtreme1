@@ -1,0 +1,62 @@
+@import 'ant.less';
+
+#app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #dee5eb;
+    margin: 0px;
+    height: 100%;
+}
+
+body {
+    margin: 0px;
+    width: 100%;
+    overflow: hidden;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+.limit {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    /* height: 10px; */
+    /**/
+}
+::-webkit-scrollbar-track {
+    background: rgb(100 100 100);
+    border-radius: 2px;
+}
+::-webkit-scrollbar-thumb {
+    background: #424242;
+    border-radius: 10px;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #4a4a4a;
+}
+
+.over-not-allowed {
+    position: absolute;
+    inset: 0px;
+    cursor: not-allowed;
+}
+
+@keyframes loading-360 {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading {
+    animation: loading-360 0.8s infinite linear;
+}

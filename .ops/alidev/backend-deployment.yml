@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: x1-community
+      app.kubernetes.io/instance: x1-community
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: x1-community
+        app.kubernetes.io/instance: x1-community
+        app.kubernetes.io/component: backend
+    spec:
+      nodeSelector:
+        dedicated: app
+      imagePullSecrets:
+        - name: basicai-registry
+      containers:
+        - name: backend
+          image: $BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+          env:
+            - name: JAVA_OPTS
+              value: "-XX:InitialRAMPercentage=20.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -XshowSettings:vm"
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 100m
+            limits:
+              memory: 2Gi
+              cpu: 1
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+      volumes:
+        - name: config
+          configMap:
+            name: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app.kubernetes.io/name: x1-community
+    app.kubernetes.io/instance: x1-community
+    app.kubernetes.io/component: backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: backend
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: x1-community.alidev.beisai.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: backend
+                port:
+                  number: 80
+            path: /api(/|$)(.*)
+            pathType: Prefix
+  tls:
+    - hosts:
+        - x1-community.alidev.beisai.com
+      secretName: alidev.beisai.com

@@ -1,0 +1,5 @@
+dist/
+
+main/node_modules/
+pc-tool/node_modules/
+image-tool/node_modules/

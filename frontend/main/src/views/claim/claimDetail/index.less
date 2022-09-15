@@ -1,0 +1,72 @@
+@prefix-cls: ~'@{namespace}-claimDetail';
+  .@{prefix-cls} {
+    background-color: #30395a;
+    margin-left: 5px;
+    min-height: calc(100vh - @header-height);
+    .task-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+      padding: 0 20px;
+      box-shadow: 0px 5px 7px rgba(158,166,171,0.16);
+      z-index: 1000;
+    }
+  }
+
+@prefix-cls-left: ~'@{namespace}-taskLeft';
+  .@{prefix-cls-left} {
+    display: flex;
+    align-items: center;
+    .task-footer-left{
+      display: flex;
+      .task-footer-info{
+        height: 24px;
+        font-size: 16px;
+        color: #fff; 
+        background-color: #4792b4;
+        border-radius: 12px;
+        padding-right: 10px;
+      }
+      .edit-icon{
+        height: 24px;width: 24px;display: inline-block;text-align: center;background-color: #57CCEF;
+        border-radius: 12px;
+        //  width: 24px; height: 24px; text-align: center;
+      }
+      .tooptip-edit{
+        background-color: #F8E792;
+        border-radius: 50%;
+        padding-top: 3px;
+        height: 24px;width: 24px;text-align: center;
+      }
+      .tooptip-right {
+        background-color: #7FF0B3;
+        border-radius: 50%;padding-top: 3px;
+        height: 24px;width: 24px;text-align: center;
+        color: #fff;
+      }
+    }
+  }
+@prefix-cls-center: ~'@{namespace}-taskCenter';
+  .@{prefix-cls-center} {
+    width: 340px;
+    .center-info{
+      background-color: #ffffff; width: 340px; margin-top: -22px;height: 5px;color: #ffffff;padding-top:10px;text-align: center
+    }
+  }
+@prefix-cls-right: ~'@{namespace}-taskRight';
+  .@{prefix-cls-right} {
+    .task-footer-right{
+      display: flex;
+      align-items: center;
+      color: #F3F3F3;
+      div{
+        margin-left: 20px;
+      }
+    }
+    
+  }

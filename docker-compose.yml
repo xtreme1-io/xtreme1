@@ -1,0 +1,108 @@
+version: '3.9'
+services:
+  nginx:
+    image: nginx:1.22
+    ports:
+      - 8190:80
+    volumes:
+      - ./deploy/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+      - frontend
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: ImOxO8Lz
+      MYSQL_DATABASE: x1_community
+      MYSQL_USER: x1_community
+      MYSQL_PASSWORD: Rc4K3L6f
+    ports:
+      - 8191:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./deploy/mysql/migration:/docker-entrypoint-initdb.d
+    # Increase the healthcheck parameter: execute'/usr/bin/mysql --user=x1_community --password=Rc4K3L6f --execute "SHOW DATABASES;"'
+    # The execution time is set to 10 seconds, the timeout is often set to 20 seconds, and the number of retries is 10 times.
+    # If the database can be logged in and can be queried, it means the database startup is complete.
+    healthcheck:
+      # Only when the query command can actually be executed can the startup be completed
+      test: '/usr/bin/mysql --user=x1_community --password=Rc4K3L6f --execute "SHOW DATABASES;"'
+      interval: 10s
+      timeout: 20s
+      retries: 10
+  redis:
+    image: redis:6.2
+    ports:
+      - 8192:6379
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+  minio:
+    image: bitnami/minio:2022.9.1
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: 1tQB970y
+      MINIO_DEFAULT_BUCKETS: x1-community:download
+    ports:
+      - 8193:9000
+      - 8194:9001
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--silent",
+          "-f",
+          "http://minio:9000/minio/health/ready"
+        ]
+      interval: 5s
+      timeout: 25s
+      retries: 5
+      start_period: 2s
+  backend:
+    image: basicai/xtreme1-backend
+    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
+    # build: ./backend
+    ports:
+      - 8180:8080
+    # volumes:
+    # Using customized application.yml to override default configs.
+    #   - /host/path/to/customized/application.yml:/app/config/application.yml
+    depends_on:
+      mysql:
+        # The java container will not start until the mysql container status is healthy.
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+  frontend:
+    image: basicai/xtreme1-frontend
+    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
+    # build: ./frontend
+    ports:
+      - 8181:8080
+  image-object-detection:
+    image: basicai/xtreme1-image-object-detection
+    ports:
+      - 8182:5000
+    # You need to explicitly specify model profile to start this service.
+    profiles:
+      - model
+  point-cloud-object-detection:
+    image: basicai/xtreme1-point-cloud-object-detection
+    ports:
+      - 8183:5000
+    # You need to explicitly specify model profile to start this service.
+    profiles:
+      - model
+volumes:
+  mysql-data:
+  redis-data:
+  minio-data:

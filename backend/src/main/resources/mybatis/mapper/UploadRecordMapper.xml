@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.UploadRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.UploadRecord">
+        <id column="id" property="id" />
+        <result column="serial_number" property="serialNumber" />
+        <result column="file_url" property="fileUrl" />
+        <result column="file_name" property="fileName" />
+        <result column="error_message" property="errorMessage" />
+        <result column="total_file_size" property="totalFileSize" />
+        <result column="downloaded_file_size" property="downloadedFileSize" />
+        <result column="total_data_num" property="totalDataNum" />
+        <result column="parsed_data_num" property="parsedDataNum" />
+        <result column="status" property="status" />
+        <result column="created_at" property="createdAt" />
+        <result column="created_by" property="createdBy" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="updated_by" property="updatedBy" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, serial_number, file_url, file_name, error_message, total_file_size, downloaded_file_size, total_data_num, parsed_data_num, status, created_at, created_by, updated_at, updated_by
+    </sql>
+
+
+</mapper>

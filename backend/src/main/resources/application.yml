@@ -1,0 +1,97 @@
+debug: false
+
+server:
+  address: 0.0.0.0
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: xtreme1
+  datasource:
+    url: jdbc:mysql://mysql:3306/x1_community
+    username: x1_community
+    password: Rc4K3L6f
+    hikari:
+      connection-test-query: SELECT 1
+      connection-timeout: 60000
+      max-lifetime: 54000
+  redis:
+    host: redis
+    port: 6379
+    password:
+
+jwt:
+  secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
+  issuer: BasicAI
+  expireHours: 120
+
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  type-aliases-package: ai.basic.x1.adapter.port.dao.mybatis.model
+
+minio:
+  internalEndpoint: http://minio:9000/
+  endpoint: http://localhost:8193/
+  accessKey: admin
+  secretKey: 1tQB970y
+  bucketName: x1-community
+
+export:
+  data:
+    version: Basic AI Community V1.0
+file:
+  tempPath: /tmp/x1/
+  size:
+    large: 400
+    medium: 200
+    small: 100
+  prefix:
+    large: large
+    medium: medium
+    small: small
+dataset-initial:
+  dataset:
+    name: LiDAR Fusion Trial
+    fileName: xtreme1-lidar-fusion-trial.zip
+    type: LIDAR_FUSION
+    userName: admin@xtreme1.io
+    classes[0]:
+      name: Car
+      color: "#f39c12"
+      toolType: CUBOID
+      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
+    classes[1]:
+      name: Van
+      color: "#2ecc71"
+      toolType: CUBOID
+      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
+    classes[2]:
+      name: Truck
+      color: "#d1ccc0"
+      toolType: CUBOID
+      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
+
+model:
+  arithmetic:
+    image80:
+      url: http://image-object-detection:5000/basic_predict
+    preModel:
+      url: http://point-cloud-object-detection:5000/3dbox
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true

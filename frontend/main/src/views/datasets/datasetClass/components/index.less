@@ -1,0 +1,114 @@
+:global(.basic-basic-drawer .ant-drawer-body .scrollbar__wrap) {
+  padding: 10px !important;
+}
+.basic-form {
+  .setting-line {
+    margin-bottom: 10px;
+  }
+  :global(.ant-radio-wrapper) {
+    width: 44px;
+    height: 44px;
+  }
+  :global(.ant-radio-wrapper:nth-child(4n)) {
+    margin-right: 0;
+  }
+  :global(.img-tool) {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  :global(.img-tool img) {
+    width: 28px;
+  }
+  :global(span.ant-radio + *) {
+    padding-right: 0px;
+    padding-left: 0px;
+  }
+  :global(.ant-radio-checked + span .img-tool) {
+    border: 1px solid @primary-color;
+    background: rgba(87, 204, 239, 0.15);
+  }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    .name {
+      margin-left: 12px;
+      font-size: 14px;
+    }
+  }
+  &-tab {
+    display: flex;
+    justify-content: space-between;
+    &-item {
+      cursor: pointer;
+      &.active {
+        color: @primary-color;
+      }
+    }
+  }
+
+  .option-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    input {
+      flex: 1;
+    }
+  }
+  .option {
+    cursor: pointer;
+    border: 1px solid #ccc;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    height: 28px;
+    padding-left: 10px;
+    padding-right: 5px;
+    margin-bottom: 10px;
+    &:hover {
+      background-color: rgba(87, 204, 239, 0.15);
+    }
+  }
+  .add {
+    cursor: pointer;
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+  }
+  .del-action,
+  .confirm-action {
+    margin-left: 3px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+  .footer {
+    margin-left: -10px;
+  }
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  width: 100%;
+  margin-left: -20px;
+  display: flex;
+  flex-direction: row-reverse;
+  .btn {
+    width: 100%;
+    &:first-child {
+      margin-left: 10px;
+    }
+  }
+}
