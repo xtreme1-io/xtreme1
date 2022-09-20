@@ -68,6 +68,7 @@ To run model services, you need deploy on a Linux platform with nvidia-docker ru
 | ------------- | ------------- |
 | GPU | Nvidia Tesla T4 or other similar Nvidia-GPU  |
 | RAM | 4G or more |
+| GPU RAM | 6G or more |
 
 #### Software Requirements
 
