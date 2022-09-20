@@ -62,12 +62,12 @@ Any OS that can install Docker Compose, you can install Docker Compose by instal
 | RAM | 2GB or more |
 | Hard Drive | 10GB or more (depends on data size) |
 
-To run model services, you need the following more resources.
+To run model services, you need deploy on a Linux platform with nvidia-docker runtime installed and following more resources.
 
 | Component | Recommended configuration |
 | ------------- | ------------- |
-| GPU | |
-| RAM | |
+| GPU | Nvidia Tesla T4 or other similar Nvidia-GPU  |
+| RAM | 4G or more |
 
 #### Software Requirements
 
