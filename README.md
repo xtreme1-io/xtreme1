@@ -135,6 +135,19 @@ docker compose down -v
 
 Docker compose will pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend`. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
+### Enable model service
+
+**Make sure you have installed the [NVIDIA driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and Docker engine for your Linux distribution**.
+
+**Note that you do not need to install the CUDA Toolkit on the host system, but the NVIDIA driver needs to be installed**.
+
+For instructions on getting started with the NVIDIA Container Toolkit, refer to the [installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
+
+```bash
+# You need to explicitly specify model profile to start model services.
+docker compose --profile model up
+```
+
 ## Build Xtreme1 from source code
 
 ### Enable Docker BuildKit
