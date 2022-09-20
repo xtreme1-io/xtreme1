@@ -26,6 +26,28 @@ A community is important for the company. We are very open to feedback and encou
 
 # Key features #
 
+<table>
+  <tr>
+    <td width="50%">
+      <a href="https://www.basic.ai/">
+        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/image%20segmentation.gif" />
+      </a>
+    </td>
+    <td width="50%">
+<a href="https://www.basic.ai/">
+<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20object%20tracking.gif" />
+
+  </tr>
+  <tr>
+    <th>
+      <a href="https://www.basic.ai/">Image Bounding-box Annotation - Object Detection</a>
+    </th>
+    <th>
+      <a href="https://www.basic.ai/">Image Segmentation Annotation - YOLOR </a>
+    </th>
+
+</table>
+
  :one: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
  
  :two: Built-in models for object detection, instance segmentation and classification
@@ -37,6 +59,28 @@ A community is important for the company. We are very open to feedback and encou
  :five: Data debug and model-training
  
  :six: AI-powered tools for model performance evaluation
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="https://www.basic.ai/">
+        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20annotation.gif" />
+      </a>
+    </td>
+    <td width="50%">
+<a href="https://www.basic.ai/">
+<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20object%20tracking.gif" />
+
+  </tr>
+  <tr>
+    <th>
+      <a href="https://www.basic.ai/">3D Point Cloud Cuboid Annotation - LiDAR-based 3D Object Detection</a>
+    </th>
+    <th>
+      <a href="https://www.basic.ai/">3D Point Cloud Object Tracking - LiDAR-based 3D Object Tracking</a>
+    </th>
+
+</table>
 
 # Quick start
 
