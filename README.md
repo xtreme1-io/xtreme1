@@ -43,14 +43,46 @@ A community is important for the company. We are very open to feedback and encou
 
 * Get early access to [Xtreme1 online version](https://app.basic.ai/#/login/) without any installation :rocket:
 
-* [Run with release package](#run-with-release-package) :cd:
-* [Run with source code](#run-with-source-code) :wrench:
+* [Install and start Xtreme1](#install-and-start-xtreme1) :cd:
+* [Build Xtreme1 from source code](#build-xtreme1-from-source-code) :wrench:
 
-## Run with release package
+## Install and Start Xtreme1
 
 ### Prerequisites 
 
-We use Docker Compose to simplify running multiple containers together, the latest [Docker Desktop](https://docs.docker.com/desktop/) already integrated `docker compose` subcommand. If you haven't installed Docker Desktop yet, you should install it first.
+#### Operating System Requirements
+
+Any OS that can install Docker Compose, you can install Docker Compose by installing [Docker Desktop](https://docs.docker.com/desktop/) on Mac, Windows, and Linux with desktop, on Linux server you can install [Docker Engine](https://docs.docker.com/engine/) with [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/).
+
+#### Hardware Requirements
+
+| Component  | Recommended configuration |
+| ------------- | ------------- |
+| CPU | AMD64 or ARM64 |
+| RAM | 2GB or more |
+| Hard Drive | 10GB or more (depends on data size) |
+
+To run model services, you need the following more resources.
+
+| Component | Recommended configuration |
+| ------------- | ------------- |
+| GPU | |
+| RAM | |
+
+#### Software Requirements
+
+For Mac, Windows, and Linux with desktop:
+
+| Software | Version |
+| ------------- | ------------- |
+| Docker Desktop | 4.1 or higher |
+
+For Linux server:
+
+| Software | Version |
+| ------------- | ------------- |
+| Docker Engine | 20.10 or higher |
+| Docker Compose Plugin | 2.0 or higher |
 
 ### Download release package
 
@@ -80,12 +112,6 @@ services:
 
 ### Docker Compose advanced
 
-It is recommended to use Compose V2+ and the new `docker compose` command, not the old `docker-compose` command, you can see the differences between the two in the document [Overview of Docker Compose](https://docs.docker.com/compose/).
-
-> Docker Desktop(Mac, Win, Linux) will auto install Docker Compose. If you are on Linux server, you can install Docker Compose plugin following this article [Install Docker Compose CLI plugin](https://docs.docker.com/compose/install/compose-plugin/).
-
-Here is more advanced commands for Docker Compose.
-
 ```bash
 # Start in foreground.
 docker compose up
@@ -93,7 +119,7 @@ docker compose up
 # Or add -d option to run in background.
 docker compose up -d
 
-# You need to explicitly specify model profile to start all model related services, the model services need GPU resource.
+# You need to explicitly specify model profile to start model services.
 docker compose --profile model up
 
 # When up finished, you can start or stop all or specific service.
@@ -107,11 +133,9 @@ docker compose down
 docker compose down -v
 ```
 
-It'll pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
+Docker compose will pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend`. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
-After successfully started all services, you can open `http://localhost:8190` to access web frontend, and access MinIO console at `http://localhost:8194`.
-
-## Run with source code
+## Build Xtreme1 from source code
 
 ### Enable Docker BuildKit
 
@@ -136,9 +160,9 @@ git clone https://github.com/basicai/xtreme1.git
 cd xtreme1
 ```
 
-### Build images and run services with Docker Compose
+### Build images and run services
 
-The default `docker-compose.yml` will pull all images from Docker Hub, including application images like `backend`, `frontend` etc. If you changed the code, and want to know whether it works or not, you can comment service's image line and uncomment build line, like following.
+The `docker-compose.yml` default will pull application images from Docker Hub, if you want to build images from source code, you can comment service's image line and uncomment build line.
 
 ```yaml
 services:
@@ -150,15 +174,9 @@ services:
     build: ./frontend
 ```
 
-Then you can run `docker compose up` to build `backend` and `frontend` image from source code and start all services. Be sure to run `docker compose build` when code changes, as up command will only build image when it not exist.
-
-Also you can run each application service in your favorite IDE, like IDEA or Visual Studio Code. For `backend` service which need `mysql`, `redia` and `minio`, you can start these services with Docker Compose, and connect these services using host binding port.
+Then when you run `docker compose up`, it will first build `backend` and `frontend` image and start services. Be sure to run `docker compose build` when code changed, as up command will only build image when it not exist.
 
 > You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already added into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
-
-### Using your existing base services
-
-If you already have MySQL, Redis, or MinIO base services, you can use it directly, and not depend on Docker Compose to manage these services, but you need to change `backend` service's configuration. You can change configurations in default configuration file at `backend/src/main/resources/application.yml`, or using command option `-Dspring.profiles.active=local` to specify a local configuration file to override the default one.
 
 To get more development guides, you can read the README in each application service's directory.
 
