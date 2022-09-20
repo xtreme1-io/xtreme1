@@ -13,9 +13,10 @@
 
 
 # Intro #
-BasicAI Xtreme1 is an open-source suite that speedily develops and iterates your datasets and models. The built-in AI-assisted tools take your labeling efforts to the next level of efficiency. Your full data-centric MLOps lifecycle is taken care of with reproducibility, manageability, and automation.
+BasicAI launched the world’s 1st open-source platform for multisensory training data. 
 
-Xtreme1 was released under the open-source Apache License 2.0 in September 2022.
+Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 3d point cloud dataset ML challenges.
+The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
 # Support #
 [Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
@@ -95,7 +96,7 @@ A community is important for the company. We are very open to feedback and encou
 
 #### Operating System Requirements
 
-Any OS that can install Docker Compose, you can install Docker Compose by installing [Docker Desktop](https://docs.docker.com/desktop/) on Mac, Windows, and Linux with desktop, on Linux server you can install [Docker Engine](https://docs.docker.com/engine/) with [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/).
+Any OS can install the Xtreme1 platform with Docker Compose (installing [Docker Desktop](https://docs.docker.com/desktop/) on Mac, Windows, and Linux devices). On the Linux server, you can install Docker Engine with [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/).
 
 #### Hardware Requirements
 
@@ -104,14 +105,6 @@ Any OS that can install Docker Compose, you can install Docker Compose by instal
 | CPU | AMD64 or ARM64 |
 | RAM | 2GB or more |
 | Hard Drive | 10GB or more (depends on data size) |
-
-To run model services, you need deploy on a Linux platform with nvidia-docker runtime installed and following more resources.
-
-| Component | Recommended configuration |
-| ------------- | ------------- |
-| GPU | Nvidia Tesla T4 or other similar Nvidia-GPU  |
-| RAM | 4G or more |
-| GPU RAM | 6G or more |
 
 #### Software Requirements
 
@@ -127,6 +120,15 @@ For Linux server:
 | ------------- | ------------- |
 | Docker Engine | 20.10 or higher |
 | Docker Compose Plugin | 2.0 or higher |
+
+#### :warning: (Build-in) Models Deployment Requirements
+It's required to install and run the model on a Linux server with `nvidia-container-runtime`.
+
+| Component | Recommended configuration |
+| ------------- | ------------- |
+| GPU | Nvidia Tesla T4 or other similar Nvidia-GPU  |
+| RAM | 4G or more |
+| GPU RAM | 6G or more |
 
 ### Download release package
 
@@ -154,7 +156,7 @@ services:
 ```
 <img src="https://www.basic.ai/_nuxt/img/4f457dd.png" alt="xtreme1_lidar_page">
 
-### Docker Compose advanced
+### Docker Compose advanced settings
 
 ```bash
 # Start in foreground.
