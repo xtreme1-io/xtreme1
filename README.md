@@ -122,13 +122,14 @@ For Linux server:
 | Docker Compose Plugin | 2.0 or higher |
 
 #### :warning: (Build-in) Models Deployment Requirements
-It's required to install and run the model on a Linux server with `nvidia-container-runtime`.
+
+Right row models only can be running on Linux server with [NVIDIA Container Runtime](https://developer.nvidia.com/nvidia-container-runtime).
 
 | Component | Recommended configuration |
 | ------------- | ------------- |
-| GPU | Nvidia Tesla T4 or other similar Nvidia-GPU  |
-| RAM | 4G or more |
+| GPU | Nvidia Tesla T4 or other similar Nvidia GPU  |
 | GPU RAM | 6G or more |
+| RAM | 4G or more |
 
 ### Download release package
 
