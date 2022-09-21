@@ -31,12 +31,12 @@ A community is important for the company. We are very open to feedback and encou
   <tr>
     <td width="50%">
       <a href="https://www.basic.ai/">
-        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/object%20detection.gif" />
+        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/image-bbox-model.gif" />
       </a>
     </td>
     <td width="50%">
 <a href="https://www.basic.ai/">
-<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/image%20segmentation.gif" />
+<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/2d-seg-model.gif" />
 
   </tr>
   <tr>
@@ -65,12 +65,12 @@ A community is important for the company. We are very open to feedback and encou
   <tr>
     <td width="50%">
       <a href="https://www.basic.ai/">
-        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20annotation.gif" />
+        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d-annotation.gif" />
       </a>
     </td>
     <td width="50%">
 <a href="https://www.basic.ai/">
-<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20object%20tracking.gif" />
+<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d-track-model.gif" />
 
   </tr>
   <tr>
