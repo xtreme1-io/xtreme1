@@ -13,9 +13,10 @@
 
 
 # Intro #
-BasicAI Xtreme1 is an open-source suite that speedily develops and iterates your datasets and models. The built-in AI-assisted tools take your labeling efforts to the next level of efficiency. Your full data-centric MLOps lifecycle is taken care of with reproducibility, manageability, and automation.
+BasicAI launched the world’s 1st open-source platform for multisensory training data. 
 
-Xtreme1 was released under the open-source Apache License 2.0 in September 2022.
+Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 3d point cloud dataset ML challenges.
+The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
 # Support #
 [Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
@@ -25,6 +26,28 @@ A community is important for the company. We are very open to feedback and encou
 [👉 Join us on Slack today!](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz)
 
 # Key features #
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="https://www.basic.ai/">
+        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/object%20detection.gif" />
+      </a>
+    </td>
+    <td width="50%">
+<a href="https://www.basic.ai/">
+<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/image%20segmentation.gif" />
+
+  </tr>
+  <tr>
+    <th>
+      <a href="https://www.basic.ai/">Image Bounding-box Annotation - Object Detection</a>
+    </th>
+    <th>
+      <a href="https://www.basic.ai/">Image Segmentation Annotation - YOLOR </a>
+    </th>
+
+</table>
 
  :one: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
  
@@ -37,20 +60,76 @@ A community is important for the company. We are very open to feedback and encou
  :five: Data debug and model-training
  
  :six: AI-powered tools for model performance evaluation
- 
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="https://www.basic.ai/">
+        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20annotation.gif" />
+      </a>
+    </td>
+    <td width="50%">
+<a href="https://www.basic.ai/">
+<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20object%20tracking.gif" />
+
+  </tr>
+  <tr>
+    <th>
+      <a href="https://www.basic.ai/">3D Point Cloud Cuboid Annotation - LiDAR-based 3D Object Detection</a>
+    </th>
+    <th>
+      <a href="https://www.basic.ai/">3D Point Cloud Object Tracking - LiDAR-based 3D Object Tracking</a>
+    </th>
+
+</table>
 
 # Quick start
 
 * Get early access to [Xtreme1 online version](https://app.basic.ai/#/login/) without any installation :rocket:
 
-* [Run with release package](#run-with-release-package) :cd:
-* [Run with source code](#run-with-source-code) :wrench:
+* [Install and start Xtreme1](#install-and-start-xtreme1) :cd:
+* [Build Xtreme1 from source code](#build-xtreme1-from-source-code) :wrench:
 
-## Run with release package
+## Install and Start Xtreme1
 
 ### Prerequisites 
 
-We use Docker Compose to simplify running multiple containers together, the latest [Docker Desktop](https://docs.docker.com/desktop/) already integrated `docker compose` subcommand. If you haven't installed Docker Desktop yet, you should install it first.
+#### Operating System Requirements
+
+Any OS can install the Xtreme1 platform with Docker Compose (installing [Docker Desktop](https://docs.docker.com/desktop/) on Mac, Windows, and Linux devices). On the Linux server, you can install Docker Engine with [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/).
+
+#### Hardware Requirements
+
+| Component  | Recommended configuration |
+| ------------- | ------------- |
+| CPU | AMD64 or ARM64 |
+| RAM | 2GB or more |
+| Hard Drive | 10GB or more (depends on data size) |
+
+#### Software Requirements
+
+For Mac, Windows, and Linux with desktop:
+
+| Software | Version |
+| ------------- | ------------- |
+| Docker Desktop | 4.1 or higher |
+
+For Linux server:
+
+| Software | Version |
+| ------------- | ------------- |
+| Docker Engine | 20.10 or higher |
+| Docker Compose Plugin | 2.0 or higher |
+
+#### :warning: (Build-in) Models Deployment Requirements
+
+Right row models only can be running on Linux server with [NVIDIA Container Runtime](https://developer.nvidia.com/nvidia-container-runtime).
+
+| Component | Recommended configuration |
+| ------------- | ------------- |
+| GPU | Nvidia Tesla T4 or other similar Nvidia GPU  |
+| GPU RAM | 6G or more |
+| RAM | 4G or more |
 
 ### Download release package
 
@@ -78,13 +157,7 @@ services:
 ```
 <img src="https://www.basic.ai/_nuxt/img/4f457dd.png" alt="xtreme1_lidar_page">
 
-### Docker Compose advanced
-
-It is recommended to use Compose V2+ and the new `docker compose` command, not the old `docker-compose` command, you can see the differences between the two in the document [Overview of Docker Compose](https://docs.docker.com/compose/).
-
-> Docker Desktop(Mac, Win, Linux) will auto install Docker Compose. If you are on Linux server, you can install Docker Compose plugin following this article [Install Docker Compose CLI plugin](https://docs.docker.com/compose/install/compose-plugin/).
-
-Here is more advanced commands for Docker Compose.
+### Docker Compose advanced settings
 
 ```bash
 # Start in foreground.
@@ -93,7 +166,7 @@ docker compose up
 # Or add -d option to run in background.
 docker compose up -d
 
-# You need to explicitly specify model profile to start all model related services, the model services need GPU resource.
+# You need to explicitly specify model profile to start model services.
 docker compose --profile model up
 
 # When up finished, you can start or stop all or specific service.
@@ -107,11 +180,22 @@ docker compose down
 docker compose down -v
 ```
 
-It'll pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend` etc. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
+Docker compose will pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend`. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
-After successfully started all services, you can open `http://localhost:8190` to access web frontend, and access MinIO console at `http://localhost:8194`.
+### Enable model service
 
-## Run with source code
+**Make sure you have installed the [NVIDIA driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and Docker engine for your Linux distribution**.
+
+**Note that you do not need to install the CUDA Toolkit on the host system, but the NVIDIA driver needs to be installed**.
+
+For instructions on getting started with the NVIDIA Container Toolkit, refer to the [installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
+
+```bash
+# You need to explicitly specify model profile to start model services.
+docker compose --profile model up
+```
+
+## Build Xtreme1 from source code
 
 ### Enable Docker BuildKit
 
@@ -136,9 +220,9 @@ git clone https://github.com/basicai/xtreme1.git
 cd xtreme1
 ```
 
-### Build images and run services with Docker Compose
+### Build images and run services
 
-The default `docker-compose.yml` will pull all images from Docker Hub, including application images like `backend`, `frontend` etc. If you changed the code, and want to know whether it works or not, you can comment service's image line and uncomment build line, like following.
+The `docker-compose.yml` default will pull application images from Docker Hub, if you want to build images from source code, you can comment service's image line and uncomment build line.
 
 ```yaml
 services:
@@ -150,15 +234,9 @@ services:
     build: ./frontend
 ```
 
-Then you can run `docker compose up` to build `backend` and `frontend` image from source code and start all services. Be sure to run `docker compose build` when code changes, as up command will only build image when it not exist.
-
-Also you can run each application service in your favorite IDE, like IDEA or Visual Studio Code. For `backend` service which need `mysql`, `redia` and `minio`, you can start these services with Docker Compose, and connect these services using host binding port.
+Then when you run `docker compose up`, it will first build `backend` and `frontend` image and start services. Be sure to run `docker compose build` when code changed, as up command will only build image when it not exist.
 
 > You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already added into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
-
-### Using your existing base services
-
-If you already have MySQL, Redis, or MinIO base services, you can use it directly, and not depend on Docker Compose to manage these services, but you need to change `backend` service's configuration. You can change configurations in default configuration file at `backend/src/main/resources/application.yml`, or using command option `-Dspring.profiles.active=local` to specify a local configuration file to override the default one.
 
 To get more development guides, you can read the README in each application service's directory.
 
