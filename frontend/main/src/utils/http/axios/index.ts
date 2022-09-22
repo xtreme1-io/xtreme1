@@ -254,14 +254,19 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
   );
 }
 export const defHttp = createAxios();
-
+const regexIP = /^((25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
 if (document.domain !== 'localhost') {
-  const list = window.location.hostname.split('.');
-  if (list.length > 3) {
-    document.domain = list.slice(list.length - 3).join('.');
+  if (regexIP.test(document.domain)) {
+    document.domain = location.hostname;
   } else {
-    document.domain = list.slice(list.length - 2).join('.');
+    const list = window.location.hostname.split('.');
+    if (list.length > 3) {
+      document.domain = list.slice(list.length - 3).join('.');
+    } else {
+      document.domain = list.slice(list.length - 2).join('.');
+    }
   }
+
 } else {
   document.domain = 'localhost';
 }
