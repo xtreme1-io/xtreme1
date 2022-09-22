@@ -27,7 +27,7 @@ A community is important for the company. We are very open to feedback and encou
 
 # Key features #
 
-Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Annotation - Segmentation Model (YOLOR)
+Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Annotation - Segmentation Model (YOLOR) 
 :-------------------------:|:-------------------------:
 ![](https://github.com/basicai/xtreme1/blob/dev/docs/images/image-bbox-model.gif)  |  ![](https://github.com/basicai/xtreme1/blob/dev/docs/images/2d-seg-model.gif)
 
