@@ -76,8 +76,10 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
             } catch (Exception e) {
                 failureHandler.onModelRunFailure(message, e);
             }
+        } else {
+            failureHandler.onModelRunFailure(message, new UsecaseException(apiResult.getMessage()));
         }
-        return apiResult.getCode() == UsecaseCode.OK;
+        return true;
     }
 
     @Override

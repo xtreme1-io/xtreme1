@@ -23,7 +23,7 @@ import java.util.List;
 @Component
 public class PredImageCo80ModelHttpCaller {
 
-    @Value("${model.arithmetic.image80.url:http://pre/basic_predict}")
+    @Value("${model.arithmetic.image80.url}")
     private String url;
 
     @Autowired
