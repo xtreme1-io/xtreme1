@@ -79,9 +79,10 @@ public class FileUseCase {
 
     private void setUrl(FileBO fileBO) {
         try {
+            fileBO.setInternalUrl(minioService.getInternalUrl(fileBO.getBucketName(), fileBO.getPath()));
             fileBO.setUrl(minioService.getUrl(fileBO.getBucketName(), fileBO.getPath()));
         } catch (Exception e) {
-            log.error("Get url error",e);
+            log.error("Get url error", e);
             throw new UsecaseException("Get url error");
         }
     }
@@ -103,7 +104,6 @@ public class FileUseCase {
         });
         fileDAO.saveBatch(files);
         var reFileBOs = DefaultConverter.convert(files, FileBO.class);
-        Objects.requireNonNull(reFileBOs).forEach(reFileBO -> setUrl(reFileBO));
         return reFileBOs;
     }
 }

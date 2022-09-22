@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.port.minio;
 
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.entity.PresignedUrlBO;
 import cn.hutool.core.io.FileUtil;
 import io.minio.*;
@@ -19,6 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static ai.basic.x1.util.Constants.MINIO;
+import static ai.basic.x1.util.Constants.SLANTING_BAR;
+
 /**
  * @author fyb
  * @date 2022/3/30 11:20
@@ -31,7 +35,7 @@ public class MinioService {
     private ExtendMinioClient extendMinioClient;
 
     @Autowired
-    private ExtendMinioClient extendMinioClientInternal;
+    private MinioProp minioProp;
 
     /**
      * Create bucket
@@ -41,8 +45,8 @@ public class MinioService {
     @SneakyThrows
     private void createBucket(String bucketName) {
         var bucketExistsArgs = BucketExistsArgs.builder().bucket(bucketName).build();
-        if (!extendMinioClientInternal.bucketExists(bucketExistsArgs)) {
-            extendMinioClientInternal.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+        if (!extendMinioClient.bucketExists(bucketExistsArgs)) {
+            extendMinioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
         }
     }
 
@@ -69,7 +73,7 @@ public class MinioService {
                 .stream(inputStream, size, partSize)
                 .contentType(contentType)
                 .build();
-        extendMinioClientInternal.putObject(putArgs);
+        extendMinioClient.putObject(putArgs);
         return getUrl(bucketName, fileName);
     }
 
@@ -93,7 +97,7 @@ public class MinioService {
                         FileUtil.getInputStream(file),
                         file.length(),
                         null)));
-        extendMinioClientInternal.uploadSnowballObjects(UploadSnowballObjectsArgs.builder()
+        extendMinioClient.uploadSnowballObjects(UploadSnowballObjectsArgs.builder()
                 .bucket(bucketName)
                 .objects(objects)
                 .build());
@@ -113,8 +117,8 @@ public class MinioService {
                 .bucket(bucketName)
                 .object(objectName)
                 .method(Method.GET);
-        var region = extendMinioClientInternal.getRegion(builder.build());
-        return extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
+        var region = extendMinioClient.getRegion(builder.build());
+        return replaceUrl(extendMinioClient.getPresignedObjectUrl(builder.region(region).build()));
     }
 
     /**
@@ -131,7 +135,7 @@ public class MinioService {
                 .bucket(bucketName)
                 .object(objectName)
                 .method(Method.GET);
-        return extendMinioClientInternal.getPresignedObjectUrl(builder.build());
+        return extendMinioClient.getPresignedObjectUrl(builder.build());
     }
 
     /**
@@ -152,8 +156,8 @@ public class MinioService {
                 .object(objectName)
                 .extraQueryParams(queryParams)
                 .expiry(60 * 60 * 24 * 7);
-        var region = extendMinioClientInternal.getRegion(builder.build());
-        return extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
+        var region = extendMinioClient.getRegion(builder.build());
+        return replaceUrl(extendMinioClient.getPresignedObjectUrl(builder.region(region).build()));
     }
 
     /**
@@ -173,12 +177,17 @@ public class MinioService {
                 .bucket(bucketName)
                 .object(objectName)
                 .expiry(60 * 60 * 24 * 7);
-        var region = extendMinioClientInternal.getRegion(builder.build());
+        var region = extendMinioClient.getRegion(builder.build());
         // This must be PUT, if it is GET, it is the file access address. If it is a POST upload, an error will be reported.
         var preUrl = extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
         var accessUrl = getInternalUrl(bucketName, objectName);
         return PresignedUrlBO.builder()
                 .accessUrl(accessUrl)
-                .presignedUrl(preUrl).build();
+                .presignedUrl(replaceUrl(preUrl)).build();
+    }
+
+    private String replaceUrl(String url) {
+        return url.replace(minioProp.getEndpoint(), "http://" + RequestContextHolder.getContext().getRequestInfo().getHost() +
+                SLANTING_BAR + MINIO + SLANTING_BAR);
     }
 }

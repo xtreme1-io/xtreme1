@@ -39,8 +39,7 @@ mybatis-plus:
   type-aliases-package: ai.basic.x1.adapter.port.dao.mybatis.model
 
 minio:
-  internalEndpoint: http://minio:9000/
-  endpoint: http://localhost:8190/
+  endpoint: http://minio:9000/
   accessKey: admin
   secretKey: 1tQB970y
   bucketName: x1-community

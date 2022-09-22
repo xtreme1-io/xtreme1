@@ -10,7 +10,7 @@ public interface Constants {
 
     String X_REAL_IP = "X-Real-Ip";
 
-    String X_HOST = "X-Host";
+    String HOST = "Host";
 
     String X_UA = "X-User-Agent";
 
@@ -73,6 +73,8 @@ public interface Constants {
     String RESULT = "result";
 
     String SLANTING_BAR = "/";
+
+    String MINIO = "minio";
 
 
     String QUESTION_MARK = "?";

@@ -511,7 +511,7 @@ public class DataInfoUseCase {
                 .isDeleted(false);
         var file = FileUtil.file(dataInfoUploadBO.getSavePath());
         var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
-        var path = fileUrl.replace(minioProp.getInternalEndpoint(), "").replace(minioProp.getBucketName() + "/", "");
+        var path = fileUrl.replace(minioProp.getEndpoint(), "").replace(minioProp.getBucketName() + "/", "");
         var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(minioProp.getBucketName())
                 .size(file.length()).path(path).type(FileUtil.getMimeType(path)).build();
         var fileBOS = fileUseCase.saveBatchFile(userId, Collections.singletonList(fileBO));

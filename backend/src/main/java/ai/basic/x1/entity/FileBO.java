@@ -95,6 +95,11 @@ public class FileBO {
     private String url;
 
     /**
+     * File internal url
+     */
+    private String internalUrl;
+
+    /**
      * File extension information
      */
     private JSONObject extraInfo;
