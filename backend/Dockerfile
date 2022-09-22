@@ -4,7 +4,7 @@ WORKDIR /build
 ADD . .
 RUN --mount=type=cache,target=/root/.m2 mvn package
 
-FROM openjdk:11
+FROM openjdk:11-jre
 RUN apt update && \
     apt install -y iputils-ping curl wget netcat
 WORKDIR /app

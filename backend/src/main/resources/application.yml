@@ -40,7 +40,7 @@ mybatis-plus:
 
 minio:
   internalEndpoint: http://minio:9000/
-  endpoint: http://localhost:8193/
+  endpoint: http://localhost:8190/
   accessKey: admin
   secretKey: 1tQB970y
   bucketName: x1-community
