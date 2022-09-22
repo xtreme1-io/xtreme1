@@ -15,8 +15,8 @@
 # Intro #
 BasicAI launched the world’s 1st open-source platform for multisensory training data. 
 
-Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 3d point cloud dataset ML challenges.
-The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
+Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2d image and 3d point cloud dataset ML challenges.
+The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2d/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
 # Support #
 [Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
