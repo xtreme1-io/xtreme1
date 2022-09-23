@@ -99,3 +99,37 @@ spec:
     - hosts:
         - x1-community.alitest.beisai.com
       secretName: alitest.beisai.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  type: ExternalName
+  externalName: basicai-dataset-tmp-minio-endpoint.alitest.beisai.com
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/upstream-vhost: basicai-dataset-tmp-minio-endpoint.alitest.beisai.com
+  name: minio
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: x1-community.alitest.beisai.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: minio
+                port:
+                  number: 443
+            path: /minio(/|$)(.*)
+            pathType: Prefix
+  tls:
+    - hosts:
+        - x1-community.alitest.beisai.com
+      secretName: alitest.beisai.com
