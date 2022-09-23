@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static ai.basic.x1.util.Constants.MINIO;
-import static ai.basic.x1.util.Constants.SLANTING_BAR;
+import static ai.basic.x1.util.Constants.*;
 
 /**
  * @author fyb
@@ -187,7 +186,8 @@ public class MinioService {
     }
 
     private String replaceUrl(String url) {
-        return url.replace(minioProp.getEndpoint(), "http://" + RequestContextHolder.getContext().getRequestInfo().getHost() +
+        return url.replace(minioProp.getEndpoint(), RequestContextHolder.getContext().getRequestInfo().getForwardedProto() + "://" +
+                RequestContextHolder.getContext().getRequestInfo().getHost() +
                 SLANTING_BAR + MINIO + SLANTING_BAR);
     }
 }

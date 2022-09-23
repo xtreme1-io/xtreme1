@@ -16,6 +16,10 @@ public interface Constants {
 
     String X_FORWARDED_FOR = "X-Forwarded-For";
 
+
+    String X_FORWARDED_PROTO = "X-Forwarded-Proto";
+
+
     String FILE = "file";
 
     String DIRECTORY = "directory";
