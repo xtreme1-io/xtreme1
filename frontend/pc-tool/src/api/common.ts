@@ -67,8 +67,8 @@ export async function getDataClassification(dataIds: string[] | string) {
     let url = `/api/annotate/data/listByDataIds`;
     let argsStr = queryStr({ dataIds });
     let data = await get(`${url}?${argsStr}`);
-    data = data.data || {};
-    let dataAnnotations = data.dataAnnotations || [];
+    // data = data.data || {};
+    let dataAnnotations = data.data || [];
 
     let attrsMap = {} as Record<string, Record<string, string>>;
     dataAnnotations.forEach((e: any) => {

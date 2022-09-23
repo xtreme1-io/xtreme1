@@ -76,8 +76,10 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
             } catch (Exception e) {
                 failureHandler.onModelRunFailure(message, e);
             }
+        } else {
+            failureHandler.onModelRunFailure(message, new UsecaseException(apiResult.getMessage()));
         }
-        return apiResult.getCode() == UsecaseCode.OK;
+        return true;
     }
 
     @Override
@@ -112,7 +114,7 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
         if (CollUtil.isEmpty(fileNodes)) {
             throw new IllegalArgumentException("file is not found");
         }
-        String url = fileNodes.get(0).getFile().getUrl();
+        String url = fileNodes.get(0).getFile().getInternalUrl();
         if (StrUtil.isEmpty(url)) {
             throw new IllegalArgumentException("file url is empty");
         }

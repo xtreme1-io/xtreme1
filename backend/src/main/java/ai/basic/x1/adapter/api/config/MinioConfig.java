@@ -30,14 +30,4 @@ public class MinioConfig {
         return new ExtendMinioClient(ExtendMinioClient.builder().endpoint(minioProp.getEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build());
     }
 
-    /**
-     * Get extendMinioClientInternal
-     *
-     * @return extendMinioClientInternal
-     */
-    @Bean(value = "extendMinioClientInternal")
-    public ExtendMinioClient extendMinioClientInternal() {
-        return new ExtendMinioClient(ExtendMinioClient.builder().endpoint(minioProp.getInternalEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build());
-    }
-
 }

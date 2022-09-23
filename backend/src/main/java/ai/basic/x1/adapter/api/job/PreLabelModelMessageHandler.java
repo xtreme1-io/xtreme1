@@ -116,23 +116,23 @@ public class PreLabelModelMessageHandler extends AbstractModelMessageHandler<Lis
                     List<ImageInfo> imageInfoList = new ArrayList<>();
                     imageInfoList.add(ImageInfo.builder()
                             .name(fileNodeBO.getFile().getName())
-                            .url(fileNodeBO.getFile().getUrl())
+                            .url(fileNodeBO.getFile().getInternalUrl())
                             .build());
                     dataInfo.setImages(imageInfoList);
                 } else {
                     dataInfo.getImages().add(ImageInfo.builder()
                             .name(fileNodeBO.getFile().getName())
-                            .url(fileNodeBO.getFile().getUrl())
+                            .url(fileNodeBO.getFile().getInternalUrl())
                             .build());
                 }
             }
             //pcd
             if (prePath.startsWith(POINT_CLOUD)) {
-                dataInfo.setPointCloudFile(getFileBO(fileNodeBO.getFile()).getUrl());
+                dataInfo.setPointCloudFile(getFileBO(fileNodeBO.getFile()).getInternalUrl());
             }
             //cameraConfig
             if (prePath.startsWith(CAMERA_CONFIG)) {
-                dataInfo.setCameraConfig(fileNodeBO.getFile().getUrl());
+                dataInfo.setCameraConfig(fileNodeBO.getFile().getInternalUrl());
             }
         }
         if (DIRECTORY.equals(fileNodeBO.getType()) && CollUtil.isNotEmpty(fileNodeBO.getFiles())) {

@@ -14,4 +14,5 @@ public class RequestInfo {
     private String userAgent;
     private String host;
     private String forwardedFor;
+    private String forwardedProto;
 }

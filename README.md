@@ -15,8 +15,8 @@
 # Intro #
 BasicAI launched the world’s 1st open-source platform for multisensory training data. 
 
-Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 3d point cloud dataset ML challenges.
-The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
+Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2d image and 3d point cloud dataset ML challenges.
+The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2d/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
 # Support #
 [Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
@@ -27,27 +27,9 @@ A community is important for the company. We are very open to feedback and encou
 
 # Key features #
 
-<table>
-  <tr>
-    <td width="50%">
-      <a href="https://www.basic.ai/">
-        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/object%20detection.gif" />
-      </a>
-    </td>
-    <td width="50%">
-<a href="https://www.basic.ai/">
-<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/image%20segmentation.gif" />
-
-  </tr>
-  <tr>
-    <th>
-      <a href="https://www.basic.ai/">Image Bounding-box Annotation - Object Detection</a>
-    </th>
-    <th>
-      <a href="https://www.basic.ai/">Image Segmentation Annotation - YOLOR </a>
-    </th>
-
-</table>
+Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Annotation - Segmentation Model (YOLOR) 
+:-------------------------:|:-------------------------:
+![](/docs/images/image-bbox-model.gif)  |  ![](/docs/images/2d-seg-model.gif)
 
  :one: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
  
@@ -61,27 +43,9 @@ A community is important for the company. We are very open to feedback and encou
  
  :six: AI-powered tools for model performance evaluation
 
-<table>
-  <tr>
-    <td width="50%">
-      <a href="https://www.basic.ai/">
-        <img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20annotation.gif" />
-      </a>
-    </td>
-    <td width="50%">
-<a href="https://www.basic.ai/">
-<img src="https://github.com/basicai/xtreme1/blob/feat-readme/docs/images/3d%20object%20tracking.gif" />
-
-  </tr>
-  <tr>
-    <th>
-      <a href="https://www.basic.ai/">3D Point Cloud Cuboid Annotation - LiDAR-based 3D Object Detection</a>
-    </th>
-    <th>
-      <a href="https://www.basic.ai/">3D Point Cloud Object Tracking - LiDAR-based 3D Object Tracking</a>
-    </th>
-
-</table>
+3D Point Cloud Cuboid Annotation - LiDAR-based 3D Object Detection Model |  3D Point Cloud Object Tracking Annotation - LiDAR-based 3D Object Tracking Model
+:-------------------------:|:-------------------------:
+![](/docs/images/3d-annotation.gif)  |  ![](/docs/images/3d-track-model.gif)
 
 # Quick start
 
@@ -123,7 +87,7 @@ For Linux server:
 
 #### :warning: (Build-in) Models Deployment Requirements
 
-Right row models only can be running on Linux server with [NVIDIA Container Runtime](https://developer.nvidia.com/nvidia-container-runtime).
+Right row models only can be running on Linux server with [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
 
 | Component | Recommended configuration |
 | ------------- | ------------- |
@@ -142,7 +106,7 @@ unzip -d xtreme1-v0.5 xtreme1-v0.5.zip
 
 ### Start all services
 
-Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1.
+Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1. You can replace `localhost` to ip address if you want to access from another computer.
 
 ```bash
 docker compose up
@@ -157,7 +121,7 @@ services:
 ```
 <img src="https://www.basic.ai/_nuxt/img/4f457dd.png" alt="xtreme1_lidar_page">
 
-### Docker Compose advanced settings
+### Docker Compose advanced commands
 
 ```bash
 # Start in foreground.
@@ -165,9 +129,6 @@ docker compose up
 
 # Or add -d option to run in background.
 docker compose up -d
-
-# You need to explicitly specify model profile to start model services.
-docker compose --profile model up
 
 # When up finished, you can start or stop all or specific service.
 docker compose start
@@ -180,20 +141,16 @@ docker compose down
 docker compose down -v
 ```
 
-Docker compose will pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend`. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`. We use Docker volume to save data, so you won't lose any data between container recreating.
+Docker compose will pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend`. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`, for example you can access MinIO console at `http://localhost:8194`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
-### Enable model service
-
-**Make sure you have installed the [NVIDIA driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and Docker engine for your Linux distribution**.
-
-**Note that you do not need to install the CUDA Toolkit on the host system, but the NVIDIA driver needs to be installed**.
-
-For instructions on getting started with the NVIDIA Container Toolkit, refer to the [installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
+### Start model services
 
 ```bash
 # You need to explicitly specify model profile to start model services.
 docker compose --profile model up
 ```
+
+> Make sure you have installed [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker). But you do not need to install the CUDA Toolkit, as it already contained in the model image.
 
 ## Build Xtreme1 from source code
 
