@@ -115,6 +115,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
     nginx.ingress.kubernetes.io/upstream-vhost: basicai-dataset-tmp-minio-endpoint.alitest.beisai.com
+    nginx.ingress.kubernetes.io/proxy-body-size: 1000m
   name: minio
 spec:
   ingressClassName: nginx
