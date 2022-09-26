@@ -1,7 +1,7 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.5-green) 
+![](https://img.shields.io/badge/Release-v0.5.1-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 <a href="https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz" alt="Join Slack">
 <img src="https://img.shields.io/static/v1?label=Join&message=Slack&color=ff69b4" /></a>
@@ -100,8 +100,8 @@ Right row models only can be running on Linux server with [NVIDIA Driver](https:
 Click the latest release on the right of repository home, select asset whose name likes `xtreme1-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
 
 ```bash
-wget https://github.com/basicai/xtreme1/releases/download/v0.5/xtreme1-v0.5.zip
-unzip -d xtreme1-v0.5 xtreme1-v0.5.zip
+wget https://github.com/basicai/xtreme1/releases/download/v0.5.1/xtreme1-v0.5.1.zip
+unzip -d xtreme1-v0.5.1 xtreme1-v0.5.1.zip
 ```
 
 ### Start all services
