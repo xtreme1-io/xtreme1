@@ -8,7 +8,7 @@ FROM openjdk:11-jre
 RUN apt update && \
     apt install -y iputils-ping curl wget netcat
 WORKDIR /app
-COPY --from=build /build/target/xtreme1-backend-0.5-SNAPSHOT.jar ./app.jar
+COPY --from=build /build/target/xtreme1-backend-0.5.1-SNAPSHOT.jar ./app.jar
 RUN mkdir -p config
 RUN wget 'https://basicai-asset.s3.us-west-2.amazonaws.com/xtreme1/xtreme1-lidar-fusion-trial.zip' -O xtreme1-lidar-fusion-trial.zip
 EXPOSE 8080
