@@ -106,7 +106,7 @@ unzip -d xtreme1-v0.5.1 xtreme1-v0.5.1.zip
 
 ### Start all services
 
-Enter into the release package directory, and execute the following command to start all services. If everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1. You can replace `localhost` to ip address if you want to access from another computer.
+Enter into the release package directory, and execute the following command to start all services. It need a few minutes to init database and prepare a test dataset, if everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1. You can replace `localhost` to ip address if you want to access from another computer.
 
 ```bash
 docker compose up
@@ -143,10 +143,10 @@ docker compose down -v
 
 Docker compose will pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend`. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`, for example you can access MinIO console at `http://localhost:8194`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
-### Start model services
+### Enable model services
 
 ```bash
-# You need to explicitly specify model profile to start model services.
+# You need to explicitly specify model profile to enable model services.
 docker compose --profile model up
 ```
 
