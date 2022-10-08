@@ -1,15 +1,14 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.5.1-green) 
+![](https://img.shields.io/badge/Release-v0.5.1-brightgreen) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
-<a href="https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag" alt="Join Slack">
-<img src="https://img.shields.io/static/v1?label=Join&message=Slack&color=ff69b4" /></a>
-<a href="https://twitter.com/BasicAIteam" alt="Follow Twitter"><img src="https://img.shields.io/badge/Follow-Twitter-blue" /></a>
-<a href="https://app.basic.ai/#/login" alt="app">
-<img src="https://img.shields.io/badge/Xtreme1-App-yellow" /></a>    [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/) ![](https://img.shields.io/badge/Readme-简体中文-9cf) 
+[![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
+[![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
+[![Online](https://img.shields.io/badge/Xtreme1_Online-App-yellow)](https://app.basic.ai/#/login)
+[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/) 
+[![README_CN](https://img.shields.io/badge/Readme-简体中文-9cf)](./README_CN.md)
 </div>
-
 
 # Intro #
 BasicAI launched the global 1st open-source platform for multisensory training data. 
