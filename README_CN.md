@@ -1,28 +1,23 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.5.1-green) 
+![](https://img.shields.io/badge/Release-v0.5.1-brightgreen) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
-<a href="https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag" alt="Join Slack">
-<img src="https://img.shields.io/static/v1?label=Join&message=Slack&color=ff69b4" /></a>
-<a href="https://twitter.com/BasicAIteam" alt="Follow Twitter"><img src="https://img.shields.io/badge/Follow-Twitter-blue" /></a>
-<a href="https://app.basic.ai/#/login" alt="app">
-<img src="https://img.shields.io/badge/Xtreme1-App-yellow" /></a> [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/)
-
-[Read English version](./README.md)
-</div> 
-
+[![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
+[![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
+[![Online](https://img.shields.io/badge/Xtreme1_Online-App-yellow)](https://app.basic.ai/#/login)
+[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/) 
+[![README_CN](https://img.shields.io/badge/Readme-English-9cf)](./README.md)
+</div>
 
 ## 简介
 BasicAI发布了全球首个开源多模态训练数据平台Xtreme1！
 Xtreme1深入AI工程化，致力于解决数据集在数据标注、数据监管和本体库管理的挑战。无论是2D和3D数据集的目标检测、场景分割或多传感器融合数据集，强大的工具和AI模型都能加快模型落地的速度。
 
-
-
 ## 加入社区
-[Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
+[Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues) 
 
-欢迎加入社区生态！任何使用上的问题和建议，可以通过issue反馈给开发者！
+欢迎加入社区生态！任何使用上的问题和建议，可以通过issue反馈给开发者们！
 
 👉 加入中文微信技术交流群！（添加小助理X星人的微信：`xtreme1_ai`）
 
