@@ -7,14 +7,17 @@
 <img src="https://img.shields.io/static/v1?label=Join&message=Slack&color=ff69b4" /></a>
 <a href="https://twitter.com/BasicAIteam" alt="Follow Twitter"><img src="https://img.shields.io/badge/Follow-Twitter-blue" /></a>
 <a href="https://app.basic.ai/#/login" alt="app">
-<img src="https://img.shields.io/badge/Xtreme1-App-yellow" /></a>    
-[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/)
-</div>
+<img src="https://img.shields.io/badge/Xtreme1-App-yellow" /></a> [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/)
+
+[Read English version](./README.md)
+</div> 
 
 
 ## 简介
 BasicAI发布了全球首个开源多模态训练数据平台Xtreme1！
 Xtreme1深入AI工程化，致力于解决数据集在数据标注、数据监管和本体库管理的挑战。无论是2D和3D数据集的目标检测、场景分割或多传感器融合数据集，强大的工具和AI模型都能加快模型落地的速度。
+
+
 
 ## 加入社区
 [Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
