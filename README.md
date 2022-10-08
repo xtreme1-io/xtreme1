@@ -3,7 +3,7 @@
 
 ![](https://img.shields.io/badge/Release-v0.5.1-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
-<a href="https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz" alt="Join Slack">
+<a href="https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag" alt="Join Slack">
 <img src="https://img.shields.io/static/v1?label=Join&message=Slack&color=ff69b4" /></a>
 <a href="https://twitter.com/BasicAIteam" alt="Follow Twitter"><img src="https://img.shields.io/badge/Follow-Twitter-blue" /></a>
 <a href="https://app.basic.ai/#/login" alt="app">
@@ -13,37 +13,37 @@
 
 
 # Intro #
-BasicAI launched the world’s 1st open-source platform for multisensory training data. 
+BasicAI launched the global 1st open-source platform for multisensory training data. 
 
 Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2d image and 3d point cloud dataset ML challenges.
 The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2d/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
 # Support #
-[Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
+[Website](https://basic.ai) | [Slack](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
 
 A community is important for the company. We are very open to feedback and encourage you to create Issues and help us grow!
 
-[👉 Join us on Slack today!](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz)
+[👉 Join us on Slack today!](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
 
 # Key features #
 
-Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Annotation - Segmentation Model (YOLOR) 
+Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Annotation - [YOLOR](https://github.com/WongKinYiu/yolor)
 :-------------------------:|:-------------------------:
 ![](/docs/images/image-bbox-model.gif)  |  ![](/docs/images/2d-seg-model.gif)
 
- :one: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
+ :one: Supports data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
  
- :two: Built-in models for object detection, instance segmentation and classification
+ :two: Built-in pre-labeling and interactive models support 2d/3d object detection, segmentation and classification
  
- :three: Configurable Ontology for general classes (hierarchies) and attributes for use in your model training
- 
- :four: Data management and quality control
- 
- :five: Data debug and model-training
- 
- :six: AI-powered tools for model performance evaluation
+ :three: Configurable Ontology Center for general classes (with hierarchies) and attributes for use in your model training
 
-3D Point Cloud Cuboid Annotation - LiDAR-based 3D Object Detection Model |  3D Point Cloud Object Tracking Annotation - LiDAR-based 3D Object Tracking Model
+ :four: Data management and quality monitoring
+ 
+ :five: Find labeling errors and fix them
+ 
+ :six: Model results visualization to help you evaluate your model
+
+3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  3D Point Cloud Object Tracking Annotation - LiDAR-based 3D Object Tracking Model
 :-------------------------:|:-------------------------:
 ![](/docs/images/3d-annotation.gif)  |  ![](/docs/images/3d-track-model.gif)
 
