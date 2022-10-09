@@ -12,8 +12,8 @@
 # Intro #
 BasicAI launched the global 1st open-source platform for multisensory training data. 
 
-Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2d image and 3d point cloud dataset ML challenges.
-The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2d/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
+Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2D image and 3D point cloud dataset ML challenges.
+The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2D/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
 # Support #
 [Website](https://basic.ai) | [Slack](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues) 
@@ -28,9 +28,9 @@ Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Ann
 :-------------------------:|:-------------------------:
 ![](/docs/images/image-bbox-model.gif)  |  ![](/docs/images/2d-seg-model.gif)
 
- :one: Supports data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
+ :one: Supports data labeling for images, 3D LiDAR and 2D/3D Sensor Fusion datasets
  
- :two: Built-in pre-labeling and interactive models support 2d/3d object detection, segmentation and classification
+ :two: Built-in pre-labeling and interactive models support 2D/3D object detection, segmentation and classification
  
  :three: Configurable Ontology Center for general classes (with hierarchies) and attributes for use in your model training
 
