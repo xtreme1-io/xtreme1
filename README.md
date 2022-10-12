@@ -1,49 +1,46 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.5.1-green) 
+![](https://img.shields.io/badge/Release-v0.5.1-brightgreen) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
-<a href="https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz" alt="Join Slack">
-<img src="https://img.shields.io/static/v1?label=Join&message=Slack&color=ff69b4" /></a>
-<a href="https://twitter.com/BasicAIteam" alt="Follow Twitter"><img src="https://img.shields.io/badge/Follow-Twitter-blue" /></a>
-<a href="https://app.basic.ai/#/login" alt="app">
-<img src="https://img.shields.io/badge/Xtreme1-App-yellow" /></a>    
-[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/)
+[![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
+[![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
+[![Online](https://img.shields.io/badge/Xtreme1_Online-App-yellow)](https://app.basic.ai/#/login)
+[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/) 
 </div>
 
-
 # Intro #
-BasicAI launched the world’s 1st open-source platform for multisensory training data. 
+BasicAI launched the world's first open-source platform for multisensory training data. 
 
-Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2d image and 3d point cloud dataset ML challenges.
-The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2d/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
+Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2D image and 3D point cloud dataset ML challenges.
+The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2D/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
-# Support #
-[Website](https://basic.ai) | [Slack](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues)
+# Join community #
+[Website](https://basic.ai) | [Slack](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues) 
 
-A community is important for the company. We are very open to feedback and encourage you to create Issues and help us grow!
+Join the Xtreme1 community on Slack to share your suggestions, advice, and questions with us.
 
-[👉 Join us on Slack today!](https://join.slack.com/share/enQtNDA4MjA4MzEwNjg1Mi04ZDc1NmI4YzMxNjgyYWRhZGExMzM1NzllZTQ3Yzk5ZjAzZWQ4MWM5ZjNiZmQ0OGE2YzU5YTkwZGIzNTc5ZGMz)
+[👉 Join us on Slack today!](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
 
 # Key features #
 
-Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Annotation - Segmentation Model (YOLOR) 
+Image Bounding-box Annotation - [YOLOR](https://github.com/WongKinYiu/yolor) |  Image Segmentation Annotation - [RITM](https://github.com/saic-vul/ritm_interactive_segmentation)
 :-------------------------:|:-------------------------:
 ![](/docs/images/image-bbox-model.gif)  |  ![](/docs/images/2d-seg-model.gif)
 
- :one: Data labeling for images, 3D LiDAR and 2D&3D Sensor Fusion datasets
+ :one: Supports data labeling for images, 3D LiDAR and 2D/3D Sensor Fusion datasets
  
- :two: Built-in models for object detection, instance segmentation and classification
+ :two: Built-in pre-labeling and interactive models support 2D/3D object detection, segmentation and classification
  
- :three: Configurable Ontology for general classes (hierarchies) and attributes for use in your model training
- 
- :four: Data management and quality control
- 
- :five: Data debug and model-training
- 
- :six: AI-powered tools for model performance evaluation
+ :three: Configurable Ontology Center for general classes (with hierarchies) and attributes for use in your model training
 
-3D Point Cloud Cuboid Annotation - LiDAR-based 3D Object Detection Model |  3D Point Cloud Object Tracking Annotation - LiDAR-based 3D Object Tracking Model
+ :four: Data management and quality monitoring
+ 
+ :five: Find labeling errors and fix them
+ 
+ :six: Model results visualization to help you evaluate your model
+
+3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  2D & 3D Fusion Object Tracking Annotation - [AB3DMOT](https://github.com/saic-vul/ritm_interactive_segmentation)
 :-------------------------:|:-------------------------:
 ![](/docs/images/3d-annotation.gif)  |  ![](/docs/images/3d-track-model.gif)
 
@@ -67,8 +64,8 @@ Any OS can install the Xtreme1 platform with Docker Compose (installing [Docker 
 | Component  | Recommended configuration |
 | ------------- | ------------- |
 | CPU | AMD64 or ARM64 |
-| RAM | 2GB or more |
-| Hard Drive | 10GB or more (depends on data size) |
+| RAM | 2GB or higher |
+| Hard Drive | 10GB+ free disk space (depends on data size) |
 
 #### Software Requirements
 
@@ -76,14 +73,14 @@ For Mac, Windows, and Linux with desktop:
 
 | Software | Version |
 | ------------- | ------------- |
-| Docker Desktop | 4.1 or higher |
+| Docker Desktop | 4.1 or newer |
 
 For Linux server:
 
 | Software | Version |
 | ------------- | ------------- |
-| Docker Engine | 20.10 or higher |
-| Docker Compose Plugin | 2.0 or higher |
+| Docker Engine | 20.10 or newer |
+| Docker Compose Plugin | 2.0 or newer |
 
 #### :warning: (Build-in) Models Deployment Requirements
 
@@ -92,8 +89,8 @@ Right row models only can be running on Linux server with [NVIDIA Driver](https:
 | Component | Recommended configuration |
 | ------------- | ------------- |
 | GPU | Nvidia Tesla T4 or other similar Nvidia GPU  |
-| GPU RAM | 6G or more |
-| RAM | 4G or more |
+| GPU RAM | 6G or higher |
+| RAM | 4G or higher |
 
 ### Download release package
 
@@ -106,13 +103,13 @@ unzip -d xtreme1-v0.5.1 xtreme1-v0.5.1.zip
 
 ### Start all services
 
-Enter into the release package directory, and execute the following command to start all services. It need a few minutes to init database and prepare a test dataset, if everything shows ok in console, you can open address `http://localhost:8190` in your favorite browser (Chrome recommend) to try out Xtreme1. You can replace `localhost` to ip address if you want to access from another computer.
+Enter into the release package directory, and execute the following command to start all services. It need a few minutes to init database and prepare a test dataset, if everything shows ok in console, you can open address `http://localhost:8190` in your browser (Google Chrome is recommended) to try out Xtreme1. You can replace `localhost` to ip address if you want to access from another computer.
 
 ```bash
 docker compose up
 ```
 
-> :warning: Some Docker images, such as `MySQL`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
+> :warning: Some Docker images, such as `MySQL`, do not support ARM architecture, if your computer is using ARM CPU, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `ARM64` platform through QEMU emulation, but the performance will be affected.
 
 ```yaml
 services:
