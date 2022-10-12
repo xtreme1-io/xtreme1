@@ -68,7 +68,7 @@ services:
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./backend
     ports:
-      - 8180:8080
+      - 8290:8080
     # volumes:
     # Using customized application.yml to override default configs.
     #   - /host/path/to/customized/application.yml:/app/config/application.yml
@@ -97,18 +97,18 @@ services:
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./frontend
     ports:
-      - 8181:8080
+      - 8291:8080
   image-object-detection:
     image: basicai/xtreme1-image-object-detection
     ports:
-      - 8182:5000
+      - 8292:5000
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
   point-cloud-object-detection:
     image: basicai/xtreme1-point-cloud-object-detection
     ports:
-      - 8183:5000
+      - 8293:5000
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
