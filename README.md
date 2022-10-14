@@ -1,7 +1,8 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.5.1-brightgreen) 
+
+![](https://img.shields.io/badge/Release-v0.5.1-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
@@ -38,6 +39,7 @@ Image Bounding-box Annotation - [YOLOR](https://github.com/WongKinYiu/yolor) |  
  
  :five: Find labeling errors and fix them
  
+
  :six: Model results visualization to help you evaluate your model
 
 3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  2D & 3D Fusion Object Tracking Annotation - [AB3DMOT](https://github.com/saic-vul/ritm_interactive_segmentation)
