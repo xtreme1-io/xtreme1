@@ -2,6 +2,7 @@
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
 ![](https://img.shields.io/badge/Release-v0.5.1-brightgreen) 
+
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
@@ -24,7 +25,8 @@ Join the Xtreme1 community on Slack to share your suggestions, advice, and quest
 
 # Key features #
 
-Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Annotation - [YOLOR](https://github.com/WongKinYiu/yolor)
+Image Bounding-box Annotation - [YOLOR](https://github.com/WongKinYiu/yolor) |  Image Segmentation Annotation - [
+ritm_interactive_segmentation](https://github.com/saic-vul/ritm_interactive_segmentation)
 :-------------------------:|:-------------------------:
 ![](/docs/images/image-bbox-model.gif)  |  ![](/docs/images/2d-seg-model.gif)
 
@@ -37,10 +39,11 @@ Image Bounding-box Annotation - Object Detection Model |  Image Segmentation Ann
  :four: Data management and quality monitoring
  
  :five: Find labeling errors and fix them
- 
- :six: Model results visualization to help you evaluate your model
 
-3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  3D Point Cloud Object Tracking Annotation - LiDAR-based 3D Object Tracking Model
+ :six: Model vs Ground truth results visualization and comparison
+
+3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  3D Point Cloud Object Tracking Annotation - [3D Multi-Object Tracking](https://github.com/xinshuoweng/AB3DMOT)
+
 :-------------------------:|:-------------------------:
 ![](/docs/images/3d-annotation.gif)  |  ![](/docs/images/3d-track-model.gif)
 
