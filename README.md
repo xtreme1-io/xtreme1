@@ -2,7 +2,6 @@
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
 ![](https://img.shields.io/badge/Release-v0.5.1-brightgreen) 
-
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
@@ -25,8 +24,7 @@ Join the Xtreme1 community on Slack to share your suggestions, advice, and quest
 
 # Key features #
 
-Image Bounding-box Annotation - [YOLOR](https://github.com/WongKinYiu/yolor) |  Image Segmentation Annotation - [
-ritm_interactive_segmentation](https://github.com/saic-vul/ritm_interactive_segmentation)
+Image Bounding-box Annotation - [YOLOR](https://github.com/WongKinYiu/yolor) |  Image Segmentation Annotation - [ritm_interactive_segmentation](https://github.com/saic-vul/ritm_interactive_segmentation)
 :-------------------------:|:-------------------------:
 ![](/docs/images/image-bbox-model.gif)  |  ![](/docs/images/2d-seg-model.gif)
 
@@ -42,8 +40,7 @@ ritm_interactive_segmentation](https://github.com/saic-vul/ritm_interactive_segm
 
  :six: Model vs Ground truth results visualization and comparison
 
-3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  3D Point Cloud Object Tracking Annotation - [3D Multi-Object Tracking](https://github.com/xinshuoweng/AB3DMOT)
-
+3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  3D Point Cloud Object Tracking Annotation - [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
 :-------------------------:|:-------------------------:
 ![](/docs/images/3d-annotation.gif)  |  ![](/docs/images/3d-track-model.gif)
 
@@ -112,7 +109,7 @@ Enter into the release package directory, and execute the following command to s
 docker compose up
 ```
 
-> :warning: Some Docker images, such as `MySQL`, do not support arm platform, if your computer is using arm cpu, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `arm64` platform through QEMU emulation, but the performance will be affected.
+> :warning: Some Docker images, such as `MySQL`, do not support ARM platform, if your computer is using ARM CPU, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `ARM64` image to run on `ARM64` platform through QEMU emulation, but the performance will be affected.
 
 ```yaml
 services:
