@@ -442,8 +442,6 @@ public class DataInfoUseCase {
                 return;
             }
             log.info("Get data name,pointCloudParentName:{},dataName:{} ", pointCloudFile.getParentFile().getName(), JSONUtil.toJsonStr(dataNameList));
-            var dataInfoBOList = new ArrayList<DataInfoBO>();
-            var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>();
             var dataInfoBOBuilder = DataInfoBO.builder().datasetId(datasetId).status(DataStatusEnum.VALID)
                     .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
                     .createdAt(OffsetDateTime.now())
@@ -452,12 +450,14 @@ public class DataInfoUseCase {
                     .isDeleted(false);
             var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                     .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
-            CountDownLatch countDownLatch = new CountDownLatch(dataNameList.size());
-            AtomicReference<Long> insertNum = new AtomicReference<>(1L);
-            for (var dataName : dataNameList) {
-                var dataFiles = getDataFiles(pointCloudFile.getParentFile(), dataName, datasetType);
-                parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
-                    try {
+            var list = ListUtil.split(dataNameList, 5);
+            CountDownLatch countDownLatch = new CountDownLatch(list.size());
+            list.forEach(subDataNameList -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
+                var dataInfoBOList = new ArrayList<DataInfoBO>();
+                var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>();
+                try {
+                    subDataNameList.forEach(dataName -> {
+                        var dataFiles = getDataFiles(pointCloudFile.getParentFile(), dataName, datasetType);
                         if (CollectionUtil.isNotEmpty(dataFiles)) {
                             var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                             var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
@@ -467,33 +467,25 @@ public class DataInfoUseCase {
                             var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
                         }
-                    } catch (Exception e) {
-                        log.error("Handle data error", e);
-                    } finally {
-                        countDownLatch.countDown();
-                        parsedDataNum.set(parsedDataNum.get() + 1);
-                        if (parsedDataNum.get() % 5 == 0) {
-                            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
-                            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
-                        }
-                        if (CollectionUtil.isNotEmpty(dataInfoBOList) && (dataInfoBOList.size() % BATCH_SIZE == 0 || dataInfoBOList.size() == insertNum.get())) {
-                            var dataInfoBOS = insertBatch(dataInfoBOList);
-                            saveBatchDataResult(dataInfoBOS, dataAnnotationObjectBOList);
-                            dataInfoBOList.clear();
-                        }
-                        insertNum.set(insertNum.get() + 1);
+                    });
+                    if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+                        var resDataInfoList = insertBatch(dataInfoBOList);
+                        saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
                     }
-                })));
-            }
+                } catch (Exception e) {
+                    log.error("Handle data error", e);
+                } finally {
+                    parsedDataNum.set(parsedDataNum.get() + subDataNameList.size());
+                    var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                    uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+                    countDownLatch.countDown();
+                }
+            }))));
+
             try {
                 countDownLatch.await();
             } catch (InterruptedException e) {
                 log.error("Parse point cloud count down latch error", e);
-            }
-            if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
-                var dataInfoBOS = insertBatch(dataInfoBOList);
-                saveBatchDataResult(dataInfoBOS, dataAnnotationObjectBOList);
-                dataInfoBOList.clear();
             }
         });
         var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
@@ -551,37 +543,35 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(files)) {
             var list = ListUtil.split(files, 10);
             CountDownLatch countDownLatch = new CountDownLatch(list.size());
-            list.forEach(fl -> {
-                parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
-                    try {
-                        var dataInfoBOList = new ArrayList<DataInfoBO>();
-                        var fileBOS = uploadFileList(userId, rootPath, tempPath, fl);
-                        createUploadThumbnail(userId, fileBOS, rootPath);
-                        fileBOS.forEach(fileBO -> {
-                            var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
-                            var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
-                            var file = FileUtil.file(tempPath + fileBO.getPath().replace(rootPath, ""));
-                            handleDataResult(file.getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList);
-                            var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
-                                    .fileId(fileBO.getId()).type(FILE).build();
-                            var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).tempDataId(tempDataId).build();
-                            dataInfoBOList.add(dataInfoBO);
-                        });
-                        if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
-                            var resDataInfoList = insertBatch(dataInfoBOList);
-                            saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
-                        }
-                    } catch (Exception e) {
-                        log.error("handle data error", e);
-                    } finally {
-                        parsedDataNum.set(parsedDataNum.get() + fl.size());
-                        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
-                        uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
-                        countDownLatch.countDown();
+            list.forEach(fl -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
+                try {
+                    var dataInfoBOList = new ArrayList<DataInfoBO>();
+                    var fileBOS = uploadFileList(userId, rootPath, tempPath, fl);
+                    createUploadThumbnail(userId, fileBOS, rootPath);
+                    fileBOS.forEach(fileBO -> {
+                        var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
+                        var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
+                        var file = FileUtil.file(tempPath + fileBO.getPath().replace(rootPath, ""));
+                        handleDataResult(file.getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList);
+                        var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
+                                .fileId(fileBO.getId()).type(FILE).build();
+                        var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).tempDataId(tempDataId).build();
+                        dataInfoBOList.add(dataInfoBO);
+                    });
+                    if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+                        var resDataInfoList = insertBatch(dataInfoBOList);
+                        saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
                     }
+                } catch (Exception e) {
+                    log.error("Handle data error", e);
+                } finally {
+                    parsedDataNum.set(parsedDataNum.get() + fl.size());
+                    var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                    uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+                    countDownLatch.countDown();
+                }
 
-                })));
-            });
+            }))));
             try {
                 countDownLatch.await();
             } catch (InterruptedException e) {
