@@ -480,13 +480,13 @@ public class DataInfoUseCase {
                     uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
                     countDownLatch.countDown();
                 }
-                try {
-                    countDownLatch.await();
-                } catch (InterruptedException e) {
-                    log.error("Parse point cloud count down latch error", e);
-                }
-
             }))));
+
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                log.error("Parse point cloud count down latch error", e);
+            }
         });
         var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
