@@ -133,6 +133,7 @@ public class DecompressionFileUtils {
             }
             return false;
         } catch (Exception e) {
+            log.error("url error", e);
             return false;
         }
     }
