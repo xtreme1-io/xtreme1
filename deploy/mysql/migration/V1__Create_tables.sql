@@ -1,18 +1,3 @@
-/*
- Navicat Premium Data Transfer
-
- Source Server         : x1_community
- Source Server Type    : MySQL
- Source Server Version : 50736
- Source Host           : nlb.alidev.beisai.com:3306
- Source Schema         : x1_community
-
- Target Server Type    : MySQL
- Target Server Version : 50736
- File Encoding         : 65001
-
- Date: 05/09/2022 14:48:56
-*/
 
 SET NAMES utf8mb4;
 SET
