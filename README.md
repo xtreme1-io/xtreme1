@@ -21,7 +21,7 @@ The built-in AI-assisted tools take your annotation efforts to the next level of
 
 Join the Xtreme1 community on Slack to share your suggestions, advice, and questions with us.
 
-[👉 Join us on Slack today!](https://join.slack.com/t/basicai/shared_invite/zt-1dd26nn1d-JPK00lwvGdb5XrAfH51Eag)
+[👉 Join us on Slack today!](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jpoj6hib-ATqS640GPSluIUtERlN8yQ)
 
 # Key features #
 
