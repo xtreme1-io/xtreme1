@@ -1,6 +1,7 @@
 package ai.basic.x1.adapter.api.filter;
 
 import ai.basic.x1.adapter.dto.LoggedUserDTO;
+import ai.basic.x1.usecase.UserTokenUseCase;
 import ai.basic.x1.usecase.UserUseCase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -17,12 +18,12 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthenticationFilter implements Filter {
 
-    private JwtHelper jwtHelper;
+    private UserTokenUseCase userTokenUseCase;
 
     private UserUseCase userUseCase;
 
-    public JwtAuthenticationFilter(JwtHelper jwtHelper, UserUseCase userUseCase) {
-        this.jwtHelper = jwtHelper;
+    public JwtAuthenticationFilter(UserTokenUseCase userTokenUseCase, UserUseCase userUseCase) {
+        this.userTokenUseCase = userTokenUseCase;
         this.userUseCase = userUseCase;
     }
 
@@ -44,7 +45,7 @@ public class JwtAuthenticationFilter implements Filter {
             return;
         }
 
-        var payload = jwtHelper.getPayload(token);
+        var payload = userTokenUseCase.getPayload(token);
         if (payload == null) {
             chain.doFilter(request, response);
             return;

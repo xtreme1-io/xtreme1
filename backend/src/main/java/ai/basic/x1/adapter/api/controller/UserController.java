@@ -1,15 +1,18 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.api.filter.JwtPayload;
 import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.adapter.dto.UserDTO;
+import ai.basic.x1.adapter.dto.UserTokenDTO;
+import ai.basic.x1.adapter.dto.request.CreateApiTokenRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserAuthRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserDeleteRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserUpdateRequestDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
 import ai.basic.x1.entity.UserBO;
-import ai.basic.x1.usecase.ModelUseCase;
+import ai.basic.x1.usecase.UserTokenUseCase;
 import ai.basic.x1.usecase.UserUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
@@ -23,6 +26,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.OffsetDateTime;
 
 /**
  * @author Jagger Wang、Zhujh
@@ -40,7 +45,7 @@ public class UserController extends BaseController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private ModelUseCase modelUseCase;
+    private UserTokenUseCase userTokenUseCase;
 
     @PostMapping("/register")
     public UserLoginResponseDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
@@ -65,10 +70,9 @@ public class UserController extends BaseController {
         }
         userUseCase.loginSuccessProcess(user);
 
+        var token = userTokenUseCase.generateGatewayToken(user.getId()).getToken();
         return UserLoginResponseDTO.builder()
-                .token(jwtHelper.generateToken(JwtPayload.builder()
-                        .userId(user.getId())
-                        .build()))
+                .token(token)
                 .user(UserDTO.fromBO(user))
                 .build();
     }
@@ -117,6 +121,20 @@ public class UserController extends BaseController {
     public UserDTO info(@PathVariable Long id) {
         var user = userUseCase.findById(id);
         return UserDTO.fromBO(user);
+    }
+
+    @PostMapping("/api/token/create")
+    public UserTokenDTO createApiToken(@RequestBody @Validated CreateApiTokenRequestDTO createApiToken) {
+        var userId = RequestContextHolder.getContext().getUserInfo().getId();
+        var result = userTokenUseCase.generateApiToken(userId,
+                OffsetDateTime.parse(createApiToken.getExpireAt()));
+        return DefaultConverter.convert(result, UserTokenDTO.class);
+    }
+
+    @PostMapping("/api/token/delete/{id}")
+    public void deleteApiToken(@PathVariable("id") Long id) {
+        var userId = RequestContextHolder.getContext().getUserInfo().getId();
+        userTokenUseCase.deleteApiToken(id, userId);
     }
 
 }
