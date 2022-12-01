@@ -1056,6 +1056,13 @@ public class DataInfoUseCase {
         });
         var fileBOS = uploadFileList(userId, rootPath, tempPath, files);
         createUploadThumbnail(userId, fileBOS, rootPath);
+        fileBOS.forEach(fileBO -> {
+           if(fileBO.getName().toUpperCase().endsWith(PCD_SUFFIX)) {
+               fileBO.getUrl();
+               fileBO.getInternalUrl();
+               //TODO 调用生成渲染图接口
+           }
+        });
         var fileIdMap = fileBOS.stream().collect(Collectors.toMap(FileBO::getPathHash, FileBO::getId));
         replaceFileId(nodeList, fileIdMap);
         nodeList.sort(Comparator.comparing(DataInfoBO.FileNodeBO::getName));
@@ -1320,5 +1327,4 @@ public class DataInfoUseCase {
             log.error("Upload thumbnail error", e);
         }
     }
-
 }
