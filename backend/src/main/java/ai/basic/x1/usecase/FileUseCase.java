@@ -104,6 +104,7 @@ public class FileUseCase {
         });
         fileDAO.saveBatch(files);
         var reFileBOs = DefaultConverter.convert(files, FileBO.class);
+        reFileBOs.forEach(fileBO -> setUrl(fileBO));
         return reFileBOs;
     }
 }
