@@ -477,7 +477,7 @@ public class DataInfoUseCase {
                             var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                             var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
                             handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList);
-                            var fileNodeList = assembleContent(userId, dataFiles, rootPath,dataInfoUploadBO.getDatasetId());
+                            var fileNodeList = assembleContent(userId, dataFiles, rootPath);
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
                             var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
@@ -1058,7 +1058,7 @@ public class DataInfoUseCase {
      * @param rootPath  Root path
      * @return content
      */
-    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath,Long datasetId) {
+    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath) {
         var nodeList = new ArrayList<DataInfoBO.FileNodeBO>();
         var files = new ArrayList<File>();
         dataFiles.forEach(dataFile -> {
@@ -1073,7 +1073,7 @@ public class DataInfoUseCase {
         createUploadThumbnail(userId, fileBOS, rootPath);
         fileBOS.forEach(fileBO -> {
             if (fileBO.getName().toUpperCase().endsWith(PCD_SUFFIX)) {
-                handelPointCloudConvertRender(fileBO,datasetId);
+                handelPointCloudConvertRender(fileBO);
             }
         });
         var fileIdMap = fileBOS.stream().collect(Collectors.toMap(FileBO::getPathHash, FileBO::getId));
@@ -1343,7 +1343,7 @@ public class DataInfoUseCase {
 
 
 
-    public void handelPointCloudConvertRender(FileBO pcdFileBO, Long datasetId) {
+    public void handelPointCloudConvertRender(FileBO pcdFileBO) {
         String filePath = pcdFileBO.getPath();
         String basePath = "";
         String fileName;
@@ -1361,8 +1361,9 @@ public class DataInfoUseCase {
         PresignedUrlBO binaryPreSignUrlBO;
         PresignedUrlBO imagePreSignUrlBO;
         try {
-            binaryPreSignUrlBO = generatePresignedUrl(binaryPath, datasetId, pcdFileBO.getCreatedBy());
-            imagePreSignUrlBO = generatePresignedUrl(imagePath, datasetId, pcdFileBO.getCreatedBy());
+            binaryPreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(),binaryPath);
+            imagePreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(),imagePath);
+
         } catch (Throwable throwable) {
             log.error("generate preSignUrl error!", throwable);
             return;
