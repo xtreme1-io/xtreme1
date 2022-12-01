@@ -105,6 +105,7 @@ services:
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
+    runtime: nvidia
   point-cloud-object-detection:
     image: basicai/xtreme1-point-cloud-object-detection
     ports:
@@ -112,6 +113,7 @@ services:
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
+    runtime: nvidia
 volumes:
   mysql-data:
   redis-data:
