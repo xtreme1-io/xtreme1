@@ -1,21 +1,29 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
+import ai.basic.x1.adapter.port.rpc.PointCloudConvertRenderHttpCaller;
+import ai.basic.x1.adapter.port.rpc.dto.*;
 import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.entity.enums.RelationEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
+import ai.basic.x1.util.Constants;
 import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.StreamProgress;
@@ -139,10 +147,17 @@ public class DataInfoUseCase {
     @Value("${file.prefix.small:small}")
     private String small;
 
+    @Autowired
+    private PointCloudConvertRenderHttpCaller pointCloudConvertRenderHttpCaller;
+
+
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
 
     private static final ExecutorService parseExecutorService = ThreadUtil.newExecutor(5);
 
+    private static final Integer PC_RENDER_IMAGE_WIDTH = 2000;
+    private static final Integer PC_RENDER_IMAGE_HEIGHT = 2000;
+    private static final Integer RETRY_COUNT = 3;
     /**
      * Filter out files whose file suffix is not image, and discard the file when it returns false
      */
@@ -462,7 +477,7 @@ public class DataInfoUseCase {
                             var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                             var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
                             handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList);
-                            var fileNodeList = assembleContent(userId, dataFiles, rootPath);
+                            var fileNodeList = assembleContent(userId, dataFiles, rootPath,dataInfoUploadBO.getDatasetId());
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
                             var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
@@ -1043,7 +1058,7 @@ public class DataInfoUseCase {
      * @param rootPath  Root path
      * @return content
      */
-    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath) {
+    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath,Long datasetId) {
         var nodeList = new ArrayList<DataInfoBO.FileNodeBO>();
         var files = new ArrayList<File>();
         dataFiles.forEach(dataFile -> {
@@ -1057,11 +1072,9 @@ public class DataInfoUseCase {
         var fileBOS = uploadFileList(userId, rootPath, tempPath, files);
         createUploadThumbnail(userId, fileBOS, rootPath);
         fileBOS.forEach(fileBO -> {
-           if(fileBO.getName().toUpperCase().endsWith(PCD_SUFFIX)) {
-               fileBO.getUrl();
-               fileBO.getInternalUrl();
-               //TODO 调用生成渲染图接口
-           }
+            if (fileBO.getName().toUpperCase().endsWith(PCD_SUFFIX)) {
+                handelPointCloudConvertRender(fileBO,datasetId);
+            }
         });
         var fileIdMap = fileBOS.stream().collect(Collectors.toMap(FileBO::getPathHash, FileBO::getId));
         replaceFileId(nodeList, fileIdMap);
@@ -1326,5 +1339,115 @@ public class DataInfoUseCase {
         } catch (IOException e) {
             log.error("Upload thumbnail error", e);
         }
+    }
+
+
+
+    public void handelPointCloudConvertRender(FileBO pcdFileBO, Long datasetId) {
+        String filePath = pcdFileBO.getPath();
+        String basePath = "";
+        String fileName;
+        String binaryFileName = "";
+        String imageFileName = "";
+        if (filePath.contains(Constants.SLANTING_BAR)) {
+            basePath = filePath.substring(0, filePath.lastIndexOf(Constants.SLANTING_BAR) + 1);
+            fileName = filePath.substring(filePath.lastIndexOf(Constants.SLANTING_BAR) + 1);
+            binaryFileName = "binary-" + fileName;
+            imageFileName = "render-" + UUID.randomUUID().toString() + ".png";
+        }
+
+        String binaryPath = String.format("%s%s", basePath, binaryFileName);
+        String imagePath = String.format("%s%s", basePath, imageFileName);
+        PresignedUrlBO binaryPreSignUrlBO;
+        PresignedUrlBO imagePreSignUrlBO;
+        try {
+            binaryPreSignUrlBO = generatePresignedUrl(binaryPath, datasetId, pcdFileBO.getCreatedBy());
+            imagePreSignUrlBO = generatePresignedUrl(imagePath, datasetId, pcdFileBO.getCreatedBy());
+        } catch (Throwable throwable) {
+            log.error("generate preSignUrl error!", throwable);
+            return;
+        }
+        List<PointCloudCRRespDTO> pointCloudCRRespDTOS = callPointCloudConvertRender(pcdFileBO, binaryPreSignUrlBO, imagePreSignUrlBO);
+        if (CollUtil.isNotEmpty(pointCloudCRRespDTOS)) {
+            for (PointCloudCRRespDTO pointCloudCRRespDTO : pointCloudCRRespDTOS) {
+                if (pointCloudCRRespDTO.getCode() == 0) {
+                    FileBO binaryPcdFile = FileBO.builder().name(binaryFileName)
+                            .originalName(binaryFileName)
+                            .path(binaryPath)
+                            .type(pcdFileBO.getType())
+                            .size(pointCloudCRRespDTO.getBinaryPcdSize())
+                            .bucketName(pcdFileBO.getBucketName())
+                            .createdAt(OffsetDateTime.now())
+                            .createdBy(pcdFileBO.getCreatedBy())
+                            .relation(RelationEnum.BINARY)
+                            .relationId(pcdFileBO.getId())
+                            .pathHash(ByteUtil.bytesToLong(SecureUtil.md5().digest(binaryPath))).build();
+                    FileBO imageFile = FileBO.builder().name(imageFileName)
+                            .originalName(imageFileName)
+                            .path(imagePath)
+                            .type(FileUtil.getMimeType(imageFileName))
+                            .size(pointCloudCRRespDTO.getImageSize())
+                            .bucketName(pcdFileBO.getBucketName())
+                            .createdAt(OffsetDateTime.now())
+                            .createdBy(pcdFileBO.getCreatedBy())
+                            .relation(RelationEnum.POINT_CLOUD_RENDER_IMAGE)
+                            .relationId(pcdFileBO.getId())
+                            .pathHash(ByteUtil.bytesToLong(SecureUtil.md5().digest(imagePath)))
+                            .extraInfo(JSONUtil.parseObj(pointCloudCRRespDTO.getPointCloudRange())
+                                    .set("width", PC_RENDER_IMAGE_WIDTH)
+                                    .set("height", PC_RENDER_IMAGE_HEIGHT))
+                            .build();
+                    fileUseCase.saveBatchFile(pcdFileBO.getCreatedBy(), List.of(binaryPcdFile, imageFile));
+                }
+            }
+        }
+    }
+
+    private List<PointCloudCRRespDTO> callPointCloudConvertRender(FileBO relationFileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {
+        PointCloudCRReqDTO pointCloudCRReqDTO = PointCloudCRReqDTO.builder()
+                .data(List.of(buildPointCloutFileInfo(relationFileBO, binaryPreSignUrlBO, imagePreSignUrlBO)))
+                .type(1)
+                .renderParam(buildRenderParam())
+                .convertParam(ConvertParam.builder().extraFields(Collections.EMPTY_LIST).build()).build();
+        ApiResult<List<PointCloudCRRespDTO>> apiResult = null;
+
+        StopWatch stopWatch = new StopWatch();
+        int count = 0;
+        while (count <= RETRY_COUNT && ObjectUtil.isNull(apiResult)) {
+            try {
+                stopWatch.start();
+                apiResult = pointCloudConvertRenderHttpCaller.callConvertRender(pointCloudCRReqDTO);
+                stopWatch.stop();
+                log.info("call pointCloudConvertRender took:{},req:{},resp:{}", stopWatch.getLastTaskTimeMillis(), JSONUtil.toJsonStr(pointCloudCRReqDTO), JSONUtil.toJsonStr(apiResult));
+                break;
+            } catch (Throwable throwable) {
+                if (stopWatch.isRunning()) {
+                    stopWatch.stop();
+                }
+                log.error("call pointCloudConvertRender service error! req:{}, resp:{}", JSONUtil.toJsonStr(pointCloudCRReqDTO), JSONUtil.toJsonStr(apiResult), throwable);
+            }
+            count++;
+        }
+        if (ObjectUtil.isNull(apiResult) || apiResult.getCode() != UsecaseCode.OK) {
+            return null;
+        }
+        return apiResult.getData();
+    }
+
+    private PointCloudFileInfo buildPointCloutFileInfo(FileBO fileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {
+        PointCloudFileInfo pointCloudFileInfo = PointCloudFileInfo.builder().pointCloudFile(fileBO.getInternalUrl())
+                .uploadBinaryPcdPath(binaryPreSignUrlBO.getPresignedUrl())
+                .uploadImagePath(imagePreSignUrlBO.getPresignedUrl())
+                .build();
+        return pointCloudFileInfo;
+
+    }
+
+    private RenderParam buildRenderParam() {
+        return RenderParam.builder().colors(List.of(6313414l, 3640543l, 1886145l, 3402883l, 8385883l))
+                .zRange(null)
+                .width(PC_RENDER_IMAGE_WIDTH)
+                .height(PC_RENDER_IMAGE_HEIGHT)
+                .numStd(3).build();
     }
 }

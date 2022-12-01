@@ -13,6 +13,7 @@ import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -93,6 +94,7 @@ public class FileUseCase {
      * @param fileBOS fileBOs
      * @return fileList
      */
+    @Transactional(rollbackFor = Throwable.class)
     public List<FileBO> saveBatchFile(Long userId, List<FileBO> fileBOS) {
         var files = DefaultConverter.convert(fileBOS, File.class);
         Objects.requireNonNull(files).forEach(file -> {
