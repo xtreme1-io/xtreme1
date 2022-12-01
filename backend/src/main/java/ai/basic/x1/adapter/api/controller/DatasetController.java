@@ -1,14 +1,15 @@
 package ai.basic.x1.adapter.api.controller;
 
-import ai.basic.x1.adapter.dto.DatasetDTO;
-import ai.basic.x1.adapter.dto.DatasetQueryDTO;
+import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.adapter.dto.request.DatasetRequestDTO;
 import ai.basic.x1.adapter.exception.ApiException;
 import ai.basic.x1.entity.DataInfoBO;
 import ai.basic.x1.entity.DatasetBO;
 import ai.basic.x1.entity.DatasetQueryBO;
+import ai.basic.x1.entity.DatasetStatisticsBO;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.usecase.DataInfoUseCase;
+import ai.basic.x1.usecase.DatasetClassUseCase;
 import ai.basic.x1.usecase.DatasetUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +39,9 @@ public class DatasetController extends BaseDatasetController {
 
     @Autowired
     protected DataInfoUseCase dataInfoUsecase;
+
+    @Autowired
+    private DatasetClassUseCase datasetClassUseCase;
 
 
     @PostMapping("create")
@@ -106,6 +111,26 @@ public class DatasetController extends BaseDatasetController {
     @GetMapping("findOntologyIsExistByDatasetId")
     public Boolean findOntologyIsExistByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId) {
         return datasetUsecase.findOntologyIsExistByDatasetId(datasetId);
+    }
+
+    @GetMapping("/statistics/overview/{datasetId}")
+    public ClassStatisticsDTO datasetOverview(@PathVariable("datasetId") Long datasetId,
+                                              @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
+                                              @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
+        var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(List.of(datasetId));
+        return ClassStatisticsDTO.builder()
+                .datasetStatistics(
+                        DefaultConverter.convert(datasetStatisticsMap.getOrDefault(datasetId,
+                                        DatasetStatisticsBO.createEmpty(datasetId)),
+                                DatasetStatisticsDTO.class)
+                )
+                .toolTypeUnits(
+                        DefaultConverter.convert(datasetClassUseCase.statisticsObjectByToolType(datasetId), ToolTypeStatisticsUnitDTO.class)
+                )
+                .classUnits(
+                        DefaultConverter.convert(datasetClassUseCase.statisticObjectByClass(datasetId,
+                                pageNo, pageSize), ClassStatisticsUnitDTO.class))
+                .build();
     }
 
 }

@@ -6,4 +6,26 @@
     <sql id="Base_Column_List">
         id, dataset_id, type, name, color, tool_type, attributes, created_at, created_by, updated_at, updated_by
     </sql>
+
+    <select id="statisticsObjectByClass"
+            resultType="ai.basic.x1.adapter.port.dao.mybatis.model.ClassStatisticsUnit">
+        SELECT class_id AS classId,
+            count(*) AS objectCount
+        FROM data d INNER JOIN data_annotation_object dao ON d.data_id = dao.data_id
+                    INNER JOIN dataset_class dc ON dc.id = dao.class_id
+        where d.dataset_id = #{datasetId} AND dc.is_deleted AND d.is_deleted = FALSE
+        GROUP BY dao.class_id
+        ORDER BY objectCount
+    </select>
+
+    <select id="statisticsObjectByToolType"
+            resultType="ai.basic.x1.adapter.port.dao.mybatis.model.ToolTypeStatisticsUnit">
+        SELECT dc.tool_type AS toolType,
+               count(*) AS objectCount
+        FROM dataset_class dc INNER JOIN data_annotation_object dao ON dc.id = dao.class_id
+                              INNER JOIN data d d ON d.id = dao.data_id
+        where d.dataset_id = #{datasetId} AND dc.is_deleted = FALSE AND d.is_deleted = FALSE
+        GROUP BY dc.tool_type
+        ORDER BY objectCount
+    </select>
 </mapper>
