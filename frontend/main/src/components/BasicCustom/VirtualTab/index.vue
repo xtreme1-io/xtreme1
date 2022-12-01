@@ -58,8 +58,8 @@
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-virtualTab';
-  @active-color: #57ccef;
-  @active-bgColor: #f0fafe;
+  @active-color: @primary-color;
+  @active-bgColor: #f0f7ff;
   @active-startColor: #07b9ee;
   @active-endColor: #3cefba;
   .@{prefix-cls} {
@@ -87,9 +87,10 @@
           background-color: @active-bgColor;
 
           span {
-            background: linear-gradient(135deg, @active-startColor, @active-endColor);
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: @active-color;
+            // background: linear-gradient(135deg, @active-startColor, @active-endColor);
+            // -webkit-text-fill-color: transparent;
+            // background-clip: text;
           }
         }
 
