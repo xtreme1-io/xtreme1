@@ -73,9 +73,9 @@ export const getOntologyInfoApi = (params: { id: string }) =>
   });
 
 /** validate ontology name */
-export const validateNameApi = (params: { name: string }) =>
-  defHttp.post<boolean>({
-    url: `${Api.ONTOLOGY}/validateName/${params.name}`,
+export const validateNameApi = (params: { name: string; id?: string }) =>
+  defHttp.get<boolean>({
+    url: `${Api.ONTOLOGY}/validateName`,
     params,
     headers: {
       // @ts-ignore

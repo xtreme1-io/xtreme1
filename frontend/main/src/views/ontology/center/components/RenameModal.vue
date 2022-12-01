@@ -66,7 +66,7 @@
   // 表单
   const rules = {
     name: [
-      { validator: validateReName, trigger: 'change' },
+      { validator: validateReName(props.id as string), trigger: 'change' },
       { max: 256, message: t('business.ontology.maxLength') },
     ],
   };
@@ -117,30 +117,6 @@
     if (!formState.name) isValid.value = false;
     else isValid.value = true;
   };
-
-  // 0.3 改为点击校验
-  // const handleBlur = () => {
-  //   formRef.value
-  //     .validate()
-  //     .then((res) => {
-  //       if (typeof res == 'boolean') {
-  //         isValid.value = false;
-  //       } else {
-  //         isValid.value = true;
-  //       }
-  //     })
-  //     .catch(() => {
-  //       isValid.value = false;
-  //     });
-  // };
-  // let timeout;
-  // const handleChange = () => {
-  //   isValid.value = false;
-  //   clearTimeout(timeout);
-  //   timeout = setTimeout(() => {
-  //     handleBlur();
-  //   }, 500);
-  // };
 </script>
 <style lang="less" scoped>
   .ant-form {

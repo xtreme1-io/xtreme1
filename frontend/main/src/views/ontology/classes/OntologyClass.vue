@@ -22,7 +22,7 @@
             :cardList="cardList"
             :activeTab="activeTab"
             @edit="handleEdit"
-            @create="handleCreate"
+            @create="handleToCreate"
           />
         </ScrollContainer>
       </div>
@@ -31,8 +31,17 @@
       <SearchForm @search="handleSearch" :activeTab="activeTab" :datasetType="datasetType" />
     </div>
     <!-- Modal -->
+    <CreateClass
+      @register="registerCreateModal"
+      @fetchList="handleRefresh"
+      :detail="detail"
+      :activeTab="activeTab"
+      :datasetType="datasetType"
+      :ontologyId="ontologyId"
+      @manage="handleOpenFormModal"
+    />
     <FormModal
-      @register="register"
+      @register="registerFormModal"
       @fetchList="handleRefresh"
       :detail="detail"
       :activeTab="activeTab"
@@ -48,9 +57,10 @@
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from './components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
-  import FormModal from './components/FormModal.vue';
   import HeaderAction from './components/HeaderAction.vue';
   import Action from './components/Action.vue';
+  import CreateClass from './create/CreateClass.vue';
+  import FormModal from './create/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { handleScroll } from '/@/utils/business/scrollListener';
   // icons
@@ -83,7 +93,6 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { setDatasetBreadcrumb } from '/@/utils/business';
 
-  const [register, { openModal }] = useModal();
   const { t } = useI18n();
   const { prefixCls } = useDesign('ontologyClasses');
   const { createMessage } = useMessage();
@@ -142,9 +151,18 @@
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
 
   /** Create */
-  const handleCreate = () => {
+  const [registerCreateModal, { openModal: openCreateModal, closeModal: closeCreateModal }] =
+    useModal();
+  const handleToCreate = () => {
     (detail.value as any) = null;
-    openModal();
+    openCreateModal();
+  };
+
+  /** Form Modal */
+  const [registerFormModal, { openModal: openFormModal }] = useModal();
+  const handleOpenFormModal = () => {
+    closeCreateModal();
+    openFormModal();
   };
 
   /** Edit */
@@ -155,7 +173,7 @@
       } else {
         detail.value = await getClassificationByIdApi({ id: id });
       }
-      openModal();
+      openCreateModal();
     } catch (error: any) {
       createMessage.error(String(error));
     }

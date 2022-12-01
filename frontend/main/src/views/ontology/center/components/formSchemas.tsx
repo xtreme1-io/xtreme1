@@ -11,7 +11,7 @@ export const validateCreateName = async (_rule: RuleObject, value: string) => {
 
   const res = await validateNameApi({ name: value });
 
-  if (res) {
+  if (!res) {
     return Promise.resolve();
   } else {
     const text = t('business.ontology.duplicate');
@@ -19,17 +19,20 @@ export const validateCreateName = async (_rule: RuleObject, value: string) => {
   }
 };
 
-export const validateReName = async (_rule: RuleObject, value: string) => {
-  if (value === '') {
-    return Promise.reject(t('business.ontology.noOntologyName'));
-  }
+export const validateReName = (ontologyId: string) => {
+  return async (_rule: RuleObject, value: string) => {
+    if (value === '') {
+      return Promise.reject(t('business.ontology.noOntologyName'));
+    }
 
-  const res = await validateNameApi({ name: value });
+    const res = await validateNameApi({ name: value, id: ontologyId });
 
-  if (res) {
-    return Promise.resolve();
-  } else {
-    const text = t('business.ontology.ontology') + ` “${value}” ` + t('business.ontology.hasExist');
-    return Promise.reject(text);
-  }
+    if (!res) {
+      return Promise.resolve();
+    } else {
+      const text =
+        t('business.ontology.ontology') + ` “${value}” ` + t('business.ontology.hasExist');
+      return Promise.reject(text);
+    }
+  };
 };
