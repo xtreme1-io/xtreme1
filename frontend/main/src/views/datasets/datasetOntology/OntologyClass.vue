@@ -86,6 +86,8 @@
     ClassificationItem,
   } from '/@/api/business/model/datasetOntologyModel';
   import { datasetItemDetail } from '/@/api/business/dataset';
+  import Scenario from '/@/assets/svg/tags/scenario.svg';
+  import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
   import Data from '/@/assets/svg/tags/data.svg';
   import DataActive from '/@/assets/svg/tags/dataActive.svg';
   import Ontology from '/@/assets/svg/tags/class.svg';
@@ -112,6 +114,13 @@
   const classificationId = ref<Nullable<number>>();
 
   const tabListDataset = [
+    {
+      name: t('business.dataset.overview'),
+      url: RouteChildEnum.DATASETS_OVERVIEW,
+      params: { id: datasetId },
+      icon: Scenario,
+      activeIcon: ScenarioActive,
+    },
     {
       name: t('business.dataset.data'),
       url: RouteChildEnum.DATASETS_DATA,

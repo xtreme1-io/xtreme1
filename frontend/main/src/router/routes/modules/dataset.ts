@@ -76,7 +76,7 @@ const dataset: AppRouteModule = {
     {
       path: 'overview',
       name: 'DatasetsOverviewPage',
-      component: () => import('/@/views/datasets/datasetContent/index.vue'),
+      component: () => import('/@/views/datasets/datasetOverview/index.vue'),
       meta: {
         title: t('routes.datasets.overview'),
         // affix: true,

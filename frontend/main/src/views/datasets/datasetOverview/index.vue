@@ -1,0 +1,65 @@
+<template>
+  <div :class="`${prefixCls}`" v-loading="loadingRef">
+    <div class="actions">
+      <VirtualTab :list="tabList" />
+    </div>
+  </div>
+</template>
+<script lang="ts" setup>
+  // vue
+  import { ref } from 'vue';
+  // components
+  import { VirtualTab } from '/@@/VirtualTab';
+  // icons
+  import Scenario from '/@/assets/svg/tags/scenario.svg';
+  import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
+  import Data from '/@/assets/svg/tags/data.svg';
+  import DataActive from '/@/assets/svg/tags/dataActive.svg';
+  import Ontology from '/@/assets/svg/tags/ontology.svg';
+  import OntologyActive from '/@/assets/svg/tags/ontologyActive.svg';
+  // utils
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { useDesign } from '/@/hooks/web/useDesign';
+  import { RouteChildEnum } from '/@/enums/routeEnum';
+  import { useRoute } from 'vue-router';
+
+  const { t } = useI18n();
+  const { prefixCls } = useDesign('datasetOverview');
+  const { query } = useRoute();
+  const { id } = query;
+
+  const loadingRef = ref<boolean>(false);
+
+  /** Virtual Tab */
+  const tabList = [
+    {
+      name: t('business.dataset.overview'),
+      url: RouteChildEnum.DATASETS_OVERVIEW,
+      active: true,
+      icon: Scenario,
+      activeIcon: ScenarioActive,
+    },
+    {
+      name: t('business.datasetContent.data'),
+      url: RouteChildEnum.DATASETS_DATA,
+      params: { id: id },
+      icon: Data,
+      activeIcon: DataActive,
+    },
+    {
+      name: t('business.ontology.ontology'),
+      url: RouteChildEnum.DATASETS_CLASS,
+      params: { id: id },
+      icon: Ontology,
+      activeIcon: OntologyActive,
+    },
+  ];
+</script>
+<style lang="less" scoped>
+  @prefix-cls: ~'@{namespace}-datasetOverview';
+  .@{prefix-cls} {
+    display: flex;
+    height: 100%;
+    padding: 15px 20px;
+  }
+</style>
