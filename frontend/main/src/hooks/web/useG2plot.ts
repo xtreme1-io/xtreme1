@@ -1,12 +1,21 @@
 // import { Chart } from '@antv/g2';
-import { Line, Column, Bar } from '@antv/g2plot';
-import type { Plot, LineOptions, ColumnOptions, BarOptions } from '@antv/g2plot';
+import { Line, Column, Bar, Pie, Scatter } from '@antv/g2plot';
+import type {
+  Plot,
+  LineOptions,
+  ColumnOptions,
+  BarOptions,
+  PieOptions,
+  ScatterOptions,
+} from '@antv/g2plot';
 import { tryOnUnmounted } from '@vueuse/core';
 
 export enum PlotEnum {
   LINE = 'line',
   COLUMN = 'column',
   BAR = 'bar',
+  PIE = 'pie',
+  SCATTER = 'scatter',
 }
 type PlotType = LineOptions | ColumnOptions | BarOptions;
 
@@ -29,12 +38,20 @@ export function useG2plot() {
       case PlotEnum.BAR:
         plot = createPlotBar(container, options);
         break;
+      case PlotEnum.PIE:
+        plot = createPlotPie(container, options);
+        break;
+      case PlotEnum.SCATTER:
+        plot = createPlotScatter(container, options);
+        break;
       default:
         console.error('There is no matching type');
     }
 
     plotRender();
     removeInteraction();
+
+    return plot;
   }
 
   // 创建图表实例
@@ -47,7 +64,12 @@ export function useG2plot() {
   function createPlotBar(container: HTMLElement, options: BarOptions): Bar {
     return new Bar(container, options);
   }
-
+  function createPlotPie(container: HTMLElement, options: PieOptions): Pie {
+    return new Pie(container, options);
+  }
+  function createPlotScatter(container: HTMLElement, options: ScatterOptions): Scatter {
+    return new Scatter(container, options);
+  }
   // 渲染
   function plotRender() {
     plot.render();

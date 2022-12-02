@@ -3,6 +3,11 @@
     <div class="actions">
       <VirtualTab :list="tabList" />
     </div>
+    <div class="content">
+      <TheProgress />
+      <TheSimilarity />
+      <TheDistribution />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -10,6 +15,9 @@
   import { ref } from 'vue';
   // components
   import { VirtualTab } from '/@@/VirtualTab';
+  import TheProgress from './components/TheProgress.vue';
+  import TheSimilarity from './components/TheSimilarity.vue';
+  import TheDistribution from './components/TheDistribution.vue';
   // icons
   import Scenario from '/@/assets/svg/tags/scenario.svg';
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
@@ -59,7 +67,16 @@
   @prefix-cls: ~'@{namespace}-datasetOverview';
   .@{prefix-cls} {
     display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
     height: 100%;
     padding: 15px 20px;
+    .content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
   }
 </style>
