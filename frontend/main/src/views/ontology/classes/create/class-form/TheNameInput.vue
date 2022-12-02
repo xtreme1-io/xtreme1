@@ -1,16 +1,20 @@
 <template>
-  <Input
-    autocomplete="off"
-    v-model:value="name"
-    :placeholder="t('business.ontology.createHolder')"
-    @blur="handleBlur"
-    @change="handleNameChange"
-    allow-clear
-  />
+  <Form ref="formRef" :model="formState" :rules="rules">
+    <Form.Item label="" name="name">
+      <Input
+        autocomplete="off"
+        v-model:value="formState.name"
+        :placeholder="t('business.ontology.createHolder')"
+        @blur="handleBlur"
+        @change="handleNameChange"
+        allow-clear
+      />
+    </Form.Item>
+  </Form>
 </template>
 <script lang="ts" setup>
-  import { computed } from 'vue';
-  import { Input } from 'ant-design-vue';
+  import { reactive, ref, watch, onMounted } from 'vue';
+  import { Form, Input } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import emitter from 'tiny-emitter/instance';
   import {
@@ -32,22 +36,26 @@
   }>();
   const emits = defineEmits(['update:name', 'valid']);
 
-  const name = computed({
-    get() {
-      return props.name;
+  watch(
+    () => props.name,
+    () => {
+      formState.name = props.name;
     },
-    set(newName) {
-      emits('update:name', newName);
-    },
-  });
+  );
 
-  const handleBlur = (newValue) => {
-    validateName({}, newValue);
-  };
-  const handleNameChange = () => {
-    if (!name.value) emits('valid', true);
-    else emits('valid', false);
-  };
+  const formRef = ref();
+  const formState: { name: string | undefined } = reactive({
+    name: undefined,
+  });
+  watch(
+    () => formState.name,
+    () => {
+      emits('update:name', formState.name);
+    },
+  );
+  onMounted(() => {
+    console.log('name input');
+  });
 
   /** Validate Name */
   const validateName = async (_rule: RuleObject, value: string) => {
@@ -64,7 +72,7 @@
         }
 
         const params: ValidateNameParams = {
-          name: name.value ?? '',
+          name: formState.name ?? '',
           datasetId: props.datasetId as number,
         };
         if (props.activeTab == ClassTypeEnum.CLASS) {
@@ -117,5 +125,28 @@
       emits('valid', true);
     }
   };
+
+  const rules = {
+    name: [
+      { required: true, validator: validateName, trigger: 'blur' },
+      { max: 256, message: t('business.ontology.maxLength') },
+    ],
+  };
+
+  const handleBlur = () => {
+    formRef.value.validate();
+  };
+  const handleNameChange = () => {
+    if (!formState.name) emits('valid', true);
+    else emits('valid', false);
+  };
+  // const handleBlur = (newValue) => {
+  //   console.log('blur: ', newValue);
+  //   validateName({}, newValue);
+  // };
+  // const handleNameChange = () => {
+  //   if (!name.value) emits('valid', true);
+  //   else emits('valid', false);
+  // };
 </script>
 <style lang="less" scoped></style>

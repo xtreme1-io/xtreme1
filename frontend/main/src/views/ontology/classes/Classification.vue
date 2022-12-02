@@ -22,7 +22,7 @@
             :cardList="cardList"
             :activeTab="activeTab"
             @edit="handleEdit"
-            @create="handleCreate"
+            @create="handleOpenCreate"
           />
         </ScrollContainer>
       </div>
@@ -31,9 +31,28 @@
       <SearchForm @search="handleSearch" :activeTab="activeTab" :datasetType="datasetType" />
     </div>
     <!-- Modal -->
-    <FormModal
-      @register="register"
+    <CreateClass
+      @register="registerCreateClassModal"
       @fetchList="handleRefresh"
+      :detail="detail"
+      :activeTab="activeTab"
+      :datasetType="datasetType"
+      :ontologyId="ontologyId"
+      @manage="handleOpenFormModal"
+    />
+    <CreateClassification
+      @register="registerCreateClassificationModal"
+      @fetchList="handleRefresh"
+      :detail="detail"
+      :activeTab="activeTab"
+      :datasetType="datasetType"
+      :ontologyId="ontologyId"
+      @manage="handleOpenFormModal"
+    />
+    <FormModal
+      @register="registerFormModal"
+      @fetchList="handleRefresh"
+      @back="handleBack"
       :detail="detail"
       :activeTab="activeTab"
       :datasetType="datasetType"
@@ -44,13 +63,15 @@
 <script lang="ts" setup>
   // vue
   import { ref, unref, onMounted, provide } from 'vue';
-  // 组件
+  // components
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from './components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
-  import FormModal from './components/FormModal.vue';
   import HeaderAction from './components/HeaderAction.vue';
   import Action from './components/Action.vue';
+  import CreateClass from './create/CreateClass.vue';
+  import CreateClassification from './create/CreateClassification.vue';
+  import FormModal from './create/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { handleScroll } from '/@/utils/business/scrollListener';
   // icons
@@ -58,13 +79,13 @@
   import OntologyActive from '/@/assets/svg/tags/ontologyActive.svg';
   import Scenario from '/@/assets/svg/tags/scenario.svg';
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
-  // 工具
+  // utils
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRoute } from 'vue-router';
   import { useModal } from '/@/components/Modal';
-  // 接口
+  // api
   import { RouteChildEnum } from '/@/enums/routeEnum';
   import {
     getClassApi,
@@ -83,18 +104,14 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { setDatasetBreadcrumb } from '/@/utils/business';
 
-  const [register, { openModal }] = useModal();
   const { t } = useI18n();
   const { prefixCls } = useDesign('ontologyClasses');
   const { createMessage } = useMessage();
   const loadingRef = ref<boolean>(false);
   const route = useRoute();
   const pathArr = route.path.split('/');
-  // 这里页面 path 要和 ClassTypeEnum 保持一致
   const pageType = pathArr[pathArr.length - 1].toLocaleUpperCase();
-  // console.log('pageType', pageType);
   const ontologyId = Number(route.query.id);
-  // TODO 需要调用接口来获取当前 ontology 的类型
   const datasetType = ref<datasetTypeEnum>(datasetTypeEnum.LIDAR_BASIC);
 
   /** Virtual Tab */
@@ -138,47 +155,79 @@
   type detailItem = ClassItem | ClassificationItem;
   const detail = ref<detailItem>();
 
-  // 关闭弹窗时
   const updateDetail = (newDetail) => {
     detail.value = Object.assign(Object(detail.value), newDetail);
   };
   provide('updateDetail', updateDetail);
-  // const activeTab = ref<ClassTypeEnum>(ClassTypeEnum.CLASS);
-  // const activeTab = ref<ClassTypeEnum>(ClassTypeEnum.CLASSIFICATION);
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
 
-  // 新建
-  const handleCreate = () => {
-    (detail.value as any) = null;
-    openModal();
+  /** Class Modal */
+  const [
+    registerCreateClassModal,
+    { openModal: openCreateClassModal, closeModal: closeCreateClassModal },
+  ] = useModal();
+
+  /** Classification Modal */
+  const [
+    registerCreateClassificationModal,
+    { openModal: openCreateClassificationModal, closeModal: closeCreateClassificationModal },
+  ] = useModal();
+
+  /** Form Modal */
+  const [registerFormModal, { openModal: openFormModal, closeModal: closeFormModal }] = useModal();
+  const handleOpenFormModal = () => {
+    closeCreateClassModal();
+    closeCreateClassificationModal();
+    openFormModal();
   };
-  // 编辑
+  const handleBack = () => {
+    closeFormModal();
+    if (pageType == ClassTypeEnum.CLASS) {
+      openCreateClassModal(true, { isKeep: true });
+    } else {
+      openCreateClassificationModal(true, { isKeep: true });
+    }
+  };
+
+  /** Create */
+  const handleOpenCreate = (isEdit = false) => {
+    if (!isEdit) {
+      (detail.value as any) = null;
+    }
+    if (pageType == ClassTypeEnum.CLASS) {
+      openCreateClassModal();
+    } else {
+      console.log('handleOpenCreate', isEdit);
+      openCreateClassificationModal(true, { isEdit });
+    }
+  };
+
+  /** Edit */
   const handleEdit = async (id) => {
     try {
-      // 弹窗始终存在，所以在外部获取数据
       if (pageType == ClassTypeEnum.CLASS) {
         detail.value = await getClassByIdApi({ id: id });
       } else {
         detail.value = await getClassificationByIdApi({ id: id });
+        console.log(detail.value);
       }
-      openModal();
+      handleOpenCreate(true);
     } catch (error: any) {
       createMessage.error(String(error));
     }
   };
 
-  let cardList = ref<Array<ClassItem | ClassificationItem>>([]);
-  const total = ref<number>(0);
-  const pageNo = ref<number>(1);
-
-  // 搜索参数
+  /** Search */
   const searchFormValue = ref<SearchItem>({});
-  // 搜索事件
   const handleSearch = (formValue) => {
     searchFormValue.value = formValue.value;
     getList();
   };
-  // 获取列表
+
+  /** List */
+  const cardList = ref<Array<ClassItem | ClassificationItem>>([]);
+  const total = ref<number>(0);
+  const pageNo = ref<number>(1);
   const getList = async (isConcat = false) => {
     loadingRef.value = true;
 
@@ -213,13 +262,14 @@
     loadingRef.value = false;
   };
 
-  // 获取当前 ontology 的详情，获取 datasetType
+  /** Info */
   const getOntologyInfo = async () => {
     const res = await getOntologyInfoApi({ id: String(ontologyId) });
     datasetType.value = res.type;
     setDatasetBreadcrumb(res.name);
   };
 
+  /** Scroll */
   const scrollRef = ref<Nullable<ScrollActionType>>(null);
   onMounted(() => {
     handleScroll(scrollRef, () => {
@@ -228,12 +278,11 @@
         getList(true);
       }
     });
-    // 获取列表
     getList();
-    // 获取详情
     getOntologyInfo();
   });
 
+  /** Refresh */
   const handleRefresh = () => {
     unref(scrollRef)?.scrollTo(0);
     pageNo.value = 1;

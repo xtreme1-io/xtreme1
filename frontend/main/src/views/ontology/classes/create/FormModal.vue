@@ -104,11 +104,11 @@
   import { Button } from 'ant-design-vue';
   import { BasicModal, useModalInner, useModal } from '/@/components/Modal';
   import Icon from '/@/components/Icon';
-  import ClassesTree from './modal-components/ClassesTree.vue';
-  import AttrForm from './modal-components/AttrForm.vue';
-  import OptionForm from './modal-components/OptionForm.vue';
-  import DiscardModal from './modal-components/DiscardModal.vue';
-  import OptionEditor from './modal-components/OptionEditor.vue';
+  import ClassesTree from './components/ClassesTree.vue';
+  import AttrForm from './components/AttrForm.vue';
+  import OptionForm from './components/OptionForm.vue';
+  import DiscardModal from './components/DiscardModal.vue';
+  import OptionEditor from './components/OptionEditor.vue';
 
   import {
     ClassItem,
@@ -131,7 +131,7 @@
   const [register, { closeModal }] = useModalInner();
   const [discardRegister, { openModal: openDiscardModal }] = useModal();
 
-  const emits = defineEmits(['fetchList']);
+  const emits = defineEmits(['fetchList', 'back']);
 
   const props = withDefaults(
     defineProps<{
@@ -221,6 +221,8 @@
   /** Close Popup */
   const updateDetail = inject('updateDetail', Function, true);
   const handleCancel = () => {
+    emits('back');
+    return;
     // Judgment is Edit
     if (props.detail?.id) {
       console.log(isChangedByUser, isShowEdit);

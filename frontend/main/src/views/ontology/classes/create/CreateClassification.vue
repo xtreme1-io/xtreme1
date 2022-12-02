@@ -10,7 +10,7 @@
     @ok="handleCreate"
   >
     <div class="content">
-      <div class="title">Basic Info</div>
+      <div class="title">Basic Info - classification</div>
       <Form
         ref="formRef"
         :model="formState"
@@ -48,10 +48,11 @@
           </div>
         </div>
         <div class="form-wrapper">
-          <Form.Item>
-            <Switch v-model:checked="formState.isRequired" />
-            <span style="margin-left: 10px">{{ t('business.class.isRequired') }}</span>
-          </Form.Item>
+          <div class="w-260px">
+            <Form.Item :label="t('business.class.isRequired')">
+              <Switch v-model:checked="formState.isRequired" />
+            </Form.Item>
+          </div>
         </div>
       </Form>
       <div class="title">Related by (999)</div>
@@ -66,7 +67,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, watch, unref, onMounted } from 'vue';
+  import { ref, reactive, watch, unref } from 'vue';
   // components
   import { Form, Select, Switch } from 'ant-design-vue';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
@@ -93,7 +94,32 @@
   }>();
   const emits = defineEmits(['submit', 'valid', 'changed', 'manage']);
 
-  const [registerModal, { closeModal }] = useModalInner(() => {});
+  const baseFormName = ref<string>('');
+  const [registerModal, { closeModal }] = useModalInner((config) => {
+    // Initial page load
+    console.log(config);
+    if (config.isKeep) {
+      console.log(formState);
+      return;
+    }
+    console.log(props.detail);
+    if (config.isEdit) {
+      formState.name = props.detail.name;
+      formState.inputType = props.detail.inputType;
+      formState.isRequired = props.detail.isRequired;
+
+      baseFormName.value = props.detail.name;
+      emitter.emit('changeRootName', props.detail.name);
+
+      defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
+    } else {
+      formState.name = undefined;
+      formState.inputType = inputTypeEnum.RADIO;
+      formState.isRequired = false;
+      defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
+    }
+    console.log(formState);
+  });
 
   /** Form */
   const labelCol = { span: 8 };
@@ -105,6 +131,9 @@
     isRequired: false,
   });
   defineExpose({ formState });
+  watch(formState, () => {
+    console.log(formState);
+  });
 
   const rules = {
     name: [
@@ -159,30 +188,6 @@
   const handleCancel = () => {
     closeModal();
   };
-  // Initial page load
-  const baseFormName = ref<string>('');
-  onMounted(() => {
-    // edit -- Echo
-    if (props.detail) {
-      console.log('detail ===> ', props.detail);
-      // Is there has an id, is Edit, otherwise it is copy
-      if (props?.detail?.id) {
-        baseFormName.value = props.detail.name;
-      }
-
-      // Change the root node of tree
-      emitter.emit('changeRootName', props.detail.name);
-
-      const formData: IClassificationForm = reactive(Object.assign(formState, props.detail));
-
-      formState = reactive(formData);
-      defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
-    } else {
-      const formData: IClassificationForm = reactive(Object.assign(formState));
-      formState = reactive(formData);
-      defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
-    }
-  });
 
   /** Manage */
   const handleManageAttr = () => {

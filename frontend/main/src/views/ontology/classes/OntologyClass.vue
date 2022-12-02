@@ -22,7 +22,7 @@
             :cardList="cardList"
             :activeTab="activeTab"
             @edit="handleEdit"
-            @create="handleToCreate"
+            @create="handleOpenCreate"
           />
         </ScrollContainer>
       </div>
@@ -52,6 +52,7 @@
     <FormModal
       @register="registerFormModal"
       @fetchList="handleRefresh"
+      @back="handleBack"
       :detail="detail"
       :activeTab="activeTab"
       :datasetType="datasetType"
@@ -165,35 +166,34 @@
     registerCreateClassModal,
     { openModal: openCreateClassModal, closeModal: closeCreateClassModal },
   ] = useModal();
-  const handleToCreateClass = () => {
-    (detail.value as any) = null;
-    openCreateClassModal();
-  };
 
   /** Classification Modal */
   const [
     registerCreateClassificationModal,
     { openModal: openCreateClassificationModal, closeModal: closeCreateClassificationModal },
   ] = useModal();
-  const handleToCreateClassification = () => {
-    (detail.value as any) = null;
-    openCreateClassificationModal();
-  };
 
   /** Form Modal */
-  const [registerFormModal, { openModal: openFormModal }] = useModal();
+  const [registerFormModal, { openModal: openFormModal, closeModal: closeFormModal }] = useModal();
   const handleOpenFormModal = () => {
     closeCreateClassModal();
     closeCreateClassificationModal();
     openFormModal();
   };
+  const handleBack = () => {
+    closeFormModal();
+    handleOpenCreate();
+  };
 
   /** Create */
-  const handleToCreate = () => {
+  const handleOpenCreate = (isEdit?: boolean) => {
+    if (isEdit) {
+      (detail.value as any) = null;
+    }
     if (pageType == ClassTypeEnum.CLASS) {
-      handleToCreateClass();
+      openCreateClassModal();
     } else {
-      handleToCreateClassification();
+      openCreateClassificationModal();
     }
   };
 
@@ -202,10 +202,10 @@
     try {
       if (pageType == ClassTypeEnum.CLASS) {
         detail.value = await getClassByIdApi({ id: id });
-        openCreateClassModal();
       } else {
         detail.value = await getClassificationByIdApi({ id: id });
       }
+      handleOpenCreate(true);
     } catch (error: any) {
       createMessage.error(String(error));
     }
