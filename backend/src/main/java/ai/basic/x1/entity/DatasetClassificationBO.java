@@ -42,8 +42,6 @@ public class DatasetClassificationBO {
      */
     private InputTypeEnum inputType;
 
-    private Boolean isDeleted;
-
     private Boolean isRequired;
 
     /**

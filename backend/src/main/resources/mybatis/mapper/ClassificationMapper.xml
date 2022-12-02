@@ -4,7 +4,7 @@
 
     <!-- generic query result colum -->
     <sql id="Base_Column_List">
-        id, ontology_id, name, color, dataset_type, is_required, input_type, options, is_deleted,created_at, created_by, updated_at, updated_by
+        id, ontology_id, name, color, dataset_type, is_required, input_type, options,created_at, created_by, updated_at, updated_by
     </sql>
 
 
