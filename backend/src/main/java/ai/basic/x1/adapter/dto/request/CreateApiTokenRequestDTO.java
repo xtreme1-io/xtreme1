@@ -1,23 +1,21 @@
-package ai.basic.x1.adapter.api.filter;
+package ai.basic.x1.adapter.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import javax.validation.constraints.NotEmpty;
 
 /**
- * @author Jagger Wang
+ * @author zhujh
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JwtPayload {
+public class CreateApiTokenRequestDTO {
 
-    private Long userId;
-
-    private Date expireTime;
+    private String expireAt;
 
 }
