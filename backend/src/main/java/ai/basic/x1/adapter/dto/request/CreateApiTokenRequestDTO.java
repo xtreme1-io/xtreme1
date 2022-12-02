@@ -16,7 +16,6 @@ import javax.validation.constraints.NotEmpty;
 @AllArgsConstructor
 public class CreateApiTokenRequestDTO {
 
-    @NotEmpty(message = "is empty string")
     private String expireAt;
 
 }

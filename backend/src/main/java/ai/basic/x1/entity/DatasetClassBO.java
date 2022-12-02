@@ -50,8 +50,6 @@ public class DatasetClassBO {
 
     private JSONArray attributes;
 
-    private Boolean isDeleted;
-
     /**
      * number of class in one dataset
      */

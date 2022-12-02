@@ -4,7 +4,7 @@
 
     <!-- generic query result column -->
     <sql id="Base_Column_List">
-        id, name, dataset_type, is_deleted,created_at, created_by, updated_at, updated_by
+        id, name, dataset_type,created_at, created_by, updated_at, updated_by
     </sql>
 
 

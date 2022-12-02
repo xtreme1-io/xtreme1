@@ -40,11 +40,7 @@ public class CommonConfig implements WebMvcConfigurer {
 
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
-        return new Jackson2ObjectMapperBuilder()
-                .serializerByType(Long.TYPE, ToStringSerializer.instance)
-                .serializerByType(Long.class, ToStringSerializer.instance)
-                .serializerByType(BigInteger.class, ToStringSerializer.instance)
-                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return new Jackson2ObjectMapperBuilder().featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Bean

@@ -38,8 +38,6 @@ public class ClassBO {
 
     private JSONArray attributes;
 
-    private Boolean isDeleted;
-
     /**
      * Query value, create start time
      */
