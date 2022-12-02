@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.api.filter.JwtPayload;
 import ai.basic.x1.adapter.port.dao.UserTokenDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.UserToken;
 import ai.basic.x1.entity.UserTokenBO;
+import ai.basic.x1.entity.enums.TokenType;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
@@ -58,10 +59,15 @@ public class UserTokenUseCase {
     }
 
     public UserTokenBO generateGatewayToken(Long userId) {
-        return generateApiToken(userId, jwtHelper.getDefaultExpireTime());
+        return generateToken(userId, jwtHelper.getDefaultExpireTime(), TokenType.GATEWAY);
     }
 
     public UserTokenBO generateApiToken(Long userId, @Nullable OffsetDateTime expireAt) {
+        return generateToken(userId, expireAt, TokenType.API);
+    }
+
+    private UserTokenBO generateToken(Long userId, @Nullable OffsetDateTime expireAt,
+                                TokenType tokenType) {
         Date expireDate = null;
         if (expireAt != null) {
             if (OffsetDateTime.now().isAfter(expireAt)) {
@@ -77,6 +83,7 @@ public class UserTokenUseCase {
                     .expireTime(expireDate)
                     .build())
             )
+            .tokenType(tokenType)
             .createdBy(userId)
             .expireAt(expireAt)
             .build();
@@ -85,9 +92,17 @@ public class UserTokenUseCase {
         return DefaultConverter.convert(userToken, UserTokenBO.class);
     }
 
+    public UserTokenBO getApiToken(Long userId) {
+        return DefaultConverter.convert(userTokenDAO.getOne(new LambdaQueryWrapper<UserToken>()
+                .eq(UserToken::getCreatedBy, userId)
+                .eq(UserToken::getTokenType, TokenType.API)
+        , false), UserTokenBO.class);
+    }
+
     public void deleteApiToken(Long id, Long userId) {
         userTokenDAO.remove(new LambdaQueryWrapper<UserToken>()
                 .eq(UserToken::getId, id)
+                .eq(UserToken::getTokenType, TokenType.API)
                 .eq(UserToken::getCreatedBy, userId));
     }
 

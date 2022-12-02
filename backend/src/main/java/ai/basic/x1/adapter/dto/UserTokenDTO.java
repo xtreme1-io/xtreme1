@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.entity.enums.TokenType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +22,8 @@ public class UserTokenDTO {
 
     private String token;
 
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    private TokenType tokenType;
+
     private OffsetDateTime expireAt;
 
     private OffsetDateTime createdAt;

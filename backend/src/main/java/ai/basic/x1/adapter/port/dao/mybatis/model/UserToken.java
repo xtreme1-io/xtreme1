@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
+import ai.basic.x1.entity.enums.TokenType;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,8 @@ public class UserToken {
     private Long id;
 
     private String token;
+
+    private TokenType tokenType;
 
     private OffsetDateTime expireAt;
 

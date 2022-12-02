@@ -123,6 +123,12 @@ public class UserController extends BaseController {
         return UserDTO.fromBO(user);
     }
 
+    @GetMapping("/api/token/info")
+    public UserTokenDTO findApiToken() {
+        var userId = RequestContextHolder.getContext().getUserInfo().getId();
+        return DefaultConverter.convert(userTokenUseCase.getApiToken(userId), UserTokenDTO.class);
+    }
+
     @PostMapping("/api/token/create")
     public UserTokenDTO createApiToken(@RequestBody @Validated CreateApiTokenRequestDTO createApiToken) {
         var userId = RequestContextHolder.getContext().getUserInfo().getId();
