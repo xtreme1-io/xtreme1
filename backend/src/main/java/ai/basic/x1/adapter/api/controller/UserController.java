@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -130,10 +131,17 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("/api/token/create")
-    public UserTokenDTO createApiToken(@RequestBody @Validated CreateApiTokenRequestDTO createApiToken) {
+    public UserTokenDTO createApiToken(@RequestBody CreateApiTokenRequestDTO createApiToken) {
         var userId = RequestContextHolder.getContext().getUserInfo().getId();
-        var result = userTokenUseCase.generateApiToken(userId,
-                OffsetDateTime.parse(createApiToken.getExpireAt()));
+        OffsetDateTime expireAt = null;
+        if (StringUtils.hasLength(createApiToken.getExpireAt())) {
+            try {
+                expireAt = OffsetDateTime.parse(createApiToken.getExpireAt());
+            } catch (Exception e) {
+                throw new UsecaseException(UsecaseCode.UNKNOWN, "The date format is incorrect");
+            }
+        }
+        var result = userTokenUseCase.generateApiToken(userId, expireAt);
         return DefaultConverter.convert(result, UserTokenDTO.class);
     }
 
