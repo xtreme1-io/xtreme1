@@ -1409,7 +1409,7 @@ public class DataInfoUseCase {
                 .data(List.of(buildPointCloutFileInfo(relationFileBO, binaryPreSignUrlBO, imagePreSignUrlBO)))
                 .type(1)
                 .renderParam(buildRenderParam())
-                .convertParam(ConvertParam.builder().extraFields(Collections.EMPTY_LIST).build()).build();
+                .convertParam(ConvertParam.builder().extraFields(Arrays.asList("rgb")).build()).build();
         ApiResult<List<PointCloudCRRespDTO>> apiResult = null;
 
         StopWatch stopWatch = new StopWatch();
