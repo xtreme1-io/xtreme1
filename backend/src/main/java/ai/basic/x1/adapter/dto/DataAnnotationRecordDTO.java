@@ -1,5 +1,7 @@
 package ai.basic.x1.adapter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +26,7 @@ public class DataAnnotationRecordDTO {
     /**
      * Serial number
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long serialNo;
 
     /**

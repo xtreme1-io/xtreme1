@@ -347,19 +347,22 @@ public class DataInfoUseCase {
         var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
         if (!boo) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ERROR.getMessage());
-            throw new UsecaseException(DATASET_DATA_FILE_URL_ERROR);
+            log.error("File url error,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         var dataset = datasetDAO.getById(dataInfoUploadBO.getDatasetId());
         if (ObjectUtil.isNull(dataset)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_NOT_FOUND.getMessage());
-            throw new UsecaseException(DATASET_NOT_FOUND);
+            log.error("Dataset not found,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         dataInfoUploadBO.setType(dataset.getType());
         var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
         var mimeType = FileUtil.getMimeType(fileUrl);
         if (!validateUrlFileSuffix(dataInfoUploadBO, mimeType)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_FORMAT_ERROR.getMessage());
-            throw new UsecaseException(DATASET_DATA_FILE_FORMAT_ERROR);
+            log.error("Incorrect file format,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         dataInfoUploadBO.setUploadRecordId(uploadRecordBO.getId());
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
@@ -692,11 +695,11 @@ public class DataInfoUseCase {
      * @return Serial number
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Long modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+    public String modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
         var modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
         var serialNo = IdUtil.getSnowflakeNextId();
         batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
-        return serialNo;
+        return  String.valueOf(serialNo);
     }
 
     /**
@@ -1342,7 +1345,6 @@ public class DataInfoUseCase {
     }
 
 
-
     public void handelPointCloudConvertRender(FileBO pcdFileBO) {
         String filePath = pcdFileBO.getPath();
         String basePath = "";
@@ -1361,8 +1363,8 @@ public class DataInfoUseCase {
         PresignedUrlBO binaryPreSignUrlBO;
         PresignedUrlBO imagePreSignUrlBO;
         try {
-            binaryPreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(),binaryPath);
-            imagePreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(),imagePath);
+            binaryPreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), binaryPath);
+            imagePreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), imagePath);
 
         } catch (Throwable throwable) {
             log.error("generate preSignUrl error!", throwable);
