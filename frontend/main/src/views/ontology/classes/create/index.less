@@ -1,17 +1,47 @@
-// BaseForm
-.basic-form {
-  position: relative;
-  height: 100%;
-  :deep(.ant-input-number) {
-    min-width: auto;
+.content {
+  padding: 24px 26px;
+  height: 280px;
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #333333;
+    margin-bottom: 20px;
+  }
+  .form-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
   }
 }
+
+// form-item
 :deep(.ant-form-item) {
-  margin-bottom: 12px;
-  // .ant-select {
-  //   border: none;
-  // }
+  height: 28px;
+  margin-bottom: 20px;
+  padding: 0 10px;
+  .ant-form-item-label {
+    & > label {
+      height: 28px;
+    }
+  }
+  .ant-form-item-control-input {
+    min-height: 28px;
+    .ant-input-affix-wrapper {
+      padding: 4px 10px;
+    }
+  }
+  .ant-select {
+    .ant-select-selector {
+      height: 28px;
+    }
+  }
 }
+
 :deep(.ant-form-item:not(.ant-form-item-with-help)) {
   margin-bottom: 12px;
   // .ant-select {
@@ -37,6 +67,7 @@
   }
 }
 
+// select
 :deep(.ant-select) {
   .ant-select-selector {
     padding-left: 7px !important;

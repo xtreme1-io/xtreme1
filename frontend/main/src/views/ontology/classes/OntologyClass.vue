@@ -32,7 +32,16 @@
     </div>
     <!-- Modal -->
     <CreateClass
-      @register="registerCreateModal"
+      @register="registerCreateClassModal"
+      @fetchList="handleRefresh"
+      :detail="detail"
+      :activeTab="activeTab"
+      :datasetType="datasetType"
+      :ontologyId="ontologyId"
+      @manage="handleOpenFormModal"
+    />
+    <CreateClassification
+      @register="registerCreateClassificationModal"
       @fetchList="handleRefresh"
       :detail="detail"
       :activeTab="activeTab"
@@ -53,13 +62,14 @@
 <script lang="ts" setup>
   // vue
   import { ref, unref, onMounted, provide } from 'vue';
-  // 组件
+  // components
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from './components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
   import HeaderAction from './components/HeaderAction.vue';
   import Action from './components/Action.vue';
   import CreateClass from './create/CreateClass.vue';
+  import CreateClassification from './create/CreateClassification.vue';
   import FormModal from './create/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { handleScroll } from '/@/utils/business/scrollListener';
@@ -68,13 +78,13 @@
   import OntologyActive from '/@/assets/svg/tags/ontologyActive.svg';
   import Scenario from '/@/assets/svg/tags/scenario.svg';
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
-  // 工具
+  // utils
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useRoute } from 'vue-router';
   import { useModal } from '/@/components/Modal';
-  // 接口
+  // api
   import { RouteChildEnum } from '/@/enums/routeEnum';
   import {
     getClassApi,
@@ -150,19 +160,41 @@
   provide('updateDetail', updateDetail);
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
 
-  /** Create */
-  const [registerCreateModal, { openModal: openCreateModal, closeModal: closeCreateModal }] =
-    useModal();
-  const handleToCreate = () => {
+  /** Class Modal */
+  const [
+    registerCreateClassModal,
+    { openModal: openCreateClassModal, closeModal: closeCreateClassModal },
+  ] = useModal();
+  const handleToCreateClass = () => {
     (detail.value as any) = null;
-    openCreateModal();
+    openCreateClassModal();
+  };
+
+  /** Classification Modal */
+  const [
+    registerCreateClassificationModal,
+    { openModal: openCreateClassificationModal, closeModal: closeCreateClassificationModal },
+  ] = useModal();
+  const handleToCreateClassification = () => {
+    (detail.value as any) = null;
+    openCreateClassificationModal();
   };
 
   /** Form Modal */
   const [registerFormModal, { openModal: openFormModal }] = useModal();
   const handleOpenFormModal = () => {
-    closeCreateModal();
+    closeCreateClassModal();
+    closeCreateClassificationModal();
     openFormModal();
+  };
+
+  /** Create */
+  const handleToCreate = () => {
+    if (pageType == ClassTypeEnum.CLASS) {
+      handleToCreateClass();
+    } else {
+      handleToCreateClassification();
+    }
   };
 
   /** Edit */
@@ -170,10 +202,10 @@
     try {
       if (pageType == ClassTypeEnum.CLASS) {
         detail.value = await getClassByIdApi({ id: id });
+        openCreateClassModal();
       } else {
         detail.value = await getClassificationByIdApi({ id: id });
       }
-      openCreateModal();
     } catch (error: any) {
       createMessage.error(String(error));
     }

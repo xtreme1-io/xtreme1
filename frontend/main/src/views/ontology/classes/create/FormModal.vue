@@ -98,7 +98,7 @@
 
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { setSchema, setClassSchema, handleMutiTabAction } from './modal-components/utils';
+  import { setSchema, setClassSchema, handleMutiTabAction } from './components/utils';
   import emitter from 'tiny-emitter/instance';
 
   import { Button } from 'ant-design-vue';

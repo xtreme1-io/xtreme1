@@ -70,7 +70,6 @@
             </Form.Item>
           </div>
         </div>
-        <!-- Lidar -->
         <div class="form-wrapper">
           <div class="w-260px">
             <Form.Item v-if="showConstraintsForLidar" :label="t('business.class.constraints')">
@@ -97,7 +96,6 @@
         <Form.Item v-if="showConstraintsForImage" :label="t('business.class.constraints')">
           <Switch v-model:checked="formState.isConstraintsForImage" />
         </Form.Item>
-        <!-- ImageInfo -->
         <div v-if="showImageInfo" class="text-center">
           <TheImageInfo
             v-model:imageLimit="formState.imageLimit"
@@ -110,7 +108,7 @@
       <div class="title">Related by (999)</div>
       <div class="title">
         <span>Attributes (N)</span>
-        <Button type="primary" @click="handleManage">
+        <Button type="primary" @click="handleManageAttr">
           {{ 'Manage attributes' }}
         </Button>
       </div>
@@ -134,28 +132,20 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   // import { useMessage } from '/@/hooks/web/useMessage'; // 类型
   import emitter from 'tiny-emitter/instance';
-  import { BaseForm, imageConstraintsEnum } from './typing';
+  import { ICLassForm, imageConstraintsEnum } from './typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { ClassTypeEnum, ToolTypeEnum } from '/@/api/business/model/classModel';
   import { inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import { toolTypeList } from './class-form/data';
-  import { handleMutiTabAction } from '../components/modal-components/utils';
 
   const { t } = useI18n();
   // const { createMessage } = useMessage();
   // const handleRefresh = inject('handleRefresh', Function, true); // 刷新列表页面
   const props = defineProps<{
     detail?: any;
-    dataSchema?: any;
-    handleSet?: Function;
-    handleAddIndex?: Function;
-    indexList?: number[];
-    activeTab?: ClassTypeEnum;
     isCenter?: boolean;
     datasetType?: datasetTypeEnum;
     datasetId?: number;
-    classId?: Nullable<number>;
-    classificationId?: Nullable<number>;
   }>();
   const emits = defineEmits(['submit', 'valid', 'changed', 'manage']);
 
@@ -165,7 +155,7 @@
   const labelCol = { span: 8 };
   const wrapperCol = { span: 12, offset: 1 };
   const formRef = ref();
-  let formState: BaseForm = reactive({
+  let formState: ICLassForm = reactive({
     name: undefined,
     color: '#7dfaf2',
     datasetType: datasetTypeEnum.IMAGE,
@@ -283,6 +273,13 @@
       // emitter.emit('handleSaveForm', { type: 'change' });
     }
   });
+  // Check if objects are equal
+  const isObjectChange = (source, comparison): boolean => {
+    const _source = JSON.stringify(source);
+    const _comparison = JSON.stringify({ ...source, ...comparison });
+
+    return _source == _comparison;
+  };
 
   // /** Validate Name */
   // const validateName = async (_rule: RuleObject, value: string) => {
@@ -410,14 +407,6 @@
     return showConstraintsForImage.value && formState.isConstraintsForImage;
   });
 
-  // Check if objects are equal
-  const isObjectChange = (source, comparison): boolean => {
-    const _source = JSON.stringify(source);
-    const _comparison = JSON.stringify({ ...source, ...comparison });
-
-    return _source == _comparison;
-  };
-
   // Initial page load
   const baseFormName = ref<string>('');
   onMounted(() => {
@@ -432,41 +421,37 @@
       // Change the root node of tree
       emitter.emit('changeRootName', props.detail.name);
 
-      const formData: BaseForm = reactive(Object.assign(formState, props.detail));
-      handleMutiTabAction(
-        props.activeTab,
-        () => {
-          formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
-          if (props.detail?.toolTypeOptions) {
-            const toolTypeOptions = JSON.parse(JSON.stringify(props.detail.toolTypeOptions));
-            console.log('props.datasetType', props.datasetType);
-            // echo toolTypeOptions based on datasetType
-            if (props.datasetType != datasetTypeEnum.IMAGE) {
-              formData.isConstraints = toolTypeOptions.isConstraints;
-              formData.isStandard = toolTypeOptions?.isStandard;
-              if (!formData.isStandard) {
-                // If isStandard is false, you need to manually end the non-first listening
-                standardEcho.value++;
-                formData.length = toolTypeOptions?.length;
-                formData.width = toolTypeOptions?.width;
-                formData.height = toolTypeOptions?.height;
-              } else {
-                formData.length = toolTypeOptions?.length;
-                formData.width = toolTypeOptions?.width;
-                formData.height = toolTypeOptions?.height;
-              }
-              formData.points = toolTypeOptions?.points;
-            } else {
-              formData.isConstraintsForImage = toolTypeOptions.isConstraintsForImage;
-              formData.imageLimit = toolTypeOptions?.imageLimit;
-              formData.imageLength = toolTypeOptions?.imageLength;
-              formData.imageWidth = toolTypeOptions?.imageWidth;
-              formData.imageArea = toolTypeOptions?.imageArea;
-            }
+      const formData: ICLassForm = reactive(Object.assign(formState, props.detail));
+
+      formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
+      if (props.detail?.toolTypeOptions) {
+        const toolTypeOptions = JSON.parse(JSON.stringify(props.detail.toolTypeOptions));
+        console.log('props.datasetType', props.datasetType);
+        // echo toolTypeOptions based on datasetType
+        if (props.datasetType != datasetTypeEnum.IMAGE) {
+          formData.isConstraints = toolTypeOptions.isConstraints;
+          formData.isStandard = toolTypeOptions?.isStandard;
+          if (!formData.isStandard) {
+            // If isStandard is false, you need to manually end the non-first listening
+            standardEcho.value++;
+            formData.length = toolTypeOptions?.length;
+            formData.width = toolTypeOptions?.width;
+            formData.height = toolTypeOptions?.height;
+          } else {
+            formData.length = toolTypeOptions?.length;
+            formData.width = toolTypeOptions?.width;
+            formData.height = toolTypeOptions?.height;
           }
-        },
-        () => {},
-      );
+          formData.points = toolTypeOptions?.points;
+        } else {
+          formData.isConstraintsForImage = toolTypeOptions.isConstraintsForImage;
+          formData.imageLimit = toolTypeOptions?.imageLimit;
+          formData.imageLength = toolTypeOptions?.imageLength;
+          formData.imageWidth = toolTypeOptions?.imageWidth;
+          formData.imageArea = toolTypeOptions?.imageArea;
+        }
+      }
+
       // Assign a value
       formState = reactive(formData);
       defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
@@ -474,7 +459,7 @@
       // Non-echo isStandard is false, you need to manually end it. Not the first monitoring
       standardEcho.value++;
       // For non-center pages, datasetType is passed in
-      const formData: BaseForm = reactive(Object.assign(formState));
+      const formData: ICLassForm = reactive(Object.assign(formState));
       formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
       formState = reactive(formData);
       defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
@@ -482,7 +467,7 @@
   });
 
   /** Manage */
-  const handleManage = () => {
+  const handleManageAttr = () => {
     emits('manage');
   };
   /** Create */
@@ -494,47 +479,4 @@
 
 <style lang="less" scoped>
   @import url(./index.less);
-  .content {
-    padding: 24px 26px;
-    height: 280px;
-    .title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 19px;
-      color: #333333;
-      margin-bottom: 20px;
-    }
-    .form-wrapper {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 40px;
-    }
-  }
-  .ant-form {
-    :deep(.ant-form-item) {
-      height: 28px;
-      margin-bottom: 20px;
-      padding: 0 10px;
-      .ant-form-item-label {
-        & > label {
-          height: 28px;
-        }
-      }
-      .ant-form-item-control-input {
-        min-height: 28px;
-        .ant-input-affix-wrapper {
-          padding: 4px 10px;
-        }
-      }
-      .ant-select {
-        .ant-select-selector {
-          height: 28px;
-        }
-      }
-    }
-  }
 </style>

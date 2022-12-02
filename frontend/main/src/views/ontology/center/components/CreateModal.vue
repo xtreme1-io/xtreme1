@@ -133,6 +133,9 @@
         min-height: 28px;
         .ant-input-affix-wrapper {
           padding: 4px 10px;
+          .ant-input {
+            height: 18px;
+          }
         }
       }
       .ant-select {
