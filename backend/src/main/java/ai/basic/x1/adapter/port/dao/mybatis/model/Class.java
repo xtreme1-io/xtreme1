@@ -42,11 +42,6 @@ public class Class {
     @TableField(value = "tool_type_options", typeHandler = JacksonTypeHandler.class)
     private JSONObject toolTypeOptions;
 
-    /**
-     * logic delete
-     */
-    private Boolean isDeleted;
-
     @TableField(value = "attributes", typeHandler = JacksonTypeHandler.class)
     private JSONArray attributes;
     /**

@@ -40,11 +40,6 @@ public class Classification {
     private JSONArray options;
 
     /**
-     * logic delete
-     */
-    private Boolean isDeleted;
-
-    /**
      * create time
      */
     @TableField(fill = FieldFill.INSERT)
