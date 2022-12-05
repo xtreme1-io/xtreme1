@@ -16,6 +16,6 @@ public class ClassStatisticsUnit {
 
     private Long classId;
 
-    private Integer objectCount;
+    private Integer objectAmount;
 
 }

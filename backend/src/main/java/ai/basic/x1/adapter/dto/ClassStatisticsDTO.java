@@ -19,8 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ClassStatisticsDTO {
 
-    private DatasetStatisticsDTO datasetStatistics;
-
     private List<ToolTypeStatisticsUnitDTO> toolTypeUnits;
 
     private List<ClassStatisticsUnitDTO> classUnits;

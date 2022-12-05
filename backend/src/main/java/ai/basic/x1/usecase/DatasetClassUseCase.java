@@ -1,8 +1,11 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ClassStatisticsUnit;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
+import ai.basic.x1.adapter.port.dao.mybatis.model.ToolTypeStatisticsUnit;
 import ai.basic.x1.entity.ClassStatisticsUnitBO;
 import ai.basic.x1.entity.DatasetClassBO;
 import ai.basic.x1.entity.ToolTypeStatisticsUnitBO;
@@ -33,6 +36,9 @@ public class DatasetClassUseCase {
 
     @Autowired
     private DatasetClassDAO datasetClassDao;
+
+    @Autowired
+    private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 
     /**
      * create or update DatasetClass
@@ -136,7 +142,7 @@ public class DatasetClassUseCase {
             return ClassStatisticsUnitBO.builder()
                     .toolType(cla.getToolType())
                     .name(cla.getName() == null ? "No class" : cla.getName())
-                    .objectAmount(e.getObjectCount())
+                    .objectAmount(e.getObjectAmount())
                     .color(cla.getColor() == null ? "#dedede" : cla.getColor())
                     .build();
         }).collect(Collectors.toList());
@@ -145,6 +151,16 @@ public class DatasetClassUseCase {
     public List<ToolTypeStatisticsUnitBO> statisticsObjectByToolType(Long datasetId) {
         var toolTypeUnits = datasetClassDao.getBaseMapper()
                 .statisticsObjectByToolType(datasetId);
+
+        long noClassObjectCount = dataAnnotationObjectDAO.count(new LambdaQueryWrapper<DataAnnotationObject>()
+                .eq(DataAnnotationObject::getDatasetId, datasetId)
+                .isNull(DataAnnotationObject::getClassId)
+        );
+        toolTypeUnits.add(ToolTypeStatisticsUnit.builder()
+                .toolType(null)
+                .objectAmount((int) noClassObjectCount)
+                .build()
+        );
         return DefaultConverter.convert(toolTypeUnits, ToolTypeStatisticsUnitBO.class);
     }
 

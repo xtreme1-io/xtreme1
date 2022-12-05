@@ -8,6 +8,7 @@ import ai.basic.x1.entity.DatasetBO;
 import ai.basic.x1.entity.DatasetQueryBO;
 import ai.basic.x1.entity.DatasetStatisticsBO;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.usecase.DataAnnotationObjectUseCase;
 import ai.basic.x1.usecase.DataInfoUseCase;
 import ai.basic.x1.usecase.DatasetClassUseCase;
 import ai.basic.x1.usecase.DatasetUseCase;
@@ -42,6 +43,9 @@ public class DatasetController extends BaseDatasetController {
 
     @Autowired
     private DatasetClassUseCase datasetClassUseCase;
+
+    @Autowired
+    private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
 
 
     @PostMapping("create")
@@ -113,17 +117,24 @@ public class DatasetController extends BaseDatasetController {
         return datasetUsecase.findOntologyIsExistByDatasetId(datasetId);
     }
 
-    @GetMapping("/statistics/overview/{datasetId}")
-    public ClassStatisticsDTO datasetOverview(@PathVariable("datasetId") Long datasetId,
+    @GetMapping("{datasetId}/statistics/dataStatus")
+    public DatasetStatisticsDTO statisticsDataStatus(@PathVariable("datasetId") Long datasetId) {
+        var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(List.of(datasetId));
+        var objectCount = dataAnnotationObjectUseCase.countObjectByDatasetId(datasetId);
+        var statisticsInfo = datasetStatisticsMap.getOrDefault(datasetId,
+                DatasetStatisticsBO.createEmpty(datasetId));
+
+        var result = DefaultConverter.convert(statisticsInfo, DatasetStatisticsDTO.class);
+        result.setItemCount(statisticsInfo.getItemCount());
+        result.setObjectCount(objectCount.intValue());
+        return result;
+    }
+
+    @GetMapping("{datasetId}/statistics/classObject")
+    public ClassStatisticsDTO statisticsClassObject(@PathVariable("datasetId") Long datasetId,
                                               @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
                                               @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
-        var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(List.of(datasetId));
         return ClassStatisticsDTO.builder()
-                .datasetStatistics(
-                        DefaultConverter.convert(datasetStatisticsMap.getOrDefault(datasetId,
-                                        DatasetStatisticsBO.createEmpty(datasetId)),
-                                DatasetStatisticsDTO.class)
-                )
                 .toolTypeUnits(
                         DefaultConverter.convert(datasetClassUseCase.statisticsObjectByToolType(datasetId), ToolTypeStatisticsUnitDTO.class)
                 )

@@ -17,6 +17,6 @@ public class ToolTypeStatisticsUnit {
 
     private ToolTypeEnum toolType;
 
-    private Integer objectCount;
+    private Integer objectAmount;
 
 }
