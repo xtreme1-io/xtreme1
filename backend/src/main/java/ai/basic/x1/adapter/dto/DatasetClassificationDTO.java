@@ -34,10 +34,10 @@ public class DatasetClassificationDTO {
      */
     private Long classificationId;
 
-    @NotNull(groups = GroupSave.class)
+    @NotNull
     private Long datasetId;
 
-    @NotNull(groups = GroupSave.class)
+    @NotNull
     @Length(max = 256, message = "The length of name should be less than 256.")
     private String name;
 
@@ -64,9 +64,4 @@ public class DatasetClassificationDTO {
     private SortByEnum sortBy;
 
     private SortEnum ascOrDesc;
-
-
-    public interface GroupSave {
-
-    }
 }

@@ -47,11 +47,6 @@ public class DatasetClassification{
     private JSONArray options;
 
     /**
-     * logic delete
-     */
-    private Boolean isDeleted;
-
-    /**
      * create time
      */
     @TableField(fill = FieldFill.INSERT)

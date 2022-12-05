@@ -1,11 +1,8 @@
 package ai.basic.x1.adapter.api.controller;
 
-import ai.basic.x1.adapter.dto.DatasetClassDTO;
 import ai.basic.x1.adapter.dto.DatasetClassificationDTO;
 import ai.basic.x1.entity.DatasetClassificationBO;
 import ai.basic.x1.usecase.DatasetClassificationUseCase;
-import ai.basic.x1.usecase.exception.UsecaseCode;
-import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import ai.basic.x1.util.lock.IDistributedLock;
@@ -14,7 +11,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.groups.Default;
 import java.util.List;
 
 /**
@@ -27,21 +23,18 @@ public class DatasetClassificationController {
 
     private final DatasetClassificationUseCase datasetClassificationUseCase;
 
-    @Autowired
-    private IDistributedLock distributedLock;
-
     public DatasetClassificationController(DatasetClassificationUseCase datasetClassificationUseCase) {
         this.datasetClassificationUseCase = datasetClassificationUseCase;
     }
 
     @PostMapping("create")
-    public void create(@RequestBody @Validated({Default.class, DatasetClassDTO.GroupSave.class}) DatasetClassificationDTO dto) {
+    public void create(@RequestBody @Validated DatasetClassificationDTO dto) {
         save(dto);
     }
 
     @PostMapping("update/{id}")
     public void update(@PathVariable Long id,
-                       @RequestBody @Validated({Default.class, DatasetClassificationDTO.GroupSave.class}) DatasetClassificationDTO dto) {
+                       @RequestBody @Validated DatasetClassificationDTO dto) {
         dto.setId(id);
         save(dto);
     }
@@ -77,20 +70,8 @@ public class DatasetClassificationController {
         return datasetClassificationUseCase.nameExists(DatasetClassificationBO.builder().id(id).datasetId(datasetId).name(name).build());
     }
 
-    private void save(@RequestBody @Validated({Default.class, DatasetClassificationDTO.GroupSave.class}) DatasetClassificationDTO datasetClassificationDTO) {
+    private void save(@RequestBody @Validated DatasetClassificationDTO datasetClassificationDTO) {
         DatasetClassificationBO datasetClassificationBO = DefaultConverter.convert(datasetClassificationDTO, DatasetClassificationBO.class);
-
-        var lockKey = String.format("%s:%s:%s", "datasetClassification", "datasetId+classificationName", datasetClassificationBO.getDatasetId() + "+" + datasetClassificationBO.getName());
-        var boo = distributedLock.tryLock(lockKey, 1000);
-        try {
-            if (!boo) {
-                throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
-            }
-            datasetClassificationUseCase.saveDatasetClassification(datasetClassificationBO);
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            distributedLock.unlock(lockKey);
-        }
+        datasetClassificationUseCase.saveDatasetClassification(datasetClassificationBO);
     }
 }

@@ -34,8 +34,18 @@ public class OntologyController {
         return DefaultConverter.convert(ontologyUseCase.findById(id), OntologyDTO.class);
     }
 
-    @PostMapping("/save")
-    public void save(@RequestBody @Validated OntologyDTO ontologyDTO) {
+    @PostMapping("create")
+    public void create(@Validated @RequestBody OntologyDTO ontologyDTO) {
+        save(ontologyDTO);
+    }
+
+    @PostMapping("update/{id}")
+    public void update(@PathVariable Long id, @Validated @RequestBody OntologyDTO ontologyDTO) {
+        ontologyDTO.setId(id);
+        save(ontologyDTO);
+    }
+
+    public void save(OntologyDTO ontologyDTO) {
         ontologyUseCase.saveOntology(DefaultConverter.convert(ontologyDTO, OntologyBO.class));
     }
 
