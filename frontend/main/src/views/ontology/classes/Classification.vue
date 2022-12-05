@@ -6,7 +6,7 @@
         <VirtualTab :list="tabListClasses" />
       </div>
       <div class="btn">
-        <HeaderAction :activeTab="activeTab" :datasetType="datasetType" />
+        <HeaderDropdown :activeTab="activeTab" :datasetType="datasetType" />
       </div>
       <div class="mb-15px">
         <Action
@@ -33,26 +33,13 @@
     <!-- Modal -->
     <CreateClass
       @register="registerCreateClassModal"
-      @fetchList="handleRefresh"
       :detail="detail"
       :activeTab="activeTab"
       :datasetType="datasetType"
       :ontologyId="ontologyId"
-      @manage="handleOpenFormModal"
     />
     <CreateClassification
       @register="registerCreateClassificationModal"
-      @fetchList="handleRefresh"
-      :detail="detail"
-      :activeTab="activeTab"
-      :datasetType="datasetType"
-      :ontologyId="ontologyId"
-      @manage="handleOpenFormModal"
-    />
-    <FormModal
-      @register="registerFormModal"
-      @fetchList="handleRefresh"
-      @back="handleBack"
       :detail="detail"
       :activeTab="activeTab"
       :datasetType="datasetType"
@@ -67,11 +54,10 @@
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from './components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
-  import HeaderAction from './components/HeaderAction.vue';
+  import HeaderDropdown from './components/HeaderDropdown.vue';
   import Action from './components/Action.vue';
   import CreateClass from './create/CreateClass.vue';
   import CreateClassification from './create/CreateClassification.vue';
-  import FormModal from './create/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { handleScroll } from '/@/utils/business/scrollListener';
   // icons
@@ -162,32 +148,11 @@
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
 
   /** Class Modal */
-  const [
-    registerCreateClassModal,
-    { openModal: openCreateClassModal, closeModal: closeCreateClassModal },
-  ] = useModal();
+  const [registerCreateClassModal, { openModal: openCreateClassModal }] = useModal();
 
   /** Classification Modal */
-  const [
-    registerCreateClassificationModal,
-    { openModal: openCreateClassificationModal, closeModal: closeCreateClassificationModal },
-  ] = useModal();
-
-  /** Form Modal */
-  const [registerFormModal, { openModal: openFormModal, closeModal: closeFormModal }] = useModal();
-  const handleOpenFormModal = () => {
-    closeCreateClassModal();
-    closeCreateClassificationModal();
-    openFormModal();
-  };
-  const handleBack = () => {
-    closeFormModal();
-    if (pageType == ClassTypeEnum.CLASS) {
-      openCreateClassModal(true, { isKeep: true });
-    } else {
-      openCreateClassificationModal(true, { isKeep: true });
-    }
-  };
+  const [registerCreateClassificationModal, { openModal: openCreateClassificationModal }] =
+    useModal();
 
   /** Create */
   const handleOpenCreate = (isEdit = false) => {
@@ -195,7 +160,7 @@
       (detail.value as any) = null;
     }
     if (pageType == ClassTypeEnum.CLASS) {
-      openCreateClassModal();
+      openCreateClassModal(true, { isEdit });
     } else {
       console.log('handleOpenCreate', isEdit);
       openCreateClassificationModal(true, { isEdit });
@@ -251,7 +216,7 @@
         res = await getClassificationApi(postData);
       }
 
-      cardList.value = cardList.value.concat(res.list);
+      cardList.value = cardList.value.concat(res.list ?? []);
 
       total.value = res.total;
     } catch (error: any) {
@@ -265,7 +230,7 @@
   /** Info */
   const getOntologyInfo = async () => {
     const res = await getOntologyInfoApi({ id: String(ontologyId) });
-    datasetType.value = res.type;
+    datasetType.value = res.type ?? datasetTypeEnum.IMAGE;
     setDatasetBreadcrumb(res.name);
   };
 

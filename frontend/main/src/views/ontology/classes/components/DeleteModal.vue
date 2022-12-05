@@ -6,6 +6,7 @@
     :ok-text="t('common.confirmText')"
     @ok="handleDelete"
     centered
+    :width="720"
     :okButtonProps="{
       danger: true,
       loading: isLoading,

@@ -1,7 +1,8 @@
 <template>
+  <div class="tree__title">{{ t('business.ontology.modal.treeGraph') }}</div>
   <Tree
     v-if="showTree"
-    v-model:selectedKeys="selectedKeys"
+    :selectedKeys="selectedKeys"
     :show-line="showLine"
     :treeData="treeData"
     :replace-fields="replaceFields"
@@ -18,11 +19,13 @@
 </template>
 <script lang="ts" setup>
   import { ref, unref, reactive, watch, computed } from 'vue';
+  import { useI18n } from '/@/hooks/web/useI18n';
   import { Tree } from 'ant-design-vue';
   import emitter from 'tiny-emitter/instance';
   import { clone } from '/@/utils/business/deepClone';
   import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
 
+  const { t } = useI18n();
   const showLine = ref<boolean>(true);
   const showIcon = ref<boolean>(false);
   const replaceFields = { title: 'name' };
@@ -121,8 +124,11 @@
 
   // click node event
   const emits = defineEmits(['select']);
-  const handleSelect = (selectedKeys: string[]) => {
-    emits('select', unref(selectedKeys));
+  const handleSelect = (newSelectedKeys: string[]) => {
+    if (newSelectedKeys.length != 0) {
+      selectedKeys.value = newSelectedKeys;
+      emits('select', unref(newSelectedKeys));
+    }
   };
   // change node
   emitter.off('changeSelected');
@@ -132,6 +138,14 @@
   });
 </script>
 <style lang="less">
+  .tree__title {
+    font-weight: 500; //font-weight: 600;
+
+    font-size: 16px;
+    line-height: 19px;
+
+    color: #333333;
+  }
   .classes-tree {
     width: 100%;
     height: 100%;

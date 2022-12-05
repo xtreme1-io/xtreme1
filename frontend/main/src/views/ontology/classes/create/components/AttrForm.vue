@@ -24,8 +24,6 @@
       type="options"
       v-model:showRequired="showEditorRequired"
       :dataSchema="data"
-      :handleSet="handleSet"
-      :handleAddIndex="handleAddIndex"
     />
     <FormDiscard
       :showModal="showDiscardModal"
@@ -35,7 +33,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, unref, onMounted, watch, inject } from 'vue';
+  import { ref, onMounted, watch, inject, provide } from 'vue';
   import { Divider, Select } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import OptionEditor from './OptionEditor.vue';
@@ -47,18 +45,37 @@
   import { ClassTypeEnum, inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import { inputTypeList } from './data';
 
-  const emits = defineEmits(['done', 'del', 'changeIndexList', 'createSave', 'valid']);
+  const emits = defineEmits([
+    'done',
+    'del',
+    'changeIndexList',
+    'createSave',
+    'valid',
+    'update',
+    'close',
+  ]);
   const props = defineProps<{
     dataSchema?: any;
-    handleSet?: Function;
-    handleAddIndex?: Function;
     indexList?: number[];
     activeTab?: ClassTypeEnum;
   }>();
 
-  const { handleSet, handleAddIndex } = unref(props);
+  const handleSetDataSchema = inject('handleSetDataSchema', Function, true);
+  const handleAddIndex = inject('handleAddIndex', Function, true);
+  const changeShowEdit = inject('changeShowEdit', Function, true);
+
   const data = ref<any>();
   data.value = getSchema(props.dataSchema, props.indexList);
+
+  const list = ref<string[]>([]);
+  const newIndexList = [...(props.indexList ?? [])];
+  newIndexList.pop();
+  const parentData = getSchema(props.dataSchema, newIndexList);
+  console.log(parentData);
+  list.value = parentData.attributes
+    .map((item) => item.name)
+    .filter((item) => item != data.value.name);
+  console.log(list);
   // There must be option under attrForm
   watch(data.value.options, (newData) => {
     if (newData.length > 0) {
@@ -96,29 +113,20 @@
   const showEditorRequired = ref<boolean>(false);
 
   /** BasicForm */
-  // Drop-down box toggle selection event
-  const handleChangeType = (val) => {
-    if (val === inputTypeEnum.TEXT) {
-      isShow.value = false;
-      // options need to be cleared
-      props.handleSet &&
-        props.handleSet({
-          setType: 'update',
-          setValue: { options: [] },
-        });
-      data.value = getSchema(props.dataSchema, props.indexList);
-    } else {
-      isShow.value = true;
-      data.value = getSchema(props.dataSchema, props.indexList);
-    }
-    emitter.emit('handleSaveForm', { type: 'change' });
-  };
   // register Form
-  const [registerForm, { setFieldsValue, validate, getFieldsValue }] = useForm({
-    schemas: attributeBase(),
+  const [registerForm, { setFieldsValue, validate, clearValidate, getFieldsValue }] = useForm({
+    schemas: attributeBase(list.value),
+  });
+  provide('getFieldsValue', getFieldsValue);
+  onMounted(() => {
+    setFieldsValue({
+      ...data.value,
+    });
+    handleChangeType(data.value.type);
   });
   // validation form - name
   const validateAttrForm = async () => {
+    clearValidate();
     try {
       await validate();
       return true;
@@ -126,8 +134,24 @@
       return false;
     }
   };
+  defineExpose({ validateForm: validateAttrForm });
 
-  const isShowEdit = inject('isShowEdit');
+  // Drop-down box toggle selection event
+  const handleChangeType = (val) => {
+    if (val === inputTypeEnum.TEXT) {
+      isShow.value = false;
+      // options need to be cleared
+      handleSetDataSchema({
+        setType: 'update',
+        setValue: { options: [] },
+      });
+      data.value = getSchema(props.dataSchema, props.indexList);
+    } else {
+      isShow.value = true;
+      data.value = getSchema(props.dataSchema, props.indexList);
+    }
+    emitter.emit('handleSaveForm', { type: 'change' });
+  };
 
   emitter.off('handleSaveForm');
   emitter.on('handleSaveForm', async (params?) => {
@@ -136,6 +160,7 @@
     const res = await validateAttrForm();
 
     if (res) {
+      changeShowEdit(false);
       // Check the options field
       // -- not triggered by blur
       if (params?.type != 'blur') {
@@ -145,13 +170,7 @@
         // If the type is not text and the current type is not change, the subsequent judgment will be made
         if (type != inputTypeEnum.TEXT && params?.type != 'change') {
           const { options } = data.value;
-          if ((isShowEdit as any).value) {
-            showDiscardModal.value = true;
-            if (params?.type == 'tree') {
-              emitter.emit('changeSelected', params.selectList);
-            }
-            return;
-          } else if (options.length > 0) {
+          if (options.length > 0) {
             showEditorRequired.value = false;
           } else {
             showEditorRequired.value = true;
@@ -185,7 +204,7 @@
 
       // If it's Go , go to index
       if (params?.type == 'go') {
-        props.handleAddIndex && props.handleAddIndex(params?.index);
+        handleAddIndex(params?.index);
       }
 
       // If it is a tree data click, update the indexList value, to update the data on the right
@@ -202,23 +221,23 @@
       if (params.type == 'create') {
         emits('createSave', params.data);
       }
+
+      if (params?.type == 'confirm') {
+        emits('update');
+      }
+      if (params?.type == 'close') {
+        emits('close');
+      }
     } else {
       showDiscardModal.value = true;
-      if (params?.type != 'blur') {
-        showDiscardModal.value = true;
-      }
+      // if (params?.type != 'blur') {
+      //   showDiscardModal.value = true;
+      // }
       // Prevent tree selected node from changing
       if (params?.type == 'tree') {
         emitter.emit('changeSelected', params.selectList);
       }
     }
-  });
-
-  onMounted(() => {
-    setFieldsValue({
-      ...data.value,
-    });
-    handleChangeType(data.value.type);
   });
 </script>
 <style lang="less" scoped>

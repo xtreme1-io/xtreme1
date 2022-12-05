@@ -22,18 +22,22 @@
         </div>
       </div>
       <div v-show="showInput" class="editor__addition">
-        <Input
-          autocomplete="off"
-          ref="inputRef"
-          v-model:value="additionValue"
-          @blur.prevent="onBlur"
-        />
-        <div class="editor__addition--del" @click="handleDelete">
-          <Icon style="color: #ccc" size="22" icon="mdi:delete-forever" />
-        </div>
-        <div class="editor__addition--save" @click="handleSave">
-          <CheckOutlined style="color: #ccc; font-size: 18px" />
-        </div>
+        <Form ref="formRef" :model="formState" :rules="rules" hideRequiredMark labelAlign="left">
+          <Form.Item label="" name="additionValue">
+            <Input
+              autocomplete="off"
+              ref="inputRef"
+              v-model:value="formState.additionValue"
+              @blur.prevent="onBlur"
+            />
+            <div class="editor__addition--del" @click="handleDelete">
+              <Icon style="color: #ccc" size="22" icon="mdi:delete-forever" />
+            </div>
+            <div class="editor__addition--save" @click="handleSave">
+              <CheckOutlined style="color: #ccc; font-size: 18px" />
+            </div>
+          </Form.Item>
+        </Form>
       </div>
       <div class="editor__add" @click="handleAdd">
         <Icon style="color: #57ccef" icon="ic:baseline-add" size="20" />
@@ -43,27 +47,62 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, unref, inject, watch } from 'vue';
+  import { ref, unref, inject, watch, reactive, computed } from 'vue';
   import { CheckOutlined } from '@ant-design/icons-vue';
-  import { Input } from 'ant-design-vue';
+  import { Form, Input } from 'ant-design-vue';
   import Icon from '/@/components/Icon';
   import TreeIcon from '/@/assets/svg/ontology/tree.svg';
   import emitter from 'tiny-emitter/instance';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { attributeFactory, optionFactory } from './utils';
+  import { RuleObject } from 'ant-design-vue/es/form/interface';
 
   const { t } = useI18n();
 
   const changeShowEdit = inject('changeShowEdit', Function, true);
+  const handleSetDataSchema = inject('handleSetDataSchema', Function, true);
+  const handleAddIndex = inject('handleAddIndex', Function, true);
+  const getFieldsValue = inject('getFieldsValue', Function, true);
+
   const emits = defineEmits(['update:showRequired']);
   const props = defineProps<{
     dataSchema?: any;
-    handleSet?: Function;
-    handleAddIndex?: Function;
     type: string;
     showRequired?: boolean;
     isBasic?: boolean;
   }>();
+
+  const list = computed<string[]>(() => {
+    if (props.dataSchema?.options) {
+      return props.dataSchema?.options.map((item) => item.name);
+    } else if (props.dataSchema?.attributes) {
+      return props.dataSchema?.attributes.map((item) => item.name);
+    } else {
+      return [];
+    }
+  });
+
+  const formRef = ref();
+  const formState: { additionValue: string | undefined } = reactive({
+    additionValue: undefined,
+  });
+  const validateName = async (_rule: RuleObject, value: string) => {
+    if (value === '') {
+      return Promise.reject(t('business.ontology.modal.nameRequired'));
+    } else if (list.value.some((item) => item == value)) {
+      return Promise.reject('Duplicated Name');
+    } else if (value.includes(':') || value.includes('：')) {
+      return Promise.reject(': is not allowed');
+    } else {
+      return Promise.resolve();
+    }
+  };
+  const rules = {
+    additionValue: [
+      { required: true, validator: validateName, trigger: 'change' },
+      { max: 256, message: t('business.ontology.maxLength') },
+    ],
+  };
 
   // whether to display input
   const showInput = ref<boolean>(false);
@@ -72,7 +111,7 @@
   });
   // get the input element
   const inputRef = ref<Nullable<HTMLElement>>(null);
-  const additionValue = ref<string>('');
+  // const additionValue = ref<string>('');
   // input out of focus event
   const onBlur = () => {
     setTimeout(() => {
@@ -87,28 +126,43 @@
     }, 200);
   };
 
-  const handleSave = () => {
-    const value = unref(additionValue.value);
-    props.handleSet &&
-      props.handleSet({
+  const handleSave = async () => {
+    try {
+      if (getFieldsValue && getFieldsValue()) {
+        console.log(getFieldsValue());
+
+        const { name } = getFieldsValue();
+        console.log(name);
+
+        if (!name) return;
+      }
+      console.log('save', props);
+      // if (!props.isBasic) {
+      // }
+      await formRef.value.validate();
+      // const value = unref(additionValue.value);
+      const value = unref(formState.additionValue);
+      handleSetDataSchema({
         setType: 'add',
         setValue: props.type === 'attributes' ? attributeFactory(value) : optionFactory(value),
       });
 
-    handleDelete();
+      handleDelete();
 
-    if (props.type === 'attributes') {
-      // If it is AttrForm , enter immediately
-      const length = props.dataSchema[props.type].length;
-      handleGo(length - 1);
-    } else {
-      // If it is Options , hide the verification information
-      emits('update:showRequired', false);
-    }
+      if (props.type === 'attributes') {
+        // If it is AttrForm , enter immediately
+        const length = props.dataSchema[props.type].length;
+        handleGo(length - 1);
+      } else {
+        // If it is Options , hide the verification information
+        emits('update:showRequired', false);
+      }
+    } catch (error) {}
   };
 
   const handleDelete = () => {
-    additionValue.value = '';
+    formRef.value.clearValidate();
+    formState.additionValue = undefined;
     showInput.value = false;
   };
 
@@ -117,10 +171,10 @@
       if (emitter.e.handleSaveForm) {
         emitter.emit('handleSaveForm', { type: 'go', index: index });
       } else {
-        props.handleAddIndex && props.handleAddIndex(index);
+        handleAddIndex(index);
       }
     } else {
-      props.handleAddIndex && props.handleAddIndex(index);
+      handleAddIndex(index);
     }
   };
 
@@ -201,6 +255,16 @@
       display: flex;
       align-items: center;
       margin-bottom: 10px;
+      :deep(.ant-form) {
+        width: 100%;
+        .ant-form-item {
+          margin-bottom: 0;
+        }
+        .ant-form-item-control-input-content {
+          display: flex;
+          align-items: center;
+        }
+      }
 
       input {
         flex: 1;

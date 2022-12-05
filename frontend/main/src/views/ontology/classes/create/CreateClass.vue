@@ -2,12 +2,12 @@
   <BasicModal
     v-bind="$attrs"
     @register="registerModal"
-    :title="t('business.ontology.createOntology')"
+    :title="modalTitle"
     :width="640"
     :height="450"
     destroyOnClose
     @cancel="handleCancel"
-    @ok="handleCreate"
+    @ok="handleCreateSave"
   >
     <div class="content">
       <div class="title">Basic Info</div>
@@ -23,24 +23,13 @@
         <div class="form-wrapper">
           <div class="w-260px">
             <Form.Item :label="t('common.nameText')" name="name">
-              <TheNameInput
-                style="width: 160px"
-                v-bind="$attrs"
-                v-model:name="formState.name"
-                :activeTab="ClassTypeEnum.CLASS"
-                :datasetId="props.datasetId"
-                :isCenter="props.isCenter"
-                :baseFormName="baseFormName"
-              />
-              <!-- <Input
+              <Input
                 style="width: 160px"
                 autocomplete="off"
                 v-model:value="formState.name"
                 :placeholder="t('business.ontology.createHolder')"
-                @blur="handleBlur"
-                @change="handleNameChange"
                 allow-clear
-              /> -->
+              />
             </Form.Item>
           </div>
           <div class="flex-1">
@@ -114,67 +103,165 @@
       </div>
     </div>
   </BasicModal>
+  <!-- Modal -->
+  <TheAttributes
+    @register="registerAttrModal"
+    @back="handleBack"
+    @update="handleUpdateDataSchema"
+    :formState="formState"
+    :dataSchema="dataSchema"
+    :activeTab="ClassTypeEnum.CLASS"
+    :datasetType="props.datasetType"
+    :datasetId="props.datasetId"
+    :ontologyId="props.ontologyId"
+    :isCenter="false"
+    :classId="props.classId"
+    :title="`${modalTitle}/Attributes`"
+  />
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch, unref, onMounted } from 'vue';
-  // 组件
-  import { Form, Select, Switch } from 'ant-design-vue';
+  import { ref, reactive, computed, watch, unref } from 'vue';
+  // components
+  import { Form, Select, Switch, Input } from 'ant-design-vue';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
-  import { BasicModal, useModalInner } from '/@/components/Modal';
+  import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
   import { Button } from '/@@/Button';
-  import TheColor from './class-form/TheColor.vue';
-  import TheStandard from './class-form/TheStandard.vue';
-  import TheImageInfo from './class-form/TheImageInfo.vue';
-  import TheNameInput from './class-form/TheNameInput.vue';
-  import { datasetTypeList } from './class-form/data';
-  // 工具
+  import TheAttributes from './TheAttributes.vue';
+  import TheColor from './basicForm/TheColor.vue';
+  import TheStandard from './basicForm/TheStandard.vue';
+  import TheImageInfo from './basicForm/TheImageInfo.vue';
+  // import TheNameInput from './basicForm/TheNameInput.vue';
+  import { datasetTypeList, toolTypeList, validateName } from './basicForm/data';
+  // utils
   import { useI18n } from '/@/hooks/web/useI18n';
-  // import { useMessage } from '/@/hooks/web/useMessage'; // 类型
+  import { useMessage } from '/@/hooks/web/useMessage';
   import emitter from 'tiny-emitter/instance';
-  import { ICLassForm, imageConstraintsEnum } from './typing';
+  import { ICLassForm, IDataSchema, imageConstraintsEnum } from './typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { ClassTypeEnum, ToolTypeEnum } from '/@/api/business/model/classModel';
-  import { inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
-  import { toolTypeList } from './class-form/data';
+  import { ToolTypeEnum } from '/@/api/business/model/classModel';
+  import { ClassTypeEnum } from '/@/api/business/model/classModel';
+  // interface
+  import { createEditClassApi } from '/@/api/business/ontologyClasses';
+  import { createDatasetClassApi, updateDatasetClassApi } from '/@/api/business/datasetOntology';
+  import { handleAddUuid } from './utils';
 
   const { t } = useI18n();
-  // const { createMessage } = useMessage();
-  // const handleRefresh = inject('handleRefresh', Function, true); // 刷新列表页面
+  const { createMessage } = useMessage();
+  // const handleRefresh = inject('handleRefresh', Function, true);
   const props = defineProps<{
     detail?: any;
     isCenter?: boolean;
     datasetType?: datasetTypeEnum;
     datasetId?: number;
+    ontologyId: number | null;
+    classId?: number;
   }>();
-  const emits = defineEmits(['submit', 'valid', 'changed', 'manage']);
+  const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
 
-  const [registerModal, { closeModal }] = useModalInner(() => {});
+  /** Init */
+  const modalTitle = ref<string>('Create New Class');
+  const baseFormName = ref<string>('');
+  const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
+    (config) => {
+      console.log(config);
+      // from attributes
+      if (config.isKeep) {
+        console.log(formState);
+        return;
+      }
+      console.log(props.detail);
+      // from Edit
+      if (config.isEdit) {
+        modalTitle.value = 'Edit Class';
+        setModalProps({
+          title: 'Edit Class',
+        });
+        formState.name = props.detail.name;
+        baseFormName.value = props.detail.name;
+        emitter.emit('changeRootName', props.detail.name);
+
+        formState.datasetType = unref(props.datasetType) as datasetTypeEnum;
+        formState.color = props.detail.color;
+        if (props.detail?.toolTypeOptions) {
+          const toolTypeOptions = JSON.parse(JSON.stringify(props.detail.toolTypeOptions));
+          console.log('props.datasetType', props.datasetType);
+          // echo toolTypeOptions based on datasetType
+          if (props.datasetType != datasetTypeEnum.IMAGE) {
+            formState.isConstraints = toolTypeOptions.isConstraints;
+            formState.isStandard = toolTypeOptions?.isStandard;
+            if (!formState.isStandard) {
+              // If isStandard is false, you need to manually end the non-first listening
+              standardEcho.value++;
+              formState.length = toolTypeOptions?.length;
+              formState.width = toolTypeOptions?.width;
+              formState.height = toolTypeOptions?.height;
+            } else {
+              formState.length = toolTypeOptions?.length;
+              formState.width = toolTypeOptions?.width;
+              formState.height = toolTypeOptions?.height;
+            }
+            formState.points = toolTypeOptions?.points;
+          } else {
+            formState.isConstraintsForImage = toolTypeOptions.isConstraintsForImage;
+            formState.imageLimit = toolTypeOptions?.imageLimit;
+            formState.imageLength = toolTypeOptions?.imageLength;
+            formState.imageWidth = toolTypeOptions?.imageWidth;
+            formState.imageArea = toolTypeOptions?.imageArea;
+          }
+        }
+
+        dataSchema.value = {
+          attributes: props.detail.attributes ?? [],
+        };
+
+        defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
+      } else {
+        modalTitle.value = 'Create New Class';
+        setModalProps({
+          title: 'Create New Class',
+        });
+        dataSchema.value = {
+          attributes: [],
+        };
+        // Non-echo isStandard is false, you need to manually end it. Not the first monitoring
+        standardEcho.value++;
+        formState.name = undefined;
+        defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
+      }
+      console.log(formState);
+    },
+  );
 
   /** Form */
   const labelCol = { span: 8 };
   const wrapperCol = { span: 12, offset: 1 };
   const formRef = ref();
-  let formState: ICLassForm = reactive({
+  const formState: ICLassForm = reactive({
     name: undefined,
     color: '#7dfaf2',
     datasetType: datasetTypeEnum.IMAGE,
     toolType: ToolTypeEnum.BOUNDING_BOX,
     isConstraints: false,
-    isConstraintsForImage: false,
-    inputType: inputTypeEnum.RADIO,
-    isRequired: false,
     isStandard: false,
     length: [undefined, undefined],
     width: [undefined, undefined],
     height: [undefined, undefined],
     points: undefined,
+    isConstraintsForImage: false,
     imageLimit: imageConstraintsEnum.SIZE,
     imageLength: [undefined, undefined],
     imageWidth: [undefined, undefined],
     imageArea: [undefined, undefined],
   });
   defineExpose({ formState });
+  /** Rules */
+  const rules = {
+    name: [
+      { required: true, validator: validateName, trigger: 'change' },
+      { max: 256, message: t('business.ontology.maxLength') },
+    ],
+  };
   watch(
     () => formState.datasetType,
     (newVal, oldVal) => {
@@ -281,96 +368,6 @@
     return _source == _comparison;
   };
 
-  // /** Validate Name */
-  // const validateName = async (_rule: RuleObject, value: string) => {
-  //   if (!value) {
-  //     afterValid(false);
-  //     return Promise.reject(t('business.ontology.modal.nameRequired'));
-  //   } else {
-  //     // OntologyCenter | DatasetOntology
-  //     if (!props.isCenter) {
-  //       if (value === baseFormName.value) {
-  //         // name has not changed, no duplicate name verification
-  //         afterValid(true, value);
-  //         return Promise.resolve();
-  //       }
-
-  //       const params: ValidateNameParams = {
-  //         name: formState.name ?? '',
-  //         datasetId: props.datasetId as number,
-  //       };
-  //       if (props.activeTab == ClassTypeEnum.CLASS) {
-  //         try {
-  //           const res = await validateClassNameApi(params);
-  //           if (!res) {
-  //             afterValid(true, value);
-  //             return Promise.resolve();
-  //           } else {
-  //             emits('valid', true);
-  //             const text =
-  //               t('business.class.class') +
-  //               ` "${params.name}" ` +
-  //               t('business.ontology.modal.alreadyExits') +
-  //               t('business.ontology.modal.enterNewName');
-  //             return Promise.reject(text);
-  //           }
-  //         } catch {}
-  //       } else {
-  //         try {
-  //           const res = await validateClassificationNameApi(params);
-  //           if (!res) {
-  //             afterValid(true, value);
-  //             return Promise.resolve();
-  //           } else {
-  //             emits('valid', true);
-  //             const text =
-  //               t('business.class.classification') +
-  //               ` "${params.name}" ` +
-  //               t('business.ontology.modal.alreadyExits') +
-  //               t('business.ontology.modal.enterNewName');
-  //             return Promise.reject(text);
-  //           }
-  //         } catch {}
-  //       }
-  //     } else {
-  //       // DatasetOntology
-  //       // -- no duplicate name verification
-  //       afterValid(true, value);
-  //       return Promise.resolve();
-  //     }
-  //   }
-  // };
-
-  // // method after verification
-  // const afterValid = (isValid: boolean, newName?: string) => {
-  //   if (isValid) {
-  //     emits('valid', false); // Pass validation, submit to formModal , control buttons are disabled
-  //     emitter.emit('changeRootName', newName); // Change the root node of tree
-  //   } else {
-  //     emits('valid', true);
-  //   }
-  // };
-
-  /** Rules */
-  const rules = {
-    name: [
-      // { required: true, validator: validateName, trigger: 'blur' },
-      { max: 256, message: t('business.ontology.maxLength') },
-    ],
-  };
-
-  // const handleBlur = () => {
-  //   formRef.value.validate();
-  // };
-  // const handleNameChange = () => {
-  //   if (!formState.name) emits('valid', true);
-  //   else emits('valid', false);
-  // };
-  /** Cancel */
-  const handleCancel = () => {
-    closeModal();
-  };
-
   // toolType drop down options
   const toolTypeOption = computed(() => {
     if (formState.datasetType != datasetTypeEnum.IMAGE) {
@@ -407,73 +404,84 @@
     return showConstraintsForImage.value && formState.isConstraintsForImage;
   });
 
-  // Initial page load
-  const baseFormName = ref<string>('');
-  onMounted(() => {
-    // edit -- Echo
-    if (props.detail) {
-      console.log('detail ===> ', props.detail);
-      // Is there has an id, is Edit, otherwise it is copy
-      if (props?.detail?.id) {
-        baseFormName.value = props.detail.name;
-      }
+  /** Manage Attributes */
+  const dataSchema = ref<IDataSchema>({ attributes: [] });
+  const handleUpdateDataSchema = (newDataSchema: IDataSchema) => {
+    dataSchema.value = newDataSchema;
+  };
 
-      // Change the root node of tree
-      emitter.emit('changeRootName', props.detail.name);
+  const [registerAttrModal, { openModal: openAttrModal, closeModal: closeAttrModal }] = useModal();
+  const handleManageAttr = () => {
+    openAttrModal(true, {});
+  };
+  const handleBack = () => {
+    closeAttrModal();
+  };
 
-      const formData: ICLassForm = reactive(Object.assign(formState, props.detail));
+  /** Cancel */
+  const handleCancel = () => {
+    closeModal();
+  };
+  const handleReset = () => {
+    dataSchema.value = { attributes: [] };
+  };
 
-      formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
-      if (props.detail?.toolTypeOptions) {
-        const toolTypeOptions = JSON.parse(JSON.stringify(props.detail.toolTypeOptions));
-        console.log('props.datasetType', props.datasetType);
-        // echo toolTypeOptions based on datasetType
-        if (props.datasetType != datasetTypeEnum.IMAGE) {
-          formData.isConstraints = toolTypeOptions.isConstraints;
-          formData.isStandard = toolTypeOptions?.isStandard;
-          if (!formData.isStandard) {
-            // If isStandard is false, you need to manually end the non-first listening
-            standardEcho.value++;
-            formData.length = toolTypeOptions?.length;
-            formData.width = toolTypeOptions?.width;
-            formData.height = toolTypeOptions?.height;
-          } else {
-            formData.length = toolTypeOptions?.length;
-            formData.width = toolTypeOptions?.width;
-            formData.height = toolTypeOptions?.height;
-          }
-          formData.points = toolTypeOptions?.points;
+  /** Create */
+  const handleCreateSave = async (data) => {
+    console.log('createSave: ', data);
+
+    await formRef.value.validate();
+
+    handleAddUuid(dataSchema.value.attributes);
+    const params: any = {
+      id: props.detail?.id ?? undefined,
+      ontologyId: props.ontologyId ?? undefined,
+      name: formState.name as string,
+      color: formState.color,
+      toolType: formState.toolType,
+      toolTypeOptions: {},
+      attributes: dataSchema.value.attributes as any[],
+      datasetId: props.datasetId ?? undefined,
+      classId: props.classId ?? undefined,
+    };
+    if (formState.datasetType != datasetTypeEnum.IMAGE) {
+      params.toolTypeOptions = {
+        isConstraints: formState.isConstraints ?? false,
+        isStandard: formState.isStandard ?? false,
+        length: formState.length,
+        width: formState.width,
+        height: formState.height,
+        points: formState.points,
+      };
+    } else {
+      params.toolTypeOptions = {
+        isConstraintsForImage: formState.isConstraintsForImage ?? false,
+        imageLimit: formState.imageLimit,
+        imageLength: formState.imageLength,
+        imageWidth: formState.imageWidth,
+        imageArea: formState.imageArea,
+      };
+    }
+    console.log('The create/save params is :', params);
+
+    try {
+      changeOkLoading(true);
+      if (props.isCenter) {
+        await createEditClassApi(params);
+      } else {
+        if (params.id) {
+          await updateDatasetClassApi(params);
         } else {
-          formData.isConstraintsForImage = toolTypeOptions.isConstraintsForImage;
-          formData.imageLimit = toolTypeOptions?.imageLimit;
-          formData.imageLength = toolTypeOptions?.imageLength;
-          formData.imageWidth = toolTypeOptions?.imageWidth;
-          formData.imageArea = toolTypeOptions?.imageArea;
+          await createDatasetClassApi(params);
         }
       }
-
-      // Assign a value
-      formState = reactive(formData);
-      defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
-    } else {
-      // Non-echo isStandard is false, you need to manually end it. Not the first monitoring
-      standardEcho.value++;
-      // For non-center pages, datasetType is passed in
-      const formData: ICLassForm = reactive(Object.assign(formState));
-      formData.datasetType = unref(props.datasetType) as datasetTypeEnum;
-      formState = reactive(formData);
-      defaultFormState.value = JSON.parse(JSON.stringify(unref(formData)));
+      handleReset();
+      closeModal();
+      emits('fetchList');
+    } catch (error) {
+      createMessage.error(String(error));
     }
-  });
-
-  /** Manage */
-  const handleManageAttr = () => {
-    emits('manage');
-  };
-  /** Create */
-  const isLoading = ref<boolean>(false);
-  const handleCreate = () => {
-    isLoading.value = true;
+    changeOkLoading(false);
   };
 </script>
 

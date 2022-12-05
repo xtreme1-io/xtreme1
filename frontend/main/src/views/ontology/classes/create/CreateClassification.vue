@@ -2,12 +2,12 @@
   <BasicModal
     v-bind="$attrs"
     @register="registerModal"
-    :title="t('business.ontology.createOntology')"
+    :title="modalTitle"
     :width="640"
     :height="450"
     destroyOnClose
     @cancel="handleCancel"
-    @ok="handleCreate"
+    @ok="handleCreateSave"
   >
     <div class="content">
       <div class="title">Basic Info - classification</div>
@@ -23,14 +23,12 @@
         <div class="form-wrapper">
           <div class="w-260px">
             <Form.Item :label="t('common.nameText')" name="name">
-              <TheNameInput
+              <Input
                 style="width: 160px"
-                v-bind="$attrs"
-                v-model:name="formState.name"
-                :activeTab="ClassTypeEnum.CLASS"
-                :datasetId="props.datasetId"
-                :isCenter="props.isCenter"
-                :baseFormName="baseFormName"
+                autocomplete="off"
+                v-model:value="formState.name"
+                :placeholder="t('business.ontology.createHolder')"
+                allow-clear
               />
             </Form.Item>
           </div>
@@ -64,80 +62,125 @@
       </div>
     </div>
   </BasicModal>
+  <!-- Modal -->
+  <TheAttributes
+    @register="registerAttrModal"
+    @back="handleBack"
+    @update="handleUpdateDataSchema"
+    :formState="formState"
+    :dataSchema="dataSchema"
+    :activeTab="ClassTypeEnum.CLASSIFICATION"
+    :datasetType="props.datasetType"
+    :datasetId="props.datasetId"
+    :ontologyId="props.ontologyId"
+    :isCenter="false"
+    :classificationId="props.classificationId"
+    :title="`${modalTitle}/Options`"
+  />
 </template>
 
 <script lang="ts" setup>
   import { ref, reactive, watch, unref } from 'vue';
   // components
-  import { Form, Select, Switch } from 'ant-design-vue';
+  import { Form, Select, Switch, Input } from 'ant-design-vue';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
-  import { BasicModal, useModalInner } from '/@/components/Modal';
+  import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
   import { Button } from '/@@/Button';
-  import TheNameInput from './class-form/TheNameInput.vue';
-  import { inputTypeList } from './class-form/data';
+  import TheAttributes from './TheAttributes.vue';
+  import { inputTypeList, validateName } from './basicForm/data';
   // utils
   import { useI18n } from '/@/hooks/web/useI18n';
-  // import { useMessage } from '/@/hooks/web/useMessage';
+  import { useMessage } from '/@/hooks/web/useMessage';
   import emitter from 'tiny-emitter/instance';
-  import { IClassificationForm } from './typing';
-  import { ClassTypeEnum } from '/@/api/business/model/classModel';
+  import _ from 'lodash';
+  // interface
+  import { IClassificationForm, IDataSchema } from './typing';
   import { inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { ClassTypeEnum } from '/@/api/business/model/classModel';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { createEditClassificationApi } from '/@/api/business/ontologyClasses';
+  import {
+    createDatasetClassificationApi,
+    updateDatasetClassificationApi,
+  } from '/@/api/business/datasetOntology';
+  import { handleAddUuid } from './utils';
 
   const { t } = useI18n();
-  // const { createMessage } = useMessage();
+  const { createMessage } = useMessage();
   // const handleRefresh = inject('handleRefresh', Function, true);
   const props = defineProps<{
     detail?: any;
     handleSet?: Function;
     isCenter?: boolean;
+    datasetType?: datasetTypeEnum;
     datasetId?: number;
+    ontologyId: number | null;
+    classificationId?: number;
   }>();
-  const emits = defineEmits(['submit', 'valid', 'changed', 'manage']);
+  const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
 
+  /** Init */
+  const modalTitle = ref<string>('Create New Classification');
   const baseFormName = ref<string>('');
-  const [registerModal, { closeModal }] = useModalInner((config) => {
-    // Initial page load
-    console.log(config);
-    if (config.isKeep) {
+  const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
+    (config) => {
+      console.log(config);
+      // from attributes
+      if (config.isKeep) {
+        console.log(formState);
+        return;
+      }
+      console.log(props.detail);
+      // from Edit
+      if (config.isEdit) {
+        modalTitle.value = 'Edit Classification';
+        setModalProps({
+          title: 'Edit Classification',
+        });
+        formState.name = props.detail.name;
+
+        formState.inputType = props.detail.inputType;
+        formState.isRequired = props.detail.isRequired;
+
+        baseFormName.value = props.detail.name;
+        emitter.emit('changeRootName', props.detail.name);
+
+        dataSchema.value = {
+          options: props.detail.options ?? [],
+        };
+
+        defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
+      } else {
+        modalTitle.value = 'Create New Classification';
+        setModalProps({
+          title: 'Create New Classification',
+        });
+        dataSchema.value = {
+          options: [],
+        };
+        formState.name = undefined;
+        formState.inputType = inputTypeEnum.RADIO;
+        formState.isRequired = false;
+        defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
+      }
       console.log(formState);
-      return;
-    }
-    console.log(props.detail);
-    if (config.isEdit) {
-      formState.name = props.detail.name;
-      formState.inputType = props.detail.inputType;
-      formState.isRequired = props.detail.isRequired;
-
-      baseFormName.value = props.detail.name;
-      emitter.emit('changeRootName', props.detail.name);
-
-      defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
-    } else {
-      formState.name = undefined;
-      formState.inputType = inputTypeEnum.RADIO;
-      formState.isRequired = false;
-      defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
-    }
-    console.log(formState);
-  });
+    },
+  );
 
   /** Form */
   const labelCol = { span: 8 };
   const wrapperCol = { span: 12, offset: 1 };
   const formRef = ref();
-  let formState: IClassificationForm = reactive({
+  const formState: IClassificationForm = reactive({
     name: undefined,
     inputType: inputTypeEnum.RADIO,
     isRequired: false,
   });
   defineExpose({ formState });
-  watch(formState, () => {
-    console.log(formState);
-  });
-
+  /** Rules */
   const rules = {
     name: [
-      // { required: true, validator: validateName, trigger: 'blur' },
+      { required: true, validator: validateName, trigger: 'change' },
       { max: 256, message: t('business.ontology.maxLength') },
     ],
   };
@@ -162,7 +205,7 @@
     },
   );
 
-  // isChanged?
+  /** isChanged */
   // The default FormState
   const defaultFormState = ref<any>({});
   // Watch data changes
@@ -184,19 +227,65 @@
     return _source == _comparison;
   };
 
+  /** Manage Attributes */
+  const dataSchema = ref<IDataSchema>({ options: [] });
+  const handleUpdateDataSchema = (newDataSchema: IDataSchema) => {
+    dataSchema.value = newDataSchema;
+  };
+
+  const [registerAttrModal, { openModal: openAttrModal, closeModal: closeAttrModal }] = useModal();
+  const handleManageAttr = () => {
+    openAttrModal(true, {});
+  };
+  const handleBack = () => {
+    closeAttrModal();
+  };
+
   /** Cancel */
   const handleCancel = () => {
     closeModal();
   };
-
-  /** Manage */
-  const handleManageAttr = () => {
-    emits('manage');
+  const handleReset = () => {
+    dataSchema.value = { options: [] };
   };
+
   /** Create */
-  const isLoading = ref<boolean>(false);
-  const handleCreate = () => {
-    isLoading.value = true;
+  const handleCreateSave = async (data) => {
+    console.log('createSave: ', data);
+
+    await formRef.value.validate();
+
+    handleAddUuid(dataSchema.value.options);
+    const params: any = {
+      id: props.detail?.id ?? undefined,
+      ontologyId: props.ontologyId ?? undefined,
+      name: formState.name as string,
+      inputType: formState.inputType,
+      isRequired: formState.isRequired,
+      options: dataSchema.value.options as any[],
+      datasetId: props.datasetId ?? undefined,
+      classificationId: props.classificationId ?? undefined,
+    };
+    console.log('The create/save params is :', params);
+
+    try {
+      changeOkLoading(true);
+      if (props.isCenter) {
+        await createEditClassificationApi(params);
+      } else {
+        if (params.id) {
+          await updateDatasetClassificationApi(params);
+        } else {
+          await createDatasetClassificationApi(params);
+        }
+      }
+      handleReset();
+      closeModal();
+      emits('fetchList');
+    } catch (error) {
+      createMessage.error(String(error));
+    }
+    changeOkLoading(false);
   };
 </script>
 

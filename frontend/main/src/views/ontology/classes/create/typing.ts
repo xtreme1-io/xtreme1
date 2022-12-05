@@ -53,3 +53,8 @@ export enum imageConstraintsEnum {
   SIZE = 'SIZE',
   AREA = 'AREA',
 }
+
+export interface IDataSchema {
+  attributes?: any[];
+  options?: any[];
+}

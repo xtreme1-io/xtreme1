@@ -8,13 +8,7 @@
     />
     <BasicForm @register="registerForm" :showActionButtonGroup="false" hideRequiredMark />
     <Divider style="margin: 10px 0" />
-    <OptionEditor
-      type="attributes"
-      :showRequired="showEditorRequired"
-      :dataSchema="data"
-      :handleSet="handleSet"
-      :handleAddIndex="handleAddIndex"
-    />
+    <OptionEditor type="attributes" :showRequired="showEditorRequired" :dataSchema="data" />
     <FormDiscard
       :showModal="showDiscardModal"
       @cancel="handleCancelDiscard"
@@ -23,7 +17,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, unref, onMounted, inject } from 'vue';
+  import { ref, onMounted, inject, provide } from 'vue';
   import { Divider } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import OptionEditor from './OptionEditor.vue';
@@ -34,17 +28,31 @@
   import { getSchema, handleMutiTabAction, setClassSchema, setSchema } from './utils';
   import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
 
-  const emits = defineEmits(['done', 'del', 'changeIndexList', 'createSave', 'valid']);
+  const emits = defineEmits([
+    'done',
+    'del',
+    'changeIndexList',
+    'createSave',
+    'valid',
+    'update',
+    'close',
+  ]);
   const props = defineProps<{
     dataSchema?: any;
-    handleSet?: Function;
-    handleAddIndex?: Function;
     indexList?: number[];
     activeTab?: ClassTypeEnum;
   }>();
 
+  const handleAddIndex = inject('handleAddIndex', Function, true);
+  const changeShowEdit = inject('changeShowEdit', Function, true);
+
   const data = getSchema(props.dataSchema, props.indexList);
-  const { handleSet, handleAddIndex } = unref(props);
+
+  const list = ref<string[]>([]);
+  const newIndexList = [...(props.indexList ?? [])];
+  newIndexList.pop();
+  const parentData = getSchema(props.dataSchema, newIndexList);
+  list.value = parentData.options.map((item) => item.name).filter((item) => item != data.name);
 
   /** FormHeader */
   // Return to the previous level, you need to judge the length of options
@@ -73,11 +81,19 @@
   const showEditorRequired = ref<boolean>(false);
 
   // register Form
-  const [registerForm, { setFieldsValue, validate, getFieldsValue }] = useForm({
-    schemas: optionBase,
+  const [registerForm, { setFieldsValue, validate, clearValidate, getFieldsValue }] = useForm({
+    schemas: optionBase(list.value),
   });
+  provide('getFieldsValue', getFieldsValue);
+  onMounted(() => {
+    setFieldsValue({
+      ...data,
+    });
+  });
+
   // validation form - name
   const validateOptionForm = async () => {
+    clearValidate();
     try {
       await validate();
       return true;
@@ -86,19 +102,12 @@
     }
   };
 
-  const isShowEdit = inject('isShowEdit');
-
   emitter.off('handleSaveForm');
   emitter.on('handleSaveForm', async (params?) => {
     const res = await validateOptionForm();
     if (res) {
-      if ((isShowEdit as any).value) {
-        showDiscardModal.value = true;
-        if (params?.type == 'tree') {
-          emitter.emit('changeSelected', params.selectList);
-        }
-        return;
-      }
+      changeShowEdit(false);
+
       handleMutiTabAction(
         props.activeTab,
         () => {
@@ -117,7 +126,7 @@
 
       // If it's Go , go to index
       if (params?.type == 'go') {
-        props.handleAddIndex && props.handleAddIndex(params?.index);
+        handleAddIndex(params?.index);
       }
 
       // If it is a tree data click, update the indexList value, to update the data on the right
@@ -134,6 +143,13 @@
       if (params?.type == 'create') {
         emits('createSave', params.data);
       }
+
+      if (params?.type == 'confirm') {
+        emits('update');
+      }
+      if (params?.type == 'close') {
+        emits('close');
+      }
     } else {
       showDiscardModal.value = true;
       // Prevent tree selected node from changing
@@ -141,11 +157,6 @@
         emitter.emit('changeSelected', params.selectList);
       }
     }
-  });
-  onMounted(() => {
-    setFieldsValue({
-      ...data,
-    });
   });
 </script>
 <style lang="less" scoped>
