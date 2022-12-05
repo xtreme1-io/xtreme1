@@ -8,6 +8,7 @@ export enum RouteEnum {
   CLAIM = '/claim',
   ONTOLOGY = '/ontology',
   MODELS = '/models',
+  Apis = '/api',
 }
 
 export enum RouteChildEnum {
