@@ -1,10 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
-import ai.basic.x1.entity.enums.ToolTypeEnum;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.annotation.*;
-import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,47 +10,30 @@ import java.time.OffsetDateTime;
 
 /**
  * @author chenchao
- * @date 2022-03-11
+ * @date 2022/12/2
  */
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(autoResultMap = true)
-public class DatasetClass {
+public class DatasetClassificationOntology {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private Long datasetId;
+    private Long datasetClassificationId;
 
-    private String name;
+    private Long ontologyId;
 
-    private String color;
+    private Long classificationId;
 
-    private ToolTypeEnum toolType;
-
-    /**
-     * Type configuration properties
-     */
-    @TableField(value = "tool_type_options", typeHandler = JacksonTypeHandler.class)
-    private JSONObject toolTypeOptions;
-
-    @TableField(value = "attributes", typeHandler = JacksonTypeHandler.class)
-    private JSONArray attributes;
-
-    /**
-     * create time
-     */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
 
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
 
-    /**
-     * update time
-     */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private OffsetDateTime updatedAt;
 

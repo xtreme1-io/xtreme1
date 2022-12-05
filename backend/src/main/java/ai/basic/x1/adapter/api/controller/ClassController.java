@@ -35,8 +35,18 @@ public class ClassController {
         return DefaultConverter.convert(classUseCase.findByPage(pageNo, pageSize, Objects.requireNonNull(DefaultConverter.convert(classDTO, ClassBO.class))), ClassDTO.class);
     }
 
-    @PostMapping("/save")
-    public void save(@RequestBody @Validated() ClassDTO classDTO) {
+    @PostMapping("create")
+    public void create(@Validated @RequestBody ClassDTO classDTO) {
+        save(classDTO);
+    }
+
+    @PostMapping("update/{id}")
+    public void update(@PathVariable Long id, @Validated @RequestBody ClassDTO classDTO) {
+        classDTO.setId(id);
+        save(classDTO);
+    }
+
+    public void save(ClassDTO classDTO) {
         classUseCase.saveClass(Objects.requireNonNull(DefaultConverter.convert(classDTO, ClassBO.class)));
     }
 
@@ -50,7 +60,7 @@ public class ClassController {
         if (StrUtil.isEmpty(name)) {
             return false;
         }
-        return classUseCase.validateName(id,ontologyId, name);
+        return classUseCase.validateName(id, ontologyId, name);
     }
 
 }
