@@ -148,3 +148,9 @@ export enum imageConstraintsEnum {
   SIZE = 'SIZE',
   AREA = 'AREA',
 }
+
+export enum CardTypeEnum {
+  no_mask,
+  selector,
+  card,
+}
