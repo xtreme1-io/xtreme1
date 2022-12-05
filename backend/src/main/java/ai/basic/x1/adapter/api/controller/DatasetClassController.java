@@ -2,19 +2,16 @@ package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.dto.DatasetClassDTO;
 import ai.basic.x1.entity.DatasetClassBO;
+import ai.basic.x1.entity.enums.ToolTypeEnum;
 import ai.basic.x1.usecase.DatasetClassUseCase;
-import ai.basic.x1.usecase.exception.UsecaseCode;
-import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
-import ai.basic.x1.util.lock.IDistributedLock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.groups.Default;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author chenchao
@@ -26,20 +23,17 @@ public class DatasetClassController {
 
     private final DatasetClassUseCase datasetClassUseCase;
 
-    @Autowired
-    private IDistributedLock distributedLock;
-
     public DatasetClassController(DatasetClassUseCase datasetClassUseCase) {
         this.datasetClassUseCase = datasetClassUseCase;
     }
 
     @PostMapping("create")
-    public void create(@Validated({Default.class, DatasetClassDTO.GroupSave.class}) @RequestBody DatasetClassDTO datasetClassDTO) {
+    public void create(@Validated @RequestBody DatasetClassDTO datasetClassDTO) {
         save(datasetClassDTO);
     }
 
     @PostMapping("update/{id}")
-    public void update(@PathVariable Long id, @Validated({Default.class, DatasetClassDTO.GroupSave.class}) @RequestBody DatasetClassDTO datasetClassDTO) {
+    public void update(@PathVariable Long id, @Validated @RequestBody DatasetClassDTO datasetClassDTO) {
         datasetClassDTO.setId(id);
         save(datasetClassDTO);
     }
@@ -59,6 +53,7 @@ public class DatasetClassController {
                                             @RequestParam(defaultValue = "10") Integer pageSize,
                                             DatasetClassDTO datasetClassReqDTO) {
         DatasetClassBO datasetClassBO = DefaultConverter.convert(datasetClassReqDTO, DatasetClassBO.class);
+        Assert.notNull(datasetClassBO, "param can not be null");
         Assert.notNull(datasetClassBO.getDatasetId(), "datasetId can not be null");
         return DefaultConverter.convert(datasetClassUseCase.findByPage(pageNo,
                 pageSize, datasetClassBO), DatasetClassDTO.class);
@@ -71,26 +66,16 @@ public class DatasetClassController {
 
     /**
      * Check whether the class name already exists in the same dataset
+     *
      * @return if exists return true
      */
     @GetMapping("validateName")
-    public Boolean validateName(@RequestParam Long datasetId, @RequestParam String name,@RequestParam(required = false) Long id) {
-        return datasetClassUseCase.nameExists(DatasetClassBO.builder().datasetId(datasetId).name(name).id(id).build());
+    public Boolean validateName(@RequestParam Long datasetId, @RequestParam String name, @RequestParam(required = false) Long id, @RequestParam ToolTypeEnum toolType) {
+        return datasetClassUseCase.validateName(id, datasetId, name, toolType);
     }
 
     private void save(DatasetClassDTO dto) {
         DatasetClassBO datasetClassBO = DefaultConverter.convert(dto, DatasetClassBO.class);
-        var lockKey = String.format("%s:%s:%s", "datasetClass", "datasetId+className", datasetClassBO.getDatasetId() + "+" + datasetClassBO.getName());
-        var boo = distributedLock.tryLock(lockKey, 1000);
-        try {
-            if (!boo) {
-                throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
-            }
-            datasetClassUseCase.saveDatasetClass(datasetClassBO);
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            distributedLock.unlock(lockKey);
-        }
+        datasetClassUseCase.saveDatasetClass(Objects.requireNonNull(datasetClassBO));
     }
 }
