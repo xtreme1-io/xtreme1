@@ -1,6 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
-import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.entity.enums.TokenType;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,48 +10,33 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 /**
- * @author andy
- * @date 2022-04-02 15:49:34
+ * @author zhujh
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(autoResultMap = true)
-public class Ontology {
+public class UserToken {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * name
-     */
-    private String name;
+    private String token;
 
-    /**
-     * type
-     */
-    private DatasetTypeEnum type;
+    private TokenType tokenType;
 
-    /**
-     * create time
-     */
+    private OffsetDateTime expireAt;
+
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
-    /**
-     * creator
-     */
+
     @TableField(fill = FieldFill.INSERT)
     private Long createdBy;
-    /**
-     * update time
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private OffsetDateTime updatedAt;
-    /**
-     * updater
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updatedBy;
 
+    @TableField(fill = FieldFill.UPDATE)
+    private OffsetDateTime updatedAt;
+
+    @TableField(fill = FieldFill.UPDATE)
+    private Long updatedBy;
 }

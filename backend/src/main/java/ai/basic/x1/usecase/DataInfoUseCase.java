@@ -1,21 +1,29 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
+import ai.basic.x1.adapter.port.rpc.PointCloudConvertRenderHttpCaller;
+import ai.basic.x1.adapter.port.rpc.dto.*;
 import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.entity.enums.RelationEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
+import ai.basic.x1.util.Constants;
 import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.StreamProgress;
@@ -139,10 +147,17 @@ public class DataInfoUseCase {
     @Value("${file.prefix.small:small}")
     private String small;
 
+    @Autowired
+    private PointCloudConvertRenderHttpCaller pointCloudConvertRenderHttpCaller;
+
+
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
 
     private static final ExecutorService parseExecutorService = ThreadUtil.newExecutor(5);
 
+    private static final Integer PC_RENDER_IMAGE_WIDTH = 2000;
+    private static final Integer PC_RENDER_IMAGE_HEIGHT = 2000;
+    private static final Integer RETRY_COUNT = 3;
     /**
      * Filter out files whose file suffix is not image, and discard the file when it returns false
      */
@@ -332,19 +347,22 @@ public class DataInfoUseCase {
         var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
         if (!boo) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ERROR.getMessage());
-            throw new UsecaseException(DATASET_DATA_FILE_URL_ERROR);
+            log.error("File url error,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         var dataset = datasetDAO.getById(dataInfoUploadBO.getDatasetId());
         if (ObjectUtil.isNull(dataset)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_NOT_FOUND.getMessage());
-            throw new UsecaseException(DATASET_NOT_FOUND);
+            log.error("Dataset not found,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         dataInfoUploadBO.setType(dataset.getType());
         var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
         var mimeType = FileUtil.getMimeType(fileUrl);
         if (!validateUrlFileSuffix(dataInfoUploadBO, mimeType)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_FORMAT_ERROR.getMessage());
-            throw new UsecaseException(DATASET_DATA_FILE_FORMAT_ERROR);
+            log.error("Incorrect file format,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         dataInfoUploadBO.setUploadRecordId(uploadRecordBO.getId());
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
@@ -677,11 +695,11 @@ public class DataInfoUseCase {
      * @return Serial number
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Long modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+    public String modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
         var modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
         var serialNo = IdUtil.getSnowflakeNextId();
         batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
-        return serialNo;
+        return  String.valueOf(serialNo);
     }
 
     /**
@@ -1056,6 +1074,11 @@ public class DataInfoUseCase {
         });
         var fileBOS = uploadFileList(userId, rootPath, tempPath, files);
         createUploadThumbnail(userId, fileBOS, rootPath);
+        fileBOS.forEach(fileBO -> {
+            if (fileBO.getName().toUpperCase().endsWith(PCD_SUFFIX)) {
+                handelPointCloudConvertRender(fileBO);
+            }
+        });
         var fileIdMap = fileBOS.stream().collect(Collectors.toMap(FileBO::getPathHash, FileBO::getId));
         replaceFileId(nodeList, fileIdMap);
         nodeList.sort(Comparator.comparing(DataInfoBO.FileNodeBO::getName));
@@ -1321,4 +1344,113 @@ public class DataInfoUseCase {
         }
     }
 
+
+    public void handelPointCloudConvertRender(FileBO pcdFileBO) {
+        String filePath = pcdFileBO.getPath();
+        String basePath = "";
+        String fileName;
+        String binaryFileName = "";
+        String imageFileName = "";
+        if (filePath.contains(Constants.SLANTING_BAR)) {
+            basePath = filePath.substring(0, filePath.lastIndexOf(Constants.SLANTING_BAR) + 1);
+            fileName = filePath.substring(filePath.lastIndexOf(Constants.SLANTING_BAR) + 1);
+            binaryFileName = "binary-" + fileName;
+            imageFileName = "render-" + UUID.randomUUID().toString() + ".png";
+        }
+
+        String binaryPath = String.format("%s%s", basePath, binaryFileName);
+        String imagePath = String.format("%s%s", basePath, imageFileName);
+        PresignedUrlBO binaryPreSignUrlBO;
+        PresignedUrlBO imagePreSignUrlBO;
+        try {
+            binaryPreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), binaryPath);
+            imagePreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), imagePath);
+
+        } catch (Throwable throwable) {
+            log.error("generate preSignUrl error!", throwable);
+            return;
+        }
+        List<PointCloudCRRespDTO> pointCloudCRRespDTOS = callPointCloudConvertRender(pcdFileBO, binaryPreSignUrlBO, imagePreSignUrlBO);
+        if (CollUtil.isNotEmpty(pointCloudCRRespDTOS)) {
+            for (PointCloudCRRespDTO pointCloudCRRespDTO : pointCloudCRRespDTOS) {
+                if (pointCloudCRRespDTO.getCode() == 0) {
+                    FileBO binaryPcdFile = FileBO.builder().name(binaryFileName)
+                            .originalName(binaryFileName)
+                            .path(binaryPath)
+                            .type(pcdFileBO.getType())
+                            .size(pointCloudCRRespDTO.getBinaryPcdSize())
+                            .bucketName(pcdFileBO.getBucketName())
+                            .createdAt(OffsetDateTime.now())
+                            .createdBy(pcdFileBO.getCreatedBy())
+                            .relation(RelationEnum.BINARY)
+                            .relationId(pcdFileBO.getId())
+                            .pathHash(ByteUtil.bytesToLong(SecureUtil.md5().digest(binaryPath))).build();
+                    FileBO imageFile = FileBO.builder().name(imageFileName)
+                            .originalName(imageFileName)
+                            .path(imagePath)
+                            .type(FileUtil.getMimeType(imageFileName))
+                            .size(pointCloudCRRespDTO.getImageSize())
+                            .bucketName(pcdFileBO.getBucketName())
+                            .createdAt(OffsetDateTime.now())
+                            .createdBy(pcdFileBO.getCreatedBy())
+                            .relation(RelationEnum.POINT_CLOUD_RENDER_IMAGE)
+                            .relationId(pcdFileBO.getId())
+                            .pathHash(ByteUtil.bytesToLong(SecureUtil.md5().digest(imagePath)))
+                            .extraInfo(JSONUtil.parseObj(pointCloudCRRespDTO.getPointCloudRange())
+                                    .set("width", PC_RENDER_IMAGE_WIDTH)
+                                    .set("height", PC_RENDER_IMAGE_HEIGHT))
+                            .build();
+                    fileUseCase.saveBatchFile(pcdFileBO.getCreatedBy(), List.of(binaryPcdFile, imageFile));
+                }
+            }
+        }
+    }
+
+    private List<PointCloudCRRespDTO> callPointCloudConvertRender(FileBO relationFileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {
+        PointCloudCRReqDTO pointCloudCRReqDTO = PointCloudCRReqDTO.builder()
+                .data(List.of(buildPointCloutFileInfo(relationFileBO, binaryPreSignUrlBO, imagePreSignUrlBO)))
+                .type(1)
+                .renderParam(buildRenderParam())
+                .convertParam(ConvertParam.builder().extraFields(Arrays.asList("rgb")).build()).build();
+        ApiResult<List<PointCloudCRRespDTO>> apiResult = null;
+
+        StopWatch stopWatch = new StopWatch();
+        int count = 0;
+        while (count <= RETRY_COUNT && ObjectUtil.isNull(apiResult)) {
+            try {
+                stopWatch.start();
+                apiResult = pointCloudConvertRenderHttpCaller.callConvertRender(pointCloudCRReqDTO);
+                stopWatch.stop();
+                log.info("call pointCloudConvertRender took:{},req:{},resp:{}", stopWatch.getLastTaskTimeMillis(), JSONUtil.toJsonStr(pointCloudCRReqDTO), JSONUtil.toJsonStr(apiResult));
+                break;
+            } catch (Throwable throwable) {
+                if (stopWatch.isRunning()) {
+                    stopWatch.stop();
+                }
+                log.error("call pointCloudConvertRender service error! req:{}, resp:{}", JSONUtil.toJsonStr(pointCloudCRReqDTO), JSONUtil.toJsonStr(apiResult), throwable);
+            }
+            count++;
+        }
+        if (ObjectUtil.isNull(apiResult) || apiResult.getCode() != UsecaseCode.OK) {
+            return null;
+        }
+        return apiResult.getData();
+    }
+
+    private PointCloudFileInfo buildPointCloutFileInfo(FileBO fileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {
+        PointCloudFileInfo pointCloudFileInfo = PointCloudFileInfo.builder().pointCloudFile(fileBO.getInternalUrl())
+                .uploadBinaryPcdPath(binaryPreSignUrlBO.getPresignedUrl())
+                .uploadImagePath(imagePreSignUrlBO.getPresignedUrl())
+                .build();
+        return pointCloudFileInfo;
+
+    }
+
+    private RenderParam buildRenderParam() {
+        return RenderParam.builder().colors(List.of(6313414l, 3640543l, 1886145l, 3402883l, 8385883l))
+                .zRange(null)
+                .width(PC_RENDER_IMAGE_WIDTH)
+                .height(PC_RENDER_IMAGE_HEIGHT)
+                .numStd(3).build();
+    }
 }

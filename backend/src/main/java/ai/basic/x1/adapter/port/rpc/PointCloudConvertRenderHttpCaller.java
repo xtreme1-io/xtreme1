@@ -1,6 +1,8 @@
 package ai.basic.x1.adapter.port.rpc;
 
 import ai.basic.x1.adapter.dto.ApiResult;
+import ai.basic.x1.adapter.port.rpc.dto.PointCloudCRReqDTO;
+import ai.basic.x1.adapter.port.rpc.dto.PointCloudCRRespDTO;
 import ai.basic.x1.adapter.port.rpc.dto.PreModelReqDTO;
 import ai.basic.x1.adapter.port.rpc.dto.PreModelRespDTO;
 import ai.basic.x1.usecase.exception.UsecaseException;
@@ -19,32 +21,32 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class PreLabelModelHttpCaller {
+public class PointCloudConvertRenderHttpCaller {
 
-    @Value("${model.arithmetic.preModel.url}")
-    private String preModelUrl;
+    @Value("${pointcloud.convertRender.url}")
+    private String url;
 
 
-    public ApiResult<List<PreModelRespDTO>> callPreLabelModel(PreModelReqDTO preModelReqDTO) {
+    public ApiResult<List<PointCloudCRRespDTO>> callConvertRender(PointCloudCRReqDTO pointCloudCRReqDTO) {
         try {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
-            String requestBody = JSONUtil.toJsonStr(preModelReqDTO);
-            HttpRequest httpRequest = HttpUtil.createPost(preModelUrl)
+            String requestBody = JSONUtil.toJsonStr(pointCloudCRReqDTO);
+            HttpRequest httpRequest = HttpUtil.createPost(url)
                     .body(requestBody, ContentType.JSON.getValue());
             HttpResponse httpResponse = httpRequest.execute();
             stopWatch.stop();
-            log.info(String.format("call preLabelModelService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
+            log.info(String.format("call pointCloudConvertRender took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
             if (httpResponse.getStatus() == HttpStatus.HTTP_OK) {
-                ApiResult<List<PreModelRespDTO>> apiResult = JSONUtil.toBean(httpResponse.body(), new TypeReference<>() {
+                ApiResult<List<PointCloudCRRespDTO>> apiResult = JSONUtil.toBean(httpResponse.body(), new TypeReference<>() {
                 }, false);
                 return apiResult;
             } else {
-                throw new UsecaseException("preLabelModel run error!");
+                throw new UsecaseException("pointCloudConvertRender service error!");
             }
         } catch (Throwable throwable) {
-            log.error("call pre-model service error.", throwable);
-            throw new UsecaseException("preLabelModel run error!");
+            log.error("call pointCloudConvertRender service error.", throwable);
+            throw new UsecaseException("pointCloudConvertRender service error!");
         }
     }
 }

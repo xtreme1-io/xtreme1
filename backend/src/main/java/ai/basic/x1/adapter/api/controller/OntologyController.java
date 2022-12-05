@@ -5,6 +5,8 @@ import ai.basic.x1.entity.OntologyBO;
 import ai.basic.x1.usecase.OntologyUseCase;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.util.StrUtil;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -30,6 +32,24 @@ public class OntologyController {
     @GetMapping("info/{id}")
     public OntologyDTO info(@PathVariable("id") Long id) {
         return DefaultConverter.convert(ontologyUseCase.findById(id), OntologyDTO.class);
+    }
+
+    @PostMapping("/save")
+    public void save(@RequestBody @Validated OntologyDTO ontologyDTO) {
+        ontologyUseCase.saveOntology(DefaultConverter.convert(ontologyDTO, OntologyBO.class));
+    }
+
+    @PostMapping("delete/{id}")
+    public Boolean delete(@PathVariable("id") Long id) {
+        return ontologyUseCase.deleteOntology(id);
+    }
+
+    @GetMapping("validateName")
+    public Boolean validateName(@RequestParam(value = "id",required = false) Long id, @RequestParam("name") String name) {
+        if (StrUtil.isEmpty(name)) {
+            return false;
+        }
+        return ontologyUseCase.validateName(id, name);
     }
 
 }

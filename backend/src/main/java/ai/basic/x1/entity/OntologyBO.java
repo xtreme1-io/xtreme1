@@ -25,8 +25,6 @@ public class OntologyBO {
      */
     private DatasetTypeEnum type;
 
-    private Boolean isDeleted;
-
     /**
      * number of class in one ontology
      */

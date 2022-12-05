@@ -40,11 +40,7 @@ public class CommonConfig implements WebMvcConfigurer {
 
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
-        return new Jackson2ObjectMapperBuilder()
-                .serializerByType(Long.TYPE, ToStringSerializer.instance)
-                .serializerByType(Long.class, ToStringSerializer.instance)
-                .serializerByType(BigInteger.class, ToStringSerializer.instance)
-                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return new Jackson2ObjectMapperBuilder().featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Bean
@@ -58,8 +54,9 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtHelper jwtHelper, UserUseCase userUseCase) {
-        return new JwtAuthenticationFilter(jwtHelper, userUseCase);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(UserTokenUseCase userTokenUseCase,
+                                                           UserUseCase userUseCase) {
+        return new JwtAuthenticationFilter(userTokenUseCase, userUseCase);
     }
 
     @Override
@@ -168,5 +165,9 @@ public class CommonConfig implements WebMvcConfigurer {
         return new UploadUseCase();
     }
 
+    @Bean
+    public UserTokenUseCase userTokenUseCase() {
+        return new UserTokenUseCase();
+    }
 
 }

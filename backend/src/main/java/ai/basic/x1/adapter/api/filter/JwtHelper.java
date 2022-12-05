@@ -2,7 +2,9 @@ package ai.basic.x1.adapter.api.filter;
 
 import io.jsonwebtoken.*;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Jagger Wang
@@ -13,9 +15,11 @@ public class JwtHelper {
 
     private JwtBuilder jwtBuilder;
 
+    private Integer jwtExpireHours;
+
     public JwtHelper(String jwtSecret, String jwtIssuer, Integer jwtExpireHours) {
         this.jwtParser = Jwts.parser().setSigningKey(jwtSecret);
-
+        this.jwtExpireHours = jwtExpireHours;
         if (jwtIssuer != null && jwtExpireHours != null) {
             this.jwtBuilder = Jwts.builder()
                     .setIssuer(jwtIssuer)
@@ -31,9 +35,9 @@ public class JwtHelper {
     }
 
     public String generateToken(JwtPayload payload) {
-        var claims = Jwts.claims()
-                .setSubject(payload.getUserId().toString());
-        return jwtBuilder.setClaims(claims).compact();
+        return jwtBuilder.setSubject(payload.getUserId().toString())
+                .setExpiration(payload.getExpireTime())
+                .compact();
     }
 
     public boolean validateToken(String token) {
@@ -57,5 +61,16 @@ public class JwtHelper {
         return JwtPayload.builder()
                 .userId(Long.parseLong(claims.getSubject()))
                 .build();
+    }
+
+    public JwtPayload parseToken(String token) {
+        Claims claims = jwtParser.parseClaimsJws(token).getBody();
+        return JwtPayload.builder()
+                .userId(Long.parseLong(claims.getSubject()))
+                .build();
+    }
+
+    public OffsetDateTime getDefaultExpireTime() {
+        return OffsetDateTime.now().plusHours(jwtExpireHours);
     }
 }
