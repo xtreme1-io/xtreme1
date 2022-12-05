@@ -21,16 +21,6 @@ public class DatasetClassificationBO {
 
     private Long id;
 
-    /**
-     * The id of the inherited ontology
-     */
-    private Long ontologyId;
-
-    /**
-     * The id of the inherited classification in the ontology
-     */
-    private Long classificationId;
-
     private Long datasetId;
 
     private String name;
