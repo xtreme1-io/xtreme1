@@ -5,12 +5,10 @@ import ai.basic.x1.entity.DatasetClassificationBO;
 import ai.basic.x1.usecase.DatasetClassificationUseCase;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
-import ai.basic.x1.util.lock.IDistributedLock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -50,8 +48,10 @@ public class DatasetClassificationController {
     }
 
     @GetMapping("findByPage")
-    public Page<DatasetClassificationDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize, @Valid DatasetClassificationDTO datasetClassificationDTO) {
+    public Page<DatasetClassificationDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize, DatasetClassificationDTO datasetClassificationDTO) {
         DatasetClassificationBO datasetClassificationBO = DefaultConverter.convert(datasetClassificationDTO, DatasetClassificationBO.class);
+        Assert.notNull(datasetClassificationBO, "param can not be null");
+        Assert.notNull(datasetClassificationBO.getDatasetId(), "datasetId can not be null");
         return DefaultConverter.convert(datasetClassificationUseCase.findByPage(pageNo,
                 pageSize, datasetClassificationBO), DatasetClassificationDTO.class);
     }
@@ -63,14 +63,15 @@ public class DatasetClassificationController {
 
     /**
      * Check whether the classification name already exists in the same dataset
+     *
      * @return if exists return true
      */
     @GetMapping("validateName")
-    public boolean validateName(@RequestParam Long datasetId, @RequestParam String name,@RequestParam(required = false) Long id) {
-        return datasetClassificationUseCase.nameExists(DatasetClassificationBO.builder().id(id).datasetId(datasetId).name(name).build());
+    public boolean validateName(@RequestParam Long datasetId, @RequestParam String name, @RequestParam(required = false) Long id) {
+        return datasetClassificationUseCase.validateName(id, datasetId, name);
     }
 
-    private void save(@RequestBody @Validated DatasetClassificationDTO datasetClassificationDTO) {
+    private void save(DatasetClassificationDTO datasetClassificationDTO) {
         DatasetClassificationBO datasetClassificationBO = DefaultConverter.convert(datasetClassificationDTO, DatasetClassificationBO.class);
         datasetClassificationUseCase.saveDatasetClassification(datasetClassificationBO);
     }
