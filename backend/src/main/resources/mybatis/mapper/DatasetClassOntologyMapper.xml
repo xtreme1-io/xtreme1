@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.DatasetClassOntologyMapper">
+    <insert id="saveOrUpdateBatch">
+        INSERT INTO dataset_class_ontology (dataset_class_id,ontology_id,class_id, `created_by`, `updated_by`)
+        VALUES
+        <foreach collection="list" item="item"  separator=",">
+            (#{item.datasetClassId},#{item.ontologyId},#{item.classId},#{item.createdBy},#{item.updatedBy})
+        </foreach>
+        ON DUPLICATE KEY UPDATE ontology_id=VALUES(ontology_id),
+        class_id=VALUES(class_id),
+        updated_by=VALUES(updated_by)
+    </insert>
+</mapper>
