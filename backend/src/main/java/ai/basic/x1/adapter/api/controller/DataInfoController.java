@@ -46,11 +46,11 @@ public class DataInfoController extends BaseDatasetController {
     protected DataAnnotationRecordUseCase dataAnnotationRecordUseCase;
 
     @PostMapping("upload")
-    public Long upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
+    public String upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);
         assert dataInfoUploadBO != null;
         dataInfoUploadBO.setUserId(userDTO.getId());
-        return dataInfoUsecase.upload(dataInfoUploadBO);
+        return String.valueOf(dataInfoUsecase.upload(dataInfoUploadBO));
     }
 
     @GetMapping("findUploadRecordBySerialNumbers")
@@ -134,10 +134,10 @@ public class DataInfoController extends BaseDatasetController {
     }
 
     @GetMapping("export")
-    public Long export(@Validated DataInfoQueryDTO dataInfoQueryDTO) {
+    public String export(@Validated DataInfoQueryDTO dataInfoQueryDTO) {
         var dataInfoQueryBO = DefaultConverter.convert(dataInfoQueryDTO, DataInfoQueryBO.class);
         assert dataInfoQueryBO != null;
-        return dataInfoUsecase.export(dataInfoQueryBO);
+        return String.valueOf(dataInfoUsecase.export(dataInfoQueryBO));
     }
 
     @GetMapping("findExportRecordBySerialNumbers")
@@ -166,7 +166,7 @@ public class DataInfoController extends BaseDatasetController {
     }
 
     @PostMapping("modelAnnotate")
-    public Long modelAnnotate(@Validated @RequestBody DataModelAnnotateDTO dataModelAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
+    public String modelAnnotate(@Validated @RequestBody DataModelAnnotateDTO dataModelAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
         var resultFilterParam = dataModelAnnotateDTO.getResultFilterParam();
         var modelCode = EnumUtil.fromString(ModelCodeEnum.class, dataModelAnnotateDTO.getModelCode());
         ModelParamUtils.valid(resultFilterParam, modelCode);

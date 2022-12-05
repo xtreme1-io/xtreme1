@@ -1,6 +1,8 @@
 package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.entity.enums.UploadStatusEnum;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +26,7 @@ public class UploadRecordDTO {
     /**
      * Serial number
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long serialNumber;
 
     /**
