@@ -33,7 +33,8 @@ public class ClassController {
     }
 
     @GetMapping("/findByPage")
-    public Page<ClassDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize, @Validated ClassDTO classDTO) {
+    public Page<ClassDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize, ClassDTO classDTO) {
+        Objects.requireNonNull(classDTO.getOntologyId(),"ontology id can not be null");
         return DefaultConverter.convert(classUseCase.findByPage(pageNo, pageSize, Objects.requireNonNull(DefaultConverter.convert(classDTO, ClassBO.class))), ClassDTO.class);
     }
 
@@ -68,6 +69,16 @@ public class ClassController {
             return false;
         }
         return classUseCase.validateName(id, ontologyId, name, toolType);
+    }
+
+    @PostMapping("/pushAttributesToDataset/{id}")
+    public void pushAttributesToDataset(@PathVariable("id") Long id) {
+        classUseCase.pushAttributesToDataset(id);
+    }
+
+    @GetMapping("/getRelatedDatasetClassNum/{id}")
+    public long getRelatedDatasetClassNum(@PathVariable("id") Long id) {
+        return classUseCase.getRelatedDatasetClassNum(id);
     }
 
 }

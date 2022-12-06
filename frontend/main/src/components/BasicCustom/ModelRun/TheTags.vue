@@ -33,8 +33,8 @@
 </template>
 <script lang="ts" setup>
   import { computed, watch } from 'vue';
-  import { datasetTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import { Tag } from 'ant-design-vue';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   const props = defineProps<{ classes: any[]; datasetType: datasetTypeEnum }>();
   const emits = defineEmits(['update:classes']);

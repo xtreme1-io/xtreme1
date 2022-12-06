@@ -1,11 +1,11 @@
 import { ref, unref } from 'vue';
 import { AttrItem, OptionItem } from './typing';
 import {
-  ClassItem,
-  ClassificationItem,
+  ontologyClassItem,
+  ontologyClassificationItem,
   ClassTypeEnum,
   inputTypeEnum,
-} from '/@/api/business/model/ontologyClassesModel';
+} from '/@/api/business/model/classesModel';
 
 /** create an option */
 export const optionFactory = (name) => {
@@ -251,14 +251,16 @@ export const handleDetail = (detail, activeTab) => {
       () => {
         // echo attributes
         classDataSchema.value = {
-          attributes: (detail as ClassItem)?.attributes ? (detail as ClassItem)!.attributes : [],
+          attributes: (detail as ontologyClassItem)?.attributes
+            ? (detail as ontologyClassItem)!.attributes
+            : [],
         };
       },
       () => {
         // echo options
         dataSchema.value = {
-          options: (detail as ClassificationItem)?.options
-            ? (detail as ClassificationItem)!.options
+          options: (detail as ontologyClassificationItem)?.options
+            ? (detail as ontologyClassificationItem)!.options
             : [],
         };
       },

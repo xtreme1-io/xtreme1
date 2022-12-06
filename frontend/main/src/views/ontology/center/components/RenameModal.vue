@@ -40,7 +40,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   // 接口
-  import { createEditOntologyApi } from '/@/api/business/ontology';
+  import { updateOntologyApi } from '/@/api/business/ontology';
   import { validateReName } from './formSchemas';
   import { SaveOntologyParams, UpdateOntologyParams } from '/@/api/business/model/ontologyModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
@@ -99,7 +99,7 @@
         name: formState.name,
         type: formState.type,
       };
-      await createEditOntologyApi(postData);
+      await updateOntologyApi(postData);
 
       const successText = t('business.ontology.ontology') + t('business.ontology.hasBeenRenamed');
       createMessage.success(successText);

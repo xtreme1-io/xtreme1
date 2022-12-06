@@ -16,16 +16,11 @@
   // const { t } = useI18n();
   // const { createMessage } = useMessage();
 
-  const props = defineProps<{
-    selectedList: string[];
-    list: any[];
-  }>();
-  const emits = defineEmits(['selectAll', 'unSelect', 'refresh']);
+  const props = defineProps<{ selectedList: any[] }>();
+  const emits = defineEmits(['selectAll', 'unSelect', 'refresh', 'delete']);
 
   const selectedItemIds = computed(() => {
-    return props.list
-      .filter((item) => props.selectedList.includes(item.id))
-      .map((item) => item.itemId);
+    return props.selectedList.map((item) => item.id);
   });
 
   // Select
@@ -35,9 +30,13 @@
   const handleUnselectAll = () => {
     emits('unSelect');
   };
+  const handleDeleted = () => {
+    emits('delete');
+  };
 
   const functionMap = {
     handleSelectAll,
     handleUnselectAll,
+    handleDeleted,
   };
 </script>

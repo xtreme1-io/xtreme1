@@ -19,6 +19,7 @@ import ai.basic.x1.util.Page;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -162,5 +163,29 @@ public class ClassUseCase {
         var classWrapper = new LambdaQueryWrapper<Class>().eq(Class::getOntologyId, ontologyId);
         classWrapper.eq(ObjectUtil.isNotNull(toolType), Class::getToolType, toolType);
         return DefaultConverter.convert(classDAO.list(classWrapper), ClassBO.class);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void pushAttributesToDataset(Long id) {
+        Class clazz = classDAO.getById(id);
+        JSONArray attributes = clazz.getAttributes();
+        var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, id);
+        List<DatasetClassOntology> list = datasetClassOntologyDAO.list(datasetClassOntologyWrapper);
+        if (ObjectUtil.isEmpty(list)){
+            return;
+        }
+        List<Long> datasetClassIds = list.stream().map(DatasetClassOntology::getDatasetClassId).collect(toList());
+        List<DatasetClass> datasetClasses = new ArrayList<>();
+        datasetClassIds.forEach(datasetClassId->{
+            datasetClasses.add(DatasetClass.builder().id(datasetClassId).attributes(attributes).build());
+        });
+        if (ObjectUtil.isNotEmpty(datasetClasses)){
+            datasetClassDAO.updateBatchById(datasetClasses);
+        }
+    }
+
+    public long getRelatedDatasetClassNum(Long id) {
+        var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, id);
+        return datasetClassOntologyDAO.count(datasetClassOntologyWrapper);
     }
 }

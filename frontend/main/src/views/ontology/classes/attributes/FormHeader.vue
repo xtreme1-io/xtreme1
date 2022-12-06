@@ -6,7 +6,7 @@
       icon="ic:outline-arrow-back"
     />
     <span class="breadcrumb">{{ breadcrumb }}</span>
-    <img class="delete" :src="deleteSvg" @click="handleDelete" />
+    <img v-show="isDisabled" class="delete" :src="deleteSvg" @click="handleDelete" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -20,6 +20,7 @@
   const props = defineProps<{
     dataSchema?: any;
     indexList?: number[];
+    isDisabled: boolean;
   }>();
 
   const breadcrumb = computed(() => {

@@ -1,6 +1,6 @@
 import emitter from 'tiny-emitter/instance';
 import { FormSchema } from '/@/components/Form/index';
-import { inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+import { inputTypeEnum } from '/@/api/business/model/classesModel';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { RuleObject } from 'ant-design-vue/es/form/interface';
 

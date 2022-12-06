@@ -74,17 +74,16 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import { getOntologyByTeamApi } from '/@/api/business/ontology';
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
-  import { handleMutiTabAction } from '/@/views/ontology/classes/components/modal-components/utils';
   import {
-    syncClassToOntologyApi,
-    syncClassificationToOntologyApi,
-  } from '/@/api/business/datasetOntology';
+    syncDatasetClassToOntologyApi,
+    syncDatasetClassificationToOntologyApi,
+  } from '/@/api/business/classes';
 
   import { SaveOntologyParams } from '/@/api/business/model/ontologyModel';
-  import { createEditOntologyApi } from '/@/api/business/ontology';
+  import { createOntologyApi } from '/@/api/business/ontology';
   import { validateCreateName } from '/@/views/ontology/center/components/formSchemas';
 
   interface IFormState {
@@ -183,35 +182,32 @@
       id: props.id,
       ontologyId: formState.ontologyId as unknown as string,
     };
-    handleMutiTabAction(
-      props.activeTab,
-      async () => {
-        try {
-          await syncClassToOntologyApi(params);
+    if (props.activeTab == ClassTypeEnum.CLASS) {
+      try {
+        await syncDatasetClassToOntologyApi(params);
 
-          const successText =
-            t('business.class.class') + ` "${props.name}" ` + t('business.class.hasSync');
-          createMessage.success(successText);
+        const successText =
+          t('business.class.class') + ` "${props.name}" ` + t('business.class.hasSync');
+        createMessage.success(successText);
 
-          handleClose();
-          // 同步之后需要刷新列表
-          handleRefresh();
-        } catch (e) {}
-      },
-      async () => {
-        try {
-          await syncClassificationToOntologyApi(params);
+        handleClose();
+        // 同步之后需要刷新列表
+        handleRefresh();
+      } catch (e) {}
+    } else {
+      try {
+        await syncDatasetClassificationToOntologyApi(params);
 
-          const successText =
-            t('business.class.classification') + ` "${props.name}" ` + t('business.class.hasSync');
-          createMessage.success(successText);
+        const successText =
+          t('business.class.classification') + ` "${props.name}" ` + t('business.class.hasSync');
+        createMessage.success(successText);
 
-          handleClose();
-          // 同步之后需要刷新列表
-          handleRefresh();
-        } catch (e) {}
-      },
-    );
+        handleClose();
+        // 同步之后需要刷新列表
+        handleRefresh();
+      } catch (e) {}
+    }
+
     setTimeout(() => {
       isLoading.value = false;
     }, 500);
@@ -229,7 +225,7 @@
         type: props.datasetType,
       };
       // 创建
-      await createEditOntologyApi(postData);
+      await createOntologyApi(postData);
 
       // 同步
       await toSync();
@@ -260,27 +256,23 @@
     };
 
     // 开始同步
-    handleMutiTabAction(
-      props.activeTab,
-      async () => {
-        try {
-          await syncClassToOntologyApi(params);
-        } catch (e) {}
-        // 关闭弹窗
-        handleClose();
-        // 同步之后需要刷新列表
-        handleRefresh();
-      },
-      async () => {
-        try {
-          await syncClassificationToOntologyApi(params);
-        } catch (e) {}
-        // 关闭弹窗
-        handleClose();
-        // 同步之后需要刷新列表
-        handleRefresh();
-      },
-    );
+    if (props.activeTab == ClassTypeEnum.CLASS) {
+      try {
+        await syncDatasetClassToOntologyApi(params);
+      } catch (e) {}
+      // 关闭弹窗
+      handleClose();
+      // 同步之后需要刷新列表
+      handleRefresh();
+    } else {
+      try {
+        await syncDatasetClassificationToOntologyApi(params);
+      } catch (e) {}
+      // 关闭弹窗
+      handleClose();
+      // 同步之后需要刷新列表
+      handleRefresh();
+    }
   };
 </script>
 <style scoped lang="less">

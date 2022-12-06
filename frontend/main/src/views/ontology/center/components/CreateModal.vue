@@ -50,7 +50,7 @@
   import { useMessage } from '/@/hooks/web/useMessage'; // 类型
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   // 接口
-  import { createEditOntologyApi } from '/@/api/business/ontology';
+  import { createOntologyApi } from '/@/api/business/ontology';
   import { validateCreateName } from './formSchemas';
   import { SaveOntologyParams } from '/@/api/business/model/ontologyModel';
   import { datasetTypeList } from '../../classes/attributes/data';
@@ -94,7 +94,7 @@
       await formRef.value.validate();
 
       let postData: SaveOntologyParams = { name: formState.name, type: formState.type };
-      await createEditOntologyApi(postData);
+      await createOntologyApi(postData);
 
       const successText =
         t('business.ontology.ontology') +

@@ -66,9 +66,9 @@
   import { actionList, ICopyEnum } from './data';
   import BackTitle from './BackTitle.vue';
 
-  import { CardTypeEnum } from '/@/views/ontology/classes/create/components/data';
-  import { GetListParams, ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
-  import { getClassApi, getClassificationApi } from '/@/api/business/ontologyClasses';
+  import { CardTypeEnum } from '/@/views/ontology/classes/attributes/data';
+  import { getOntologyClassesParams, ClassTypeEnum } from '/@/api/business/model/classesModel';
+  import { getOntologyClassApi, getOntologyClassificationApi } from '/@/api/business/classes';
 
   const { createMessage } = useMessage();
   const { t } = useI18n();
@@ -195,7 +195,7 @@
       cardList.value = [];
     }
 
-    const postData: GetListParams = {
+    const postData: getOntologyClassesParams = {
       pageNo: pageNo.value,
       pageSize: 30,
       ontologyId: Number(ontologyId.value),
@@ -204,9 +204,9 @@
     let res;
     try {
       if (currentVirtualTab.value == ClassTypeEnum.CLASS) {
-        res = await getClassApi(postData);
+        res = await getOntologyClassApi(postData);
       } else {
-        res = await getClassificationApi(postData);
+        res = await getOntologyClassificationApi(postData);
       }
 
       cardList.value = cardList.value.concat(res.list);

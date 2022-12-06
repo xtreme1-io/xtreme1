@@ -7,11 +7,8 @@
     :width="650"
     :height="700"
     @cancel="handleCancel"
-    :okText="'Confirm'"
-    :okButtonProps="{
-      // disabled: isValid,
-    }"
     @ok="handleConfirm"
+    :okText="okText"
   >
     <template #title>
       <Icon
@@ -38,6 +35,7 @@
             :type="editorType"
             :isBasic="true"
             :dataSchema="dataSchema"
+            :isDisabled="isDisabled"
           />
           <template v-if="toggle">
             <component
@@ -46,6 +44,7 @@
               :activeTab="activeTab"
               :dataSchema="dataSchema"
               :indexList="indexList"
+              :isDisabled="isDisabled"
               @done="handleDone"
               @del="handleDel"
               @changeIndexList="handleChangeIndexList"
@@ -79,20 +78,9 @@
   import DiscardModal from './DiscardModal.vue';
   import OptionEditor from './OptionEditor.vue';
 
-  import {
-    // ClassItem,
-    // ClassificationItem,
-    ClassTypeEnum,
-    datasetTypeEnum,
-  } from '/@/api/business/model/ontologyClassesModel';
-  // import { createEditClassApi, createEditClassificationApi } from '/@/api/business/ontologyClasses';
-  // import {
-  //   createDatasetClassApi,
-  //   updateDatasetClassApi,
-  //   createDatasetClassificationApi,
-  //   updateDatasetClassificationApi,
-  // } from '/@/api/business/datasetOntology';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { IDataSchema } from '../create/typing';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   // const { t } = useI18n();
   // const modalTitle = ref<string>('Create');
@@ -100,11 +88,27 @@
   // Set value for class | classification
 
   /** Modal */
-  const [register, { closeModal }] = useModalInner(() => {
+  const isDisabled = ref<boolean>(false);
+  const okText = ref<string>('Create');
+  const [register, { closeModal, setModalProps }] = useModalInner((config) => {
     emitter.emit('changeRootName', props.formState.name || 'Root');
     dataSchema.value = props.dataSchema;
     console.log('===>', dataSchema.value);
     indexList.value = [];
+
+    // if is Edit ,Change text to Save
+    if (
+      (dataSchema.value?.attributes && dataSchema.value?.attributes?.length > 0) ||
+      (dataSchema.value?.options && dataSchema.value?.options?.length > 0)
+    ) {
+      setModalProps({
+        okText: 'Save',
+      });
+    }
+
+    if (config.isPreview) {
+      isDisabled.value = true;
+    }
   });
   const [discardRegister, { openModal: openDiscardModal }] = useModal();
 
@@ -163,6 +167,10 @@
     } else {
       setSchema(dataSchema.value, indexList.value, setOption);
     }
+    // if has changed ,change text to Save
+    setModalProps({
+      okText: 'Save',
+    });
   };
   provide('handleSetDataSchema', handleSetDataSchema);
 
