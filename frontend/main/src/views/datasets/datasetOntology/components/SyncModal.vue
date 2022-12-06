@@ -77,7 +77,6 @@
   import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
-  import { handleMutiTabAction } from '/@/views/ontology/classes/components/modal-components/utils';
   import {
     syncClassToOntologyApi,
     syncClassificationToOntologyApi,
@@ -183,35 +182,32 @@
       id: props.id,
       ontologyId: formState.ontologyId as unknown as string,
     };
-    handleMutiTabAction(
-      props.activeTab,
-      async () => {
-        try {
-          await syncClassToOntologyApi(params);
+    if (props.activeTab == ClassTypeEnum.CLASS) {
+      try {
+        await syncClassToOntologyApi(params);
 
-          const successText =
-            t('business.class.class') + ` "${props.name}" ` + t('business.class.hasSync');
-          createMessage.success(successText);
+        const successText =
+          t('business.class.class') + ` "${props.name}" ` + t('business.class.hasSync');
+        createMessage.success(successText);
 
-          handleClose();
-          // 同步之后需要刷新列表
-          handleRefresh();
-        } catch (e) {}
-      },
-      async () => {
-        try {
-          await syncClassificationToOntologyApi(params);
+        handleClose();
+        // 同步之后需要刷新列表
+        handleRefresh();
+      } catch (e) {}
+    } else {
+      try {
+        await syncClassificationToOntologyApi(params);
 
-          const successText =
-            t('business.class.classification') + ` "${props.name}" ` + t('business.class.hasSync');
-          createMessage.success(successText);
+        const successText =
+          t('business.class.classification') + ` "${props.name}" ` + t('business.class.hasSync');
+        createMessage.success(successText);
 
-          handleClose();
-          // 同步之后需要刷新列表
-          handleRefresh();
-        } catch (e) {}
-      },
-    );
+        handleClose();
+        // 同步之后需要刷新列表
+        handleRefresh();
+      } catch (e) {}
+    }
+
     setTimeout(() => {
       isLoading.value = false;
     }, 500);
@@ -260,27 +256,23 @@
     };
 
     // 开始同步
-    handleMutiTabAction(
-      props.activeTab,
-      async () => {
-        try {
-          await syncClassToOntologyApi(params);
-        } catch (e) {}
-        // 关闭弹窗
-        handleClose();
-        // 同步之后需要刷新列表
-        handleRefresh();
-      },
-      async () => {
-        try {
-          await syncClassificationToOntologyApi(params);
-        } catch (e) {}
-        // 关闭弹窗
-        handleClose();
-        // 同步之后需要刷新列表
-        handleRefresh();
-      },
-    );
+    if (props.activeTab == ClassTypeEnum.CLASS) {
+      try {
+        await syncClassToOntologyApi(params);
+      } catch (e) {}
+      // 关闭弹窗
+      handleClose();
+      // 同步之后需要刷新列表
+      handleRefresh();
+    } else {
+      try {
+        await syncClassificationToOntologyApi(params);
+      } catch (e) {}
+      // 关闭弹窗
+      handleClose();
+      // 同步之后需要刷新列表
+      handleRefresh();
+    }
   };
 </script>
 <style scoped lang="less">

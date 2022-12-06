@@ -66,7 +66,7 @@
   import { actionList, ICopyEnum } from './data';
   import BackTitle from './BackTitle.vue';
 
-  import { CardTypeEnum } from '/@/views/ontology/classes/create/components/data';
+  import { CardTypeEnum } from '/@/views/ontology/classes/attributes/data';
   import { GetListParams, ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import { getClassApi, getClassificationApi } from '/@/api/business/ontologyClasses';
 

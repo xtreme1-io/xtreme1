@@ -2,39 +2,55 @@
   <div :class="`${prefixCls}`">
     <CreateCard @click="handleCreate" />
     <div v-for="item in props.cardList" :key="item.ontologyId" class="card">
-      <template v-if="props.activeTab == ClassTypeEnum.CLASS">
-        <div class="card__title">
-          <img :src="toolTypeImg[item.toolType]" />
-          <Tooltip placement="topLeft" :title="item.name">
+      <div class="card__container">
+        <template v-if="props.activeTab == ClassTypeEnum.CLASS">
+          <div class="card__title">
+            <Checkbox
+              v-if="cardType === CardTypeEnum.selector"
+              :checked="isSelected(item.id)"
+              @change="handleSelectedChange(item)"
+            />
+            <div class="card__title--img">
+              <img :src="toolTypeImg[item.toolType]" />
+            </div>
+            <Tooltip placement="topLeft" :title="item.name">
+              <span>{{ item.name }}</span>
+            </Tooltip>
+          </div>
+          <div class="card__text" :style="{ backgroundColor: item.color }">
             <span>{{ item.name }}</span>
-          </Tooltip>
+          </div>
+          <div class="card__attribute">
+            <span>{{ t('business.class.attributes') + '：' }}</span>
+            <span>{{ getAttributeLength(item.attributes) }}</span>
+          </div>
+        </template>
+        <template v-if="props.activeTab == ClassTypeEnum.CLASSIFICATION">
+          <div class="card__title">
+            <Checkbox
+              v-if="cardType === CardTypeEnum.selector"
+              :checked="isSelected(item.id)"
+              @change="handleSelectedChange(item)"
+            />
+            <div class="card__title--img">
+              <img :src="inputItemImg[item.inputType]" />
+            </div>
+            <Tooltip placement="topLeft" :title="item.name">
+              <span>{{ item.name }}</span>
+            </Tooltip>
+          </div>
+          <div class="card__img">
+            <div :style="{ backgroundImage: 'url(' + CardImage + ')' }"></div>
+          </div>
+        </template>
+        <div class="card__date">
+          <span>{{ t('business.class.createdDate') + '：' }}</span>
+          <span>{{ getDate(item.createdAt) }}</span>
         </div>
-        <div class="card__text" :style="{ backgroundColor: item.color }">
-          <span>{{ item.name }}</span>
-        </div>
-        <div class="card__attribute">
-          <span>{{ t('business.class.attributes') + '：' }}</span>
-          <span>{{ getAttributeLength(item.attributes) }}</span>
-        </div>
-      </template>
-      <template v-if="props.activeTab == ClassTypeEnum.CLASSIFICATION">
-        <div class="card__title">
-          <img :src="inputItemImg[item.inputType]" />
-          <Tooltip placement="topLeft" :title="item.name">
-            <span>{{ item.name }}</span>
-          </Tooltip>
-        </div>
-        <div class="card__img">
-          <div :style="{ backgroundImage: 'url(' + CardImage + ')' }"></div>
-        </div>
-      </template>
-      <div class="card__date">
-        <span>{{ t('business.class.createdDate') + '：' }}</span>
-        <span>{{ getDate(item.createdAt) }}</span>
       </div>
       <div class="card__mask animate-fadeIn animate-animated">
         <div class="delete">
-          <EllipsisOutlined style="color: #57ccef" />
+          <EllipsisOutlined style="color: #aaa" />
           <div class="action-list">
             <div class="item" @click.stop="handleDelete(item)">
               <img class="ml-2 mr-3" :src="deleteSvg" alt="" />
@@ -59,18 +75,19 @@
   />
 </template>
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useModal } from '/@/components/Modal';
   import { getDate } from '/@/utils/business/timeFormater';
 
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { Button, Tooltip, Checkbox } from 'ant-design-vue';
   import { EllipsisOutlined } from '@ant-design/icons-vue';
-  import { Button, Tooltip } from 'ant-design-vue';
   import DeleteModal from './DeleteModal.vue';
   import CreateCard from '../../center/components/CreateCard.vue';
-  import { toolTypeImg, inputItemImg } from '../attributes/data';
+
+  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { toolTypeImg, inputItemImg, CardTypeEnum } from '../attributes/data';
   import deleteSvg from '/@/assets/icons/delete.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';
 
@@ -80,6 +97,8 @@
 
   const props = withDefaults(
     defineProps<{
+      selectedList?: any[];
+      cardType?: CardTypeEnum;
       type?: 'dataset' | undefined;
       cardList: any[];
       activeTab: ClassTypeEnum;
@@ -90,7 +109,7 @@
     },
   );
 
-  const emits = defineEmits(['edit', 'create']);
+  const emits = defineEmits(['edit', 'create', 'handleSelected']);
 
   /** Edit */
   const handleEdit = (id) => {
@@ -115,6 +134,14 @@
   const handleCreate = () => {
     emits('create');
   };
+
+  /** Select */
+  const isSelected = computed(() => (id: number) => {
+    return props.selectedList?.some((item) => item.id == id);
+  });
+  const handleSelectedChange = (item) => {
+    emits('handleSelected', item);
+  };
 </script>
 <style lang="less" scoped>
   @import '/@/design/function/gridLayout.less';
@@ -127,108 +154,120 @@
       position: relative;
       width: 100%;
       height: 100%;
-      padding: 10px;
       border-radius: 4px;
       background-color: #fff;
       overflow: hidden;
       font-weight: 400;
       font-size: 14px;
       color: #333;
-
-      .card__title {
+      .card__container {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        gap: 10px;
         width: 100%;
-        height: 24px;
-        margin-bottom: 6px;
-
-        img {
-          width: 16px;
-          height: 16px;
-          margin-right: 10px;
-          margin-left: 4px;
-        }
-
-        span {
-          font-size: 18px;
-          padding-right: 24px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          text-align: center;
-        }
-      }
-
-      .card__text {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        padding: 7% 0;
-        margin-bottom: 6px;
-
-        span {
-          color: #ffffff;
-          font-weight: 700;
-          font-size: 32px;
+        height: 100%;
+        padding: 10px;
+        .card__title {
+          display: flex;
+          align-items: center;
+          gap: 6px;
           width: 100%;
-          padding: 10px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          text-align: center;
+          height: 24px;
+
+          .card__title--img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            img {
+              width: 16px;
+              height: 16px;
+            }
+          }
+
+          span {
+            font-size: 18px;
+            padding-right: 24px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+          }
+          :deep(.ant-checkbox-wrapper) {
+            z-index: 5;
+            .ant-checkbox-inner {
+              width: 20px;
+              height: 20px;
+            }
+          }
         }
-      }
 
-      .card__img {
-        margin-bottom: 6px;
-
-        div {
+        .card__text {
+          display: flex;
+          justify-content: center;
+          align-items: center;
           width: 100%;
-          padding-top: 49%;
-          background-color: #fff;
-          background-position: 50%;
-          background-repeat: no-repeat;
-          background-size: cover;
+          padding: 8% 0;
+
+          span {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 32px;
+            width: 100%;
+            padding: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+          }
         }
-      }
 
-      .card__attribute {
-        margin-bottom: 6px;
-        line-height: 16px;
-      }
+        .card__img {
+          div {
+            width: 100%;
+            padding-top: 49%;
+            background-color: #fff;
+            background-position: 50%;
+            background-repeat: no-repeat;
+            background-size: cover;
+          }
+        }
 
-      .card__date {
-        line-height: 16px;
-      }
+        .card__attribute {
+          line-height: 16px;
+        }
 
-      &:hover {
-        .card__mask {
-          display: block;
+        .card__date {
+          line-height: 16px;
         }
       }
 
       .card__mask {
         display: none;
+        align-items: center;
+        justify-content: center;
         position: absolute;
         width: 100%;
         height: 100%;
+        padding: 10px;
         top: 0;
         left: 0;
+        z-index: 3;
         background: rgba(0, 0, 0, 0.3);
 
         .delete {
           position: absolute;
           width: 24px;
           height: 24px;
-          right: 6px;
-          top: 6px;
+          right: 10px;
+          top: 10px;
           display: flex;
           justify-content: center;
           align-items: center;
 
-          background: rgba(255, 255, 255, 0.75);
-          border-radius: 3px;
+          background-color: #f3f3f3;
+          border-radius: 4px;
           cursor: pointer;
 
           &:hover {
@@ -270,17 +309,23 @@
         }
 
         .sync {
-          position: absolute;
-          left: 20px;
-          right: 20px;
-          bottom: 60px;
+          width: 100%;
+          button {
+            border-radius: 6px;
+          }
         }
 
         .edit {
-          position: absolute;
-          left: 20px;
-          right: 20px;
-          bottom: 20px;
+          width: 100%;
+          button {
+            border-radius: 6px;
+          }
+        }
+      }
+
+      &:hover {
+        .card__mask {
+          display: flex;
         }
       }
     }

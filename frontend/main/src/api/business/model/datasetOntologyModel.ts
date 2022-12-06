@@ -17,8 +17,8 @@ export interface GetListParams extends BasicPageParams, SearchItem {
 /** response params */
 export interface ResponseItem extends OntologyResponseItem {
   datasetId?: number;
-  classId?: Nullable<number>;
-  classificationId?: Nullable<number>;
+  classId?: number;
+  classificationId?: number;
   type?: string;
 }
 

@@ -113,7 +113,6 @@
     :activeTab="ClassTypeEnum.CLASS"
     :datasetType="props.datasetType"
     :datasetId="props.datasetId"
-    :ontologyId="props.ontologyId"
     :isCenter="false"
     :classId="props.classId"
     :title="`${modalTitle}/Attributes`"
@@ -136,14 +135,14 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import emitter from 'tiny-emitter/instance';
+  import { handleAddUuid, validateName } from './utils';
+  // interface
   import { ICLassForm, IDataSchema, imageConstraintsEnum } from './typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { ToolTypeEnum } from '/@/api/business/model/classModel';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
-  // interface
   import { createEditClassApi } from '/@/api/business/ontologyClasses';
   import { createDatasetClassApi, updateDatasetClassApi } from '/@/api/business/datasetOntology';
-  import { handleAddUuid, validateName } from './utils';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -153,7 +152,7 @@
     isCenter?: boolean;
     datasetType?: datasetTypeEnum;
     datasetId?: number;
-    ontologyId: number | null;
+    ontologyId?: number | null; // for edit
     classId?: number;
   }>();
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);

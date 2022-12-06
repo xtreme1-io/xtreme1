@@ -93,6 +93,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import emitter from 'tiny-emitter/instance';
   import _ from 'lodash';
+  import { handleAddUuid, validateName } from './utils';
   // interface
   import { IClassificationForm, IDataSchema } from './typing';
   import { inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
@@ -103,7 +104,6 @@
     createDatasetClassificationApi,
     updateDatasetClassificationApi,
   } from '/@/api/business/datasetOntology';
-  import { handleAddUuid, validateName } from './utils';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -114,7 +114,7 @@
     isCenter?: boolean;
     datasetType?: datasetTypeEnum;
     datasetId?: number;
-    ontologyId: number | null;
+    ontologyId?: number | null;
     classificationId?: number;
   }>();
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);

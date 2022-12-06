@@ -37,6 +37,6 @@ export type DeleteOntologyParams = BasicIdParams;
 
 /** get ontology by team name */
 export interface FindOntologyByTeamParams {
-  name: string;
+  name?: string;
   type: datasetTypeEnum;
 }

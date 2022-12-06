@@ -54,7 +54,7 @@
       </Form.Item>
       <Form.Item v-if="props.activeTab == ClassTypeEnum.CLASS">
         <CollContainer icon="fa-solid:toolbox" :title="t('business.ontology.searchForm.toolType')">
-          <div class="select-inner">
+          <div class="select-inner w-full">
             <Select
               size="small"
               v-model:value="formState.toolType"
@@ -73,7 +73,7 @@
       </Form.Item>
       <Form.Item v-if="props.activeTab == ClassTypeEnum.CLASSIFICATION">
         <CollContainer icon="lucide:form-input" :title="t('business.class.inputType')">
-          <div class="select-inner">
+          <div class="select-inner w-full">
             <Select
               size="small"
               v-model:value="formState.inputType"

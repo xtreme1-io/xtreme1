@@ -116,7 +116,7 @@
     SortTypeOption,
     toolTypeList,
     inputTypeList,
-  } from './modal-components/data';
+  } from '/@/views/ontology/classes/attributes/data';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('searchForm');

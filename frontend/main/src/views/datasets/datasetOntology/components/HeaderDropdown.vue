@@ -1,8 +1,8 @@
 <template>
   <div class="h-36px inline-flex gap-10px items-center">
-    <Dropdown placement="bottomRight">
-      <div class="flex items-center justify-center h-36px w-44px rounded-8px border-4 bg-white">
-        <Icon style="cursor: pointer; color: #aaa" icon="gridicons:ellipsis" :size="18" />
+    <Dropdown placement="bottomRight" trigger="click" overlayClassName="headerDropdown">
+      <div class="ellipsis_box">
+        <Icon class="ellipsis_box-icon" icon="gridicons:ellipsis" :size="18" />
       </div>
       <template #overlay>
         <Menu>
@@ -18,7 +18,7 @@
             <div class="flex gap-10px items-center">
               <SvgIcon class="icon" name="ontology-import" />
               <div class="title">
-                {{ 'Import by Excel' }}
+                {{ 'Import by Json' }}
               </div>
             </div>
           </Menu.Item>
@@ -26,7 +26,7 @@
             <div class="flex gap-10px items-center">
               <SvgIcon class="icon" name="ontology-export" />
               <div class="title">
-                {{ 'Export Excel' }}
+                {{ 'Export as Json' }}
               </div>
             </div>
           </Menu.Item>
@@ -194,4 +194,44 @@
   };
   const handleExport = () => {};
 </script>
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+  .ellipsis_box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    width: 44px;
+    border-radius: 8px;
+    border-width: 4px;
+    background-color: #ddebff;
+    border-color: #fff;
+    box-shadow: 0 0 0 1px #ccc;
+    transition: all 0.3s;
+    &:hover {
+      box-shadow: 0 0 0 1px @primary-color;
+    }
+    cursor: pointer;
+    &-icon {
+      color: @primary-color;
+    }
+  }
+</style>
+<style lang="less">
+  .headerDropdown {
+    // width: 220px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+    .ant-dropdown-menu {
+      padding: 8px 0;
+      overflow: hidden;
+      box-shadow: none;
+      .ant-dropdown-menu-item {
+        &:hover {
+          background: #e6f0fe;
+        }
+      }
+    }
+  }
+</style>
