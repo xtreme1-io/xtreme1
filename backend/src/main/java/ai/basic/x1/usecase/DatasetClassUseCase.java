@@ -66,12 +66,19 @@ public class DatasetClassUseCase {
         }
         if (ObjectUtil.isNotNull(datasetClassBO.getOntologyId()) && ObjectUtil.isNotNull(datasetClassBO.getClassId())) {
             var datasetClassOntology = DatasetClassOntology.builder()
-                    .datasetClassId(Objects.requireNonNull(datasetClass).getId())
+                    .datasetClassId(datasetClass.getId())
                     .ontologyId(datasetClassBO.getOntologyId())
                     .classId(datasetClassBO.getClassId())
                     .build();
             datasetClassOntologyDAO.getBaseMapper().saveOrUpdateBatch(Lists.newArrayList(datasetClassOntology));
+        }else if (ObjectUtil.isNull(datasetClassBO.getOntologyId()) && ObjectUtil.isNull(datasetClassBO.getClassId())){
+            removeDatasetClassOntology(datasetClass.getId());
         }
+    }
+
+    private void removeDatasetClassOntology(Long datasetClassId){
+        var wrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getDatasetClassId, datasetClassId);
+        datasetClassOntologyDAO.remove(wrapper);
     }
 
     /**
