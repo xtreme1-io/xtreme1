@@ -141,8 +141,12 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { ToolTypeEnum } from '/@/api/business/model/classModel';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
-  import { createEditClassApi } from '/@/api/business/ontologyClasses';
-  import { createDatasetClassApi, updateDatasetClassApi } from '/@/api/business/datasetOntology';
+  import {
+    updateOntologyClassApi,
+    createOntologyClassApi,
+    createDatasetClassApi,
+    updateDatasetClassApi,
+  } from '/@/api/business/classes';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -465,7 +469,11 @@
     try {
       changeOkLoading(true);
       if (props.isCenter) {
-        await createEditClassApi(params);
+        if (params.id) {
+          await updateOntologyClassApi(params);
+        } else {
+          await createOntologyClassApi(params);
+        }
       } else {
         if (params.id) {
           await updateDatasetClassApi(params);

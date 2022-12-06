@@ -78,18 +78,18 @@
   import { useModal } from '/@/components/Modal';
   import { handleScroll } from '/@/utils/business/scrollListener';
   import { RouteChildEnum } from '/@/enums/routeEnum';
-  import { ClassTypeEnum, datasetTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import {
-    getClassApi,
-    getClassByIdApi,
-    getClassificationApi,
-    getClassificationByIdApi,
-  } from '/@/api/business/datasetOntology';
+    getDatasetClassApi,
+    getDatasetClassByIdApi,
+    getDatasetClassificationApi,
+    getDatasetClassificationByIdApi,
+  } from '/@/api/business/classes';
   import {
-    GetListParams,
-    ClassItem,
-    ClassificationItem,
-  } from '/@/api/business/model/datasetOntologyModel';
+    ClassTypeEnum,
+    getDatasetClassesParams,
+    datasetClassItem,
+    datasetClassificationItem,
+  } from '/@/api/business/model/classesModel';
   import { datasetItemDetail } from '/@/api/business/dataset';
   import Scenario from '/@/assets/svg/tags/scenario.svg';
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
@@ -99,6 +99,7 @@
   import OntologyActive from '/@/assets/svg/tags/classActive.svg';
   import { setDatasetBreadcrumb } from '/@/utils/business';
   import { CardTypeEnum } from '/@/views/ontology/classes/attributes/data';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('datasetOntology');
@@ -159,7 +160,7 @@
   ];
 
   /** Clicked Detail */
-  const detail = ref<ClassItem | ClassificationItem>();
+  const detail = ref<datasetClassItem | datasetClassificationItem>();
   const updateDetail = (newDetail) => {
     detail.value = Object.assign(Object(detail.value), newDetail);
   };
@@ -188,9 +189,9 @@
   const handleEdit = async (id) => {
     try {
       if (pageType == ClassTypeEnum.CLASS) {
-        detail.value = await getClassByIdApi({ id: id });
+        detail.value = await getDatasetClassByIdApi({ id: id });
       } else {
-        detail.value = await getClassificationByIdApi({ id: id });
+        detail.value = await getDatasetClassificationByIdApi({ id: id });
       }
 
       ontologyId.value = detail.value?.ontologyId;
@@ -211,12 +212,12 @@
   };
 
   /** List */
-  const cardList = ref<Array<ClassItem | ClassificationItem>>([]);
+  const cardList = ref<Array<datasetClassItem | datasetClassificationItem>>([]);
   const total = ref<number>(0);
   const pageNo = ref<number>(1);
   const getList = async (isConcat = false) => {
     loadingRef.value = true;
-    const postData: GetListParams = {
+    const postData: getDatasetClassesParams = {
       pageNo: pageNo.value,
       pageSize: 30,
       datasetId: datasetId,
@@ -231,9 +232,9 @@
     let res;
     try {
       if (pageType == ClassTypeEnum.CLASS) {
-        res = await getClassApi(postData);
+        res = await getDatasetClassApi(postData);
       } else {
-        res = await getClassificationApi(postData);
+        res = await getDatasetClassificationApi(postData);
       }
       cardList.value = cardList.value.concat(res.list);
 

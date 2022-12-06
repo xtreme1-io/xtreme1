@@ -26,7 +26,7 @@
   import emitter from 'tiny-emitter/instance';
   import { optionBase } from './formSchemas';
   import { getSchema, handleMutiTabAction, setClassSchema, setSchema } from './utils';
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
 
   const emits = defineEmits([
     'done',

@@ -74,16 +74,16 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
 
   import { getOntologyByTeamApi } from '/@/api/business/ontology';
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   import {
-    syncClassToOntologyApi,
-    syncClassificationToOntologyApi,
-  } from '/@/api/business/datasetOntology';
+    syncDatasetClassToOntologyApi,
+    syncDatasetClassificationToOntologyApi,
+  } from '/@/api/business/classes';
 
   import { SaveOntologyParams } from '/@/api/business/model/ontologyModel';
-  import { createEditOntologyApi } from '/@/api/business/ontology';
+  import { createOntologyApi } from '/@/api/business/ontology';
   import { validateCreateName } from '/@/views/ontology/center/components/formSchemas';
 
   interface IFormState {
@@ -184,7 +184,7 @@
     };
     if (props.activeTab == ClassTypeEnum.CLASS) {
       try {
-        await syncClassToOntologyApi(params);
+        await syncDatasetClassToOntologyApi(params);
 
         const successText =
           t('business.class.class') + ` "${props.name}" ` + t('business.class.hasSync');
@@ -196,7 +196,7 @@
       } catch (e) {}
     } else {
       try {
-        await syncClassificationToOntologyApi(params);
+        await syncDatasetClassificationToOntologyApi(params);
 
         const successText =
           t('business.class.classification') + ` "${props.name}" ` + t('business.class.hasSync');
@@ -225,7 +225,7 @@
         type: props.datasetType,
       };
       // 创建
-      await createEditOntologyApi(postData);
+      await createOntologyApi(postData);
 
       // 同步
       await toSync();
@@ -258,7 +258,7 @@
     // 开始同步
     if (props.activeTab == ClassTypeEnum.CLASS) {
       try {
-        await syncClassToOntologyApi(params);
+        await syncDatasetClassToOntologyApi(params);
       } catch (e) {}
       // 关闭弹窗
       handleClose();
@@ -266,7 +266,7 @@
       handleRefresh();
     } else {
       try {
-        await syncClassificationToOntologyApi(params);
+        await syncDatasetClassificationToOntologyApi(params);
       } catch (e) {}
       // 关闭弹窗
       handleClose();

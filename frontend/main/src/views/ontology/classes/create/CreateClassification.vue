@@ -96,14 +96,15 @@
   import { handleAddUuid, validateName } from './utils';
   // interface
   import { IClassificationForm, IDataSchema } from './typing';
-  import { inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { inputTypeEnum } from '/@/api/business/model/classesModel';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { createEditClassificationApi } from '/@/api/business/ontologyClasses';
   import {
+    updateOntologyClassificationApi,
+    createOntologyClassificationApi,
     createDatasetClassificationApi,
     updateDatasetClassificationApi,
-  } from '/@/api/business/datasetOntology';
+  } from '/@/api/business/classes';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -271,7 +272,11 @@
     try {
       changeOkLoading(true);
       if (props.isCenter) {
-        await createEditClassificationApi(params);
+        if (params.id) {
+          await updateOntologyClassificationApi(params);
+        } else {
+          await createOntologyClassificationApi(params);
+        }
       } else {
         if (params.id) {
           await updateDatasetClassificationApi(params);

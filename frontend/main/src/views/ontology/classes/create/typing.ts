@@ -1,8 +1,5 @@
-import {
-  ToolTypeEnum,
-  datasetTypeEnum,
-  inputTypeEnum,
-} from '/@/api/business/model/ontologyClassesModel';
+import { ToolTypeEnum, inputTypeEnum } from '/@/api/business/model/classesModel';
+import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 export interface ICLassForm {
   name: string | undefined;

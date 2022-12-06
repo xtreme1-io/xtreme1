@@ -58,13 +58,11 @@
   import ChooseOntology from './copy-modal/ChooseOntology.vue';
   import ChooseClass from './copy-modal/ChooseClass.vue';
   import ConflictModal from './copy-modal/ConflictModal.vue';
-  // import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
-  // import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { useModal } from '/@/components/Modal';
   import { onMounted, ref } from 'vue';
   import { ICopyEnum } from './copy-modal/data';
-  import { GetListParams } from '/@/api/business/model/ontologyClassesModel';
-  import { getClassApi, getClassificationApi } from '/@/api/business/ontologyClasses';
+  import { getOntologyClassesParams } from '/@/api/business/model/classesModel';
+  import { getOntologyClassApi, getOntologyClassificationApi } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
 
   // const { t } = useI18n();
@@ -163,15 +161,15 @@
 
   // TODO get ontology classList and classificationList, max 100
   const getSelectedOntologyList = async () => {
-    const postData: GetListParams = {
+    const postData: getOntologyClassesParams = {
       pageNo: 1,
       pageSize: 100,
       ontologyId: Number(selectedOntologyId.value),
     };
-    const classRes = await getClassApi(postData);
+    const classRes = await getOntologyClassApi(postData);
     ontologyClassList.value = classRes.list ?? [];
 
-    const classificationRes = await getClassificationApi(postData);
+    const classificationRes = await getOntologyClassificationApi(postData);
     ontologyClassificationList.value = classificationRes.list ?? [];
   };
 

@@ -79,20 +79,9 @@
   import DiscardModal from './DiscardModal.vue';
   import OptionEditor from './OptionEditor.vue';
 
-  import {
-    // ClassItem,
-    // ClassificationItem,
-    ClassTypeEnum,
-    datasetTypeEnum,
-  } from '/@/api/business/model/ontologyClassesModel';
-  // import { createEditClassApi, createEditClassificationApi } from '/@/api/business/ontologyClasses';
-  // import {
-  //   createDatasetClassApi,
-  //   updateDatasetClassApi,
-  //   createDatasetClassificationApi,
-  //   updateDatasetClassificationApi,
-  // } from '/@/api/business/datasetOntology';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { IDataSchema } from '../create/typing';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   // const { t } = useI18n();
   // const modalTitle = ref<string>('Create');

@@ -1,10 +1,6 @@
-import {
-  ClassTypeEnum,
-  ToolTypeEnum,
-  datasetTypeEnum,
-  inputTypeEnum,
-} from '/@/api/business/model/ontologyClassesModel';
+import { ClassTypeEnum, ToolTypeEnum, inputTypeEnum } from '/@/api/business/model/classesModel';
 import { imageConstraintsEnum } from './data';
+import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 export enum formType {
   options = 'options',

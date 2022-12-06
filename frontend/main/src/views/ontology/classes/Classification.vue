@@ -8,14 +8,6 @@
       <div class="btn">
         <HeaderDropdown :activeTab="activeTab" :datasetType="datasetType" />
       </div>
-      <div class="mb-15px">
-        <Action
-          :selectedList="selectedList"
-          :list="cardList"
-          @selectAll="handleSelectAll"
-          @unSelect="handleUnSelect"
-        />
-      </div>
       <div style="height: calc(100vh - 154px)">
         <ScrollContainer ref="scrollRef">
           <ClassCard
@@ -55,7 +47,6 @@
   import SearchForm from './components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
   import HeaderDropdown from './components/HeaderDropdown.vue';
-  import Action from './components/Action.vue';
   import CreateClass from './create/CreateClass.vue';
   import CreateClassification from './create/CreateClassification.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
@@ -74,19 +65,19 @@
   // api
   import { RouteChildEnum } from '/@/enums/routeEnum';
   import {
-    getClassApi,
-    getClassByIdApi,
-    getClassificationApi,
-    getClassificationByIdApi,
-  } from '/@/api/business/ontologyClasses';
+    getOntologyClassApi,
+    getOntologyClassByIdApi,
+    getOntologyClassificationApi,
+    getOntologyClassificationByIdApi,
+  } from '/@/api/business/classes';
   import { getOntologyInfoApi } from '/@/api/business/ontology';
   import {
-    GetListParams,
+    getOntologyClassesParams,
     ClassTypeEnum,
     SearchItem,
-    ClassItem,
-    ClassificationItem,
-  } from '/@/api/business/model/ontologyClassesModel';
+    ontologyClassItem,
+    ontologyClassificationItem,
+  } from '/@/api/business/model/classesModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { setDatasetBreadcrumb } from '/@/utils/business';
 
@@ -138,7 +129,7 @@
     },
   ];
 
-  type detailItem = ClassItem | ClassificationItem;
+  type detailItem = ontologyClassItem | ontologyClassificationItem;
   const detail = ref<detailItem>();
 
   const updateDetail = (newDetail) => {
@@ -171,9 +162,9 @@
   const handleEdit = async (id) => {
     try {
       if (pageType == ClassTypeEnum.CLASS) {
-        detail.value = await getClassByIdApi({ id: id });
+        detail.value = await getOntologyClassByIdApi({ id: id });
       } else {
-        detail.value = await getClassificationByIdApi({ id: id });
+        detail.value = await getOntologyClassificationByIdApi({ id: id });
         console.log(detail.value);
       }
       handleOpenCreate(true);
@@ -190,7 +181,7 @@
   };
 
   /** List */
-  const cardList = ref<Array<ClassItem | ClassificationItem>>([]);
+  const cardList = ref<Array<ontologyClassItem | ontologyClassificationItem>>([]);
   const total = ref<number>(0);
   const pageNo = ref<number>(1);
   const getList = async (isConcat = false) => {
@@ -201,7 +192,7 @@
       cardList.value = [];
     }
 
-    const postData: GetListParams = {
+    const postData: getOntologyClassesParams = {
       pageNo: pageNo.value,
       pageSize: 30,
       ontologyId: ontologyId,
@@ -211,9 +202,9 @@
     let res;
     try {
       if (pageType == ClassTypeEnum.CLASS) {
-        res = await getClassApi(postData);
+        res = await getOntologyClassApi(postData);
       } else {
-        res = await getClassificationApi(postData);
+        res = await getOntologyClassificationApi(postData);
       }
 
       cardList.value = cardList.value.concat(res.list ?? []);
@@ -255,11 +246,6 @@
     getList();
   };
   provide('handleRefresh', handleRefresh);
-
-  /** Selected */
-  const selectedList = ref<string[]>([]);
-  const handleSelectAll = () => {};
-  const handleUnSelect = () => {};
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-ontologyClasses';

@@ -11,12 +11,8 @@ import textIcon from '/@/assets/images/class/text_icon.png';
 
 import { useI18n } from '/@/hooks/web/useI18n';
 import { SortTypeEnum } from '/@/api/model/baseModel';
-import {
-  SortFieldEnum,
-  datasetTypeEnum,
-  ToolTypeEnum,
-  inputTypeEnum,
-} from '/@/api/business/model/ontologyClassesModel';
+import { SortFieldEnum, ToolTypeEnum, inputTypeEnum } from '/@/api/business/model/classesModel';
+import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 const { t } = useI18n();
 

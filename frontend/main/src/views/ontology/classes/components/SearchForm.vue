@@ -107,11 +107,11 @@
     SearchItem,
     ClassTypeEnum,
     ToolTypeEnum,
-    datasetTypeEnum,
     SortFieldEnum,
-  } from '/@/api/business/model/ontologyClassesModel';
+  } from '/@/api/business/model/classesModel';
   import type { Dayjs } from 'dayjs';
   import { dataSortOption, SortTypeOption, toolTypeList, inputTypeList } from '../attributes/data';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('searchForm');

@@ -60,9 +60,9 @@
   // 工具
   import { useI18n } from '/@/hooks/web/useI18n';
   // 接口
-  import { datasetTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import { PreModelParam } from '/@/api/business/model/modelsModel';
   import { getModelByIdApi } from '/@/api/business/models';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();

@@ -86,7 +86,7 @@
   import DeleteModal from './DeleteModal.vue';
   import CreateCard from '../../center/components/CreateCard.vue';
 
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { toolTypeImg, inputItemImg, CardTypeEnum } from '../attributes/data';
   import deleteSvg from '/@/assets/icons/delete.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';

@@ -42,7 +42,7 @@
   import emitter from 'tiny-emitter/instance';
   import { attributeBase } from './formSchemas';
   import { getSchema, handleMutiTabAction, setClassSchema, setSchema } from './utils';
-  import { ClassTypeEnum, inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { ClassTypeEnum, inputTypeEnum } from '/@/api/business/model/classesModel';
   import { inputTypeList } from './data';
 
   const emits = defineEmits([

@@ -1,5 +1,5 @@
+import { datasetTypeEnum } from './datasetModel';
 import { BasicPageParams, BasicFetchResult } from '/@/api/model/baseModel';
-import { datasetTypeEnum } from './ontologyClassesModel';
 
 /** Models List Start */
 /** list item */

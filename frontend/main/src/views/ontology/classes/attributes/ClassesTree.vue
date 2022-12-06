@@ -23,7 +23,7 @@
   import { Tree } from 'ant-design-vue';
   import emitter from 'tiny-emitter/instance';
   import { clone } from '/@/utils/business/deepClone';
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
 
   const { t } = useI18n();
   const showLine = ref<boolean>(true);
