@@ -1241,7 +1241,10 @@ public class DataInfoUseCase {
                 var objects = objectList.stream().map(object -> object.getClassAttributes()).collect(Collectors.toList());
                 dataResultExportBO.setObjects(DefaultConverter.convert(objects, DataResultObjectExportBO.class));
             }
-            var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).result(dataResultExportBO).build();
+            var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
+            if(CollectionUtil.isNotEmpty(annotationList) || CollectionUtil.isNotEmpty(objectList)){
+                dataInfoExportBO.setResult(dataResultExportBO);
+            }
             dataInfoExportBOList.add(dataInfoExportBO);
         });
         return dataInfoExportBOList;
