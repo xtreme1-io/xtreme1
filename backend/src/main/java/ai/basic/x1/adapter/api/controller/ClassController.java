@@ -71,4 +71,14 @@ public class ClassController {
         return classUseCase.validateName(id, ontologyId, name, toolType);
     }
 
+    @PostMapping("/pushAttributesToDataset/{id}")
+    public void pushAttributesToDataset(@PathVariable("id") Long id) {
+        classUseCase.pushAttributesToDataset(id);
+    }
+
+    @GetMapping("/getRelatedDatasetClassNum/{id}")
+    public long getRelatedDatasetClassNum(@PathVariable("id") Long id) {
+        return classUseCase.getRelatedDatasetClassNum(id);
+    }
+
 }
