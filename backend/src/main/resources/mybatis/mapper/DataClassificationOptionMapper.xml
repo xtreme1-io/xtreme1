@@ -8,7 +8,8 @@
         <result column="dataset_id" property="datasetId" />
         <result column="data_id" property="dataId" />
         <result column="classification_id" property="classificationId" />
-        <result column="option_id" property="optionId" />
+        <result column="attribute_id" property="attributeId" />
+        <result column="option_name" property="optionName" />
         <result column="option_path" property="optionPath" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="created_at" property="createdAt" />
         <result column="created_by" property="createdBy" />
@@ -18,20 +19,21 @@
 
     <!-- generic query result colum -->
     <sql id="Base_Column_List">
-        id, dataset_id, data_id, classification_id, option_id, option_path,
+        id, dataset_id, data_id, classification_id, attribute_id, option_name, option_path,
         created_at, updated_at, created_by, updated_by
     </sql>
 
     <insert id="insertOrUpdateBatch">
         INSERT INTO data_classification_option (dataset_id, data_id, classification_id,
-                                                    option_id, option_path)
+        attribute_id, option_name, option_path)
         VALUES
         <foreach collection="list" item="item"  separator=",">
             (
             #{item.datasetId},
             #{item.dataId},
             #{item.classificationId},
-            #{item.optionId},
+            #{item.attributeId},
+            #{item.optionName},
             #{item.optionPath,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler}
             )
         </foreach>
@@ -41,14 +43,14 @@
         SELECT cdss.*, tmp.dataAmount
         FROM data_classification_option cdss
                  INNER JOIN (
-            SELECT classification_id, leaf_option_id, count(*) as dataAmount
+            SELECT classification_id, attribute_id, count(*) as dataAmount
             FROM dataset_classification dc
                      INNER JOIN data_classification_option cds
                                 ON dc.id = cds.classification_id
             WHERE cds.dataset_id = #{datasetId}
-            GROUP BY cds.classification_id, cds.leaf_option_id
+            GROUP BY cds.attribute_id, cds.option_name
             ORDER BY dataAmount DESC
-        ) AS tmp ON cdss.classification_id = tmp.classification_id AND cdss.leaf_option_id = tmp.leaf_option_id
+        ) AS tmp ON cdss.classification_id = tmp.classification_id AND cdss.attribute_id = tmp.attribute_id
     </select>
 
 

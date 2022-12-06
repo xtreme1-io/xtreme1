@@ -30,7 +30,9 @@ public class DataClassificationOption {
 
     private Long classificationId;
 
-    private String optionId;
+    private String attributeId;
+
+    private String optionName;
 
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> optionPath;

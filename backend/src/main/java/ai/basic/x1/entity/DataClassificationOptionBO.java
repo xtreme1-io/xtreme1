@@ -28,7 +28,7 @@ public class DataClassificationOptionBO {
 
     private String optionName;
 
-    private String optionId;
+    private String attributeId;
 
     private List<String> optionPath;
 
@@ -37,5 +37,9 @@ public class DataClassificationOptionBO {
     private OffsetDateTime createdAt;
 
     private OffsetDateTime updatedAt;
+
+    private Long createdBy;
+
+    private Long updatedBy;
 
 }
