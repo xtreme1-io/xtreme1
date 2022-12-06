@@ -12,10 +12,12 @@
         color="#CCCCCC"
       />
     </div>
-    <div>Expiration Date</div>
-    <div class="w-420px">
-      <DatePicker v-model:value="date" />
-    </div>
+    <template v-if="!info">
+      <div>Expiration Date</div>
+      <div class="w-420px">
+        <DatePicker v-model:value="date" />
+      </div>
+    </template>
     <div> Go to our Documents to see how to use this token in APIs </div>
     <Button v-if="!info" type="primary" class="mr-2" @click="handleCreate">
       Generate a new token
