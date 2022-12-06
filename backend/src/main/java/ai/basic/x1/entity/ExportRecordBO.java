@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 /**
  * @author fyb
  * @date 2022-04-21 11:48:13
@@ -55,5 +57,25 @@ public class ExportRecordBO {
      * File path
      */
     private String filePath;
+
+    /**
+     * Create time
+     */
+    private OffsetDateTime createdAt;
+
+    /**
+     * Creator id
+     */
+    private Long createdBy;
+
+    /**
+     * Update time
+     */
+    private OffsetDateTime updatedAt;
+
+    /**
+     * Modify person id
+     */
+    private Long updatedBy;
 
 }

@@ -1,7 +1,6 @@
 package ai.basic.x1.adapter.dto.request;
 
 import cn.hutool.json.JSONObject;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -71,7 +70,7 @@ public class ObjectResultDTO {
         @NotNull(message = "classificationId cannot null",groups = GroupAnnotation.class)
         private Long classificationId;
 
-        private JsonNode classificationAttributes;
+        private JSONObject classificationAttributes;
     }
 
     public interface GroupAnnotation{

@@ -1,8 +1,8 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +31,7 @@ public class DataAnnotation {
     private Long classificationId;
 
     @TableField(value = "classification_attributes", typeHandler = JacksonTypeHandler.class)
-    private JsonNode classificationAttributes;
+    private JSONObject classificationAttributes;
 
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;

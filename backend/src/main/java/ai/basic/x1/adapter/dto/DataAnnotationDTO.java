@@ -1,6 +1,6 @@
 package ai.basic.x1.adapter.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,5 +25,5 @@ public class DataAnnotationDTO {
 
     private Long classificationId;
 
-    private JsonNode classificationAttributes;
+    private JSONObject classificationAttributes;
 }

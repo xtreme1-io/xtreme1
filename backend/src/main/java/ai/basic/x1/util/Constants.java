@@ -80,6 +80,8 @@ public interface Constants {
 
     String MINIO = "minio";
 
+    String DATA = "data";
+
 
     String QUESTION_MARK = "?";
 
@@ -90,7 +92,6 @@ public interface Constants {
     Integer PAGE_NO = 1;
 
     Integer PAGE_SIZE = 1000;
-
 
     Set<String> COMPRESSED_DATA_TYPE = new HashSet<>() {{
         add("application/zip");

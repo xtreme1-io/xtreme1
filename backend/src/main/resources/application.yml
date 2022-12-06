@@ -6,6 +6,8 @@ server:
   shutdown: graceful
 
 spring:
+  main:
+    allow-circular-references: true
   application:
     name: xtreme1
   datasource:
@@ -46,7 +48,7 @@ minio:
 
 export:
   data:
-    version: Basic AI Community V1.0
+    version: Basic AI V1.0
 file:
   tempPath: /tmp/x1/
   size:
