@@ -1242,7 +1242,7 @@ public class DataInfoUseCase {
                 dataResultExportBO.setObjects(DefaultConverter.convert(objects, DataResultObjectExportBO.class));
             }
             var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
-            if(CollectionUtil.isNotEmpty(annotationList) || CollectionUtil.isNotEmpty(objectList)){
+            if (CollectionUtil.isNotEmpty(annotationList) || CollectionUtil.isNotEmpty(objectList)) {
                 dataInfoExportBO.setResult(dataResultExportBO);
             }
             dataInfoExportBOList.add(dataInfoExportBO);

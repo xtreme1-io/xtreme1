@@ -2,12 +2,15 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.ClassDAO;
 import ai.basic.x1.adapter.port.dao.ClassificationDAO;
+import ai.basic.x1.adapter.port.dao.DatasetClassOntologyDAO;
 import ai.basic.x1.adapter.port.dao.OntologyDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Class;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Classification;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassOntology;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Ontology;
 import ai.basic.x1.entity.ClassBO;
 import ai.basic.x1.entity.OntologyBO;
+import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
@@ -17,8 +20,10 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +46,9 @@ public class OntologyUseCase {
 
     @Autowired
     private ClassificationDAO classificationDAO;
+
+    @Autowired
+    private DatasetClassOntologyDAO datasetClassOntologyDAO;
 
     public Page<OntologyBO> findByPage(Integer pageNo, Integer pageSize, OntologyBO bo) {
         LambdaQueryWrapper<Ontology> ontologyQueryWrapper = Wrappers.lambdaQuery();
@@ -69,10 +77,11 @@ public class OntologyUseCase {
     }
 
     public void saveOntology(OntologyBO ontologyBO) {
-        if (validateName(ontologyBO.getId(),ontologyBO.getName())) {
+        try {
+            ontologyDAO.saveOrUpdate(DefaultConverter.convert(ontologyBO, Ontology.class));
+        } catch (DuplicateKeyException e) {
             throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
         }
-        ontologyDAO.saveOrUpdate(DefaultConverter.convert(ontologyBO, Ontology.class));
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -86,26 +95,31 @@ public class OntologyUseCase {
         classificationLambdaQueryWrapper.eq(Classification::getOntologyId, id);
         classificationDAO.remove(classificationLambdaQueryWrapper);
 
-        //delete relationship of datasetClass and datasetClassification and deleted ontology
-//        LambdaQueryWrapper<DatasetClassOntology> datasetClassOntologyLambdaQueryWrapper = Wrappers.lambdaQuery();
-//        datasetClassOntologyLambdaQueryWrapper.eq(DatasetClassOntology::getOntologyId,id);
-//        datasetClassOntologyDAO.remove(datasetClassOntologyLambdaQueryWrapper);
-//        LambdaQueryWrapper<DatasetClassificationOntology> datasetClassificationOntologyLambdaQueryWrapper = Wrappers.lambdaQuery();
-//        datasetClassificationOntologyLambdaQueryWrapper.eq(DatasetClassificationOntology::getOntologyId,id);
-//        datasetClassificationOntologyDAO.remove(datasetClassificationOntologyLambdaQueryWrapper);
+        //delete relationship of datasetClass and deleted ontology
+        LambdaQueryWrapper<DatasetClassOntology> datasetClassOntologyLambdaQueryWrapper = Wrappers.lambdaQuery();
+        datasetClassOntologyLambdaQueryWrapper.eq(DatasetClassOntology::getOntologyId,id);
+        datasetClassOntologyDAO.remove(datasetClassOntologyLambdaQueryWrapper);
 
         LambdaQueryWrapper<Ontology> ontologyLambdaQueryWrapper = Wrappers.lambdaQuery();
         ontologyLambdaQueryWrapper.eq(Ontology::getId, id);
         return ontologyDAO.remove(ontologyLambdaQueryWrapper);
     }
 
-    public boolean validateName(Long id, String name) {
+    public boolean validateName(Long id, String name,DatasetTypeEnum type) {
         LambdaQueryWrapper<Ontology> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Ontology::getName, name);
+        lambdaQueryWrapper.eq(Ontology::getType,type);
         if (ObjectUtil.isNotEmpty(id)) {
             lambdaQueryWrapper.ne(Ontology::getId, id);
         }
         return ontologyDAO.getBaseMapper().exists(lambdaQueryWrapper);
     }
 
+    public List<OntologyBO> findAll(@Nullable DatasetTypeEnum type) {
+        LambdaQueryWrapper<Ontology> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        if (ObjectUtil.isNotNull(type)) {
+            lambdaQueryWrapper.eq(Ontology::getType, type);
+        }
+        return DefaultConverter.convert(ontologyDAO.list(lambdaQueryWrapper), OntologyBO.class);
+    }
 }

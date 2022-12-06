@@ -10,8 +10,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import org.w3c.dom.stylesheets.LinkStyle;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author chenchao
@@ -28,7 +30,7 @@ public class ClassDTO {
     @NotNull(message = "ontology id cannot be null")
     private Long ontologyId;
 
-    @Length(max = 256,message = "The length of name should be less than 256.")
+    @Length(max = 256, message = "The length of name should be less than 256.")
     private String name;
 
     private String color;
@@ -44,6 +46,11 @@ public class ClassDTO {
     private JSONArray attributes;
 
     /**
+     * Whether to reset the relationship with the class in the dataset
+     */
+    private Boolean isResetRelations;
+
+    /**
      * Query value, create start time
      */
     private String startTime;
@@ -56,5 +63,14 @@ public class ClassDTO {
     private SortByEnum sortBy;
 
     private SortEnum ascOrDesc;
+
+    private List<DatasetClass> datasetClasses;
+
+    @Data
+    public static class DatasetClass {
+        private Long id;
+
+        private String name;
+    }
 
 }

@@ -43,4 +43,15 @@ public class DatasetStatisticsBO {
 
         return annotatedCount + notAnnotatedCount + invalidCount;
     }
+
+    public static DatasetStatisticsBO createEmpty(Long datasetId) {
+        return DatasetStatisticsBO.builder()
+                .datasetId(datasetId)
+                .annotatedCount(0)
+                .notAnnotatedCount(0)
+                .invalidCount(0)
+                .itemCount(0)
+                .build();
+    }
+
 }
