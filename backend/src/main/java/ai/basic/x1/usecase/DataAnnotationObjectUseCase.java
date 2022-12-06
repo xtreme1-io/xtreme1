@@ -3,8 +3,11 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
+import ai.basic.x1.adapter.port.dao.mybatis.query.ScenarioQuery;
 import ai.basic.x1.entity.DataAnnotationObjectBO;
+import ai.basic.x1.entity.ScenarioQueryBO;
 import ai.basic.x1.util.DefaultConverter;
+import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -118,5 +121,11 @@ public class DataAnnotationObjectUseCase {
     public Long countObjectByDatasetId(Long datasetId) {
         return dataAnnotationObjectDAO.count(new LambdaQueryWrapper<DataAnnotationObject>()
                 .eq(DataAnnotationObject::getDatasetId, datasetId));
+    }
+
+    public Page<DataAnnotationObjectBO> findByScenarioPage(Integer pageNo, Integer pageSize, ScenarioQueryBO scenarioQueryBO) {
+        var page = dataAnnotationObjectDAO.getBaseMapper().findByScenarioPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize),
+                DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
+        return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
     }
 }
