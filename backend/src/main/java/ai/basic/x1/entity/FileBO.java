@@ -104,4 +104,9 @@ public class FileBO {
      */
     private JSONObject extraInfo;
 
+    /**
+     * The path in the compressed package
+     */
+    private String zipPath;
+
 }

@@ -65,4 +65,8 @@ public class ExportRecordUseCase {
         return exportRecordBOList;
     }
 
+    public void saveOrUpdate(ExportRecordBO exportRecordBO) {
+        exportRecordDAO.saveOrUpdate(DefaultConverter.convert(exportRecordBO,ExportRecord.class));
+    }
+
 }

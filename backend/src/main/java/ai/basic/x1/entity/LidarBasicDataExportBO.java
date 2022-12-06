@@ -1,27 +1,25 @@
 package ai.basic.x1.entity;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * @author fyb
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataExportBO {
+public class LidarBasicDataExportBO extends DataExportBaseBO{
 
     /**
-     * Data information
+     * Pcd url
      */
-    private DataExportBaseBO data;
+    private String pointCloudUrl;
 
     /**
-     * Data result information
+     * The path in the compressed package
      */
-    private DataResultExportBO result;
+    private String pointCloudZipPath;
 
 }
