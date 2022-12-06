@@ -111,12 +111,7 @@
     SortFieldEnum,
   } from '/@/api/business/model/ontologyClassesModel';
   import type { Dayjs } from 'dayjs';
-  import {
-    dataSortOption,
-    SortTypeOption,
-    toolTypeList,
-    inputTypeList,
-  } from './modal-components/data';
+  import { dataSortOption, SortTypeOption, toolTypeList, inputTypeList } from '../attributes/data';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('searchForm');

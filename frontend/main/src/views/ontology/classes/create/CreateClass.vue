@@ -127,12 +127,11 @@
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
   import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
   import { Button } from '/@@/Button';
-  import TheAttributes from './TheAttributes.vue';
-  import TheColor from './basicForm/TheColor.vue';
-  import TheStandard from './basicForm/TheStandard.vue';
-  import TheImageInfo from './basicForm/TheImageInfo.vue';
-  // import TheNameInput from './basicForm/TheNameInput.vue';
-  import { datasetTypeList, toolTypeList, validateName } from './basicForm/data';
+  import TheColor from './TheColor.vue';
+  import TheStandard from './TheStandard.vue';
+  import TheImageInfo from './TheImageInfo.vue';
+  import TheAttributes from '../attributes/TheAttributes.vue';
+  import { datasetTypeList, toolTypeList } from '../attributes/data';
   // utils
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -144,7 +143,7 @@
   // interface
   import { createEditClassApi } from '/@/api/business/ontologyClasses';
   import { createDatasetClassApi, updateDatasetClassApi } from '/@/api/business/datasetOntology';
-  import { handleAddUuid } from './utils';
+  import { handleAddUuid, validateName } from './utils';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();

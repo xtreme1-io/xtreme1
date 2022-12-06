@@ -86,8 +86,8 @@
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
   import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
   import { Button } from '/@@/Button';
-  import TheAttributes from './TheAttributes.vue';
-  import { inputTypeList, validateName } from './basicForm/data';
+  import TheAttributes from '../attributes/TheAttributes.vue';
+  import { inputTypeList } from '../attributes/data';
   // utils
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -103,7 +103,7 @@
     createDatasetClassificationApi,
     updateDatasetClassificationApi,
   } from '/@/api/business/datasetOntology';
-  import { handleAddUuid } from './utils';
+  import { handleAddUuid, validateName } from './utils';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();

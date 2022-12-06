@@ -75,6 +75,7 @@
   import { Button, ButtonSize } from '/@@/Button';
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from './components/SearchForm.vue';
+  // import SearchForm1 from '/@/views/ontology/classes/components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
   import FormModal from './components/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';

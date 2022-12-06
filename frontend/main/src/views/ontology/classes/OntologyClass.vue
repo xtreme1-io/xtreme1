@@ -194,8 +194,6 @@
   const total = ref<number>(0);
   const pageNo = ref<number>(1);
   const getList = async (isConcat = false) => {
-    // cardList.value = [];
-    // return;
     loadingRef.value = true;
 
     if (!isConcat) {
@@ -231,8 +229,6 @@
 
   /** Info */
   const getOntologyInfo = async () => {
-    // datasetType.value = datasetTypeEnum.IMAGE;
-    // return;
     const res = await getOntologyInfoApi({ id: String(ontologyId) });
     datasetType.value = res.type ?? datasetTypeEnum.IMAGE;
     setDatasetBreadcrumb(res.name);

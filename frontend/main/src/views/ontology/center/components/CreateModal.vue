@@ -53,7 +53,7 @@
   import { createEditOntologyApi } from '/@/api/business/ontology';
   import { validateCreateName } from './formSchemas';
   import { SaveOntologyParams } from '/@/api/business/model/ontologyModel';
-  import { datasetTypeList } from '../../classes/components/modal-components/data';
+  import { datasetTypeList } from '../../classes/attributes/data';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();

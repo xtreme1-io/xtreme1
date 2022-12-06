@@ -68,16 +68,16 @@
   import { ref, unref, computed, watch, defineEmits, defineProps, inject, provide } from 'vue';
 
   // import { useI18n } from '/@/hooks/web/useI18n';
-  import { setSchema, setClassSchema } from './components/utils';
+  import { setSchema, setClassSchema } from './utils';
   import emitter from 'tiny-emitter/instance';
 
   import { BasicModal, useModalInner, useModal } from '/@/components/Modal';
   import Icon from '/@/components/Icon';
-  import ClassesTree from './components/ClassesTree.vue';
-  import AttrForm from './components/AttrForm.vue';
-  import OptionForm from './components/OptionForm.vue';
-  import DiscardModal from './components/DiscardModal.vue';
-  import OptionEditor from './components/OptionEditor.vue';
+  import ClassesTree from './ClassesTree.vue';
+  import AttrForm from './AttrForm.vue';
+  import OptionForm from './OptionForm.vue';
+  import DiscardModal from './DiscardModal.vue';
+  import OptionEditor from './OptionEditor.vue';
 
   import {
     // ClassItem,
@@ -92,7 +92,7 @@
   //   createDatasetClassificationApi,
   //   updateDatasetClassificationApi,
   // } from '/@/api/business/datasetOntology';
-  import { IDataSchema } from './typing';
+  import { IDataSchema } from '../create/typing';
 
   // const { t } = useI18n();
   // const modalTitle = ref<string>('Create');

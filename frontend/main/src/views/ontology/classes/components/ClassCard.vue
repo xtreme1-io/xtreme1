@@ -70,7 +70,7 @@
   import { Button, Tooltip } from 'ant-design-vue';
   import DeleteModal from './DeleteModal.vue';
   import CreateCard from '../../center/components/CreateCard.vue';
-  import { toolTypeImg, inputItemImg } from './modal-components/data';
+  import { toolTypeImg, inputItemImg } from '../attributes/data';
   import deleteSvg from '/@/assets/icons/delete.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';
 

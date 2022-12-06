@@ -29,7 +29,7 @@
   import { computed, ref } from 'vue';
   import { Input } from 'ant-design-vue';
   import randomSvg from '/@/assets/svg/ontology/random.svg';
-  import { colorOption } from './data';
+  import { colorOption } from '../attributes/data';
 
   const props = defineProps<{ color: string }>();
   const emits = defineEmits(['update:color']);

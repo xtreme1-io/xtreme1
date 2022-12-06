@@ -97,7 +97,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { Radio, InputNumber } from 'ant-design-vue';
   import { computed } from 'vue';
-  import { imageConstraintsEnum } from './data';
+  import { imageConstraintsEnum } from '../attributes/data';
 
   const { t } = useI18n();
 
