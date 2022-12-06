@@ -2,7 +2,7 @@
   <div :class="`${prefixCls}`">
     <div>My Token</div>
     <div class="flex">
-      <div class="w-520px whitespace-nowrap overflow-x-scroll mr-2">
+      <div class="w-420px whitespace-nowrap overflow-x-scroll mr-2">
         <span>{{ info?.token }}</span>
       </div>
       <Icon
@@ -14,11 +14,17 @@
     </div>
     <template v-if="!info">
       <div>Expiration Date</div>
-      <div class="w-420px">
-        <DatePicker v-model:value="date" />
+      <div class="flex items-center">
+        <div class="w-420px">
+          <DatePicker style="width: 100%" v-model:value="date" />
+        </div>
+        <div class="ml-2"> <Checkbox v-model:checked="isNever" />Never Expire </div>
       </div>
     </template>
-    <div> Go to our Documents to see how to use this token in APIs </div>
+    <div>
+      Go to our Documents to see how to use this token in APIs
+      <Icon icon="ic:sharp-open-in-new" />
+    </div>
     <Button v-if="!info" type="primary" class="mr-2" @click="handleCreate">
       Generate a new token
     </Button>
@@ -30,7 +36,7 @@
 <script lang="ts" setup>
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Button, DatePicker } from 'ant-design-vue';
+  import { Button, DatePicker, Checkbox, message } from 'ant-design-vue';
   import Icon from '/@/components/Icon';
   import { onMounted, ref } from 'vue';
   import { createToken, deleteToken, getTokenInfo } from '/@/api/business/api';
@@ -39,6 +45,7 @@
   const { t } = useI18n();
   const info = ref();
   const date = ref();
+  const isNever = ref();
   onMounted(() => {
     getInfo();
   });
@@ -48,8 +55,15 @@
   };
 
   const handleCreate = async () => {
+    if (!isNever.value && !date.value) {
+      return message.error('please select Expiration Date');
+    }
+    let expireAt: any = moment(date.value).utc().format();
+    if (isNever.value) {
+      expireAt = null;
+    }
     await createToken({
-      expireAt: moment(date.value).utc().format(),
+      expireAt: expireAt,
     });
     getInfo();
   };
