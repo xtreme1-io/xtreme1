@@ -15,7 +15,6 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
@@ -94,13 +93,13 @@ public class ExportUseCase {
         var lambdaQueryWrapper = new LambdaQueryWrapper<ExportRecord>();
         lambdaQueryWrapper.in(ExportRecord::getSerialNumber, serialNumber);
         var exportRecord = exportRecordDAO.getOne(lambdaQueryWrapper);
-        var zipPath = String.format("%s%s/", tempPath, FileUtil.getPrefix(fileName));
-        FileUtil.mkParentDirs(zipPath);
-        getDataAndUpload(exportRecord, zipPath, query);
+        var srcPath = String.format("%s%s", tempPath, FileUtil.getPrefix(fileName));
+        FileUtil.mkdir(srcPath);
+        getDataAndUpload(exportRecord, srcPath, query);
         return serialNumber;
     }
 
-    private void getDataAndUpload(ExportRecord record, String zipPath, DataInfoQueryBO query) {
+    private void getDataAndUpload(ExportRecord record, String srcPath, DataInfoQueryBO query) {
         var rootPath = String.format("%s/%s", record.getCreatedBy(),
                 TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
         var exportRecordBOBuilder = ExportRecordBO.builder()
@@ -114,7 +113,7 @@ public class ExportUseCase {
             if (CollectionUtil.isEmpty(page.getList())) {
                 break;
             }
-            writeFile(page.getList(), zipPath, query);
+            writeFile(page.getList(), srcPath, query);
             var listSize = page.getList().size();
             var exportRecordBO = exportRecordBOBuilder
                     .generatedNum((page.getPageNo() - 1) * page.getPageSize() + listSize)
@@ -124,9 +123,10 @@ public class ExportUseCase {
             exportRecordUsecase.saveOrUpdate(exportRecordBO);
             i++;
         }
-        var zipFile = ZipUtil.zip(zipPath);
-        var path = String.format("%s/%s", rootPath, FileUtil.getName(zipFile));
-        var fileBO = FileBO.builder().name(zipFile.getName()).originalName(zipFile.getName()).bucketName(minioProp.getBucketName())
+        var zipPath = srcPath + ".zip";
+        var zipFile = ZipUtil.zip(srcPath, zipPath + ".zip", true);
+        var path = String.format("%s/%s", rootPath, FileUtil.getName(zipPath));
+        var fileBO = FileBO.builder().name(FileUtil.getName(zipPath)).originalName(FileUtil.getName(zipPath)).bucketName(minioProp.getBucketName())
                 .size(zipFile.length()).path(path).type(FileUtil.getMimeType(path)).build();
         try {
             minioService.uploadFile(minioProp.getBucketName(), path, FileUtil.getInputStream(zipFile), FileUtil.getMimeType(path), zipFile.length());
@@ -153,13 +153,13 @@ public class ExportUseCase {
         var jsonConfig = JSONConfig.create().setIgnoreNullValue(false);
         dataExportBOList.forEach(dataExportBO -> {
             var dataExportBaseBO = dataExportBO.getData();
-            var dataPath = String.format("%s%s/%s-%s%s", zipPath, Constants.DATA, dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
+            var dataPath = String.format("%s/%s/%s-%s%s", zipPath, Constants.DATA, dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
             FileUtil.writeString(JSONUtil.toJsonStr(dataExportBaseBO, jsonConfig), dataPath, StandardCharsets.UTF_8);
-            if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
-                var resultPath = String.format("%s%s/%s-%s%s", zipPath, Constants.RESULT,
+            /*if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
+                var resultPath = String.format("%s/%s/%s-%s%s", zipPath, Constants.RESULT,
                         dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
                 FileUtil.writeString(JSONUtil.toJsonStr(dataExportBO.getResult(), jsonConfig), resultPath, StandardCharsets.UTF_8);
-            }
+            }*/
         });
     }
 
