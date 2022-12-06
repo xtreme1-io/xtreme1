@@ -5,10 +5,21 @@
       :indexList="props.indexList"
       @back="handleBack"
       @del="handleDelete"
+      :isDisabled="props.isDisabled"
     />
-    <BasicForm @register="registerForm" :showActionButtonGroup="false" hideRequiredMark />
+    <BasicForm
+      @register="registerForm"
+      :showActionButtonGroup="false"
+      hideRequiredMark
+      :disabled="props.isDisabled"
+    />
     <Divider style="margin: 10px 0" />
-    <OptionEditor type="attributes" :showRequired="showEditorRequired" :dataSchema="data" />
+    <OptionEditor
+      type="attributes"
+      :showRequired="showEditorRequired"
+      :dataSchema="data"
+      :isDisabled="props.isDisabled"
+    />
     <FormDiscard
       :showModal="showDiscardModal"
       @cancel="handleCancelDiscard"
@@ -41,6 +52,7 @@
     dataSchema?: any;
     indexList?: number[];
     activeTab?: ClassTypeEnum;
+    isDisabled: boolean;
   }>();
 
   const handleAddIndex = inject('handleAddIndex', Function, true);

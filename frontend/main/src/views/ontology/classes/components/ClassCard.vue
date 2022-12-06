@@ -58,8 +58,17 @@
             </div>
           </div>
         </div>
-        <div class="edit">
-          <Button type="primary" block @click="handleEdit(item.id)">
+        <div class="btn">
+          <Button
+            v-show="props.isCenter"
+            class="push"
+            type="primary"
+            block
+            @click="handlePush(item)"
+          >
+            {{ 'Push to All' }}
+          </Button>
+          <Button class="edit" type="primary" block @click="handleEdit(item)">
             {{ t('common.editText') }}
           </Button>
         </div>
@@ -90,6 +99,7 @@
   import { toolTypeImg, inputItemImg, CardTypeEnum } from '../attributes/data';
   import deleteSvg from '/@/assets/icons/delete.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';
+  import { ModalConfirmCustom } from '/@/utils/business/confirm';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('cardItem');
@@ -111,9 +121,27 @@
 
   const emits = defineEmits(['edit', 'create', 'handleSelected']);
 
+  /** Push */
+  const handlePush = (item) => {
+    const relatedNum = 0;
+    ModalConfirmCustom({
+      title: 'Push to All',
+      content: `Are you sure you want to override all ${relatedNum} related classes by current attributes`,
+      okText: 'Override',
+      okButtonProps: {
+        type: 'primary',
+        style: {
+          backgroundColor: '#FCB17A',
+        },
+      },
+      onOk: () => {
+        console.log(item);
+      },
+    });
+  };
   /** Edit */
-  const handleEdit = (id) => {
-    emits('edit', id);
+  const handleEdit = (item) => {
+    emits('edit', item.id);
   };
 
   /** Delete */
@@ -245,7 +273,7 @@
 
       .card__mask {
         display: none;
-        align-items: center;
+        align-items: flex-end;
         justify-content: center;
         position: absolute;
         width: 100%;
@@ -315,10 +343,17 @@
           }
         }
 
-        .edit {
+        .btn {
           width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding-bottom: 20px;
           button {
             border-radius: 6px;
+          }
+          .push {
+            background-color: #fcb17a;
           }
         }
       }

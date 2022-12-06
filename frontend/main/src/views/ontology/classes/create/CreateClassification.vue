@@ -8,6 +8,7 @@
     destroyOnClose
     @cancel="handleCancel"
     @ok="handleCreateSave"
+    :okText="okText"
   >
     <div class="content">
       <div class="title">Basic Info - classification</div>
@@ -73,7 +74,7 @@
     :datasetType="props.datasetType"
     :datasetId="props.datasetId"
     :ontologyId="props.ontologyId"
-    :isCenter="false"
+    :isCenter="props.isCenter"
     :classificationId="props.classificationId"
     :title="`${modalTitle}/Options`"
   />
@@ -121,8 +122,9 @@
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
 
   /** Init */
-  const modalTitle = ref<string>('Create New Classification');
   const baseFormName = ref<string>('');
+  const modalTitle = ref<string>('Create New Classification');
+  const okText = ref<string>('Create');
   const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
     (config) => {
       console.log(config);
@@ -135,8 +137,10 @@
       // from Edit
       if (config.isEdit) {
         modalTitle.value = 'Edit Classification';
+        okText.value = 'Save';
         setModalProps({
           title: 'Edit Classification',
+          okText: 'Save',
         });
         formState.name = props.detail.name;
 
@@ -153,8 +157,10 @@
         defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
       } else {
         modalTitle.value = 'Create New Classification';
+        okText.value = 'Create';
         setModalProps({
           title: 'Create New Classification',
+          okText: 'Create',
         });
         dataSchema.value = {
           options: [],

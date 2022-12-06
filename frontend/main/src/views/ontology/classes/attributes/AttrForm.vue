@@ -3,12 +3,22 @@
     <FormHeader
       :dataSchema="props.dataSchema"
       :indexList="props.indexList"
+      :isDisabled="props.isDisabled"
       @back="handleBack"
       @del="handleDelete"
     />
-    <BasicForm @register="registerForm" :showActionButtonGroup="false" hideRequiredMark>
+    <BasicForm
+      @register="registerForm"
+      :showActionButtonGroup="false"
+      hideRequiredMark
+      :disabled="props.isDisabled"
+    >
       <template #inputType="{ model, field }">
-        <Select v-model:value="model[field]" @change="handleChangeType">
+        <Select
+          v-model:value="model[field]"
+          @change="handleChangeType"
+          :disabled="props.isDisabled"
+        >
           <Select.Option v-for="item in inputTypeList" :key="item.key" :value="item.value">
             <div class="img-tool">
               <img :src="item.img" alt="" />
@@ -24,6 +34,7 @@
       type="options"
       v-model:showRequired="showEditorRequired"
       :dataSchema="data"
+      :isDisabled="props.isDisabled"
     />
     <FormDiscard
       :showModal="showDiscardModal"
@@ -58,6 +69,7 @@
     dataSchema?: any;
     indexList?: number[];
     activeTab?: ClassTypeEnum;
+    isDisabled: boolean;
   }>();
 
   const handleSetDataSchema = inject('handleSetDataSchema', Function, true);

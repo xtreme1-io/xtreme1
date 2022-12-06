@@ -29,6 +29,8 @@
       :activeTab="activeTab"
       :datasetType="datasetType"
       :ontologyId="ontologyId"
+      :isCenter="true"
+      @fetchList="handleRefresh"
     />
     <CreateClassification
       @register="registerCreateClassificationModal"
@@ -36,6 +38,8 @@
       :activeTab="activeTab"
       :datasetType="datasetType"
       :ontologyId="ontologyId"
+      :isCenter="true"
+      @fetchList="handleRefresh"
     />
   </div>
 </template>
