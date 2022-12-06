@@ -208,6 +208,8 @@
   import { ModelListItem } from '/@/api/business/model/modelsModel';
   import { downloadByCorsUrl } from '/@/utils/file/download';
 
+  import Scenario from '/@/assets/svg/tags/scenario.svg';
+  import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
   import Data from '/@/assets/svg/tags/data.svg';
   import DataActive from '/@/assets/svg/tags/dataActive.svg';
   import Ontology from '/@/assets/svg/tags/class.svg';
@@ -226,6 +228,13 @@
   const { t } = useI18n();
 
   const tabList = [
+    {
+      name: t('business.dataset.overview'),
+      url: RouteChildEnum.DATASETS_OVERVIEW,
+      params: { id: id },
+      icon: Scenario,
+      activeIcon: ScenarioActive,
+    },
     {
       name: t('business.datasetContent.data'),
       url: RouteChildEnum.DATASETS_DATA,

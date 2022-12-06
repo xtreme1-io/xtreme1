@@ -1,22 +1,18 @@
 package ai.basic.x1.entity;
 
 
-import cn.hutool.json.JSONObject;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author fyb
  */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class DataExportBaseBO {
+
+    /**
+     * Data id
+     */
+    private Long id;
 
     /**
      * Export version
@@ -24,17 +20,12 @@ public class DataExportBaseBO {
     private String version;
 
     /**
-     * Dataset name
+     * Data name
      */
-    private String datasetName;
+    private String name;
 
     /**
-     * Export time
+     * Type
      */
-    private String exportTime;
-
-    /**
-     * Export content
-     */
-    private List<JSONObject> contents;
+    private String type;
 }

@@ -1,13 +1,9 @@
 package ai.basic.x1.entity;
 
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author fyb
@@ -19,26 +15,13 @@ import java.util.List;
 public class DataExportBO {
 
     /**
-     * name
-     */
-    private String name;
-
-    /**
      * Data information
      */
-    private JSON data;
+    private DataExportBaseBO data;
 
-    @Data
-    public static class Result {
+    /**
+     * Data result information
+     */
+    private DataResultExportBO result;
 
-        /**
-         * Classifications
-         */
-        private List<JSON> classifications;
-
-        /**
-         * Annotation results
-         */
-        private List<JSONObject> objects;
-    }
 }

@@ -1,0 +1,64 @@
+// BaseForm
+.basic-form {
+  position: relative;
+  height: 100%;
+  :deep(.ant-input-number) {
+    min-width: auto;
+  }
+}
+:deep(.ant-form-item) {
+  margin-bottom: 12px;
+  // .ant-select {
+  //   border: none;
+  // }
+}
+:deep(.ant-form-item:not(.ant-form-item-with-help)) {
+  margin-bottom: 12px;
+  // .ant-select {
+  //   border: none;
+  // }
+}
+
+// Select input
+.ant-select-item-option {
+  padding: 5px;
+}
+.ant-select-item-option-content {
+  .img-tool {
+    border: none;
+    display: flex;
+    align-items: center;
+    // transform: translateY(5px);
+    img {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+    }
+  }
+}
+
+:deep(.ant-select) {
+  .ant-select-selector {
+    padding-left: 7px !important;
+  }
+  .ant-select-selection-item {
+    display: flex;
+    align-items: center;
+    .img-tool {
+      border: none;
+      display: flex;
+      align-items: center;
+      img {
+        width: 16px;
+        height: 16px;
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
+:deep(.ant-input-affix-wrapper) {
+  .ant-input {
+    height: 14px;
+  }
+}

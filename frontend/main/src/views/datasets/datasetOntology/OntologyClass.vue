@@ -6,9 +6,12 @@
         <VirtualTab :list="tabListOntology" />
       </div>
       <div class="classes__left--header inline-flex">
-        <Button gradient @click="handleCreate" :size="ButtonSize.LG" noBorder>
-          {{ t('common.createText') }}
-        </Button>
+        <HeaderAction
+          :activeTab="activeTab"
+          :datasetType="datasetType"
+          @copy="handleCopyFrom"
+          @create="handleCreate"
+        />
       </div>
       <div v-show="cardList.length > 0" style="height: calc(100vh - 154px)">
         <ScrollContainer ref="scrollRef">
@@ -18,6 +21,8 @@
             @edit="handleEdit"
             :activeTab="activeTab"
             :isCenter="false"
+            :selectedList="[]"
+            @sync="toSync"
           />
         </ScrollContainer>
       </div>
@@ -56,6 +61,13 @@
       :classId="classId"
       :classificationId="classificationId"
     />
+    <SyncModal
+      @register="syncRegister"
+      :id="itemId"
+      :name="itemName"
+      :activeTab="activeTab"
+      :datasetType="datasetType"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -63,9 +75,13 @@
   import { Button, ButtonSize } from '/@@/Button';
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from './components/SearchForm.vue';
+  // import SearchForm1 from '/@/views/ontology/classes/components/SearchForm.vue';
   import ClassCard from './components/ClassCard.vue';
   import FormModal from './components/FormModal.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
+  import SyncModal from './components/SyncModal.vue';
+  import HeaderAction from './components/HeaderAction.vue';
+
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -81,11 +97,17 @@
     getClassificationByIdApi,
   } from '/@/api/business/datasetOntology';
   import {
+    getClassByIdApi as getOntologyClassByIdApi,
+    getClassificationByIdApi as getOntologyClassificationByIdApi,
+  } from '/@/api/business/ontologyClasses';
+  import {
     GetListParams,
     ClassItem,
     ClassificationItem,
   } from '/@/api/business/model/datasetOntologyModel';
   import { datasetItemDetail } from '/@/api/business/dataset';
+  import Scenario from '/@/assets/svg/tags/scenario.svg';
+  import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
   import Data from '/@/assets/svg/tags/data.svg';
   import DataActive from '/@/assets/svg/tags/dataActive.svg';
   import Ontology from '/@/assets/svg/tags/class.svg';
@@ -112,6 +134,13 @@
   const classificationId = ref<Nullable<number>>();
 
   const tabListDataset = [
+    {
+      name: t('business.dataset.overview'),
+      url: RouteChildEnum.DATASETS_OVERVIEW,
+      params: { id: datasetId },
+      icon: Scenario,
+      activeIcon: ScenarioActive,
+    },
     {
       name: t('business.dataset.data'),
       url: RouteChildEnum.DATASETS_DATA,
@@ -155,6 +184,29 @@
 
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
 
+  const handleCopyFrom = async (id) => {
+    console.log(id);
+
+    // 根据 id 获取 ontology 内部的 class | classification
+    try {
+      if (pageType == ClassTypeEnum.CLASS) {
+        detail.value = (await getOntologyClassByIdApi({ id: id })) as any;
+        // class
+        classId.value = detail.value?.id;
+      } else {
+        detail.value = await getOntologyClassificationByIdApi({ id: id });
+        // classification
+        classificationId.value = detail.value?.id;
+      }
+      ontologyId.value = detail.value?.ontologyId;
+      // console.log(detail.value);
+
+      detail.value!.id = undefined as any;
+      openModal();
+    } catch (error: any) {
+      createMessage.error(String(error));
+    }
+  };
   /** Create */
   const handleCreate = () => {
     // reset before
@@ -252,6 +304,16 @@
     getList();
   };
   provide('handleRefresh', handleRefresh);
+
+  const [syncRegister, { openModal: openSyncModal }] = useModal();
+  const itemId = ref('');
+  const itemName = ref('');
+  const toSync = (item) => {
+    // 获取点击项的 id 和 name
+    itemId.value = item.id;
+    itemName.value = item.name;
+    openSyncModal(true, {});
+  };
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-datasetOntology';

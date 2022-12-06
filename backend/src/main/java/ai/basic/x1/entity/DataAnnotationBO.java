@@ -1,6 +1,6 @@
 package ai.basic.x1.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ public class DataAnnotationBO {
 
     private Long classificationId;
 
-    private JsonNode classificationAttributes;
+    private JSONObject classificationAttributes;
 
     private OffsetDateTime createdAt;
 
