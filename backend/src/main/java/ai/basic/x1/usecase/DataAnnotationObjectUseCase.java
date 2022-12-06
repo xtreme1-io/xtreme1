@@ -114,4 +114,9 @@ public class DataAnnotationObjectUseCase {
         deleteWrapper.in(DataAnnotationObject::getDataId, dataIds);
         dataAnnotationObjectDAO.remove(deleteWrapper);
     }
+
+    public Long countObjectByDatasetId(Long datasetId) {
+        return dataAnnotationObjectDAO.count(new LambdaQueryWrapper<DataAnnotationObject>()
+                .eq(DataAnnotationObject::getDatasetId, datasetId));
+    }
 }

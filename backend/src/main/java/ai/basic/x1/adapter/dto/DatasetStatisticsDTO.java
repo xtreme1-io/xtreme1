@@ -34,4 +34,11 @@ public class DatasetStatisticsDTO {
      */
     private Integer invalidCount;
 
+    /**
+     * annotate count
+     */
+    private Integer objectCount;
+
+    private Integer itemCount;
+
 }

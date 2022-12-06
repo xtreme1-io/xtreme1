@@ -1,10 +1,16 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassOntologyDAO;
+import ai.basic.x1.adapter.port.dao.mybatis.model.ClassStatisticsUnit;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassOntology;
+import ai.basic.x1.adapter.port.dao.mybatis.model.ToolTypeStatisticsUnit;
+import ai.basic.x1.entity.ClassStatisticsUnitBO;
 import ai.basic.x1.entity.DatasetClassBO;
+import ai.basic.x1.entity.ToolTypeStatisticsUnitBO;
 import ai.basic.x1.entity.enums.SortByEnum;
 import ai.basic.x1.entity.enums.SortEnum;
 import ai.basic.x1.entity.enums.ToolTypeEnum;
@@ -12,6 +18,7 @@ import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -22,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author chenchao
@@ -35,6 +44,9 @@ public class DatasetClassUseCase {
 
     @Autowired
     private DatasetClassOntologyDAO datasetClassOntologyDAO;
+
+    @Autowired
+    private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 
     /**
      * create or update DatasetClass
@@ -140,5 +152,56 @@ public class DatasetClassUseCase {
             classificationLambdaQueryWrapper.orderBy(SortByEnum.CREATE_TIME.name().equals(sortBy), isAsc, DatasetClass::getCreatedAt);
         }
     }
+
+    public List<ClassStatisticsUnitBO> statisticObjectByClass(Long datasetId, int pageNo,
+                                                          int pageSize) {
+        var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<ClassStatisticsUnit>(pageNo,
+                pageSize);
+        var pageResults = datasetClassDao.getBaseMapper().statisticsObjectByClass(page, datasetId);
+        if (CollUtil.isEmpty(pageResults.getRecords())) {
+            return List.of();
+        }
+        var classIds = pageResults.getRecords().stream().map(ClassStatisticsUnit::getClassId)
+                .collect(Collectors.toList());
+        Map<Long, DatasetClassBO> classMap = getClassMap(classIds);
+        return pageResults.getRecords().stream().map(e -> {
+            var cla = classMap.getOrDefault(e.getClassId(), new DatasetClassBO());
+            return ClassStatisticsUnitBO.builder()
+                    .toolType(cla.getToolType())
+                    .name(cla.getName() == null ? "No class" : cla.getName())
+                    .objectAmount(e.getObjectAmount())
+                    .color(cla.getColor() == null ? "#dedede" : cla.getColor())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    public List<ToolTypeStatisticsUnitBO> statisticsObjectByToolType(Long datasetId) {
+        var toolTypeUnits = datasetClassDao.getBaseMapper()
+                .statisticsObjectByToolType(datasetId);
+
+        long noClassObjectCount = dataAnnotationObjectDAO.count(new LambdaQueryWrapper<DataAnnotationObject>()
+                .eq(DataAnnotationObject::getDatasetId, datasetId)
+                .isNull(DataAnnotationObject::getClassId)
+        );
+        toolTypeUnits.add(ToolTypeStatisticsUnit.builder()
+                .toolType(null)
+                .objectAmount((int) noClassObjectCount)
+                .build()
+        );
+        return DefaultConverter.convert(toolTypeUnits, ToolTypeStatisticsUnitBO.class);
+    }
+
+    private Map<Long, DatasetClassBO> getClassMap(List<Long> classIds) {
+        return findByIds(classIds).stream().collect(Collectors.toMap(DatasetClassBO::getId, t -> t));
+    }
+
+    public List<DatasetClassBO> findByIds(List<Long> classIds) {
+        if (CollUtil.isEmpty(classIds)) {
+            return List.of();
+        }
+        return DefaultConverter.convert(datasetClassDao.listByIds(classIds), DatasetClassBO.class);
+    }
+
+
 
 }
