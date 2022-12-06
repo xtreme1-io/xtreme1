@@ -1,6 +1,5 @@
 package ai.basic.x1.adapter.api.controller;
 
-
 import ai.basic.x1.adapter.dto.ClassificationDTO;
 import ai.basic.x1.entity.ClassificationBO;
 import ai.basic.x1.usecase.ClassificationUseCase;
@@ -36,8 +35,18 @@ public class ClassificationController {
         return DefaultConverter.convert(classificationUseCase.findByPage(pageNo, pageSize, Objects.requireNonNull(DefaultConverter.convert(classificationDTO, ClassificationBO.class))), ClassificationDTO.class);
     }
 
-    @PostMapping("save")
-    public void save(@RequestBody @Validated() ClassificationDTO classificationDTO) {
+    @PostMapping("create")
+    public void create(@Validated @RequestBody ClassificationDTO classificationDTO) {
+        save(classificationDTO);
+    }
+
+    @PostMapping("update/{id}")
+    public void update(@PathVariable Long id, @Validated @RequestBody ClassificationDTO classificationDTO) {
+        classificationDTO.setId(id);
+        save(classificationDTO);
+    }
+
+    public void save(ClassificationDTO classificationDTO) {
         classificationUseCase.saveClassification(Objects.requireNonNull(DefaultConverter.convert(classificationDTO, ClassificationBO.class)));
     }
 
