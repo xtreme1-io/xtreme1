@@ -170,4 +170,9 @@ public class CommonConfig implements WebMvcConfigurer {
         return new UserTokenUseCase();
     }
 
+    @Bean
+    public DataClassificationOptionUseCase dataClassificationOptionUseCase() {
+        return new DataClassificationOptionUseCase();
+    }
+
 }

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface DataClassificationOptionMapper extends BaseMapper<DataClassificationOption> {
 
-    int insertOrUpdateBatch(List<DataClassificationOption> list);
+    int insertBatch(List<DataClassificationOption> list);
 
     Page<DataClassificationOption> selectByPage(Page<DataClassificationOption> page, @Param("datasetId") Long datasetId);
 

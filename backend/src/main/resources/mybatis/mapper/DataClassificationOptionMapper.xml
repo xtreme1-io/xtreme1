@@ -23,9 +23,9 @@
         created_at, updated_at, created_by, updated_by
     </sql>
 
-    <insert id="insertOrUpdateBatch">
+    <insert id="insertBatch">
         INSERT INTO data_classification_option (dataset_id, data_id, classification_id,
-        attribute_id, option_name, option_path)
+        attribute_id, option_name, option_path, created_by)
         VALUES
         <foreach collection="list" item="item"  separator=",">
             (
@@ -34,23 +34,25 @@
             #{item.classificationId},
             #{item.attributeId},
             #{item.optionName},
-            #{item.optionPath,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler}
+            #{item.optionPath,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
+            #{item.createdBy}
             )
         </foreach>
     </insert>
 
     <select id="selectByPage" resultMap="BaseResultMap">
         SELECT cdss.*, tmp.dataAmount
-        FROM data_classification_option cdss
+        FROM data_classification_option cdss INNER JOIN data d ON cdss.data_id = d.id
                  INNER JOIN (
-            SELECT classification_id, attribute_id, count(*) as dataAmount
+            SELECT attribute_id, count(*) as dataAmount
             FROM dataset_classification dc
                      INNER JOIN data_classification_option cds
                                 ON dc.id = cds.classification_id
             WHERE cds.dataset_id = #{datasetId}
             GROUP BY cds.attribute_id, cds.option_name
             ORDER BY dataAmount DESC
-        ) AS tmp ON cdss.classification_id = tmp.classification_id AND cdss.attribute_id = tmp.attribute_id
+        ) AS tmp ON cdss.attribute_id = tmp.attribute_id
+        WHERE cdss.dataset_id = #{datasetId} AND d.is_deleted = false
     </select>
 
 

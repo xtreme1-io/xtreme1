@@ -186,15 +186,6 @@ public class DatasetClassUseCase {
         var toolTypeUnits = datasetClassDao.getBaseMapper()
                 .statisticsObjectByToolType(datasetId);
 
-        long noClassObjectCount = dataAnnotationObjectDAO.count(new LambdaQueryWrapper<DataAnnotationObject>()
-                .eq(DataAnnotationObject::getDatasetId, datasetId)
-                .isNull(DataAnnotationObject::getClassId)
-        );
-        toolTypeUnits.add(ToolTypeStatisticsUnit.builder()
-                .toolType(null)
-                .objectAmount((int) noClassObjectCount)
-                .build()
-        );
         return DefaultConverter.convert(toolTypeUnits, ToolTypeStatisticsUnitBO.class);
     }
 
