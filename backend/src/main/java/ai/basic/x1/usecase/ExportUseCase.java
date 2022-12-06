@@ -15,6 +15,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.TemporalAccessorUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
@@ -155,11 +156,11 @@ public class ExportUseCase {
             var dataExportBaseBO = dataExportBO.getData();
             var dataPath = String.format("%s/%s/%s-%s%s", zipPath, Constants.DATA, dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
             FileUtil.writeString(JSONUtil.toJsonStr(dataExportBaseBO, jsonConfig), dataPath, StandardCharsets.UTF_8);
-            /*if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
+            if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
                 var resultPath = String.format("%s/%s/%s-%s%s", zipPath, Constants.RESULT,
                         dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
                 FileUtil.writeString(JSONUtil.toJsonStr(dataExportBO.getResult(), jsonConfig), resultPath, StandardCharsets.UTF_8);
-            }*/
+            }
         });
     }
 
