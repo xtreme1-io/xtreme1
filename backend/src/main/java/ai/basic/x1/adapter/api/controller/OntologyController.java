@@ -2,12 +2,15 @@ package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.dto.OntologyDTO;
 import ai.basic.x1.entity.OntologyBO;
+import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.usecase.OntologyUseCase;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author chenchao
@@ -26,6 +29,12 @@ public class OntologyController {
     @GetMapping("findByPage")
     public Page<OntologyDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize, OntologyDTO ontologyDTO) {
         Page<OntologyBO> ontologyPage = ontologyUseCase.findByPage(pageNo, pageSize, DefaultConverter.convert(ontologyDTO, OntologyBO.class));
+        return DefaultConverter.convert(ontologyPage, OntologyDTO.class);
+    }
+
+    @GetMapping("findAll")
+    public List<OntologyDTO> findAll(@RequestParam DatasetTypeEnum type) {
+        List<OntologyBO> ontologyPage = ontologyUseCase.findAll(type);
         return DefaultConverter.convert(ontologyPage, OntologyDTO.class);
     }
 
@@ -55,11 +64,11 @@ public class OntologyController {
     }
 
     @GetMapping("validateName")
-    public Boolean validateName(@RequestParam(value = "id",required = false) Long id, @RequestParam("name") String name) {
+    public Boolean validateName(@RequestParam(value = "id", required = false) Long id, @RequestParam("name") String name,@RequestParam("type") DatasetTypeEnum type) {
         if (StrUtil.isEmpty(name)) {
             return false;
         }
-        return ontologyUseCase.validateName(id, name);
+        return ontologyUseCase.validateName(id, name, type);
     }
 
 }
