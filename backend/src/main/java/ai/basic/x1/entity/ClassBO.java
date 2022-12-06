@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import ai.basic.x1.adapter.dto.ClassDTO;
 import ai.basic.x1.entity.enums.ToolTypeEnum;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -9,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author chenchao
@@ -62,5 +64,20 @@ public class ClassBO {
      * the number of class
      */
     private Integer classNum;
+
+    /**
+     * Whether to reset the relationship with the class in the dataset
+     */
+    private Boolean isResetRelations;
+
+    private List<DatasetClass> datasetClasses;
+
+    @Data
+    @Builder
+    public static class DatasetClass {
+        private Long id;
+
+        private String name;
+    }
 
 }

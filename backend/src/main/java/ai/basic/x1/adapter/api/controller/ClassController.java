@@ -2,6 +2,7 @@ package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.dto.ClassDTO;
 import ai.basic.x1.entity.ClassBO;
+import ai.basic.x1.entity.enums.ToolTypeEnum;
 import ai.basic.x1.usecase.ClassUseCase;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
@@ -9,6 +10,7 @@ import cn.hutool.core.util.StrUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -35,6 +37,11 @@ public class ClassController {
         return DefaultConverter.convert(classUseCase.findByPage(pageNo, pageSize, Objects.requireNonNull(DefaultConverter.convert(classDTO, ClassBO.class))), ClassDTO.class);
     }
 
+    @GetMapping("/findAll/{ontologyId}")
+    public List<ClassDTO> findAllByOntologyId(@PathVariable Long ontologyId, @RequestParam ToolTypeEnum toolType) {
+        return DefaultConverter.convert(classUseCase.findAll(ontologyId, toolType), ClassDTO.class);
+    }
+
     @PostMapping("create")
     public void create(@Validated @RequestBody ClassDTO classDTO) {
         save(classDTO);
@@ -56,11 +63,11 @@ public class ClassController {
     }
 
     @GetMapping("/validateName")
-    public Boolean validateName(@RequestParam(required = false) Long id, @RequestParam Long ontologyId, @RequestParam String name) {
+    public Boolean validateName(@RequestParam(required = false) Long id, @RequestParam Long ontologyId, @RequestParam String name, @RequestParam ToolTypeEnum toolType) {
         if (StrUtil.isEmpty(name)) {
             return false;
         }
-        return classUseCase.validateName(id, ontologyId, name);
+        return classUseCase.validateName(id, ontologyId, name, toolType);
     }
 
 }

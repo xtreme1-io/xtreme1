@@ -1,12 +1,17 @@
 package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.ClassDAO;
+import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
+import ai.basic.x1.adapter.port.dao.DatasetClassOntologyDAO;
 import ai.basic.x1.adapter.port.dao.OntologyDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Class;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassOntology;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Ontology;
 import ai.basic.x1.entity.ClassBO;
 import ai.basic.x1.entity.enums.SortByEnum;
 import ai.basic.x1.entity.enums.SortEnum;
+import ai.basic.x1.entity.enums.ToolTypeEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
@@ -22,6 +27,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * @author chenchao
@@ -34,6 +42,12 @@ public class ClassUseCase {
 
     @Autowired
     private OntologyDAO ontologyDAO;
+
+    @Autowired
+    private DatasetClassOntologyDAO datasetClassOntologyDAO;
+
+    @Autowired
+    private DatasetClassDAO datasetClassDAO;
 
     public Page<ClassBO> findByPage(Integer pageNo, Integer pageSize, ClassBO classBO) {
         LambdaQueryWrapper<Class> classLambdaQueryWrapper = Wrappers.lambdaQuery();
@@ -48,7 +62,26 @@ public class ClassUseCase {
     }
 
     public ClassBO findById(Long id) {
-        return DefaultConverter.convert(classDAO.getById(id), ClassBO.class);
+        ClassBO classBO = DefaultConverter.convert(classDAO.getById(id), ClassBO.class);
+        if (ObjectUtil.isNull(classBO)) {
+            return null;
+        }
+        var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, id);
+        List<DatasetClassOntology> list = datasetClassOntologyDAO.list(datasetClassOntologyWrapper);
+        if (ObjectUtil.isEmpty(list)) {
+            return classBO;
+        }
+        var datasetClassIds = list.stream().map(DatasetClassOntology::getDatasetClassId).collect(toList());
+        List<DatasetClass> datasetClasses = datasetClassDAO.listByIds(datasetClassIds);
+        classBO.setDatasetClasses(new ArrayList<>());
+        datasetClasses.forEach(datasetClass ->
+                classBO.getDatasetClasses().add(
+                        ClassBO.DatasetClass
+                                .builder()
+                                .id(datasetClass.getId())
+                                .name(datasetClass.getName())
+                                .build()));
+        return classBO;
     }
 
     public List<ClassBO> findByOntologyIdList(List<Long> ontologyIdList) {
@@ -83,30 +116,51 @@ public class ClassUseCase {
         Class classInfo = DefaultConverter.convert(bo, Class.class);
         try {
             classDAO.saveOrUpdate(classInfo);
-        }catch (DuplicateKeyException e){
+        } catch (DuplicateKeyException e) {
             throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
         }
-
+        if (ObjectUtil.isNotNull(bo.getId()) && ObjectUtil.equals(Boolean.TRUE, bo.getIsResetRelations())) {
+            removeDatasetClassOntology(bo.getId());
+        }
     }
 
     /**
-     * 删除数据 物理删除
+     * delete class
      *
      * @param id id
      * @return true-false
      */
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteClass(Long id) {
+        removeDatasetClassOntology(id);
         return classDAO.removeById(id);
     }
 
-    public boolean validateName(Long id, Long ontologyId, String name) {
-        LambdaQueryWrapper<Class> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Class::getName, name);
-        lambdaQueryWrapper.eq(Class::getOntologyId, ontologyId);
+    /**
+     * delete relationship of datasetClass and deleted class
+     *
+     * @param classId
+     */
+    private void removeDatasetClassOntology(Long classId) {
+        LambdaQueryWrapper<DatasetClassOntology> datasetClassOntologyLambdaQueryWrapper = Wrappers.lambdaQuery();
+        datasetClassOntologyLambdaQueryWrapper.eq(DatasetClassOntology::getClassId, classId);
+        datasetClassOntologyDAO.remove(datasetClassOntologyLambdaQueryWrapper);
+    }
+
+    public boolean validateName(Long id, Long ontologyId, String name,ToolTypeEnum toolType) {
+        LambdaQueryWrapper<Class> lambdaQueryWrapper = new LambdaQueryWrapper<Class>()
+                .eq(Class::getName, name)
+                .eq(Class::getOntologyId, ontologyId)
+                .eq(Class::getToolType,toolType);
         if (ObjectUtil.isNotEmpty(id)) {
             lambdaQueryWrapper.ne(Class::getId, id);
         }
         return classDAO.getBaseMapper().exists(lambdaQueryWrapper);
+    }
+
+    public List<ClassBO> findAll(Long ontologyId, ToolTypeEnum toolType) {
+        var classWrapper = new LambdaQueryWrapper<Class>().eq(Class::getOntologyId, ontologyId);
+        classWrapper.eq(ObjectUtil.isNotNull(toolType), Class::getToolType, toolType);
+        return DefaultConverter.convert(classDAO.list(classWrapper), ClassBO.class);
     }
 }
