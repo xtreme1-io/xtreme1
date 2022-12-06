@@ -33,7 +33,8 @@ public class ClassController {
     }
 
     @GetMapping("/findByPage")
-    public Page<ClassDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize, @Validated ClassDTO classDTO) {
+    public Page<ClassDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo, @RequestParam(defaultValue = "10") Integer pageSize, ClassDTO classDTO) {
+        Objects.requireNonNull(classDTO.getOntologyId(),"ontology id can not be null");
         return DefaultConverter.convert(classUseCase.findByPage(pageNo, pageSize, Objects.requireNonNull(DefaultConverter.convert(classDTO, ClassBO.class))), ClassDTO.class);
     }
 
