@@ -105,6 +105,16 @@ export const validateOntologyClassNameApi = (params: ValidateOntologyClassesName
     },
   });
 
+/** push ontology class */
+export const pushAttributesToDatasetApi = (params: BasicIdParams) =>
+  defHttp.post<null>({
+    url: `${Api.ONTOLOGY_CLASS}/pushAttributesToDataset/${params.id}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 // ---------------------------------------
 
 /** Ontology Classification */

@@ -59,13 +59,7 @@
           </div>
         </div>
         <div class="btn">
-          <Button
-            v-show="props.isCenter"
-            class="push"
-            type="primary"
-            block
-            @click="handlePush(item)"
-          >
+          <Button v-show="showPush" class="push" type="primary" block @click="handlePush(item)">
             {{ 'Push to All' }}
           </Button>
           <Button class="edit" type="primary" block @click="handleEdit(item)">
@@ -100,6 +94,7 @@
   import deleteSvg from '/@/assets/icons/delete.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';
   import { ModalConfirmCustom } from '/@/utils/business/confirm';
+  import { pushAttributesToDatasetApi } from '/@/api/business/classes';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('cardItem');
@@ -122,6 +117,9 @@
   const emits = defineEmits(['edit', 'create', 'handleSelected']);
 
   /** Push */
+  const showPush = computed(() => {
+    return props.isCenter && props.activeTab == ClassTypeEnum.CLASS;
+  });
   const handlePush = (item) => {
     const relatedNum = 0;
     ModalConfirmCustom({
@@ -134,8 +132,8 @@
           backgroundColor: '#FCB17A',
         },
       },
-      onOk: () => {
-        console.log(item);
+      onOk: async () => {
+        await pushAttributesToDatasetApi({ id: item.id });
       },
     });
   };

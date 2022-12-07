@@ -68,6 +68,8 @@ export interface ontologyClassItem extends ontologyResponseItem {
   datasetType: datasetTypeEnum;
   toolType: ToolTypeEnum;
   toolTypeOptions: ToolTypeOptionsItem;
+  datasetClasses: any;
+  isResetRelations: boolean;
 }
 export type ontologyClassResponse = BasicFetchResult<ontologyClassItem>;
 /** ontology classification */

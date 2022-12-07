@@ -6,9 +6,10 @@
     wrapClassName="ontology-class-modal"
     :width="650"
     :height="700"
-    @cancel="handleCancel"
+    :closeFunc="handleCancel"
     @ok="handleConfirm"
     :okText="okText"
+    :closable="false"
   >
     <template #title>
       <Icon
@@ -69,6 +70,7 @@
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { setSchema, setClassSchema } from './utils';
   import emitter from 'tiny-emitter/instance';
+  import { ModalConfirmCustom } from '/@/utils/business/confirm';
 
   import { BasicModal, useModalInner, useModal } from '/@/components/Modal';
   import Icon from '/@/components/Icon';
@@ -262,12 +264,26 @@
   /** Close Popup */
   const updateDetail = inject('updateDetail', Function, true);
   const handleCancel = () => {
-    console.log('cancel', indexList.value);
-    if (indexList.value.length == 0) {
-      emits('back');
+    if (isChangedByUser.value) {
+      ModalConfirmCustom({
+        title: 'Discard ',
+        content: `Are you sure to discard the changes?`,
+        okText: 'Discard',
+        okButtonProps: {
+          type: 'primary',
+          style: {
+            backgroundColor: '#FCB17A',
+          },
+        },
+        onOk: async () => {
+          // TODO Discard
+          handleClose();
+        },
+      });
     } else {
-      emitter.emit('handleSaveForm', { type: 'close' });
+      handleClose();
     }
+
     return;
     openDiscardModal();
     // // Judgment is Edit
@@ -303,6 +319,12 @@
   provide('handleUpdateValid', handleUpdateValid);
 
   const handleConfirm = () => {
+    // console.log('cancel', indexList.value);
+    // if (indexList.value.length == 0) {
+    //   emits('back');
+    // } else {
+    //   emitter.emit('handleSaveForm', { type: 'close' });
+    // }
     emitter.emit('handleSaveForm', { type: 'confirm' });
   };
   // Confirm to create or save

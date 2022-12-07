@@ -242,6 +242,7 @@
         // Non-echo isStandard is false, you need to manually end it. Not the first monitoring
         standardEcho.value++;
         formState.name = undefined;
+        formState.datasetType = unref(props.datasetType) as datasetTypeEnum;
         defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
       }
       console.log(formState);
@@ -280,6 +281,7 @@
   watch(
     () => formState.datasetType,
     (newVal, oldVal) => {
+      console.log('=======>', formState);
       if (newVal == datasetTypeEnum.IMAGE) {
         formState.toolType = ToolTypeEnum.POLYGON;
         formState.isConstraints = false;
