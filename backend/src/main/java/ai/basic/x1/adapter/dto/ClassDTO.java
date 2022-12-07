@@ -10,7 +10,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -65,6 +64,8 @@ public class ClassDTO {
     private SortEnum ascOrDesc;
 
     private List<DatasetClass> datasetClasses;
+
+    private Long datasetClassNum;
 
     @Data
     public static class DatasetClass {
