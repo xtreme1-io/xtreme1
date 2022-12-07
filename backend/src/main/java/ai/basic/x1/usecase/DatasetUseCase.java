@@ -27,6 +27,7 @@ import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
@@ -48,6 +49,7 @@ public class DatasetUseCase {
     private DatasetDAO datasetDAO;
 
     @Autowired
+    @Qualifier("distributedLock")
     private IDistributedLock distributedLock;
 
     @Autowired
@@ -65,14 +67,14 @@ public class DatasetUseCase {
     @Autowired
     private DatasetInitialInfo datasetInitialInfo;
 
-    @Value("${file.tempPath:/tmp/x1/}")
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
     private static final ExecutorService executorService = ThreadUtil.newExecutor(1);
 
     @PostConstruct
     public void init() {
-        var file = FileUtil.file(".",datasetInitialInfo.getFileName());
+        var file = FileUtil.file(".", datasetInitialInfo.getFileName());
         if (file.isFile()) {
             executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
                 var datasetName = datasetInitialInfo.getName();

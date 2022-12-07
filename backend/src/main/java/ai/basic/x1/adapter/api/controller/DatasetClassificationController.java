@@ -63,7 +63,6 @@ public class DatasetClassificationController {
 
     /**
      * Check whether the classification name already exists in the same dataset
-     *
      * @return if exists return true
      */
     @GetMapping("validateName")
