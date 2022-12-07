@@ -29,6 +29,9 @@ public class DataAnnotationUseCase {
     @Autowired
     private DataEditUseCase dataEditUseCase;
 
+    @Autowired
+    private DataClassificationOptionUseCase dataClassificationOptionUseCase;
+
     /**
      * query classifications annotation results
      *
@@ -75,6 +78,7 @@ public class DataAnnotationUseCase {
                 .collect(Collectors.toSet());
 
         dataAnnotationDAO.getBaseMapper().mysqlInsertOrUpdateBatch(DefaultConverter.convert(dataAnnotationBOs, DataAnnotation.class));
+        dataClassificationOptionUseCase.saveBatch(dataAnnotationBOs);
 
         Set<Long> oldIds = oldInfos.stream().map(DataAnnotationBO::getId).collect(Collectors.toSet());
         // Obtain the comparison between the original data and the new data,

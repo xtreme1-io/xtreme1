@@ -43,8 +43,17 @@ public class DataClassificationOptionUseCase {
 
         var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<DataClassificationOption>(pageNo, pageSize);
         var records = dataClassificationOptionDAO.getBaseMapper()
-                .selectByPage(page, datasetId).getRecords();
+                .statisticsDataByOption(page, datasetId).getRecords();
         return DefaultConverter.convert(records, DataClassificationOptionBO.class);
+    }
+
+    public List<DataClassificationOptionBO> findByClassIds(List<Long> classIds) {
+        if (CollUtil.isEmpty(classIds)) {
+            return List.of();
+        }
+        var options = dataClassificationOptionDAO.getBaseMapper()
+                .findByClassIds(classIds);
+        return DefaultConverter.convert(options, DataClassificationOptionBO.class);
     }
 
 }
