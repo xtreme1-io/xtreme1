@@ -3,38 +3,39 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.api.context.UserInfo;
-import ai.basic.x1.adapter.port.dao.*;
-import ai.basic.x1.adapter.port.dao.mybatis.model.*;
-import ai.basic.x1.entity.*;
+import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
+import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
+import ai.basic.x1.adapter.port.dao.DatasetDAO;
+import ai.basic.x1.adapter.port.dao.mybatis.model.Dataset;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
+import ai.basic.x1.entity.DataInfoUploadBO;
+import ai.basic.x1.entity.DatasetBO;
+import ai.basic.x1.entity.DatasetClassBO;
+import ai.basic.x1.entity.DatasetQueryBO;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import ai.basic.x1.util.lock.IDistributedLock;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.LIDAR_FUSION;
-import static ai.basic.x1.util.Constants.PAGE_SIZE_100;
 
 /**
  * @author fyb
@@ -47,6 +48,7 @@ public class DatasetUseCase {
     private DatasetDAO datasetDAO;
 
     @Autowired
+    @Qualifier("distributedLock")
     private IDistributedLock distributedLock;
 
     @Autowired
@@ -64,6 +66,7 @@ public class DatasetUseCase {
     @Autowired
     private DatasetInitialInfo datasetInitialInfo;
 
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     @Autowired
     private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
 
