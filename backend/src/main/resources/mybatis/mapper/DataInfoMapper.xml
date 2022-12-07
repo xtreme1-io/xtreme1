@@ -29,4 +29,18 @@
         </foreach> AND is_deleted = FALSE
         GROUP BY dataset_id
     </select>
+
+    <select id="listByIds" resultMap="BaseResultMap">
+        SELECT * FROM
+        data d
+        WHERE d.id in
+        <foreach collection="ids" index="index" item="id" open="("
+                 separator=","
+                 close=")">
+            #{id}
+        </foreach>
+        <if test="isQueryDeletedData == false">
+            AND d.is_deleted=#{isQueryDeletedData}
+        </if>
+    </select>
 </mapper>
