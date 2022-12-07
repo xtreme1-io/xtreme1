@@ -91,7 +91,7 @@ public class DataInfoController extends BaseDatasetController {
 
     @GetMapping("listByIds")
     public List<DataInfoDTO> listByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
-        var dataInfoBos = dataInfoUsecase.listByIds(dataIds);
+        var dataInfoBos = dataInfoUsecase.listByIds(dataIds,false);
         if (CollectionUtil.isNotEmpty(dataInfoBos)) {
             return dataInfoBos.stream().map(this::convertDataInfoDTO).collect(Collectors.toList());
         }

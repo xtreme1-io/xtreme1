@@ -259,10 +259,11 @@ public class DataInfoUseCase {
      * Query data object list according to id collection
      *
      * @param ids id collection
+     * @param isQueryDeletedData Whether to query to delete data
      * @return Collection of data objects
      */
-    public List<DataInfoBO> listByIds(List<Long> ids) {
-        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
+    public List<DataInfoBO> listByIds(List<Long> ids,Boolean isQueryDeletedData) {
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.getBaseMapper().listByIds(ids,isQueryDeletedData), DataInfoBO.class);
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
             setDataInfoBOListFile(dataInfoBOList);
         }
@@ -725,7 +726,7 @@ public class DataInfoUseCase {
             }
             i++;
         }
-        var dataInfoBOList = listByIds(dataIds);
+        var dataInfoBOList = listByIds(dataIds,false);
         var dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
         for (var dataId : dataIds) {
             modelMessageBO.setDataId(dataId);
@@ -1479,7 +1480,7 @@ public class DataInfoUseCase {
         Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
                 dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
                 : Map.of();
-        var dataList = listByIds(dataIds);
+        var dataList = listByIds(dataIds,false);
         dataList.forEach(dataInfoBO -> {
             var dataId = dataInfoBO.getId();
             var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());

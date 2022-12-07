@@ -24,4 +24,12 @@ public interface DataInfoMapper extends ExtendBaseMapper<DataInfo> {
      */
     List<DatasetStatistics> getDatasetStatisticsByDatasetIds(@Param("datasetIds") List<Long> datasetIds);
 
+    /**
+     * Get data info
+     * @param ids Data id
+     * @param isQueryDeletedData Whether to query to delete data
+     * @return Data info
+     */
+    List<DataInfo> listByIds(@Param("ids") List<Long> ids, @Param("isQueryDeletedData") Boolean isQueryDeletedData);
+
 }
