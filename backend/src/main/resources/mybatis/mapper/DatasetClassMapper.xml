@@ -4,8 +4,22 @@
 
     <!-- generic query result colum -->
     <sql id="Base_Column_List">
-        id, dataset_id, type, name, color, tool_type, attributes, created_at, created_by, updated_at, updated_by
+        id, dataset_id, name, color, tool_type, attributes, created_at, created_by, updated_at, updated_by
     </sql>
+    <insert id="saveOrUpdateBatch">
+        INSERT INTO dataset_class (dataset_id, name, color, tool_type,tool_type_options, attributes, created_by, updated_by)
+        VALUES
+        <foreach collection="list" item="item"  separator=",">
+            (#{item.datasetId},#{item.name},#{item.color},#{item.toolType},
+             #{item.toolTypeOptions,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
+             #{item.attributes,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
+             #{item.createdBy},#{item.updatedBy})
+        </foreach>
+        ON DUPLICATE KEY UPDATE color=VALUES(color),
+        tool_type_options=VALUES(tool_type_options),
+        attributes=VALUES(attributes),
+        updated_by=VALUES(updated_by)
+    </insert>
 
     <select id="statisticsObjectByClass"
             resultType="ai.basic.x1.adapter.port.dao.mybatis.model.ClassStatisticsUnit">
@@ -27,5 +41,17 @@
         WHERE d.dataset_id = #{datasetId}
           AND d.is_deleted = FALSE
         GROUP BY dc.tool_type
+    </select>
+    <select id="getDatasetClass" resultType="ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dataset_class
+        WHERE
+        dataset_id = #{datasetId}
+        and (name, tool_type) IN (
+        <foreach collection="list" item="item" separator=",">
+            (#{item.name},#{item.toolType})
+        </foreach>
+        )
     </select>
 </mapper>

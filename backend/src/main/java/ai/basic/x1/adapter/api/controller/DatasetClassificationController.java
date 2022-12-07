@@ -1,6 +1,7 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.dto.DatasetClassificationDTO;
+import ai.basic.x1.adapter.dto.request.DatasetClassificationCopyDTO;
 import ai.basic.x1.entity.DatasetClassificationBO;
 import ai.basic.x1.usecase.DatasetClassificationUseCase;
 import ai.basic.x1.util.DefaultConverter;
@@ -59,6 +60,11 @@ public class DatasetClassificationController {
     @GetMapping("findAll/{datasetId}")
     public List<DatasetClassificationDTO> findAll(@PathVariable("datasetId") Long datasetId) {
         return DefaultConverter.convert(datasetClassificationUseCase.findAll(datasetId), DatasetClassificationDTO.class);
+    }
+
+    @PostMapping("/copyFromOntologyCenter")
+    public void copyFromOntologyCenter(@RequestBody() @Validated DatasetClassificationCopyDTO datasetClassificationCopyDTO) {
+        datasetClassificationUseCase.copyFromOntologyCenter(DefaultConverter.convert(datasetClassificationCopyDTO, DatasetClassificationBO.class));
     }
 
     /**

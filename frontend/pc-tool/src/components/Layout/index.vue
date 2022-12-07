@@ -1,7 +1,6 @@
 <template>
     <div class="layout-main-container">
         <div
-            ref="imgContainer"
             v-show="!state.config.showSingleImgView && editor.state.imgViews.length > 0"
             :style="{
                 width: `${imgViewWidth}px`,
@@ -12,7 +11,7 @@
             <div v-show="state.config.showImgView" style="width: 100%; height: 100%">
                 <slot name="img-view"></slot>
             </div>
-            <div class="handle-line-img"></div>
+            <div ref="handleImg" class="handle-line-img"></div>
             <div @click="toggleImgView" class="visible-handle img">
                 <LeftOutlined v-if="state.config.showImgView" />
                 <RightOutlined v-else />
@@ -28,7 +27,6 @@
         </div>
         <div
             class="side-view-container"
-            ref="sideContainer"
             :style="{
                 width: `${sideViewWidth}px`,
                 right: 0,
@@ -37,7 +35,7 @@
             <div v-show="state.config.showSideView" style="width: 100%; height: 100%">
                 <slot name="side-view"></slot>
             </div>
-            <div class="handle-line-side"></div>
+            <div ref="handleSide" class="handle-line-side"></div>
             <div @click="toggleSideView" class="visible-handle side">
                 <RightOutlined v-if="state.config.showSideView" />
                 <LeftOutlined v-else />
@@ -99,8 +97,8 @@
             });
         },
     );
-    const sideContainer = ref<HTMLElement | null>(null);
-    const imgContainer = ref<HTMLElement | null>(null);
+    const handleSide = ref<HTMLElement | null>(null);
+    const handleImg = ref<HTMLElement | null>(null);
     // let imgViewRight = toolWidth + info.imgViewWidth;
     // let operationRight = 0;
     let sideViewWidth = computed(() => {
@@ -135,60 +133,51 @@
         });
         editor.pc.render();
     }, 30);
+    function addEventListenerResize(dom: HTMLElement, side: 1 | -1, callBack: Function) {
+        let start = 0;
+        let offsetX = 0;
+        let width = 0;
+        let onMouseDown = (event: MouseEvent) => {
+            let parent = dom.parentElement;
+            width = parent?.clientWidth || 0;
+            document.body.style.cursor = 'ew-resize';
+            dom.classList.add('active');
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            start = event.screenX;
+        };
+        let onMouseMove = (event: MouseEvent) => {
+            offsetX = start - event.screenX;
+            start = event.screenX;
+            width += side * offsetX;
+            callBack && callBack({ offsetX, width });
+        };
+        let onMouseUp = () => {
+            document.body.style.cursor = '';
+            dom.classList.remove('active');
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+        dom.addEventListener('mousedown', onMouseDown);
+        return () => {
+            dom.removeEventListener('mousedown', onMouseDown);
+        };
+    }
     function initResize() {
-        if (sideContainer.value) {
-            const container = sideContainer.value as HTMLElement;
-            interact(container).resizable({
-                edges: { left: true },
-                listeners: {
-                    move(event) {
-                        const { width } = event.rect;
-                        info.sideViewWidth = width < 100 ? 0 : width;
-                        state.config.showSideView = info.sideViewWidth > 100;
-                        render();
-                    },
-                },
-                modifiers: [
-                    // keep the edges inside the parent
-                    interact.modifiers.restrictEdges({
-                        outer: 'parent',
-                    }),
-                    // minimum size
-                    interact.modifiers.restrictSize({
-                        min: { width: 99, height: 200 },
-                        max: { width: 600, height: 200 },
-                    }),
-                ],
-
-                inertia: false,
+        if (handleSide.value) {
+            addEventListenerResize(handleSide.value, 1, (data: any) => {
+                let width = data.width;
+                info.sideViewWidth = width > 600 ? 600 : width < 100 ? 0 : width;
+                state.config.showSideView = info.sideViewWidth > 100;
+                render();
             });
         }
-        if (imgContainer.value) {
-            const container = imgContainer.value as HTMLElement;
-            interact(container).resizable({
-                edges: { right: true },
-                listeners: {
-                    move(event) {
-                        const { width } = event.rect;
-                        info.imgViewWidth = width < 100 ? 0 : width;
-                        state.config.showImgView = info.imgViewWidth > 100;
-                        render();
-                    },
-                },
-                modifiers: [
-                    // keep the edges inside the parent
-                    interact.modifiers.restrictEdges({
-                        outer: 'parent',
-                    }),
-
-                    // minimum size
-                    interact.modifiers.restrictSize({
-                        min: { width: 99, height: 200 },
-                        max: { width: 500, height: 200 },
-                    }),
-                ],
-
-                inertia: false,
+        if (handleImg.value) {
+            addEventListenerResize(handleImg.value, -1, (data: any) => {
+                let width = data.width;
+                info.imgViewWidth = width > 500 ? 500 : width < 100 ? 0 : width;
+                state.config.showImgView = info.imgViewWidth > 100;
+                render();
             });
         }
     }
@@ -201,6 +190,7 @@
         position: relative;
         user-select: none;
         padding: 6px 0px;
+
         .img-view-container {
             position: absolute;
             top: 0px;
@@ -221,6 +211,7 @@
             // padding-left: 3px;
             border-left: 3px solid transparent;
         }
+
         .check-view-container {
             position: absolute;
             top: 0px;
@@ -229,6 +220,7 @@
             bottom: 0px;
             z-index: 100;
         }
+
         .main-view-container {
             position: absolute;
             top: 0px;
@@ -237,32 +229,43 @@
             bottom: 0px;
             background-color: black;
         }
+
         .handle-line-img {
-            width: 10px;
+            width: 3px;
             height: 100%;
             position: absolute;
-            right: -10px;
+            right: -3px;
             top: 0;
-            border-left-width: 3px;
-            border-left-style: solid;
-            border-left-color: transparent;
+            background-color: transparent;
+
+            &.active {
+                background-color: #2e8cf0;
+            }
+
             &:hover {
-                border-left-color: #2e8cf0;
+                cursor: ew-resize;
+                background-color: #2e8cf0;
             }
         }
+
         .handle-line-side {
-            width: 10px;
+            width: 3px;
             height: 100%;
             position: absolute;
-            left: -10px;
+            background-color: transparent;
+            left: -3px;
             top: 0;
-            border-right-width: 3px;
-            border-right-style: solid;
-            border-right-color: transparent;
+
+            &.active {
+                background-color: #2e8cf0;
+            }
+
             &:hover {
-                border-right-color: #2e8cf0;
+                cursor: ew-resize;
+                background-color: #2e8cf0;
             }
         }
+
         .visible-handle {
             position: absolute;
             background: #3a393e;

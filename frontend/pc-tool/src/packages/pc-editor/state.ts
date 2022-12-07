@@ -120,8 +120,6 @@ function getDefaultConfig(): IConfig {
         pointSize: 0.1,
         heightRange: [-10000, 10000],
         groundEnable: true,
-        trimMin: new THREE.Vector3(-200, -200, -5),
-        trimMax: new THREE.Vector3(200, 200, 20),
         // render
         pointColorMode: 'height',
         pointIntensity: [0, 255],
@@ -143,5 +141,9 @@ function getDefaultConfig(): IConfig {
         renderProjectPoint: false,
         //
         FILTER_ALL: 'All',
+        aspectRatio: 1.78,
+        maxViewHeight: '100%',
+        maxViewWidth: '100%',
+        limitRect2Image: true,
     };
 }

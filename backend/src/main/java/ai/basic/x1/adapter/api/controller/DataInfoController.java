@@ -3,10 +3,7 @@ package ai.basic.x1.adapter.api.controller;
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.adapter.exception.ApiException;
-import ai.basic.x1.entity.DataInfoQueryBO;
-import ai.basic.x1.entity.DataInfoUploadBO;
-import ai.basic.x1.entity.DataPreAnnotationBO;
-import ai.basic.x1.entity.ScenarioQueryBO;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
 import ai.basic.x1.usecase.*;
@@ -56,6 +53,9 @@ public class DataInfoController extends BaseDatasetController {
 
     @Autowired
     protected ClassUseCase classUseCase;
+
+    @Autowired
+    private DataClassificationOptionUseCase dataClassificationOptionUseCase;
 
     @PostMapping("upload")
     public String upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
@@ -209,6 +209,12 @@ public class DataInfoController extends BaseDatasetController {
         }
         var page = dataAnnotationObjectUseCase.findByScenarioPage(pageNo, pageSize, scenarioQueryBO);
         return DefaultConverter.convert(page, DataAnnotationObjectDTO.class);
+    }
+
+    @GetMapping("classificationOption/findAll")
+    public List<DataClassificationOptionDTO> findClassificationOption(@RequestParam Long classId) {
+        var options = dataClassificationOptionUseCase.findByClassIds(List.of(classId));
+         return DefaultConverter.convert(options, DataClassificationOptionDTO.class);
     }
 
     @GetMapping("scenarioExport")

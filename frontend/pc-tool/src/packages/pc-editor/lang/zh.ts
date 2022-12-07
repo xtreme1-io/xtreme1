@@ -35,6 +35,7 @@ const zh: ILocale = {
 
     // msg
     'msg-not-save': '是否保存变更?',
+    'create-rect-valid': '不允许标注到图片外',
 };
 
 export { zh };
