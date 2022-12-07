@@ -37,6 +37,7 @@ const Event = {
     CHECK_UPDATE_INFO: 'check_update_info',
 
     RESULT_EXPAND_TOGGLE: 'result_expand_toggle',
+    RESIZE: 'resize',
 };
 
 export default Event;

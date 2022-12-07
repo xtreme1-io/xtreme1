@@ -4,12 +4,11 @@
             <span :class="blocking ? 'close disable' : 'close'" @click="blocking ? null : onClose()"
                 ><CloseOutlined /><span style="margin-left: 4px">{{ $$('btn-close') }}</span></span
             >
-            <div class="header-info">
-                <span class="dataset-type">{{ bsState.datasetType }}</span>
-                <span>-</span>
-                <span class="dataset-name limit" :title="bsState.datasetName">{{
-                    bsState.datasetName
+            <div class="task-header-info" v-if="bsState.datasetName">
+                <span :title="bsState.datasetName || ''" class="task-header-name">{{
+                    bsState.datasetName || ''
                 }}</span>
+                <i class="iconfont icon-a-Jobinformation task-header-icon"></i>
             </div>
         </div>
         <div class="item-wrap data-index" v-if="state.frames.length > 0">
@@ -174,7 +173,33 @@
         height: 100%;
         display: flex;
         justify-content: space-between;
+        .task-header-info {
+            border-radius: 16px;
+            height: 28px;
+            padding: 2px 15px;
+            background: rgba(58, 58, 62, 0.39);
+            border: 1px solid rgba(58, 58, 62, 0.39);
+            display: flex;
+            align-items: center;
+            margin-left: 12px;
 
+            .task-header-name {
+                font-size: 14px;
+                line-height: 18px;
+                color: #bec1ca;
+                padding-right: 12px;
+                border-right: 1px solid #57575c;
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .task-header-icon {
+                margin-left: 10px;
+                cursor: pointer;
+            }
+        }
         .item-wrap {
             // min-width: 100px;
             display: flex;

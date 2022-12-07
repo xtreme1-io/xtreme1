@@ -149,8 +149,6 @@ export interface IConfig {
     pointSize: number;
     heightRange: [number, number];
     groundEnable: boolean;
-    trimMin: THREE.Vector3;
-    trimMax: THREE.Vector3;
     // setting
     pointColorMode: 'height' | 'intensity';
     pointIntensity: [number, number];
@@ -166,6 +164,10 @@ export interface IConfig {
 
     //
     FILTER_ALL: string;
+    aspectRatio: number;
+    maxViewHeight: string;
+    maxViewWidth: string;
+    limitRect2Image: boolean;
 }
 
 export interface IAnnotationInfo {
@@ -261,7 +263,7 @@ export interface IFrame {
     // flow
     dataStatus: 'INVALID' | 'VALID';
     annotationStatus: 'ANNOTATED' | 'NOT_ANNOTATED' | 'INVALID';
-    // skipped: boolean;
+    skipped: boolean;
 }
 
 export interface IFilter {

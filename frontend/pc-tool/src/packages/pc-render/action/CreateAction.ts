@@ -247,6 +247,7 @@ export default class CreateAction extends Action {
     }
 
     onMouseMove(event: MouseEvent) {
+        event.stopPropagation();
         let pos = { x: event.offsetX, y: event.offsetY };
         switch (this.drawType) {
             case 'points-1':
@@ -281,16 +282,19 @@ export default class CreateAction extends Action {
     }
 
     onMouseUp(event: MouseEvent) {
+        event.stopPropagation();
         if (!this.enabled || !this.startMouseDown) return;
         this.handleMouse(event);
     }
 
     onMouseDown(event: MouseEvent) {
+        event.stopPropagation();
         if (!this.enabled || !this.startMouseDown) return;
         this.handleMouse(event);
     }
 
     onClick(event: MouseEvent) {
+        event.stopPropagation();
         if (!this.enabled || !this.startClick) return;
         this.handleMouse(event);
     }

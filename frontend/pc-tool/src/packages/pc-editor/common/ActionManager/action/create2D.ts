@@ -4,17 +4,15 @@ import {
     Image2DRenderView,
     Box,
     Box2D,
-    Object2D,
     AnnotateObject,
-    AnnotateType,
+    utils,
 } from 'pc-render';
 import * as THREE from 'three';
 import * as _ from 'lodash';
 import Editor from '../../../Editor';
 import { define } from '../define';
-import { setIdInfo } from '../../../utils';
+import { setIdInfo, clamRange } from '../../../utils';
 import { Const, IAnnotationInfo, IUserData, StatusType } from '../../../type';
-import EditorEvent from '../../../config/event';
 
 export const create2DRect = define({
     valid(editor: Editor) {
@@ -55,12 +53,21 @@ export const create2DRect = define({
                             return resolve(null);
                         }
 
-                        // image coordinate
-                        let imgSize = view.imgSize;
+                        // to 图片坐标系
                         data.forEach((pos) => {
-                            pos.x = (pos.x / view.width) * imgSize.x;
-                            pos.y = (pos.y / view.height) * imgSize.y;
+                            view.domToImg(pos);
                         });
+
+                        if (
+                            config.limitRect2Image &&
+                            noPointsInImage(data[0], data[1], view.imgSize)
+                        ) {
+                            editor.showMsg('warning', editor.lang('create-rect-valid'));
+                            resolve(null);
+                            return;
+                        }
+
+                        config.limitRect2Image && clipPoints(data, view.imgSize);
 
                         let center = new THREE.Vector2();
                         center.copy(data[0]).add(data[1]).divideScalar(2);
@@ -79,16 +86,7 @@ export const create2DRect = define({
                         editor.state.config.showClassView = true;
 
                         editor.cmdManager.withGroup(() => {
-                            // if (editor.state.isSeriesFrame) {
-                            //     editor.cmdManager.execute('add-track', {
-                            //         trackId: userData.trackId,
-                            //         trackName: userData.trackName,
-                            //     });
-                            // }
-
-                            editor.cmdManager.execute('add-object', [
-                                { objects: rect, frame: editor.getCurrentFrame() },
-                            ]);
+                            editor.cmdManager.execute('add-object', [{ objects: rect }]);
                             editor.cmdManager.execute('select-object', rect);
                         });
 
@@ -137,16 +135,9 @@ export const create2DBox = define({
                         // startClick: false,
                     },
                     (data: THREE.Vector2[]) => {
-                        // console.log(data);
-                        // if (data.length !== 2) {
-                        //     return resolve(null);
-                        // }
-
-                        // // image coordinate
-                        let imgSize = view.imgSize;
+                        // to 图片坐标系
                         data.forEach((pos) => {
-                            pos.x = (pos.x / view.width) * imgSize.x;
-                            pos.y = (pos.y / view.height) * imgSize.y;
+                            view.domToImg(pos);
                         });
 
                         let positions1 = getPositionFromPoints([data[0], data[1]]);
@@ -165,12 +156,6 @@ export const create2DBox = define({
 
                         editor.state.config.showClassView = true;
                         editor.cmdManager.withGroup(() => {
-                            // if (editor.state.isSeriesFrame) {
-                            //     editor.cmdManager.execute('add-track', {
-                            //         trackId: userData.trackId,
-                            //         trackName: userData.trackName,
-                            //     });
-                            // }
                             editor.cmdManager.execute('add-object', [{ objects: box }]);
                             editor.cmdManager.execute('select-object', box);
                         });
@@ -195,17 +180,16 @@ export const projectObject2D = define({
         let selection = editor.pc.selection;
         let config = editor.state.config;
         let addObjects: AnnotateObject[] = [];
-
+        let deleteObjects: AnnotateObject[] = [];
         if (!config.projectPoint4 && !config.projectPoint8) return;
 
         let annotate3D = editor.pc.getAnnotate3D();
         let annotate2D = editor.pc.getAnnotate2D();
-        let views = editor.pc.renderViews.filter(
-            // (e) => e.name === `${config.imgViewPrefix}-${0}`,
-            (e) => e.name.startsWith(`${config.imgViewPrefix}`),
+        let views = editor.pc.renderViews.filter((e) =>
+            e.name.startsWith(`${config.imgViewPrefix}`),
         ) as Image2DRenderView[];
 
-        // project select box
+        // 映射选中的Box
         if (selectFlag && selection.length === 1 && selection[0] instanceof Box) {
             annotate3D = [selection[0]];
         }
@@ -238,8 +222,6 @@ export const projectObject2D = define({
             }
         });
 
-        let imgPos = new THREE.Vector3();
-        let pos = new THREE.Vector3();
         let updateN = 0;
         annotate3D.forEach((object) => {
             let userData = object.userData as IUserData;
@@ -248,17 +230,8 @@ export const projectObject2D = define({
             views.forEach((view) => {
                 let viewId = view.id;
 
-                // pos.set(0, 0, 0).applyMatrix4(object.matrixWorld);
-                // view.worldToCanvas(pos, imgPos);
-
-                // imgPos.x > 0 &&
-                //     imgPos.x <= view.width &&
-                //     imgPos.y > 0 &&
-                //     imgPos.y <= view.height &&
-                //     Math.abs(imgPos.z) <= 1
-
                 // isBoxInImage
-                if (isBoxInImage(object, view)) {
+                if (utils.isBoxInImage(object, view)) {
                     if (config.projectPoint8) {
                         if (existMapBox2D[viewId][trackId]) {
                             if (updateFlag) {
@@ -284,23 +257,25 @@ export const projectObject2D = define({
                             }
                         }
                     }
+                } else {
+                    if (existMapRect[viewId][trackId])
+                        deleteObjects.push(existMapRect[viewId][trackId]);
+                    if (existMapBox2D[viewId][trackId])
+                        deleteObjects.push(existMapBox2D[viewId][trackId]);
                 }
             });
         });
 
         console.log('updateN:', updateN);
         console.log('addObjects:', addObjects);
-        if (addObjects.length > 0) {
-            editor.cmdManager.execute('add-object', [{ objects: addObjects }]);
+        console.log('deleteObjects:', deleteObjects);
 
-            let selection = editor.pc.selection;
-            if (editor.state.config.showClassView && selection.length > 0) {
-                let object = selection[0];
-                editor.dispatchEvent({
-                    type: EditorEvent.SHOW_CLASS_INFO,
-                    data: { id: object.userData.trackId },
-                });
-            }
+        if (addObjects.length > 0 || deleteObjects.length > 0) {
+            editor.cmdManager.withGroup(() => {
+                if (deleteObjects.length > 0)
+                    editor.cmdManager.execute('delete-object', deleteObjects);
+                if (addObjects.length > 0) editor.cmdManager.execute('add-object', addObjects);
+            });
         }
 
         function updateProjectRect(view: Image2DRenderView, object: Box, target: Rect) {
@@ -308,7 +283,23 @@ export const projectObject2D = define({
             target.center.copy(info1.center);
             target.size.copy(info1.size);
             // TODO:
+            if (config.limitRect2Image) {
+                validRect(view, target);
+            }
+
             editor.pc.render();
+        }
+
+        function validRect(view: Image2DRenderView, target: Rect) {
+            let center = target.center;
+            let size = target.size;
+
+            let rx = THREE.MathUtils.clamp(center.x + size.x / 2, 0, view.imgSize.x);
+            let lx = THREE.MathUtils.clamp(center.x - size.x / 2, 0, view.imgSize.x);
+            let ty = THREE.MathUtils.clamp(center.y - size.y / 2, 0, view.imgSize.y);
+            let by = THREE.MathUtils.clamp(center.y + size.y / 2, 0, view.imgSize.y);
+            target.center.set((rx + lx) / 2, (by + ty) / 2);
+            target.size.set(rx - lx, by - ty);
         }
 
         function updateProjectBox(view: Image2DRenderView, object: Box, target: Box2D) {
@@ -324,6 +315,9 @@ export const projectObject2D = define({
             let object2D1 = new Rect();
             object2D1.center.copy(info1.center);
             object2D1.size.copy(info1.size);
+            if (config.limitRect2Image) {
+                validRect(view, object2D1);
+            }
             setObject(view, object, object2D1);
         }
         function createProjectBox2D(view: Image2DRenderView, object: Box) {
@@ -354,6 +348,21 @@ export const projectObject2D = define({
     },
 });
 
+function noPointsInImage(p1: THREE.Vector2, p2: THREE.Vector2, imgSize: THREE.Vector2) {
+    let n = 0;
+    [p1, p2, new THREE.Vector2(p1.x, p2.y), new THREE.Vector2(p2.x, p1.y)].forEach((pos) => {
+        if (pos.x > 0 && pos.x < imgSize.x && pos.y > 0 && pos.y < imgSize.y) n++;
+    });
+    return n === 0;
+}
+
+function clipPoints(points: THREE.Vector2[], imgSize: THREE.Vector2) {
+    points.forEach((pos) => {
+        pos.x = clamRange(pos.x, 0, imgSize.x);
+        pos.y = clamRange(pos.y, 0, imgSize.y);
+    });
+}
+
 function get2DBox(points: THREE.Vector2[]) {
     let minX = Infinity;
     let maxX = -Infinity;
@@ -379,45 +388,4 @@ function getPositionFromPoints(points: THREE.Vector2[]) {
     ];
 
     return positions;
-}
-
-let v1 = new THREE.Vector3();
-let v2 = new THREE.Vector3();
-let v3 = new THREE.Vector3();
-let v4 = new THREE.Vector3();
-let v5 = new THREE.Vector3();
-let v6 = new THREE.Vector3();
-let v7 = new THREE.Vector3();
-let v8 = new THREE.Vector3();
-
-function isBoxInImage(object: Box, view: Image2DRenderView) {
-    let box = object.geometry.boundingBox as THREE.Box3;
-    v1.set(box.max.x, box.min.y, box.max.z);
-    v2.set(box.max.x, box.min.y, box.min.z);
-    v3.set(box.max.x, box.max.y, box.min.z);
-    v4.set(box.max.x, box.max.y, box.max.z);
-
-    v5.set(box.min.x, box.min.y, box.max.z);
-    v6.set(box.min.x, box.min.y, box.min.z);
-    v7.set(box.min.x, box.max.y, box.min.z);
-    v8.set(box.min.x, box.max.y, box.max.z);
-
-    let positions = [v1, v2, v3, v4, v5, v6, v7, v8];
-
-    for (let i = 0; i < positions.length; i++) {
-        let pos = positions[i];
-        pos.applyMatrix4(object.matrixWorld);
-        view.worldToCanvas(pos);
-        if (
-            pos.x > 0 &&
-            pos.x < view.width &&
-            pos.y > 0 &&
-            pos.y < view.height &&
-            Math.abs(pos.z) < 1
-        ) {
-            return true;
-        }
-    }
-
-    return false;
 }
