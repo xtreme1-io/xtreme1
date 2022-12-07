@@ -3,12 +3,9 @@ package ai.basic.x1.adapter.api.controller;
 import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.adapter.dto.request.DatasetRequestDTO;
 import ai.basic.x1.adapter.exception.ApiException;
-import ai.basic.x1.entity.DataInfoBO;
-import ai.basic.x1.entity.DatasetBO;
-import ai.basic.x1.entity.DatasetQueryBO;
-import ai.basic.x1.entity.DatasetStatisticsBO;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
-import ai.basic.x1.entity.enums.ToolTypeEnum;
+import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
 import ai.basic.x1.usecase.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +45,9 @@ public class DatasetController extends BaseDatasetController {
 
     @Autowired
     private DataClassificationOptionUseCase dataClassificationOptionUseCase;
+
+    @Autowired
+    private ClassUseCase classUseCase;
 
 
     @PostMapping("create")
@@ -133,8 +134,8 @@ public class DatasetController extends BaseDatasetController {
 
     @GetMapping("{datasetId}/statistics/classObject")
     public ClassStatisticsDTO statisticsClassObject(@PathVariable("datasetId") Long datasetId,
-                                              @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
-                                              @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
+                                                    @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
+                                                    @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
         return ClassStatisticsDTO.builder()
                 .toolTypeUnits(
                         DefaultConverter.convert(datasetClassUseCase.statisticsObjectByToolType(datasetId), ToolTypeStatisticsUnitDTO.class)
@@ -151,6 +152,22 @@ public class DatasetController extends BaseDatasetController {
                                                                           @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
         var results = dataClassificationOptionUseCase.statisticsDataByOption(datasetId, pageNo, pageSize);
         return DefaultConverter.convert(results, DataClassificationOptionDTO.class);
+    }
+
+    @PostMapping("createByScenario")
+    public void createByScenario(@RequestBody @Validated DatasetScenarioDTO dto) {
+        var datasetScenarioBO = DefaultConverter.convert(dto, DatasetScenarioBO.class);
+        if (dto.getSource().equals(ScenarioQuerySourceEnum.ONTOLOGY.name())) {
+            var datasetClassIds = classUseCase.findDatasetClassIdsByClassId(dto.getClassId());
+            if (CollectionUtil.isEmpty(datasetClassIds)) {
+                throw new ApiException(UsecaseCode.DATASET_DATA_SCENARIO_NOT_FOUND);
+            }
+            datasetScenarioBO.setClassIds(datasetClassIds);
+            datasetScenarioBO.setOntologyClassId(dto.getClassId());
+        } else {
+            datasetScenarioBO.setClassIds(Collections.singletonList(dto.getClassId()));
+        }
+        datasetUsecase.createByScenario(datasetScenarioBO);
     }
 
 }
