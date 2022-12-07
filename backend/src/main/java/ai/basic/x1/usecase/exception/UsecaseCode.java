@@ -47,7 +47,10 @@ public enum UsecaseCode {
     
     POINT_CLOUD_COMPRESSED_FILE_ERROR("POINT_CLOUD_COMPRESSED_FILE_ERROR", "The format of the compressed package is incorrect. It must contain point_cloud"),
     COMPRESSED_PACKAGE_EMPTY("COMPRESSED_PACKAGE_EMPTY", "Compressed package is empty"),
-    DATASET_CLASS_CLASSIFICATION_EMPTY("DATASET_CLASS_CLASSIFICATION_EMPTY", "You don't have any class or classification for your  annotation,do you want to create them at first?");
+    DATASET_CLASS_CLASSIFICATION_EMPTY("DATASET_CLASS_CLASSIFICATION_EMPTY", "You don't have any class or classification for your  annotation,do you want to create them at first?"),
+
+    DATASET_DATA_SCENARIO_NOT_FOUND("DATASET_DATA_SCENARIO_NOT_FOUND", "no data has been found");
+
 
     // Storage
 

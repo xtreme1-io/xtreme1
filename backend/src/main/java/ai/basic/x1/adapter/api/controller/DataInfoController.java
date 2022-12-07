@@ -2,12 +2,15 @@ package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
+import ai.basic.x1.adapter.exception.ApiException;
 import ai.basic.x1.entity.DataInfoQueryBO;
 import ai.basic.x1.entity.DataInfoUploadBO;
 import ai.basic.x1.entity.DataPreAnnotationBO;
 import ai.basic.x1.entity.ScenarioQueryBO;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
+import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
 import ai.basic.x1.usecase.*;
+import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +53,9 @@ public class DataInfoController extends BaseDatasetController {
 
     @Autowired
     protected DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
+
+    @Autowired
+    protected ClassUseCase classUseCase;
 
     @PostMapping("upload")
     public String upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
@@ -190,13 +197,32 @@ public class DataInfoController extends BaseDatasetController {
     public Page<DataAnnotationObjectDTO> findByScenarioPage(@RequestParam(defaultValue = "1") Integer pageNo,
                                                             @RequestParam(defaultValue = "10") Integer pageSize,
                                                             @Validated ScenarioQueryDTO dto) {
-        var page = dataAnnotationObjectUseCase.findByScenarioPage(pageNo, pageSize, DefaultConverter.convert(dto, ScenarioQueryBO.class));
+        var scenarioQueryBO = DefaultConverter.convert(dto, ScenarioQueryBO.class);
+        if (dto.getSource().equals(ScenarioQuerySourceEnum.ONTOLOGY.name())) {
+            var datasetClassIds = classUseCase.findDatasetClassIdsByClassId(dto.getClassId());
+            if (CollectionUtil.isEmpty(datasetClassIds)) {
+                return new Page<>();
+            }
+            scenarioQueryBO.setClassIds(datasetClassIds);
+        } else {
+            scenarioQueryBO.setClassIds(Collections.singletonList(dto.getClassId()));
+        }
+        var page = dataAnnotationObjectUseCase.findByScenarioPage(pageNo, pageSize, scenarioQueryBO);
         return DefaultConverter.convert(page, DataAnnotationObjectDTO.class);
     }
 
     @GetMapping("scenarioExport")
     public String scenarioExport(@Validated ScenarioQueryDTO scenarioQueryDTO) {
         var scenarioQueryBO = DefaultConverter.convert(scenarioQueryDTO, ScenarioQueryBO.class);
+        if (scenarioQueryDTO.getSource().equals(ScenarioQuerySourceEnum.ONTOLOGY.name())) {
+            var datasetClassIds = classUseCase.findDatasetClassIdsByClassId(scenarioQueryDTO.getClassId());
+            if (CollectionUtil.isEmpty(datasetClassIds)) {
+                throw new ApiException(UsecaseCode.DATASET_DATA_SCENARIO_NOT_FOUND);
+            }
+            scenarioQueryBO.setClassIds(datasetClassIds);
+        } else {
+            scenarioQueryBO.setClassIds(Collections.singletonList(scenarioQueryDTO.getClassId()));
+        }
         return String.valueOf(dataInfoUsecase.scenarioExport(scenarioQueryBO));
     }
 
