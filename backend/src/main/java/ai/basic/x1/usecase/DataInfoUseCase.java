@@ -122,7 +122,7 @@ public class DataInfoUseCase {
     @Autowired
     private  DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase;
 
-    @Value("${file.tempPath:/tmp/x1/}")
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
     @Value("${export.data.version}")
