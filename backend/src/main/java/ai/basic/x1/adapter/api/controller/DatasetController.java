@@ -8,10 +8,8 @@ import ai.basic.x1.entity.DatasetBO;
 import ai.basic.x1.entity.DatasetQueryBO;
 import ai.basic.x1.entity.DatasetStatisticsBO;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
-import ai.basic.x1.usecase.DataAnnotationObjectUseCase;
-import ai.basic.x1.usecase.DataInfoUseCase;
-import ai.basic.x1.usecase.DatasetClassUseCase;
-import ai.basic.x1.usecase.DatasetUseCase;
+import ai.basic.x1.entity.enums.ToolTypeEnum;
+import ai.basic.x1.usecase.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
@@ -46,6 +44,9 @@ public class DatasetController extends BaseDatasetController {
 
     @Autowired
     private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
+
+    @Autowired
+    private DataClassificationOptionUseCase dataClassificationOptionUseCase;
 
 
     @PostMapping("create")
@@ -142,6 +143,14 @@ public class DatasetController extends BaseDatasetController {
                         DefaultConverter.convert(datasetClassUseCase.statisticObjectByClass(datasetId,
                                 pageNo, pageSize), ClassStatisticsUnitDTO.class))
                 .build();
+    }
+
+    @GetMapping("{datasetId}/statistics/classificationData")
+    public List<DataClassificationOptionDTO> statisticsClassificationData(@PathVariable("datasetId") Long datasetId,
+                                                                          @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
+                                                                          @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
+        var results = dataClassificationOptionUseCase.statisticsDataByOption(datasetId, pageNo, pageSize);
+        return DefaultConverter.convert(results, DataClassificationOptionDTO.class);
     }
 
 }

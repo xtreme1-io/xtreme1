@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScenarioQueryBO {
+public class ScenarioQueryBO extends BaseQueryBO{
 
     private Long datasetId;
 
@@ -22,4 +23,6 @@ public class ScenarioQueryBO {
     private String attributeId;
 
     private String optionName;
+
+    private DatasetTypeEnum datasetType;
 }

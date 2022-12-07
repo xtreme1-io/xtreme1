@@ -39,7 +39,7 @@
           </Form.Item>
         </Form>
       </div>
-      <div class="editor__add" @click="handleAdd">
+      <div v-if="!props.isDisabled" class="editor__add" @click="handleAdd">
         <Icon style="color: #57ccef" icon="ic:baseline-add" size="20" />
         {{ t('common.addText') }}
       </div>
@@ -70,6 +70,7 @@
     type: string;
     showRequired?: boolean;
     isBasic?: boolean;
+    isDisabled: boolean;
   }>();
 
   const list = computed<string[]>(() => {

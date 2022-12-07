@@ -21,13 +21,13 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { handleMutiTabAction } from './modal-components/utils';
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
-  import { deleteClassApi, deleteClassificationApi } from '/@/api/business/ontologyClasses';
   import {
-    deleteClassApi as deleteDatasetClassApi,
-    deleteClassificationApi as deleteDatasetClassificationApi,
-  } from '/@/api/business/datasetOntology';
+    deleteOntologyClassApi,
+    deleteOntologyClassificationApi,
+    deleteDatasetClassApi,
+    deleteDatasetClassificationApi,
+  } from '/@/api/business/classes';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
 
   const { createMessage } = useMessage();
   const handleRefresh = inject('handleRefresh', Function, true);
@@ -45,51 +45,46 @@
   const isLoading = ref<boolean>(false);
   const handleDelete = async () => {
     isLoading.value = true;
-    handleMutiTabAction(
-      props.activeTab,
-      async () => {
-        try {
-          if (props.isCenter) {
-            await deleteClassApi({ id: props.id });
-          } else {
-            await deleteDatasetClassApi({ id: props.id });
-          }
 
-          const successText =
-            t('business.class.class') + ` "${props.name}" ` + t('business.class.hasDeleted');
-          createMessage.success(successText);
-
-          isLoading.value = false;
-          closeModal();
-          handleRefresh();
-        } catch (error) {
-          isLoading.value = false;
-          console.log('error', error);
+    if (props.activeTab == ClassTypeEnum.CLASS) {
+      try {
+        if (props.isCenter) {
+          await deleteOntologyClassApi({ id: props.id });
+        } else {
+          await deleteDatasetClassApi({ id: props.id });
         }
-      },
-      async () => {
-        try {
-          if (props.isCenter) {
-            await deleteClassificationApi({ id: props.id });
-          } else {
-            await deleteDatasetClassificationApi({ id: props.id });
-          }
 
-          const successText =
-            t('business.class.classification') +
-            ` "${props.name}" ` +
-            t('business.class.hasDeleted');
-          createMessage.success(successText);
+        const successText =
+          t('business.class.class') + ` "${props.name}" ` + t('business.class.hasDeleted');
+        createMessage.success(successText);
 
-          isLoading.value = false;
-          closeModal();
-          handleRefresh();
-        } catch (error) {
-          isLoading.value = false;
-          console.log('error', error);
+        isLoading.value = false;
+        closeModal();
+        handleRefresh();
+      } catch (error) {
+        isLoading.value = false;
+        console.log('error', error);
+      }
+    } else {
+      try {
+        if (props.isCenter) {
+          await deleteOntologyClassificationApi({ id: props.id });
+        } else {
+          await deleteDatasetClassificationApi({ id: props.id });
         }
-      },
-    );
+
+        const successText =
+          t('business.class.classification') + ` "${props.name}" ` + t('business.class.hasDeleted');
+        createMessage.success(successText);
+
+        isLoading.value = false;
+        closeModal();
+        handleRefresh();
+      } catch (error) {
+        isLoading.value = false;
+        console.log('error', error);
+      }
+    }
   };
 </script>
 <style scoped>

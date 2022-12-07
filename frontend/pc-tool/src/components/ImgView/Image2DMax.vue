@@ -3,9 +3,13 @@
         class="img-view-max"
         ref="container"
         v-show="state.config.showSingleImgView"
-        :style="{ width: `${innerState.width}px`, height: `${innerState.height}px` }"
+        :style="{
+            width: `${state.config.maxViewWidth}px`,
+            height: `${state.config.maxViewHeight}px`,
+        }"
     >
-        <div style="height: 100%" @dblclick="onDBClick">
+        <div style="height: 100%; position: relative" @dblclick="onDBClick">
+            <!-- <div class="render-proxy" ref="proxy"></div> -->
             <div class="render" ref="dom"></div>
         </div>
         <ChangeRefVue v-show="canOperate()" />
@@ -38,22 +42,22 @@
         <div class="tool" v-show="canOperate()">
             <span class="icon" :title="$$('close')" @click="onBack"><CloseCircleOutlined /></span>
         </div>
-        <div class="label-container" :style="{ transform: innerState.transform }">
+        <div class="label-container">
             <Labels :data="innerState.labels" v-show="editor.state.config.showLabel" />
         </div>
+        <slot name="annotation-2d" :data="innerState.annotations"></slot>
     </div>
 </template>
 
 <script setup lang="ts">
     import { onMounted, onBeforeUnmount, ref, watch, reactive, computed } from 'vue';
-    import { Image2DRenderView, Event, Rect, Box2D, Transform2DAction } from 'pc-render';
-    import { useInjectEditor } from '../../state';
-    import { useInjectState } from '../../state';
+    import { Image2DRenderView, Event, Rect, Box2D, Transform2DAction, utils } from 'pc-render';
+    import { useInjectState, useInjectEditor } from '../../state';
     import * as THREE from 'three';
     import interact from 'interactjs';
-    import { IClassType } from 'pc-editor';
+    import { IClassType, Event as EditorEvent } from 'pc-editor';
     import * as locale from './lang';
-    // import config from './config';
+    import * as _ from 'lodash';
     import Labels from '../MainView/Labels.vue';
     import ChangeRefVue from './ChangeRef.vue';
     import {
@@ -61,13 +65,8 @@
         ArrowRightOutlined,
         CloseCircleOutlined,
     } from '@ant-design/icons-vue';
-
     import useUI from '../../hook/useUI';
     import useContextMenu from '../../hook/useContextMenu';
-
-    // import * as d3Selection from 'd3-selection';
-    // import * as d3Zoom from 'd3-zoom';
-    // import * as d3 from 'd3';
 
     // ***************Props and Emits***************
 
@@ -75,6 +74,7 @@
     let { handleContext, clearContext } = useContextMenu();
     let { canOperate } = useUI();
     let dom = ref<HTMLDivElement | null>(null);
+    let proxy = ref<HTMLDivElement | null>(null);
     let container = ref<HTMLDivElement | null>(null);
     let editor = useInjectEditor();
     let pc = editor.pc;
@@ -84,8 +84,9 @@
     let innerState = reactive({
         renderBox: true,
         renderPoints: true,
-        width: '100%',
-        height: '100%',
+        annotations: [] as any[],
+        // width: '100%',
+        // height: '100%',
         labels: [] as any[],
         transform: 'matrix(1, 0, 0, 1, 0, 0)',
     });
@@ -102,14 +103,19 @@
 
     onMounted(() => {
         if (dom.value) {
-            view = new Image2DRenderView(dom.value, pc, { name: state.config.singleViewPrefix });
+            view = new Image2DRenderView(dom.value, pc, {
+                name: state.config.singleViewPrefix,
+                actions: ['select', 'render-2d-shape', 'create-obj', 'edit-2d', 'transform-2d'],
+            });
             pc.addRenderView(view);
-            view.lineWidth = 2;
+            // view.lineWidth = 2;
             view.toggle(false);
+            // proxy.value.appendChild(view.proxy.canvas);
+            // proxy.value.appendChild(view.proxy.renderer.domElement);
         }
 
-        view.addEventListener(Event.RENDER_AFTER, updateLabel);
-        view.addEventListener(Event.CONTAINER_TRANSFORM, updateContainerTransform);
+        view.addEventListener(Event.RENDER_AFTER, onRender);
+        // view.addEventListener(Event.CONTAINER_TRANSFORM, updateContainerTransform);
         initResize(container.value as any);
         handleContext(container.value as any);
         // initZoom();
@@ -117,10 +123,12 @@
 
     onBeforeUnmount(() => {
         clearContext();
-        view.removeEventListener(Event.RENDER_AFTER, updateLabel);
-        view.removeEventListener(Event.CONTAINER_TRANSFORM, updateContainerTransform);
+        view.removeEventListener(Event.RENDER_AFTER, onRender);
+        // view.removeEventListener(Event.CONTAINER_TRANSFORM, updateContainerTransform);
     });
-
+    function onRender() {
+        updateLabel();
+    }
     let classTypeMap = computed(() => {
         let map = {} as Record<string, IClassType>;
         editor.state.classTypes.forEach((e) => {
@@ -129,31 +137,32 @@
         return map;
     });
 
-    // function initZoom() {
-    //     let parent = container.value as HTMLDivElement;
-    //     let child = d3.select(dom.value as HTMLDivElement);
+    let updateSize = _.throttle(() => {
+        let config = editor.state.config;
+        if (!container.value || config.maxViewWidth === '100%' || config.maxViewHeight === '100%')
+            return;
 
-    //     const zoom = d3.zoom<HTMLDivElement, any>().on('zoom', (e) => {
-    //         console.log(e.transform);
-    //         let { k, x, y } = e.transform;
-    //         child.style('transform', `translate(${x}px,${y}px) scale(${k})`);
-    //         // g.style('stroke-width', 3 / Math.sqrt(transform.k));
-    //         // points.attr('r', 3 / Math.sqrt(transform.k));
-    //     });
+        let parent = container.value.parentElement as HTMLElement;
+        let bbox = parent.getBoundingClientRect();
+        if ((config.maxViewHeight as any) > bbox.height) config.maxViewHeight = bbox.height as any;
+        if ((config.maxViewWidth as any) > bbox.width) config.maxViewWidth = bbox.width as any;
+        editor.pc.render();
+    }, 100);
 
-    //     d3.select(parent).call(zoom).call(zoom.transform, d3.zoomIdentity);
-    // }
+    editor.addEventListener(EditorEvent.RESIZE, updateSize);
 
     function initResize(dom: HTMLDivElement) {
         interact(dom).resizable({
             // resize from all edges and corners
             edges: { left: false, right: true, bottom: true, top: false },
-
+            margin: 10,
             listeners: {
                 move(event) {
+                    event.stopPropagation();
+                    let config = editor.state.config;
                     const { width, height } = event.rect;
-                    innerState.width = width;
-                    innerState.height = height;
+                    config.maxViewWidth = width;
+                    config.maxViewHeight = height;
                     view.render();
                 },
             },
@@ -173,15 +182,8 @@
         });
     }
 
-    function updateContainerTransform() {
-        let m = view.containerMatrix.elements;
-        innerState.transform = `matrix(${m[0]},${m[1]},${m[4]},${m[5]},${m[12]},${m[13]})`;
-    }
-
     let updateLabel = () => {
         if (!editor.state.config.showLabel) return;
-
-        updateContainerTransform();
 
         let camera = view.camera;
         let matrix = new THREE.Matrix4();
@@ -194,21 +196,18 @@
         let pos = new THREE.Vector3();
         // let pos1 = new THREE.Vector3();
         objects.forEach((e) => {
-            if (!e.visible || !view.renderBox) return;
+            if (!e.visible || !view.renderBox || !utils.isBoxInImage(e, view)) return;
             let userData = e.userData;
             let trackName = userData.trackName || '';
             let classType = userData.classType || '';
             let classConfig = classTypeMap.value[classType];
             let className = classConfig ? classConfig.label || classConfig.name || '' : classType;
 
-            pos.set(0, 0, 0);
-            pos.applyMatrix4(e.matrixWorld);
-            pos.applyMatrix4(matrix);
-            pos.x = ((pos.x + 1) / 2) * view.width;
-            pos.y = (-(pos.y - 1) / 2) * view.height;
-            // pos.z = 0;
+            pos.copy(e.position);
+            view.worldToImg(pos);
             if (Math.abs(pos.z) > 1) return;
 
+            view.imgToDom(pos);
             // let subId = (userData.id + '').slice(-4);
             let obj = {
                 name: classType ? `${className}-${trackName}` : `${trackName}`,
@@ -223,13 +222,12 @@
 
         let tempPos = new THREE.Vector2();
         object2d.forEach((object) => {
-            if (view.isRenderable(object)) {
+            if (view.isRenderable(object) && object.viewId === view.renderId) {
                 if (object instanceof Rect) {
                     tempPos.copy(object.center);
                 } else if (object instanceof Box2D) {
                     object.getCenter(tempPos);
                 }
-
                 let userData = object.userData;
                 let classType = userData.classType || '';
                 // let subId = (userData.id + '').slice(-4);
@@ -239,9 +237,7 @@
                     ? classConfig.label || classConfig.name || ''
                     : classType;
 
-                // tempPos.y = tempPos.y - object.size.y;
-                tempPos.x = (tempPos.x / view.imgSize.x) * view.width;
-                tempPos.y = (tempPos.y / view.imgSize.y) * view.height;
+                view.imgToDom(tempPos);
                 let obj = {
                     name: classType ? `${className}-${trackName}` : `${trackName}`,
                     x: tempPos.x,
@@ -307,11 +303,17 @@
             z-index: 1;
         }
 
-        .render {
+        .render-proxy {
             height: 100%;
+            width: 100%;
+        }
+        .render {
+            position: absolute;
+            inset: 0;
+            // height: 100%;
             // transform: scale(0.8);
             // transform-origin: center;
-            transform-origin: 0 0;
+            // transform-origin: 0 0;
         }
 
         .back {

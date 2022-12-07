@@ -259,10 +259,11 @@ public class DataInfoUseCase {
      * Query data object list according to id collection
      *
      * @param ids id collection
+     * @param isQueryDeletedData Whether to query to delete data
      * @return Collection of data objects
      */
-    public List<DataInfoBO> listByIds(List<Long> ids) {
-        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
+    public List<DataInfoBO> listByIds(List<Long> ids,Boolean isQueryDeletedData) {
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.getBaseMapper().listByIds(ids,isQueryDeletedData), DataInfoBO.class);
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
             setDataInfoBOListFile(dataInfoBOList);
         }
@@ -407,7 +408,10 @@ public class DataInfoUseCase {
         dataInfoQueryBO.setPageNo(PAGE_NO);
         dataInfoQueryBO.setPageSize(PAGE_SIZE);
         dataInfoQueryBO.setDatasetType(dataset.getType());
-        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> exportUseCase.asyncExportDataZip(fileName, serialNumber, dataInfoQueryBO))));
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, dataInfoQueryBO,
+                        this::findByPage,
+                        this::processData))));
         return serialNumber;
     }
 
@@ -722,7 +726,7 @@ public class DataInfoUseCase {
             }
             i++;
         }
-        var dataInfoBOList = listByIds(dataIds);
+        var dataInfoBOList = listByIds(dataIds,false);
         var dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
         for (var dataId : dataIds) {
             modelMessageBO.setDataId(dataId);
@@ -1444,6 +1448,55 @@ public class DataInfoUseCase {
                 }
             }
         }
+    }
+
+    /**
+     * Export data
+     *
+     * @param scenarioQueryBO Query parameters
+     * @return Serial number
+     */
+    public Long scenarioExport(ScenarioQueryBO scenarioQueryBO) {
+        var fileName = String.format("%s-%s.zip", "export", TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
+        var serialNumber = exportUseCase.createExportRecord(fileName);
+        scenarioQueryBO.setPageNo(PAGE_NO);
+        scenarioQueryBO.setPageSize(PAGE_SIZE_100);
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, scenarioQueryBO,
+                dataAnnotationObjectUseCase::findDataIdByScenarioPage,
+                this::processScenarioData))));
+        return serialNumber;
+    }
+
+
+    public List<DataExportBO> processScenarioData(List<DataAnnotationObjectBO> dataAnnotationObjectBOList, ScenarioQueryBO queryBO) {
+        if (CollectionUtil.isEmpty(dataAnnotationObjectBOList)) {
+            return List.of();
+        }
+        var dataInfoExportBOList = new ArrayList<DataExportBO>();
+        var dataIds = dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
+        queryBO.setDataIds(dataIds);
+        var dataAnnotationObjectList = dataAnnotationObjectUseCase.listByScenario(queryBO);
+        Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
+                dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
+                : Map.of();
+        var dataList = listByIds(dataIds,false);
+        dataList.forEach(dataInfoBO -> {
+            var dataId = dataInfoBO.getId();
+            var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());
+            var objectList = dataAnnotationObjectMap.get(dataId);
+            var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
+            if (CollectionUtil.isNotEmpty(objectList)) {
+                var objects = objectList.stream().map(object -> object.getClassAttributes()).collect(Collectors.toList());
+                dataResultExportBO.setObjects(DefaultConverter.convert(objects, DataResultObjectExportBO.class));
+            }
+            var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
+            if (CollectionUtil.isNotEmpty(objectList)) {
+                dataInfoExportBO.setResult(dataResultExportBO);
+            }
+            dataInfoExportBOList.add(dataInfoExportBO);
+        });
+        return dataInfoExportBOList;
     }
 
     private List<PointCloudCRRespDTO> callPointCloudConvertRender(FileBO relationFileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {

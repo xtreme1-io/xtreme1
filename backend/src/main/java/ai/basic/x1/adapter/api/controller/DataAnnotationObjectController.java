@@ -1,15 +1,12 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.dto.DataAnnotationObjectDTO;
-import ai.basic.x1.adapter.dto.ScenarioQueryDTO;
 import ai.basic.x1.adapter.dto.request.ObjectResultDTO;
 import ai.basic.x1.adapter.dto.response.DataAnnotationObjectResponseDTO;
 import ai.basic.x1.adapter.dto.response.DataAnnotationObjectResultDTO;
 import ai.basic.x1.entity.DataAnnotationObjectBO;
-import ai.basic.x1.entity.ScenarioQueryBO;
 import ai.basic.x1.usecase.DataAnnotationObjectUseCase;
 import ai.basic.x1.util.DefaultConverter;
-import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,15 +48,6 @@ public class DataAnnotationObjectController {
                 dataAnnotationObjectUseCase.findByDataIds(dataIds), DataAnnotationObjectDTO.class);
         return DataAnnotationObjectResultDTO.builder().dataAnnotationObjects(dataAnnotationObjects).queryDate(OffsetDateTime.now()).build();
     }
-
-    @GetMapping("/findByScenarioPage")
-    public Page<DataAnnotationObjectDTO> findByScenarioPage(@RequestParam(defaultValue = "1") Integer pageNo,
-                                                            @RequestParam(defaultValue = "10") Integer pageSize,
-                                                            @Validated ScenarioQueryDTO dto) {
-        var page = dataAnnotationObjectUseCase.findByScenarioPage(pageNo, pageSize, DefaultConverter.convert(dto, ScenarioQueryBO.class));
-        return DefaultConverter.convert(page, DataAnnotationObjectDTO.class);
-    }
-
 
     private List<DataAnnotationObjectDTO> convertToDataAnnotationObject(ObjectResultDTO objectResultDTO) {
         List<DataAnnotationObjectDTO> dataAnnotationObjectDTOs = new ArrayList<>();

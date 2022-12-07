@@ -1,4 +1,5 @@
 import Editor from './Editor';
+import * as THREE from 'three';
 import {
     SideRenderView,
     ResizeTransAction,
@@ -96,6 +97,16 @@ function hackImgView(editor: Editor, view: Image2DRenderView) {
             option[positionName] = positionMap;
             editor.cmdManager.execute('update-2d-box', { object, option });
         };
+        editAction.validRect = function (
+            center: THREE.Vector2,
+            size: THREE.Vector2,
+            moveOnly: boolean,
+        ) {
+            let config = editor.state.config;
+            if (config.limitRect2Image) {
+                validRect(center, size, view.imgSize, moveOnly);
+            }
+        };
     }
 
     let get2DObject = view.get2DObject;
@@ -129,4 +140,26 @@ function hackImgView(editor: Editor, view: Image2DRenderView) {
             return objects;
         }
     };
+}
+function validRect(
+    center: THREE.Vector2,
+    size: THREE.Vector2,
+    imgSize: THREE.Vector2,
+    moveOnly: boolean,
+) {
+    if (moveOnly) {
+        // x
+        if (center.x - size.x / 2 < 0) center.x = size.x / 2;
+        if (center.x + size.x / 2 > imgSize.x) center.x = imgSize.x - size.x / 2;
+        // y
+        if (center.y - size.y / 2 < 0) center.y = size.y / 2;
+        if (center.y + size.y / 2 > imgSize.y) center.y = imgSize.y - size.y / 2;
+    } else {
+        let rx = THREE.MathUtils.clamp(center.x + size.x / 2, 0, imgSize.x);
+        let lx = THREE.MathUtils.clamp(center.x - size.x / 2, 0, imgSize.x);
+        let ty = THREE.MathUtils.clamp(center.y - size.y / 2, 0, imgSize.y);
+        let by = THREE.MathUtils.clamp(center.y + size.y / 2, 0, imgSize.y);
+        center.set((rx + lx) / 2, (by + ty) / 2);
+        size.set(rx - lx, by - ty);
+    }
 }

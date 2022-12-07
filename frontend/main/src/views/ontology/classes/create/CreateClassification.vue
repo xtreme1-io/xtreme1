@@ -8,6 +8,7 @@
     destroyOnClose
     @cancel="handleCancel"
     @ok="handleCreateSave"
+    :okText="okText"
   >
     <div class="content">
       <div class="title">Basic Info - classification</div>
@@ -73,7 +74,7 @@
     :datasetType="props.datasetType"
     :datasetId="props.datasetId"
     :ontologyId="props.ontologyId"
-    :isCenter="false"
+    :isCenter="props.isCenter"
     :classificationId="props.classificationId"
     :title="`${modalTitle}/Options`"
   />
@@ -93,17 +94,18 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import emitter from 'tiny-emitter/instance';
   import _ from 'lodash';
+  import { handleAddUuid, validateName } from './utils';
   // interface
   import { IClassificationForm, IDataSchema } from './typing';
-  import { inputTypeEnum } from '/@/api/business/model/ontologyClassesModel';
+  import { inputTypeEnum } from '/@/api/business/model/classesModel';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { createEditClassificationApi } from '/@/api/business/ontologyClasses';
   import {
+    updateOntologyClassificationApi,
+    createOntologyClassificationApi,
     createDatasetClassificationApi,
     updateDatasetClassificationApi,
-  } from '/@/api/business/datasetOntology';
-  import { handleAddUuid, validateName } from './utils';
+  } from '/@/api/business/classes';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -114,14 +116,15 @@
     isCenter?: boolean;
     datasetType?: datasetTypeEnum;
     datasetId?: number;
-    ontologyId: number | null;
+    ontologyId?: number | null;
     classificationId?: number;
   }>();
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
 
   /** Init */
-  const modalTitle = ref<string>('Create New Classification');
   const baseFormName = ref<string>('');
+  const modalTitle = ref<string>('Create New Classification');
+  const okText = ref<string>('Create');
   const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
     (config) => {
       console.log(config);
@@ -134,8 +137,10 @@
       // from Edit
       if (config.isEdit) {
         modalTitle.value = 'Edit Classification';
+        okText.value = 'Save';
         setModalProps({
           title: 'Edit Classification',
+          okText: 'Save',
         });
         formState.name = props.detail.name;
 
@@ -152,8 +157,10 @@
         defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
       } else {
         modalTitle.value = 'Create New Classification';
+        okText.value = 'Create';
         setModalProps({
           title: 'Create New Classification',
+          okText: 'Create',
         });
         dataSchema.value = {
           options: [],
@@ -271,7 +278,11 @@
     try {
       changeOkLoading(true);
       if (props.isCenter) {
-        await createEditClassificationApi(params);
+        if (params.id) {
+          await updateOntologyClassificationApi(params);
+        } else {
+          await createOntologyClassificationApi(params);
+        }
       } else {
         if (params.id) {
           await updateDatasetClassificationApi(params);

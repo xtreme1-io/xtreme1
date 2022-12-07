@@ -1,44 +1,33 @@
 <template>
   <div :class="`${prefixCls}`" v-loading="loadingRef">
     <div class="classes__left">
-      <div class="actions">
+      <div class="header">
         <VirtualTab :list="tabListDataset" />
         <VirtualTab :list="tabListOntology" />
       </div>
-      <div class="classes__left--header inline-flex">
-        <HeaderAction
-          :activeTab="activeTab"
-          :datasetType="datasetType"
-          @copy="handleCopyFrom"
-          @create="handleCreate"
+      <div class="btn">
+        <HeaderDropdown :activeTab="activeTab" :datasetType="datasetType" />
+      </div>
+      <div class="mb-15px">
+        <Action
+          :selectedList="selectedList"
+          :list="cardList"
+          @selectAll="handleSelectAll"
+          @unSelect="handleUnSelect"
         />
       </div>
-      <div v-show="cardList.length > 0" style="height: calc(100vh - 154px)">
+      <div style="height: calc(100vh - 154px)">
         <ScrollContainer ref="scrollRef">
           <ClassCard
-            type="dataset"
+            :selectedList="selectedList"
+            :cardType="CardTypeEnum.selector"
             :cardList="cardList"
-            @edit="handleEdit"
             :activeTab="activeTab"
-            :isCenter="false"
-            :selectedList="[]"
-            @sync="toSync"
+            @edit="handleEdit"
+            @create="handleOpenCreate"
+            @handleSelected="handleSelected"
           />
         </ScrollContainer>
-      </div>
-      <div class="empty" v-if="cardList.length == 0">
-        <div class="empty-wrapper">
-          <img src="../../../assets/images/class/empty-place.png" alt="" />
-          <div v-if="pageType == ClassTypeEnum.CLASS" class="tip">
-            {{ t('business.ontology.emptyClass') }}
-          </div>
-          <div v-else class="tip">
-            {{ t('business.ontology.emptyClassification') }}
-          </div>
-          <Button gradient @click="handleCreate" :size="ButtonSize.LG" noBorder>
-            {{ t('common.createText') }}
-          </Button>
-        </div>
       </div>
     </div>
     <div class="classes__right">
@@ -49,38 +38,38 @@
         :datasetType="datasetType"
       />
     </div>
-    <FormModal
-      @register="register"
-      @fetchList="handleRefresh"
+    <!-- Modal -->
+    <CreateClass
+      @register="registerCreateClassModal"
       :detail="detail"
       :activeTab="activeTab"
-      :isCenter="false"
       :datasetType="datasetType"
       :datasetId="datasetId"
-      :ontologyId="ontologyId"
       :classId="classId"
-      :classificationId="classificationId"
+      @fetchList="handleRefresh"
     />
-    <SyncModal
-      @register="syncRegister"
-      :id="itemId"
-      :name="itemName"
+    <CreateClassification
+      @register="registerCreateClassificationModal"
+      :detail="detail"
       :activeTab="activeTab"
       :datasetType="datasetType"
+      :datasetId="datasetId"
+      :classificationId="classificationId"
+      @fetchList="handleRefresh"
     />
   </div>
 </template>
 <script lang="ts" setup>
   import { ref, unref, provide, onBeforeMount } from 'vue';
-  import { Button, ButtonSize } from '/@@/Button';
   import { VirtualTab } from '/@@/VirtualTab';
-  import SearchForm from './components/SearchForm.vue';
+  import SearchForm from '/@/views/ontology/classes/components/SearchForm.vue';
   // import SearchForm1 from '/@/views/ontology/classes/components/SearchForm.vue';
-  import ClassCard from './components/ClassCard.vue';
-  import FormModal from './components/FormModal.vue';
+  import ClassCard from '/@/views/ontology/classes/components/ClassCard.vue';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
-  import SyncModal from './components/SyncModal.vue';
-  import HeaderAction from './components/HeaderAction.vue';
+  import Action from './components/Action.vue';
+  import HeaderDropdown from './components/HeaderDropdown.vue';
+  import CreateClass from '/@/views/ontology/classes/create/CreateClass.vue';
+  import CreateClassification from '/@/views/ontology/classes/create/CreateClassification.vue';
 
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
@@ -89,22 +78,18 @@
   import { useModal } from '/@/components/Modal';
   import { handleScroll } from '/@/utils/business/scrollListener';
   import { RouteChildEnum } from '/@/enums/routeEnum';
-  import { ClassTypeEnum, datasetTypeEnum } from '/@/api/business/model/ontologyClassesModel';
   import {
-    getClassApi,
-    getClassByIdApi,
-    getClassificationApi,
-    getClassificationByIdApi,
-  } from '/@/api/business/datasetOntology';
+    getDatasetClassApi,
+    getDatasetClassByIdApi,
+    getDatasetClassificationApi,
+    getDatasetClassificationByIdApi,
+  } from '/@/api/business/classes';
   import {
-    getClassByIdApi as getOntologyClassByIdApi,
-    getClassificationByIdApi as getOntologyClassificationByIdApi,
-  } from '/@/api/business/ontologyClasses';
-  import {
-    GetListParams,
-    ClassItem,
-    ClassificationItem,
-  } from '/@/api/business/model/datasetOntologyModel';
+    ClassTypeEnum,
+    getDatasetClassesParams,
+    datasetClassItem,
+    datasetClassificationItem,
+  } from '/@/api/business/model/classesModel';
   import { datasetItemDetail } from '/@/api/business/dataset';
   import Scenario from '/@/assets/svg/tags/scenario.svg';
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
@@ -113,7 +98,8 @@
   import Ontology from '/@/assets/svg/tags/class.svg';
   import OntologyActive from '/@/assets/svg/tags/classActive.svg';
   import { setDatasetBreadcrumb } from '/@/utils/business';
-  const [register, { openModal }] = useModal();
+  import { CardTypeEnum } from '/@/views/ontology/classes/attributes/data';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('datasetOntology');
@@ -127,12 +113,10 @@
 
   const datasetId = Number(route.query.id);
   const ontologyId = ref<Nullable<number>>();
-  // class
-  const datasetType = ref<datasetTypeEnum>(datasetTypeEnum.IMAGE);
-  const classId = ref<Nullable<number>>();
-  // classification
-  const classificationId = ref<Nullable<number>>();
+  const classId = ref<number>();
+  const classificationId = ref<number>();
 
+  /** Tab */
   const tabListDataset = [
     {
       name: t('business.dataset.overview'),
@@ -175,8 +159,8 @@
     },
   ];
 
-  const detail = ref<ClassItem | ClassificationItem>();
-
+  /** Clicked Detail */
+  const detail = ref<datasetClassItem | datasetClassificationItem>();
   const updateDetail = (newDetail) => {
     detail.value = Object.assign(Object(detail.value), newDetail);
   };
@@ -184,60 +168,41 @@
 
   const activeTab = ref<ClassTypeEnum>(pageType as ClassTypeEnum);
 
-  const handleCopyFrom = async (id) => {
-    console.log(id);
-
-    // 根据 id 获取 ontology 内部的 class | classification
-    try {
-      if (pageType == ClassTypeEnum.CLASS) {
-        detail.value = (await getOntologyClassByIdApi({ id: id })) as any;
-        // class
-        classId.value = detail.value?.id;
-      } else {
-        detail.value = await getOntologyClassificationByIdApi({ id: id });
-        // classification
-        classificationId.value = detail.value?.id;
-      }
-      ontologyId.value = detail.value?.ontologyId;
-      // console.log(detail.value);
-
-      detail.value!.id = undefined as any;
-      openModal();
-    } catch (error: any) {
-      createMessage.error(String(error));
+  /** Create */
+  const [registerCreateClassModal, { openModal: openCreateClassModal }] = useModal();
+  const [registerCreateClassificationModal, { openModal: openCreateClassificationModal }] =
+    useModal();
+  const handleOpenCreate = (isEdit = false) => {
+    if (!isEdit) {
+      (detail.value as any) = null;
+    }
+    if (pageType == ClassTypeEnum.CLASS) {
+      console.log(detail, activeTab, datasetType, ontologyId);
+      openCreateClassModal(true, { isEdit });
+    } else {
+      console.log('handleOpenCreate', isEdit);
+      openCreateClassificationModal(true, { isEdit });
     }
   };
-  /** Create */
-  const handleCreate = () => {
-    // reset before
-    ontologyId.value = null;
-    classificationId.value = null;
-    classId.value = null;
-    (detail.value as any) = null;
-    openModal();
-  };
+
   /** Edit */
   const handleEdit = async (id) => {
     try {
       if (pageType == ClassTypeEnum.CLASS) {
-        detail.value = await getClassByIdApi({ id: id });
+        detail.value = await getDatasetClassByIdApi({ id: id });
       } else {
-        detail.value = await getClassificationByIdApi({ id: id });
+        detail.value = await getDatasetClassificationByIdApi({ id: id });
       }
+
       ontologyId.value = detail.value?.ontologyId;
-      // class
       classId.value = detail.value?.classId;
-      // classification
       classificationId.value = detail.value?.classificationId;
-      openModal();
+
+      handleOpenCreate(true);
     } catch (error: any) {
       createMessage.error(String(error));
     }
   };
-
-  let cardList = ref<Array<ClassItem | ClassificationItem>>([]);
-  const total = ref<number>(0);
-  const pageNo = ref<number>(1);
 
   /** Search */
   const searchFormValue = ref({});
@@ -246,9 +211,13 @@
     getList();
   };
 
+  /** List */
+  const cardList = ref<Array<datasetClassItem | datasetClassificationItem>>([]);
+  const total = ref<number>(0);
+  const pageNo = ref<number>(1);
   const getList = async (isConcat = false) => {
     loadingRef.value = true;
-    const postData: GetListParams = {
+    const postData: getDatasetClassesParams = {
       pageNo: pageNo.value,
       pageSize: 30,
       datasetId: datasetId,
@@ -263,9 +232,9 @@
     let res;
     try {
       if (pageType == ClassTypeEnum.CLASS) {
-        res = await getClassApi(postData);
+        res = await getDatasetClassApi(postData);
       } else {
-        res = await getClassificationApi(postData);
+        res = await getDatasetClassificationApi(postData);
       }
       cardList.value = cardList.value.concat(res.list);
 
@@ -278,6 +247,8 @@
     loadingRef.value = false;
   };
 
+  /** DatasetType */
+  const datasetType = ref<datasetTypeEnum>(datasetTypeEnum.IMAGE);
   const getDatasetType = async () => {
     const res = await datasetItemDetail({ id: datasetId });
     datasetType.value = res.type;
@@ -305,15 +276,36 @@
   };
   provide('handleRefresh', handleRefresh);
 
-  const [syncRegister, { openModal: openSyncModal }] = useModal();
-  const itemId = ref('');
-  const itemName = ref('');
-  const toSync = (item) => {
-    // 获取点击项的 id 和 name
-    itemId.value = item.id;
-    itemName.value = item.name;
-    openSyncModal(true, {});
+  /** Selected */
+  const selectedList = ref<any[]>([]);
+  const handleSelectAll = () => {
+    selectedList.value = [...cardList.value];
   };
+  const handleUnSelect = () => {
+    selectedList.value = [];
+  };
+  const handleSelected = (selectItem: any) => {
+    const index = unref(selectedList).findIndex((item: any) => selectItem.id === item.id);
+
+    if (index === -1) {
+      unref(selectedList).push(selectItem);
+    } else {
+      unref(selectedList).splice(index, 1);
+    }
+
+    console.log(unref(selectedList));
+  };
+
+  /** Sync */
+  // const [syncRegister, { openModal: openSyncModal }] = useModal();
+  // const itemId = ref('');
+  // const itemName = ref('');
+  // const toSync = (item) => {
+  //   // 获取点击项的 id 和 name
+  //   itemId.value = item.id;
+  //   itemName.value = item.name;
+  //   openSyncModal(true, {});
+  // };
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-datasetOntology';
@@ -328,7 +320,7 @@
       flex-direction: column;
       padding: 15px 20px;
 
-      .actions {
+      .header {
         display: flex;
         margin-bottom: 15px;
 
@@ -342,6 +334,10 @@
         right: 20px;
       }
 
+      .btn {
+        position: absolute;
+        right: 20px;
+      }
       .empty {
         width: 100%;
         height: 100%;

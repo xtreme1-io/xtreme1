@@ -5,6 +5,7 @@ import { isLeft, isRight } from '../utils';
 import Action from './Action';
 import * as _ from 'lodash';
 
+let temp = new THREE.Matrix4();
 export default class Transform2DAction extends Action {
     static actionName: string = 'transform-2d';
     renderView: Image2DRenderView;
@@ -24,14 +25,15 @@ export default class Transform2DAction extends Action {
         this.container.addEventListener('wheel', this.onZoom);
         this.container.addEventListener('mousedown', this.onMousedown);
 
-        this.renderView.addEventListener(Event.RENDER_AFTER, this.onRender);
+        // this.renderView.addEventListener(Event.RENDER_AFTER, this.onRender);
     }
 
     onRender() {
         // console.log('onRender');
         let { container, containerMatrix } = this.renderView;
-        let m = containerMatrix.elements;
-        container.style.transform = `matrix(${m[0]},${m[1]},${m[4]},${m[5]},${m[12]},${m[13]})`;
+        // let m = containerMatrix.elements;
+        // container.style.transform = `matrix(${m[0]},${m[1]},${m[4]},${m[5]},${m[12]},${m[13]})`;
+        this.renderView.render();
         this.renderView.dispatchEvent({ type: Event.CONTAINER_TRANSFORM });
     }
 
@@ -71,7 +73,7 @@ export default class Transform2DAction extends Action {
         let offsetX = e.clientX - bbox.x;
         let offsetY = e.clientY - bbox.y;
 
-        let matrix = new THREE.Matrix4();
+        let matrix = temp;
 
         containerMatrix.premultiply(matrix.makeTranslation(-offsetX, -offsetY, 0));
         containerMatrix.premultiply(matrix.makeScale(zoom, zoom, 1));

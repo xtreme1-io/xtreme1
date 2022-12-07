@@ -22,12 +22,13 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { ClassTypeEnum } from '/@/api/business/model/ontologyClassesModel';
-  import { deleteClassApi, deleteClassificationApi } from '/@/api/business/ontologyClasses';
+  import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import {
-    deleteClassApi as deleteDatasetClassApi,
-    deleteClassificationApi as deleteDatasetClassificationApi,
-  } from '/@/api/business/datasetOntology';
+    deleteOntologyClassApi,
+    deleteOntologyClassificationApi,
+    deleteDatasetClassApi,
+    deleteDatasetClassificationApi,
+  } from '/@/api/business/classes';
 
   const { createMessage } = useMessage();
   const handleRefresh = inject('handleRefresh', Function, true);
@@ -48,7 +49,7 @@
     if (props.activeTab == ClassTypeEnum.CLASS) {
       try {
         if (props.isCenter) {
-          await deleteClassApi({ id: props.id });
+          await deleteOntologyClassApi({ id: props.id });
         } else {
           await deleteDatasetClassApi({ id: props.id });
         }
@@ -67,7 +68,7 @@
     } else {
       try {
         if (props.isCenter) {
-          await deleteClassificationApi({ id: props.id });
+          await deleteOntologyClassificationApi({ id: props.id });
         } else {
           await deleteDatasetClassificationApi({ id: props.id });
         }

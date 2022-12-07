@@ -27,10 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author chenchao
@@ -148,11 +150,11 @@ public class ClassUseCase {
         datasetClassOntologyDAO.remove(datasetClassOntologyLambdaQueryWrapper);
     }
 
-    public boolean validateName(Long id, Long ontologyId, String name,ToolTypeEnum toolType) {
+    public boolean validateName(Long id, Long ontologyId, String name, ToolTypeEnum toolType) {
         LambdaQueryWrapper<Class> lambdaQueryWrapper = new LambdaQueryWrapper<Class>()
                 .eq(Class::getName, name)
                 .eq(Class::getOntologyId, ontologyId)
-                .eq(Class::getToolType,toolType);
+                .eq(Class::getToolType, toolType);
         if (ObjectUtil.isNotEmpty(id)) {
             lambdaQueryWrapper.ne(Class::getId, id);
         }
@@ -171,15 +173,15 @@ public class ClassUseCase {
         JSONArray attributes = clazz.getAttributes();
         var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, id);
         List<DatasetClassOntology> list = datasetClassOntologyDAO.list(datasetClassOntologyWrapper);
-        if (ObjectUtil.isEmpty(list)){
+        if (ObjectUtil.isEmpty(list)) {
             return;
         }
         List<Long> datasetClassIds = list.stream().map(DatasetClassOntology::getDatasetClassId).collect(toList());
         List<DatasetClass> datasetClasses = new ArrayList<>();
-        datasetClassIds.forEach(datasetClassId->{
+        datasetClassIds.forEach(datasetClassId -> {
             datasetClasses.add(DatasetClass.builder().id(datasetClassId).attributes(attributes).build());
         });
-        if (ObjectUtil.isNotEmpty(datasetClasses)){
+        if (ObjectUtil.isNotEmpty(datasetClasses)) {
             datasetClassDAO.updateBatchById(datasetClasses);
         }
     }
@@ -188,4 +190,11 @@ public class ClassUseCase {
         var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, id);
         return datasetClassOntologyDAO.count(datasetClassOntologyWrapper);
     }
+
+    public List<Long> findDatasetClassIdsByClassId(Long classId) {
+        var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, classId);
+        List<DatasetClassOntology> list = datasetClassOntologyDAO.list(datasetClassOntologyWrapper);
+        return list.stream().map(DatasetClassOntology::getDatasetClassId).collect(toList());
+    }
+
 }

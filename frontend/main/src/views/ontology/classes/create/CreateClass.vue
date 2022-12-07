@@ -4,102 +4,110 @@
     @register="registerModal"
     :title="modalTitle"
     :width="640"
-    :height="450"
     destroyOnClose
     @cancel="handleCancel"
     @ok="handleCreateSave"
+    :okText="okText"
   >
-    <div class="content">
-      <div class="title">Basic Info</div>
-      <Form
-        ref="formRef"
-        :model="formState"
-        :rules="rules"
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        hideRequiredMark
-        labelAlign="left"
-      >
-        <div class="form-wrapper">
-          <div class="w-260px">
-            <Form.Item :label="t('common.nameText')" name="name">
-              <Input
-                style="width: 160px"
-                autocomplete="off"
-                v-model:value="formState.name"
-                :placeholder="t('business.ontology.createHolder')"
-                allow-clear
-              />
-            </Form.Item>
+    <div class="create_content">
+      <div class="content-item">
+        <div class="title">Basic Info</div>
+        <Form
+          ref="formRef"
+          :model="formState"
+          :rules="rules"
+          :labelCol="labelCol"
+          :wrapperCol="wrapperCol"
+          hideRequiredMark
+          labelAlign="left"
+        >
+          <div class="form-wrapper">
+            <div class="w-260px">
+              <Form.Item :label="t('common.nameText')" name="name">
+                <Input
+                  style="width: 160px"
+                  autocomplete="off"
+                  v-model:value="formState.name"
+                  :placeholder="t('business.ontology.createHolder')"
+                  allow-clear
+                />
+              </Form.Item>
+            </div>
+            <div class="flex-1">
+              <Form.Item
+                :label="t('business.class.color')"
+                :labelCol="{ span: 5 }"
+                :wrapperCol="wrapperCol"
+              >
+                <TheColor style="width: 160px" v-model:color="formState.color" />
+              </Form.Item>
+            </div>
           </div>
-          <div class="flex-1">
-            <Form.Item
-              :label="t('business.class.color')"
-              :labelCol="{ span: 5 }"
-              :wrapperCol="wrapperCol"
-            >
-              <TheColor style="width: 160px" v-model:color="formState.color" />
+          <div class="form-wrapper">
+            <!-- <div class="w-260px">
+            <Form.Item v-if="props.isCenter" :label="t('business.ontology.ontologyType')">
+              <Select v-model:value="formState.datasetType" :options="datasetTypeList" disabled />
             </Form.Item>
+          </div> -->
+            <div class="w-260px">
+              <Form.Item :label="t('business.class.toolTypeText')">
+                <Select style="width: 160px" v-model:value="formState.toolType">
+                  <Select.Option v-for="item in toolTypeOption" :key="item.id" :value="item.type">
+                    <div class="img-tool">
+                      <img :src="item.img" alt="" />
+                      <span>{{ item.text }}</span>
+                    </div>
+                  </Select.Option>
+                </Select>
+              </Form.Item>
+            </div>
           </div>
-        </div>
-        <div class="form-wrapper">
-          <Form.Item v-if="props.isCenter" :label="t('business.ontology.ontologyType')">
-            <Select v-model:value="formState.datasetType" :options="datasetTypeList" disabled />
+          <div class="form-wrapper">
+            <div class="w-260px">
+              <Form.Item v-if="showConstraintsForLidar" :label="t('business.class.constraints')">
+                <Switch v-model:checked="formState.isConstraints" />
+              </Form.Item>
+            </div>
+          </div>
+          <!-- Standard -->
+          <template v-if="showStandard">
+            <div class="w-260px">
+              <Form.Item :label="t('business.ontology.modal.constraints.standard')">
+                <Switch v-model:checked="formState.isStandard" />
+              </Form.Item>
+            </div>
+            <TheStandard
+              :isStandard="(formState.isStandard as boolean)"
+              v-model:points="formState.points"
+              v-model:length="formState.length"
+              v-model:width="formState.width"
+              v-model:height="formState.height"
+            />
+          </template>
+          <!-- Image -->
+          <Form.Item v-if="showConstraintsForImage" :label="t('business.class.constraints')">
+            <Switch v-model:checked="formState.isConstraintsForImage" />
           </Form.Item>
-          <div class="w-260px">
-            <Form.Item :label="t('business.class.toolTypeText')">
-              <Select style="width: 160px" v-model:value="formState.toolType">
-                <Select.Option v-for="item in toolTypeOption" :key="item.id" :value="item.type">
-                  <div class="img-tool">
-                    <img :src="item.img" alt="" />
-                    <span>{{ item.text }}</span>
-                  </div>
-                </Select.Option>
-              </Select>
-            </Form.Item>
+          <div v-if="showImageInfo" class="text-center">
+            <TheImageInfo
+              v-model:imageLimit="formState.imageLimit"
+              v-model:imageLength="formState.imageLength"
+              v-model:imageWidth="formState.imageWidth"
+              v-model:imageArea="formState.imageArea"
+            />
           </div>
+        </Form>
+      </div>
+      <div class="content-item">
+        <div class="title">Related by (999)</div>
+      </div>
+      <div class="content-item">
+        <div class="title">
+          <span>Attributes (N)</span>
+          <Button type="primary" @click="handleManageAttr">
+            {{ 'Manage attributes' }}
+          </Button>
         </div>
-        <div class="form-wrapper">
-          <div class="w-260px">
-            <Form.Item v-if="showConstraintsForLidar" :label="t('business.class.constraints')">
-              <Switch v-model:checked="formState.isConstraints" />
-            </Form.Item>
-          </div>
-        </div>
-        <!-- Standard -->
-        <template v-if="showStandard">
-          <div class="w-260px">
-            <Form.Item :label="t('business.ontology.modal.constraints.standard')">
-              <Switch v-model:checked="formState.isStandard" />
-            </Form.Item>
-          </div>
-          <TheStandard
-            :isStandard="(formState.isStandard as boolean)"
-            v-model:points="formState.points"
-            v-model:length="formState.length"
-            v-model:width="formState.width"
-            v-model:height="formState.height"
-          />
-        </template>
-        <!-- Image -->
-        <Form.Item v-if="showConstraintsForImage" :label="t('business.class.constraints')">
-          <Switch v-model:checked="formState.isConstraintsForImage" />
-        </Form.Item>
-        <div v-if="showImageInfo" class="text-center">
-          <TheImageInfo
-            v-model:imageLimit="formState.imageLimit"
-            v-model:imageLength="formState.imageLength"
-            v-model:imageWidth="formState.imageWidth"
-            v-model:imageArea="formState.imageArea"
-          />
-        </div>
-      </Form>
-      <div class="title">Related by (999)</div>
-      <div class="title">
-        <span>Attributes (N)</span>
-        <Button type="primary" @click="handleManageAttr">
-          {{ 'Manage attributes' }}
-        </Button>
       </div>
     </div>
   </BasicModal>
@@ -113,8 +121,7 @@
     :activeTab="ClassTypeEnum.CLASS"
     :datasetType="props.datasetType"
     :datasetId="props.datasetId"
-    :ontologyId="props.ontologyId"
-    :isCenter="false"
+    :isCenter="props.isCenter"
     :classId="props.classId"
     :title="`${modalTitle}/Attributes`"
   />
@@ -131,19 +138,23 @@
   import TheStandard from './TheStandard.vue';
   import TheImageInfo from './TheImageInfo.vue';
   import TheAttributes from '../attributes/TheAttributes.vue';
-  import { datasetTypeList, toolTypeList } from '../attributes/data';
+  import { toolTypeList } from '../attributes/data';
   // utils
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import emitter from 'tiny-emitter/instance';
+  import { handleAddUuid, validateName } from './utils';
+  // interface
   import { ICLassForm, IDataSchema, imageConstraintsEnum } from './typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { ToolTypeEnum } from '/@/api/business/model/classModel';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
-  // interface
-  import { createEditClassApi } from '/@/api/business/ontologyClasses';
-  import { createDatasetClassApi, updateDatasetClassApi } from '/@/api/business/datasetOntology';
-  import { handleAddUuid, validateName } from './utils';
+  import {
+    updateOntologyClassApi,
+    createOntologyClassApi,
+    createDatasetClassApi,
+    updateDatasetClassApi,
+  } from '/@/api/business/classes';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -153,14 +164,15 @@
     isCenter?: boolean;
     datasetType?: datasetTypeEnum;
     datasetId?: number;
-    ontologyId: number | null;
+    ontologyId?: number | null; // for edit
     classId?: number;
   }>();
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
 
   /** Init */
-  const modalTitle = ref<string>('Create New Class');
   const baseFormName = ref<string>('');
+  const modalTitle = ref<string>('Create New Class');
+  const okText = ref<string>('Create');
   const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
     (config) => {
       console.log(config);
@@ -173,8 +185,10 @@
       // from Edit
       if (config.isEdit) {
         modalTitle.value = 'Edit Class';
+        okText.value = 'Save';
         setModalProps({
           title: 'Edit Class',
+          okText: 'Save',
         });
         formState.name = props.detail.name;
         baseFormName.value = props.detail.name;
@@ -217,8 +231,10 @@
         defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
       } else {
         modalTitle.value = 'Create New Class';
+        okText.value = 'Create';
         setModalProps({
           title: 'Create New Class',
+          okText: 'Create',
         });
         dataSchema.value = {
           attributes: [],
@@ -466,7 +482,11 @@
     try {
       changeOkLoading(true);
       if (props.isCenter) {
-        await createEditClassApi(params);
+        if (params.id) {
+          await updateOntologyClassApi(params);
+        } else {
+          await createOntologyClassApi(params);
+        }
       } else {
         if (params.id) {
           await updateDatasetClassApi(params);

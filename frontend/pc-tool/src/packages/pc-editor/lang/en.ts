@@ -34,6 +34,7 @@ const en = {
 
     // msg
     'msg-not-save': "You didn't save changes?",
+    'create-rect-valid': "Don't beyond the picture",
 };
 
 export type ILocale = typeof en;

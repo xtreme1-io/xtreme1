@@ -9,6 +9,9 @@ import { Info, RectTool, Box3DTool, ClearHandler, IBoxEvent, IRectEvent } from '
 import { isLeft, isRight } from '../utils';
 import * as _ from 'lodash';
 
+let tempV2_1 = new THREE.Vector2();
+let tempV2_2 = new THREE.Vector2();
+
 export default class Edit2DAction extends Action {
     static actionName: string = 'edit-2d';
     renderView: Image2DRenderView;
@@ -60,13 +63,13 @@ export default class Edit2DAction extends Action {
     }
 
     initBoxDrop() {
-        let scaleSize = new THREE.Vector2();
+        // let scaleSize = new THREE.Vector2();
         let renderView = this.renderView;
-        const onStart = (data: IBoxEvent) => {
-            let { imgSize, width, height } = renderView;
-            scaleSize.set(imgSize.x / width, imgSize.y / height);
-        };
-        const onUpdate = (data: IBoxEvent) => {
+        // const onStart = (data: IBoxEvent) => {
+        //     let { imgSize, width, height } = renderView;
+        //     scaleSize.set(imgSize.x / width, imgSize.y / height);
+        // };
+        const onUpdate = _.throttle((data: IBoxEvent) => {
             // console.log('drop', data);
             if (!data.data) return;
             const {
@@ -79,7 +82,9 @@ export default class Edit2DAction extends Action {
                 let posMap: Record<number, THREE.Vector2> = {};
                 positions1.reduce(
                     (map: Record<number, THREE.Vector2>, pos: THREE.Vector2, index: number) => {
-                        map[index] = pos.multiply(scaleSize).clone();
+                        let copy = pos.clone();
+                        renderView.domToImg(copy);
+                        map[index] = copy;
                         return map;
                     },
                     posMap,
@@ -89,55 +94,66 @@ export default class Edit2DAction extends Action {
                 let posMap: Record<number, THREE.Vector2> = {};
                 positions2.reduce(
                     (map: Record<number, THREE.Vector2>, pos: THREE.Vector2, index: number) => {
-                        map[index] = pos.multiply(scaleSize).clone();
+                        let copy = pos.clone();
+                        renderView.domToImg(copy);
+                        map[index] = copy;
                         return map;
                     },
                     posMap,
                 );
                 this.updateBox2DData('positions2', posMap);
             }
-        };
-        this.boxTool.addEventListener('start', onStart);
+        }, 30);
+        // this.boxTool.addEventListener('start', onStart);
         this.boxTool.addEventListener('update', onUpdate);
 
-        this.boxTool.box2DWrap.addEventListener('dblclick', () => {
-            if (this.object) {
-                this.renderView.pointCloud.dispatchEvent({
-                    type: Event.OBJECT_DBLCLICK,
-                    data: this.object,
-                });
-            }
-        });
-    }
-    initRectDrop() {
-        const scaleSize = new THREE.Vector2();
+        // this.boxTool.box2DWrap.addEventListener('dblclick', (e: MouseEvent) => {
+        //     if (this.object) {
+        //         e.stopPropagation();
 
-        const onStart = (data: IRectEvent) => {
-            let { imgSize, width, height } = this.renderView;
-            scaleSize.set(imgSize.x / width, imgSize.y / height);
-        };
-        const onUpdate = (data: IRectEvent) => {
+        //         this.renderView.pointCloud.dispatchEvent({
+        //             type: Event.OBJECT_DBLCLICK,
+        //             data: this.object,
+        //         });
+        //     }
+        // });
+    }
+
+    validRect(center: THREE.Vector2, size: THREE.Vector2, moveOnly: boolean) {}
+
+    initRectDrop() {
+        // const scaleSize = new THREE.Vector2();
+
+        // const onStart = (data: IRectEvent) => {
+        //     let { imgSize, width, height } = this.renderView;
+        //     scaleSize.set(imgSize.x / width, imgSize.y / height);
+        // };
+        const onUpdate = _.throttle((data: IRectEvent) => {
             if (!data.data) return;
             const { center, size } = data.data;
             if (!center || !size) return;
 
-            let { imgSize, width, height } = this.renderView;
-            scaleSize.set(imgSize.x / width, imgSize.y / height);
+            // let { imgSize, width, height } = this.renderView;
+            let scale = this.renderView.getScale();
+            let newCenter = center.clone();
+            let newScale = size.clone().multiplyScalar(1 / scale);
+            this.renderView.domToImg(newCenter);
+            this.validRect(newCenter, newScale, data.info === 'bg');
 
-            this.updateRectData(center.multiply(scaleSize), size.multiply(scaleSize));
-        };
+            this.updateRectData(newCenter, newScale);
+        }, 30);
 
-        this.rectTool.addEventListener('start', onStart);
+        // this.rectTool.addEventListener('start', onStart);
         this.rectTool.addEventListener('update', onUpdate);
 
-        this.rectTool.rectWrap.addEventListener('dblclick', () => {
-            if (this.object) {
-                this.renderView.pointCloud.dispatchEvent({
-                    type: Event.OBJECT_DBLCLICK,
-                    data: this.object,
-                });
-            }
-        });
+        // this.rectTool.rectWrap.addEventListener('dblclick', () => {
+        //     if (this.object) {
+        //         this.renderView.pointCloud.dispatchEvent({
+        //             type: Event.OBJECT_DBLCLICK,
+        //             data: this.object,
+        //         });
+        //     }
+        // });
     }
     update() {
         if (
@@ -162,16 +178,18 @@ export default class Edit2DAction extends Action {
     updateBox2D() {
         let newPos = get(THREE.Vector2, 1);
         let { positions1, positions2 } = this.object as Box2D;
-        let { imgSize, width, height } = this.renderView;
-        const scaleSize = get(THREE.Vector2, 2).set(width, height).divide(imgSize);
+        // let { imgSize, width, height } = this.renderView;
+        // const scaleSize = get(THREE.Vector2, 2).set(width, height).divide(imgSize);
         const circlePositions1: Vector2Of4 = this.boxTool.getEmptyVector2Of4();
         const circlePositions2: Vector2Of4 = this.boxTool.getEmptyVector2Of4();
         positions1.forEach((pos, index) => {
-            newPos.copy(pos).multiply(scaleSize);
+            newPos.copy(pos);
+            this.renderView.imgToDom(newPos);
             circlePositions1[index].copy(newPos);
         });
         positions2.forEach((pos, index) => {
-            newPos.copy(pos).multiply(scaleSize);
+            newPos.copy(pos);
+            this.renderView.imgToDom(newPos);
             circlePositions2[index].copy(newPos);
         });
         this.boxTool.updateBox2D(circlePositions1, circlePositions2);
@@ -179,12 +197,12 @@ export default class Edit2DAction extends Action {
 
     updateRect() {
         let { center, size } = this.object as Rect;
-        let { imgSize, width, height } = this.renderView;
-        let scaleSize = get(THREE.Vector2, 2).set(width, height).divide(imgSize);
-        this.rectTool.updateRect(
-            size.clone().multiply(scaleSize),
-            center.clone().multiply(scaleSize),
-        );
+        let scale = this.renderView.getScale();
+        let newCenter = tempV2_1.copy(center);
+        let newSize = tempV2_2.copy(size).multiplyScalar(scale);
+
+        this.renderView.imgToDom(newCenter);
+        this.rectTool.updateRect(newSize, newCenter);
     }
 
     updateRectData(center: THREE.Vector2, size?: THREE.Vector2) {

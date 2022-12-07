@@ -4,12 +4,10 @@ import ai.basic.x1.adapter.port.dao.ExportRecordDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ExportRecord;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
-import ai.basic.x1.entity.DataInfoBO;
-import ai.basic.x1.entity.DataInfoQueryBO;
-import ai.basic.x1.entity.ExportRecordBO;
-import ai.basic.x1.entity.FileBO;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ExportStatusEnum;
 import ai.basic.x1.util.Constants;
+import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.TemporalAccessorUtil;
@@ -25,13 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author fyb
@@ -55,9 +52,6 @@ public class ExportUseCase {
 
     @Autowired
     private FileUseCase fileUseCase;
-
-    @Autowired
-    private DataInfoUseCase dataInfoUseCase;
 
     @Value("${file.tempPath:/tmp}")
     private String tempPath;
@@ -89,18 +83,20 @@ public class ExportUseCase {
         return serialNumber;
     }
 
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
-    public Long asyncExportDataZip(String fileName, Long serialNumber, DataInfoQueryBO query) {
+
+    public <T, Q extends BaseQueryBO> Long asyncExportDataZip(String fileName, Long serialNumber,
+                Q query, Function<Q, Page<T>> fun, Function2<List<T>, Q, List<DataExportBO>> processData) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<ExportRecord>();
         lambdaQueryWrapper.in(ExportRecord::getSerialNumber, serialNumber);
         var exportRecord = exportRecordDAO.getOne(lambdaQueryWrapper);
         var srcPath = String.format("%s%s", tempPath, FileUtil.getPrefix(fileName));
         FileUtil.mkdir(srcPath);
-        getDataAndUpload(exportRecord, srcPath, query);
+        getDataAndUpload(exportRecord, srcPath, query,fun,processData);
         return serialNumber;
     }
 
-    private void getDataAndUpload(ExportRecord record, String srcPath, DataInfoQueryBO query) {
+    private <T, Q extends BaseQueryBO> void getDataAndUpload(ExportRecord record, String srcPath, Q query,
+                                                             Function<Q, Page<T>> fun, Function2<List<T>, Q, List<DataExportBO>> processData) {
         var rootPath = String.format("%s/%s", record.getCreatedBy(),
                 TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
         var exportRecordBOBuilder = ExportRecordBO.builder()
@@ -110,11 +106,11 @@ public class ExportUseCase {
         int i = 0;
         while (true) {
             query.setPageNo(i);
-            var page = dataInfoUseCase.findByPage(query);
+            var page = fun.apply(query);
             if (CollectionUtil.isEmpty(page.getList())) {
                 break;
             }
-            writeFile(page.getList(), srcPath, query);
+            writeFile(page.getList(), srcPath, query,processData);
             var listSize = page.getList().size();
             var exportRecordBO = exportRecordBOBuilder
                     .generatedNum((page.getPageNo() - 1) * page.getPageSize() + listSize)
@@ -149,8 +145,8 @@ public class ExportUseCase {
 
     }
 
-    private void writeFile(List<DataInfoBO> list, String zipPath, DataInfoQueryBO query) {
-        var dataExportBOList = dataInfoUseCase.processData(list, query);
+    private <T, Q extends BaseQueryBO>  void writeFile(List<T> list, String zipPath, Q query,Function2<List<T>, Q, List<DataExportBO>> processData) {
+        var dataExportBOList = processData.apply(list,query);
         var jsonConfig = JSONConfig.create().setIgnoreNullValue(false);
         dataExportBOList.forEach(dataExportBO -> {
             var dataExportBaseBO = dataExportBO.getData();

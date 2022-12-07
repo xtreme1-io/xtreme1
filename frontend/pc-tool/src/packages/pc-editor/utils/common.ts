@@ -26,6 +26,10 @@ export function translateCameraConfig(info: any) {
     return { cameraExternal, cameraInternal };
 }
 
+export function clamRange(v: number, min: number, max: number) {
+    return Math.max(Math.min(max, v), min);
+}
+
 export function createViewConfig(fileConfig: IFileConfig[], cameraInfo: any[]) {
     let viewConfig = [] as IImgViewConfig[];
     let pointsUrl = '';
