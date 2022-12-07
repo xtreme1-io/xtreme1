@@ -75,6 +75,9 @@ public class DatasetUseCase {
     @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 
+    @Autowired
+    private DatasetClassUseCase datasetClassUseCase;
+
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
@@ -257,7 +260,7 @@ public class DatasetUseCase {
         var datasetBO = DatasetBO.builder().name(datasetScenarioBO.getDatasetName()).type(datasetScenarioBO.getDatasetType()).build();
         var newDatasetBO = create(datasetBO);
         var datasetId = newDatasetBO.getId();
-        var newClassId = 1L;
+        var newClassId = datasetClassUseCase.copyClassesToNewDataset(datasetId, datasetScenarioBO.getOntologyClassId(), datasetScenarioBO.getSource());
         var scenarioQueryBO = DefaultConverter.convert(datasetScenarioBO, ScenarioQueryBO.class);
         scenarioQueryBO.setPageSize(PAGE_SIZE_100);
         var i = 1;
