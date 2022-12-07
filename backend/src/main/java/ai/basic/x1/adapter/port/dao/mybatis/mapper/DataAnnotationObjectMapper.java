@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author chenchao
  * @date 2022/8/26
@@ -15,4 +17,8 @@ import org.apache.ibatis.annotations.Param;
 public interface DataAnnotationObjectMapper extends ExtendBaseMapper<DataAnnotationObject> {
 
    Page<DataAnnotationObject> findByScenarioPage(Page<DataAnnotationObject> page, @Param("scenarioQuery") ScenarioQuery scenarioQuery);
+
+   List<DataAnnotationObject> listByScenario(@Param("scenarioQuery") ScenarioQuery scenarioQuery);
+
+   Page<DataAnnotationObject> findDataIdByScenarioPage(Page<DataAnnotationObject> page, @Param("scenarioQuery") ScenarioQuery scenarioQuery);
 }

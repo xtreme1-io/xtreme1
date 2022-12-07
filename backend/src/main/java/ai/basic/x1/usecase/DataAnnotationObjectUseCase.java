@@ -128,4 +128,17 @@ public class DataAnnotationObjectUseCase {
                 DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
         return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
     }
+
+    public List<DataAnnotationObjectBO> listByScenario(ScenarioQueryBO scenarioQueryBO) {
+        var dataAnnotationObjectList = dataAnnotationObjectDAO.getBaseMapper().listByScenario(DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
+        return DefaultConverter.convert(dataAnnotationObjectList, DataAnnotationObjectBO.class);
+    }
+
+    public Page<DataAnnotationObjectBO> findDataIdByScenarioPage(ScenarioQueryBO scenarioQueryBO) {
+        var page = dataAnnotationObjectDAO.getBaseMapper().findDataIdByScenarioPage(
+                new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(scenarioQueryBO.getPageNo(), scenarioQueryBO.getPageSize()),
+                DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
+        return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
+    }
+
 }

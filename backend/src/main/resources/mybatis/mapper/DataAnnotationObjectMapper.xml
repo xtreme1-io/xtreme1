@@ -20,6 +20,15 @@
         id, dataset_id, data_id, class_id, class_attributes, created_at, created_by, updated_at, updated_by
     </sql>
 
+    <select id="listByScenario" resultMap="BaseResultMap">
+        SELECT DISTINCT
+        dao.id,
+        dao.dataset_id,
+        dao.data_id,
+        dao.class_id,
+        dao.class_attributes
+        <include refid="commonSql"/>
+    </select>
 
     <select id="findByScenarioPage" resultMap="BaseResultMap">
         SELECT DISTINCT
@@ -28,35 +37,45 @@
             dao.data_id,
             dao.class_id,
             dao.class_attributes
+        <include refid="commonSql"/>
+    </select>
+
+    <select id="findDataIdByScenarioPage" resultMap="BaseResultMap">
+        SELECT DISTINCT
+            dao.data_id
+        <include refid="commonSql"/>
+    </select>
+
+    <sql id="commonSql">
         FROM
-            data_annotation_object dao
+        data_annotation_object dao
         <if test="scenarioQuery.attributeId != null and scenarioQuery.attributeId != ''">
             LEFT JOIN data_classification_option dco ON dao.data_id = dco.data_id
         </if>
         WHERE
-             dao.class_id IN
-            <foreach collection="scenarioQuery.classIds" item="classId" index="index" open="(" close=")" separator=",">
-                #{classId}
+        dao.class_id IN
+        <foreach collection="scenarioQuery.classIds" item="classId" index="index" open="(" close=")" separator=",">
+            #{classId}
+        </foreach>
+
+        <if test="scenarioQuery.datasetId != null">
+            AND dao.dataset_id = #{scenarioQuery.datasetId}
+        </if>
+
+        <if test="scenarioQuery.dataIds != null and scenarioQuery.dataIds.size() > 0">
+            AND dao.data_id IN
+            <foreach collection="scenarioQuery.dataIds" item="dataId" index="index" open="(" close=")" separator=",">
+                #{dataId}
             </foreach>
+        </if>
 
-            <if test="scenarioQuery.datasetId != null">
-                AND dao.dataset_id = #{scenarioQuery.datasetId}
-            </if>
+        <if test="scenarioQuery.attributeId != null and scenarioQuery.attributeId != ''">
+            AND dco.attribute_id = #{scenarioQuery.attributeId}
+        </if>
 
-            <if test="scenarioQuery.dataIds != null and scenarioQuery.dataIds.size() > 0">
-                AND dao.data_id IN
-                <foreach collection="scenarioQuery.dataIds" item="dataId" index="index" open="(" close=")" separator=",">
-                    #{dataId}
-                </foreach>
-            </if>
-
-            <if test="scenarioQuery.attributeId != null and scenarioQuery.attributeId != ''">
-                AND dco.attribute_id = #{scenarioQuery.attributeId}
-            </if>
-
-            <if test="scenarioQuery.optionName != null and scenarioQuery.optionName != ''">
-                AND dco.option_name = #{scenarioQuery.optionName}
-            </if>
-    </select>
+        <if test="scenarioQuery.optionName != null and scenarioQuery.optionName != ''">
+            AND dco.option_name = #{scenarioQuery.optionName}
+        </if>
+    </sql>
 
 </mapper>

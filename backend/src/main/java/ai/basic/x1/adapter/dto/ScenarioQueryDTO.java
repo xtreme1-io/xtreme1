@@ -1,5 +1,7 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
+import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,4 +26,8 @@ public class ScenarioQueryDTO {
     private String attributeId;
 
     private String optionName;
+
+    @NotEmpty(message = "datasetType cannot be null")
+    @ValidStringEnum(message = "type must be one of LIDAR_FUSION,LIDAR_BASIC,IMAGE", enumClass = DatasetTypeEnum.class)
+    private String datasetType;
 }

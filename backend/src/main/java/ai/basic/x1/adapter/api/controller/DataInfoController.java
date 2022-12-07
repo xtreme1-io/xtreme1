@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.entity.DataInfoQueryBO;
 import ai.basic.x1.entity.DataInfoUploadBO;
 import ai.basic.x1.entity.DataPreAnnotationBO;
+import ai.basic.x1.entity.ScenarioQueryBO;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.usecase.*;
 import ai.basic.x1.util.DefaultConverter;
@@ -39,11 +40,15 @@ public class DataInfoController extends BaseDatasetController {
 
     @Autowired
     protected UploadUseCase uploadUseCase;
+
     @Autowired
     protected DatasetUseCase datasetUseCase;
 
     @Autowired
     protected DataAnnotationRecordUseCase dataAnnotationRecordUseCase;
+
+    @Autowired
+    protected DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
 
     @PostMapping("upload")
     public String upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
@@ -179,6 +184,20 @@ public class DataInfoController extends BaseDatasetController {
                                                 @RequestParam(required = false) List<Long> dataIds) {
         var modelObjectBO = dataInfoUsecase.getModelAnnotateResult(serialNo, dataIds);
         return DefaultConverter.convert(modelObjectBO, ModelObjectDTO.class);
+    }
+
+    @GetMapping("/findByScenarioPage")
+    public Page<DataAnnotationObjectDTO> findByScenarioPage(@RequestParam(defaultValue = "1") Integer pageNo,
+                                                            @RequestParam(defaultValue = "10") Integer pageSize,
+                                                            @Validated ScenarioQueryDTO dto) {
+        var page = dataAnnotationObjectUseCase.findByScenarioPage(pageNo, pageSize, DefaultConverter.convert(dto, ScenarioQueryBO.class));
+        return DefaultConverter.convert(page, DataAnnotationObjectDTO.class);
+    }
+
+    @GetMapping("scenarioExport")
+    public String scenarioExport(@Validated ScenarioQueryDTO scenarioQueryDTO) {
+        var scenarioQueryBO = DefaultConverter.convert(scenarioQueryDTO, ScenarioQueryBO.class);
+        return String.valueOf(dataInfoUsecase.scenarioExport(scenarioQueryBO));
     }
 
 }

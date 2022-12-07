@@ -407,7 +407,10 @@ public class DataInfoUseCase {
         dataInfoQueryBO.setPageNo(PAGE_NO);
         dataInfoQueryBO.setPageSize(PAGE_SIZE);
         dataInfoQueryBO.setDatasetType(dataset.getType());
-        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> exportUseCase.asyncExportDataZip(fileName, serialNumber, dataInfoQueryBO))));
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, dataInfoQueryBO,
+                        this::findByPage,
+                        this::processData))));
         return serialNumber;
     }
 
@@ -1444,6 +1447,55 @@ public class DataInfoUseCase {
                 }
             }
         }
+    }
+
+    /**
+     * Export data
+     *
+     * @param scenarioQueryBO Query parameters
+     * @return Serial number
+     */
+    public Long scenarioExport(ScenarioQueryBO scenarioQueryBO) {
+        var fileName = String.format("%s-%s.zip", "export", TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
+        var serialNumber = exportUseCase.createExportRecord(fileName);
+        scenarioQueryBO.setPageNo(PAGE_NO);
+        scenarioQueryBO.setPageSize(PAGE_SIZE_100);
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, scenarioQueryBO,
+                dataAnnotationObjectUseCase::findDataIdByScenarioPage,
+                this::processScenarioData))));
+        return serialNumber;
+    }
+
+
+    public List<DataExportBO> processScenarioData(List<DataAnnotationObjectBO> dataAnnotationObjectBOList, ScenarioQueryBO queryBO) {
+        if (CollectionUtil.isEmpty(dataAnnotationObjectBOList)) {
+            return List.of();
+        }
+        var dataInfoExportBOList = new ArrayList<DataExportBO>();
+        var dataIds = dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
+        queryBO.setDataIds(dataIds);
+        var dataAnnotationObjectList = dataAnnotationObjectUseCase.listByScenario(queryBO);
+        Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
+                dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
+                : Map.of();
+        var dataList = listByIds(dataIds);
+        dataList.forEach(dataInfoBO -> {
+            var dataId = dataInfoBO.getId();
+            var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());
+            var objectList = dataAnnotationObjectMap.get(dataId);
+            var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
+            if (CollectionUtil.isNotEmpty(objectList)) {
+                var objects = objectList.stream().map(object -> object.getClassAttributes()).collect(Collectors.toList());
+                dataResultExportBO.setObjects(DefaultConverter.convert(objects, DataResultObjectExportBO.class));
+            }
+            var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
+            if (CollectionUtil.isNotEmpty(objectList)) {
+                dataInfoExportBO.setResult(dataResultExportBO);
+            }
+            dataInfoExportBOList.add(dataInfoExportBO);
+        });
+        return dataInfoExportBOList;
     }
 
     private List<PointCloudCRRespDTO> callPointCloudConvertRender(FileBO relationFileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {
