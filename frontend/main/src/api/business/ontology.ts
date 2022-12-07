@@ -82,7 +82,7 @@ export const getOntologyInfoApi = (params: { id: string }) =>
   });
 
 /** validate ontology name */
-export const validateNameApi = (params: ValidateOntologyNameParams) =>
+export const validateOntologyNameApi = (params: ValidateOntologyNameParams) =>
   defHttp.get<boolean>({
     url: `${Api.ONTOLOGY}/validateName`,
     params,
