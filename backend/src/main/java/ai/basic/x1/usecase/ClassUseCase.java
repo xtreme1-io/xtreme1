@@ -69,21 +69,8 @@ public class ClassUseCase {
         if (ObjectUtil.isNull(classBO)) {
             return null;
         }
-        var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, id);
-        List<DatasetClassOntology> list = datasetClassOntologyDAO.list(datasetClassOntologyWrapper);
-        if (ObjectUtil.isEmpty(list)) {
-            return classBO;
-        }
-        var datasetClassIds = list.stream().map(DatasetClassOntology::getDatasetClassId).collect(toList());
-        List<DatasetClass> datasetClasses = datasetClassDAO.listByIds(datasetClassIds);
-        classBO.setDatasetClasses(new ArrayList<>());
-        datasetClasses.forEach(datasetClass ->
-                classBO.getDatasetClasses().add(
-                        ClassBO.DatasetClass
-                                .builder()
-                                .id(datasetClass.getId())
-                                .name(datasetClass.getName())
-                                .build()));
+        long datasetClassNum =getRelatedDatasetClassNum(id);
+        classBO.setDatasetClassNum(datasetClassNum);
         return classBO;
     }
 
