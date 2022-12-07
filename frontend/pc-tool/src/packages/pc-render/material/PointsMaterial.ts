@@ -31,7 +31,6 @@ function getShaderCode(option: IOption = { hasIntensity: false }) {
 
     // color
     uniform ColorItem colorRange[6];
-    uniform float colorN;
     uniform float colorMode;
 
     // intensity
@@ -49,8 +48,6 @@ function getShaderCode(option: IOption = { hasIntensity: false }) {
     uniform vec2 heightRange;
     uniform vec2 pointHeight;
     uniform float pointSize; 
-    uniform vec3 trimMin; 
-    uniform vec3 trimMax; 
     // 1.0 range-only, 2.0 range-opacity
     uniform float trimType; 
 
@@ -77,9 +74,6 @@ function getShaderCode(option: IOption = { hasIntensity: false }) {
         vec3 color = vec3(1.0,0,0);
         ColorItem item;
         for(int i = 0; i < 6; i++){
-
-            if(i > int(colorN)) break;
-
             item = colorRange[i];
             if(value >= item.min && value < item.max) {
                 color = item.color;
@@ -122,15 +116,6 @@ function getShaderCode(option: IOption = { hasIntensity: false }) {
                 vColor = getColor(position.z);
         }
 
-        if(!isInBox(position.xyz,trimMin,trimMax)){
-            if(trimType == 1.0){
-                // gl_Position = vec4(2.0);
-                vDiscard = 1.0;
-            }else{
-                vOpacity = 0.3;
-            }
-            
-        }
 
         if(hasCameraRegion > 0.0){
             vec4 posNor = regionMatrix * vec4( position, 1.0 );
@@ -160,7 +145,10 @@ function getShaderCode(option: IOption = { hasIntensity: false }) {
             
         }
 
-        if(vDiscard > 0.0) vOpacity = 0.0;
+        if(vDiscard > 0.0) {
+            gl_Position = vec4(2.0,2.0,2.0,1.0);
+            vOpacity = 0.0;
+        }
 
     }`;
 
@@ -199,8 +187,6 @@ export enum IColorMode {
 export interface IUniformOption {
     groundColor?: THREE.Color;
     pointSize?: number;
-    trimMin?: THREE.Vector3;
-    trimMax?: THREE.Vector3;
     // 1.0 range-only, 2.0 range-opacity
     trimType?: 1 | 2;
     // filter
@@ -239,8 +225,6 @@ export default class PointsMaterial extends THREE.RawShaderMaterial {
                     value: new THREE.Vector2(-10000, 10000),
                 },
                 pointSize: { value: 1 },
-                trimMin: { value: new THREE.Vector3(-10000, -10000, -6) },
-                trimMax: { value: new THREE.Vector3(10000, 10000, 6) },
                 trimType: { value: 1.0 },
                 colorMode: { value: -1 },
 
@@ -257,8 +241,6 @@ export default class PointsMaterial extends THREE.RawShaderMaterial {
                         matrix: new THREE.Matrix4(),
                     },
                 },
-                // color
-                colorN: { value: 3 },
                 colorRange: {
                     value: [
                         { min: -3, max: -1.5, color: new THREE.Color(1, 0, 0) },

@@ -24,7 +24,7 @@ spring:
     password:
 
 jwt:
-  secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
+  secret: G6j7j#$&YOy9&p(s2b@v53^)38E!cG49
   issuer: BasicAI
   expireHours: 120
 
@@ -50,7 +50,7 @@ export:
   data:
     version: Basic AI V1.0
 file:
-  tempPath: /tmp/x1/
+  tempPath: /tmp/xtreme1/
   size:
     large: 400
     medium: 200
@@ -93,6 +93,10 @@ model:
 pointcloud:
   convertRender:
     url: http://pcd-tools:5000/pointcloud/convert_render
+
+dataset:
+  similarity:
+    url: http://nlb.alidev.beisai.com:9500/api/v1/calcSimilarity
 
 management:
   endpoint:

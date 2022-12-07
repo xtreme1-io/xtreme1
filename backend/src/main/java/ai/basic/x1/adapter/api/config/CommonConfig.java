@@ -124,10 +124,16 @@ public class CommonConfig implements WebMvcConfigurer {
         return new OntologyUseCase();
     }
 
-    @Bean
+    @Bean(name = "distributedLock")
     public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
-        return new DistributedLock(stringRedisTemplate, "ai:basicai:x1:", 5000);
+        return new DistributedLock(stringRedisTemplate, "ai:basicai:xtreme1:commonLock", 5000);
     }
+
+    @Bean(name = "similarityDistributedLock")
+    public IDistributedLock similarityDistributedLock(StringRedisTemplate stringRedisTemplate) {
+        return new DistributedLock(stringRedisTemplate, "ai:basicai:xtreme1:similarityLock", 300000);
+    }
+
 
     @Bean
     public ModelUseCase modelUseCase() {
@@ -156,12 +162,12 @@ public class CommonConfig implements WebMvcConfigurer {
 
 
     @Bean
-    public DataFlowUseCase dataFlowUseCase(){
+    public DataFlowUseCase dataFlowUseCase() {
         return new DataFlowUseCase();
     }
 
     @Bean
-    public UploadUseCase uploadUseCase(){
+    public UploadUseCase uploadUseCase() {
         return new UploadUseCase();
     }
 
@@ -173,6 +179,10 @@ public class CommonConfig implements WebMvcConfigurer {
     @Bean
     public DataClassificationOptionUseCase dataClassificationOptionUseCase() {
         return new DataClassificationOptionUseCase();
+    }
+    @Bean
+    public DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase() {
+        return new DatasetSimilarityRecordUseCase();
     }
 
 }

@@ -119,7 +119,10 @@ public class DataInfoUseCase {
     @Autowired
     private UploadRecordDAO uploadRecordDAO;
 
-    @Value("${file.tempPath:/tmp/x1/}")
+    @Autowired
+    private  DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase;
+
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
     @Value("${export.data.version}")
@@ -259,10 +262,11 @@ public class DataInfoUseCase {
      * Query data object list according to id collection
      *
      * @param ids id collection
+     * @param isQueryDeletedData Whether to query to delete data
      * @return Collection of data objects
      */
-    public List<DataInfoBO> listByIds(List<Long> ids) {
-        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
+    public List<DataInfoBO> listByIds(List<Long> ids,Boolean isQueryDeletedData) {
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.getBaseMapper().listByIds(ids,isQueryDeletedData), DataInfoBO.class);
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
             setDataInfoBOListFile(dataInfoBOList);
         }
@@ -529,6 +533,7 @@ public class DataInfoUseCase {
         var uploadRecordBO = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+        datasetSimilarityRecordUseCase.generateDatasetSimilarityRecord(datasetId);
     }
 
     private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -589,6 +594,7 @@ public class DataInfoUseCase {
             }
             var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+            datasetSimilarityRecordUseCase.generateDatasetSimilarityRecord(datasetId);
         } else {
             var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
@@ -725,7 +731,7 @@ public class DataInfoUseCase {
             }
             i++;
         }
-        var dataInfoBOList = listByIds(dataIds);
+        var dataInfoBOList = listByIds(dataIds,false);
         var dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
         for (var dataId : dataIds) {
             modelMessageBO.setDataId(dataId);
@@ -1038,7 +1044,7 @@ public class DataInfoUseCase {
                 var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
                 if (CollectionUtil.isEmpty(result.getObjects())) {
                     log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
-                    errorBuilder.append(FileUtil.getPrefix(dataName) + ".json the objects in the result file cannot be empty;");
+                    errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
                     return;
                 }
                 result.getObjects().forEach(object -> {
@@ -1479,7 +1485,7 @@ public class DataInfoUseCase {
         Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
                 dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
                 : Map.of();
-        var dataList = listByIds(dataIds);
+        var dataList = listByIds(dataIds,false);
         dataList.forEach(dataInfoBO -> {
             var dataId = dataInfoBO.getId();
             var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());

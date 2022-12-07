@@ -4,35 +4,35 @@
         @dblclick="onDBClick"
         :style="{
             borderColor: state.config.imgRegionIndex === props.imgIndex ? '#1890ff' : '#2e2525',
+            aspectRatio: state.config.aspectRatio,
         }"
     >
         <div class="render" ref="dom"></div>
         <div class="tool">
             <span
                 :class="state.config.imgRegionIndex === props.imgIndex ? 'icon active' : 'icon'"
-                :title="$$('show-camera')"
                 @dblclick.stop="null"
                 @click.stop="showView"
-                ><EyeOutlined />
+            >
+                <span class="eye-icon" :title="$$('show-camera')">
+                    <EyeOutlined />
+                </span>
             </span>
-            <!-- <span class="icon" title="full screen" @click="onTool('full')"
-                ><FullscreenOutlined
-            /></span> -->
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import { onMounted, ref, onBeforeMount } from 'vue';
+    import { onMounted, ref, onBeforeUnmount } from 'vue';
     import * as THREE from 'three';
     import { Image2DRenderView, PointsMaterial, Rect } from 'pc-render';
-    import { useInjectEditor } from '../../state';
-    import { useInjectState } from '../../state';
+    import { useInjectState, useInjectEditor } from '../../state';
     import * as locale from './lang';
 
     import useUI from '../../hook/useUI';
     import useContextMenu from '../../hook/useContextMenu';
     import { FullscreenOutlined, EyeOutlined } from '@ant-design/icons-vue';
+    import useInjectProxy from './useProxy';
 
     // ***************Props and Emits***************
     interface ImgViewProps {
@@ -53,6 +53,7 @@
     let $$ = editor.bindLocale(locale);
     let { canOperate } = useUI();
     let { handleContext, clearContext } = useContextMenu();
+    let renderProxy = useInjectProxy();
 
     onMounted(() => {
         // console.log('img view onMounted');
@@ -60,7 +61,9 @@
             let config = state.config;
             view = new Image2DRenderView(dom.value, pc, {
                 name: `${config.imgViewPrefix}-${props.imgIndex}`,
+                // actions: [],
                 actions: ['render-2d-shape'],
+                proxy: renderProxy,
             });
             view.renderBox = state.config.projectMap3d;
             view.renderRect = state.config.projectPoint4;
@@ -73,23 +76,16 @@
             view.setOptions(state.imgViews[props.imgIndex]);
             view.renderPoints = false;
 
-            // view.onImageLoad = function () {
-            //     let config = state.imgViews[props.imgIndex];
-            //     let { imgSize } = config;
-            //     let { naturalWidth, naturalHeight } = view.img;
-
-            //     if (!imgSize || imgSize[0] !== naturalWidth || imgSize[1] !== naturalHeight) {
-            //         config.imgSize = [naturalWidth, naturalHeight];
-            //         view.setOptions(config);
-            //     }
-            // };
-
             handleContext(dom.value);
         }
     });
 
-    onBeforeMount(() => {
+    onBeforeUnmount(() => {
         clearContext();
+
+        pc.removeRenderView(view);
+        renderProxy.removeView(view);
+        view.destroy();
     });
 
     function showView(e: MouseEvent) {
@@ -129,11 +125,11 @@
         position: relative;
         color: white;
         // padding: 3px;
-        background: #2e2525;
+        // background: #2e2525;
         border: 2px solid #2e2525;
         width: 100%;
-        min-height: 100px;
-        aspect-ratio: 1.8;
+        // min-height: 100px;
+        aspect-ratio: 1.78;
 
         .render {
             height: 100%;
@@ -159,11 +155,25 @@
             right: 6px;
             top: 6px;
             .icon {
-                width: 28px;
+                .camera-heading {
+                    font-size: 14px;
+                    padding-right: 3px;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    display: inline-block;
+                    flex: 1;
+                }
+                .eye-icon {
+                    display: inline-block;
+                }
+                display: flex;
+                max-width: 90px;
+                // width: 28px;
                 text-align: center;
                 font-size: 16px;
                 margin-left: 6px;
-                padding: initial;
+                padding-right: 6px;
+                white-space: nowrap;
             }
         }
     }

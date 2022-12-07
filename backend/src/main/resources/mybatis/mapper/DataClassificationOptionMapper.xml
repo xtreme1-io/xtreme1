@@ -40,7 +40,7 @@
         </foreach>
     </insert>
 
-    <select id="selectByPage" resultMap="BaseResultMap">
+    <select id="statisticsDataByOption" resultMap="BaseResultMap">
         SELECT cdss.*, tmp.dataAmount
         FROM data_classification_option cdss INNER JOIN data d ON cdss.data_id = d.id
                  INNER JOIN (
@@ -53,6 +53,16 @@
             ORDER BY dataAmount DESC
         ) AS tmp ON cdss.attribute_id = tmp.attribute_id
         WHERE cdss.dataset_id = #{datasetId} AND d.is_deleted = false
+    </select>
+
+    <select id="findByClassIds" resultMap="BaseResultMap">
+        select cdss.*
+        from data_classification_option cdss INNER JOIN data_annotation_object dao
+            ON cdss.data_id = dao.data_id
+        where dao.class_id IN
+        <foreach collection="classIds" item="classId" open="(" separator="," close=")">
+            #{classId}
+        </foreach>
     </select>
 
 

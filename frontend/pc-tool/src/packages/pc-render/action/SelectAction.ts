@@ -24,24 +24,25 @@ export default class SelectAction extends Action {
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
-        this.onDBLClick = this.onDBLClick.bind(this);
+        // this.onDBLClick = this.onDBLClick.bind(this);
         this.onClick = _.debounce(this.onClick.bind(this), 500, { leading: true, trailing: false });
-        // this.onDBLClick = _.debounce(this.onDBLClick.bind(this), 55);
     }
     init() {
-        let dom = this.renderView.renderer.domElement;
+        let dom = this.renderView.container;
         this._mouseDown = false;
         this._mouseDownPos = new THREE.Vector2();
 
         dom.addEventListener('mousedown', this.onMouseDown);
         dom.addEventListener('mouseup', this.onMouseUp);
-        dom.addEventListener('dblclick', this.onDBLClick);
+        // dom.addEventListener('dblclick', this.onDBLClick);
         dom.addEventListener('click', this.onClick);
     }
 
     onDBLClick(event: MouseEvent) {
         let object = this.getObject(event);
         if (object) {
+            event.stopPropagation();
+
             this.renderView.pointCloud.dispatchEvent({
                 type: Event.OBJECT_DBLCLICK,
                 data: object,
@@ -77,19 +78,19 @@ export default class SelectAction extends Action {
     }
 
     getObject(event: MouseEvent) {
-        let pos = this.getProjectPos(event);
-
         let object;
         if (this.renderView instanceof MainRenderView) {
-            object = this.checkMainView(pos);
+            object = this.checkMainView(event);
         } else {
-            object = this.checkImage2DView(pos);
+            object = this.checkImage2DView(event);
         }
 
         return object;
     }
 
-    checkMainView(pos: THREE.Vector2) {
+    checkMainView(event: MouseEvent) {
+        let pos = get(THREE.Vector2, 0);
+        this.getProjectPos(event, pos);
         let annotate3D = this.renderView.pointCloud.getAnnotate3D();
 
         this.raycaster.setFromCamera(pos, this.renderView.camera);
@@ -101,16 +102,17 @@ export default class SelectAction extends Action {
         }
     }
 
-    checkImage2DView(pos: THREE.Vector2) {
+    checkImage2DView(event: MouseEvent) {
         // debugger;
         let renderView = this.renderView as Image2DRenderView;
         let imgSize = renderView.imgSize;
 
         let findObject;
-        let tempPos = get(THREE.Vector2, 0);
-        // to image coord
-        tempPos.x = ((pos.x + 1) / 2) * imgSize.x;
-        tempPos.y = ((-pos.y + 1) / 2) * imgSize.y;
+        let imgPos = get(THREE.Vector2, 0).set(event.offsetX, event.offsetY);
+        // 转换到图片坐标系
+        renderView.domToImg(imgPos);
+        // tempPos.x = ((pos.x + 1) / 2) * imgSize.x;
+        // tempPos.y = ((-pos.y + 1) / 2) * imgSize.y;
 
         if (!findObject && (renderView.renderRect || renderView.renderBox2D)) {
             let annotate2D = renderView.get2DObject();
@@ -118,7 +120,7 @@ export default class SelectAction extends Action {
             for (let i = annotate2D.length - 1; i >= 0; i--) {
                 obj = annotate2D[i];
 
-                if (renderView.isRenderable(obj) && obj.isContainPosition(tempPos)) {
+                if (renderView.isRenderable(obj) && obj.isContainPosition(imgPos)) {
                     findObject = obj;
                     break;
                 }
@@ -127,36 +129,37 @@ export default class SelectAction extends Action {
 
         if (!findObject && renderView.renderBox) {
             let annotate3D = renderView.get3DObject();
-            this.raycaster.setFromCamera(pos, this.renderView.camera);
+            let projectPos = get(THREE.Vector2, 1).copy(imgPos);
+            this.getProjectImgPos(projectPos);
+            this.raycaster.setFromCamera(projectPos, this.renderView.camera);
 
             let intersects = this.raycaster.intersectObjects(annotate3D);
             findObject = intersects.length > 0 ? intersects[0].object : null;
         }
 
         return findObject;
-
-        // if (findObject) {
-        //     this.selectObject(findObject as any);
-        // } else {
-        //     // this.renderView.pointCloud.selectObject();
-        //     // this.selectObject();
-        // }
     }
 
     selectObject(object?: AnnotateObject) {
         this.renderView.pointCloud.selectObject(object);
     }
 
-    // is2DRenderable(obj: Object2D) {
-    //     return (
-    //         (this.renderView.renderId && obj.viewId === this.renderView.renderId) ||
-    //         obj.viewId === this.renderView.id
-    //     );
-    // }
+    getProjectImgPos(pos: THREE.Vector2, target?: THREE.Vector2) {
+        let renderView = this.renderView as Image2DRenderView;
+        let { imgSize } = renderView;
 
-    getProjectPos(event: MouseEvent) {
+        target = target || pos;
+        target.x = (pos.x / imgSize.x) * 2 - 1;
+        target.y = (-pos.y / imgSize.y) * 2 + 1;
+        return target;
+    }
+
+    getProjectPos(event: MouseEvent, pos?: THREE.Vector2) {
         let x = (event.offsetX / this.renderView.width) * 2 - 1;
         let y = (-event.offsetY / this.renderView.height) * 2 + 1;
-        return new THREE.Vector2(x, y);
+
+        pos = pos || new THREE.Vector2();
+        pos.set(x, y);
+        return pos;
     }
 }

@@ -24,20 +24,12 @@ public class ClassificationUtils {
 
     public static List<DataClassificationOption> parse(List<DataAnnotationBO> dataAnnotations) {
         List<DataClassificationOption> results = new ArrayList<>();
-        for (var subList : Lists.partition(dataAnnotations, 10)) {
-            var tasks = subList.stream()
-                    .map(e -> CompletableFuture.supplyAsync(() -> parse(e)))
-                    .collect(Collectors.toList());
-
-            tasks.forEach(t -> {
-                try {
-                    results.addAll(t.get());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-            });
+        for (DataAnnotationBO dataAnnotation : dataAnnotations) {
+            try {
+                results.addAll(parse(dataAnnotation));
+            } catch (Exception e) {
+                log.error("parse classification option fail. " + e);
+            }
         }
         return results;
     }
