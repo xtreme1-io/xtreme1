@@ -119,6 +119,9 @@ public class DataInfoUseCase {
     @Autowired
     private UploadRecordDAO uploadRecordDAO;
 
+    @Autowired
+    private  DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase;
+
     @Value("${file.tempPath:/tmp/x1/}")
     private String tempPath;
 
@@ -530,6 +533,7 @@ public class DataInfoUseCase {
         var uploadRecordBO = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+        datasetSimilarityRecordUseCase.generateDatasetSimilarityRecord(datasetId);
     }
 
     private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -590,6 +594,7 @@ public class DataInfoUseCase {
             }
             var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+            datasetSimilarityRecordUseCase.generateDatasetSimilarityRecord(datasetId);
         } else {
             var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
@@ -1039,7 +1044,7 @@ public class DataInfoUseCase {
                 var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
                 if (CollectionUtil.isEmpty(result.getObjects())) {
                     log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
-                    errorBuilder.append(FileUtil.getPrefix(dataName) + ".json the objects in the result file cannot be empty;");
+                    errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
                     return;
                 }
                 result.getObjects().forEach(object -> {
