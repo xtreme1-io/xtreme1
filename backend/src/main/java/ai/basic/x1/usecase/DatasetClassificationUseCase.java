@@ -1,8 +1,9 @@
 package ai.basic.x1.usecase;
 
 
+import ai.basic.x1.adapter.port.dao.ClassificationDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
+import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.entity.DatasetClassificationBO;
 import ai.basic.x1.entity.enums.SortByEnum;
 import ai.basic.x1.entity.enums.SortEnum;
@@ -28,6 +29,9 @@ public class DatasetClassificationUseCase {
 
     @Autowired
     private DatasetClassificationDAO datasetClassificationDAO;
+
+    @Autowired
+    private ClassificationDAO classificationDAO;
 
     @Transactional(rollbackFor = Throwable.class)
     public void saveDatasetClassification(DatasetClassificationBO datasetClassificationBO) {
@@ -103,5 +107,13 @@ public class DatasetClassificationUseCase {
             classificationLambdaQueryWrapper.orderBy(SortByEnum.NAME.name().equals(sortBy),isAsc,DatasetClassification::getName);
             classificationLambdaQueryWrapper.orderBy(SortByEnum.CREATE_TIME.name().equals(sortBy),isAsc,DatasetClassification::getCreatedAt);
         }
+    }
+
+    public void copyFromOntologyCenter(DatasetClassificationBO datasetClassificationBO) {
+        Long datasetId = datasetClassificationBO.getDatasetId();
+        List<Classification> classifications = classificationDAO.listByIds(datasetClassificationBO.getClassificationIds());
+        List<DatasetClassification> datasetClassifications = DefaultConverter.convert(classifications, DatasetClassification.class);
+        datasetClassifications.forEach(entity -> entity.setDatasetId(datasetId));
+        datasetClassificationDAO.getBaseMapper().saveOrUpdateBatch(datasetClassifications);
     }
 }

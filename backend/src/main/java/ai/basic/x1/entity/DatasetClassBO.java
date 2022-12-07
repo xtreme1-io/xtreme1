@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author andy
@@ -72,6 +73,8 @@ public class DatasetClassBO {
      * Query value, create end time
      */
     private OffsetDateTime endTime;
+
+    private List<Long> classIds;
 
 
 }

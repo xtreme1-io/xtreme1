@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author chenchao
@@ -47,4 +48,6 @@ public class DatasetClassificationBO {
     private String sortBy;
 
     private String ascOrDesc;
+
+    private List<Long> classificationIds;
 }
