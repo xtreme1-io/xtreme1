@@ -23,6 +23,7 @@
             :cardType="CardTypeEnum.selector"
             :cardList="cardList"
             :activeTab="activeTab"
+            :isCenter="false"
             @edit="handleEdit"
             @create="handleOpenCreate"
             @handleSelected="handleSelected"

@@ -1,4 +1,5 @@
 import { defHttp } from '/@/utils/http/axios';
+import { ToolTypeEnum } from './model/classesModel';
 import {
   OntologyListItem,
   GetOntologyParams,
@@ -59,7 +60,7 @@ export const deleteOntologyApi = (params: DeleteOntologyParams) =>
     },
   });
 
-export const getAllOntologyApi = (params: { type: string }) =>
+export const getAllOntologyApi = (params: { type?: ToolTypeEnum }) =>
   defHttp.get<OntologyListItem[]>({
     url: `${Api.ONTOLOGY}/findAll`,
     params,

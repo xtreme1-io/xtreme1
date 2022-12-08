@@ -36,7 +36,7 @@
             :type="editorType"
             :isBasic="true"
             :dataSchema="dataSchema"
-            :isDisabled="isDisabled"
+            :isDisabled="props.isPreview"
           />
           <template v-if="toggle">
             <component
@@ -45,7 +45,7 @@
               :activeTab="activeTab"
               :dataSchema="dataSchema"
               :indexList="indexList"
-              :isDisabled="isDisabled"
+              :isDisabled="props.isPreview"
               @done="handleDone"
               @del="handleDel"
               @changeIndexList="handleChangeIndexList"
@@ -92,9 +92,8 @@
   // Set value for class | classification
 
   /** Modal */
-  const isDisabled = ref<boolean>(false);
   const okText = ref<string>('Create');
-  const [register, { closeModal, setModalProps }] = useModalInner((config) => {
+  const [register, { closeModal, setModalProps }] = useModalInner(() => {
     emitter.emit('changeRootName', props.formState.name || 'Root');
     dataSchema.value = _.cloneDeep(props.dataSchema);
     console.log('===>', dataSchema.value);
@@ -108,10 +107,6 @@
       setModalProps({
         okText: 'Save',
       });
-    }
-
-    if (config.isPreview) {
-      isDisabled.value = true;
     }
   });
   const [discardRegister, { openModal: openDiscardModal }] = useModal();
@@ -129,10 +124,12 @@
       classId?: Nullable<number>;
       classificationId?: Nullable<number>;
       title: string;
+      isPreview: boolean;
     }>(),
     {
       isCenter: true,
       datasetType: datasetTypeEnum.IMAGE,
+      isPreview: false,
     },
   );
 

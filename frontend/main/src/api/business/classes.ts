@@ -85,7 +85,7 @@ export const getOntologyClassByIdApi = (params: BasicIdParams) =>
 
 /** get ontology class by name */
 export const getAllClassByOntologyIdApi = (params: getAllOntologyParams) =>
-  defHttp.get<any>({
+  defHttp.get<ontologyClassItem[]>({
     url: `${Api.ONTOLOGY_CLASS}/findAll/${params.ontologyId}`,
     params,
     headers: {

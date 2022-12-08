@@ -5,7 +5,7 @@ export interface ICLassForm {
   name: string | undefined;
   color: string;
   datasetType: datasetTypeEnum;
-  toolType: ToolTypeEnum;
+  toolType: ToolTypeEnum | undefined;
   isConstraints: boolean;
   isConstraintsForImage: boolean;
   isStandard?: boolean;
