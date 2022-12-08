@@ -128,7 +128,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch, unref } from 'vue';
+  import { ref, reactive, computed, watch, unref, inject } from 'vue';
   // components
   import { Form, Select, Switch, Input } from 'ant-design-vue';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
@@ -168,6 +168,7 @@
     classId?: number;
   }>();
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
+  const updateDetail = inject('updateDetail', Function, true);
 
   /** Init */
   const baseFormName = ref<string>('');
@@ -374,7 +375,6 @@
       emits('changed');
       // Stop Watch
       stopWatchFormState();
-      // emitter.emit('handleSaveForm', { type: 'change' });
     }
   });
   // Check if objects are equal
@@ -437,6 +437,7 @@
 
   /** Cancel */
   const handleCancel = () => {
+    updateDetail({});
     closeModal();
   };
   const handleReset = () => {

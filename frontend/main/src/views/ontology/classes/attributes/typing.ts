@@ -56,3 +56,12 @@ export interface BaseForm {
   imageWidth?: any;
   imageArea?: any;
 }
+
+export enum attributeOptionEnum {
+  TREE_CLICK = 'tree_click',
+  FORM_UPDATE = 'form_update',
+  BACK = 'back',
+  NEXT = 'next',
+  CONFIRM = 'confirm',
+  CLOSE = 'close',
+}

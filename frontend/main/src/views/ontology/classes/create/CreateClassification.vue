@@ -12,7 +12,7 @@
   >
     <div class="create_content">
       <div class="content-item">
-        <div class="title">Basic Info - classification</div>
+        <div class="title">Basic Info</div>
         <Form
           ref="formRef"
           :model="formState"
@@ -229,7 +229,6 @@
       emits('changed');
       // Stop Watch
       stopWatchFormState();
-      // emitter.emit('handleSaveForm', { type: 'change' });
     }
   });
   // Check if objects are equal
