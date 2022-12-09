@@ -66,7 +66,6 @@ public class DatasetUseCase {
     @Autowired
     private DatasetInitialInfo datasetInitialInfo;
 
-    @Value("${file.tempPath:/tmp/xtreme1/}")
     @Autowired
     private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
 
@@ -76,7 +75,7 @@ public class DatasetUseCase {
     @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 
-    @Value("${file.tempPath:/tmp/x1/}")
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
     private static final ExecutorService executorService = ThreadUtil.newExecutor(1);
