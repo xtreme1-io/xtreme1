@@ -68,6 +68,7 @@ export interface ontologyClassItem extends ontologyResponseItem {
   datasetType: datasetTypeEnum;
   toolType: ToolTypeEnum;
   toolTypeOptions: ToolTypeOptionsItem;
+  datasetClassNum: number;
   datasetClasses: any;
   isResetRelations: boolean;
 }

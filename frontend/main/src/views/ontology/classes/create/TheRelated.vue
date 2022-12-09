@@ -3,7 +3,7 @@
     <div class="related__select">
       <div class="related__select-ontology">
         <span>Ontology</span>
-        <Select v-model:value="selectedOntologyId">
+        <Select :value="props.ontologyId" @change="handleChangeOntology">
           <Select.Option v-for="item in ontologyList" :key="item.id" :value="item.id">
             <span>{{ item.name }}</span>
           </Select.Option>
@@ -11,7 +11,7 @@
       </div>
       <div class="related__select-class">
         <span>Class</span>
-        <Select v-model:value="selectedClassId">
+        <Select :value="props.classId" @change="handleChangeClass">
           <Select.Option v-for="item in classList" :key="item.id" :value="item.id">
             <span>{{ item.name }}</span>
           </Select.Option>
@@ -32,14 +32,13 @@
     :datasetType="props.datasetType"
     :datasetId="props.datasetId"
     :isCenter="props.isCenter"
-    :classId="props.classId"
     :title="modalTitle"
     :isPreview="true"
   />
 </template>
 <script lang="ts" setup>
-  import { ref, watch } from 'vue';
-  import { Select } from 'ant-design-vue';
+  import { onMounted, ref, watch, inject } from 'vue';
+  import { Select, message } from 'ant-design-vue';
   import { useModal } from '/@/components/Modal';
   import TheAttributes from '../attributes/TheAttributes.vue';
   import emitter from 'tiny-emitter/instance';
@@ -47,7 +46,11 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { getAllOntologyApi } from '/@/api/business/ontology';
   import { OntologyListItem } from '/@/api/business/model/ontologyModel';
-  import { getAllClassByOntologyIdApi, getOntologyClassByIdApi } from '/@/api/business/classes';
+  import {
+    getAllClassByOntologyIdApi,
+    getOntologyClassByIdApi,
+    updateOntologyClassApi,
+  } from '/@/api/business/classes';
   import {
     ClassTypeEnum,
     ontologyClassItem,
@@ -56,47 +59,61 @@
   import { IDataSchema } from './typing';
 
   const props = defineProps<{
+    dataSchema: IDataSchema;
+
     datasetType: datasetTypeEnum;
     toolType: ToolTypeEnum | undefined;
 
     isCenter?: boolean;
     datasetId?: number;
-    ontologyId?: number | null; // for edit
-    classId?: number;
+
+    ontologyId: number | undefined;
+    classId: number | undefined;
   }>();
-  // const emits = defineEmits(['preview']);
+
+  const emits = defineEmits(['update:ontologyId', 'update:classId', 'update']);
+  const changeLoading = inject('changeLoading', Function, true);
+
+  const handleChangeOntology = (value) => {
+    emits('update:ontologyId', value);
+    emits('update:classId', undefined);
+  };
+  const handleChangeClass = (value) => {
+    emits('update:classId', value);
+  };
+
   watch(
     () => props.toolType,
     () => {
-      getOntologyList();
+      emits('update:ontologyId', undefined);
+      emits('update:classId', undefined);
+    },
+  );
+  watch(
+    () => props.ontologyId,
+    (newValue) => {
+      if (newValue) getClassList();
     },
   );
 
   /** Ontology List */
   const ontologyList = ref<OntologyListItem[]>([]);
   const getOntologyList = async () => {
-    selectedOntologyId.value = undefined;
-    selectedClassId.value = undefined;
-
-    const res = await getAllOntologyApi({ type: props.toolType });
+    const res = await getAllOntologyApi({ type: props.datasetType });
 
     ontologyList.value = [...res];
   };
-
-  /** Ontology Select */
-  const selectedOntologyId = ref<number | string>();
-  watch(selectedOntologyId, () => {
-    selectedClassId.value = undefined;
-    getClassList();
+  onMounted(() => {
+    getOntologyList();
   });
 
   /** Class List */
-  const selectedClassId = ref<number | string>();
   const classList = ref<ontologyClassItem[]>([]);
   const getClassList = async () => {
-    if (selectedOntologyId.value) {
+    console.log(props, '>>', props.ontologyId);
+    if (props.ontologyId) {
       const res = await getAllClassByOntologyIdApi({
-        ontologyId: selectedOntologyId.value,
+        ontologyId: props.ontologyId,
         toolType: props.toolType,
       });
 
@@ -104,25 +121,23 @@
     }
   };
 
-  const getTitle = () => {
-    const selectedOntology: any = ontologyList.value.filter(
-      (item) => item.id == selectedOntologyId.value,
-    );
-    const selectedClass: any = classList.value.filter((item) => item.id == selectedClassId.value);
-
-    return `Previewing ${selectedOntology.name}/ ${selectedClass.name}`;
-  };
-
   /** Preview */
   const formState = ref<any>({});
   const dataSchema = ref<IDataSchema>({ attributes: [] });
   const modalTitle = ref<string>('');
   const [registerAttrModal, { openModal: openAttrModal, closeModal: closeAttrModal }] = useModal();
+  const getTitle = () => {
+    const selectedOntology: any = ontologyList.value.filter(
+      (item: any) => item.id == props.ontologyId,
+    );
+    const selectedClass: any = classList.value.filter((item) => item.id == props.classId);
+    return `Previewing ${selectedOntology.name}/ ${selectedClass.name}`;
+  };
   const handlePreview = async () => {
-    if (selectedClassId.value) {
+    if (props.classId) {
       modalTitle.value = getTitle();
 
-      const res = await getOntologyClassByIdApi({ id: selectedClassId.value });
+      const res = await getOntologyClassByIdApi({ id: props.classId });
 
       formState.value = { ...res };
       dataSchema.value = {
@@ -130,6 +145,8 @@
       };
 
       openAttrModal(true, {});
+    } else {
+      message.warning('Please pick one class you want to relate to at first');
     }
   };
   const handleBack = () => {
@@ -139,6 +156,41 @@
   emitter.off('pushClass');
   emitter.on('pushClass', async () => {
     console.log('pushClass');
+    if (props.classId) {
+      changeLoading(true);
+
+      try {
+        const res = await getOntologyClassByIdApi({ id: props.classId });
+        const params: any = {
+          ...res,
+          attributes: props.dataSchema.attributes,
+        };
+        await updateOntologyClassApi(params);
+      } catch (error) {
+        message.error(String(error));
+      }
+
+      changeLoading(false);
+    }
+  });
+
+  emitter.off('pullClass');
+  emitter.on('pullClass', async () => {
+    console.log('pullClass');
+    if (props.classId) {
+      changeLoading(true);
+
+      try {
+        const res = await getOntologyClassByIdApi({ id: props.classId });
+        emits('update', {
+          attributes: res.attributes,
+        });
+      } catch (error) {
+        message.error(String(error));
+      }
+
+      changeLoading(false);
+    }
   });
 </script>
 <style lang="less" scoped>

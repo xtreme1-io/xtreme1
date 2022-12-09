@@ -9,7 +9,7 @@
     @ok="handleCreateSave"
     :okText="okText"
   >
-    <div class="create_content">
+    <div class="create_content class_create">
       <div class="content-item">
         <div class="title">Basic Info</div>
         <div class="content">
@@ -99,21 +99,41 @@
           </Form>
         </div>
       </div>
-      <div class="content-item">
-        <div class="title">Related by (999)</div>
+      <div v-if="props.isCenter" class="content-item">
+        <div class="title">Related by ({{ relatedNum }})</div>
+      </div>
+      <div v-else class="content-item">
+        <div class="title">
+          Related to
+          <Tooltip :overlayStyle="{ width: '320px' }">
+            <template #title>
+              This can only be linked to {{ formState.toolType }}
+              classes in ontology center, after that you can scenario search across datasets
+            </template>
+            <ExclamationCircleOutlined style="transform: rotate(180deg)" />
+          </Tooltip>
+        </div>
         <div class="content">
           <TheRelated
-            v-if="!props.isCenter"
-            :datasetType="props.datasetType as datasetTypeEnum "
+            :dataSchema="dataSchema"
+            :datasetId="props.datasetId"
+            :isCenter="props.isCenter"
             :toolType="formState.toolType"
-            v-bind="props"
+            :datasetType="props.datasetType as datasetTypeEnum "
+            v-model:ontologyId="formState.ontologyId"
+            v-model:classId="formState.classId"
+            @update="handleUpdateDataSchema"
           />
         </div>
       </div>
       <div class="content-item">
         <div class="title">
-          <span>Attributes (N)</span>
-          <TheManage @manage="handleManageAttr" />
+          <span>Attributes ({{ attributesNum }})</span>
+          <TheManage
+            :isCenter="props.isCenter"
+            :activeTab="ClassTypeEnum.CLASS"
+            @manage="handleManageAttr"
+          />
         </div>
       </div>
     </div>
@@ -129,15 +149,15 @@
     :datasetType="props.datasetType"
     :datasetId="props.datasetId"
     :isCenter="props.isCenter"
-    :classId="props.classId"
     :title="`${modalTitle}/Attributes`"
   />
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch, unref, inject } from 'vue';
+  import { ref, reactive, computed, watch, unref, inject, nextTick, provide } from 'vue';
   // components
-  import { Form, Select, Switch, Input } from 'ant-design-vue';
+  import { Form, Select, Switch, Input, Tooltip } from 'ant-design-vue';
+  import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
   import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
   import TheColor from './TheColor.vue';
@@ -151,7 +171,13 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import emitter from 'tiny-emitter/instance';
-  import { handleAddUuid, validateName } from './utils';
+  import {
+    getCreateClassParams,
+    getDefaultCreateClassFormState,
+    handleAddUuid,
+    isObjectChanged,
+    validateName,
+  } from './utils';
   // interface
   import { ICLassForm, IDataSchema, imageConstraintsEnum } from './typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
@@ -163,32 +189,37 @@
     createDatasetClassApi,
     updateDatasetClassApi,
   } from '/@/api/business/classes';
+  import _ from 'lodash';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
   // const handleRefresh = inject('handleRefresh', Function, true);
-  const props = defineProps<{
-    detail?: any;
-    isCenter?: boolean;
-    datasetType?: datasetTypeEnum;
-    datasetId?: number;
-    ontologyId?: number | null; // for edit
-    classId?: number;
-  }>();
+  const props = withDefaults(
+    defineProps<{
+      detail?: any;
+      datasetType?: datasetTypeEnum;
+      datasetId?: number;
+      ontologyId?: number;
+      isCenter?: boolean;
+    }>(),
+    {
+      isCenter: false,
+    },
+  );
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
   const updateDetail = inject('updateDetail', Function, true);
 
   /** Init */
+  const relatedNum = ref<number>(0);
   const baseFormName = ref<string>('');
   const modalTitle = ref<string>('Create New Class');
   const okText = ref<string>('Create');
-  const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
-    (config) => {
-      // from attributes
+  const [registerModal, { closeModal, changeOkLoading, setModalProps, changeLoading }] =
+    useModalInner((config) => {
       if (config.isKeep) {
         return;
       }
-      console.log(props.detail);
+      console.log('createClass detail', props.detail);
       // from Edit
       if (config.isEdit) {
         modalTitle.value = 'Edit Class';
@@ -198,18 +229,20 @@
           okText: 'Save',
         });
 
+        relatedNum.value = props.detail.datasetClassNum ?? 0;
         baseFormName.value = props.detail.name;
         emitter.emit('changeRootName', props.detail.name);
 
         formState.name = props.detail.name;
-        formState.color = props.detail.color;
-        formState.datasetType = unref(props.datasetType) as datasetTypeEnum;
+        formState.color = props.detail.color ?? '#7dfaf2';
         formState.toolType = props.detail.toolType;
+        nextTick(() => {
+          formState.ontologyId = props.detail?.ontologyId;
+          formState.classId = props.detail?.classId;
+        });
 
         if (props.detail?.toolTypeOptions) {
           const toolTypeOptions = JSON.parse(JSON.stringify(props.detail.toolTypeOptions));
-          console.log('props.datasetType', props.datasetType);
-          // echo toolTypeOptions based on datasetType
           if (props.datasetType != datasetTypeEnum.IMAGE) {
             formState.isConstraints = toolTypeOptions.isConstraints;
             formState.isStandard = toolTypeOptions?.isStandard;
@@ -234,9 +267,7 @@
           }
         }
 
-        dataSchema.value = {
-          attributes: props.detail.attributes ?? [],
-        };
+        dataSchema.value = { attributes: props.detail.attributes ?? [] };
 
         defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
       } else {
@@ -246,41 +277,28 @@
           title: 'Create New Class',
           okText: 'Create',
         });
-        dataSchema.value = {
-          attributes: [],
-        };
         // Non-echo isStandard is false, you need to manually end it. Not the first monitoring
         standardEcho.value++;
 
+        relatedNum.value = 0;
         formState.name = undefined;
-        formState.toolType = ToolTypeEnum.BOUNDING_BOX;
-        formState.datasetType = unref(props.datasetType) as datasetTypeEnum;
+        formState.color = '#7dfaf2';
+        formState.toolType =
+          props.datasetType == datasetTypeEnum.IMAGE
+            ? ToolTypeEnum.BOUNDING_BOX
+            : ToolTypeEnum.CUBOID;
 
+        dataSchema.value = { attributes: [] };
         defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
       }
       console.log(formState);
-    },
-  );
+    });
+  provide('changeLoading', changeLoading);
 
   /** Form */
   const formRef = ref();
-  const formState: ICLassForm = reactive({
-    name: undefined,
-    color: '#7dfaf2',
-    datasetType: datasetTypeEnum.IMAGE,
-    toolType: undefined,
-    isConstraints: false,
-    isStandard: false,
-    length: [undefined, undefined],
-    width: [undefined, undefined],
-    height: [undefined, undefined],
-    points: undefined,
-    isConstraintsForImage: false,
-    imageLimit: imageConstraintsEnum.SIZE,
-    imageLength: [undefined, undefined],
-    imageWidth: [undefined, undefined],
-    imageArea: [undefined, undefined],
-  });
+  const formState: ICLassForm = reactive({});
+  getDefaultCreateClassFormState(formState);
   defineExpose({ formState });
   /** Rules */
   const rules = {
@@ -290,9 +308,8 @@
     ],
   };
   watch(
-    () => formState.datasetType,
+    () => props.datasetType,
     (newVal, oldVal) => {
-      console.log('=======>', formState);
       if (newVal == datasetTypeEnum.IMAGE) {
         formState.toolType = ToolTypeEnum.POLYGON;
         formState.isConstraints = false;
@@ -316,7 +333,6 @@
   watch(
     () => formState.isConstraints,
     (newVal) => {
-      console.log('isConstraints changed');
       if (!newVal) {
         formState.isStandard = false;
         formState.length = [undefined, undefined];
@@ -336,7 +352,6 @@
         standardEcho.value++;
         return;
       }
-      console.log('isStandard changed');
       if (newVal) {
         formState.length = undefined;
         formState.width = undefined;
@@ -365,7 +380,6 @@
   watch(
     () => formState.isConstraintsForImage,
     (newVal) => {
-      console.log('isConstraintsForImage changed');
       if (!newVal) {
         formState.imageLength = [undefined, undefined];
         formState.imageWidth = [undefined, undefined];
@@ -379,25 +393,16 @@
   const defaultFormState = ref<any>({});
   // Watch data changes
   const stopWatchFormState = watch(formState, (value) => {
-    const flag = isObjectChange(unref(defaultFormState), unref(value));
+    const flag = isObjectChanged(unref(defaultFormState), unref(value));
     if (!flag) {
-      // Throws a change state event
       emits('changed');
-      // Stop Watch
       stopWatchFormState();
     }
   });
-  // Check if objects are equal
-  const isObjectChange = (source, comparison): boolean => {
-    const _source = JSON.stringify(source);
-    const _comparison = JSON.stringify({ ...source, ...comparison });
-
-    return _source == _comparison;
-  };
 
   // toolType drop down options
   const toolTypeOption = computed(() => {
-    if (formState.datasetType != datasetTypeEnum.IMAGE) {
+    if (props.datasetType != datasetTypeEnum.IMAGE) {
       return toolTypeList.filter((item) => item.type === ToolTypeEnum.CUBOID);
     } else {
       return toolTypeList.filter((item) => item.type !== ToolTypeEnum.CUBOID);
@@ -431,13 +436,18 @@
     return showConstraintsForImage.value && formState.isConstraintsForImage;
   });
 
+  const isResetRelations = ref<boolean>(false);
   const handleChangeToolType = () => {
     emitter.emit('resetSelect');
+    isResetRelations.value = true;
     // TODO 判断是否继续更改
   };
 
   /** Manage Attributes */
   const dataSchema = ref<IDataSchema>({ attributes: [] });
+  const attributesNum = computed(() => {
+    return dataSchema.value.attributes!.length ?? 0;
+  });
   const handleUpdateDataSchema = (newDataSchema: IDataSchema) => {
     dataSchema.value = newDataSchema;
   };
@@ -452,6 +462,8 @@
 
   /** Cancel */
   const handleCancel = () => {
+    isResetRelations.value = false;
+    getDefaultCreateClassFormState(formState);
     updateDetail({});
     closeModal();
   };
@@ -466,35 +478,13 @@
     await formRef.value.validate();
 
     handleAddUuid(dataSchema.value.attributes);
-    const params: any = {
-      id: props.detail?.id ?? undefined,
-      ontologyId: props.ontologyId ?? undefined,
-      name: formState.name as string,
-      color: formState.color,
-      toolType: formState.toolType,
-      toolTypeOptions: {},
-      attributes: dataSchema.value.attributes as any[],
-      datasetId: props.datasetId ?? undefined,
-      classId: props.classId ?? undefined,
-    };
-    if (formState.datasetType != datasetTypeEnum.IMAGE) {
-      params.toolTypeOptions = {
-        isConstraints: formState.isConstraints ?? false,
-        isStandard: formState.isStandard ?? false,
-        length: formState.length,
-        width: formState.width,
-        height: formState.height,
-        points: formState.points,
-      };
-    } else {
-      params.toolTypeOptions = {
-        isConstraintsForImage: formState.isConstraintsForImage ?? false,
-        imageLimit: formState.imageLimit,
-        imageLength: formState.imageLength,
-        imageWidth: formState.imageWidth,
-        imageArea: formState.imageArea,
-      };
-    }
+
+    const params = getCreateClassParams({
+      formState: _.cloneDeep(formState),
+      props: _.cloneDeep(props),
+      dataSchema: _.cloneDeep(unref(dataSchema)),
+      isResetRelations: isResetRelations.value,
+    });
     console.log('The create/save params is :', params);
 
     try {
@@ -513,7 +503,7 @@
         }
       }
       handleReset();
-      closeModal();
+      handleCancel();
       emits('fetchList');
     } catch (error) {
       createMessage.error(String(error));

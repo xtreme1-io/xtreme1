@@ -16,7 +16,7 @@ export interface OntologyListItem {
 /** list request params */
 export interface GetOntologyParams extends BasicPageParams {
   name?: string;
-  type?: string;
+  type?: datasetTypeEnum;
 }
 
 /** list response params */
