@@ -80,7 +80,7 @@ public class DatasetUseCase {
     private DatasetClassUseCase datasetClassUseCase;
 
     @Autowired
-    private DataAnnotationDAO dataAnnotationDAO;
+    private DataAnnotationClassificationDAO dataAnnotationClassificationDAO;
 
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
@@ -209,9 +209,9 @@ public class DatasetUseCase {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
             dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId,id);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
-            var dataAnnotationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotation.class);
-            dataAnnotationLambdaUpdateWrapper.eq(DataAnnotation::getDatasetId,id);
-            dataAnnotationDAO.remove(dataAnnotationLambdaUpdateWrapper);
+            var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId,id);
+            dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
         })));
     }
 

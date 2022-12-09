@@ -124,7 +124,7 @@ public class DataInfoUseCase {
     private DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase;
 
     @Autowired
-    private DataAnnotationDAO dataAnnotationDAO;
+    private DataAnnotationClassificationDAO dataAnnotationClassificationDAO;
 
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
@@ -189,9 +189,9 @@ public class DataInfoUseCase {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
             dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDataId, ids);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
-            var dataAnnotationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotation.class);
-            dataAnnotationLambdaUpdateWrapper.eq(DataAnnotation::getDataId, ids);
-            dataAnnotationDAO.remove(dataAnnotationLambdaUpdateWrapper);
+            var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDataId, ids);
+            dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
         })));
     }
 
