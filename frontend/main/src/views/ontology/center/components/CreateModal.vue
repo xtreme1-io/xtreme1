@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, inject } from 'vue';
+  import { ref, reactive, inject, watch } from 'vue';
   // 组件
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Form, Input, Button, Select } from 'ant-design-vue';
@@ -50,10 +50,10 @@
   import { useMessage } from '/@/hooks/web/useMessage'; // 类型
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   // 接口
-  import { createOntologyApi } from '/@/api/business/ontology';
-  import { validateCreateName } from './formSchemas';
+  import { createOntologyApi, validateOntologyNameApi } from '/@/api/business/ontology';
   import { SaveOntologyParams } from '/@/api/business/model/ontologyModel';
   import { datasetTypeList } from '../../classes/attributes/data';
+  import { RuleObject } from 'ant-design-vue/es/form/interface';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -66,12 +66,6 @@
     isValid.value = false;
   });
   // 表单
-  const rules = {
-    name: [
-      { validator: validateCreateName, trigger: 'change' },
-      { max: 256, message: t('business.ontology.maxLength') },
-    ],
-  };
   const layout = {
     labelCol: { span: 5, offset: 5 },
     wrapperCol: { span: 10 },
@@ -81,6 +75,31 @@
     name: '',
     type: datasetTypeEnum.LIDAR_BASIC,
   });
+  const validateCreateName = async (_rule: RuleObject, value: string) => {
+    if (value === '') {
+      return Promise.reject(t('business.ontology.noOntologyName'));
+    }
+    const res = await validateOntologyNameApi({ name: value, type: formState.type });
+
+    if (!res) {
+      return Promise.resolve();
+    } else {
+      const text = t('business.ontology.duplicate');
+      return Promise.reject(text);
+    }
+  };
+  const rules = {
+    name: [
+      { validator: validateCreateName, trigger: 'change' },
+      { max: 256, message: t('business.ontology.maxLength') },
+    ],
+  };
+  watch(
+    () => formState.type,
+    () => {
+      formRef.value.validate();
+    },
+  );
 
   // 取消
   const handleCancel = () => {

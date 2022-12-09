@@ -15,6 +15,7 @@ import ai.basic.x1.util.lock.IDistributedLock;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -74,6 +75,12 @@ public class DatasetUseCase {
 
     @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
+
+    @Autowired
+    private DatasetClassUseCase datasetClassUseCase;
+
+    @Autowired
+    private DataAnnotationClassificationDAO dataAnnotationClassificationDAO;
 
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
@@ -193,6 +200,19 @@ public class DatasetUseCase {
         datasetLambdaUpdateWrapper.eq(Dataset::getId, id);
         datasetLambdaUpdateWrapper.set(Dataset::getIsDeleted, true);
         datasetDAO.update(datasetLambdaUpdateWrapper);
+
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+            var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+            dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, id);
+            dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
+            dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+            var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
+            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId,id);
+            dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
+            var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId,id);
+            dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
+        })));
     }
 
     /**
@@ -257,7 +277,7 @@ public class DatasetUseCase {
         var datasetBO = DatasetBO.builder().name(datasetScenarioBO.getDatasetName()).type(datasetScenarioBO.getDatasetType()).build();
         var newDatasetBO = create(datasetBO);
         var datasetId = newDatasetBO.getId();
-        var newClassId = 1L;
+        var newClassId = datasetClassUseCase.copyClassesToNewDataset(datasetId, datasetScenarioBO.getOntologyClassId(), datasetScenarioBO.getSource());
         var scenarioQueryBO = DefaultConverter.convert(datasetScenarioBO, ScenarioQueryBO.class);
         scenarioQueryBO.setPageSize(PAGE_SIZE_100);
         var i = 1;
@@ -287,6 +307,7 @@ public class DatasetUseCase {
                 if (ObjectUtil.isNotNull(classId)) {
                     dataAnnotationObjectBO.setClassId(newClassId);
                     var dataAnnotationResultObjectBO = DefaultConverter.convert(dataAnnotationObjectBO.getClassAttributes(), DataAnnotationResultObjectBO.class);
+                    dataAnnotationResultObjectBO.setId(IdUtil.randomUUID());
                     dataAnnotationResultObjectBO.setClassId(newClassId);
                     dataAnnotationObjectBO.setClassAttributes(JSONUtil.parseObj(dataAnnotationResultObjectBO));
                 }

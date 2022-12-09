@@ -6,9 +6,10 @@
     wrapClassName="ontology-class-modal"
     :width="650"
     :height="700"
-    @cancel="handleCancel"
+    :closeFunc="handleCancel"
     @ok="handleConfirm"
     :okText="okText"
+    :closable="false"
   >
     <template #title>
       <Icon
@@ -35,7 +36,7 @@
             :type="editorType"
             :isBasic="true"
             :dataSchema="dataSchema"
-            :isDisabled="isDisabled"
+            :isDisabled="props.isPreview"
           />
           <template v-if="toggle">
             <component
@@ -44,7 +45,7 @@
               :activeTab="activeTab"
               :dataSchema="dataSchema"
               :indexList="indexList"
-              :isDisabled="isDisabled"
+              :isDisabled="props.isPreview"
               @done="handleDone"
               @del="handleDel"
               @changeIndexList="handleChangeIndexList"
@@ -64,11 +65,12 @@
   <DiscardModal @register="discardRegister" @close="handleClose" />
 </template>
 <script lang="ts" setup>
-  import { ref, unref, computed, watch, defineEmits, defineProps, inject, provide } from 'vue';
+  import { ref, unref, computed, watch, defineEmits, defineProps, provide } from 'vue';
 
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { setSchema, setClassSchema } from './utils';
   import emitter from 'tiny-emitter/instance';
+  // import { ModalConfirmCustom } from '/@/utils/business/confirm';
 
   import { BasicModal, useModalInner, useModal } from '/@/components/Modal';
   import Icon from '/@/components/Icon';
@@ -81,6 +83,8 @@
   import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { IDataSchema } from '../create/typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import _ from 'lodash';
+  import { attributeOptionEnum } from './typing';
 
   // const { t } = useI18n();
   // const modalTitle = ref<string>('Create');
@@ -88,11 +92,10 @@
   // Set value for class | classification
 
   /** Modal */
-  const isDisabled = ref<boolean>(false);
   const okText = ref<string>('Create');
-  const [register, { closeModal, setModalProps }] = useModalInner((config) => {
+  const [register, { closeModal, setModalProps }] = useModalInner(() => {
     emitter.emit('changeRootName', props.formState.name || 'Root');
-    dataSchema.value = props.dataSchema;
+    dataSchema.value = _.cloneDeep(props.dataSchema);
     console.log('===>', dataSchema.value);
     indexList.value = [];
 
@@ -104,10 +107,6 @@
       setModalProps({
         okText: 'Save',
       });
-    }
-
-    if (config.isPreview) {
-      isDisabled.value = true;
     }
   });
   const [discardRegister, { openModal: openDiscardModal }] = useModal();
@@ -125,10 +124,12 @@
       classId?: Nullable<number>;
       classificationId?: Nullable<number>;
       title: string;
+      isPreview: boolean;
     }>(),
     {
       isCenter: true,
       datasetType: datasetTypeEnum.IMAGE,
+      isPreview: false,
     },
   );
 
@@ -167,7 +168,8 @@
     } else {
       setSchema(dataSchema.value, indexList.value, setOption);
     }
-    // if has changed ,change text to Save
+    // has changed
+    isChangedByUser.value = true;
     setModalProps({
       okText: 'Save',
     });
@@ -205,6 +207,11 @@
       setSchema(dataSchema.value, indexList.value, { setType: 'delete' });
     }
     unref(indexList).pop();
+    // has changed
+    isChangedByUser.value = true;
+    setModalProps({
+      okText: 'Save',
+    });
   };
   watch(
     indexList,
@@ -240,8 +247,8 @@
     // Loading formModal for the first time does not load AttrForm | OptionForm
     if (emitter.e.handleSaveForm && oldSelectList[0] != 'root') {
       // Submit Form
-      emitter.emit('handleSaveForm', {
-        type: 'tree',
+      emitter.emit('validateForm', {
+        type: attributeOptionEnum.TREE_CLICK,
         indexList: newIndexList, // new
         selectList: oldSelectList, // old
       });
@@ -260,38 +267,31 @@
   const isChangedByUser = ref<boolean>(false);
 
   /** Close Popup */
-  const updateDetail = inject('updateDetail', Function, true);
   const handleCancel = () => {
-    console.log('cancel', indexList.value);
-    if (indexList.value.length == 0) {
-      emits('back');
+    if (isChangedByUser.value) {
+      openDiscardModal();
+      // ModalConfirmCustom({
+      //   title: 'Discard ',
+      //   content: t('business.ontology.modal.optionValid'),
+      //   okText: 'Discard',
+      //   okButtonProps: {
+      //     type: 'primary',
+      //     style: {
+      //       backgroundColor: '#FCB17A',
+      //     },
+      //   },
+      //   onOk: async () => {
+      //     // Discard
+      //     handleClose();
+      //   },
+      // });
     } else {
-      emitter.emit('handleSaveForm', { type: 'close' });
+      handleClose();
+      return true;
     }
-    return;
-    openDiscardModal();
-    // // Judgment is Edit
-    // if (props.detail?.id) {
-    //   console.log(isChangedByUser, isShowEdit);
-    //   // Determine if the user has changed
-    //   // -- judge whether isShowEdit is not filled
-    //   if (isChangedByUser.value) {
-    //     openDiscardModal();
-    //   } else if (isShowEdit.value) {
-    //     openDiscardModal();
-    //   } else {
-    //     handleClose();
-    //   }
-    // } else if (props?.classId || props?.classificationId) {
-    //   // The copy from
-    //   openDiscardModal();
-    // } else {
-    //   openDiscardModal();
-    // }
   };
   const handleClose = () => {
     isChangedByUser.value = false;
-    updateDetail({});
     closeModal();
   };
 
@@ -303,11 +303,16 @@
   provide('handleUpdateValid', handleUpdateValid);
 
   const handleConfirm = () => {
-    emitter.emit('handleSaveForm', { type: 'confirm' });
+    if (component.value) {
+      emitter.emit('validateForm', { type: attributeOptionEnum.CONFIRM });
+    } else {
+      handleUpdateDataSchema();
+    }
   };
   // Confirm to create or save
   const handleUpdateDataSchema = async () => {
     emits('update', dataSchema.value);
+    handleClose();
     console.log(props.dataSchema);
   };
 

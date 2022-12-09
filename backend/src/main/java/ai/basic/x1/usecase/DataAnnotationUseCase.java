@@ -1,21 +1,18 @@
 package ai.basic.x1.usecase;
 
-import ai.basic.x1.adapter.api.context.RequestContextHolder;
-import ai.basic.x1.adapter.port.dao.DataAnnotationDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotation;
-import ai.basic.x1.entity.DataAnnotationBO;
-import ai.basic.x1.util.DefaultConverter;
-import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import ai.basic.x1.entity.DataAnnotationClassificationBO;
+import ai.basic.x1.entity.DataAnnotationObjectBO;
+import ai.basic.x1.entity.DataAnnotationResultBO;
+import cn.hutool.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author chenchao
@@ -24,66 +21,37 @@ import java.util.stream.Collectors;
 public class DataAnnotationUseCase {
 
     @Autowired
-    private DataAnnotationDAO dataAnnotationDAO;
-
-    @Autowired
     private DataEditUseCase dataEditUseCase;
 
     @Autowired
-    private DataClassificationOptionUseCase dataClassificationOptionUseCase;
+    private DataAnnotationClassificationUseCase dataAnnotationClassificationUseCase;
 
-    /**
-     * query classifications annotation results
-     *
-     * @param dataIds data id list
-     * @return annotate result list
-     */
-    public List<DataAnnotationBO> findByDataIds(Collection<Long> dataIds) {
-        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotation.class);
-        lambdaQueryWrapper.in(DataAnnotation::getDataId, dataIds);
-        return DefaultConverter.convert(dataAnnotationDAO.list(lambdaQueryWrapper), DataAnnotationBO.class);
-    }
+    @Autowired
+    private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
 
     /**
      * for one data and one classiofication, it can only have one record, so query all saved dataAnnotations,
      * use classification id to match, if they match, update, if not, insert
      *
-     * @param dataAnnotationBOs records that need save
+     * @param dataAnnotationClassificationBOs records that need save
      */
     @Transactional(rollbackFor = Exception.class)
-    public void saveDataAnnotation(List<DataAnnotationBO> dataAnnotationBOs) {
+    public List<DataAnnotationObjectBO> saveDataAnnotation(List<DataAnnotationClassificationBO> dataAnnotationClassificationBOs, List<DataAnnotationObjectBO> dataAnnotationObjectBOs, Set<Long> deletedDataIds) {
 
-        dataEditUseCase.checkLock(dataAnnotationBOs.stream().map(DataAnnotationBO::getDataId).collect(Collectors.toSet()));
-        if (ObjectUtil.isEmpty(dataAnnotationBOs)) {
-            return;
+//        dataEditUseCase.checkLock(dataAnnotationClassificationBOs.stream().map(DataAnnotationClassificationBO::getDataId).collect(Collectors.toSet()));
+        dataAnnotationClassificationUseCase.save(dataAnnotationClassificationBOs);
+        return dataAnnotationObjectUseCase.save(dataAnnotationObjectBOs, deletedDataIds);
+    }
+
+    public List<DataAnnotationResultBO> findByDataIds(List<Long> dataIds) {
+        List<DataAnnotationClassificationBO> dataAnnotationClassificationBOs = dataAnnotationClassificationUseCase.findByDataIds(dataIds);
+        List<DataAnnotationObjectBO> dataAnnotationObjectBOs = dataAnnotationObjectUseCase.findByDataIds(dataIds);
+        List<DataAnnotationResultBO> results = new ArrayList<>();
+        for (Long dataId : dataIds) {
+            List<DataAnnotationClassificationBO> classificationValues = dataAnnotationClassificationBOs.stream().filter(bo -> dataId.equals(bo.getDataId())).collect(toList());
+            List<DataAnnotationObjectBO> objects = dataAnnotationObjectBOs.stream().filter(bo -> dataId.equals(bo.getDataId())).collect(toList());
+            results.add(DataAnnotationResultBO.builder().dataId(dataId).classificationValues(classificationValues).objects(objects).build());
         }
-        Set<Long> dataIds = dataAnnotationBOs.stream().map(DataAnnotationBO::getDataId).collect(Collectors.toSet());
-        List<DataAnnotationBO> oldInfos = findByDataIds(dataIds);
-        dataAnnotationBOs.forEach(bo -> {
-            bo.setCreatedAt(OffsetDateTime.now());
-            bo.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
-            for (DataAnnotationBO annotationBO : oldInfos) {
-                if (ObjectUtil.equals(annotationBO.getDataId(), bo.getDataId())
-                        && ObjectUtil.equals(annotationBO.getClassificationId(), bo.getClassificationId())) {
-                    bo.setId(annotationBO.getId());
-                    bo.setCreatedAt(annotationBO.getCreatedAt());
-                    bo.setCreatedBy(annotationBO.getCreatedBy());
-                }
-            }
-        });
-
-        Set<Long> annotationIds = dataAnnotationBOs.stream()
-                .map(DataAnnotationBO::getId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        dataAnnotationDAO.getBaseMapper().mysqlInsertOrUpdateBatch(DefaultConverter.convert(dataAnnotationBOs, DataAnnotation.class));
-        dataClassificationOptionUseCase.saveBatch(dataAnnotationBOs);
-
-        Set<Long> oldIds = oldInfos.stream().map(DataAnnotationBO::getId).collect(Collectors.toSet());
-        // Obtain the comparison between the original data and the new data,
-        // and delete what is not in the new data. The function of this method is to obtain the difference set
-        oldIds.removeIf(annotationIds::contains);
-        dataAnnotationDAO.removeBatchByIds(oldIds);
+        return results;
     }
 }

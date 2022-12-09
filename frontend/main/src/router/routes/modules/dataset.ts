@@ -111,6 +111,19 @@ const dataset: AppRouteModule = {
         currentActiveMenu: currentActiveMenu,
       },
     },
+    {
+      path: 'searchScenario',
+      name: 'searchScenario',
+      component: () => import('/@/views/datasets/datasetSearch/searchScenario.vue'),
+      meta: {
+        sessionTitle: 'breadcrumbTitle',
+        sessionInfo: 'breadcrumbType',
+        title: 'searchScenario',
+        // affix: true,
+        hideMenu: true,
+        currentActiveMenu: currentActiveMenu,
+      },
+    },
   ],
 };
 

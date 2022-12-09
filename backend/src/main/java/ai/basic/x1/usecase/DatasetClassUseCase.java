@@ -1,18 +1,19 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.ClassDAO;
 import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassOntologyDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Class;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ClassStatisticsUnit;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassOntology;
-import ai.basic.x1.adapter.port.dao.mybatis.model.ToolTypeStatisticsUnit;
+import ai.basic.x1.entity.ClassBO;
 import ai.basic.x1.entity.ClassStatisticsUnitBO;
 import ai.basic.x1.entity.DatasetClassBO;
 import ai.basic.x1.entity.ToolTypeStatisticsUnitBO;
+import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
 import ai.basic.x1.entity.enums.SortByEnum;
 import ai.basic.x1.entity.enums.SortEnum;
 import ai.basic.x1.entity.enums.ToolTypeEnum;
@@ -30,6 +31,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,13 +45,10 @@ import static java.util.stream.Collectors.*;
 public class DatasetClassUseCase {
 
     @Autowired
-    private DatasetClassDAO datasetClassDao;
+    private DatasetClassDAO datasetClassDAO;
 
     @Autowired
     private DatasetClassOntologyDAO datasetClassOntologyDAO;
-
-    @Autowired
-    private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 
     @Autowired
     private ClassDAO classDAO;
@@ -66,7 +65,7 @@ public class DatasetClassUseCase {
 
         DatasetClass datasetClass = DefaultConverter.convert(datasetClassBO, DatasetClass.class);
         try {
-            datasetClassDao.saveOrUpdate(datasetClass);
+            datasetClassDAO.saveOrUpdate(datasetClass);
         } catch (DuplicateKeyException e) {
             throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
         }
@@ -103,7 +102,7 @@ public class DatasetClassUseCase {
         if (ObjectUtil.isNotEmpty(id)) {
             lambdaQueryWrapper.ne(DatasetClass::getId, id);
         }
-        return datasetClassDao.getBaseMapper().exists(lambdaQueryWrapper);
+        return datasetClassDAO.getBaseMapper().exists(lambdaQueryWrapper);
     }
 
     /**
@@ -122,13 +121,13 @@ public class DatasetClassUseCase {
                 .le(ObjectUtil.isNotNull(datasetClassBO.getEndTime()), DatasetClass::getCreatedAt, datasetClassBO.getEndTime())
                 .like(StrUtil.isNotEmpty(datasetClassBO.getName()), DatasetClass::getName, datasetClassBO.getName());
         addOrderRule(lambdaQueryWrapper, datasetClassBO.getSortBy(), datasetClassBO.getAscOrDesc());
-        return DefaultConverter.convert(datasetClassDao.page(com.baomidou.mybatisplus.extension.plugins.pagination.Page.of(pageNo, pageSize), lambdaQueryWrapper), DatasetClassBO.class);
+        return DefaultConverter.convert(datasetClassDAO.page(com.baomidou.mybatisplus.extension.plugins.pagination.Page.of(pageNo, pageSize), lambdaQueryWrapper), DatasetClassBO.class);
     }
 
     public DatasetClassBO findById(Long id) {
         LambdaQueryWrapper<DatasetClass> datasetClassLambdaQueryWrapper = new LambdaQueryWrapper<>();
         datasetClassLambdaQueryWrapper.eq(DatasetClass::getId, id);
-        DatasetClassBO datasetClassBO = DefaultConverter.convert(datasetClassDao.getOne(datasetClassLambdaQueryWrapper), DatasetClassBO.class);
+        DatasetClassBO datasetClassBO = DefaultConverter.convert(datasetClassDAO.getOne(datasetClassLambdaQueryWrapper), DatasetClassBO.class);
         var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getDatasetClassId, id);
         DatasetClassOntology one = datasetClassOntologyDAO.getOne(datasetClassOntologyWrapper);
         if (ObjectUtil.isNotNull(one)) {
@@ -147,13 +146,13 @@ public class DatasetClassUseCase {
     public void deleteClass(Long id) {
         var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getDatasetClassId, id);
         datasetClassOntologyDAO.remove(datasetClassOntologyWrapper);
-        datasetClassDao.removeById(id);
+        datasetClassDAO.removeById(id);
     }
 
     public List<DatasetClassBO> findAll(Long datasetId) {
         LambdaQueryWrapper<DatasetClass> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(DatasetClass::getDatasetId, datasetId);
-        List<DatasetClass> list = datasetClassDao.list(lambdaQueryWrapper);
+        List<DatasetClass> list = datasetClassDAO.list(lambdaQueryWrapper);
         return DefaultConverter.convert(list, DatasetClassBO.class);
     }
 
@@ -170,7 +169,7 @@ public class DatasetClassUseCase {
                                                               int pageSize) {
         var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<ClassStatisticsUnit>(pageNo,
                 pageSize);
-        var pageResults = datasetClassDao.getBaseMapper().statisticsObjectByClass(page, datasetId);
+        var pageResults = datasetClassDAO.getBaseMapper().statisticsObjectByClass(page, datasetId);
         if (CollUtil.isEmpty(pageResults.getRecords())) {
             return List.of();
         }
@@ -189,7 +188,7 @@ public class DatasetClassUseCase {
     }
 
     public List<ToolTypeStatisticsUnitBO> statisticsObjectByToolType(Long datasetId) {
-        var toolTypeUnits = datasetClassDao.getBaseMapper()
+        var toolTypeUnits = datasetClassDAO.getBaseMapper()
                 .statisticsObjectByToolType(datasetId);
 
         return DefaultConverter.convert(toolTypeUnits, ToolTypeStatisticsUnitBO.class);
@@ -203,27 +202,79 @@ public class DatasetClassUseCase {
         if (CollUtil.isEmpty(classIds)) {
             return List.of();
         }
-        return DefaultConverter.convert(datasetClassDao.listByIds(classIds), DatasetClassBO.class);
+        return DefaultConverter.convert(datasetClassDAO.listByIds(classIds), DatasetClassBO.class);
     }
 
 
     @Transactional(rollbackFor = Exception.class)
     public void copyFromOntologyCenter(DatasetClassBO datasetClassBO) {
         Long datasetId = datasetClassBO.getDatasetId();
-        List<Class> classes = classDAO.listByIds(datasetClassBO.getClassIds());
+        List<ClassBO> classes = DefaultConverter.convert(classDAO.listByIds(datasetClassBO.getClassIds()), ClassBO.class);
         List<DatasetClass> datasetClasses = DefaultConverter.convert(classes, DatasetClass.class);
         datasetClasses.forEach(entity -> entity.setDatasetId(datasetId));
-        datasetClassDao.getBaseMapper().saveOrUpdateBatch(datasetClasses);
-        List<DatasetClassBO> datasetClassResult = DefaultConverter.convert(datasetClassDao.getBaseMapper().getDatasetClass(datasetId, datasetClasses), DatasetClassBO.class);
+        datasetClassDAO.getBaseMapper().saveOrUpdateBatch(datasetClasses);
+        List<DatasetClassBO> datasetClassResult = DefaultConverter.convert(datasetClassDAO.getBaseMapper().getDatasetClasses(datasetId, datasetClasses), DatasetClassBO.class);
+        associateRelationships(classes,datasetClassResult);
+    }
+
+    /**
+     * @param datasetId dataset that need insert
+     * @param classId
+     * @param source    source of class, ontology or dataset
+     * @return value is id of  insertedclass
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Long copyClassesToNewDataset(Long datasetId, Long classId, ScenarioQuerySourceEnum source) {
+        DatasetClass datasetClass;
+        if (ScenarioQuerySourceEnum.DATASET_CLASS.equals(source)) {
+            datasetClass = datasetClassDAO.getById(classId);
+            if (ObjectUtil.isNull(datasetClass)) {
+                throw new UsecaseException(UsecaseCode.UNKNOWN, "can not find class by class id " + classId);
+            }
+        } else if (ScenarioQuerySourceEnum.ONTOLOGY.equals(source)) {
+            Class clazz = classDAO.getById(classId);
+            if (ObjectUtil.isNull(clazz)) {
+                throw new UsecaseException(UsecaseCode.UNKNOWN, "can not find class by class id " + classId);
+            }
+            datasetClass = DefaultConverter.convert(clazz, DatasetClass.class);
+        } else {
+            throw new UsecaseException(UsecaseCode.UNKNOWN);
+        }
+        datasetClass.setDatasetId(datasetId);
+        datasetClass.setId(null);
+        datasetClass.setCreatedAt(OffsetDateTime.now());
+        datasetClass.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
+        datasetClass.setUpdatedAt(null);
+        datasetClass.setUpdatedBy(null);
+        datasetClassDAO.save(datasetClass);
+        return datasetClass.getId();
+    }
+
+    public void deleteClasses(List<Long> datasetClassIds) {
+        var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().in(DatasetClassOntology::getDatasetClassId, datasetClassIds);
+        datasetClassOntologyDAO.remove(datasetClassOntologyWrapper);
+        datasetClassDAO.getBaseMapper().deleteBatchIds(datasetClassIds);
+    }
+
+    public void saveToOntologyCenter(Long ontologyId, List<Long> datasetClassIds) {
+        List<DatasetClassBO> datasetClassBOs = DefaultConverter.convert(datasetClassDAO.listByIds(datasetClassIds), DatasetClassBO.class);
+        List<Class> classes = DefaultConverter.convert(datasetClassBOs, Class.class);
+        classes.forEach(entity -> entity.setOntologyId(ontologyId));
+        classDAO.getBaseMapper().saveOrUpdateBatch(classes);
+        List<ClassBO> classResult = DefaultConverter.convert(classDAO.getBaseMapper().getClasses(ontologyId, classes), ClassBO.class);
+        associateRelationships(classResult, datasetClassBOs);
+    }
+
+    private void associateRelationships(List<ClassBO> classBOs, List<DatasetClassBO> datasetClassBOs) {
         List<DatasetClassOntology> relations = new ArrayList<>();
-        for (DatasetClassBO bo : datasetClassResult) {
-            for (Class clazz : classes) {
-                if (bo.getName().equals(clazz.getName()) && bo.getToolType().equals(clazz.getToolType())) {
+        for (ClassBO bo : classBOs) {
+            for (DatasetClassBO datasetClassBO : datasetClassBOs) {
+                if (datasetClassBO.getName().equals(bo.getName()) && datasetClassBO.getToolType().equals(bo.getToolType())) {
                     DatasetClassOntology relation = DatasetClassOntology
                             .builder()
-                            .datasetClassId(bo.getId())
-                            .ontologyId(clazz.getOntologyId())
-                            .classId(clazz.getId())
+                            .datasetClassId(datasetClassBO.getId())
+                            .ontologyId(bo.getOntologyId())
+                            .classId(bo.getId())
                             .build();
                     relations.add(relation);
                     break;

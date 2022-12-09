@@ -6,7 +6,7 @@
       icon="ic:outline-arrow-back"
     />
     <span class="breadcrumb">{{ breadcrumb }}</span>
-    <img v-show="isDisabled" class="delete" :src="deleteSvg" @click="handleDelete" />
+    <img v-show="!props.isDisabled" class="delete" :src="deleteSvg" @click="handleDelete" />
   </div>
 </template>
 <script lang="ts" setup>

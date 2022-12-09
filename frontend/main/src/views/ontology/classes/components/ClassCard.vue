@@ -1,7 +1,12 @@
 <template>
   <div :class="`${prefixCls}`">
-    <CreateCard @click="handleCreate" />
-    <div v-for="item in props.cardList" :key="item.ontologyId" class="card">
+    <CreateCard v-if="props.canCreate" @click="handleCreate" />
+    <div
+      v-for="item in props.cardList"
+      :key="item.ontologyId"
+      class="card"
+      :class="hasBorder ? 'border' : ''"
+    >
       <div class="card__container">
         <template v-if="props.activeTab == ClassTypeEnum.CLASS">
           <div class="card__title">
@@ -48,7 +53,7 @@
           <span>{{ getDate(item.createdAt) }}</span>
         </div>
       </div>
-      <div class="card__mask animate-fadeIn animate-animated">
+      <div v-if="!hasBorder" class="card__mask animate-fadeIn animate-animated">
         <div class="delete">
           <EllipsisOutlined style="color: #aaa" />
           <div class="action-list">
@@ -59,13 +64,7 @@
           </div>
         </div>
         <div class="btn">
-          <Button
-            v-show="props.isCenter"
-            class="push"
-            type="primary"
-            block
-            @click="handlePush(item)"
-          >
+          <Button v-show="showPush" class="push" type="primary" block @click="handlePush(item)">
             {{ 'Push to All' }}
           </Button>
           <Button class="edit" type="primary" block @click="handleEdit(item)">
@@ -100,6 +99,7 @@
   import deleteSvg from '/@/assets/icons/delete.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';
   import { ModalConfirmCustom } from '/@/utils/business/confirm';
+  import { pushAttributesToDatasetApi } from '/@/api/business/classes';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('cardItem');
@@ -113,15 +113,21 @@
       cardList: any[];
       activeTab: ClassTypeEnum;
       isCenter?: boolean;
+      canCreate?: boolean;
+      hasBorder?: boolean;
     }>(),
     {
       isCenter: true,
+      canCreate: true,
     },
   );
 
   const emits = defineEmits(['edit', 'create', 'handleSelected']);
 
   /** Push */
+  const showPush = computed(() => {
+    return props.isCenter && props.activeTab == ClassTypeEnum.CLASS;
+  });
   const handlePush = (item) => {
     const relatedNum = 0;
     ModalConfirmCustom({
@@ -134,8 +140,8 @@
           backgroundColor: '#FCB17A',
         },
       },
-      onOk: () => {
-        console.log(item);
+      onOk: async () => {
+        await pushAttributesToDatasetApi({ id: item.id });
       },
     });
   };
@@ -168,7 +174,7 @@
     return props.selectedList?.some((item) => item.id == id);
   });
   const handleSelectedChange = (item) => {
-    emits('handleSelected', item);
+    emits('handleSelected', item, props.activeTab);
   };
 </script>
 <style lang="less" scoped>
@@ -188,6 +194,10 @@
       font-weight: 400;
       font-size: 14px;
       color: #333;
+      &.hasBorder {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+      }
       .card__container {
         display: flex;
         flex-direction: column;

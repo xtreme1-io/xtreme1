@@ -45,5 +45,5 @@ export interface FindOntologyByTeamParams {
 export interface ValidateOntologyNameParams {
   id?: string;
   name?: string;
-  type?: string;
+  type?: datasetTypeEnum;
 }

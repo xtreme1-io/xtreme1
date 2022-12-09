@@ -163,10 +163,10 @@ public class DatasetController extends BaseDatasetController {
                 throw new ApiException(UsecaseCode.DATASET_DATA_SCENARIO_NOT_FOUND);
             }
             datasetScenarioBO.setClassIds(datasetClassIds);
-            datasetScenarioBO.setOntologyClassId(dto.getClassId());
         } else {
             datasetScenarioBO.setClassIds(Collections.singletonList(dto.getClassId()));
         }
+        datasetScenarioBO.setOntologyClassId(dto.getClassId());
         datasetUsecase.createByScenario(datasetScenarioBO);
     }
 

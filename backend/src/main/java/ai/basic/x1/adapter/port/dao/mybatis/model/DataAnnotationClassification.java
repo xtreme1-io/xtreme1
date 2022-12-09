@@ -19,7 +19,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(autoResultMap = true)
-public class DataAnnotation {
+public class DataAnnotationClassification {
 
     @TableId(type = IdType.AUTO)
     private Long id;

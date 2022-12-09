@@ -33,7 +33,7 @@
       v-if="isShow"
       type="options"
       v-model:showRequired="showEditorRequired"
-      :dataSchema="data"
+      :dataSchema="currentData"
       :isDisabled="props.isDisabled"
     />
     <FormDiscard
@@ -44,7 +44,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, onMounted, watch, inject, provide } from 'vue';
+  import { ref, onMounted, watch, inject, provide, nextTick } from 'vue';
   import { Divider, Select } from 'ant-design-vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import OptionEditor from './OptionEditor.vue';
@@ -52,9 +52,10 @@
   import FormDiscard from './FormDiscard.vue';
   import emitter from 'tiny-emitter/instance';
   import { attributeBase } from './formSchemas';
-  import { getSchema, handleMutiTabAction, setClassSchema, setSchema } from './utils';
+  import { getSchema } from './utils';
   import { ClassTypeEnum, inputTypeEnum } from '/@/api/business/model/classesModel';
   import { inputTypeList } from './data';
+  import { attributeOptionEnum } from './typing';
 
   const emits = defineEmits([
     'done',
@@ -76,20 +77,19 @@
   const handleAddIndex = inject('handleAddIndex', Function, true);
   const changeShowEdit = inject('changeShowEdit', Function, true);
 
-  const data = ref<any>();
-  data.value = getSchema(props.dataSchema, props.indexList);
+  const currentData = ref<any>();
+  currentData.value = getSchema(props.dataSchema, props.indexList);
 
   const list = ref<string[]>([]);
   const newIndexList = [...(props.indexList ?? [])];
   newIndexList.pop();
   const parentData = getSchema(props.dataSchema, newIndexList);
-  console.log(parentData);
   list.value = parentData.attributes
     .map((item) => item.name)
-    .filter((item) => item != data.value.name);
-  console.log(list);
+    .filter((item) => item != currentData.value.name);
+
   // There must be option under attrForm
-  watch(data.value.options, (newData) => {
+  watch(currentData.value.options, (newData) => {
     if (newData.length > 0) {
       showEditorRequired.value = false;
     }
@@ -100,8 +100,8 @@
   /** FormHeader */
   // Return to the previous level, you need to judge the length of options
   const handleBack = () => {
-    emitter.emit('handleSaveForm', {
-      type: 'back',
+    emitter.emit('validateForm', {
+      type: attributeOptionEnum.BACK,
     });
   };
   // Delete
@@ -130,11 +130,16 @@
     schemas: attributeBase(list.value),
   });
   provide('getFieldsValue', getFieldsValue);
+  const isInit = ref<boolean>(true);
   onMounted(() => {
-    setFieldsValue({
-      ...data.value,
+    isInit.value = true;
+
+    setFieldsValue({ ...currentData.value });
+    handleChangeType(currentData.value.type);
+
+    nextTick(() => {
+      isInit.value = false;
     });
-    handleChangeType(data.value.type);
   });
   // validation form - name
   const validateAttrForm = async () => {
@@ -157,99 +162,75 @@
         setType: 'update',
         setValue: { options: [] },
       });
-      data.value = getSchema(props.dataSchema, props.indexList);
+      currentData.value = getSchema(props.dataSchema, props.indexList);
     } else {
       isShow.value = true;
-      data.value = getSchema(props.dataSchema, props.indexList);
+      currentData.value = getSchema(props.dataSchema, props.indexList);
     }
-    emitter.emit('handleSaveForm', { type: 'change' });
+    emitter.emit('handleSaveForm');
   };
 
-  emitter.off('handleSaveForm');
-  emitter.on('handleSaveForm', async (params?) => {
-    console.log('Save Attribute Form', data);
-    // validation form first
+  emitter.off('validateForm');
+  emitter.on('validateForm', async (config: { type: attributeOptionEnum; [prop: string]: any }) => {
+    // 校验表单
     const res = await validateAttrForm();
 
     if (res) {
+      // 没有需要保存的
       changeShowEdit(false);
-      // Check the options field
-      // -- not triggered by blur
-      if (params?.type != 'blur') {
-        // First, get the inputType value of the value of the current form
-        const { type } = getFieldsValue();
 
-        // If the type is not text and the current type is not change, the subsequent judgment will be made
-        if (type != inputTypeEnum.TEXT && params?.type != 'change') {
-          const { options } = data.value;
-          if (options.length > 0) {
-            showEditorRequired.value = false;
-          } else {
-            showEditorRequired.value = true;
-            showDiscardModal.value = true;
+      const formValue = getFieldsValue();
+      console.log(formValue);
+      // config?.type != attributeOptionEnum.FORM_UPDATE
+      // 校验 options
+      if (formValue.type != inputTypeEnum.TEXT && currentData.value.options.length == 0) {
+        showEditorRequired.value = true;
+        showDiscardModal.value = true;
 
-            // If you click on the tree node, you need to prevent the tree selected node from changing
-            if (params?.type == 'tree') {
-              emitter.emit('changeSelected', params.selectList);
-            }
-            return;
-          }
+        // If you click on the tree node, you need to prevent the tree selected node from changing
+        if (config?.type == attributeOptionEnum.TREE_CLICK) {
+          emitter.emit('changeSelected', config.selectList);
+        }
+      } else {
+        showEditorRequired.value = false;
+        showDiscardModal.value = false;
+
+        switch (config.type) {
+          case attributeOptionEnum.NEXT:
+            handleAddIndex(config?.index);
+            break;
+          case attributeOptionEnum.TREE_CLICK:
+            emits('changeIndexList', config.indexList);
+            break;
+          case attributeOptionEnum.BACK:
+            emits('done');
+            break;
+          case attributeOptionEnum.CONFIRM:
+            emits('update');
+            break;
+          case attributeOptionEnum.CLOSE:
+            emits('close');
+            break;
         }
       }
-
-      // Save
-      handleMutiTabAction(
-        props.activeTab,
-        () => {
-          setClassSchema(props.dataSchema, props.indexList, {
-            setType: 'update',
-            setValue: getFieldsValue() as any,
-          });
-        },
-        () => {
-          setSchema(props.dataSchema, props.indexList, {
-            setType: 'update',
-            setValue: getFieldsValue() as any,
-          });
-        },
-      );
-
-      // If it's Go , go to index
-      if (params?.type == 'go') {
-        handleAddIndex(params?.index);
-      }
-
-      // If it is a tree data click, update the indexList value, to update the data on the right
-      if (params?.type == 'tree') {
-        emits('changeIndexList', params.indexList);
-      }
-
-      // If it returns, throw done
-      if (params.type == 'back') {
-        emits('done');
-      }
-
-      // create or save
-      if (params.type == 'create') {
-        emits('createSave', params.data);
-      }
-
-      if (params?.type == 'confirm') {
-        emits('update');
-      }
-      if (params?.type == 'close') {
-        emits('close');
-      }
+      // 放行
     } else {
+      // 取消当前操作，弹窗
       showDiscardModal.value = true;
-      // if (params?.type != 'blur') {
-      //   showDiscardModal.value = true;
-      // }
-      // Prevent tree selected node from changing
-      if (params?.type == 'tree') {
-        emitter.emit('changeSelected', params.selectList);
+      if (config?.type == attributeOptionEnum.TREE_CLICK) {
+        emitter.emit('changeSelected', config.selectList);
       }
     }
+  });
+
+  emitter.off('handleSaveForm');
+  emitter.on('handleSaveForm', async () => {
+    if (isInit.value) return;
+
+    handleSetDataSchema({
+      setType: 'update',
+      setValue: getFieldsValue() as any,
+    });
   });
 </script>
 <style lang="less" scoped>
