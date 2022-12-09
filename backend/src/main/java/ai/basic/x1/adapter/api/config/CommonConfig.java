@@ -4,11 +4,11 @@ import ai.basic.x1.adapter.api.annotation.user.LoggedUserArgumentResolver;
 import ai.basic.x1.adapter.api.context.RequestContextInterceptor;
 import ai.basic.x1.adapter.api.filter.JwtAuthenticationFilter;
 import ai.basic.x1.adapter.api.filter.JwtHelper;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSimilarityJob;
 import ai.basic.x1.usecase.*;
 import ai.basic.x1.util.lock.DistributedLock;
 import ai.basic.x1.util.lock.IDistributedLock;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -185,9 +184,14 @@ public class CommonConfig implements WebMvcConfigurer {
     public DataClassificationOptionUseCase dataClassificationOptionUseCase() {
         return new DataClassificationOptionUseCase();
     }
+
     @Bean
     public DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase() {
         return new DatasetSimilarityRecordUseCase();
     }
 
+    @Bean
+    public DatasetSimilarityJobUseCase datasetSimilarityJobUseCase() {
+        return new DatasetSimilarityJobUseCase();
+    }
 }

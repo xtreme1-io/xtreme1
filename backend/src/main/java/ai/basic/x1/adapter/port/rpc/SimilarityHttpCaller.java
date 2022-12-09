@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class SimilarityHttpCaller {
 
-    @Value("${model.arithmetic.preModel.url}")
+    @Value("${dataset.similarity.url}")
     private String similarityUrl;
 
     public ApiResult callSimilarity(SimilarityParamDTO similarityParamDTO) {
