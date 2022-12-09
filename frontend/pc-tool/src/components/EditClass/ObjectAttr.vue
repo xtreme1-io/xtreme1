@@ -203,7 +203,7 @@
     function onOk() {
         if (props.state.showMsgType === 'attr-from') {
             emit('copy-from', iState.trackId);
-        } 
+        }
         // else {
         //     emit('copy-to', [iState.range[0] - 1, iState.range[1] - 1]);
         // }
