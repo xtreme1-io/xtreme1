@@ -30,7 +30,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -489,7 +488,7 @@ public class DataInfoUseCase {
                             var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                             var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
                             handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
-                            var fileNodeList = assembleContent(userId, dataFiles, rootPath, dataInfoUploadBO.getFileName());
+                            var fileNodeList = assembleContent(dataFiles, rootPath, dataInfoUploadBO);
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
                             var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
@@ -576,7 +575,7 @@ public class DataInfoUseCase {
             list.forEach(fl -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
                 try {
                     var dataInfoBOList = new ArrayList<DataInfoBO>();
-                    var fileBOS = uploadFileList(userId, rootPath, tempPath, fl, dataInfoUploadBO.getFileName());
+                    var fileBOS = uploadFileList(rootPath, fl, dataInfoUploadBO);
                     createUploadThumbnail(userId, fileBOS, rootPath);
                     fileBOS.forEach(fileBO -> {
                         var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
@@ -1081,12 +1080,12 @@ public class DataInfoUseCase {
     /**
      * Assemble the content of a single frame
      *
-     * @param dataFiles Data composition file
-     * @param rootPath  Root path
-     * @param zipName   Compression package name
+     * @param dataFiles        Data composition file
+     * @param rootPath         Root path
+     * @param dataInfoUploadBO Compression package name
      * @return content
      */
-    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath, String zipName) {
+    private List<DataInfoBO.FileNodeBO> assembleContent(List<File> dataFiles, String rootPath, DataInfoUploadBO dataInfoUploadBO) {
         var nodeList = new ArrayList<DataInfoBO.FileNodeBO>();
         var files = new ArrayList<File>();
         dataFiles.forEach(dataFile -> {
@@ -1097,8 +1096,8 @@ public class DataInfoUseCase {
                     .files(getDirList(dataFile, rootPath, files)).build();
             nodeList.add(node);
         });
-        var fileBOS = uploadFileList(userId, rootPath, tempPath, files, zipName);
-        createUploadThumbnail(userId, fileBOS, rootPath);
+        var fileBOS = uploadFileList(rootPath, files, dataInfoUploadBO);
+        createUploadThumbnail(dataInfoUploadBO.getUserId(), fileBOS, rootPath);
         fileBOS.forEach(fileBO -> {
             if (fileBO.getName().toUpperCase().endsWith(PCD_SUFFIX)) {
                 handelPointCloudConvertRender(fileBO);
@@ -1174,11 +1173,12 @@ public class DataInfoUseCase {
     /**
      * Batch upload files
      *
-     * @param rootPath Path prefix
-     * @param files    File list
+     * @param rootPath         Path prefix
+     * @param files            File list
+     * @param dataInfoUploadBO Data upload information
      * @return File information list
      */
-    public List<FileBO> uploadFileList(Long userId, String rootPath, String tempPath, List<File> files, String zipName) {
+    public List<FileBO> uploadFileList(String rootPath, List<File> files, DataInfoUploadBO dataInfoUploadBO) {
         var bucketName = minioProp.getBucketName();
         try {
             minioService.uploadFileList(bucketName, rootPath, tempPath, files);
@@ -1188,9 +1188,9 @@ public class DataInfoUseCase {
 
         var fileBOS = new ArrayList<FileBO>();
         files.forEach(file -> {
-            var zipPath = file.getAbsolutePath().replace(tempPath, "");
+            var zipPath = file.getAbsolutePath().replace(dataInfoUploadBO.getBaseSavePath(), "");
             var path = String.format("%s%s", rootPath, zipPath);
-            zipPath = zipPath.startsWith(zipName) ? zipPath : String.format("%s/%s", zipName, zipPath);
+            zipPath = zipPath.startsWith(dataInfoUploadBO.getFileName()) ? zipPath : String.format("%s/%s", dataInfoUploadBO.getFileName(), zipPath);
             var mimeType = FileUtil.getMimeType(path);
             var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(bucketName)
                     .size(file.length()).path(path).zipPath(zipPath).type(mimeType).build();
@@ -1201,7 +1201,7 @@ public class DataInfoUseCase {
             }
             fileBOS.add(fileBO);
         });
-        return fileUseCase.saveBatchFile(userId, fileBOS);
+        return fileUseCase.saveBatchFile(dataInfoUploadBO.getUserId(), fileBOS);
     }
 
 
@@ -1343,26 +1343,6 @@ public class DataInfoUseCase {
                 break;
         }
         return dataExportBaseBO;
-    }
-
-    /**
-     * Assemble the content below point_content
-     *
-     * @param list File node list
-     * @return File information collection
-     */
-    private List<Object> handlePointCloudContent(List<DataInfoBO.FileNodeBO> list) {
-        var pointCloudList = new ArrayList<>();
-        list.forEach(l -> {
-            if (l.getType().equals(FILE)) {
-                pointCloudList.add(l.getFile().getUrl());
-            } else {
-                var json = new JSONObject();
-                json.set(l.getName(), handlePointCloudContent(l.getFiles()));
-                pointCloudList.add(json);
-            }
-        });
-        return pointCloudList;
     }
 
     /**
