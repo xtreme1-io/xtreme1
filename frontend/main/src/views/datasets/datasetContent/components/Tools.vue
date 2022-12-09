@@ -39,6 +39,10 @@
         <VirtualTab :list="tabList" />
       </div>
       <div class="view-actions">
+        <Button class="mr-2" type="default" @click="handleGoSearch" :size="ButtonSize.LG">
+          <Icon icon="ic:twotone-manage-search" size="20" />
+          Scenario Search
+        </Button>
         <Button type="primary" @click="handleOpenUpload" :size="ButtonSize.LG" noBorder>
           {{ t('business.datasetContent.upload') }}
         </Button>
@@ -216,7 +220,9 @@
   import OntologyActive from '/@/assets/svg/tags/classActive.svg';
   import DownloadIcon from '/@/assets/svg/dataset/download.svg';
   import { Authority } from '/@/components/Authority';
+  import { useGo } from '/@/hooks/web/usePage';
 
+  const go = useGo();
   const makeFrameDisable = ref<boolean>(false);
   const annotateAndModelRun = ref<boolean>(false);
   const flagReactive = reactive({
@@ -318,6 +324,10 @@
       fileList.value = [];
       uploadUrl.value = '';
     }
+  };
+
+  const handleGoSearch = () => {
+    go(RouteChildEnum.SEARCH_SCENARIO);
   };
 
   /** Export */

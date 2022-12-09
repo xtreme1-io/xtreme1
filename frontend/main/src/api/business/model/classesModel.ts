@@ -174,6 +174,18 @@ export interface ValidateDatasetClassesNameParams {
   toolType?: ToolTypeEnum;
 }
 
+/** Copy */
+export interface ICopyClassParams {
+  datasetId: string | number;
+  ontologyId: string | number;
+  classIds: Array<string | number>;
+}
+export interface ICopyClassificationParams {
+  datasetId: string | number;
+  ontologyId: string | number;
+  classificationIds: Array<string | number>;
+}
+
 /**----------------------------- */
 /** sync class | classification*/
 export interface SyncParams {

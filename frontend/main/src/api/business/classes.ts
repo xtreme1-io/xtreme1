@@ -19,6 +19,8 @@ import {
   ValidateDatasetClassesNameParams,
   ValidateOntologyClassesNameParams,
   SyncParams,
+  ICopyClassParams,
+  ICopyClassificationParams,
 } from './model/classesModel';
 import { BasicIdParams } from '/@/api/model/baseModel';
 
@@ -85,7 +87,7 @@ export const getOntologyClassByIdApi = (params: BasicIdParams) =>
 
 /** get ontology class by name */
 export const getAllClassByOntologyIdApi = (params: getAllOntologyParams) =>
-  defHttp.get<any>({
+  defHttp.get<ontologyClassItem[]>({
     url: `${Api.ONTOLOGY_CLASS}/findAll/${params.ontologyId}`,
     params,
     headers: {
@@ -271,6 +273,17 @@ export const getDatasetAllClass = (params: getAllDatasetParams) =>
     },
   });
 
+/** copy class from ontology */
+export const copyClassFromOntologyApi = (params: ICopyClassParams) =>
+  defHttp.post<null>({
+    url: `${Api.DATASET_CLASS}/copyFromOntologyCenter`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 // ---------------------------------------
 
 /** Dataset Classification */
@@ -332,6 +345,17 @@ export const getDatasetClassificationByIdApi = (params: BasicIdParams) =>
 export const validateDatasetClassificationNameApi = (params: ValidateDatasetClassesNameParams) =>
   defHttp.get<boolean>({
     url: `${Api.DATASET_CLASSIFICATION}/validateName`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** copy classification from ontology */
+export const copyClassificationFromOntologyApi = (params: ICopyClassificationParams) =>
+  defHttp.post<null>({
+    url: `${Api.DATASET_CLASSIFICATION}/copyFromOntologyCenter`,
     params,
     headers: {
       // @ts-ignore

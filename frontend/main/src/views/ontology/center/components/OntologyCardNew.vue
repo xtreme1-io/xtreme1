@@ -4,7 +4,7 @@
       class="ontology__item"
       v-for="item in props.cardList"
       :key="item.id"
-      :class="[activeCard == item.id ? 'active' : '']"
+      :class="[props.activeCard == item.id ? 'active' : '']"
       @click="handleClick(item)"
     >
       <div class="ontology__item--img">
@@ -83,18 +83,17 @@
   const props = defineProps<{
     cardList: OntologyListItem[];
     isOntologyCenter?: boolean;
+    activeCard?: string | number;
   }>();
-  const emits = defineEmits(['select']);
+  const emits = defineEmits(['update:activeCard']);
 
-  const activeCard = ref<string | number>();
   // 点击卡片 ->  携带id跳转到 classes 页面
   const handleClick = (item: OntologyListItem) => {
     if (props.isOntologyCenter) {
       setDatasetBreadcrumb(item.name);
       go(`${RouteEnum.ONTOLOGY}/class?id=${item.id}&teamId=${item.teamId}`);
     } else {
-      activeCard.value = item.id;
-      emits('select', item);
+      emits('update:activeCard', item.id);
     }
   };
   // 重命名

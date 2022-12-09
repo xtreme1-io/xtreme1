@@ -1,7 +1,12 @@
 <template>
   <div :class="`${prefixCls}`">
-    <CreateCard @click="handleCreate" />
-    <div v-for="item in props.cardList" :key="item.ontologyId" class="card">
+    <CreateCard v-if="props.canCreate" @click="handleCreate" />
+    <div
+      v-for="item in props.cardList"
+      :key="item.ontologyId"
+      class="card"
+      :class="hasBorder ? 'border' : ''"
+    >
       <div class="card__container">
         <template v-if="props.activeTab == ClassTypeEnum.CLASS">
           <div class="card__title">
@@ -48,7 +53,7 @@
           <span>{{ getDate(item.createdAt) }}</span>
         </div>
       </div>
-      <div class="card__mask animate-fadeIn animate-animated">
+      <div v-if="!hasBorder" class="card__mask animate-fadeIn animate-animated">
         <div class="delete">
           <EllipsisOutlined style="color: #aaa" />
           <div class="action-list">
@@ -108,9 +113,12 @@
       cardList: any[];
       activeTab: ClassTypeEnum;
       isCenter?: boolean;
+      canCreate?: boolean;
+      hasBorder?: boolean;
     }>(),
     {
       isCenter: true,
+      canCreate: true,
     },
   );
 
@@ -166,7 +174,7 @@
     return props.selectedList?.some((item) => item.id == id);
   });
   const handleSelectedChange = (item) => {
-    emits('handleSelected', item);
+    emits('handleSelected', item, props.activeTab);
   };
 </script>
 <style lang="less" scoped>
@@ -186,6 +194,10 @@
       font-weight: 400;
       font-size: 14px;
       color: #333;
+      &.hasBorder {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+      }
       .card__container {
         display: flex;
         flex-direction: column;

@@ -3,10 +3,11 @@
     v-bind="$attrs"
     @register="registerModal"
     title="Copy from Ontology Center"
-    :okText="t('business.ontology.copy.next')"
     centered
     destroyOnClose
+    @cancel="handleCancel"
     @ok="handleNext"
+    :okText="t('business.ontology.copy.next')"
     :okButtonProps="{ disabled: isDisabled }"
     :width="1200"
     :height="750"
@@ -20,7 +21,11 @@
       <div class="ontology__list wrapper-outer">
         <div class="wrapper-inner" v-show="cardList.length > 0" style="height: 530px">
           <ScrollContainer ref="scrollRef">
-            <OntologyCard :cardList="cardList" :isOntologyCenter="false" @select="handleSelected" />
+            <OntologyCard
+              :cardList="cardList"
+              :isOntologyCenter="false"
+              v-model:activeCard="selectedOntologyId"
+            />
           </ScrollContainer>
         </div>
         <div class="wrapper-inner empty" v-if="cardList.length == 0">
@@ -38,11 +43,12 @@
   </BasicModal>
 </template>
 <script lang="ts" setup>
-  import { onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useGo } from '/@/hooks/web/usePage';
   import { RouteEnum } from '/@/enums/routeEnum';
+  import emitter from 'tiny-emitter/instance';
 
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Button } from '/@@/Button';
@@ -58,35 +64,30 @@
   const go = useGo();
   const emits = defineEmits(['copyAll', 'select', 'next']);
 
-  const selectedOntology = ref<string>();
-  watch(selectedOntology, (newVal) => {
-    if (newVal) {
-      isDisabled.value = false;
-    }
+  const selectedOntologyId = ref<string | number>();
+
+  const isDisabled = computed(() => {
+    return !selectedOntologyId.value;
   });
 
   /** Modal */
-  const [registerModal, { closeModal }] = useModalInner(() => {
+  const [registerModal, { closeModal }] = useModalInner((config) => {
+    if (config.isClear) {
+      selectedOntologyId.value = undefined;
+    }
     getList();
   });
-  const isDisabled = ref<boolean>(true);
   const handleNext = () => {
     closeModal();
     setTimeout(() => {
-      emits('next', selectedOntology.value);
-      selectedOntology.value = undefined;
-      isDisabled.value = true;
+      emits('next', selectedOntologyId.value);
+      // selectedOntologyId.value = undefined;
     }, 100);
   };
 
   /** Copy All */
   const handleCopyAll = () => {
     emits('copyAll', ICopyEnum.ONTOLOGY);
-  };
-
-  /** Select */
-  const handleSelected = (item: any) => {
-    selectedOntology.value = item.id;
   };
 
   /** List */
@@ -129,9 +130,22 @@
     });
   });
 
+  /** Go to Ontology */
   const handleToOntology = () => {
     const url = RouteEnum.ONTOLOGY;
     go(url);
+  };
+
+  /** Cancel Callback */
+  emitter.off('cancelOntology');
+  emitter.on('cancelOntology', () => {
+    console.log('cancel ontology');
+    selectedOntologyId.value = undefined;
+  });
+  const handleCancel = () => {
+    emitter.emit('cancelOntology');
+    emitter.emit('cancelClass');
+    emitter.emit('cancelConflict');
   };
 </script>
 <style lang="less" scoped>

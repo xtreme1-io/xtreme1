@@ -1,11 +1,11 @@
 <template>
   <span :class="[prefixCls, theme]" @click="toggleCollapsed">
-    <Icon
+    <!-- <Icon
       style="transform: rotate(180deg); color: #57ccef; font-size: 20px; cursor: pointer"
       icon="line-md:arrow-open-left"
       v-if="getCollapsed"
     />
-    <img style="width: 22px; height: auto" :src="backIcon" alt="" v-else />
+    <img style="width: 22px; height: auto" :src="backIcon" alt="" v-else /> -->
 
     <!-- <MenuUnfoldOutlined v-if="getCollapsed" /> <MenuFoldOutlined v-else /> -->
   </span>

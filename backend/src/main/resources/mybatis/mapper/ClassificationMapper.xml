@@ -6,6 +6,19 @@
     <sql id="Base_Column_List">
         id, ontology_id, name, color, dataset_type, is_required, input_type, options,created_at, created_by, updated_at, updated_by
     </sql>
+    <insert id="saveOrUpdateBatch">
+        INSERT INTO classification (ontology_id, name, is_required, input_type,options, created_by, updated_by)
+        VALUES
+        <foreach collection="list" item="item"  separator=",">
+            (#{item.ontologyId},#{item.name},#{item.isRequired},#{item.inputType},
+            #{item.options,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
+            #{item.createdBy},#{item.updatedBy})
+        </foreach>
+        ON DUPLICATE KEY UPDATE is_required=VALUES(is_required),
+        input_type=VALUES(input_type),
+        options=VALUES(options),
+        updated_by=VALUES(updated_by)
+    </insert>
 
 
 </mapper>

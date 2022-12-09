@@ -1,6 +1,7 @@
 package ai.basic.x1.adapter.port.dao.mybatis.mapper;
 
 import ai.basic.x1.adapter.port.dao.mybatis.model.Class;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import java.util.List;
@@ -18,4 +19,8 @@ public interface ClassMapper extends BaseMapper<Class> {
      * @return ontologyId and classNum list
      */
     List<Class> countGroupByOntologyId(Map map);
+
+    void saveOrUpdateBatch(List<Class> list);
+
+    List<Class> getClasses(Long ontologyId,List<Class> list);
 }

@@ -42,7 +42,7 @@
           AND d.is_deleted = FALSE
         GROUP BY dc.tool_type
     </select>
-    <select id="getDatasetClass" resultType="ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass">
+    <select id="getDatasetClasses" resultType="ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass">
         SELECT
         <include refid="Base_Column_List"/>
         FROM dataset_class

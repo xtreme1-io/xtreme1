@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataAnnotationDTO {
+public class DataAnnotationClassificationDTO {
 
 
     private Long id;
