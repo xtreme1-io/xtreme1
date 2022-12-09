@@ -108,6 +108,18 @@
         okText: 'Save',
       });
     }
+
+    if (props.isPreview) {
+      setModalProps({
+        showOkBtn: false,
+        showCancelBtn: false,
+      });
+    } else {
+      setModalProps({
+        showOkBtn: true,
+        showCancelBtn: true,
+      });
+    }
   });
   const [discardRegister, { openModal: openDiscardModal }] = useModal();
 
@@ -117,13 +129,11 @@
       formState: any;
       dataSchema: IDataSchema;
       activeTab: ClassTypeEnum;
-      isCenter?: boolean;
       datasetType?: datasetTypeEnum;
       ontologyId?: Nullable<number>;
       datasetId?: Nullable<number>;
-      classId?: Nullable<number>;
-      classificationId?: Nullable<number>;
       title: string;
+      isCenter?: boolean;
       isPreview: boolean;
     }>(),
     {
@@ -376,39 +386,3 @@
     }
   }
 </style>
-<!-- <style lang="less">
-  .ontology-class-modal {
-    .ant-modal {
-      height: 100vh;
-      top: 0;
-      width: 540px !important;
-      margin-top: 0;
-      margin-bottom: 0;
-
-      .ant-modal-content {
-        box-shadow: unset;
-        border-radius: unset;
-      }
-
-      .ant-modal-header {
-        height: 50px;
-      }
-
-      .ant-modal-body {
-        height: calc(100vh - 110px);
-
-        .scrollbar {
-          padding: 0;
-
-          .scrollbar__bar {
-            display: none;
-          }
-        }
-      }
-
-      .ant-modal-footer {
-        height: 60px;
-      }
-    }
-  }
-</style> -->

@@ -102,7 +102,7 @@
   const { t } = useI18n();
 
   const props = defineProps<{
-    imageLimit: imageConstraintsEnum;
+    imageLimit?: imageConstraintsEnum;
     imageLength: [number, number];
     imageWidth: [number, number];
     imageArea: [number, number];

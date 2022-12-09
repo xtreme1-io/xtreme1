@@ -43,19 +43,15 @@
     <CreateClass
       @register="registerCreateClassModal"
       :detail="detail"
-      :activeTab="activeTab"
       :datasetType="datasetType"
       :datasetId="datasetId"
-      :classId="classId"
       @fetchList="handleRefresh"
     />
     <CreateClassification
       @register="registerCreateClassificationModal"
       :detail="detail"
-      :activeTab="activeTab"
       :datasetType="datasetType"
       :datasetId="datasetId"
-      :classificationId="classificationId"
       @fetchList="handleRefresh"
     />
   </div>
@@ -113,9 +109,6 @@
   const pageType = pathArr[pathArr.length - 1].toLocaleUpperCase();
 
   const datasetId = Number(route.query.id);
-  const ontologyId = ref<Nullable<number>>();
-  const classId = ref<number>();
-  const classificationId = ref<number>();
 
   /** Tab */
   const tabListDataset = [
@@ -178,7 +171,6 @@
       (detail.value as any) = null;
     }
     if (pageType == ClassTypeEnum.CLASS) {
-      console.log(detail, activeTab, datasetType, ontologyId);
       openCreateClassModal(true, { isEdit });
     } else {
       console.log('handleOpenCreate', isEdit);
@@ -194,10 +186,6 @@
       } else {
         detail.value = await getDatasetClassificationByIdApi({ id: id });
       }
-
-      ontologyId.value = detail.value?.ontologyId;
-      classId.value = detail.value?.classId;
-      classificationId.value = detail.value?.classificationId;
 
       handleOpenCreate(true);
     } catch (error: any) {
@@ -273,6 +261,7 @@
     unref(scrollRef)?.scrollTo(0);
     pageNo.value = 1;
     cardList.value = [];
+    selectedList.value = [];
     getList();
   };
   provide('handleRefresh', handleRefresh);

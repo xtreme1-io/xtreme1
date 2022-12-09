@@ -1,5 +1,4 @@
 import { defHttp } from '/@/utils/http/axios';
-import { ToolTypeEnum } from './model/classesModel';
 import {
   OntologyListItem,
   GetOntologyParams,
@@ -10,6 +9,7 @@ import {
   ResponseOntologyParams,
   ValidateOntologyNameParams,
 } from './model/ontologyModel';
+import { datasetTypeEnum } from './model/datasetModel';
 
 enum Api {
   ONTOLOGY = '/ontology',
@@ -60,7 +60,7 @@ export const deleteOntologyApi = (params: DeleteOntologyParams) =>
     },
   });
 
-export const getAllOntologyApi = (params: { type?: ToolTypeEnum }) =>
+export const getAllOntologyApi = (params: { type?: datasetTypeEnum }) =>
   defHttp.get<OntologyListItem[]>({
     url: `${Api.ONTOLOGY}/findAll`,
     params,

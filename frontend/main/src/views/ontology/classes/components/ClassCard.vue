@@ -129,7 +129,9 @@
     return props.isCenter && props.activeTab == ClassTypeEnum.CLASS;
   });
   const handlePush = (item) => {
-    const relatedNum = 0;
+    console.log(item);
+
+    const relatedNum = item.datasetClassNum ?? 0;
     ModalConfirmCustom({
       title: 'Push to All',
       content: `Are you sure you want to override all ${relatedNum} related classes by current attributes`,
