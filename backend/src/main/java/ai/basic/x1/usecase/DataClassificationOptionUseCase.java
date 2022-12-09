@@ -2,7 +2,7 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.DataClassificationOptionDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataClassificationOption;
-import ai.basic.x1.entity.DataAnnotationBO;
+import ai.basic.x1.entity.DataAnnotationClassificationBO;
 import ai.basic.x1.entity.DataClassificationOptionBO;
 import ai.basic.x1.util.ClassificationUtils;
 import ai.basic.x1.util.DefaultConverter;
@@ -19,7 +19,7 @@ public class DataClassificationOptionUseCase {
     private DataClassificationOptionDAO dataClassificationOptionDAO;
 
 
-    public void saveBatch(List<DataAnnotationBO> dataAnnotations) {
+    public void saveBatch(List<DataAnnotationClassificationBO> dataAnnotations) {
         if (CollUtil.isEmpty(dataAnnotations)) {
             return;
         }
@@ -27,9 +27,9 @@ public class DataClassificationOptionUseCase {
         if (CollUtil.isEmpty(options)) {
             return;
         }
-        var datasetIds = dataAnnotations.stream().map(DataAnnotationBO::getDatasetId)
+        var datasetIds = dataAnnotations.stream().map(DataAnnotationClassificationBO::getDatasetId)
                 .collect(Collectors.toSet());
-        var dataIds = dataAnnotations.stream().map(DataAnnotationBO::getDataId)
+        var dataIds = dataAnnotations.stream().map(DataAnnotationClassificationBO::getDataId)
                 .collect(Collectors.toSet());
         dataClassificationOptionDAO.remove(new LambdaQueryWrapper<DataClassificationOption>()
                 .in(DataClassificationOption::getDatasetId, datasetIds)

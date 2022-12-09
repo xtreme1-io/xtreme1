@@ -5,12 +5,24 @@
 <template>
   <div class="anticon" :class="getAppLogoClass">
     <div class="wrapper" :style="!getCollapsed ? { width: '100%', marginLeft: '7px' } : {}">
-      <img v-if="!getCollapsed" src="../../../assets/images/logo.png" @click="goHome" />
-      <img v-else class="logo" src="../../../assets/images/logo-sm.png" @click="goHome" />
+      <img width="117" v-if="!getCollapsed" src="../../../assets/images/logo.png" @click="goHome" />
+      <!-- <img v-else class="logo" src="../../../assets/images/logo-sm.png" @click="goHome" /> -->
+      <SvgIcon
+        v-else
+        style="
+          transform: rotate(180deg);
+          color: #57ccef;
+          font-size: 20px;
+          cursor: pointer;
+          margin-left: 13px;
+        "
+        name="menuIcon"
+        @click="handleColl"
+      />
     </div>
-    <!-- <div v-if="!getCollapsed" @click="handleColl">
-      
-    </div> -->
+    <div v-if="!getCollapsed" @click="handleColl">
+      <SvgIcon style="color: #57ccef; font-size: 20px; cursor: pointer" name="menuIcon" />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -18,7 +30,7 @@
   import { useGo } from '/@/hooks/web/usePage';
   import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
   import { useDesign } from '/@/hooks/web/useDesign';
-  // import Icon from '/@/components/Icon';
+  import { SvgIcon } from '/@/components/Icon';
   import { PageEnum } from '/@/enums/pageEnum';
   // import { useUserStore } from '/@/store/modules/user';
 
@@ -38,7 +50,7 @@
   });
 
   const { prefixCls } = useDesign('app-logo');
-  const { getCollapsedShowTitle, getCollapsed } = useMenuSetting();
+  const { getCollapsedShowTitle, getCollapsed, toggleCollapsed } = useMenuSetting();
   // const userStore = useUserStore();
   const go = useGo();
 
@@ -50,6 +62,10 @@
 
   function goHome() {
     go(PageEnum.BASE_HOME);
+  }
+
+  function handleColl() {
+    toggleCollapsed();
   }
 </script>
 <style lang="less" scoped>

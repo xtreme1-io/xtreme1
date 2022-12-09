@@ -1,8 +1,10 @@
 package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.DataInfoDAO;
+import ai.basic.x1.adapter.port.dao.DatasetSimilarityJobDAO;
 import ai.basic.x1.adapter.port.dao.DatasetSimilarityRecordDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSimilarityJob;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSimilarityRecord;
 import ai.basic.x1.adapter.port.dao.mybatis.model.SimilarityDataInfo;
 import ai.basic.x1.adapter.port.minio.MinioProp;
@@ -31,7 +33,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -55,6 +56,8 @@ public class DatasetSimilarityRecordUseCase {
     private DataInfoDAO dataInfoDAO;
     @Autowired
     private DataInfoUseCase dataInfoUseCase;
+    @Autowired
+    private DatasetSimilarityJobDAO datasetSimilarityJobDAO;
 
     @Autowired
     @Qualifier("similarityDistributedLock")
@@ -68,7 +71,6 @@ public class DatasetSimilarityRecordUseCase {
 
     @Autowired
     private MinioProp minioProp;
-
 
     @Transactional(rollbackFor = Throwable.class)
     public void generateDatasetSimilarityRecord(Long datasetId) {
@@ -90,7 +92,6 @@ public class DatasetSimilarityRecordUseCase {
                                 .status(SimilarityStatusEnum.SUBMITTED)
                                 .type(SimilarityTypeEnum.FULL)
                                 .dataInfo(SimilarityDataInfo.builder().fullDataIds(dataIds).build()).build();
-                        datasetSimilarityRecordDAO.save(datasetSimilarityRecord);
                     }
                 } else {
                     //increment
@@ -117,36 +118,27 @@ public class DatasetSimilarityRecordUseCase {
                                         addIds.add(dataId);
                                     }
                                 }
-                                datasetSimilarityRecord = DatasetSimilarityRecord.builder().datasetId(datasetId)
-                                        .serialNumber(IdUtil.fastSimpleUUID())
-                                        .status(SimilarityStatusEnum.SUBMITTED)
-                                        .type(SimilarityTypeEnum.INCREMENT)
-                                        .dataInfo(SimilarityDataInfo.builder().fullDataIds(dataIds).addDataIds(addIds).deletedIds(deletedIds).build()).build();
-                            } else {
-                                //empty dataset
-                                datasetSimilarityRecord = DatasetSimilarityRecord.builder().datasetId(datasetId)
-                                        .serialNumber(IdUtil.fastSimpleUUID())
-                                        .status(SimilarityStatusEnum.COMPLETED)
-                                        .type(SimilarityTypeEnum.INCREMENT)
-                                        .dataInfo(SimilarityDataInfo.builder().fullDataIds(null).addDataIds(null).deletedIds(lastFullDataIds).build()).build();
+                                if (!CollUtil.isEmpty(addIds) && CollUtil.isEmpty(deletedIds)) {
+                                    datasetSimilarityRecord = DatasetSimilarityRecord.builder().datasetId(datasetId)
+                                            .serialNumber(IdUtil.fastSimpleUUID())
+                                            .status(SimilarityStatusEnum.SUBMITTED)
+                                            .type(SimilarityTypeEnum.INCREMENT)
+                                            .dataInfo(SimilarityDataInfo.builder().fullDataIds(dataIds).addDataIds(addIds).deletedIds(deletedIds).build()).build();
+                                }
                             }
-                        } else {
-                            datasetSimilarityRecord = DatasetSimilarityRecord.builder().datasetId(datasetId)
-                                    .serialNumber(IdUtil.fastSimpleUUID())
-                                    .status(SimilarityStatusEnum.SUBMITTED)
-                                    .type(SimilarityTypeEnum.INCREMENT)
-                                    .dataInfo(SimilarityDataInfo.builder().fullDataIds(dataIds).addDataIds(dataIds).deletedIds(null).build()).build();
                         }
-                        datasetSimilarityRecordDAO.save(datasetSimilarityRecord);
                     }
                 }
                 if (ObjectUtil.isNotNull(datasetSimilarityRecord)) {
+                    datasetSimilarityRecordDAO.save(datasetSimilarityRecord);
+                    datasetSimilarityJobDAO.remove(Wrappers.lambdaQuery(DatasetSimilarityJob.class).eq(DatasetSimilarityJob::getDatasetId, datasetId));
                     SimilarityParamDTO similarityParamDTO = buildSimilarityParamDTO(datasetSimilarityRecord);
-//                    similarityHttpCaller.callSimilarity(similarityParamDTO);
+                    similarityHttpCaller.callSimilarity(similarityParamDTO);
                 }
             }
         } catch (Throwable throwable) {
             log.error("generateDatasetSimilarityRecord error", throwable);
+            throw new UsecaseException("generateDatasetSimilarityRecord error");
         } finally {
             if (lockResult) {
                 similarityDistributedLock.unlock(String.valueOf(datasetId));
@@ -154,7 +146,7 @@ public class DatasetSimilarityRecordUseCase {
         }
     }
 
-    @SneakyThrows
+
     private SimilarityParamDTO buildSimilarityParamDTO(DatasetSimilarityRecord datasetSimilarityRecord) {
         return SimilarityParamDTO.builder()
                 .datasetId(datasetSimilarityRecord.getDatasetId())
@@ -190,15 +182,14 @@ public class DatasetSimilarityRecordUseCase {
             }
             similarityFileDTO = similarityFileDTOBuilder.build();
         }
-        String filePathTemp = "datasetSimilarity/commit/%s";
-        String path = String.format(filePathTemp, datasetSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase());
+        String path = String.format(Constants.SIMILARITY_SUBMIT_FILE_PATH_FORMAT, datasetSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase());
         String json = JSONUtil.toJsonStr(similarityFileDTO);
         try {
-            minioService.uploadFile(minioProp.getBucketName(), path, IoUtil.toUtf8Stream(json), "application/json", StrUtil.byteLength(json, StandardCharsets.UTF_8));
+            minioService.uploadFileWithoutUrl(minioProp.getBucketName(), path, IoUtil.toUtf8Stream(json), "application/json", StrUtil.byteLength(json, StandardCharsets.UTF_8));
             return path;
         } catch (Throwable throwable) {
             log.error("upload dataset similarityFile error", throwable);
-            throw new UsecaseException(UsecaseCode.UNKNOWN);
+            throw new UsecaseException("upload dataset similarityFile error");
         }
     }
 
@@ -219,14 +210,14 @@ public class DatasetSimilarityRecordUseCase {
         List<DatasetSimilarityRecord> list = datasetSimilarityRecordDAO.list(Wrappers.lambdaQuery(DatasetSimilarityRecord.class)
                 .eq(DatasetSimilarityRecord::getDatasetId, datasetId).orderByDesc(DatasetSimilarityRecord::getCreatedAt).last(" LIMIT 2"));
         if (CollUtil.isNotEmpty(list)) {
-            String formatUrl = "datasetSimilarity/result/%s";
+
             DatasetSimilarityRecord firstSimilarityRecord = CollUtil.getFirst(list);
             if (firstSimilarityRecord.getStatus() == SimilarityStatusEnum.COMPLETED || list.size() == 1) {
                 DatasetSimilarityRecordBO datasetSimilarityRecordBO = DefaultConverter.convert(firstSimilarityRecord, DatasetSimilarityRecordBO.class);
                 datasetSimilarityRecordBO.setIsHistoryData(false);
                 if (firstSimilarityRecord.getStatus() == SimilarityStatusEnum.COMPLETED) {
                     try {
-                        String resultUrl = minioService.getUrl(minioProp.getBucketName(), String.format(formatUrl, firstSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase()));
+                        String resultUrl = minioService.getUrl(minioProp.getBucketName(), String.format(Constants.SIMILARITY_RESULT_PATH_FORMAT, firstSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase()));
                         datasetSimilarityRecordBO.setResultUrl(resultUrl);
                     } catch (Throwable throwable) {
                         log.error("get result url error", throwable);

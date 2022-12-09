@@ -96,7 +96,7 @@ pointcloud:
 
 dataset:
   similarity:
-    url: http://nlb.alidev.beisai.com:9500/api/v1/calcSimilarity
+    url: http://similarity-service:5000/api/v1/calcSimilarity
 
 management:
   endpoint:

@@ -21,6 +21,6 @@ public interface DatasetClassMapper extends BaseMapper<DatasetClass> {
 
     void saveOrUpdateBatch(List<DatasetClass> list);
 
-    List<DatasetClass> getDatasetClass(Long datasetId,List<DatasetClass> list);
+    List<DatasetClass> getDatasetClasses(Long datasetId,List<DatasetClass> list);
 
 }

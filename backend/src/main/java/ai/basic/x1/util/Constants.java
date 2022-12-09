@@ -119,4 +119,7 @@ public interface Constants {
     String MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:modelRun";
     String MODEL_RUN_CONSUMER_GROUP = "default-group";
     String MODEL_RUN_CONSUMER_NAME = "model-consumer";
+
+    String SIMILARITY_RESULT_PATH_FORMAT="datasetSimilarity/result/%s";
+    String SIMILARITY_SUBMIT_FILE_PATH_FORMAT="datasetSimilarity/commit/%s";
 }

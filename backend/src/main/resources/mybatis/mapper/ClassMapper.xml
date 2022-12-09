@@ -16,6 +16,33 @@
             </foreach>
         group by ontology_id;
     </select>
+    <select id="getClasses" resultType="ai.basic.x1.adapter.port.dao.mybatis.model.Class">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM class
+        WHERE
+        ontology_id = #{ontologyId}
+        and (name, tool_type) IN (
+        <foreach collection="list" item="item" separator=",">
+            (#{item.name},#{item.toolType})
+        </foreach>
+        )
+    </select>
+
+    <insert id="saveOrUpdateBatch">
+        INSERT INTO class (ontology_id, name, color, tool_type,tool_type_options, attributes, created_by, updated_by)
+        VALUES
+        <foreach collection="list" item="item"  separator=",">
+            (#{item.ontologyId},#{item.name},#{item.color},#{item.toolType},
+            #{item.toolTypeOptions,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
+            #{item.attributes,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
+            #{item.createdBy},#{item.updatedBy})
+        </foreach>
+        ON DUPLICATE KEY UPDATE color=VALUES(color),
+        tool_type_options=VALUES(tool_type_options),
+        attributes=VALUES(attributes),
+        updated_by=VALUES(updated_by)
+    </insert>
 
 
 </mapper>

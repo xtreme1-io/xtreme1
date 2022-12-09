@@ -281,14 +281,6 @@
     annotationStatus: annotationStatus,
   });
   let timeout;
-  watch(filterForm, () => {
-    /* ... */
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      fetchFilterFun(filterForm);
-    }, 400);
-  });
-
   onMounted(async () => {
     console.log(scrollRef.value);
     handleScroll(scrollRef, () => {
@@ -301,6 +293,13 @@
     fetchList(filterForm);
     fetchStatusNum();
     document.addEventListener('visibilitychange', getLockedData);
+    watch(filterForm, () => {
+      /* ... */
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        fetchFilterFun(filterForm);
+      }, 400);
+    });
   });
 
   const fetchStatusNum = async () => {
