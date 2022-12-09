@@ -85,11 +85,32 @@
         <div class="title"> {{ data.name }} </div>
       </div>
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
-        <div class="place">
+        <div class="place relation-container">
           <img class="pointCloudImg h-83px" :src="getPlaceImg()" alt="" />
+          <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
+            <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
+          </svg>
         </div>
         <div class="camera">
-          <img
+          <div
+            class="img-item"
+            v-for="(item, index) in [0, 1, 2]"
+            :ref="(e) => setRef(e, index)"
+            :key="item"
+          >
+            <img :key="item" :src="getPcImage(iState.pcImageObject[item])" alt="" />
+            <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
+              <template v-for="_item in iState.pcImageObject[item]?.object || []">
+                <polygon v-if="_item.type === '2D_RECT'" :key="_item.id" :points="_item.points" />
+                <polyline
+                  v-else-if="_item.type === '2D_BOX'"
+                  :key="_item.uuid"
+                  :points="_item.points"
+                />
+              </template>
+            </svg>
+          </div>
+          <!-- <img
             v-for="item in data.content
               ? data.content
                   .filter((record) => record?.directoryType?.includes('image'))
@@ -102,20 +123,81 @@
               placeImg
             "
             alt=""
-          />
+          /> -->
         </div>
         <div class="name"> {{ data.name }} </div>
       </template>
       <div
-        class="mb-4 place"
+        class="mb-4 place relation-container"
         v-else-if="info?.type === datasetTypeEnum.LIDAR_BASIC"
         style="width: 100%; height: 100%"
       >
         <img class="object-cover pointCloudImg" :src="getPlaceImg()" alt="" />
+        <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
+          <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
+        </svg>
         <div class="p-2 name"> {{ data.name }} </div>
       </div>
-      <div v-else-if="info?.type === datasetTypeEnum.IMAGE" style="width: 100%; height: 100%">
+      <div
+        v-else-if="info?.type === datasetTypeEnum.IMAGE"
+        class="relation-container"
+        style="width: 100%; height: 100%"
+      >
         <img
+          class="place image-card"
+          ref="svg"
+          @load="() => onImgLoad(data)"
+          :src="getImageUrl(data) || placeImg"
+          alt=""
+        />
+        <svg
+          class="easy-image"
+          :style="{
+            width: size.svgWidth + 'px',
+            height: size.svgHeight + 'px',
+          }"
+          v-if="size.init"
+          stroke-width="1"
+          stroke="white"
+          fill="transparent"
+        >
+          <template v-for="item in iState.imageObject">
+            <polyline
+              v-if="item.type === 'POLYLINE'"
+              :stroke="item.color"
+              :key="item.uuid"
+              :points="item.points"
+            />
+            <template v-else-if="item.hole.length > 0">
+              <mask :id="item.uuid" :key="item.uuid">
+                <polygon :points="item.points" fill="currentColor" />
+                <polygon
+                  v-for="(_item, _idx) in item.hole"
+                  fill="#000"
+                  :key="_idx"
+                  :points="_item"
+                />
+              </mask>
+
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                :fill="item.color || '#fff'"
+                :key="item.uuid"
+                :style="{ mask: `url(#${item.uuid})` }"
+              />
+            </template>
+            <polygon
+              v-else
+              :key="item.type + item.uuid"
+              :stroke="item.color"
+              :points="item.points"
+            />
+          </template>
+        </svg>
+        <!-- <img
           class="place image-card"
           :src="
             (data.content &&
@@ -123,7 +205,7 @@
             placeImg
           "
           alt=""
-        />
+        /> -->
         <div class="name"> {{ data.name }} </div>
       </div>
     </div>
@@ -141,10 +223,11 @@
   // import { RouteEnum } from '/@/enums/routeEnum';
   import { DatasetItem, DatasetListItem } from '/@/api/business/model/datasetModel';
   import placeImg from '/@/assets/images/dataset/fusion-banner-content.png';
-  import placeImgFull from '/@/assets/images/dataset/basic-banner-content.png';
+  // import placeImgFull from '/@/assets/images/dataset/basic-banner-content.png';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { dataTypeEnum } from '/@/api/business/model/datasetModel';
   import { PageTypeEnum } from './data';
+  import { useImgCard } from './useCardObject';
   import { Icon } from '/@/components/Icon';
   import { goToTool } from '/@/utils/business';
   import { useRoute } from 'vue-router';
@@ -155,6 +238,7 @@
     isSelected: boolean;
     info: DatasetListItem | undefined;
     type: PageTypeEnum | undefined;
+    object?: any[];
   };
   const emits = defineEmits([
     'handleSelected',
@@ -163,6 +247,8 @@
     'handleAnotateFrame',
   ]);
   const props = defineProps<Props>();
+  const { iState, size, svg, getPcImage, getPlaceImg, setRef, onImgLoad, getImageUrl } =
+    useImgCard(props);
   const dataId = unref(props).data.id;
   // const originalUrl = unref(props).data.files ? unref(props).data.files[0].url.originalUrl : null;
   const { prefixCls } = useDesign('img-card');
@@ -191,11 +277,11 @@
     }
   };
 
-  const getPlaceImg = () => {
-    const placeImgType = props.info?.type === datasetTypeEnum.LIDAR_BASIC ? placeImgFull : placeImg;
-    const pc = props.data.content.filter((item) => item.name === 'pointCloud')[0];
-    return pc && pc.files ? pc.files[0].file?.renderImage?.url || placeImgType : placeImgType;
-  };
+  // const getPlaceImg = () => {
+  //   const placeImgType = props.info?.type === datasetTypeEnum.LIDAR_BASIC ? placeImgFull : placeImg;
+  //   const pc = props.data.content.filter((item) => item.name === 'pointCloud')[0];
+  //   return pc && pc.files ? pc.files[0].file?.renderImage?.url || placeImgType : placeImgType;
+  // };
 
   const handleTrigger = (flag: boolean) => {
     hover.value = flag;
@@ -359,7 +445,11 @@
         }
 
       }
-
+      .relation-container{
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+      }
       .place{
         // margin-bottom: 6px;
 
@@ -376,18 +466,47 @@
           margin-bottom: 5px
         }
       }
+      .easy-pc {
+        pointer-events: none;
+        color: red;
+        position: absolute;
+        width: 100%;
+        aspect-ratio: 1;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+      }
 
+      .easy-image {
+        pointer-events: none;
+        color: red;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+      }
       .camera{
         display: flex;
         margin-bottom: 5px;
         // margin-left: -3px;
         // margin-right: -3px;
 
-        img{
+        .img-item {
           width: 33.33%;
-          height: 46px;
-          // padding-left: 3px;
-          // padding-right: 3px;
+          height: 50px;
+          // margin-left: 3px;
+          // margin-right: 3px;
+          position: relative;
+          overflow: hidden;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
         }
       }
     }

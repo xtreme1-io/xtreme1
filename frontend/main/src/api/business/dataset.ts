@@ -53,6 +53,16 @@ export const datasetApi = (params: DatasetParams) =>
     },
   });
 
+export const datasetObjectApi = (params: { dataIds: string }) =>
+  defHttp.get<any>({
+    url: `/annotate/data/listByDataIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 export const datasetDetailApi = (params: BasicIdParams) =>
   defHttp.get<DatasetItem>({
     url: `${Api.DATA}/info/${params.id}`,
