@@ -2,11 +2,12 @@
   <BasicModal
     v-bind="$attrs"
     @register="registerModal"
-    :okText="t('business.ontology.copy.next')"
     centered
     destroyOnClose
+    @cancel="handleCancel"
     @ok="handleConfirm"
-    :okButtonProps="{ disabled: !isDisabled }"
+    :okText="t('business.ontology.copy.next')"
+    :okButtonProps="{ disabled: isDisabled }"
     :width="1000"
     :height="700"
   >
@@ -33,20 +34,28 @@
           :functionMap="functionMap"
         />
       </div>
-      <div style="height: 450px">
-        <ScrollContainer ref="scrollRef">
-          <ClassCard
-            :cardList="cardList"
-            :selectedList="
-              currentVirtualTab === ClassTypeEnum.CLASS
-                ? ClassSelectedList
-                : ClassificationSelectedList
-            "
-            :activeTab="currentVirtualTab"
-            :cardType="CardTypeEnum.selector"
-            @handleSelected="handleSelected"
-          />
-        </ScrollContainer>
+      <div class="wrapper-outer">
+        <div
+          class="wrapper-inner"
+          v-show="cardList.length > 0"
+          style="height: 450px; padding: 15px"
+        >
+          <ScrollContainer ref="scrollRef">
+            <ClassCard
+              :cardList="cardList"
+              :selectedList="
+                currentVirtualTab === ClassTypeEnum.CLASS
+                  ? ClassSelectedList
+                  : ClassificationSelectedList
+              "
+              :activeTab="currentVirtualTab"
+              :cardType="CardTypeEnum.selector"
+              :canCreate="false"
+              :hasBorder="true"
+              @handleSelected="handleSelected"
+            />
+          </ScrollContainer>
+        </div>
       </div>
     </div>
   </BasicModal>
@@ -55,6 +64,7 @@
   import { computed, onMounted, ref, unref, watch } from 'vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import emitter from 'tiny-emitter/instance';
 
   import { VirtualTab } from '/@@/VirtualTab';
   import { BasicModal, useModalInner } from '/@/components/Modal';
@@ -76,31 +86,33 @@
   const emits = defineEmits(['copyAll', 'back', 'next']);
 
   const ontologyId = ref<string>();
+  watch(ontologyId, () => {
+    ClassSelectedList.value = [];
+    ClassificationSelectedList.value = [];
+  });
 
   /** Modal */
   const [registerModal, { closeModal }] = useModalInner((params) => {
     ontologyId.value = params.ontologyId;
     getList();
   });
+
   const modalTitle = ref<string>('Copy from Ontology Center');
-  const isDisabled = ref<boolean>(true);
   const handleConfirm = () => {
     closeModal();
     setTimeout(() => {
       emits('next', {
-        ClassSelectedList: ClassSelectedList.value,
-        ClassificationSelectedList: ClassificationSelectedList.value,
+        ClassSelectedList: unref(ClassSelectedList.value),
+        ClassificationSelectedList: unref(ClassificationSelectedList.value),
       });
-      isDisabled.value = true;
     }, 100);
   };
   const handleBack = () => {
     closeModal();
     setTimeout(() => {
       emits('back', ICopyEnum.ONTOLOGY);
+
       currentVirtualTab.value = ClassTypeEnum.CLASS;
-      ClassSelectedList.value = [];
-      ClassificationSelectedList.value = [];
     }, 100);
   };
 
@@ -134,9 +146,9 @@
   const functionMap = {
     handleSelectAll: () => {
       if (currentVirtualTab.value === ClassTypeEnum.CLASS) {
-        ClassSelectedList.value = cardList.value.map((item: any) => item.id);
+        ClassSelectedList.value = [...cardList.value];
       } else {
-        ClassificationSelectedList.value = cardList.value.map((item: any) => item.id);
+        ClassificationSelectedList.value = [...cardList.value];
       }
     },
     handleUnselectAll: () => {
@@ -151,35 +163,31 @@
   /** Select */
   const ClassSelectedList = ref<number[]>([]);
   const ClassificationSelectedList = ref<number[]>([]);
-  const handleSelected = (flag: boolean, id: number, type) => {
-    console.log(flag, id);
-
+  const handleSelected = (selectItem: any, type) => {
     if (type === ClassTypeEnum.CLASS) {
-      const index = unref(ClassSelectedList).findIndex((item: number) => id === item);
+      const index = unref(ClassSelectedList).findIndex((item: any) => selectItem.id === item.id);
 
-      if (index === -1 && flag) {
-        unref(ClassSelectedList).push(id);
-      }
-
-      if (index > -1 && !flag) {
+      if (index === -1) {
+        ClassSelectedList.value = [...ClassSelectedList.value, selectItem];
+      } else {
         unref(ClassSelectedList).splice(index, 1);
+        ClassSelectedList.value = [...ClassSelectedList.value];
       }
     } else {
-      const index = unref(ClassificationSelectedList).findIndex((item: number) => id === item);
+      const index = unref(ClassificationSelectedList).findIndex(
+        (item: any) => selectItem.id === item.id,
+      );
 
-      if (index === -1 && flag) {
-        unref(ClassificationSelectedList).push(id);
-      }
-
-      if (index > -1 && !flag) {
+      if (index === -1) {
+        ClassificationSelectedList.value = [...ClassificationSelectedList.value, selectItem];
+      } else {
         unref(ClassificationSelectedList).splice(index, 1);
+        ClassificationSelectedList.value = [...ClassificationSelectedList.value];
       }
     }
   };
-  watch([ClassSelectedList, ClassificationSelectedList], () => {
-    if (ClassSelectedList.value.length > 0 || ClassificationSelectedList.value.length > 0) {
-      isDisabled.value = false;
-    }
+  const isDisabled = computed(() => {
+    return ClassSelectedList.value.length == 0 && ClassificationSelectedList.value.length == 0;
   });
 
   /** List */
@@ -230,6 +238,19 @@
       }
     });
   });
+
+  /** Cancel Callback */
+  emitter.off('cancelClass');
+  emitter.on('cancelClass', () => {
+    console.log('cancel class');
+    ClassSelectedList.value = [];
+    ClassificationSelectedList.value = [];
+  });
+  const handleCancel = () => {
+    emitter.emit('cancelOntology');
+    emitter.emit('cancelClass');
+    emitter.emit('cancelConflict');
+  };
 </script>
 <style lang="less" scoped>
   @import './index.less';

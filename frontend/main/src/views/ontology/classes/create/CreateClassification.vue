@@ -10,56 +10,68 @@
     @ok="handleCreateSave"
     :okText="okText"
   >
-    <div class="content">
-      <div class="title">Basic Info - classification</div>
-      <Form
-        ref="formRef"
-        :model="formState"
-        :rules="rules"
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        hideRequiredMark
-        labelAlign="left"
-      >
-        <div class="form-wrapper">
-          <div class="w-260px">
-            <Form.Item :label="t('common.nameText')" name="name">
-              <Input
-                style="width: 160px"
-                autocomplete="off"
-                v-model:value="formState.name"
-                :placeholder="t('business.ontology.createHolder')"
-                allow-clear
-              />
-            </Form.Item>
-          </div>
-          <div class="flex-1">
-            <Form.Item :label="t('business.class.inputType')">
-              <Select v-model:value="formState.inputType">
-                <Select.Option v-for="item in inputTypeList" :key="item.key" :value="item.value">
-                  <div class="img-tool">
-                    <img :src="item.img" alt="" />
-                    <span>{{ item.label }}</span>
-                  </div>
-                </Select.Option>
-              </Select>
-            </Form.Item>
-          </div>
+    <div class="create_content">
+      <div class="content-item">
+        <div class="title">Basic Info</div>
+        <div class="content">
+          <Form
+            ref="formRef"
+            :model="formState"
+            :rules="rules"
+            :labelCol="labelCol"
+            :wrapperCol="wrapperCol"
+            hideRequiredMark
+            labelAlign="left"
+          >
+            <div class="form-wrapper">
+              <div class="form-wrapper-left">
+                <Form.Item :label="t('common.nameText')" name="name">
+                  <Input
+                    style="width: 160px"
+                    autocomplete="off"
+                    v-model:value="formState.name"
+                    :placeholder="t('business.ontology.createHolder')"
+                    allow-clear
+                  />
+                </Form.Item>
+              </div>
+              <div class="form-wrapper-right">
+                <Form.Item :label="t('business.class.inputType')">
+                  <Select v-model:value="formState.inputType">
+                    <Select.Option
+                      v-for="item in inputTypeList"
+                      :key="item.key"
+                      :value="item.value"
+                    >
+                      <div class="img-tool">
+                        <img :src="item.img" alt="" />
+                        <span>{{ item.label }}</span>
+                      </div>
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
+              </div>
+            </div>
+            <div class="form-wrapper">
+              <div class="form-wrapper-left">
+                <Form.Item :label="t('business.class.isRequired')">
+                  <Switch v-model:checked="formState.isRequired" />
+                </Form.Item>
+              </div>
+            </div>
+          </Form>
         </div>
-        <div class="form-wrapper">
-          <div class="w-260px">
-            <Form.Item :label="t('business.class.isRequired')">
-              <Switch v-model:checked="formState.isRequired" />
-            </Form.Item>
-          </div>
+      </div>
+      <div class="content-item">
+        <div class="title">Related by (999)</div>
+      </div>
+      <div class="content-item">
+        <div class="title">
+          <span>Attributes (N)</span>
+          <Button type="primary" @click="handleManageAttr">
+            {{ 'Manage attributes' }}
+          </Button>
         </div>
-      </Form>
-      <div class="title">Related by (999)</div>
-      <div class="title">
-        <span>Attributes (N)</span>
-        <Button type="primary" @click="handleManageAttr">
-          {{ 'Manage attributes' }}
-        </Button>
       </div>
     </div>
   </BasicModal>
@@ -223,7 +235,6 @@
       emits('changed');
       // Stop Watch
       stopWatchFormState();
-      // emitter.emit('handleSaveForm', { type: 'change' });
     }
   });
   // Check if objects are equal

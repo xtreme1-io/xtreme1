@@ -48,7 +48,7 @@
     @next="handleToConflict"
     @copyAll="handleCopyAll"
   />
-  <ConflictModal @register="registerConflictModal" @back="handleBack" />
+  <ConflictModal @register="registerConflictModal" @back="handleBack" @confirm="handleConfirm" />
 </template>
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
@@ -61,14 +61,26 @@
   import { useModal } from '/@/components/Modal';
   import { onMounted, ref } from 'vue';
   import { ICopyEnum } from './copy-modal/data';
-  import { getOntologyClassesParams } from '/@/api/business/model/classesModel';
-  import { getOntologyClassApi, getOntologyClassificationApi } from '/@/api/business/classes';
+  import {
+    getDatasetClassesParams,
+    getOntologyClassesParams,
+    ICopyClassificationParams,
+    ICopyClassParams,
+  } from '/@/api/business/model/classesModel';
+  import {
+    getOntologyClassApi,
+    getOntologyClassificationApi,
+    copyClassFromOntologyApi,
+    copyClassificationFromOntologyApi,
+    getDatasetClassApi,
+    getDatasetClassificationApi,
+  } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
 
   // const { t } = useI18n();
 
-  // const props = defineProps<{ activeTab: ClassTypeEnum; datasetType: datasetTypeEnum }>();
-  // const emits = defineEmits(['copy', 'create']);
+  const props = defineProps<{ datasetId: string | number }>();
+  const emits = defineEmits(['fetchList']);
 
   const selectedOntologyId = ref<number | string>();
   /** Copy Modal */
@@ -76,7 +88,7 @@
   const [registerChooseClassModal, { openModal: openChooseClassModal }] = useModal();
   const [registerConflictModal, { openModal: openConflictModal }] = useModal();
   const handleOpenCopy = () => {
-    openChooseOntologyModal(true, {});
+    openChooseOntologyModal(true, { isClear: true });
   };
   const handleNext = (ontologyId) => {
     console.log(ontologyId);
@@ -90,13 +102,13 @@
       openChooseClassModal(true, { ontologyId: selectedOntologyId.value });
     }
   };
-  const handleToConflict = ({ ClassSelectedList, ClassificationSelectedList }) => {
-    const { conflictClassList, conflictClassificationList } = getAllConflictResolution(
+  const handleToConflict = async ({ ClassSelectedList, ClassificationSelectedList }) => {
+    const { conflictClassList, conflictClassificationList } = await getAllConflictResolution(
       ClassSelectedList,
       ClassificationSelectedList,
     );
 
-    console.log(conflictClassList, conflictClassificationList);
+    console.log('conflict result: ', conflictClassList, conflictClassificationList);
     if (conflictClassList.length > 0 || conflictClassificationList.length > 0) {
       openConflictModal(true, {
         type: ICopyEnum.CLASSES,
@@ -110,11 +122,12 @@
   const handleCopyAll = async (type: ICopyEnum) => {
     await getSelectedOntologyList();
 
-    const { conflictClassList, conflictClassificationList } = getAllConflictResolution(
+    const { conflictClassList, conflictClassificationList } = await getAllConflictResolution(
       ontologyClassList.value,
       ontologyClassificationList.value,
     );
 
+    console.log('conflict result: ', conflictClassList, conflictClassificationList);
     if (conflictClassList.length > 0 || conflictClassificationList.length > 0) {
       openConflictModal(true, {
         type: type,
@@ -125,22 +138,42 @@
       handleConfirm();
     }
   };
-  // TODO
+
+  // Confirm Copy
   const handleConfirm = async (classList: any[] = [], classificationList: any[] = []) => {
+    // copy class
     const tempClassList = [...classList, ...noConflictClassList.value];
+    tempClassList.length > 0 && (await copyClass(tempClassList));
+
+    // copy classification
     const tempClassificationList = [...classificationList, ...noConflictClassificationList.value];
+    tempClassificationList.length > 0 && (await copyClassification(tempClassificationList));
 
-    const params = {
-      classIds: tempClassList.map((item) => item.id),
-      classificationIds: tempClassificationList.map((item) => item.id),
+    emits('fetchList');
+  };
+  const copyClass = async (list: any[]) => {
+    const params: ICopyClassParams = {
+      datasetId: props.datasetId,
+      ontologyId: selectedOntologyId.value as string,
+      classIds: list.map((item) => item.id),
     };
-
-    console.log(params);
+    await copyClassFromOntologyApi(params);
+  };
+  const copyClassification = async (list: any[]) => {
+    const params: ICopyClassificationParams = {
+      datasetId: props.datasetId,
+      ontologyId: selectedOntologyId.value as string,
+      classificationIds: list.map((item) => item.id),
+    };
+    await copyClassificationFromOntologyApi(params);
   };
 
+  /** noConflict list */
   const noConflictClassList = ref<any[]>([]);
   const noConflictClassificationList = ref<any[]>([]);
-  const getAllConflictResolution = (classList, classificationList) => {
+  const getAllConflictResolution = async (classList, classificationList) => {
+    await getDatasetOntologyList();
+
     const classRes = validateClassConflict(classList, datasetClassList.value);
     const classificationRes = validateClassificationConflict(
       classificationList,
@@ -156,16 +189,16 @@
     };
   };
 
+  // get ontology classList and classificationList, max 100
   const ontologyClassList = ref<any[]>([]);
   const ontologyClassificationList = ref<any[]>([]);
-
-  // TODO get ontology classList and classificationList, max 100
   const getSelectedOntologyList = async () => {
     const postData: getOntologyClassesParams = {
       pageNo: 1,
       pageSize: 100,
       ontologyId: Number(selectedOntologyId.value),
     };
+
     const classRes = await getOntologyClassApi(postData);
     ontologyClassList.value = classRes.list ?? [];
 
@@ -173,12 +206,21 @@
     ontologyClassificationList.value = classificationRes.list ?? [];
   };
 
-  // TODO get datasetOntology list
+  // get datasetOntology list
   const datasetClassList = ref<any[]>([]);
   const datasetClassificationList = ref<any[]>([]);
   const getDatasetOntologyList = async () => {
-    datasetClassList.value = [];
-    datasetClassificationList.value = [];
+    const postData: getDatasetClassesParams = {
+      pageNo: 1,
+      pageSize: 100,
+      datasetId: props.datasetId as number,
+    };
+
+    const datasetClassRes = await getDatasetClassApi(postData);
+    datasetClassList.value = datasetClassRes.list ?? [];
+
+    const datasetClassificationRes = await getDatasetClassificationApi(postData);
+    datasetClassificationList.value = datasetClassificationRes.list ?? [];
   };
 
   onMounted(() => {

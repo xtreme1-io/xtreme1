@@ -68,6 +68,8 @@ export interface ontologyClassItem extends ontologyResponseItem {
   datasetType: datasetTypeEnum;
   toolType: ToolTypeEnum;
   toolTypeOptions: ToolTypeOptionsItem;
+  datasetClasses: any;
+  isResetRelations: boolean;
 }
 export type ontologyClassResponse = BasicFetchResult<ontologyClassItem>;
 /** ontology classification */
@@ -170,6 +172,18 @@ export interface ValidateDatasetClassesNameParams {
   name: string;
   datasetId: number;
   toolType?: ToolTypeEnum;
+}
+
+/** Copy */
+export interface ICopyClassParams {
+  datasetId: string | number;
+  ontologyId: string | number;
+  classIds: Array<string | number>;
+}
+export interface ICopyClassificationParams {
+  datasetId: string | number;
+  ontologyId: string | number;
+  classificationIds: Array<string | number>;
 }
 
 /**----------------------------- */

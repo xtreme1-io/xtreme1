@@ -18,12 +18,8 @@ export const attributeBase = (list): FormSchema[] => {
       ],
       component: 'Input',
       componentProps: {
-        onChange: () => {
-          // console.log('input change');
-          // clearTimeout(timer);
-          // timer = setTimeout(() => {
-          //   emitter.emit('handleSaveForm', { type: 'change' });
-          // }, 500);
+        onBlur: () => {
+          emitter.emit('handleSaveForm');
         },
         allowClear: true,
       },
@@ -44,7 +40,7 @@ export const attributeBase = (list): FormSchema[] => {
       colProps: { span: 12 },
       componentProps: {
         onChange: () => {
-          emitter.emit('handleSaveForm', { type: 'change' });
+          emitter.emit('handleSaveForm');
         },
       },
     },
@@ -69,7 +65,7 @@ export const optionBase = (list): FormSchema[] => {
       component: 'Input',
       componentProps: {
         onBlur: () => {
-          // emitter.emit('handleSaveForm');
+          emitter.emit('handleSaveForm');
         },
         allowClear: true,
       },

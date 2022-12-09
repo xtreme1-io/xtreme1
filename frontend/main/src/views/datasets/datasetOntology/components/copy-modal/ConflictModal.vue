@@ -2,15 +2,17 @@
   <BasicModal
     v-bind="$attrs"
     @register="registerModal"
-    :title="modalTitle"
-    :okText="t('business.ontology.copy.next')"
     centered
     destroyOnClose
-    @ok="handleDone"
-    :okButtonProps="{ disabled: isDisabled }"
+    @cancel="handleCancel"
+    @ok="handleConfirm"
+    okText="Confirm"
     :width="1000"
     :height="750"
   >
+    <template #title>
+      <BackTitle :title="modalTitle" @back="handleBack" />
+    </template>
     <div class="copy__modal">
       <div class="header">
         <span>
@@ -69,16 +71,21 @@
 </template>
 <script lang="ts" setup>
   import { ref } from 'vue';
-  import { useI18n } from '/@/hooks/web/useI18n';
+  // import { useI18n } from '/@/hooks/web/useI18n';
   // components
+  import emitter from 'tiny-emitter/instance';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { ICopyEnum } from './data';
   import CustomTable from './CustomTable.vue';
+  import BackTitle from './BackTitle.vue';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
 
-  const { t } = useI18n();
+  // const { t } = useI18n();
+
+  const emits = defineEmits(['back', 'confirm']);
+
   const modalTitle = ref<string>('Copy from Ontology Center');
-  const isDisabled = ref<boolean>(true);
+  // const isDisabled = ref<boolean>(true);
 
   const conflictClassList = ref<any[]>([]);
   const conflictClassificationList = ref<any[]>([]);
@@ -88,7 +95,7 @@
 
   /** Modal */
   const backType = ref<ICopyEnum>(ICopyEnum.CLASSES);
-  const [registerModal] = useModalInner((config) => {
+  const [registerModal, { closeModal }] = useModalInner((config) => {
     backType.value = config.type;
 
     conflictClassList.value = config.conflictClassList.map((item) => {
@@ -100,19 +107,45 @@
       return item;
     });
   });
-
-  const handleToggleKeepAll = (type: ClassTypeEnum, isKeep: boolean) => {
-    if (type == ClassTypeEnum.CLASS) {
-      console.log(type);
-      conflictClassList.value.forEach((item) => (item.isKeep = isKeep));
-    } else {
-      console.log(type);
-      conflictClassificationList.value.forEach((item) => (item.isKeep = isKeep));
-    }
-    console.log(conflictClassList, conflictClassificationList);
+  const handleBack = () => {
+    closeModal();
+    setTimeout(() => {
+      emits('back', backType.value);
+    }, 100);
   };
 
-  const handleDone = () => {};
+  /** Toggle keep */
+  const handleToggleKeepAll = (type: ClassTypeEnum, isKeep: boolean) => {
+    if (type == ClassTypeEnum.CLASS) {
+      conflictClassList.value.forEach((item) => (item.isKeep = isKeep));
+    } else {
+      conflictClassificationList.value.forEach((item) => (item.isKeep = isKeep));
+    }
+  };
+
+  /** Confirm Conflict */
+  const handleConfirm = () => {
+    const classList = conflictClassList.value.filter((item) => !item.isKeep);
+    const classificationList = conflictClassificationList.value.filter((item) => !item.isKeep);
+
+    emits('confirm', classList, classificationList);
+    closeModal();
+  };
+
+  /** Cancel Callback */
+  emitter.off('cancelConflict');
+  emitter.on('cancelConflict', () => {
+    console.log('cancel conflict');
+    conflictClassList.value = [];
+    conflictClassificationList.value = [];
+    classificationRef.value = undefined;
+    classRef.value = undefined;
+  });
+  const handleCancel = () => {
+    emitter.emit('cancelOntology');
+    emitter.emit('cancelClass');
+    emitter.emit('cancelConflict');
+  };
 </script>
 <style scoped lang="less">
   .copy__modal {
@@ -120,6 +153,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding: 6px;
     .header {
       height: 50px;
       font-weight: 400;

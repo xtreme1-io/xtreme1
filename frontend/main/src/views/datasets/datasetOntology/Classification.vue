@@ -6,7 +6,7 @@
         <VirtualTab :list="tabListOntology" />
       </div>
       <div class="btn">
-        <HeaderDropdown :activeTab="activeTab" :datasetType="datasetType" />
+        <HeaderDropdown :datasetId="datasetId" @fetchList="handleRefresh" />
       </div>
       <div class="mb-15px">
         <Action
@@ -23,6 +23,7 @@
             :cardType="CardTypeEnum.selector"
             :cardList="cardList"
             :activeTab="activeTab"
+            :isCenter="false"
             @edit="handleEdit"
             @create="handleOpenCreate"
             @handleSelected="handleSelected"

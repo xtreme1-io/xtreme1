@@ -12,101 +12,108 @@
     <div class="create_content">
       <div class="content-item">
         <div class="title">Basic Info</div>
-        <Form
-          ref="formRef"
-          :model="formState"
-          :rules="rules"
-          :labelCol="labelCol"
-          :wrapperCol="wrapperCol"
-          hideRequiredMark
-          labelAlign="left"
-        >
-          <div class="form-wrapper">
-            <div class="w-260px">
-              <Form.Item :label="t('common.nameText')" name="name">
-                <Input
-                  style="width: 160px"
-                  autocomplete="off"
-                  v-model:value="formState.name"
-                  :placeholder="t('business.ontology.createHolder')"
-                  allow-clear
+        <div class="content">
+          <Form ref="formRef" :model="formState" :rules="rules" hideRequiredMark labelAlign="left">
+            <div class="form-wrapper">
+              <div class="form-wrapper-left">
+                <Form.Item :label="t('common.nameText')" name="name" :colon="false">
+                  <Input
+                    autocomplete="off"
+                    v-model:value="formState.name"
+                    :placeholder="t('business.ontology.createHolder')"
+                    allow-clear
+                  />
+                </Form.Item>
+              </div>
+              <div class="form-wrapper-right">
+                <Form.Item :label="t('business.class.color')" :colon="false">
+                  <TheColor style="width: 160px" v-model:color="formState.color" />
+                </Form.Item>
+              </div>
+            </div>
+            <div class="form-wrapper">
+              <div class="form-wrapper-left">
+                <Form.Item :label="t('business.class.toolTypeText')" :colon="false">
+                  <Select
+                    style="width: 160px"
+                    v-model:value="formState.toolType"
+                    @change="handleChangeToolType"
+                  >
+                    <Select.Option v-for="item in toolTypeOption" :key="item.id" :value="item.type">
+                      <div class="img-tool">
+                        <img :src="item.img" alt="" />
+                        <span>{{ item.text }}</span>
+                      </div>
+                    </Select.Option>
+                  </Select>
+                </Form.Item>
+              </div>
+            </div>
+            <div class="form-wrapper">
+              <div class="form-wrapper-left">
+                <Form.Item
+                  v-if="showConstraintsForLidar"
+                  :label="t('business.class.constraints')"
+                  :colon="false"
+                >
+                  <Switch v-model:checked="formState.isConstraints" />
+                </Form.Item>
+              </div>
+            </div>
+            <!-- Standard -->
+            <template v-if="showStandard">
+              <div class="form-wrapper">
+                <div class="form-wrapper-left">
+                  <Form.Item
+                    :label="t('business.ontology.modal.constraints.standard')"
+                    :colon="false"
+                  >
+                    <Switch v-model:checked="formState.isStandard" />
+                  </Form.Item>
+                </div>
+                <TheStandard
+                  :isStandard="(formState.isStandard as boolean)"
+                  v-model:points="formState.points"
+                  v-model:length="formState.length"
+                  v-model:width="formState.width"
+                  v-model:height="formState.height"
                 />
-              </Form.Item>
-            </div>
-            <div class="flex-1">
-              <Form.Item
-                :label="t('business.class.color')"
-                :labelCol="{ span: 5 }"
-                :wrapperCol="wrapperCol"
-              >
-                <TheColor style="width: 160px" v-model:color="formState.color" />
-              </Form.Item>
-            </div>
-          </div>
-          <div class="form-wrapper">
-            <!-- <div class="w-260px">
-            <Form.Item v-if="props.isCenter" :label="t('business.ontology.ontologyType')">
-              <Select v-model:value="formState.datasetType" :options="datasetTypeList" disabled />
+              </div>
+            </template>
+            <!-- Image -->
+            <Form.Item
+              v-if="showConstraintsForImage"
+              :label="t('business.class.constraints')"
+              :colon="false"
+            >
+              <Switch v-model:checked="formState.isConstraintsForImage" />
             </Form.Item>
-          </div> -->
-            <div class="w-260px">
-              <Form.Item :label="t('business.class.toolTypeText')">
-                <Select style="width: 160px" v-model:value="formState.toolType">
-                  <Select.Option v-for="item in toolTypeOption" :key="item.id" :value="item.type">
-                    <div class="img-tool">
-                      <img :src="item.img" alt="" />
-                      <span>{{ item.text }}</span>
-                    </div>
-                  </Select.Option>
-                </Select>
-              </Form.Item>
+            <div v-if="showImageInfo" class="text-center">
+              <TheImageInfo
+                v-model:imageLimit="formState.imageLimit"
+                v-model:imageLength="formState.imageLength"
+                v-model:imageWidth="formState.imageWidth"
+                v-model:imageArea="formState.imageArea"
+              />
             </div>
-          </div>
-          <div class="form-wrapper">
-            <div class="w-260px">
-              <Form.Item v-if="showConstraintsForLidar" :label="t('business.class.constraints')">
-                <Switch v-model:checked="formState.isConstraints" />
-              </Form.Item>
-            </div>
-          </div>
-          <!-- Standard -->
-          <template v-if="showStandard">
-            <div class="w-260px">
-              <Form.Item :label="t('business.ontology.modal.constraints.standard')">
-                <Switch v-model:checked="formState.isStandard" />
-              </Form.Item>
-            </div>
-            <TheStandard
-              :isStandard="(formState.isStandard as boolean)"
-              v-model:points="formState.points"
-              v-model:length="formState.length"
-              v-model:width="formState.width"
-              v-model:height="formState.height"
-            />
-          </template>
-          <!-- Image -->
-          <Form.Item v-if="showConstraintsForImage" :label="t('business.class.constraints')">
-            <Switch v-model:checked="formState.isConstraintsForImage" />
-          </Form.Item>
-          <div v-if="showImageInfo" class="text-center">
-            <TheImageInfo
-              v-model:imageLimit="formState.imageLimit"
-              v-model:imageLength="formState.imageLength"
-              v-model:imageWidth="formState.imageWidth"
-              v-model:imageArea="formState.imageArea"
-            />
-          </div>
-        </Form>
+          </Form>
+        </div>
       </div>
       <div class="content-item">
         <div class="title">Related by (999)</div>
+        <div class="content">
+          <TheRelated
+            v-if="!props.isCenter"
+            :datasetType="props.datasetType as datasetTypeEnum "
+            :toolType="formState.toolType"
+            v-bind="props"
+          />
+        </div>
       </div>
       <div class="content-item">
         <div class="title">
           <span>Attributes (N)</span>
-          <Button type="primary" @click="handleManageAttr">
-            {{ 'Manage attributes' }}
-          </Button>
+          <TheManage @manage="handleManageAttr" />
         </div>
       </div>
     </div>
@@ -128,15 +135,16 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch, unref } from 'vue';
+  import { ref, reactive, computed, watch, unref, inject } from 'vue';
   // components
   import { Form, Select, Switch, Input } from 'ant-design-vue';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
   import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
-  import { Button } from '/@@/Button';
   import TheColor from './TheColor.vue';
   import TheStandard from './TheStandard.vue';
   import TheImageInfo from './TheImageInfo.vue';
+  import TheRelated from './TheRelated.vue';
+  import TheManage from './TheManage.vue';
   import TheAttributes from '../attributes/TheAttributes.vue';
   import { toolTypeList } from '../attributes/data';
   // utils
@@ -168,6 +176,7 @@
     classId?: number;
   }>();
   const emits = defineEmits(['fetchList', 'submit', 'valid', 'changed', 'manage']);
+  const updateDetail = inject('updateDetail', Function, true);
 
   /** Init */
   const baseFormName = ref<string>('');
@@ -175,10 +184,8 @@
   const okText = ref<string>('Create');
   const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
     (config) => {
-      console.log(config);
       // from attributes
       if (config.isKeep) {
-        console.log(formState);
         return;
       }
       console.log(props.detail);
@@ -190,12 +197,15 @@
           title: 'Edit Class',
           okText: 'Save',
         });
-        formState.name = props.detail.name;
+
         baseFormName.value = props.detail.name;
         emitter.emit('changeRootName', props.detail.name);
 
-        formState.datasetType = unref(props.datasetType) as datasetTypeEnum;
+        formState.name = props.detail.name;
         formState.color = props.detail.color;
+        formState.datasetType = unref(props.datasetType) as datasetTypeEnum;
+        formState.toolType = props.detail.toolType;
+
         if (props.detail?.toolTypeOptions) {
           const toolTypeOptions = JSON.parse(JSON.stringify(props.detail.toolTypeOptions));
           console.log('props.datasetType', props.datasetType);
@@ -241,7 +251,11 @@
         };
         // Non-echo isStandard is false, you need to manually end it. Not the first monitoring
         standardEcho.value++;
+
         formState.name = undefined;
+        formState.toolType = ToolTypeEnum.BOUNDING_BOX;
+        formState.datasetType = unref(props.datasetType) as datasetTypeEnum;
+
         defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
       }
       console.log(formState);
@@ -249,14 +263,12 @@
   );
 
   /** Form */
-  const labelCol = { span: 8 };
-  const wrapperCol = { span: 12, offset: 1 };
   const formRef = ref();
   const formState: ICLassForm = reactive({
     name: undefined,
     color: '#7dfaf2',
     datasetType: datasetTypeEnum.IMAGE,
-    toolType: ToolTypeEnum.BOUNDING_BOX,
+    toolType: undefined,
     isConstraints: false,
     isStandard: false,
     length: [undefined, undefined],
@@ -280,6 +292,7 @@
   watch(
     () => formState.datasetType,
     (newVal, oldVal) => {
+      console.log('=======>', formState);
       if (newVal == datasetTypeEnum.IMAGE) {
         formState.toolType = ToolTypeEnum.POLYGON;
         formState.isConstraints = false;
@@ -372,7 +385,6 @@
       emits('changed');
       // Stop Watch
       stopWatchFormState();
-      // emitter.emit('handleSaveForm', { type: 'change' });
     }
   });
   // Check if objects are equal
@@ -419,6 +431,11 @@
     return showConstraintsForImage.value && formState.isConstraintsForImage;
   });
 
+  const handleChangeToolType = () => {
+    emitter.emit('resetSelect');
+    // TODO 判断是否继续更改
+  };
+
   /** Manage Attributes */
   const dataSchema = ref<IDataSchema>({ attributes: [] });
   const handleUpdateDataSchema = (newDataSchema: IDataSchema) => {
@@ -435,6 +452,7 @@
 
   /** Cancel */
   const handleCancel = () => {
+    updateDetail({});
     closeModal();
   };
   const handleReset = () => {
