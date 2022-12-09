@@ -57,11 +57,14 @@
   import OntologyCard from '/@/views/ontology/center/components/OntologyCardNew.vue';
 
   import { getOntologyApi } from '/@/api/business/ontology';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { ICopyEnum } from './data';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
   const go = useGo();
+
+  const props = defineProps<{ datasetType: datasetTypeEnum }>();
   const emits = defineEmits(['copyAll', 'select', 'next']);
 
   const selectedOntologyId = ref<string | number>();
@@ -87,7 +90,8 @@
 
   /** Copy All */
   const handleCopyAll = () => {
-    emits('copyAll', ICopyEnum.ONTOLOGY);
+    emits('copyAll', selectedOntologyId.value, ICopyEnum.ONTOLOGY);
+    closeModal();
   };
 
   /** List */
@@ -107,6 +111,7 @@
       const res: any = await getOntologyApi({
         pageNo: pageNo.value,
         pageSize: 30,
+        type: props.datasetType,
       });
       cardList.value = cardList.value.concat(res.list);
 

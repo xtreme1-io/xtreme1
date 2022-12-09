@@ -6,7 +6,11 @@
         <VirtualTab :list="tabListOntology" />
       </div>
       <div class="btn">
-        <HeaderDropdown :datasetId="datasetId" @fetchList="handleRefresh" />
+        <HeaderDropdown
+          :datasetType="datasetType"
+          :datasetId="datasetId"
+          @fetchList="handleRefresh"
+        />
       </div>
       <div class="mb-15px">
         <Action

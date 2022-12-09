@@ -436,8 +436,10 @@
     return showConstraintsForImage.value && formState.isConstraintsForImage;
   });
 
+  const isResetRelations = ref<boolean>(false);
   const handleChangeToolType = () => {
     emitter.emit('resetSelect');
+    isResetRelations.value = true;
     // TODO 判断是否继续更改
   };
 
@@ -460,6 +462,7 @@
 
   /** Cancel */
   const handleCancel = () => {
+    isResetRelations.value = false;
     getDefaultCreateClassFormState(formState);
     updateDetail({});
     closeModal();
@@ -480,6 +483,7 @@
       formState: _.cloneDeep(formState),
       props: _.cloneDeep(props),
       dataSchema: _.cloneDeep(unref(dataSchema)),
+      isResetRelations: isResetRelations.value,
     });
     console.log('The create/save params is :', params);
 

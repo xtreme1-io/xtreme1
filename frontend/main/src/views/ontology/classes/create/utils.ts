@@ -9,7 +9,7 @@ const { t } = useI18n();
 
 export const handleAddUuid = (list: any) => {
   list.forEach((item) => {
-    item.uuid = item.uuid ?? v4();
+    item.id = item.id ?? v4();
     handleAddUuid(item.options ?? item.attributes);
   });
 };
@@ -119,7 +119,7 @@ export const getCreateClassParams = (config) => {
   // isCenter
   if (props.isCenter) {
     params.ontologyId = props.ontologyId;
-    params.isResetRelation = config.isResetRelation ?? undefined;
+    params.isResetRelations = config.isResetRelations;
   } else {
     params.ontologyId = formState.ontologyId ?? undefined;
     params.classId = formState.classId ?? undefined;

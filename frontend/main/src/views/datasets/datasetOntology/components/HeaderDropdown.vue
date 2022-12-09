@@ -39,6 +39,7 @@
   <!-- Copy -->
   <ChooseOntology
     @register="registerChooseOntologyModal"
+    :datasetType="props.datasetType"
     @next="handleNext"
     @copyAll="handleCopyAll"
   />
@@ -76,10 +77,11 @@
     getDatasetClassificationApi,
   } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
   // const { t } = useI18n();
 
-  const props = defineProps<{ datasetId: string | number }>();
+  const props = defineProps<{ datasetId: string | number; datasetType: datasetTypeEnum }>();
   const emits = defineEmits(['fetchList']);
 
   const selectedOntologyId = ref<number | string>();
@@ -119,7 +121,8 @@
       handleConfirm();
     }
   };
-  const handleCopyAll = async (type: ICopyEnum) => {
+  const handleCopyAll = async (ontologyId: number, type: ICopyEnum) => {
+    selectedOntologyId.value = ontologyId;
     await getSelectedOntologyList();
 
     const { conflictClassList, conflictClassificationList } = await getAllConflictResolution(
