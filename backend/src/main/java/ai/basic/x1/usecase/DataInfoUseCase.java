@@ -1189,7 +1189,7 @@ public class DataInfoUseCase {
         var fileBOS = new ArrayList<FileBO>();
         files.forEach(file -> {
             var zipPath = file.getAbsolutePath().replace(dataInfoUploadBO.getBaseSavePath(), "");
-            var path = String.format("%s%s", rootPath, zipPath);
+            var path = String.format("%s%s", rootPath, file.getAbsolutePath().replace(tempPath, ""));
             zipPath = zipPath.startsWith(dataInfoUploadBO.getFileName()) ? zipPath : String.format("%s/%s", dataInfoUploadBO.getFileName(), zipPath);
             var mimeType = FileUtil.getMimeType(path);
             var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(bucketName)
