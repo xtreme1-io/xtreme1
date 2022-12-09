@@ -37,7 +37,7 @@
   />
 </template>
 <script lang="ts" setup>
-  import { onMounted, ref, watch } from 'vue';
+  import { onMounted, ref, watch, inject } from 'vue';
   import { Select, message } from 'ant-design-vue';
   import { useModal } from '/@/components/Modal';
   import TheAttributes from '../attributes/TheAttributes.vue';
@@ -46,7 +46,11 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { getAllOntologyApi } from '/@/api/business/ontology';
   import { OntologyListItem } from '/@/api/business/model/ontologyModel';
-  import { getAllClassByOntologyIdApi, getOntologyClassByIdApi } from '/@/api/business/classes';
+  import {
+    getAllClassByOntologyIdApi,
+    getOntologyClassByIdApi,
+    updateOntologyClassApi,
+  } from '/@/api/business/classes';
   import {
     ClassTypeEnum,
     ontologyClassItem,
@@ -55,6 +59,8 @@
   import { IDataSchema } from './typing';
 
   const props = defineProps<{
+    dataSchema: IDataSchema;
+
     datasetType: datasetTypeEnum;
     toolType: ToolTypeEnum | undefined;
 
@@ -65,7 +71,9 @@
     classId: number | undefined;
   }>();
 
-  const emits = defineEmits(['update:ontologyId', 'update:classId']);
+  const emits = defineEmits(['update:ontologyId', 'update:classId', 'update']);
+  const changeLoading = inject('changeLoading', Function, true);
+
   const handleChangeOntology = (value) => {
     emits('update:ontologyId', value);
     emits('update:classId', undefined);
@@ -148,6 +156,41 @@
   emitter.off('pushClass');
   emitter.on('pushClass', async () => {
     console.log('pushClass');
+    if (props.classId) {
+      changeLoading(true);
+
+      try {
+        const res = await getOntologyClassByIdApi({ id: props.classId });
+        const params: any = {
+          ...res,
+          attributes: props.dataSchema.attributes,
+        };
+        await updateOntologyClassApi(params);
+      } catch (error) {
+        message.error(String(error));
+      }
+
+      changeLoading(false);
+    }
+  });
+
+  emitter.off('pullClass');
+  emitter.on('pullClass', async () => {
+    console.log('pullClass');
+    if (props.classId) {
+      changeLoading(true);
+
+      try {
+        const res = await getOntologyClassByIdApi({ id: props.classId });
+        emits('update', {
+          attributes: res.attributes,
+        });
+      } catch (error) {
+        message.error(String(error));
+      }
+
+      changeLoading(false);
+    }
   });
 </script>
 <style lang="less" scoped>

@@ -115,12 +115,14 @@
         </div>
         <div class="content">
           <TheRelated
-            v-if="!props.isCenter"
-            v-bind="props"
+            :dataSchema="dataSchema"
+            :datasetId="props.datasetId"
+            :isCenter="props.isCenter"
             :toolType="formState.toolType"
             :datasetType="props.datasetType as datasetTypeEnum "
             v-model:ontologyId="formState.ontologyId"
             v-model:classId="formState.classId"
+            @update="handleUpdateDataSchema"
           />
         </div>
       </div>
@@ -152,7 +154,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch, unref, inject, nextTick } from 'vue';
+  import { ref, reactive, computed, watch, unref, inject, nextTick, provide } from 'vue';
   // components
   import { Form, Select, Switch, Input, Tooltip } from 'ant-design-vue';
   import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
@@ -212,8 +214,8 @@
   const baseFormName = ref<string>('');
   const modalTitle = ref<string>('Create New Class');
   const okText = ref<string>('Create');
-  const [registerModal, { closeModal, changeOkLoading, setModalProps }] = useModalInner(
-    (config) => {
+  const [registerModal, { closeModal, changeOkLoading, setModalProps, changeLoading }] =
+    useModalInner((config) => {
       if (config.isKeep) {
         return;
       }
@@ -232,7 +234,7 @@
         emitter.emit('changeRootName', props.detail.name);
 
         formState.name = props.detail.name;
-        formState.color = props.detail.color;
+        formState.color = props.detail.color ?? '#7dfaf2';
         formState.toolType = props.detail.toolType;
         nextTick(() => {
           formState.ontologyId = props.detail?.ontologyId;
@@ -290,8 +292,8 @@
         defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
       }
       console.log(formState);
-    },
-  );
+    });
+  provide('changeLoading', changeLoading);
 
   /** Form */
   const formRef = ref();
