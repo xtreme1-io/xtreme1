@@ -58,7 +58,7 @@
       <div class="content-item">
         <div class="title">
           <span>Options ({{ optionsNum }})</span>
-          <Button type="primary" @click="handleManageAttr">
+          <Button type="primary" @click="handleManageAttr" :disabled="isDisabled">
             {{ 'Manage attributes' }}
           </Button>
         </div>
@@ -189,15 +189,14 @@
   };
 
   // Watch inputType changes
-  const isShow = ref<boolean>(true);
   watch(
     () => formState.inputType,
     (newVal) => {
       if (newVal === inputTypeEnum.TEXT) {
-        isShow.value = false;
+        isDisabled.value = true;
         dataSchema.value = { options: [] };
       } else {
-        isShow.value = true;
+        isDisabled.value = false;
       }
     },
   );
@@ -215,6 +214,7 @@
   });
 
   /** Manage Attributes */
+  const isDisabled = ref<boolean>(false);
   const dataSchema = ref<IDataSchema>({ options: [] });
   const optionsNum = computed(() => {
     return dataSchema.value.options!.length ?? 0;

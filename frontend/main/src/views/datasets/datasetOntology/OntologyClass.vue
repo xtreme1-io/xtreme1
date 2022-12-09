@@ -14,10 +14,13 @@
       </div>
       <div class="mb-15px">
         <Action
+          :datasetType="datasetType"
+          :activeTab="activeTab"
           :selectedList="selectedList"
           :list="cardList"
           @selectAll="handleSelectAll"
           @unSelect="handleUnSelect"
+          @fetchList="handleRefresh"
         />
       </div>
       <div style="height: calc(100vh - 154px)">

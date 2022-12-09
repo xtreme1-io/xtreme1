@@ -231,6 +231,17 @@ export const deleteDatasetClassApi = (params: BasicIdParams) =>
     },
   });
 
+/** delete dataset class batch */
+export const deleteSelectedDatasetClassApi = (params: Array<BasicIdParams>) =>
+  defHttp.post<null>({
+    url: `${Api.DATASET_CLASS}/deleteByIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 /** get dataset class detail by id */
 export const getDatasetClassByIdApi = (params: BasicIdParams) =>
   defHttp.get<datasetClassItem>({
@@ -277,6 +288,17 @@ export const getDatasetAllClass = (params: getAllDatasetParams) =>
 export const copyClassFromOntologyApi = (params: ICopyClassParams) =>
   defHttp.post<null>({
     url: `${Api.DATASET_CLASS}/copyFromOntologyCenter`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** save class to ontology */
+export const saveClassToOntologyApi = (params: ICopyClassParams) =>
+  defHttp.post<null>({
+    url: `${Api.DATASET_CLASS}/saveToOntologyCenter`,
     params,
     headers: {
       // @ts-ignore
@@ -356,6 +378,17 @@ export const validateDatasetClassificationNameApi = (params: ValidateDatasetClas
 export const copyClassificationFromOntologyApi = (params: ICopyClassificationParams) =>
   defHttp.post<null>({
     url: `${Api.DATASET_CLASSIFICATION}/copyFromOntologyCenter`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** save class to ontology */
+export const saveClassificationToOntologyApi = (params: ICopyClassificationParams) =>
+  defHttp.post<null>({
+    url: `${Api.DATASET_CLASSIFICATION}/saveToOntologyCenter`,
     params,
     headers: {
       // @ts-ignore

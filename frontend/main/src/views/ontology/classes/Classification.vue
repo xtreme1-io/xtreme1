@@ -26,7 +26,6 @@
     <CreateClass
       @register="registerCreateClassModal"
       :detail="detail"
-      :activeTab="activeTab"
       :datasetType="datasetType"
       :ontologyId="ontologyId"
       :isCenter="true"
@@ -35,7 +34,6 @@
     <CreateClassification
       @register="registerCreateClassificationModal"
       :detail="detail"
-      :activeTab="activeTab"
       :datasetType="datasetType"
       :ontologyId="ontologyId"
       :isCenter="true"
