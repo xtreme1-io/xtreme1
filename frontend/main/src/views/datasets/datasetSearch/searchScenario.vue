@@ -12,10 +12,13 @@
         </div>
       </div>
       <div class="flex pl-25px pr-25px">
-        <Select mode="multiple" class="flex-1">
-          <Select.Option value="1">11111</Select.Option>
-          <Select.Option value="2">11111</Select.Option>
-        </Select>
+        <AutoComplete class="flex-1">
+          <template #dataSource>
+            <Select.Option v-for="email in result" :key="email">
+              {{ email }}
+            </Select.Option>
+          </template>
+        </AutoComplete>
         <Button class="ml-20px" type="default">Export Result</Button>
       </div>
       <!-- <div class="list">
@@ -43,12 +46,14 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Select } from 'ant-design-vue';
+  import { AutoComplete, Select } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
+  import { ref } from 'vue';
   const { prefixCls } = useDesign('searchScenario');
   // const { t } = useI18n();
+  const result = ref();
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-searchScenario';

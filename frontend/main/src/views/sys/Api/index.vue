@@ -34,7 +34,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { useI18n } from '/@/hooks/web/useI18n';
+  // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { Button, DatePicker, Checkbox, message } from 'ant-design-vue';
   import Icon from '/@/components/Icon';
@@ -42,7 +42,7 @@
   import { createToken, deleteToken, getTokenInfo } from '/@/api/business/api';
   import moment from 'moment';
   const { prefixCls } = useDesign('api');
-  const { t } = useI18n();
+  // const { t } = useI18n();
   const info = ref();
   const date = ref();
   const isNever = ref();
