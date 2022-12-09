@@ -32,7 +32,7 @@ public class DataAnnotationController {
     DataAnnotationUseCase dataAnnotationUseCase;
 
     @PostMapping("save")
-    public List<DataAnnotationObjectResponseDTO> save(@Validated({Default.class, ObjectResultDTO.GroupAnnotation.class})@RequestBody ObjectResultDTO objectResultDTO){
+    public List<DataAnnotationObjectResponseDTO> save(@Validated @RequestBody ObjectResultDTO objectResultDTO) {
         List<DataAnnotationClassificationDTO> dataAnnotationClassificationDTOS = convertToDataAnnotation(objectResultDTO);
         List<DataAnnotationObjectDTO> dataAnnotationObjectDTOs = convertToDataAnnotationObject(objectResultDTO);
         var deleteDataIds = objectResultDTO.getDataInfos()
@@ -50,9 +50,9 @@ public class DataAnnotationController {
         return DefaultConverter.convert(dataAnnotationUseCase.findByDataIds(dataIds), DataAnnotationResultDTO.class);
     }
 
-    private List<DataAnnotationClassificationDTO> convertToDataAnnotation(ObjectResultDTO objectResultDTO){
+    private List<DataAnnotationClassificationDTO> convertToDataAnnotation(ObjectResultDTO objectResultDTO) {
         List<DataAnnotationClassificationDTO> dataAnnotationClassificationDTOS = new ArrayList<>();
-        for (ObjectResultDTO.DataInfo dataInfo:objectResultDTO.getDataInfos()){
+        for (ObjectResultDTO.DataInfo dataInfo : objectResultDTO.getDataInfos()) {
             if (ObjectUtil.isNotEmpty(dataInfo.getDataAnnotations())) {
                 dataInfo.getDataAnnotations().forEach(item -> {
                     DataAnnotationClassificationDTO dataAnnotationClassificationDTO = DataAnnotationClassificationDTO.builder()

@@ -5,12 +5,16 @@ import ai.basic.x1.adapter.dto.request.DatasetClassCopyDTO;
 import ai.basic.x1.entity.DatasetClassBO;
 import ai.basic.x1.entity.enums.ToolTypeEnum;
 import ai.basic.x1.usecase.DatasetClassUseCase;
+import ai.basic.x1.usecase.exception.UsecaseCode;
+import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.util.ObjectUtil;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,10 +48,23 @@ public class DatasetClassController {
         datasetClassUseCase.deleteClass(id);
     }
 
+    @PostMapping("/deleteByIds")
+    public void delete(@RequestBody List<Long> ids) {
+        if (ObjectUtil.isEmpty(ids)){
+            throw new UsecaseException(UsecaseCode.UNKNOWN,"ID list can not be empty!");
+        }
+        datasetClassUseCase.deleteClasses(ids);
+    }
+
     @PostMapping("/copyFromOntologyCenter")
     public void copyFromOntologyCenter(@RequestBody() @Validated DatasetClassCopyDTO datasetClassCopyDTO) {
         datasetClassUseCase.copyFromOntologyCenter(DefaultConverter.convert(datasetClassCopyDTO, DatasetClassBO.class));
     }
+    @PostMapping("/saveToOntologyCenter")
+    public void saveToOntologyCenter(@RequestBody() @Validated DatasetClassCopyDTO datasetClassCopyDTO) {
+        datasetClassUseCase.saveToOntologyCenter(datasetClassCopyDTO.getOntologyId(),datasetClassCopyDTO.getClassIds());
+    }
+
 
     @GetMapping("/info/{id}")
     public DatasetClassDTO info(@PathVariable("id") Long id) {
