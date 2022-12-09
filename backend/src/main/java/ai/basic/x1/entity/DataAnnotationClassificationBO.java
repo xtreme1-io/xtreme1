@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DataAnnotationBO {
+public class DataAnnotationClassificationBO {
 
     private Long id;
 

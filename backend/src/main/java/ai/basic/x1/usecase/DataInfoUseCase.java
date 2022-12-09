@@ -87,7 +87,7 @@ public class DataInfoUseCase {
     private MinioProp minioProp;
 
     @Autowired
-    private DataAnnotationUseCase dataAnnotationUseCase;
+    private DataAnnotationClassificationUseCase dataAnnotationClassificationUseCase;
 
     @Autowired
     private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
@@ -1229,9 +1229,9 @@ public class DataInfoUseCase {
         }
         var dataInfoExportBOList = new ArrayList<DataExportBO>();
         var dataIds = dataList.stream().map(DataInfoBO::getId).collect(Collectors.toList());
-        var dataAnnotationList = dataAnnotationUseCase.findByDataIds(dataIds);
-        Map<Long, List<DataAnnotationBO>> dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
-                Collectors.groupingBy(DataAnnotationBO::getDataId)) : Map.of();
+        var dataAnnotationList = dataAnnotationClassificationUseCase.findByDataIds(dataIds);
+        Map<Long, List<DataAnnotationClassificationBO>> dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
+                Collectors.groupingBy(DataAnnotationClassificationBO::getDataId)) : Map.of();
         var dataAnnotationObjectList = dataAnnotationObjectUseCase.findByDataIds(dataIds);
         Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
                 dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
