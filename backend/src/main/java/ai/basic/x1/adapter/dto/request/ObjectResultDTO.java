@@ -67,17 +67,9 @@ public class ObjectResultDTO {
 
         private Long id;
 
-        @NotNull(message = "classificationId cannot null",groups = GroupAnnotation.class)
+        @NotNull(message = "classificationId cannot null")
         private Long classificationId;
 
         private JSONObject classificationAttributes;
-    }
-
-    public interface GroupAnnotation{
-
-    }
-
-    public interface GroupObject{
-
     }
 }

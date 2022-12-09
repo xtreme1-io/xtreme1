@@ -18,11 +18,6 @@ public class DatasetSimilarityRecordController {
     @Autowired
     private DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase;
 
-    @PostMapping("/gen")
-    public void gen(@RequestParam Long datasetId) {
-        datasetSimilarityRecordUseCase.generateDatasetSimilarityRecord(datasetId);
-    }
-
     @GetMapping("/{datasetId}")
     public DatasetSimilarityRecordDTO getDatasetSimilarityRecord(@PathVariable("datasetId") Long datasetId) {
         return DefaultConverter.convert(datasetSimilarityRecordUseCase.getDatasetSimilarityRecord(datasetId), DatasetSimilarityRecordDTO.class);

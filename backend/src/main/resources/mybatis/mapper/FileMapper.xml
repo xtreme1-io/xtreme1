@@ -9,6 +9,7 @@
         <result column="original_name" property="originalName" />
         <result column="path" property="path" />
         <result column="path_hash" property="pathHash" />
+        <result column="zip_path" property="zipPath" />
         <result column="type" property="type" />
         <result column="size" property="size" />
         <result column="bucket_name" property="bucketName" />
@@ -21,7 +22,7 @@
     </resultMap>
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, name, original_name, path,path_hash, type, size, bucket_name, created_at, created_by, updated_at, updated_by, relation_id, relation
+        id, name, original_name, path,path_hash,zip_path, type, size, bucket_name, created_at, created_by, updated_at, updated_by, relation_id, relation
     </sql>
 
 </mapper>

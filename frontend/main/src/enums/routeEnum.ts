@@ -8,6 +8,7 @@ export enum RouteEnum {
   CLAIM = '/claim',
   ONTOLOGY = '/ontology',
   MODELS = '/models',
+  Apis = '/api',
 }
 
 export enum RouteChildEnum {
@@ -20,4 +21,5 @@ export enum RouteChildEnum {
   DATASETS_OVERVIEW = '/datasets/overview',
   MODELS_DETAIL = '/models/detail',
   GROUP_INFO = '/team/groupInfo',
+  SEARCH_SCENARIO = '/datasets/searchScenario',
 }

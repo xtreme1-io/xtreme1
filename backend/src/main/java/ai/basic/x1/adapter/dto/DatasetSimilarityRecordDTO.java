@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 
 /**
  * @author fyb
@@ -16,36 +15,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DatasetSimilarityRecordDTO {
-
-
-   private Long  id;
-
-
-   private Long  datasetId;
-
-
-   private String  serialNumber;
-
-
-   private String  status;
-
-
-   private String  dataType;
-
-
-   private String  dataIds;
-
-
-   private LocalDateTime  createdAt;
-
-
-   private Long  createdBy;
-
-
-   private LocalDateTime  updatedAt;
-
-
-   private Long  updatedBy;
 
    private Boolean isHistoryData;
 
