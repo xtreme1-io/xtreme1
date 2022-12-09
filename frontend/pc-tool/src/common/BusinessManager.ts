@@ -53,6 +53,7 @@ export default class BusinessManager extends BaseBusinessManager {
 
     async getFrameObject(frame: IFrame | IFrame[]): Promise<{
         objectsMap: Record<string, IObject[]>;
+        classificationMap: Record<string, IObject[]>;
         queryTime: string;
     }> {
         let data = await api.getDataObject(

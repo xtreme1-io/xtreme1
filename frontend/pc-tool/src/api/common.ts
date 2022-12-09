@@ -22,15 +22,15 @@ export async function getUrl(url: string) {
 }
 
 export async function saveObject(config: any) {
-    let url = '/api/annotate/object/save';
+    let url = '/api/annotate/data/save';
     let data = await post(url, config);
     data = data.data || [];
-
+    console.log(data);
     let keyMap = {} as Record<string, Record<string, string>>;
     data.forEach((e: any) => {
-        let dataId = e.dataId + '';
+        let dataId = e.dataId;
         keyMap[dataId] = keyMap[dataId] || {};
-        keyMap[dataId][e.frontId + ''] = e.id + '';
+        keyMap[dataId][e.frontId] = e.id;
     });
 
     return keyMap;
@@ -39,24 +39,33 @@ export async function saveObject(config: any) {
 export async function getDataObject(dataIds: string[] | string) {
     if (!Array.isArray(dataIds)) dataIds = [dataIds];
 
-    let url = '/api/annotate/object/listByDataIds';
+    let url = '/api/annotate/data/listByDataIds';
     let argsStr = queryStr({ dataIds });
     let data = await get(`${url}?${argsStr}`);
     data = data.data || [];
-
+    console.log(data);
     let objectsMap = {} as Record<string, IObject[]>;
+    let classificationMap = {};
     // let objects = [] as IObject[];
-    data.dataAnnotationObjects.forEach((e: any) => {
-        let dataId = e.dataId;
-        objectsMap[dataId] = objectsMap[dataId] || [];
-
-        e.classAttributes.uuid = e.id + '';
-        e.classAttributes.modelRun = empty(e.modelRunId) ? '' : e.modelRunId + '';
-        e.classAttributes.modelRunLabel = empty(e.modelRunNo) ? '' : e.modelRunNo + '';
-        objectsMap[dataId].push(e.classAttributes);
+    data.forEach((e: any) => {
+        const { dataId, objects, classificationValues } = e;
+        objectsMap[dataId] = objects.map((o: any) => {
+            return utils.translateToObject(Object.assign(o.classAttributes, { backId: o.id }));
+        });
+        classificationMap[dataId] = classificationValues.reduce((map: any, c: any) => {
+            return Object.assign(
+                map,
+                utils.saveToClassificationValue(c.classificationAttributes.values),
+            );
+        }, {});
+        // e.classAttributes.uuid = e.id + '';
+        // e.classAttributes.modelRun = empty(e.modelRunId) ? '' : e.modelRunId + '';
+        // e.classAttributes.modelRunLabel = empty(e.modelRunNo) ? '' : e.modelRunNo + '';
+        // objectsMap[dataId] = objectsMap[dataId].concat(objects);
     });
     return {
         objectsMap,
+        classificationMap,
         queryTime: data.queryDate,
     };
 }
@@ -121,9 +130,9 @@ export async function getInfoByRecordId(recordId: string) {
     (data.datas || []).forEach((config: any) => {
         dataInfos.push({
             // id: config.id,
-            id: config.dataId,
-            datasetId: config.datasetId,
-            teamId: config.teamId,
+            id: config.dataId + '',
+            datasetId: config.datasetId + '',
+            teamId: config.teamId + '',
             // config: [],
             // viewConfig: [],
             pointsUrl: '',
@@ -250,11 +259,9 @@ export async function getDataFile(dataId: string) {
 }
 
 export async function getUserInfo() {
-    let url = `/api/user/user/logged`;
-    let {
-        data: { user, team, roles },
-    } = await get(url);
-    return user;
+    let url = `/api/user/logged`;
+    let { data } = await get(url);
+    return data;
 }
 export async function getDataSetInfo(datasetId: string) {
     let url = `/api/dataset/info/${datasetId}`;

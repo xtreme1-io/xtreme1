@@ -244,7 +244,7 @@ export class RectTool extends BasicSvg<IRectEvent> {
     lineSize: number = 4;
     rotation = 0;
     option: IRectOption = {
-        minSize: new THREE.Vector2(20, 20),
+        minSize: new THREE.Vector2(0, 0),
         moveAble: true,
         rotateAble: true,
         borderAble: true,

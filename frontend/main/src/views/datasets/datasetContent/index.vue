@@ -80,6 +80,7 @@
             <ImgCard
               v-for="i in list"
               :key="i.id"
+              :object="objectMap[i.id]"
               @handleSelected="handleSelected"
               :isSelected="selectedList.filter((item) => item === i.id).length > 0"
               :data="i"
@@ -175,6 +176,7 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import {
     datasetApi,
+    datasetObjectApi,
     deleteBatchDataset,
     getLockedByDataset,
     getStatusNum,
@@ -263,6 +265,7 @@
       value: '-1',
     },
   ]);
+  const objectMap = ref<Record<string, any>>({});
   onBeforeMount(async () => {
     // fetchList({});
     // max.value = await getMaxCountApi({ datasetId: id as unknown as number });
@@ -370,15 +373,35 @@
           : undefined,
     };
     try {
+      let tempList: DatasetItem[];
       if (fetchType) {
         const res: DatasetGetResultModel = await datasetApi(params);
+        tempList = res.list;
         list.value = list.value.concat(res.list);
         total.value = res.total;
       } else {
         const res: DatasetGetResultModel = await datasetApi(params);
+        tempList = res.list;
         list.value = res.list;
         total.value = res.total;
       }
+      const dataIds = tempList.map((e) => e.id);
+      if (dataIds.length)
+        datasetObjectApi({ dataIds: dataIds.toString() }).then((res) => {
+          console.log(res);
+          const map = {};
+          res.reduce((res, item) => {
+            const { objects, dataId } = item;
+            if (!res[dataId]) {
+              res[dataId] = [];
+            }
+            res[dataId] = objects.map((o) => o.classAttributes);
+            return map;
+          }, map);
+          Object.assign(objectMap.value, map);
+          console.log(objectMap.value);
+        });
+
       fetchStatusNum();
     } catch (error) {
       console.log(error);

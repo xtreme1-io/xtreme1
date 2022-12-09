@@ -28,7 +28,7 @@ export function createAnnotate3D(
     object.userData = userData;
     object.matrixAutoUpdate = true;
     object.updateMatrixWorld();
-    object.dashed = !!userData.invisibleFlag;
+    // object.dashed = !!userData.invisibleFlag;
 
     // setIdInfo(editor, userData);
     return object;
@@ -42,7 +42,7 @@ export function createAnnotateRect(
 ) {
     let object = new Rect(center, size);
     object.userData = userData;
-    object.dashed = !!userData.invisibleFlag;
+    // object.dashed = !!userData.invisibleFlag;
     // setIdInfo(editor, userData);
 
     return object;
@@ -56,7 +56,7 @@ export function createAnnotateBox2D(
 ) {
     let object = new Box2D(positions1, positions2);
     object.userData = userData;
-    object.dashed = !!userData.invisibleFlag;
+    // object.dashed = !!userData.invisibleFlag;
     // setIdInfo(editor, userData);
 
     return object;

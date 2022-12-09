@@ -32,7 +32,7 @@ export function execute(): IPageHandler {
         try {
             // get data list by record id
             await loadRecord();
-            // await loadUserInfo();
+            await loadUserInfo();
             await loadDataSetInfo();
             await Promise.all([
                 // load dataset Classification

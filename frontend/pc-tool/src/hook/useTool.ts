@@ -71,8 +71,6 @@ export default function useTool() {
             Object.assign(editor.bsState.user, {
                 id: data.id,
                 nickname: data.nickname,
-                email: data.email,
-                status: data.status,
                 username: data.username,
             });
         } catch (error) {

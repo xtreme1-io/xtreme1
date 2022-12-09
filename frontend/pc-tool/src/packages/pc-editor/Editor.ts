@@ -270,6 +270,7 @@ export default class Editor extends THREE.EventDispatcher {
         this.state.classTypes = classTypes;
         classTypes.forEach((e) => {
             this.classMap.set(e.name, e);
+            this.classMap.set(e.id, e);
         });
     }
 
