@@ -15,6 +15,7 @@ import ai.basic.x1.util.lock.IDistributedLock;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -77,6 +78,9 @@ public class DatasetUseCase {
 
     @Autowired
     private DatasetClassUseCase datasetClassUseCase;
+
+    @Autowired
+    private DataAnnotationDAO dataAnnotationDAO;
 
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
@@ -196,6 +200,19 @@ public class DatasetUseCase {
         datasetLambdaUpdateWrapper.eq(Dataset::getId, id);
         datasetLambdaUpdateWrapper.set(Dataset::getIsDeleted, true);
         datasetDAO.update(datasetLambdaUpdateWrapper);
+
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+            var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+            dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, id);
+            dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
+            dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+            var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
+            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId,id);
+            dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
+            var dataAnnotationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotation.class);
+            dataAnnotationLambdaUpdateWrapper.eq(DataAnnotation::getDatasetId,id);
+            dataAnnotationDAO.remove(dataAnnotationLambdaUpdateWrapper);
+        })));
     }
 
     /**
@@ -290,6 +307,7 @@ public class DatasetUseCase {
                 if (ObjectUtil.isNotNull(classId)) {
                     dataAnnotationObjectBO.setClassId(newClassId);
                     var dataAnnotationResultObjectBO = DefaultConverter.convert(dataAnnotationObjectBO.getClassAttributes(), DataAnnotationResultObjectBO.class);
+                    dataAnnotationResultObjectBO.setId(IdUtil.randomUUID());
                     dataAnnotationResultObjectBO.setClassId(newClassId);
                     dataAnnotationObjectBO.setClassAttributes(JSONUtil.parseObj(dataAnnotationResultObjectBO));
                 }
