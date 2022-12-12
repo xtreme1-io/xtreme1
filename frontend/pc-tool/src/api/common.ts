@@ -43,7 +43,6 @@ export async function getDataObject(dataIds: string[] | string) {
     let argsStr = queryStr({ dataIds });
     let data = await get(`${url}?${argsStr}`);
     data = data.data || [];
-    console.log(data);
     let objectsMap = {} as Record<string, IObject[]>;
     let classificationMap = {};
     // let objects = [] as IObject[];
@@ -222,6 +221,7 @@ export async function getDataSetClass(datasetId: string) {
                 return { value: e.name, label: e.name };
             });
             classType.attrs.push({
+                id: config.id || config.name,
                 name: config.name,
                 // label: config.name + '-label',
                 label: config.name,
