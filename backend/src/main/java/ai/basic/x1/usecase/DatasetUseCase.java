@@ -291,6 +291,7 @@ public class DatasetUseCase {
                 var dataIds = page.getList().stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
                 var dataInfoList = dataInfoDAO.getBaseMapper().listByIds(dataIds, false);
                 dataInfoList.forEach(dataInfo -> {
+                    dataInfo.setId(null);
                     dataInfo.setDatasetId(datasetId);
                     dataInfo.setTempDataId(dataInfo.getId());
                     dataInfo.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
@@ -302,6 +303,7 @@ public class DatasetUseCase {
                 var dataInfoMap = dataInfoList.stream().collect(Collectors.toMap(DataInfo::getTempDataId, DataInfo::getId));
                 var dataAnnotationObjectBOList = dataAnnotationObjectUseCase.listByScenario(scenarioQueryBO);
                 dataAnnotationObjectBOList.forEach(dataAnnotationObjectBO -> {
+                    dataAnnotationObjectBO.setId(null);
                     dataAnnotationObjectBO.setDatasetId(datasetId);
                     dataAnnotationObjectBO.setDataId(dataInfoMap.get(dataAnnotationObjectBO.getDataId()));
                     var classId = dataAnnotationObjectBO.getClassId();
