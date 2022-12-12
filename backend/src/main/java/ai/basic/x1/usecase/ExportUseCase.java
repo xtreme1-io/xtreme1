@@ -53,7 +53,7 @@ public class ExportUseCase {
     @Autowired
     private FileUseCase fileUseCase;
 
-    @Value("${file.tempPath:/tmp}")
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
     @FunctionalInterface

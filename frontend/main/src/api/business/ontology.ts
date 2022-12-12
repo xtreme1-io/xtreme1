@@ -9,6 +9,7 @@ import {
   ResponseOntologyParams,
   ValidateOntologyNameParams,
 } from './model/ontologyModel';
+import { datasetTypeEnum } from './model/datasetModel';
 
 enum Api {
   ONTOLOGY = '/ontology',
@@ -59,7 +60,7 @@ export const deleteOntologyApi = (params: DeleteOntologyParams) =>
     },
   });
 
-export const getAllOntologyApi = (params: { type: string }) =>
+export const getAllOntologyApi = (params: { type?: datasetTypeEnum }) =>
   defHttp.get<OntologyListItem[]>({
     url: `${Api.ONTOLOGY}/findAll`,
     params,
@@ -82,7 +83,7 @@ export const getOntologyInfoApi = (params: { id: string }) =>
   });
 
 /** validate ontology name */
-export const validateNameApi = (params: ValidateOntologyNameParams) =>
+export const validateOntologyNameApi = (params: ValidateOntologyNameParams) =>
   defHttp.get<boolean>({
     url: `${Api.ONTOLOGY}/validateName`,
     params,

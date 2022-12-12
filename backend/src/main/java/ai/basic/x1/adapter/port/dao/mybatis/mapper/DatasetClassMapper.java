@@ -19,4 +19,8 @@ public interface DatasetClassMapper extends BaseMapper<DatasetClass> {
 
     List<ToolTypeStatisticsUnit> statisticsObjectByToolType(@Param("datasetId") Long datasetId);
 
+    void saveOrUpdateBatch(List<DatasetClass> list);
+
+    List<DatasetClass> getDatasetClasses(Long datasetId,List<DatasetClass> list);
+
 }

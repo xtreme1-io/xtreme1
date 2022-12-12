@@ -56,6 +56,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { attributeFactory, optionFactory } from './utils';
   import { RuleObject } from 'ant-design-vue/es/form/interface';
+  import { attributeOptionEnum } from './typing';
 
   const { t } = useI18n();
 
@@ -170,7 +171,7 @@
   const handleGo = (index) => {
     if (!props.isBasic) {
       if (emitter.e.handleSaveForm) {
-        emitter.emit('handleSaveForm', { type: 'go', index: index });
+        emitter.emit('validateForm', { type: attributeOptionEnum.NEXT, index: index });
       } else {
         handleAddIndex(index);
       }

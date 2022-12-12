@@ -86,7 +86,7 @@
   "version" "0.5.11"
   dependencies:
     "@antv/event-emitter" "^0.1.1"
-    "@antv/g-math" "^0.1.6"
+    "@antv/g-math" "^0.1.9"
     "@antv/matrix-util" "^3.1.0-beta.1"
     "@antv/path-util" "~2.0.5"
     "@antv/util" "~2.0.13"
@@ -100,8 +100,8 @@
 "@antv/g-canvas@~0.5.10":
   "version" "0.5.12"
   dependencies:
-    "@antv/g-base" "^0.5.3"
-    "@antv/g-math" "^0.1.6"
+    "@antv/g-base" "^0.5.12"
+    "@antv/g-math" "^0.1.9"
     "@antv/matrix-util" "^3.1.0-beta.1"
     "@antv/path-util" "~2.0.5"
     "@antv/util" "~2.0.0"
@@ -117,8 +117,8 @@
 "@antv/g-svg@~0.5.6":
   "version" "0.5.6"
   dependencies:
-    "@antv/g-base" "^0.5.3"
-    "@antv/g-math" "^0.1.6"
+    "@antv/g-base" "^0.5.12"
+    "@antv/g-math" "^0.1.9"
     "@antv/util" "~2.0.0"
     "detect-browser" "^5.0.0"
     "tslib" "^2.0.3"
@@ -6159,6 +6159,26 @@
   "integrity" "sha512-qjUJ5U/hawxosMryILofZCkm3C84PLJS/0grRIpjAwu+Lkxxj5cxeCU25BG0/3mDSpXKTyZr8oh8wIgLaH0QCw=="
   "resolved" "https://registry.npmjs.org/got/-/got-8.3.2.tgz"
   "version" "8.3.2"
+  dependencies:
+    decompress-response "^3.2.0"
+    duplexer3 "^0.1.4"
+    get-stream "^3.0.0"
+    is-plain-obj "^1.1.0"
+    is-retry-allowed "^1.0.0"
+    is-stream "^1.0.0"
+    isurl "^1.0.0-alpha5"
+    lowercase-keys "^1.0.0"
+    p-cancelable "^0.3.0"
+    p-timeout "^1.1.1"
+    safe-buffer "^5.0.1"
+    timed-out "^4.0.0"
+    url-parse-lax "^1.0.0"
+    url-to-options "^1.0.1"
+
+got@^8.3.1:
+  version "8.3.2"
+  resolved "https://registry.npmjs.org/got/-/got-8.3.2.tgz"
+  integrity sha512-qjUJ5U/hawxosMryILofZCkm3C84PLJS/0grRIpjAwu+Lkxxj5cxeCU25BG0/3mDSpXKTyZr8oh8wIgLaH0QCw==
   dependencies:
     "@sindresorhus/is" "^0.7.0"
     "cacheable-request" "^2.1.1"

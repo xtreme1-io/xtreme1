@@ -117,6 +117,7 @@ export interface fileItem {
 
 export interface imgUrlObj {
   url: string;
+  extraInfo?: any;
 }
 
 export interface content {

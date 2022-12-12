@@ -1,6 +1,5 @@
 package ai.basic.x1.entity;
 
-import ai.basic.x1.adapter.dto.ClassDTO;
 import ai.basic.x1.entity.enums.ToolTypeEnum;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -71,6 +70,8 @@ public class ClassBO {
     private Boolean isResetRelations;
 
     private List<DatasetClass> datasetClasses;
+
+    private Long datasetClassNum;
 
     @Data
     @Builder

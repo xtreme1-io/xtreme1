@@ -3,11 +3,14 @@ package ai.basic.x1.adapter.port.minio;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.entity.PresignedUrlBO;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.http.HttpStatus;
+import cn.hutool.http.HttpUtil;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,6 +53,31 @@ public class MinioService {
         }
     }
 
+
+    /**
+     * check object exist
+     *
+     * @param bucketName
+     * @param objectName
+     */
+    public boolean checkObjectExist(String bucketName, String objectName) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, InternalException, XmlParserException, ErrorResponseException {
+        var bucketExistsArgs = BucketExistsArgs.builder().bucket(bucketName).build();
+        boolean existBucket = extendMinioClient.bucketExists(bucketExistsArgs);
+        if (existBucket) {
+            var statObjectArgs = StatObjectArgs.builder().bucket(bucketName).object(objectName).build();
+            try {
+                var statObjectResponse = extendMinioClient.statObject(statObjectArgs);
+                return !statObjectResponse.object().isEmpty();
+            } catch (ErrorResponseException errorResponseException) {
+                if (errorResponseException.response().code() == HttpStatus.HTTP_NOT_FOUND) {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+
     /**
      * Upload file
      *
@@ -63,6 +92,11 @@ public class MinioService {
             throws IOException, ServerException, InsufficientDataException, ErrorResponseException,
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
+        uploadFileWithoutUrl(bucketName,fileName,inputStream,contentType,size);
+        return getUrl(bucketName, fileName);
+    }
+
+    public void uploadFileWithoutUrl(String bucketName, String fileName, InputStream inputStream, String contentType, long size) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, InternalException, XmlParserException, ErrorResponseException {
         createBucket(bucketName);
         //partSize:-1 is auto setting
         long partSize = -1;
@@ -73,9 +107,7 @@ public class MinioService {
                 .contentType(contentType)
                 .build();
         extendMinioClient.putObject(putArgs);
-        return getUrl(bucketName, fileName);
     }
-
     /**
      * batch upload files
      *

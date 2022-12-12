@@ -68,4 +68,8 @@ public class JwtAuthenticationFilter implements Filter {
         return;
     }
 
+    @Override
+    public void destroy() {
+        SecurityContextHolder.clearContext();
+    }
 }

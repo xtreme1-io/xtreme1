@@ -1,13 +1,15 @@
 .create_content {
   padding: 0px 26px;
-  min-height: 280px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  &.class_create {
+    min-height: 280px;
+  }
   .content-item {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
     .title {
       display: flex;
       align-items: center;
@@ -17,11 +19,22 @@
       line-height: 19px;
       color: #333333;
     }
+    .content {
+      padding-left: 10px;
+    }
     .form-wrapper {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 40px;
+      &-left {
+        width: 260px;
+      }
+      &-right {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
     }
   }
 }
@@ -30,19 +43,24 @@
 :deep(.ant-form-item) {
   height: 28px;
   margin-bottom: 20px;
-  padding: 0 10px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  // padding: 0 10px;
   .ant-form-item-label {
     & > label {
       height: 28px;
     }
   }
   .ant-form-item-control-input {
-    min-height: 28px;
+    width: 160px;
+    height: 28px;
     .ant-input-affix-wrapper {
       padding: 4px 10px;
     }
   }
   .ant-select {
+    width: 160px;
     .ant-select-selector {
       height: 28px;
     }

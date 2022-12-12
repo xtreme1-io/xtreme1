@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,9 +28,6 @@ public class DataAnnotationObjectUseCase {
 
     @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
-
-    @Autowired
-    private DataEditUseCase dataEditUseCase;
 
     /**
      * query results of annotation
@@ -52,10 +46,9 @@ public class DataAnnotationObjectUseCase {
      * @param deleteDataIds           data id that need delete all objects
      */
     @Transactional(rollbackFor = Exception.class)
-    public List<DataAnnotationObjectBO> saveDataAnnotationObject(List<DataAnnotationObjectBO> dataAnnotationObjectBOs, Set<Long> deleteDataIds) {
+    public List<DataAnnotationObjectBO> save(List<DataAnnotationObjectBO> dataAnnotationObjectBOs, Set<Long> deleteDataIds) {
         Set<Long> dataIds = dataAnnotationObjectBOs.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toSet());
         dataIds.addAll(deleteDataIds);
-        dataEditUseCase.checkLock(dataIds);
         removeAllObjectByDataIds(deleteDataIds);
         List<DataAnnotationObjectBO> dataAnnotationObjectBOS = updateDataAnnotationObject(dataAnnotationObjectBOs);
         return dataAnnotationObjectBOS;

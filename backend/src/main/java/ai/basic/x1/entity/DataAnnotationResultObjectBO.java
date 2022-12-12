@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import lombok.Data;
 
@@ -9,47 +10,53 @@ import java.math.BigDecimal;
 public class DataAnnotationResultObjectBO {
 
     /**
-     * 框ID
+     * Object id
      */
     private String id;
 
     /**
-     * 类型
+     * type
      */
     private String type;
 
     /**
-     * 版本，初始为 0，每改一次 +1
+     * Version, initially 0, +1 every time it is changed
      */
     private Integer version;
 
     /**
-     * 追踪对象 ID
+     *
+     * Tracking object id
      */
     private String trackId;
 
     /**
-     * 追踪对象名称
+     * Track object name
      */
     private String trackName;
 
     /**
-     * 选中类型属性值
+     * Class id
      */
-    private JSONObject classValues;
+    private Long classId;
 
     /**
-     * 轮廓信息
+     * Selected type attribute value
+     */
+    private JSONArray classValues;
+
+    /**
+     * Profile information
      */
     private JSONObject contour;
 
     /**
-     * 模型识别置信度，只有模型识别时才有
+     * Confidence of model recognition, only available for model recognition
      */
     private BigDecimal modelConfidence;
 
     /**
-     * 模型识别出来的类别，只有模型识别时才有
+     * The category identified by the model is only available when the model is identified
      */
     private String modelClass;
 

@@ -16,7 +16,7 @@ export interface OntologyListItem {
 /** list request params */
 export interface GetOntologyParams extends BasicPageParams {
   name?: string;
-  type?: string;
+  type?: datasetTypeEnum;
 }
 
 /** list response params */
@@ -45,5 +45,5 @@ export interface FindOntologyByTeamParams {
 export interface ValidateOntologyNameParams {
   id?: string;
   name?: string;
-  type?: string;
+  type?: datasetTypeEnum;
 }

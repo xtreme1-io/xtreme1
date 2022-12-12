@@ -6,25 +6,25 @@ export const actionList = [
   {
     text: t('common.action.selectAll'),
     function: 'handleSelectAll',
-    svgIcon: 'action-select',
+    svgIcon: 'action-classes-selectAll',
     hasDivider: false,
   },
   {
     text: t('common.action.unselectAll'),
     function: 'handleUnselectAll',
-    svgIcon: 'action-unselect',
+    svgIcon: 'action-classes-unselectAll',
     hasDivider: false,
   },
   {
     text: 'Save to Ontology Center',
-    function: 'handleOntology',
-    svgIcon: 'action-ontology',
+    function: 'handleSaveToOntology',
+    svgIcon: 'action-classes-saveTo',
     hasDivider: true,
   },
   {
     text: 'Delete',
     function: 'handleDeleted',
-    svgIcon: 'action-delete',
+    svgIcon: 'action-classes-delete',
     hasDivider: false,
   },
 ];

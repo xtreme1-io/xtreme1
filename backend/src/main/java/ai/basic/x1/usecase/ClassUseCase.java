@@ -21,6 +21,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * @author chenchao
@@ -54,14 +56,34 @@ public class ClassUseCase {
 
     public Page<ClassBO> findByPage(Integer pageNo, Integer pageSize, ClassBO classBO) {
         LambdaQueryWrapper<Class> classLambdaQueryWrapper = Wrappers.lambdaQuery();
-        classLambdaQueryWrapper.eq(Class::getOntologyId, classBO.getOntologyId())
+        Long ontologyId = classBO.getOntologyId();
+        classLambdaQueryWrapper.eq(Class::getOntologyId, ontologyId)
                 .like(StrUtil.isNotBlank(classBO.getName()), Class::getName, classBO.getName())
                 .eq(ObjectUtils.isNotEmpty(classBO.getToolType()), Class::getToolType, classBO.getToolType())
                 .ge(ObjectUtils.isNotEmpty(classBO.getStartTime()), Class::getCreatedAt, classBO.getStartTime())
                 .le(ObjectUtils.isNotEmpty(classBO.getEndTime()), Class::getCreatedAt, classBO.getEndTime());
         addOrderRule(classLambdaQueryWrapper, classBO.getSortBy(), classBO.getAscOrDesc());
         var classPage = classDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize), classLambdaQueryWrapper);
-        return DefaultConverter.convert(classPage, ClassBO.class);
+        Page<ClassBO> classBOPage = DefaultConverter.convert(classPage, ClassBO.class);
+
+        setDatasetClassNum(ontologyId, classBOPage);
+        return classBOPage;
+    }
+
+    private void setDatasetClassNum(Long ontologyId, Page<ClassBO> classBOPage) {
+        if(ObjectUtil.isEmpty(classBOPage.getList())){
+            return;
+        }
+        List<Long> classIds = classBOPage.getList().stream().map(ClassBO::getId).collect(toList());
+        var datasetClassOntologyWrapper = new QueryWrapper<DatasetClassOntology>()
+                .select("class_id", "count(id) as datasetClassNum")
+                .lambda()
+                .eq(DatasetClassOntology::getOntologyId, ontologyId)
+                .in(DatasetClassOntology::getClassId, classIds)
+                .groupBy(DatasetClassOntology::getClassId);
+        List<DatasetClassOntology> list = datasetClassOntologyDAO.list(datasetClassOntologyWrapper);
+        Map<Long, Long> datasetClssNumMap = list.stream().collect(toMap(DatasetClassOntology::getClassId, DatasetClassOntology::getDatasetClassNum));
+        classBOPage.getList().stream().forEach(record->record.setDatasetClassNum(datasetClssNumMap.get(record.getId())));
     }
 
     public ClassBO findById(Long id) {
@@ -69,21 +91,8 @@ public class ClassUseCase {
         if (ObjectUtil.isNull(classBO)) {
             return null;
         }
-        var datasetClassOntologyWrapper = new LambdaQueryWrapper<DatasetClassOntology>().eq(DatasetClassOntology::getClassId, id);
-        List<DatasetClassOntology> list = datasetClassOntologyDAO.list(datasetClassOntologyWrapper);
-        if (ObjectUtil.isEmpty(list)) {
-            return classBO;
-        }
-        var datasetClassIds = list.stream().map(DatasetClassOntology::getDatasetClassId).collect(toList());
-        List<DatasetClass> datasetClasses = datasetClassDAO.listByIds(datasetClassIds);
-        classBO.setDatasetClasses(new ArrayList<>());
-        datasetClasses.forEach(datasetClass ->
-                classBO.getDatasetClasses().add(
-                        ClassBO.DatasetClass
-                                .builder()
-                                .id(datasetClass.getId())
-                                .name(datasetClass.getName())
-                                .build()));
+        long datasetClassNum =getRelatedDatasetClassNum(id);
+        classBO.setDatasetClassNum(datasetClassNum);
         return classBO;
     }
 

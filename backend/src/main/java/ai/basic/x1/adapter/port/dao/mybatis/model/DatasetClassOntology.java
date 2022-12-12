@@ -39,4 +39,7 @@ public class DatasetClassOntology {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updatedBy;
+
+    @TableField(exist = false)
+    private Long datasetClassNum;
 }

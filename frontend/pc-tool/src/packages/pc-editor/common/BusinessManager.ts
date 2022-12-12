@@ -31,6 +31,7 @@ export default class BusinessManager {
 
     async getFrameObject(frame: IFrame | IFrame[]): Promise<{
         objectsMap: Record<string, IObject[]>;
+        classificationMap: Record<string, any>;
         queryTime: string;
     }> {
         throw 'getFrameObject implement error';

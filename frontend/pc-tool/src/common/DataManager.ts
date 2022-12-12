@@ -3,6 +3,7 @@ import Editor from './Editor';
 import * as api from '../api';
 import { DataManager as BaseDataManager, Const } from 'pc-editor';
 import * as bsUtils from '../utils';
+import { AnnotateObject } from 'pc-render';
 
 export default class DataManager extends BaseDataManager {
     editor: Editor;
@@ -93,5 +94,25 @@ export default class DataManager extends BaseDataManager {
 
             return request;
         }
+    }
+    onAnnotatesAdd(objects: AnnotateObject[], frame?: IFrame | undefined): void {
+        let { user } = this.editor.bsState;
+
+        console.log('onAnnotatesAdd')
+        // 
+        if (user.id) {
+            objects.forEach((object) => {
+                let bsObj = object as any;
+                if (!bsObj.createdAt) {
+                    bsObj.lastTime = Date.now();
+                    bsObj.updateTime = bsObj.lastTime;
+                    bsObj.createdAt = bsUtils.formatTimeUTC(bsObj.lastTime);
+                }
+                if (!bsObj.createdBy) {
+                    bsObj.createdBy = user.id;
+                }
+            });
+        }
+        super.onAnnotatesAdd(objects, frame);
     }
 }

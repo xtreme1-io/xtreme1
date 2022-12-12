@@ -1,7 +1,7 @@
 package ai.basic.x1.util;
 
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataClassificationOption;
-import ai.basic.x1.entity.DataAnnotationBO;
+import ai.basic.x1.entity.DataAnnotationClassificationBO;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 public class ClassificationUtils {
 
 
-    public static List<DataClassificationOption> parse(List<DataAnnotationBO> dataAnnotations) {
+    public static List<DataClassificationOption> parse(List<DataAnnotationClassificationBO> dataAnnotations) {
         List<DataClassificationOption> results = new ArrayList<>();
-        for (DataAnnotationBO dataAnnotation : dataAnnotations) {
+        for (DataAnnotationClassificationBO dataAnnotation : dataAnnotations) {
             try {
                 results.addAll(parse(dataAnnotation));
             } catch (Exception e) {
@@ -30,7 +30,7 @@ public class ClassificationUtils {
         return results;
     }
 
-    private static List<DataClassificationOption> parse(DataAnnotationBO dataAnnotation) {
+    private static List<DataClassificationOption> parse(DataAnnotationClassificationBO dataAnnotation) {
         var classification = dataAnnotation.getClassificationAttributes();
         if (classification == null) {
             return List.of();
@@ -53,7 +53,7 @@ public class ClassificationUtils {
     }
 
     private static List<DataClassificationOption> convert(ClassificationNode leafNode, Map<String,
-                ClassificationNode> classificationNodeMap, DataAnnotationBO dataAnnotation) {
+                ClassificationNode> classificationNodeMap, DataAnnotationClassificationBO dataAnnotation) {
         var results = new ArrayList<DataClassificationOption>();
         if (leafNode.value instanceof Collection) {
             Collection optionNames = (Collection) leafNode.value;

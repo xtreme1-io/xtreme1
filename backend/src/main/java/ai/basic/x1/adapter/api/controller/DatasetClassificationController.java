@@ -1,10 +1,15 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.dto.DatasetClassificationDTO;
+import ai.basic.x1.adapter.dto.request.DatasetClassCopyDTO;
+import ai.basic.x1.adapter.dto.request.DatasetClassificationCopyDTO;
 import ai.basic.x1.entity.DatasetClassificationBO;
 import ai.basic.x1.usecase.DatasetClassificationUseCase;
+import ai.basic.x1.usecase.exception.UsecaseCode;
+import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.util.ObjectUtil;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +47,14 @@ public class DatasetClassificationController {
         datasetClassificationUseCase.deleteClassification(id);
     }
 
+    @PostMapping("/deleteByIds")
+    public void delete(@RequestBody List<Long> ids) {
+        if (ObjectUtil.isEmpty(ids)){
+            throw new UsecaseException(UsecaseCode.UNKNOWN,"ID list can not be empty!");
+        }
+        datasetClassificationUseCase.deleteClassifications(ids);
+    }
+
     @GetMapping("info/{id}")
     public DatasetClassificationDTO info(@PathVariable("id") Long id) {
         return DefaultConverter.convert(datasetClassificationUseCase.findById(id), DatasetClassificationDTO.class);
@@ -61,9 +74,18 @@ public class DatasetClassificationController {
         return DefaultConverter.convert(datasetClassificationUseCase.findAll(datasetId), DatasetClassificationDTO.class);
     }
 
+    @PostMapping("/copyFromOntologyCenter")
+    public void copyFromOntologyCenter(@RequestBody() @Validated DatasetClassificationCopyDTO datasetClassificationCopyDTO) {
+        datasetClassificationUseCase.copyFromOntologyCenter(DefaultConverter.convert(datasetClassificationCopyDTO, DatasetClassificationBO.class));
+    }
+
+    @PostMapping("/saveToOntologyCenter")
+    public void saveToOntologyCenter(@RequestBody() @Validated DatasetClassificationCopyDTO datasetClassificationCopyDTO) {
+        datasetClassificationUseCase.saveToOntologyCenter(datasetClassificationCopyDTO.getOntologyId(),datasetClassificationCopyDTO.getClassificationIds());
+    }
+
     /**
      * Check whether the classification name already exists in the same dataset
-     *
      * @return if exists return true
      */
     @GetMapping("validateName")

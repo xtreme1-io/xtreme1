@@ -31,7 +31,7 @@
   import randomSvg from '/@/assets/svg/ontology/random.svg';
   import { colorOption } from '../attributes/data';
 
-  const props = defineProps<{ color: string }>();
+  const props = defineProps<{ color?: string }>();
   const emits = defineEmits(['update:color']);
 
   const color = computed({

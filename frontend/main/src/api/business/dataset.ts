@@ -27,6 +27,7 @@ import { BasicIdParams } from '/@/api/model/baseModel';
 enum Api {
   DATASET = '/dataset',
   DATA = '/data',
+  DATASET_CLASS = '/datasetClass',
 }
 
 /**
@@ -46,6 +47,16 @@ export const datasetListApi = (params: ListParams) =>
 export const datasetApi = (params: DatasetParams) =>
   defHttp.get<DatasetGetResultModel>({
     url: `${Api.DATA}/findByPage`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const datasetObjectApi = (params: { dataIds: string }) =>
+  defHttp.get<any>({
+    url: `/annotate/data/listByDataIds`,
     params,
     headers: {
       // @ts-ignore
@@ -296,6 +307,25 @@ export const hasOntologyApi = (params: { datasetId: number }) =>
   defHttp.get<ResponseUploadRecord[]>({
     url: `${Api.DATASET}/findOntologyIsExistByDatasetId`,
     params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getScenario = (params: any) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATA}/findByScenarioPage`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getDatasetClass = (id) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATASET_CLASS}/findAll/${id}`,
     headers: {
       // @ts-ignore
       ignoreCancelToken: true,

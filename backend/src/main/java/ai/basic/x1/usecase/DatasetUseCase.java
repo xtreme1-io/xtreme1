@@ -3,39 +3,40 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.api.context.UserInfo;
-import ai.basic.x1.adapter.port.dao.DatasetClassDAO;
-import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
-import ai.basic.x1.adapter.port.dao.DatasetDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.Dataset;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
-import ai.basic.x1.entity.DataInfoUploadBO;
-import ai.basic.x1.entity.DatasetBO;
-import ai.basic.x1.entity.DatasetClassBO;
-import ai.basic.x1.entity.DatasetQueryBO;
+import ai.basic.x1.adapter.port.dao.*;
+import ai.basic.x1.adapter.port.dao.mybatis.model.*;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import ai.basic.x1.util.lock.IDistributedLock;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.LIDAR_FUSION;
+import static ai.basic.x1.util.Constants.PAGE_SIZE_100;
 
 /**
  * @author fyb
@@ -48,6 +49,7 @@ public class DatasetUseCase {
     private DatasetDAO datasetDAO;
 
     @Autowired
+    @Qualifier("distributedLock")
     private IDistributedLock distributedLock;
 
     @Autowired
@@ -65,14 +67,29 @@ public class DatasetUseCase {
     @Autowired
     private DatasetInitialInfo datasetInitialInfo;
 
-    @Value("${file.tempPath:/tmp/x1/}")
+    @Autowired
+    private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
+
+    @Autowired
+    private DataInfoDAO dataInfoDAO;
+
+    @Autowired
+    private DataAnnotationObjectDAO dataAnnotationObjectDAO;
+
+    @Autowired
+    private DatasetClassUseCase datasetClassUseCase;
+
+    @Autowired
+    private DataAnnotationClassificationDAO dataAnnotationClassificationDAO;
+
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
     private static final ExecutorService executorService = ThreadUtil.newExecutor(1);
 
     @PostConstruct
     public void init() {
-        var file = FileUtil.file(".",datasetInitialInfo.getFileName());
+        var file = FileUtil.file(".", datasetInitialInfo.getFileName());
         if (file.isFile()) {
             executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
                 var datasetName = datasetInitialInfo.getName();
@@ -183,6 +200,19 @@ public class DatasetUseCase {
         datasetLambdaUpdateWrapper.eq(Dataset::getId, id);
         datasetLambdaUpdateWrapper.set(Dataset::getIsDeleted, true);
         datasetDAO.update(datasetLambdaUpdateWrapper);
+
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+            var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+            dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, id);
+            dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
+            dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+            var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
+            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId, id);
+            dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
+            var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId, id);
+            dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
+        })));
     }
 
     /**
@@ -240,6 +270,59 @@ public class DatasetUseCase {
         datasetClassificationLambdaQueryWrapper.eq(DatasetClassification::getDatasetId, datasetId);
         var datasetClassificationCount = datasetClassificationDAO.count(datasetClassificationLambdaQueryWrapper);
         return datasetClassCount > 0 || datasetClassificationCount > 0;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void createByScenario(DatasetScenarioBO datasetScenarioBO) {
+        var datasetBO = DatasetBO.builder().name(datasetScenarioBO.getDatasetName()).type(datasetScenarioBO.getDatasetType()).build();
+        var newDatasetBO = create(datasetBO);
+        var datasetId = newDatasetBO.getId();
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+            datasetClassUseCase.copyClassesToNewDataset(datasetId, datasetScenarioBO.getOntologyClassId(), datasetScenarioBO.getSource());
+            var scenarioQueryBO = DefaultConverter.convert(datasetScenarioBO, ScenarioQueryBO.class);
+            scenarioQueryBO.setPageSize(PAGE_SIZE_100);
+            var i = 1;
+            while (true) {
+                scenarioQueryBO.setPageNo(i);
+                var page = dataAnnotationObjectUseCase.findDataIdByScenarioPage(scenarioQueryBO);
+                if (CollectionUtil.isEmpty(page.getList())) {
+                    break;
+                }
+                var dataIds = page.getList().stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
+                var dataInfoList = dataInfoDAO.getBaseMapper().listByIds(dataIds, false);
+                dataInfoList.forEach(dataInfo -> {
+                    dataInfo.setId(null);
+                    dataInfo.setDatasetId(datasetId);
+                    dataInfo.setTempDataId(dataInfo.getId());
+                    dataInfo.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
+                    dataInfo.setCreatedAt(OffsetDateTime.now());
+                    dataInfo.setUpdatedBy(null);
+                });
+                scenarioQueryBO.setDataIds(dataIds);
+                dataInfoDAO.getBaseMapper().insertBatch(dataInfoList);
+                var dataInfoMap = dataInfoList.stream().collect(Collectors.toMap(DataInfo::getTempDataId, DataInfo::getId));
+                var dataAnnotationObjectBOList = dataAnnotationObjectUseCase.listByScenario(scenarioQueryBO);
+                dataAnnotationObjectBOList.forEach(dataAnnotationObjectBO -> {
+                    dataAnnotationObjectBO.setId(null);
+                    dataAnnotationObjectBO.setDatasetId(datasetId);
+                    dataAnnotationObjectBO.setDataId(dataInfoMap.get(dataAnnotationObjectBO.getDataId()));
+                    var classId = dataAnnotationObjectBO.getClassId();
+                    if (ObjectUtil.isNotNull(classId)) {
+                        dataAnnotationObjectBO.setClassId(null);
+                        var dataAnnotationResultObjectBO = DefaultConverter.convert(dataAnnotationObjectBO.getClassAttributes(), DataAnnotationResultObjectBO.class);
+                        dataAnnotationResultObjectBO.setId(IdUtil.randomUUID());
+                        dataAnnotationResultObjectBO.setClassId(null);
+                        dataAnnotationResultObjectBO.setClassValues(JSONUtil.createArray());
+                        dataAnnotationObjectBO.setClassAttributes(JSONUtil.parseObj(dataAnnotationResultObjectBO));
+                    }
+                    dataAnnotationObjectBO.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
+                    dataAnnotationObjectBO.setCreatedAt(OffsetDateTime.now());
+                });
+                dataAnnotationObjectDAO.getBaseMapper().insertBatch(DefaultConverter.convert(dataAnnotationObjectBOList, DataAnnotationObject.class));
+                i++;
+            }
+        })));
+
     }
 
 }

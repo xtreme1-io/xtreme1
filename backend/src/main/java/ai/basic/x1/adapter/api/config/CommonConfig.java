@@ -4,11 +4,11 @@ import ai.basic.x1.adapter.api.annotation.user.LoggedUserArgumentResolver;
 import ai.basic.x1.adapter.api.context.RequestContextInterceptor;
 import ai.basic.x1.adapter.api.filter.JwtAuthenticationFilter;
 import ai.basic.x1.adapter.api.filter.JwtHelper;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSimilarityJob;
 import ai.basic.x1.usecase.*;
 import ai.basic.x1.util.lock.DistributedLock;
 import ai.basic.x1.util.lock.IDistributedLock;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -124,10 +123,16 @@ public class CommonConfig implements WebMvcConfigurer {
         return new OntologyUseCase();
     }
 
-    @Bean
+    @Bean(name = "distributedLock")
     public IDistributedLock distributedLock(StringRedisTemplate stringRedisTemplate) {
-        return new DistributedLock(stringRedisTemplate, "ai:basicai:x1:", 5000);
+        return new DistributedLock(stringRedisTemplate, "ai:basicai:xtreme1:commonLock", 5000);
     }
+
+    @Bean(name = "similarityDistributedLock")
+    public IDistributedLock similarityDistributedLock(StringRedisTemplate stringRedisTemplate) {
+        return new DistributedLock(stringRedisTemplate, "ai:basicai:xtreme1:similarityLock", 300000);
+    }
+
 
     @Bean
     public ModelUseCase modelUseCase() {
@@ -145,6 +150,11 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public DataAnnotationClassificationUseCase dataAnnotationClassificationUseCase(){
+        return new DataAnnotationClassificationUseCase();
+    }
+
+    @Bean
     public DataAnnotationRecordUseCase dataAnnotationRecordUseCase() {
         return new DataAnnotationRecordUseCase();
     }
@@ -156,12 +166,12 @@ public class CommonConfig implements WebMvcConfigurer {
 
 
     @Bean
-    public DataFlowUseCase dataFlowUseCase(){
+    public DataFlowUseCase dataFlowUseCase() {
         return new DataFlowUseCase();
     }
 
     @Bean
-    public UploadUseCase uploadUseCase(){
+    public UploadUseCase uploadUseCase() {
         return new UploadUseCase();
     }
 
@@ -175,4 +185,13 @@ public class CommonConfig implements WebMvcConfigurer {
         return new DataClassificationOptionUseCase();
     }
 
+    @Bean
+    public DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase() {
+        return new DatasetSimilarityRecordUseCase();
+    }
+
+    @Bean
+    public DatasetSimilarityJobUseCase datasetSimilarityJobUseCase() {
+        return new DatasetSimilarityJobUseCase();
+    }
 }

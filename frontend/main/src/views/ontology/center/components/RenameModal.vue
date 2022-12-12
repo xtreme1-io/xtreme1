@@ -40,10 +40,10 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   // 接口
-  import { updateOntologyApi } from '/@/api/business/ontology';
-  import { validateReName } from './formSchemas';
+  import { updateOntologyApi, validateOntologyNameApi } from '/@/api/business/ontology';
   import { SaveOntologyParams, UpdateOntologyParams } from '/@/api/business/model/ontologyModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { RuleObject } from 'ant-design-vue/es/form/interface';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -64,9 +64,28 @@
     e.target.setSelectionRange(0, e.target.value.length);
   };
   // 表单
+  const validateReName = async (_rule: RuleObject, value: string) => {
+    if (value === '') {
+      return Promise.reject(t('business.ontology.noOntologyName'));
+    }
+
+    const res = await validateOntologyNameApi({
+      name: value,
+      id: props.id as string,
+      type: formState.type,
+    });
+
+    if (!res) {
+      return Promise.resolve();
+    } else {
+      const text =
+        t('business.ontology.ontology') + ` “${value}” ` + t('business.ontology.hasExist');
+      return Promise.reject(text);
+    }
+  };
   const rules = {
     name: [
-      { validator: validateReName(props.id as string), trigger: 'change' },
+      { validator: validateReName, trigger: 'change' },
       { max: 256, message: t('business.ontology.maxLength') },
     ],
   };

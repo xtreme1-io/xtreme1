@@ -30,6 +30,17 @@
           <Icon style="color: #aaa" size="16" icon="ion:person-circle" />
           My Team
         </p>
+        <p
+          class="cursor-pointer p-3 m-0 hover:bg-blue-50"
+          @click="
+            () => {
+              handleGo(RouteEnum.Apis);
+            }
+          "
+        >
+          <Icon style="color: #aaa" size="16" icon="ion:person-circle" />
+          My APIs
+        </p>
         <Divider style="margin: 0" />
         <p class="cursor-pointer p-3 hover:bg-blue-50" @click="handleLoginOut">
           <Icon style="color: #aaa" icon="icomoon-free:exit" />

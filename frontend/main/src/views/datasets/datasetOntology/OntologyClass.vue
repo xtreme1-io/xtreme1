@@ -6,14 +6,21 @@
         <VirtualTab :list="tabListOntology" />
       </div>
       <div class="btn">
-        <HeaderDropdown :activeTab="activeTab" :datasetType="datasetType" />
+        <HeaderDropdown
+          :datasetType="datasetType"
+          :datasetId="datasetId"
+          @fetchList="handleRefresh"
+        />
       </div>
       <div class="mb-15px">
         <Action
+          :datasetType="datasetType"
+          :activeTab="activeTab"
           :selectedList="selectedList"
           :list="cardList"
           @selectAll="handleSelectAll"
           @unSelect="handleUnSelect"
+          @fetchList="handleRefresh"
         />
       </div>
       <div style="height: calc(100vh - 154px)">
@@ -23,6 +30,7 @@
             :cardType="CardTypeEnum.selector"
             :cardList="cardList"
             :activeTab="activeTab"
+            :isCenter="false"
             @edit="handleEdit"
             @create="handleOpenCreate"
             @handleSelected="handleSelected"
@@ -42,19 +50,15 @@
     <CreateClass
       @register="registerCreateClassModal"
       :detail="detail"
-      :activeTab="activeTab"
       :datasetType="datasetType"
       :datasetId="datasetId"
-      :classId="classId"
       @fetchList="handleRefresh"
     />
     <CreateClassification
       @register="registerCreateClassificationModal"
       :detail="detail"
-      :activeTab="activeTab"
       :datasetType="datasetType"
       :datasetId="datasetId"
-      :classificationId="classificationId"
       @fetchList="handleRefresh"
     />
   </div>
@@ -112,9 +116,6 @@
   const pageType = pathArr[pathArr.length - 1].toLocaleUpperCase();
 
   const datasetId = Number(route.query.id);
-  const ontologyId = ref<Nullable<number>>();
-  const classId = ref<number>();
-  const classificationId = ref<number>();
 
   /** Tab */
   const tabListDataset = [
@@ -177,7 +178,6 @@
       (detail.value as any) = null;
     }
     if (pageType == ClassTypeEnum.CLASS) {
-      console.log(detail, activeTab, datasetType, ontologyId);
       openCreateClassModal(true, { isEdit });
     } else {
       console.log('handleOpenCreate', isEdit);
@@ -193,10 +193,6 @@
       } else {
         detail.value = await getDatasetClassificationByIdApi({ id: id });
       }
-
-      ontologyId.value = detail.value?.ontologyId;
-      classId.value = detail.value?.classId;
-      classificationId.value = detail.value?.classificationId;
 
       handleOpenCreate(true);
     } catch (error: any) {
@@ -272,6 +268,7 @@
     unref(scrollRef)?.scrollTo(0);
     pageNo.value = 1;
     cardList.value = [];
+    selectedList.value = [];
     getList();
   };
   provide('handleRefresh', handleRefresh);
