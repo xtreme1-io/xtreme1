@@ -12,21 +12,25 @@
         </div>
       </div>
       <div class="flex pl-25px pr-25px">
-        <AutoComplete class="flex-1">
-          <template #dataSource>
-            <Select.Option v-for="email in result" :key="email">
-              {{ email }}
-            </Select.Option>
-          </template>
-        </AutoComplete>
+        <Select
+          v-model:value="result"
+          showSearch
+          mode="multiple"
+          style="flex: 1"
+          @change="handleChange"
+        >
+          <Select.Option v-for="item in options" :key="item.id" :value="item.id">
+            {{ item.name }}
+          </Select.Option>
+        </Select>
         <Button class="ml-20px" type="default">Export Result</Button>
       </div>
-      <!-- <div class="list">
+      <div class="list" v-if="list.length > 0">
         <div class="item">
           <Button type="primary">Annotate</Button>
         </div>
-      </div> -->
-      <div class="empty">
+      </div>
+      <div class="empty" v-else>
         <div class="text-center">
           <img class="inline-block mb-4" width="136" :src="datasetEmpty" alt="" />
           <div>Current Scenario is Empty</div>
@@ -46,14 +50,61 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { AutoComplete, Select } from 'ant-design-vue';
+  import { Select } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
+  import { datasetItemDetail, getDatasetClass, getScenario } from '/@/api/business/dataset';
+  import { useRoute } from 'vue-router';
+  const { query } = useRoute();
+  const { id } = query;
   const { prefixCls } = useDesign('searchScenario');
   // const { t } = useI18n();
   const result = ref();
+  const options = ref<any[]>(['gmail.com', '163.com', 'qq.com']);
+  const list = ref<any[]>([]);
+  const info = ref<any>();
+  const handleChange = (e) => {
+    if (e.length === 0) {
+      result.value = [];
+    } else if (e[1]) {
+      result.value = [e[1]];
+      fetchList(e[1]);
+    } else {
+      result.value = [e[0]];
+      fetchList(e[0]);
+    }
+  };
+
+  onMounted(() => {
+    getInfo();
+    fetchOption();
+  });
+
+  // const init = async () => {
+  //   info.value = await datasetItemDetail({ id: id as string });
+  //   // fetchList(info.value.type);
+  // };
+
+  const getInfo = async () => {
+    info.value = await datasetItemDetail({ id: id as string });
+  };
+
+  const fetchOption = async () => {
+    const list = await getDatasetClass(id);
+    options.value = list;
+  };
+
+  const fetchList = async (classId) => {
+    const res = await getScenario({
+      classId: classId,
+      datasetId: info.value.id,
+      datasetType: info.value.type,
+      source: 'DATASET_CLASS',
+    });
+    list.value = res;
+  };
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-searchScenario';
@@ -61,6 +112,9 @@
     color: #333;
     // background: #f2f5fa;
     display: flex;
+    .select-tag {
+      background: red;
+    }
     .content {
       flex: 1;
     }

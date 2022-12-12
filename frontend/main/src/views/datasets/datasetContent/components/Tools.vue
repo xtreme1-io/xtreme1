@@ -327,7 +327,7 @@
   };
 
   const handleGoSearch = () => {
-    go(RouteChildEnum.SEARCH_SCENARIO);
+    go(RouteChildEnum.SEARCH_SCENARIO + `?id=${id}`);
   };
 
   /** Export */
