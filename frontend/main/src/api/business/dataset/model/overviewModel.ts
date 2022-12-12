@@ -1,3 +1,4 @@
+import { ToolTypeEnum } from '../../model/classesModel';
 export interface IDataStatus {
   datasetId: string;
   annotatedCount: number;
@@ -8,7 +9,18 @@ export interface IDataStatus {
 }
 
 export interface IClassObject {
-  id: number;
+  classUnits: IClassUnits[];
+  toolTypeUnits: IToolTypeUnits[];
+}
+export interface IClassUnits {
+  color: string;
+  name: string;
+  objectAmount: number;
+  toolType: ToolTypeEnum;
+}
+export interface IToolTypeUnits {
+  objectAmount: number;
+  toolType: ToolTypeEnum;
 }
 
 export interface IClassificationData {

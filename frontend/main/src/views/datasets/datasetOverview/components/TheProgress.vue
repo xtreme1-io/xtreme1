@@ -12,7 +12,7 @@
       </div>
       <div class="box">
         <div class="icon">
-          <SvgIcon name="dataset-overview-annotation" :size="22" />
+          <SvgIcon name="dataset-overview-annotation" :size="22" style="color: #fff" />
         </div>
         <div class="data">
           <div class="num">{{ totalAnnotations }}</div>

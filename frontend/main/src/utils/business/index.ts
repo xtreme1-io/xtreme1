@@ -55,3 +55,9 @@ export const handleToast = (list, action) => {
 export const countFormat = (num) => {
   return num > 999 ? '999+' : num;
 };
+
+export const formatEnum = (string) => {
+  return string && string.slice
+    ? string.slice(0, 1) + string.slice(1, string.length).toLowerCase().split('_').join(' ')
+    : '';
+};

@@ -1,4 +1,6 @@
 import { pieDataEnum } from './typing';
+import { toolTypeImg } from '../../../ontology/classes/attributes/data';
+
 export const defaultPieOptions = {
   appendPadding: 10,
   angleField: 'count',
@@ -111,12 +113,21 @@ export const defaultScatterOptions = {
   },
 };
 
-export const defaultBarOptions = {
-  xField: 'sales',
-  yField: 'type',
-  seriesField: 'type',
-  color: ({ type }) => {
-    return type === '美容洗护' ? '#FAAD14' : '#5B8FF9';
+export const classificationBarOptions = {
+  xField: 'dataAmount',
+  yField: 'yKey', // attributeId + ':' + name
+  yAxis: {
+    label: {
+      formatter: (text) => {
+        return `${text.split(':')[1]}`;
+      },
+    },
+  },
+  domStyles: {
+    'g2-tooltip-value': {
+      float: 'none',
+      'margin-left': 0,
+    },
   },
   legend: {
     position: 'top-left',
@@ -127,58 +138,55 @@ export const defaultBarOptions = {
         return {
           ...oldStyle,
           r: 6,
-          // fill: oldStyle.stroke || oldStyle.fill,
         };
       },
     },
   },
-  meta: {
-    type: {
-      alias: '类别',
-    },
-    sales: {
-      alias: '销售额',
-    },
-  },
+  minBarWidth: 20,
+  maxBarWidth: 20,
 };
 
-export const pieData = [
-  { type: 'Annotated', value: 27 },
-  { type: 'Not Annotated', value: 25 },
-  { type: 'Invalid', value: 18 },
-];
+export const classOptions = {
+  xField: 'objectAmount',
+  yField: 'yKey', // toolType + ':' + name
+  seriesField: 'color',
+  yAxis: {
+    title: {
+      offset: 220,
+      text: '',
+    },
+    label: {
+      offset: 30,
+      formatter: (text) => {
+        return `${text.split(':')[1]}`;
+      },
+    },
+  },
+  tooltip: {
+    position: 'bottom',
+    shared: false,
+    showTitle: false,
+    customContent: (_, items) => {
+      const data = items[0]?.data || {};
 
-export const barData = [
-  {
-    type: '家具家电',
-    sales: 38,
+      const titleDom = `<div class="flex">
+                          <span class="w-12px h-12px rounded-12px mr-10px" style="background-color: ${
+                            data.color
+                          }"></span>
+                          <span class="w-12px h-12px mr-4px">
+                            <img src="${toolTypeImg[data.toolType]}" />
+                          </span>
+                          <span class="text-12px" style="color:#333">${data.name}</span>
+                        </div>`;
+      const tempDom = `<div style="color:#666">Counts: ${data.objectAmount}</div>`;
+
+      return `<div class="flex flex-col gap-8px py-12px">
+                ${titleDom}
+                ${tempDom}
+              </div>`;
+    },
   },
-  {
-    type: '粮油副食',
-    sales: 52,
-  },
-  {
-    type: '生鲜水果',
-    sales: 61,
-  },
-  {
-    type: '美容洗护',
-    sales: 145,
-  },
-  {
-    type: '母婴用品',
-    sales: 48,
-  },
-  {
-    type: '进口食品',
-    sales: 38,
-  },
-  {
-    type: '食品饮料',
-    sales: 38,
-  },
-  {
-    type: '家庭清洁',
-    sales: 38,
-  },
-];
+  legend: false,
+  minBarWidth: 20,
+  maxBarWidth: 20,
+};

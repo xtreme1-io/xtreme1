@@ -1,4 +1,4 @@
-import { IDataStatus } from './model/overviewModel';
+import { IClassificationData, IClassObject, IDataStatus } from './model/overviewModel';
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
@@ -17,7 +17,7 @@ export const getDataStatusApi = (params: { datasetId: number }) =>
   });
 
 export const getClassObjectApi = (params: { datasetId: number }) =>
-  defHttp.get<IDataStatus>({
+  defHttp.get<IClassObject>({
     url: `${Api.DATASET}/${params.datasetId}/statistics/classObject`,
     params,
     headers: {
@@ -27,7 +27,7 @@ export const getClassObjectApi = (params: { datasetId: number }) =>
   });
 
 export const getClassificationDataApi = (params: { datasetId: number }) =>
-  defHttp.get<IDataStatus>({
+  defHttp.get<Array<IClassificationData>>({
     url: `${Api.DATASET}/${params.datasetId}/statistics/classificationData`,
     params,
     headers: {

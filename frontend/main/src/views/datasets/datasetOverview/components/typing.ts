@@ -7,3 +7,8 @@ export enum pieDataEnum {
   NOT_ANNOTATED = 'Not Annotated',
   INVALID = 'Invalid',
 }
+
+export enum tabPaneEnum {
+  CLASS = 'Class',
+  CLASSIFICATION = 'Classification',
+}
