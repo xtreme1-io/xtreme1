@@ -81,6 +81,7 @@
     ],
     showIndexColumn: false,
     pagination: true,
+    canResize: false,
     actionColumn: {
       width: '50%',
       title: 'Resolution',
