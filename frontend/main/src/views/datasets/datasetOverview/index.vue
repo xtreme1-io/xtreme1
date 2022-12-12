@@ -4,9 +4,9 @@
       <VirtualTab :list="tabList" />
     </div>
     <div class="content">
-      <TheProgress />
-      <TheSimilarity />
-      <TheDistribution />
+      <TheProgress :datasetId="(id as unknown as number)" />
+      <TheSimilarity :datasetId="id as unknown as number" />
+      <TheDistribution :datasetId="(id as unknown as number)" />
     </div>
   </div>
 </template>

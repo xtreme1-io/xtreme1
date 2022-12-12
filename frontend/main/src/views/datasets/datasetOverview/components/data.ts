@@ -1,13 +1,14 @@
+import { pieDataEnum } from './typing';
 export const defaultPieOptions = {
   appendPadding: 10,
-  angleField: 'value',
+  angleField: 'count',
   colorField: 'type',
   radius: 1,
   innerRadius: 0.6,
   color: ({ type }) => {
-    if (type === 'Annotated') {
+    if (type === pieDataEnum.ANNOTATED) {
       return '#60A9FE';
-    } else if (type == 'Not Annotated') {
+    } else if (type == pieDataEnum.NOT_ANNOTATED) {
       return '#AAAAAA';
     } else {
       return '#FCB17A';
@@ -17,17 +18,6 @@ export const defaultPieOptions = {
     type: 'inner',
     style: {
       fontSize: 0,
-    },
-  },
-  tooltip: {
-    position: 'bottom',
-    shared: false,
-    title: 'Progress',
-    formatter: (data) => {
-      return {
-        name: data.type,
-        value: Math.round(data.value * 100) + '%',
-      };
     },
   },
   interactions: [{ type: 'element-selected' }, { type: 'element-active' }],

@@ -40,9 +40,9 @@ export const classOptions = {
   yAxis: {
     label: {
       formatter: (text) => {
-        return `【${text}】`;
+        return `【${text}】♤♡♢♧`;
       },
-      content: 'color',
+      // content: 'color',
     },
   },
   // },
