@@ -2,7 +2,7 @@
   <div :class="`${prefixCls}`">
     <div class="content">
       <div class="flex p-25px">
-        <div class="mr-24px">
+        <div class="mr-24px cursor-pointer" @click="handleBack">
           <Icon icon="material-symbols:arrow-back" />
           Back
         </div>
@@ -95,6 +95,10 @@
       result.value = [e[0]];
       fetchList(e[0]);
     }
+  };
+
+  const handleBack = () => {
+    window.history.go(-1);
   };
 
   onMounted(() => {
