@@ -334,7 +334,7 @@ export const getDataByIds = (params: any) =>
   });
 
 export const getDatasetClass = (id) =>
-  defHttp.get<ResponseUploadRecord[]>({
+  defHttp.get<any>({
     url: `${Api.DATASET_CLASS}/findAll/${id}`,
     headers: {
       // @ts-ignore

@@ -72,7 +72,7 @@
   } from '/@/api/business/dataset';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
-  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { datasetTypeEnum, DatasetGetResultModel } from '/@/api/business/model/datasetModel';
   const { query } = useRoute();
   const { id } = query;
   const { prefixCls } = useDesign('searchScenario');
@@ -84,6 +84,7 @@
   const dataInfo = ref<Record<string, any>>({});
   const object2D = ref<Record<string, any>>({});
 
+  const dataList = ref();
   const handleChange = (e) => {
     if (e.length === 0) {
       result.value = [];
