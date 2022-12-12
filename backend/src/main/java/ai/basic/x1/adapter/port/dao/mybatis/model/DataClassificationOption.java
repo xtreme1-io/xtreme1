@@ -51,4 +51,10 @@ public class DataClassificationOption {
 
     @TableField(exist = false)
     private Long dataAmount;
+
+    @TableField(exist = false, typeHandler = JacksonTypeHandler.class)
+    private List<List<String>> optionPaths;
+
+    @TableField(exist = false)
+    private Integer optionCount;
 }
