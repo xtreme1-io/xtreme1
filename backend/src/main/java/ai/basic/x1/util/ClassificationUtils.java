@@ -3,16 +3,12 @@ package ai.basic.x1.util;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataClassificationOption;
 import ai.basic.x1.entity.DataAnnotationBO;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**

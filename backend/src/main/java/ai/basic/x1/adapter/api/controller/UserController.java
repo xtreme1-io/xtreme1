@@ -28,6 +28,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
 /**
@@ -137,6 +138,8 @@ public class UserController extends BaseController {
         if (StringUtils.hasLength(createApiToken.getExpireAt())) {
             try {
                 expireAt = OffsetDateTime.parse(createApiToken.getExpireAt());
+                expireAt = OffsetDateTime.of(expireAt.toLocalDate(), LocalTime.MIDNIGHT,
+                        expireAt.getOffset());
             } catch (Exception e) {
                 throw new UsecaseException(UsecaseCode.UNKNOWN, "The date format is incorrect");
             }
