@@ -121,8 +121,9 @@
       handleConfirm();
     }
   };
-  const handleCopyAll = async (ontologyId: number, type: ICopyEnum) => {
-    selectedOntologyId.value = ontologyId;
+  const handleCopyAll = async (type: ICopyEnum, ontologyId?: number) => {
+    if (ontologyId) selectedOntologyId.value = ontologyId;
+
     await getSelectedOntologyList();
 
     const { conflictClassList, conflictClassificationList } = await getAllConflictResolution(

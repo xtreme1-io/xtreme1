@@ -19,6 +19,7 @@
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
   import { defaultBarOptions } from './data';
   import { barData } from './data';
+  import { classOptions } from './classData';
 
   enum tabPaneEnum {
     CLASS = 'Class',
@@ -36,8 +37,8 @@
 
   onMounted(async () => {
     setPlot(PlotEnum.BAR, plotClassRef.value, {
-      data: barData,
-      ...defaultBarOptions,
+      // data: list,
+      ...classOptions,
     });
 
     setPlot(PlotEnum.BAR, plotClassificationRef.value, {

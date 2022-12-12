@@ -90,7 +90,7 @@
 
   /** Copy All */
   const handleCopyAll = () => {
-    emits('copyAll', selectedOntologyId.value, ICopyEnum.ONTOLOGY);
+    emits('copyAll', ICopyEnum.ONTOLOGY, selectedOntologyId.value);
     closeModal();
   };
 
