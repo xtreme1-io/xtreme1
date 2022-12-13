@@ -12,3 +12,8 @@ export enum tabPaneEnum {
   CLASS = 'Class',
   CLASSIFICATION = 'Classification',
 }
+
+export enum brushEnum {
+  RECT = 'rect',
+  PATH = 'path',
+}

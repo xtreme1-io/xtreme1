@@ -61,8 +61,6 @@
     const notAnnotatedData = { type: pieDataEnum.NOT_ANNOTATED, count: notAnnotatedCount };
     const invalidData = { type: pieDataEnum.INVALID, count: invalidCount };
     pieData.value = [annotatedData, notAnnotatedData, invalidData];
-
-    console.log(pieData.value);
   };
 
   onMounted(async () => {

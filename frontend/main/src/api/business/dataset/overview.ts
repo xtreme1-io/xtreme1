@@ -3,7 +3,7 @@ import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
   DATASET = '/dataset',
-  DATA = '/data',
+  SIMILAR = '/datasetSimilarityRecord',
 }
 
 export const getDataStatusApi = (params: { datasetId: number }) =>
@@ -29,6 +29,29 @@ export const getClassObjectApi = (params: { datasetId: number }) =>
 export const getClassificationDataApi = (params: { datasetId: number }) =>
   defHttp.get<Array<IClassificationData>>({
     url: `${Api.DATASET}/${params.datasetId}/statistics/classificationData`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getSimilarityRecordApi = (params: { datasetId: string }) =>
+  defHttp.get<Array<IClassificationData>>({
+    url: `${Api.SIMILAR}/${params.datasetId}`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getSimilarityClassificationApi = (params: {
+  datasetId: string;
+  classificationId: string;
+}) =>
+  defHttp.get<Array<IClassificationData>>({
+    url: `${Api.SIMILAR}/${params.datasetId}/${params.classificationId}`,
     params,
     headers: {
       // @ts-ignore

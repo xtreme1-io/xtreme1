@@ -71,7 +71,6 @@
 
       itemLength += length;
       const line = (itemLength / dataLength) * 100 + '%';
-      console.log(line);
       unref(annotations).push({
         type: 'line',
         top: true,

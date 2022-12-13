@@ -1,10 +1,29 @@
 <template>
   <div class="chart_wrapper">
     <div class="title">Data Similarity Map</div>
-    <div>
-      <div>
-        <span className="select-label">Brush Type</span>
-        <Select v-model:value="brush" @change="handleChange" :options="brushOptions" />
+    <div class="flex justify-between">
+      <div class="flex gap-4px items-center">
+        <span className="select-label">Display By</span>
+        <Select
+          style="width: 200px"
+          :value="selectClassificationId"
+          @change="handleChangeClassification"
+        >
+          <Select.Option v-for="item in classificationList" :key="item.id">
+            {{ item.name }}
+          </Select.Option>
+        </Select>
+      </div>
+      <div class="flex gap-4px items-center">
+        <span className="select-label">Select data by</span>
+        <Radio.Group :value="selectedBrush" @change="handleChangeBrush">
+          <Radio.Button :value="brushEnum.PATH">
+            <div class="flex item-center"><SvgIcon name="dataset-overview-path" :size="24" /></div>
+          </Radio.Button>
+          <Radio.Button :value="brushEnum.RECT">
+            <div class="flex item-center"><SvgIcon name="dataset-overview-rect" :size="24" /></div>
+          </Radio.Button>
+        </Radio.Group>
       </div>
     </div>
     <div class="chartContainer">
@@ -14,37 +33,54 @@
 </template>
 <script lang="ts" setup>
   import { onMounted, ref } from 'vue';
-  import { Select } from 'ant-design-vue';
+  import { Select, Radio } from 'ant-design-vue';
+  import { SvgIcon } from '/@/components/Icon';
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
   import { defaultScatterOptions } from './data';
   import { arr } from './scatter';
+  import { getSimilarityRecordApi } from '/@/api/business/dataset/overview';
+  import { getDatasetClassificationAllApi } from '/@/api/business/classes';
+  import { brushEnum } from './typing';
+
+  const props = defineProps<{ datasetId: number | string }>();
 
   const { setPlot } = useG2plot();
   const plotRef = ref<HTMLElement | null>(null);
 
-  const brushOptions = [
-    {
-      value: 'rect',
-      label: 'rect',
-    },
-    {
-      value: 'path',
-      label: 'path',
-    },
-  ];
-  const brush = ref<string>('rect');
-  const handleChange = (v) => {
-    console.log(v);
-    const plot = chartRef.value;
-    console.log(plot);
-    if (plot) {
-      plot.update({ brush: { type: v } });
-    }
+  /** Classification List */
+  const selectClassificationId = ref<number>();
+  const classificationList = ref<any[]>([]);
+  const getClassificationList = async () => {
+    const params = { datasetId: props.datasetId as string };
+    const res = await getDatasetClassificationAllApi(params);
+    classificationList.value = [...res];
+  };
+  const handleChangeClassification = (value) => {
+    selectClassificationId.value = value;
+  };
+
+  /** Brush */
+  const selectedBrush = ref<brushEnum>();
+  const handleChangeBrush = ({ target }) => {
+    selectedBrush.value = target.value;
+    console.log(selectedBrush.value);
+
+    // const plot = chartRef.value;
+    // if (plot) {
+    //   plot.update({ brush: { type: value } });
+    // }
+  };
+
+  const getSimilarityRecord = async () => {
+    const params = { datasetId: props.datasetId as string };
+    const res = await getSimilarityRecordApi(params);
+    console.log(res);
   };
 
   const chartRef = ref<any>();
   onMounted(async () => {
-    console.log(arr.length);
+    await getClassificationList();
+    await getSimilarityRecord();
 
     chartRef.value = setPlot(PlotEnum.SCATTER, plotRef.value, {
       data: arr,
@@ -56,6 +92,33 @@
   @import './index.less';
   .chartContainer__box {
     width: 90%;
+  }
+  :deep(.ant-radio-group) {
+    border-radius: 300px;
+    border: 2px solid #e6f0fe;
+    .ant-radio-button-wrapper {
+      border: none;
+      &:nth-child(1) {
+        border-right: none;
+        border-radius: 300px 0 0 300px;
+      }
+      &:nth-child(2) {
+        border-left: none;
+        border-radius: 0 300px 300px 0;
+      }
+      &::before {
+        display: none;
+      }
+      span {
+        &:nth-child(2) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+    }
   }
 </style>
 <style>
