@@ -54,22 +54,36 @@
           <SvgIcon name="reload" />
         </div>
       </div>
+      <div>
+        <Radio.Group v-model:value="classification">
+          <Radio
+            v-for="item in filterOptions"
+            style="display: block"
+            :value="item.attributeId + '^' + item.optionName"
+            :key="item.attributeId + '^' + item.optionName"
+          >
+            {{ item.optionName }}
+          </Radio>
+          <!-- <Radio cstyle="display: block" :value="11">11111</Radio> -->
+        </Radio.Group>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Select } from 'ant-design-vue';
+  import { Select, Radio } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import {
     datasetItemDetail,
     getDatasetClass,
     getScenario,
     getDataByIds,
+    getClassificationOptions,
   } from '/@/api/business/dataset';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
@@ -85,18 +99,23 @@
   const options = ref<any[]>(['gmail.com', '163.com', 'qq.com']);
   const list = ref<any[]>([]);
   const info = ref<any>();
+  const classification = ref();
+  const filterOptions = ref();
   const dataInfo = ref<Record<string, any>>({});
   const object2D = ref<Record<string, any>>({});
 
   const handleChange = (e) => {
     if (e.length === 0) {
       result.value = [];
+      filterOptions.value = [];
     } else if (e[1]) {
       result.value = [e[1]];
-      fetchList(e[1]);
+      fetchList();
+      getOptions(e[1]);
     } else {
       result.value = [e[0]];
-      fetchList(e[0]);
+      fetchList();
+      getOptions(e[0]);
     }
   };
 
@@ -104,15 +123,19 @@
     window.history.go(-1);
   };
 
+  watch(classification, (res) => {
+    fetchList();
+  });
+
   onMounted(() => {
     getInfo();
     fetchOption();
   });
 
-  // const init = async () => {
-  //   info.value = await datasetItemDetail({ id: id as string });
-  //   // fetchList(info.value.type);
-  // };
+  const getOptions = async (id) => {
+    filterOptions.value = await getClassificationOptions({ classId: id as string });
+    // fetchList(info.value.type);
+  };
 
   const getInfo = async () => {
     info.value = await datasetItemDetail({ id: id as string });
@@ -123,13 +146,16 @@
     options.value = list;
   };
 
-  const fetchList = async (classId) => {
+  const fetchList = async () => {
+    console.log(classification.value);
     const res = await getScenario({
-      classId: classId,
+      classId: result.value.toString(),
       datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'DATASET_CLASS',
       pageSize: 999,
+      attributeId: classification.value ? classification.value.split('^')[0] : undefined,
+      optionName: classification.value ? classification.value.split('^')[1] : undefined,
     });
     const _list: any[] = [];
     const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))

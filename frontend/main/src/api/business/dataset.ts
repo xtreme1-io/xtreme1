@@ -361,3 +361,13 @@ export const createByScenario = (params) =>
       ignoreCancelToken: true,
     },
   });
+
+export const getClassificationOptions = (params) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/classificationOption/findAll`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
