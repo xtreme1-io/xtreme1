@@ -26,8 +26,17 @@
         <Button class="ml-20px" type="default">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
-        <div class="item">
-          <Button type="primary">Annotate</Button>
+        <div class="item" v-for="item in list" :key="item.dataId">
+          <SearchCard
+            :info="info"
+            :object2D="object2D"
+            :data="dataInfo[item.dataId]"
+            :object="item"
+          >
+            <Button @click="() => handleSingleAnnotate(item.dataId)" type="primary"
+              >Annotate</Button
+            >
+          </SearchCard>
         </div>
       </div>
       <div class="empty" v-else>
@@ -55,8 +64,15 @@
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
   import { onMounted, ref } from 'vue';
-  import { datasetItemDetail, getDatasetClass, getScenario } from '/@/api/business/dataset';
+  import {
+    datasetItemDetail,
+    getDatasetClass,
+    getScenario,
+    getDataByIds,
+  } from '/@/api/business/dataset';
+  import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   const { query } = useRoute();
   const { id } = query;
   const { prefixCls } = useDesign('searchScenario');
@@ -65,6 +81,9 @@
   const options = ref<any[]>(['gmail.com', '163.com', 'qq.com']);
   const list = ref<any[]>([]);
   const info = ref<any>();
+  const dataInfo = ref<Record<string, any>>({});
+  const object2D = ref<Record<string, any>>({});
+
   const handleChange = (e) => {
     if (e.length === 0) {
       result.value = [];
@@ -102,8 +121,46 @@
       datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'DATASET_CLASS',
+      pageSize: 999,
     });
-    list.value = res;
+    const _list: any[] = [];
+    const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))
+      .filter((item: any) => !dataInfo.value[item])
+      .toString();
+    if (dataIds.length) {
+      const datas = await getDataByIds({
+        datasetId: info.value.id,
+        dataIds: dataIds,
+      });
+      datas.reduce((info, item) => {
+        info[item.id] = item;
+        return info;
+      }, dataInfo.value);
+    }
+    if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
+      const obj2dMap = {};
+      res.list.forEach((item: any) => {
+        const type = item.classAttributes.type || item.classAttributes.objType;
+        const info = item.classAttributes;
+        if (['2D_RECT', '2D_BOX', 'rect', 'box2d'].includes(type)) {
+          if (!obj2dMap[info.trackId]) {
+            obj2dMap[info.trackId] = [];
+          }
+          obj2dMap[info.trackId].push(item);
+        } else {
+          _list.push(item);
+        }
+      });
+      Object.assign(object2D.value, obj2dMap);
+      object2D.value = obj2dMap;
+      list.value = _list;
+    } else {
+      list.value = res.list;
+    }
+  };
+
+  const handleSingleAnnotate = async (dataId: any) => {
+    console.log(dataId);
   };
 </script>
 <style lang="less" scoped>
@@ -126,12 +183,14 @@
       padding: 12px;
       border-radius: 8px;
       .item {
-        width: 227px;
+        width: 240px;
         height: 240px;
-        background-color: red;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background-color: white;
+        display: inline-block;
+        margin: 6px;
+        position: relative;
+        border-radius: 6px;
+        overflow: hidden;
       }
     }
     .empty {

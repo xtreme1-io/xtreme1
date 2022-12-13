@@ -97,6 +97,10 @@
             </Menu>
           </template>
         </Dropdown>
+        <div class="check">
+          <Checkbox class="small" :checked="showAnnotation" @change="onShowAnnotation" />
+          <span class="inline-block ml-2">Preview annotation objects</span>
+        </div>
       </div>
       <div class="view-actions" v-if="false">
         <div class="num-wrapper">
@@ -188,7 +192,7 @@
   import { useRoute } from 'vue-router';
   import { RouteChildEnum } from '/@/enums/routeEnum';
 
-  import { Slider, Dropdown, Menu, Divider, Progress, Tooltip } from 'ant-design-vue';
+  import { Slider, Dropdown, Menu, Divider, Progress, Tooltip, Checkbox } from 'ant-design-vue';
   import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon/index';
   import { Button, ButtonSize } from '/@@/Button';
@@ -266,6 +270,7 @@
     groundTruthsOption: any;
     modelrunOption: ModelListItem[];
     filterForm: any;
+    showAnnotation: boolean;
     datasetType: datasetTypeEnum | undefined;
   }>();
 
@@ -290,6 +295,7 @@
     'handleMakeFrame',
     'handleMultipleFrame',
     'handleModelRun',
+    'update:showAnnotation',
   ]);
 
   const reloadList = () => {
@@ -443,6 +449,9 @@
   const collState = ref(true);
   const handleColl = () => {
     collState.value = !unref(collState);
+  };
+  const onShowAnnotation = (e: any) => {
+    emits('update:showAnnotation', e.target.checked);
   };
 </script>
 <style lang="less" scoped>

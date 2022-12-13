@@ -111,6 +111,8 @@ export interface fileItem {
   createdAt: string;
   updatedAt: string;
   mediumThumbnail?: imgUrlObj;
+  largeThumbnail?: imgUrlObj;
+  extraInfo?: any;
   url: string;
   renderImage?: imgUrlObj;
 }

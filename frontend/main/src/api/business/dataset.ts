@@ -314,8 +314,18 @@ export const hasOntologyApi = (params: { datasetId: number }) =>
   });
 
 export const getScenario = (params: any) =>
-  defHttp.get<ResponseUploadRecord[]>({
+  defHttp.get<any>({
     url: `${Api.DATA}/findByScenarioPage`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getDataByIds = (params: any) =>
+  defHttp.get<any[]>({
+    url: `${Api.DATA}/listByIds`,
     params,
     headers: {
       // @ts-ignore
