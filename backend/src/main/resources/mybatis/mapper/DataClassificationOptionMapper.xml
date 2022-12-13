@@ -4,17 +4,25 @@
 
 
     <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.DataClassificationOption">
-        <id column="id" property="id" />
-        <result column="dataset_id" property="datasetId" />
-        <result column="data_id" property="dataId" />
-        <result column="classification_id" property="classificationId" />
-        <result column="attribute_id" property="attributeId" />
-        <result column="option_name" property="optionName" />
-        <result column="option_path" property="optionPath" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
-        <result column="created_at" property="createdAt" />
-        <result column="created_by" property="createdBy" />
-        <result column="updated_at" property="updatedAt" />
-        <result column="updated_by" property="updatedBy" />
+        <id column="id" property="id"/>
+        <result column="dataset_id" property="datasetId"/>
+        <result column="data_id" property="dataId"/>
+        <result column="classification_id" property="classificationId"/>
+        <result column="attribute_id" property="attributeId"/>
+        <result column="option_name" property="optionName"/>
+        <result column="option_path" property="optionPath"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <resultMap id="DatasetResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.DataClassificationOption"
+               extends="BaseResultMap">
+        <result column="option_paths" property="optionPaths"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="option_count" property="optionCount"/>
     </resultMap>
 
     <!-- generic query result colum -->
@@ -27,7 +35,7 @@
         INSERT INTO data_classification_option (dataset_id, data_id, classification_id,
         attribute_id, option_name, option_path, created_by)
         VALUES
-        <foreach collection="list" item="item"  separator=",">
+        <foreach collection="list" item="item" separator=",">
             (
             #{item.datasetId},
             #{item.dataId},
@@ -41,29 +49,23 @@
     </insert>
 
     <select id="statisticsDataByOption" resultMap="BaseResultMap">
-        SELECT cdss.*, tmp.dataAmount
-        FROM data_classification_option cdss INNER JOIN data d ON cdss.data_id = d.id
-                 INNER JOIN (
-            SELECT attribute_id, count(*) as dataAmount
-            FROM dataset_classification dc
-                     INNER JOIN data_classification_option cds
-                                ON dc.id = cds.classification_id
-            WHERE cds.dataset_id = #{datasetId}
-            GROUP BY cds.attribute_id, cds.option_name
-            ORDER BY dataAmount DESC
-        ) AS tmp ON cdss.attribute_id = tmp.attribute_id
-        WHERE cdss.dataset_id = #{datasetId} AND d.is_deleted = false
+        SELECT attribute_id, option_name, count(*) as dataAmount
+        FROM data d
+                 INNER JOIN data_classification_option cds
+                            ON d.id = cds.data_id
+        WHERE cds.dataset_id = #{datasetId} AND d.is_deleted = FALSE
+        GROUP BY cds.attribute_id, cds.option_name
+        ORDER BY dataAmount DESC
     </select>
 
-    <select id="findByClassIds" resultMap="BaseResultMap">
-        select cdss.*
-        from data_classification_option cdss INNER JOIN data_annotation_object dao
-            ON cdss.data_id = dao.data_id
-        where dao.class_id IN
-        <foreach collection="classIds" item="classId" open="(" separator="," close=")">
-            #{classId}
-        </foreach>
-    </select>
+    <select id="statisticsDatasetDataClassification" resultMap="DatasetResultMap">
+        SELECT data_id, attribute_id,
+            GROUP_CONCAT(option_name) AS option_name,
+            CONCAT('[',GROUP_CONCAT(option_path),']')AS option_paths,
+            count(*) as option_count
+        FROM data_classification_option
+        WHERE dataset_id=#{datasetId} AND classification_id =#{classificationId} GROUP BY data_id,attribute_id
 
+    </select>
 
 </mapper>

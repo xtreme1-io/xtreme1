@@ -38,8 +38,6 @@ export default class Editor extends BaseEditor {
             classMap[e.name] = e;
         });
         let dataInfos = [] as any[];
-        let dataAnnotations = [] as any[];
-        let classValueInfos = [] as any[];
         let queryTime = frames[0].queryTime;
         frames.forEach((dataMeta) => {
             // if (dataMeta.skipped) return;
@@ -98,21 +96,6 @@ export default class Editor extends BaseEditor {
             this.showMsg('error', this.lang('save-error'));
         }
         bsState.saving = false;
-
-        // tool
-        function isAttrVisible(
-            attr: IClassificationAttr,
-            attrMap: Record<string, IClassificationAttr>,
-        ): boolean {
-            if (!attr.parent) return true;
-            let parentAttr = attrMap[attr.parent];
-            let visible =
-                parentAttr.type !== AttrType.MULTI_SELECTION
-                    ? parentAttr.value === attr.parentValue
-                    : (parentAttr.value as any[]).indexOf(attr.parentValue) >= 0;
-
-            return visible && isAttrVisible(parentAttr, attrMap);
-        }
     }
 
     updateBackId(keyMap: Record<string, Record<string, string>>) {

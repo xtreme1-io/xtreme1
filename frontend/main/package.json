@@ -20,7 +20,7 @@
   "dependencies": {
     "@ant-design/colors": "^6.0.0",
     "@ant-design/icons-vue": "^6.0.1",
-    "@antv/g2plot": "^2.4.22",
+    "@antv/g2plot": "^2.4.23",
     "@apollo/client": "^3.5.7",
     "@iconify/iconify": "^2.0.4",
     "@logicflow/core": "^1.0.6",
@@ -49,6 +49,7 @@
     "resize-observer-polyfill": "^1.5.1",
     "sortablejs": "^1.14.0",
     "stylelint-config-recommended-vue": "^1.1.0",
+    "three": "^0.147.0",
     "tiny-emitter": "^2.1.0",
     "tinymce": "^5.10.3",
     "v3-color-picker": "^1.0.3",

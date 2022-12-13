@@ -6,8 +6,6 @@ import ai.basic.x1.adapter.port.dao.UserTokenDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.UserToken;
 import ai.basic.x1.entity.UserTokenBO;
 import ai.basic.x1.entity.enums.TokenType;
-import ai.basic.x1.usecase.exception.UsecaseCode;
-import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -70,10 +68,6 @@ public class UserTokenUseCase {
                                 TokenType tokenType) {
         Date expireDate = null;
         if (expireAt != null) {
-            if (OffsetDateTime.now().isAfter(expireAt)) {
-                throw new UsecaseException(UsecaseCode.UNKNOWN, "expireAt " + expireAt + " is " +
-                        "less than the " + OffsetDateTime.now());
-            }
             expireDate = new Date(expireAt.toInstant().toEpochMilli());
         }
 

@@ -45,6 +45,7 @@ export function execute(): IPageHandler {
 
             // load first data
             await editor.loadFrame(0, false);
+            focusObject();
         } catch (error: any) {
             editor.handleErr(error, editor.lang('load-error'));
         }
@@ -52,6 +53,13 @@ export function execute(): IPageHandler {
         editor.showLoading(false);
         if (bsState.query.type === 'modelRun') {
             editor.dataManager.pollDataModelResult();
+        }
+    }
+
+    function focusObject(){
+        let trackId = editor.bsState.query.focus;
+        if(trackId){
+            editor.selectByTrackId(trackId);
         }
     }
 

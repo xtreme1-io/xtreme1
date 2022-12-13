@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import lombok.Data;
 
@@ -31,7 +32,7 @@ public class DataResultObjectExportBO {
     /**
      * Class values
      */
-    private JSONObject classValues;
+    private JSONArray classValues;
 
     /**
      * Profile information

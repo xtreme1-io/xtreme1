@@ -27,6 +27,7 @@ import { BasicIdParams } from '/@/api/model/baseModel';
 enum Api {
   DATASET = '/dataset',
   DATA = '/data',
+  DATASET_CLASS = '/datasetClass',
 }
 
 /**
@@ -306,6 +307,25 @@ export const hasOntologyApi = (params: { datasetId: number }) =>
   defHttp.get<ResponseUploadRecord[]>({
     url: `${Api.DATASET}/findOntologyIsExistByDatasetId`,
     params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getScenario = (params: any) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATA}/findByScenarioPage`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getDatasetClass = (id) =>
+  defHttp.get<ResponseUploadRecord[]>({
+    url: `${Api.DATASET_CLASS}/findAll/${id}`,
     headers: {
       // @ts-ignore
       ignoreCancelToken: true,

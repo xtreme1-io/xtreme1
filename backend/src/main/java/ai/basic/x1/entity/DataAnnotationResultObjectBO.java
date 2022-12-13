@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import lombok.Data;
 
@@ -42,7 +43,7 @@ public class DataAnnotationResultObjectBO {
     /**
      * Selected type attribute value
      */
-    private JSONObject classValues;
+    private JSONArray classValues;
 
     /**
      * Profile information

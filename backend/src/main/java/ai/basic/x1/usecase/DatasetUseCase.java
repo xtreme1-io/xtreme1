@@ -207,10 +207,10 @@ public class DatasetUseCase {
             dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
             dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
-            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId,id);
+            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId, id);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
             var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
-            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId,id);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId, id);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
         })));
     }
@@ -277,46 +277,52 @@ public class DatasetUseCase {
         var datasetBO = DatasetBO.builder().name(datasetScenarioBO.getDatasetName()).type(datasetScenarioBO.getDatasetType()).build();
         var newDatasetBO = create(datasetBO);
         var datasetId = newDatasetBO.getId();
-        var newClassId = datasetClassUseCase.copyClassesToNewDataset(datasetId, datasetScenarioBO.getOntologyClassId(), datasetScenarioBO.getSource());
-        var scenarioQueryBO = DefaultConverter.convert(datasetScenarioBO, ScenarioQueryBO.class);
-        scenarioQueryBO.setPageSize(PAGE_SIZE_100);
-        var i = 1;
-        while (true) {
-            scenarioQueryBO.setPageNo(i);
-            var page = dataAnnotationObjectUseCase.findDataIdByScenarioPage(scenarioQueryBO);
-            if (CollectionUtil.isEmpty(page.getList())) {
-                break;
-            }
-            var dataIds = page.getList().stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
-            var dataInfoList = dataInfoDAO.getBaseMapper().listByIds(dataIds, false);
-            dataInfoList.forEach(dataInfo -> {
-                dataInfo.setDatasetId(datasetId);
-                dataInfo.setTempDataId(dataInfo.getId());
-                dataInfo.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
-                dataInfo.setCreatedAt(OffsetDateTime.now());
-                dataInfo.setUpdatedBy(null);
-            });
-            scenarioQueryBO.setDataIds(dataIds);
-            dataInfoDAO.getBaseMapper().insertBatch(dataInfoList);
-            var dataInfoMap = dataInfoList.stream().collect(Collectors.toMap(DataInfo::getTempDataId, DataInfo::getId));
-            var dataAnnotationObjectBOList = dataAnnotationObjectUseCase.listByScenario(scenarioQueryBO);
-            dataAnnotationObjectBOList.forEach(dataAnnotationObjectBO -> {
-                dataAnnotationObjectBO.setDatasetId(datasetId);
-                dataAnnotationObjectBO.setDataId(dataInfoMap.get(dataAnnotationObjectBO.getDataId()));
-                var classId = dataAnnotationObjectBO.getClassId();
-                if (ObjectUtil.isNotNull(classId)) {
-                    dataAnnotationObjectBO.setClassId(newClassId);
-                    var dataAnnotationResultObjectBO = DefaultConverter.convert(dataAnnotationObjectBO.getClassAttributes(), DataAnnotationResultObjectBO.class);
-                    dataAnnotationResultObjectBO.setId(IdUtil.randomUUID());
-                    dataAnnotationResultObjectBO.setClassId(newClassId);
-                    dataAnnotationObjectBO.setClassAttributes(JSONUtil.parseObj(dataAnnotationResultObjectBO));
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+            datasetClassUseCase.copyClassesToNewDataset(datasetId, datasetScenarioBO.getOntologyClassId(), datasetScenarioBO.getSource());
+            var scenarioQueryBO = DefaultConverter.convert(datasetScenarioBO, ScenarioQueryBO.class);
+            scenarioQueryBO.setPageSize(PAGE_SIZE_100);
+            var i = 1;
+            while (true) {
+                scenarioQueryBO.setPageNo(i);
+                var page = dataAnnotationObjectUseCase.findDataIdByScenarioPage(scenarioQueryBO);
+                if (CollectionUtil.isEmpty(page.getList())) {
+                    break;
                 }
-                dataAnnotationObjectBO.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
-                dataAnnotationObjectBO.setCreatedAt(OffsetDateTime.now());
-            });
-            dataAnnotationObjectDAO.getBaseMapper().insertBatch(DefaultConverter.convert(dataAnnotationObjectBOList, DataAnnotationObject.class));
-            i++;
-        }
+                var dataIds = page.getList().stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
+                var dataInfoList = dataInfoDAO.getBaseMapper().listByIds(dataIds, false);
+                dataInfoList.forEach(dataInfo -> {
+                    dataInfo.setId(null);
+                    dataInfo.setDatasetId(datasetId);
+                    dataInfo.setTempDataId(dataInfo.getId());
+                    dataInfo.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
+                    dataInfo.setCreatedAt(OffsetDateTime.now());
+                    dataInfo.setUpdatedBy(null);
+                });
+                scenarioQueryBO.setDataIds(dataIds);
+                dataInfoDAO.getBaseMapper().insertBatch(dataInfoList);
+                var dataInfoMap = dataInfoList.stream().collect(Collectors.toMap(DataInfo::getTempDataId, DataInfo::getId));
+                var dataAnnotationObjectBOList = dataAnnotationObjectUseCase.listByScenario(scenarioQueryBO);
+                dataAnnotationObjectBOList.forEach(dataAnnotationObjectBO -> {
+                    dataAnnotationObjectBO.setId(null);
+                    dataAnnotationObjectBO.setDatasetId(datasetId);
+                    dataAnnotationObjectBO.setDataId(dataInfoMap.get(dataAnnotationObjectBO.getDataId()));
+                    var classId = dataAnnotationObjectBO.getClassId();
+                    if (ObjectUtil.isNotNull(classId)) {
+                        dataAnnotationObjectBO.setClassId(null);
+                        var dataAnnotationResultObjectBO = DefaultConverter.convert(dataAnnotationObjectBO.getClassAttributes(), DataAnnotationResultObjectBO.class);
+                        dataAnnotationResultObjectBO.setId(IdUtil.randomUUID());
+                        dataAnnotationResultObjectBO.setClassId(null);
+                        dataAnnotationResultObjectBO.setClassValues(JSONUtil.createArray());
+                        dataAnnotationObjectBO.setClassAttributes(JSONUtil.parseObj(dataAnnotationResultObjectBO));
+                    }
+                    dataAnnotationObjectBO.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
+                    dataAnnotationObjectBO.setCreatedAt(OffsetDateTime.now());
+                });
+                dataAnnotationObjectDAO.getBaseMapper().insertBatch(DefaultConverter.convert(dataAnnotationObjectBOList, DataAnnotationObject.class));
+                i++;
+            }
+        })));
+
     }
 
 }

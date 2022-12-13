@@ -1,22 +1,21 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.port.dao.DataClassificationOptionDAO;
 import ai.basic.x1.adapter.port.dao.DataInfoDAO;
 import ai.basic.x1.adapter.port.dao.DatasetSimilarityJobDAO;
 import ai.basic.x1.adapter.port.dao.DatasetSimilarityRecordDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSimilarityJob;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSimilarityRecord;
-import ai.basic.x1.adapter.port.dao.mybatis.model.SimilarityDataInfo;
+import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
 import ai.basic.x1.adapter.port.rpc.SimilarityHttpCaller;
 import ai.basic.x1.adapter.port.rpc.dto.SimilarityFileDTO;
 import ai.basic.x1.adapter.port.rpc.dto.SimilarityParamDTO;
 import ai.basic.x1.entity.DataInfoBO;
+import ai.basic.x1.entity.DataSimilarityBO;
+import ai.basic.x1.entity.DatasetSimilarityBO;
 import ai.basic.x1.entity.DatasetSimilarityRecordBO;
 import ai.basic.x1.entity.enums.SimilarityStatusEnum;
 import ai.basic.x1.entity.enums.SimilarityTypeEnum;
-import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.Constants;
 import ai.basic.x1.util.DefaultConverter;
@@ -29,7 +28,6 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,7 +56,6 @@ public class DatasetSimilarityRecordUseCase {
     private DataInfoUseCase dataInfoUseCase;
     @Autowired
     private DatasetSimilarityJobDAO datasetSimilarityJobDAO;
-
     @Autowired
     @Qualifier("similarityDistributedLock")
     private IDistributedLock similarityDistributedLock;
@@ -71,6 +68,9 @@ public class DatasetSimilarityRecordUseCase {
 
     @Autowired
     private MinioProp minioProp;
+
+    @Autowired
+    private DataClassificationOptionDAO dataClassificationOptionDAO;
 
     @Transactional(rollbackFor = Throwable.class)
     public void generateDatasetSimilarityRecord(Long datasetId) {
@@ -232,5 +232,38 @@ public class DatasetSimilarityRecordUseCase {
             }
         }
         return null;
+    }
+
+    public DatasetSimilarityBO getDatasetSimilarityRecordByClassificationId(Long datasetId, Long classificationId) {
+        List<DataClassificationOption> dataClassificationOptions = dataClassificationOptionDAO.statisticsDatasetDataClassification(datasetId, classificationId);
+        DatasetSimilarityBO datasetSimilarityBO = buildDatasetSimilarityBO(dataClassificationOptions);
+        return datasetSimilarityBO;
+    }
+
+    private DatasetSimilarityBO buildDatasetSimilarityBO(List<DataClassificationOption> dataClassificationOptions) {
+        String noOptionStr="No Options";
+        String multiOptionStr="Multiple Options";
+        if (CollUtil.isNotEmpty(dataClassificationOptions)) {
+            DatasetSimilarityBO datasetSimilarityBO = new DatasetSimilarityBO();
+            List<String> options = new ArrayList<>();
+            List<DataSimilarityBO> dataSimilarityBOS = new ArrayList<>();
+            options.add(noOptionStr);
+            for (DataClassificationOption dataClassificationOption : dataClassificationOptions) {
+                dataSimilarityBOS.add(DataSimilarityBO.builder().attributeId(dataClassificationOption.getAttributeId())
+                        .optionCount(dataClassificationOption.getOptionCount())
+                        .optionName(dataClassificationOption.getOptionCount()==1? dataClassificationOption.getOptionName():multiOptionStr)
+                        .id(dataClassificationOption.getDataId())
+                        .optionPaths(dataClassificationOption.getOptionPaths()).build());
+                if (!options.contains(dataClassificationOption.getOptionName()) && dataClassificationOption.getOptionCount()==1) {
+                    options.add(dataClassificationOption.getOptionName());
+                }
+            }
+            options.add(multiOptionStr);
+            datasetSimilarityBO.setDataSimilarityList(dataSimilarityBOS);
+            datasetSimilarityBO.setOptions(options);
+            return datasetSimilarityBO;
+        }
+        return null;
+
     }
 }
