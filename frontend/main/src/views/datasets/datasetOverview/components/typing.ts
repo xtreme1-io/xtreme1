@@ -17,3 +17,8 @@ export enum brushEnum {
   RECT = 'rect',
   PATH = 'path',
 }
+
+export enum optionEnum {
+  NO_OPTIONS = 'No Options',
+  MULTIPLE_OPTIONS = 'Multiple Options',
+}

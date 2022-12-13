@@ -5,8 +5,8 @@
     </div>
     <div class="content">
       <TheSimilarity :datasetId="id as unknown as number" />
-      <TheProgress :datasetId="(id as unknown as number)" />
-      <TheDistribution :datasetId="(id as unknown as number)" />
+      <!-- <TheProgress :datasetId="(id as unknown as number)" /> -->
+      <!-- <TheDistribution :datasetId="(id as unknown as number)" /> -->
     </div>
   </div>
 </template>
@@ -15,9 +15,9 @@
   import { ref } from 'vue';
   // components
   import { VirtualTab } from '/@@/VirtualTab';
-  import TheProgress from './components/TheProgress.vue';
+  // import TheProgress from './components/TheProgress.vue';
   import TheSimilarity from './components/TheSimilarity.vue';
-  import TheDistribution from './components/TheDistribution.vue';
+  // import TheDistribution from './components/TheDistribution.vue';
   // icons
   import Scenario from '/@/assets/svg/tags/scenario.svg';
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';

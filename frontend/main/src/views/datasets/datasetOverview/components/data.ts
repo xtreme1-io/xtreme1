@@ -39,13 +39,14 @@ export const defaultPieOptions = {
 export const defaultScatterOptions = {
   xField: 'x',
   yField: 'y',
-  // colorField: 'id',
+  colorField: 'option',
   size: 10,
   shape: 'circle',
   limitInPlot: false,
   legend: {
-    position: 'right',
-    radio: null,
+    offsetX: 10,
+    position: 'right-top',
+    radio: null, // 隐藏图例后的 radio 按钮
     marker: {
       symbol: 'circle',
       style: (oldStyle) => {
@@ -60,7 +61,7 @@ export const defaultScatterOptions = {
     fillOpacity: 1,
   },
   brush: {
-    enabled: true,
+    enabled: false,
     // 圈选高亮，不指定默认为: filter
     action: 'highlight',
     mask: {

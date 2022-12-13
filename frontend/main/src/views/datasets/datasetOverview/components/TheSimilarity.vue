@@ -1,7 +1,7 @@
 <template>
   <div class="chart_wrapper">
     <div class="title">Data Similarity Map</div>
-    <div class="flex justify-between">
+    <div class="flex justify-between mb-20px" style="padding-right: 16.5%">
       <div class="flex gap-4px items-center">
         <span className="select-label">Display By</span>
         <Select
@@ -73,7 +73,7 @@
     getSimilarityRecordApi,
   } from '/@/api/business/dataset/overview';
   import { getDatasetClassificationAllApi } from '/@/api/business/classes';
-  import { brushEnum } from './typing';
+  import { brushEnum, optionEnum } from './typing';
   import { ISimilarityList } from '/@/api/business/dataset/model/overviewModel';
   import { datasetDetailApi } from '/@/api/business/dataset';
   import _ from 'lodash';
@@ -97,15 +97,46 @@
     getSimilarityClassification();
   };
 
-  /** Classification */
+  /** Similarity Classification */
+  const similarList = ref<ISimilarityList[]>([]);
   const getSimilarityClassification = async () => {
     if (selectClassificationId.value) {
       const params = {
         datasetId: props.datasetId as string,
-        classificationId: '12' ?? String(selectClassificationId.value),
+        classificationId: String(selectClassificationId.value),
       };
-      await getSimilarityClassificationApi(params);
+      const res = await getSimilarityClassificationApi(params);
+      similarList.value = res.dataSimilarityList.map((item: any) => {
+        item.key = item.attributeId + ':' + item.optionName;
+        return item;
+      });
+
+      updateScatterList();
+      chartRef.value.update({ data: scatterList.value });
     }
+  };
+  const updateScatterList = () => {
+    const optionMap = {} as Record<number, ISimilarityList[]>;
+    similarList.value.forEach((item) => {
+      if (optionMap[item.id]) {
+        optionMap[item.id].push(item);
+      } else {
+        optionMap[item.id] = [];
+        optionMap[item.id].push(item);
+      }
+    });
+
+    console.log(optionMap);
+    scatterList.value = scatterList.value.map((item: any) => {
+      const option = optionMap[item.id];
+      if (Array.isArray(option)) {
+        item.option = option.length > 1 ? optionEnum.MULTIPLE_OPTIONS : option[0].optionName;
+      } else {
+        item.option = optionEnum.NO_OPTIONS;
+      }
+      return item;
+    });
+    console.log(scatterList.value);
   };
 
   /** Brush */
@@ -114,21 +145,26 @@
     selectedBrush.value = value;
     console.log(selectedBrush.value);
 
-    // const plot = chartRef.value;
-    // if (plot) {
-    //   plot.update({ brush: { type: value } });
-    // }
+    const plot = chartRef.value;
+    if (plot && !!value) {
+      plot.update({ brush: { enabled: true, type: value } });
+    } else {
+      plot.update({ brush: { enabled: false } });
+    }
   };
 
   /** List */
-  const similarList = ref<Array<ISimilarityList>>([]);
+  const scatterList = ref<any[]>([]);
   const getSimilarityRecord = async () => {
     const params = { datasetId: props.datasetId as string };
     const res = await getSimilarityRecordApi(params);
     const url = res?.resultUrl;
     if (url) {
       const response = await axios.get(url);
-      similarList.value = response.data ?? [];
+      scatterList.value = (response.data ?? []).map((item) => {
+        item.option = optionEnum.NO_OPTIONS;
+        return item;
+      });
     }
   };
 
@@ -182,7 +218,7 @@
     await getSimilarityRecord();
 
     chartRef.value = setPlot(PlotEnum.SCATTER, plotRef.value, {
-      data: similarList.value,
+      data: scatterList.value,
       ...defaultScatterOptions,
 
       tooltip: {
