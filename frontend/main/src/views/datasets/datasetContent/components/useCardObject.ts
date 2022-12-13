@@ -552,7 +552,7 @@ export function useSearchCard(props: {
     const object2d: any[] = [];
     if (img.src && img.complete && objects?.length) {
       const imgIndex = state.imgIndex;
-      const { clientHeight, clientWidth } = img;
+      let { clientHeight, clientWidth } = img;
       let { naturalWidth, naturalHeight } = img;
       const info = pcActiveImage.value?.extraInfo;
       if (info) {
@@ -570,8 +570,13 @@ export function useSearchCard(props: {
         width = clientWidth;
         height = clientWidth / aspect;
       }
-      svg.style.width = String(width);
-      svg.style.height = String(height);
+      clientHeight = height;
+      clientWidth = width;
+      img.style.width = width + 'px';
+      img.style.height = height + 'px';
+      img.style.maxWidth = 'none';
+      svg.style.width = width + 'px';
+      svg.style.height = height + 'px';
       const focusItem = (os: any[]) => {
         if (!os.length) return;
 
@@ -668,7 +673,7 @@ export function useSearchCard(props: {
         matrix3.translate(offsetX, offsetY);
         matrix3.scale(scale, scale);
         const el = matrix3.elements;
-        state.transform = `matrix(${el[0]},${el[1]},${el[3]},${el[4]},${el[6]},${el[7]})`;
+        state.transform = `translate(-50%, -50%) matrix(${el[0]},${el[1]},${el[3]},${el[4]},${el[6]},${el[7]})`;
       };
       focusItem(
         objects.filter((o) => {
