@@ -238,6 +238,7 @@
     isSelected: boolean;
     info: DatasetListItem | undefined;
     type: PageTypeEnum | undefined;
+    showAnnotation: boolean;
     object?: any[];
   };
   const emits = defineEmits([

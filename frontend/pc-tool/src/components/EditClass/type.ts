@@ -1,4 +1,4 @@
-import { IAttr, ResultType, ResultStatus } from 'pc-editor';
+import { IAttr, ResultType, ResultStatus, IClassType } from 'pc-editor';
 import { AnnotateType } from 'pc-render';
 
 export interface IInstanceItem {
@@ -49,7 +49,7 @@ export interface IState {
     resultStatus: ResultStatus | '';
     resultInstances: IInstanceItem[];
     annotateType: AnnotateType | '';
-    attrs: IAttrItem[];
+    attrs: IClassType[];
     // msgInfo
     showMsgType: MsgType | '';
     //

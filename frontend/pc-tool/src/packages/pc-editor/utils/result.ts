@@ -65,7 +65,7 @@ export function translateToObject(objectV2: IObjectV2): IObject {
         ...objectV2.meta,
         ...objectV2.contour,
         confidence: objectV2.modelConfidence,
-        objType: objectV2.type,
+        objType: objectV2.type || objectV2['objType'],
         attrs: arrayToObj(objectV2.classValues || []),
     } as IObject;
     return object;
@@ -112,7 +112,9 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         // userData.isStandard = obj.isStandard || false;
         userData.trackId = obj.trackId || '';
         userData.trackName = obj.trackName || '';
+        
         userData.classType = classConfig?.name || '';
+        userData.classId = obj.classId || '';
         userData.confidence = obj.confidence || undefined;
         userData.modelClass = obj.modelClass || '';
         userData.modelRun = obj.modelRun || '';
