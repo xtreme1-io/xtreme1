@@ -36,3 +36,20 @@ export interface IClassificationData {
   createdBy: number;
   updatedBy: null;
 }
+
+export interface ISimilarResult {
+  dataSimilarityList: ISimilarityList[];
+  options: string[];
+}
+export interface ISimilarityList {
+  id: number;
+  attributeId: string;
+  optionName: string;
+  optionPaths: string[];
+  optionCount: number;
+}
+
+export interface ISimilarRecord {
+  isHistoryData: boolean;
+  resultUrl: string;
+}

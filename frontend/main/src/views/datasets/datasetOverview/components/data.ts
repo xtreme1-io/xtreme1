@@ -37,63 +37,23 @@ export const defaultPieOptions = {
 };
 
 export const defaultScatterOptions = {
-  xField: 'weight',
-  yField: 'height',
-  colorField: 'gender',
-  size: 3,
+  xField: 'x',
+  yField: 'y',
+  // colorField: 'id',
+  size: 10,
   shape: 'circle',
   limitInPlot: false,
   legend: {
     position: 'right',
-    radio: null, // 隐藏图例后的 radio 按钮
+    radio: null,
     marker: {
       symbol: 'circle',
       style: (oldStyle) => {
         return {
           ...oldStyle,
           r: 6,
-          // fill: oldStyle.stroke || oldStyle.fill,
         };
       },
-    },
-  },
-  // tooltip: {
-  //   enterable: true,
-  // },
-  tooltip: {
-    showMarkers: false,
-    enterable: true,
-    domStyles: {
-      'g2-tooltip': {
-        width: '400px',
-        padding: 0,
-      },
-    },
-    customContent: (title, items) => {
-      console.log('customContent', title, items);
-      const data = items[0]?.data || {};
-      console.log(data);
-      const titleDom = `<div class ="custom-tooltip-title">${data.gender}</div>`;
-      const tempDom = `<div class="custom-tooltip-value">
-                          <div class="custom-tooltip-temp">
-                              <span>低温</span>
-                              <span>${data.weight}</span>
-                          </div>
-                          <div class="custom-tooltip-temp">
-                            <span>高温</span>
-                            <span>${data.height}</span>
-                          </div>
-                        </div>`;
-      const windDom = `<div class = "custom-tooltip-wind">
-                          <span>风向:${data.height}</span>
-                       </div>`;
-      let domClass;
-      return `<div class="background-image ${domClass}">
-                ${titleDom}
-                ${tempDom}
-                ${windDom}
-                <div class="tooltip-footer"></div>
-              </div>`;
     },
   },
   pointStyle: {

@@ -1,4 +1,10 @@
-import { IClassificationData, IClassObject, IDataStatus } from './model/overviewModel';
+import {
+  IClassificationData,
+  IClassObject,
+  IDataStatus,
+  ISimilarRecord,
+  ISimilarResult,
+} from './model/overviewModel';
 import { defHttp } from '/@/utils/http/axios';
 
 enum Api {
@@ -37,7 +43,7 @@ export const getClassificationDataApi = (params: { datasetId: number }) =>
   });
 
 export const getSimilarityRecordApi = (params: { datasetId: string }) =>
-  defHttp.get<Array<IClassificationData>>({
+  defHttp.get<ISimilarRecord>({
     url: `${Api.SIMILAR}/${params.datasetId}`,
     params,
     headers: {
@@ -50,7 +56,7 @@ export const getSimilarityClassificationApi = (params: {
   datasetId: string;
   classificationId: string;
 }) =>
-  defHttp.get<Array<IClassificationData>>({
+  defHttp.get<ISimilarResult>({
     url: `${Api.SIMILAR}/${params.datasetId}/${params.classificationId}`,
     params,
     headers: {
