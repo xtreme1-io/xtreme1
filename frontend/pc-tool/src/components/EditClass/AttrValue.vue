@@ -8,7 +8,7 @@
     <div class="value" :span="14">
         <Radio
             :disabled="!canEdit()"
-            :name="item.name"
+            :name="item.id"
             v-model:value="item.value"
             @change="onAttChange"
             :options="item.options"
@@ -16,7 +16,7 @@
         />
         <Select
             :disabled="!canEdit()"
-            :name="item.name"
+            :name="item.id"
             v-model:value="item.value"
             @change="onAttChange"
             :options="item.options"
@@ -24,14 +24,14 @@
         />
         <Text
             :disabled="!canEdit()"
-            :name="item.name"
+            :name="item.id"
             v-model:value="item.value"
             @change="onAttChange"
             v-else-if="item.type === AttrType.TEXT"
         />
         <Check
             :disabled="!canEdit()"
-            :name="item.name"
+            :name="item.id"
             v-model:value="item.value"
             @change="onAttChange"
             :options="item.options"

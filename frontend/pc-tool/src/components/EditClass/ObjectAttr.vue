@@ -75,9 +75,11 @@
             <div
                 class="attr-item"
                 v-for="item in state.attrs"
-                :key="state.objectId + state.classType + item.name"
+                :key="state.objectId + state.classType + item.id"
             >
-                <AttrValue @change="onAttChange" :item="item" />
+                <template v-for="attr in item.attrs" :key="attr.id + '#' + state.classType">
+                    <AttrValue v-if="isAttrVisible(attr)" @change="onAttChange" :item="attr" />
+                </template>
             </div>
         </div>
     </div>
@@ -87,7 +89,7 @@
     import { IState } from './type';
     import { reactive, watch } from 'vue';
     import AttrValue from './AttrValue.vue';
-    import { utils } from 'pc-editor';
+    import { AttrType, IAttr, utils } from 'pc-editor';
     import {
         SubnodeOutlined,
         NodeExpandOutlined,
@@ -114,7 +116,7 @@
     let $$ = editor.bindLocale(locale);
     let { canEdit } = useUI();
     let control = useControl();
-
+    let attrMap = {} as Record<string, IAttr>;
     let TState = editor.state;
     let iState = reactive({
         trackId: '',
@@ -170,6 +172,20 @@
             iState.trackId = getTrackId(iState.trackNameAddId).trackId;
         },
     );
+
+    watch(
+        () => props.state.attrs,
+        () => {
+            if (props.state.attrs.length) {
+                props.state.attrs.forEach((e) => {
+                    e.attrs.forEach((attr) => {
+                        attrMap[attr.id] = attr;
+                    });
+                });
+            }
+        },
+    );
+
     async function onPick() {
         control.close();
         let box = (await editor.actionManager.execute('pickObject')) as Box;
@@ -209,6 +225,20 @@
         // }
 
         props.state.showMsgType = '';
+    }
+    function isItemVisible(attr: IAttr): boolean {
+        let parentAttr = attrMap[attr.parent];
+        return parentAttr.type !== AttrType.MULTI_SELECTION
+            ? parentAttr.value === attr.parentValue
+            : (parentAttr.value as any[]).indexOf(attr.parentValue) >= 0;
+    }
+
+    function isAttrVisible(attr: IAttr): boolean {
+        const classConfig = editor.getClassType(attr.classId);
+        if (classConfig.name !== props.state.classType) return false;
+        if (!attr.parent) return true;
+        let parentAttr = attrMap[attr.parent];
+        return isItemVisible(attr) && isAttrVisible(parentAttr);
     }
 </script>
 
