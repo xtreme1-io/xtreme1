@@ -10,6 +10,7 @@
           :datasetType="datasetType"
           :datasetId="datasetId"
           @fetchList="handleRefresh"
+          :selectedList="selectedList"
         />
       </div>
       <div class="mb-15px">

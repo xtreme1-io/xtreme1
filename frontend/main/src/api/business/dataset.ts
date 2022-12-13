@@ -341,3 +341,23 @@ export const getDatasetClass = (id) =>
       ignoreCancelToken: true,
     },
   });
+
+export const exportScenario = (params) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/scenarioExport`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const createByScenario = (params) =>
+  defHttp.post<any>({
+    url: `${Api.DATASET}/createByScenario`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });

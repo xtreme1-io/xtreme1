@@ -1,5 +1,6 @@
 <template>
   <div :class="`${prefixCls}`">
+    <exportModalVue @register="register" :info="info" :classId="result" />
     <div class="content">
       <div class="flex p-25px">
         <div class="mr-24px cursor-pointer" @click="handleBack">
@@ -23,7 +24,7 @@
             {{ item.name }}
           </Select.Option>
         </Select>
-        <Button class="ml-20px" type="default">Export Result</Button>
+        <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
         <div class="item" v-for="item in list" :key="item.dataId">
@@ -72,7 +73,10 @@
   } from '/@/api/business/dataset';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
-  import { datasetTypeEnum, DatasetGetResultModel } from '/@/api/business/model/datasetModel';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import exportModalVue from './exportModal.vue';
+  import { useModal } from '/@/components/Modal';
+  const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;
   const { prefixCls } = useDesign('searchScenario');
@@ -84,7 +88,6 @@
   const dataInfo = ref<Record<string, any>>({});
   const object2D = ref<Record<string, any>>({});
 
-  const dataList = ref();
   const handleChange = (e) => {
     if (e.length === 0) {
       result.value = [];

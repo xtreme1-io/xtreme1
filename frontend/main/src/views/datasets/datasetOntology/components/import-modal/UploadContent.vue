@@ -1,6 +1,6 @@
 <template>
   <div class="upload__content">
-    <div v-if="false" class="upload__content--dragger">
+    <div v-if="true" class="upload__content--dragger">
       <Upload.Dragger :multiple="true" :showUploadList="false" :beforeUpload="beforeUpload">
         <SvgIcon size="60" name="upload" />
         <div class="dragger-placeholder">
@@ -9,7 +9,7 @@
         </div>
       </Upload.Dragger>
     </div>
-    <div class="upload__content--progress">
+    <div class="upload__content--progress" v-else>
       <Progress type="circle" :showInfo="false" :width="50" :percent="35" />
       <span class="tip">Uploading...</span>
       <Button @click="handleCancel"> Cancel </Button>
