@@ -40,7 +40,7 @@
   <ChooseOntology
     @register="registerChooseOntologyModal"
     :datasetType="props.datasetType"
-    @next="handleNext"
+    @next="handleToClasses"
     @copyAll="handleCopyAll"
   />
   <ChooseClass
@@ -101,16 +101,21 @@
     registerChooseClassModal,
     { openModal: openChooseClassModal, closeModal: closeChooseClassModal },
   ] = useModal();
-  const [registerConflictModal, { openModal: openConflictModal }] = useModal();
+  const [registerConflictModal, { openModal: openConflictModal, closeModal: closeConflictModal }] =
+    useModal();
   const handleOpenCopy = () => {
     openChooseOntologyModal(true, { isClear: true });
   };
-  const handleNext = (ontologyId) => {
-    console.log(ontologyId);
+  const handleToClasses = (ontologyId, ontologyName) => {
+    closeChooseOntologyModal();
+
     selectedOntologyId.value = ontologyId;
-    openChooseClassModal(true, { ontologyId: selectedOntologyId.value });
+    openChooseClassModal(true, { ontologyId: selectedOntologyId.value, ontologyName });
   };
   const handleBack = (type: ICopyEnum) => {
+    closeChooseClassModal();
+    closeConflictModal();
+
     if (type == ICopyEnum.ONTOLOGY) {
       openChooseOntologyModal(true, {});
     } else if (type == ICopyEnum.CLASSES) {
@@ -123,7 +128,8 @@
       ClassificationSelectedList,
     );
 
-    console.log('conflict result: ', conflictClassList, conflictClassificationList);
+    closeChooseClassModal();
+
     if (conflictClassList.length > 0 || conflictClassificationList.length > 0) {
       openConflictModal(true, {
         type: ICopyEnum.CLASSES,

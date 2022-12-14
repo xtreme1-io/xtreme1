@@ -58,9 +58,11 @@
         </div>
         <div class="wrapper-inner empty" v-if="cardList.length == 0">
           <div class="empty-wrapper">
-            <img src="../../../../../assets/svg/empty.svg" alt="" />
+            <img src="../../../../../assets/images/class/empty-place.png" alt="" />
             <div class="tip">
-              {{ currentVirtualTab === ClassTypeEnum.CLASS ? 'No Class' : 'No Classification' }}
+              There is ontology of this Dataset type available. You can go to
+              <span class="high_light" @click="handleToOntology"> Ontology Center</span>
+              to create a new one.
             </div>
           </div>
         </div>
@@ -72,6 +74,8 @@
   import { computed, onMounted, ref, unref, watch } from 'vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useGo } from '/@/hooks/web/usePage';
+  import { RouteEnum } from '/@/enums/routeEnum';
   import emitter from 'tiny-emitter/instance';
 
   import { VirtualTab } from '/@@/VirtualTab';
@@ -90,6 +94,7 @@
 
   const { createMessage } = useMessage();
   const { t } = useI18n();
+  const go = useGo();
 
   const emits = defineEmits(['copyAll', 'back', 'next']);
 
@@ -100,15 +105,20 @@
   });
 
   /** Modal */
-  const [registerModal, { closeModal, changeLoading }] = useModalInner((params) => {
+  const modalTitle = ref<string>('Copy from Ontology Center');
+  const [registerModal, { changeLoading }] = useModalInner((params) => {
     changeLoading(false);
     ontologyId.value = params.ontologyId;
+
+    // title
+    const ontologyName = params.ontologyName ?? 'Ontology Center';
+    modalTitle.value = `Copy from ${ontologyName}`;
+
     getList();
   });
 
-  const modalTitle = ref<string>('Copy from Ontology Center');
   const handleConfirm = () => {
-    closeModal();
+    changeLoading(true);
     setTimeout(() => {
       emits('next', {
         ClassSelectedList: unref(ClassSelectedList.value),
@@ -117,7 +127,7 @@
     }, 100);
   };
   const handleBack = () => {
-    closeModal();
+    changeLoading(true);
     setTimeout(() => {
       emits('back', ICopyEnum.ONTOLOGY);
 
@@ -235,6 +245,12 @@
       total.value = 0;
     }
     changeLoading(false);
+  };
+
+  /** Go to Ontology */
+  const handleToOntology = () => {
+    const url = RouteEnum.ONTOLOGY;
+    go(url);
   };
 
   /** Scroll */

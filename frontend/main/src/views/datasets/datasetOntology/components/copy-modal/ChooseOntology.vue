@@ -30,7 +30,7 @@
         </div>
         <div class="wrapper-inner empty" v-if="cardList.length == 0">
           <div class="empty-wrapper">
-            <img src="../../../../../assets/svg/empty.svg" alt="" />
+            <img src="../../../../../assets/images/class/empty-ontology.png" alt="" />
             <div class="tip">
               There is ontology of this Dataset type available. You can go to
               <span class="high_light" @click="handleToOntology"> Ontology Center</span>
@@ -74,7 +74,7 @@
   });
 
   /** Modal */
-  const [registerModal, { closeModal, changeLoading }] = useModalInner((config) => {
+  const [registerModal, { changeLoading }] = useModalInner((config) => {
     changeLoading(false);
     if (config.isClear) {
       selectedOntologyId.value = undefined;
@@ -82,11 +82,11 @@
     getList();
   });
   const handleNext = () => {
-    closeModal();
-    setTimeout(() => {
-      emits('next', selectedOntologyId.value);
-      // selectedOntologyId.value = undefined;
-    }, 100);
+    const selectedOntologyName = cardList.value.find(
+      (item) => item.id == selectedOntologyId.value,
+    )?.name;
+
+    emits('next', selectedOntologyId.value, selectedOntologyName);
   };
 
   /** Copy All */
@@ -98,7 +98,7 @@
   /** List */
   const pageNo = ref();
   const total = ref();
-  const cardList = ref([]);
+  const cardList = ref<any[]>([]);
   const getList = async (isConcat = false) => {
     changeLoading(true);
 
