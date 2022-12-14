@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.mapper;
 
+import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendBaseMapper;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ClassStatisticsUnit;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClass;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ToolTypeStatisticsUnit;
@@ -13,7 +14,7 @@ import java.util.List;
  * @author chenchao
  * @date 2022-03-11
  */
-public interface DatasetClassMapper extends BaseMapper<DatasetClass> {
+public interface DatasetClassMapper extends ExtendBaseMapper<DatasetClass> {
 
     Page<ClassStatisticsUnit> statisticsObjectByClass(Page<ClassStatisticsUnit> page, @Param("datasetId") Long datasetId);
 
