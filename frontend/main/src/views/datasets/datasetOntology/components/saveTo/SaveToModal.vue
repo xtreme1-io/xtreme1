@@ -9,42 +9,17 @@
     :minHeight="70"
   >
     <div class="saveTo__content">
-      <!-- <div class="text" v-if="hasOntology">{{ t('business.ontology.sync.selectOntology') }}</div> -->
-      <div class="text" v-if="!hasOntology">{{ t('business.ontology.sync.noOntology') }}</div>
-      <div class="content__form">
-        <Form ref="formRef" labelAlign="left" :model="formState" :rules="rules">
-          <Form.Item
-            v-if="hasOntology"
-            label="Select an ontology to save into"
-            :labelCol="{ span: 9 }"
-          >
-            <Select
-              v-model:value="formState.ontologyId"
-              optionFilterProp="label"
-              @select="handleSelectOntology"
-            >
-              <Select.Option v-for="item in ontologyList" :key="item.id">
-                {{ item.name }}
-              </Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            v-else
-            :label="t('business.ontology.ontologyName')"
-            :labelCol="{ span: 9, offset: 0 }"
-            :wrapperCol="{ span: 12 }"
-            name="ontologyName"
-          >
-            <Input
-              autocomplete="off"
-              v-model:value="formState.ontologyName"
-              type="input"
-              allow-clear
-              @change="handleChange"
-              :placeholder="t('business.ontology.createHolder')"
-            />
-          </Form.Item>
-        </Form>
+      <div class="content__select">
+        <span class="mr-10px">Select an ontology to save into</span>
+        <Select
+          v-model:value="selectedOntologyId"
+          optionFilterProp="label"
+          @select="handleSelectOntology"
+        >
+          <Select.Option v-for="item in ontologyList" :key="item.id">
+            {{ item.name }}
+          </Select.Option>
+        </Select>
       </div>
       <!-- Conflict -->
       <div v-show="conflictList.length > 0" class="content__table">
@@ -80,7 +55,6 @@
         {{ t('common.cancelText') }}
       </Button>
       <Button
-        v-if="hasOntology"
         type="primary"
         @click="handleSaveTo"
         :disabled="!isConfirmDisabled"
@@ -88,24 +62,14 @@
       >
         {{ t('common.confirmText') }}
       </Button>
-      <Button
-        class="btn"
-        v-else
-        type="primary"
-        @click="handleCreateAndSaveTo"
-        :disabled="!isValid"
-        :loading="isLoading"
-      >
-        {{ t('business.ontology.sync.createAndSync') }}
-      </Button>
     </template>
   </BasicModal>
 </template>
 <script lang="ts" setup>
-  import { ref, reactive, computed, inject, watch } from 'vue';
+  import { ref, inject, watch } from 'vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { Form, Select, Input } from 'ant-design-vue';
+  import { Select } from 'ant-design-vue';
   import { Button } from '/@@/Button';
   import { Icon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
@@ -123,10 +87,7 @@
     getOntologyClassificationApi,
   } from '/@/api/business/classes';
 
-  import { SaveOntologyParams } from '/@/api/business/model/ontologyModel';
-  import { createOntologyApi } from '/@/api/business/ontology';
-  import { validateCreateName } from '/@/views/ontology/center/components/formSchemas';
-  import { ICopySelectEnum, IFormState } from '../copy-modal/data';
+  import { ICopySelectEnum } from '../copy-modal/data';
   import { validateClassConflict, validateClassificationConflict } from '../utils';
 
   const { createMessage } = useMessage();
@@ -144,52 +105,22 @@
     getOntologyList();
   });
   const handleCancel = () => {
-    console.log('cancel');
-
-    formState.ontologyId = undefined;
-    formState.ontologyName = undefined;
-    isValid.value = false;
+    selectedOntologyId.value = undefined;
     conflictList.value = [];
     noConflictList.value = [];
     closeModal();
   };
 
-  /** Form */
-  const formRef = ref();
-  const formState = reactive<IFormState>({
-    ontologyId: undefined,
-    ontologyName: undefined,
-  });
-  const rules = {
-    ontologyName: [
-      { required: true, validator: validateCreateName, trigger: 'change' },
-      { max: 256, message: t('business.ontology.maxLength') },
-    ],
-  };
-  // 校验
-  const isValid = ref<boolean>(false);
-  // 切换按钮状态
-  const handleChange = () => {
-    if (!!formState.ontologyName) {
-      isValid.value = true;
-    } else {
-      isValid.value = false;
-    }
-  };
-
   /** Ontology List */
+  const selectedOntologyId = ref<number>();
   const ontologyList = ref();
-  const hasOntology = computed<boolean>(() => {
-    return ontologyList.value?.length > 0;
-  });
   const getOntologyList = async () => {
     const res = await getAllOntologyApi({ type: props.datasetType });
     ontologyList.value = [...res];
-    // formState.ontologyId = ontologyList.value?.[0]?.id;
     return res;
   };
   const handleSelectOntology = (e) => {
-    formState.ontologyId = e;
+    selectedOntologyId.value = e;
     handleToConflict(e);
     isConfirmDisabled.value = false;
   };
@@ -247,8 +178,8 @@
 
   /** SaveTo */
   const handleSaveTo = async () => {
-    if (formState.ontologyId) {
-      const ontologyId = formState.ontologyId as number;
+    if (selectedOntologyId.value) {
+      const ontologyId = selectedOntologyId.value;
 
       const replaceList = conflictList.value.filter(
         (item) => item.isKeep == ICopySelectEnum.REPLACE,
@@ -256,36 +187,7 @@
       const list: any = [...replaceList, ...noConflictList.value];
 
       await handleConfirm(ontologyId, list);
-      setTimeout(() => {
-        const successText = t('business.ontology.sync.successCreated');
-        createMessage.success(successText);
-      }, 1000);
     }
-  };
-
-  /** Create & SaveTo */
-  const handleCreateAndSaveTo = async () => {
-    isLoading.value = true;
-    try {
-      await formRef.value.validate();
-
-      const postData: SaveOntologyParams = {
-        name: formState.ontologyName as unknown as string,
-        type: props.datasetType,
-      };
-      const res: any = await createOntologyApi(postData);
-
-      await handleConfirm(res.id, props.selectedList);
-
-      setTimeout(() => {
-        const successText = t('business.ontology.sync.successCreated');
-        createMessage.success(successText);
-      }, 1000);
-    } catch (error) {}
-
-    setTimeout(() => {
-      isLoading.value = false;
-    }, 1000);
   };
 
   /** Confirm */
@@ -306,6 +208,12 @@
           classificationIds: list.map((item) => item.id),
         };
         list.length > 0 && (await saveClassificationToOntologyApi(params));
+      }
+
+      if (props.activeTab == ClassTypeEnum.CLASS) {
+        createMessage.success(`Copied ${list.length} Class(es)`);
+      } else {
+        createMessage.success(`Copied ${list.length} Classification(s)`);
       }
       handleCancel();
       handleRefresh();
@@ -330,6 +238,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      margin-top: 20px;
       .header {
         font-weight: 400;
         font-size: 14px;
