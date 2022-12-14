@@ -8,7 +8,7 @@
     border-radius: 20px;
 
     .wrapper-inner {
-      height: 522px;
+      height: 450px;
       width: 100%;
       display: flex;
       justify-content: center;
@@ -16,35 +16,27 @@
       background-color: #fff;
       border-radius: 20px;
       // padding: 15px;
-    }
-  }
-
-  .ontology__list {
-    .empty {
-      .empty-wrapper {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-
-        .tip {
-          width: 480px;
-          text-align: center;
-          font-size: 14px;
-          line-height: 20px;
-          color: #666;
-        }
-        .high_light {
-          color: @primary-color;
-          cursor: pointer;
+      &.empty {
+        .empty-wrapper {
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          img {
+            height: 140px;
+          }
+          .tip {
+            width: 480px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 20px;
+            color: #666;
+          }
+          .high_light {
+            color: @primary-color;
+            cursor: pointer;
+          }
         }
       }
-    }
-  }
-
-  .conflict__list {
-    &-class {
-    }
-    &-classification {
     }
   }
 }

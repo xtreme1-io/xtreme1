@@ -12,7 +12,17 @@
     :height="750"
   >
     <template #title>
-      <BackTitle :title="modalTitle" @back="handleBack" />
+      <div class="flex items-center">
+        <Icon
+          icon="eva:arrow-back-fill"
+          color="#aaa"
+          class="mr-10px cursor-pointer"
+          size="24px"
+          @click="handleBack"
+        />
+        <Icon icon="fluent:info-16-filled" color="#FCB17A" class="mr-8px" size="24px" />
+        <span> {{ 'Conflicts' }} </span>
+      </div>
     </template>
     <div class="copy__modal">
       <div class="header">
@@ -82,16 +92,14 @@
   // components
   import emitter from 'tiny-emitter/instance';
   import { BasicModal, useModalInner } from '/@/components/Modal';
+  import { Icon } from '/@/components/Icon';
   import { ICopyEnum, ICopySelectEnum } from './data';
   import CustomTable from './CustomTable.vue';
-  import BackTitle from './BackTitle.vue';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
 
   // const { t } = useI18n();
 
   const emits = defineEmits(['back', 'confirm']);
-
-  const modalTitle = ref<string>('Copy from Ontology Center');
 
   const conflictClassList = ref<any[]>([]);
   const conflictClassificationList = ref<any[]>([]);
@@ -101,7 +109,7 @@
 
   /** Modal */
   const backType = ref<ICopyEnum>(ICopyEnum.CLASSES);
-  const [registerModal, { closeModal }] = useModalInner((config) => {
+  const [registerModal, { closeModal, changeLoading }] = useModalInner((config) => {
     backType.value = config.type;
 
     conflictClassList.value = (config.conflictClassList ?? []).map((item) => {
@@ -115,7 +123,7 @@
     });
   });
   const handleBack = () => {
-    closeModal();
+    changeLoading(true);
     setTimeout(() => {
       emits('back', backType.value);
     }, 100);

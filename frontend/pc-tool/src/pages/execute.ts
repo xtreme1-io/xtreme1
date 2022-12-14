@@ -2,6 +2,7 @@ import { IAction, IPageHandler } from '../type';
 import { useInjectEditor } from '../state';
 import modes from '../config/mode';
 import useTool from '../hook/useTool';
+import { Box } from 'pc-render';
 // import BSError from '../common/BSError';
 
 export function execute(): IPageHandler {
@@ -56,10 +57,13 @@ export function execute(): IPageHandler {
         }
     }
 
-    function focusObject(){
+    function focusObject() {
         let trackId = editor.bsState.query.focus;
-        if(trackId){
+        if (trackId) {
             editor.selectByTrackId(trackId);
+            let selection = editor.pc.selection;
+            let object3D = selection.find((item) => item instanceof Box) as Box;
+            object3D && editor.focusObject(object3D);
         }
     }
 

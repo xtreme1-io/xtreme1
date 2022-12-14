@@ -143,7 +143,6 @@
   const selectedBrush = ref<brushEnum>();
   const handleChangeBrush = (value?) => {
     selectedBrush.value = value;
-    console.log(selectedBrush.value);
 
     const plot = chartRef.value;
     if (plot && !!value) {
@@ -179,37 +178,6 @@
     imgSrc.value = res?.content?.[0]?.file?.url;
     labelName.value = res.name;
     isLoading.value = false;
-    // chartRef.value.update({
-    //   tooltip: {
-    //     customContent: (_, items) => {
-    //       console.log(_, items);
-    //       if (!_) return;
-    //       const data = items[0]?.data || {};
-    //       const dataId = data?.id ?? undefined;
-    //       if (dataId && dataId != lastDataId.value) {
-    //         lastDataId.value = dataId;
-    //         getDataInfo(dataId);
-    //         return;
-    //       }
-
-    //       const headerDom = `<div class="custom-tooltip-container-header">
-    //                             <div class="custom-tooltip-container-header-left">
-    //                               <div>ID: ${dataId}</div>
-    //                               <div class="label">Label: ${labelName.value}</div>
-    //                               <div>Vector: ${data?.x?.toFixed(4)},${data?.y?.toFixed(4)}</div>
-    //                             </div>
-    //                             <div class="custom-tooltip-container-header-right">View data</div>
-    //                           </div>`;
-    //       const contentDom = `<div class="custom-tooltip-container-content">
-    //                             <img src="${imgSrc.value}" />
-    //                           </div>`;
-    //       return `<div class="custom-tooltip-container" style="background-color:orange">
-    //                 ${headerDom}
-    //                 ${contentDom}
-    //               </div>`;
-    //     },
-    //   },
-    // });
   }, 1500);
 
   const chartRef = ref<any>();
@@ -220,7 +188,19 @@
     chartRef.value = setPlot(PlotEnum.SCATTER, plotRef.value, {
       data: scatterList.value,
       ...defaultScatterOptions,
-
+      brush: {
+        enabled: false,
+        // 圈选高亮，不指定默认为: filter
+        action: 'highlight',
+        mask: {
+          style: {
+            fill: 'rgba(0,0,0,0.15)',
+            stroke: 'rgba(0,0,0,0.45)',
+            lineWidth: 0.5,
+          },
+        },
+        isStartEnable: () => !!selectedBrush.value,
+      },
       tooltip: {
         enterable: true,
         // showDelay: 2000,

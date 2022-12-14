@@ -242,9 +242,9 @@
   const props = defineProps<{
     isStandard: boolean;
     points: number;
-    length: number | [number, number];
-    width: number | [number, number];
-    height: number | [number, number];
+    length: number | [number, number] | any;
+    width: number | [number, number] | any;
+    height: number | [number, number] | any;
   }>();
 
   const emits = defineEmits(['update:points', 'update:length', 'update:width', 'update:height']);

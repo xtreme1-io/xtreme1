@@ -1,37 +1,28 @@
 package ai.basic.x1.adapter.api.job;
 
+import ai.basic.x1.adapter.api.job.converter.ModelCocoRequestConverter;
+import ai.basic.x1.adapter.api.job.converter.ModelCocoResponseConverter;
 import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.dto.PreModelParamDTO;
-import ai.basic.x1.adapter.port.dao.ModelDAO;
 import ai.basic.x1.adapter.port.dao.ModelDataResultDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.Model;
-import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDataResult;
 import ai.basic.x1.adapter.port.rpc.PredImageCo80ModelHttpCaller;
-import ai.basic.x1.adapter.port.rpc.dto.PredImageReqDTO;
 import ai.basic.x1.adapter.port.rpc.dto.PredImageRespDTO;
 import ai.basic.x1.entity.ModelMessageBO;
 import ai.basic.x1.entity.PredImageModelObjectBO;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
+import ai.basic.x1.usecase.ModelUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author Zhujh
@@ -46,7 +37,7 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
     private PredImageCo80ModelHttpCaller modelHttpCaller;
 
     @Autowired
-    private ModelDAO modelDAO;
+    private ModelUseCase modelUseCase;
 
     private ModelRunSuccessHandler<PredImageRespDTO> successHandler = new DefaultModelRunSuccessHandler();
     private ModelRunFailureHandler failureHandler = (message, ex) -> {
@@ -57,16 +48,8 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
         this.updateModelDataResult(modelObject, message);
     };
 
-    public void setSuccessHandler(ModelRunSuccessHandler<PredImageRespDTO> successHandler) {
-        this.successHandler = successHandler;
-    }
-
-    public void setFailureHandler(ModelRunFailureHandler failureHandler) {
-        this.failureHandler = failureHandler;
-    }
-
     @Override
-    boolean modelRun(ModelMessageBO message) {
+    public boolean modelRun(ModelMessageBO message) {
         log.info("start model run. dataId: {}, modelSerialNo: {}",  message.getDataId(),
                 message.getModelSerialNo());
         var apiResult = getRetryAbleApiResult(message);
@@ -86,7 +69,7 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
     ApiResult<PredImageRespDTO> callRemoteService(ModelMessageBO message) {
         try {
             var apiResult = modelHttpCaller
-                    .callPredImageModel(buildRequestParam(message));
+                    .callPredImageModel(ModelCocoRequestConverter.convert(message));
 
             if (CollUtil.isNotEmpty(apiResult.getData())) {
                 return new ApiResult<>(apiResult.getCode(), apiResult.getMessage(),
@@ -94,32 +77,13 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
             }
             return new ApiResult<>(apiResult.getCode(), apiResult.getMessage());
         } catch (Exception e) {
-            failureHandler.onModelRunFailure(message, e);
             throw new UsecaseException(UsecaseCode.UNKNOWN, e.getMessage());
         }
     }
 
     @Override
-    ModelCodeEnum getModelCodeEnum() {
+    public ModelCodeEnum getModelCodeEnum() {
         return ModelCodeEnum.COCO_80;
-    }
-
-    public PredImageReqDTO buildRequestParam(ModelMessageBO message) {
-        var dataInfo = message.getDataInfo();
-        if (dataInfo == null) {
-            throw new IllegalArgumentException(String.format("%s data is not found",
-                    message.getDataId()));
-        }
-        var fileNodes = dataInfo.getContent();
-        if (CollUtil.isEmpty(fileNodes)) {
-            throw new IllegalArgumentException("file is not found");
-        }
-        String url = fileNodes.get(0).getFile().getInternalUrl();
-        if (StrUtil.isEmpty(url)) {
-            throw new IllegalArgumentException("file url is empty");
-        }
-        return PredImageReqDTO.builder().datas(List.of(PredImageReqDTO.ImageData.builder()
-                .imageId(dataInfo.getId()).imgUrl(url).build())).params("").build();
     }
 
     private void updateModelDataResult(PredImageModelObjectBO modelObject, ModelMessageBO message) {
@@ -139,121 +103,16 @@ public class PredictImageCo80ModelHandler extends AbstractModelMessageHandler<Pr
 
     private class DefaultModelRunSuccessHandler implements ModelRunSuccessHandler<PredImageRespDTO> {
 
-        private Map<String, ModelClass> loadSystemModelClass() {
-            Model model = modelDAO.getOne(new LambdaQueryWrapper<Model>().eq(Model::getModelCode,
-                    getModelCodeEnum()));
-            if (model == null) {
-                throw new IllegalArgumentException(
-                        String.format("%s not found system model", getModelCodeEnum()));
-            }
-            if (CollUtil.isEmpty(model.getClasses())) {
-                throw new IllegalArgumentException(
-                        String.format("%s model not have any class", getModelCodeEnum()));
-            }
-            Map<String, ModelClass> systemModelClassMap = new HashMap<>();
-            for (var modelClass : model.getClasses()) {
-                if (CollUtil.isNotEmpty(modelClass.getSubClasses())) {
-                    for (var subModelClass : modelClass.getSubClasses()) {
-                        if (subModelClass == null) {
-                            continue;
-                        }
-                        if (systemModelClassMap.containsKey(subModelClass.getCode())) {
-                            throw new IllegalArgumentException("subModelClass is duplicate. " +
-                                    "code:" + subModelClass.getCode());
-                        } else {
-                            systemModelClassMap.put(subModelClass.getCode(), subModelClass);
-                        }
-                    }
-                }
-            }
-            return systemModelClassMap;
-        }
-
         @Override
         public void onModelRunSuccess(PredImageRespDTO responseData, ModelMessageBO message) {
-            PredImageModelObjectBO modelObject;
-            if (CollUtil.isEmpty(responseData.getPredictItems())) {
-                modelObject = PredImageModelObjectBO.builder().code(1)
-                        .message("success")
-                        .dataId(message.getDataId())
-                        .objects(List.of()).build();
-            } else {
-                var systemModelClassMap = this.loadSystemModelClass();
-                var filterPredItemCondition = JSONUtil.toBean(message.getResultFilterParam(),
-                        PreModelParamDTO.class);
-                log.info("start filter predItem. filter condition: " + JSONUtil.toJsonStr(filterPredItemCondition));
-                var predObjects = responseData.getPredictItems()
-                        .stream()
-                        .filter(item -> matchSystemModelClass(item.getClsid(), systemModelClassMap)
-                                && matchSelectedClassAndConfidence(item, filterPredItemCondition)
-                        )
-                        .map(item -> convert(item, systemModelClassMap.get(String.valueOf(item.getClsid()))))
-                        .collect(Collectors.toList());
-
-                modelObject = PredImageModelObjectBO.builder().code(0)
-                        .message("success")
-                        .dataId(message.getDataId())
-                        .objects(predObjects).build();
-            }
+            var systemModelClassMap = modelUseCase.getModelClassMapByModelId(message.getModelId());
+            var filterCondition = JSONUtil.toBean(message.getResultFilterParam(),
+                    PreModelParamDTO.class);
+            var modelObject = ModelCocoResponseConverter.convert(responseData, systemModelClassMap,
+                    filterCondition);
 
             PredictImageCo80ModelHandler.this.updateModelDataResult(modelObject, message);
         }
-
-        private PredImageModelObjectBO.ObjectBO convert(PredImageRespDTO.PredictItem predictItem,
-                                                        ModelClass modelClass) {
-            var topLeft = PredImageModelObjectBO.Point
-                    .builder()
-                    .x(predictItem.getLeftTopX())
-                    .y(predictItem.getLeftTopY()).build();
-            var bottomRight = PredImageModelObjectBO.Point
-                    .builder()
-                    .x(predictItem.getRightBottomX())
-                    .y(predictItem.getRightBottomY()).build();
-
-            return PredImageModelObjectBO
-                    .ObjectBO.builder()
-                    .confidence(predictItem.getScore())
-                    .modelClass(modelClass.getName())
-                    .modelClassId(Integer.valueOf(modelClass.getCode()))
-                    .objType("rectangle")
-                    .points(List.of(topLeft, bottomRight))
-                    .build();
-        }
-
-        private boolean matchSystemModelClass(Integer clsid, Map<String, ModelClass> systemModelClassMap) {
-            return systemModelClassMap.containsKey(String.valueOf(clsid));
-        }
-
-        private boolean matchSelectedClassAndConfidence(PredImageRespDTO.PredictItem predictItem,
-                                                        PreModelParamDTO filterPredItem) {
-            if (filterPredItem == null || CollUtil.isEmpty(filterPredItem.getClasses())) {
-               throw new IllegalArgumentException("model param is empty");
-            }
-            if (CollUtil.isEmpty(filterPredItem.getClasses())) {
-                throw new IllegalArgumentException("model class select at least one class");
-            }
-            var maxConfidence = getMaxConfidence(filterPredItem.getMaxConfidence());
-            var minConfidence = getMinConfidence(filterPredItem.getMinConfidence());
-            var selectedClasses = new HashSet<>(filterPredItem.getClasses());
-
-            String clsId = String.valueOf(predictItem.getClsid());
-            return selectedClasses.contains(clsId) &&
-                    betweenConfidence(predictItem.getScore(), minConfidence, maxConfidence);
-        }
-
-        private boolean betweenConfidence(BigDecimal predConfidence, BigDecimal minConfidence,
-                                          BigDecimal maxConfidence) {
-            return minConfidence.compareTo(predConfidence) <= 0 && maxConfidence.compareTo(predConfidence) >= 0;
-        }
-
-        private BigDecimal getMaxConfidence(BigDecimal confidence) {
-            return confidence == null ? new BigDecimal(1) : confidence;
-        }
-
-        private BigDecimal getMinConfidence(BigDecimal confidence) {
-            return confidence == null ? new BigDecimal(0) : confidence;
-        }
-
     }
 
 }

@@ -16,7 +16,6 @@
   import { computed } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   // import { useMessage } from '/@/hooks/web/useMessage';
-  import { Modal } from 'ant-design-vue';
   import { useModal } from '/@/components/Modal';
   import SaveToModal from './saveTo/SaveToModal.vue';
 
@@ -25,6 +24,7 @@
   import { deleteSelectedDatasetClassApi } from '/@/api/business/classes';
   import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { ModalConfirmCustom } from '/@/utils/business/confirm';
 
   const { t } = useI18n();
   // const { createMessage } = useMessage();
@@ -57,11 +57,11 @@
 
   /** Delete */
   const handleDeleted = async () => {
-    Modal.confirm({
-      title: 'Delete',
+    ModalConfirmCustom({
+      title: 'Delete Data',
       content: 'Are you sure to delete the selected items or series?This action is irreversible',
       okText: t('common.delText'),
-      okButtonProps: { danger: true },
+      okButtonProps: { type: 'primary' },
       onOk: async () => {
         await deleteSelectedDatasetClassApi(selectedItemIds.value);
         emits('fetchList');
