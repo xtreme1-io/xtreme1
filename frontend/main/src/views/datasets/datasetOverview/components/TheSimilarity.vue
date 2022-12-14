@@ -64,6 +64,9 @@
 <script lang="ts" setup>
   import axios from 'axios';
   import { onMounted, ref } from 'vue';
+  import { useGo } from '/@/hooks/web/usePage';
+  import { RouteEnum } from '/@/enums/routeEnum';
+  import { setDatasetBreadcrumb } from '/@/utils/business';
   import { Select } from 'ant-design-vue';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
@@ -77,7 +80,9 @@
   import { ISimilarityList } from '/@/api/business/dataset/model/overviewModel';
   import { datasetDetailApi } from '/@/api/business/dataset';
   import _ from 'lodash';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
+  const go = useGo();
   const props = defineProps<{ datasetId: number | string }>();
 
   const { setPlot } = useG2plot();
@@ -173,12 +178,46 @@
   const imgSrc = ref<string>();
   const labelName = ref<string>();
   const getDataInfo = _.debounce(async (id) => {
+    const maskDom: any = document.querySelector('#tooltipMask');
+    if (maskDom) {
+      maskDom.style.display = 'block';
+    }
+
+    console.log('debounce getDataInfo');
     isLoading.value = true;
     const res: any = await datasetDetailApi({ id });
     imgSrc.value = res?.content?.[0]?.file?.url;
     labelName.value = res.name;
     isLoading.value = false;
+
+    getToolTipDom(id);
   }, 1500);
+
+  const getToolTipDom = (id) => {
+    const maskDom: any = document.querySelector('#tooltipMask');
+    const labelDom = document.querySelector('#tooltipLabel');
+    const viewDom = document.querySelector('#tooltipView');
+    const imgDom = document.querySelector('#tooltipImg');
+
+    if (labelDom) {
+      labelDom.innerHTML = labelName.value as string;
+    }
+    if (imgDom) {
+      imgDom.setAttribute('src', imgSrc.value as string);
+    }
+    if (viewDom) {
+      viewDom.addEventListener('click', () => {
+        console.log('view');
+        setDatasetBreadcrumb(labelName.value, datasetTypeEnum.IMAGE);
+        go(`${RouteEnum.DATASETS}/data?id=${id}`);
+      });
+    }
+
+    console.log('getToolTipDom', maskDom);
+    if (maskDom) {
+      maskDom.style.display = 'none';
+    }
+  };
 
   const chartRef = ref<any>();
   onMounted(async () => {
@@ -203,7 +242,7 @@
       },
       tooltip: {
         enterable: true,
-        // showDelay: 2000,
+        // showDelay: 1000,
         showMarkers: false,
         domStyles: {
           'g2-tooltip': {
@@ -212,27 +251,36 @@
           },
         },
         customContent: (_, items) => {
-          console.log(_, items);
           if (!_) return;
           const data = items[0]?.data || {};
           const dataId = data?.id ?? undefined;
           if (dataId && dataId != lastDataId.value) {
             lastDataId.value = dataId;
             getDataInfo(dataId);
+          } else {
+            setTimeout(() => {
+              getToolTipDom(dataId);
+            });
           }
 
+          // TODO loading
+          const maskDom = `<div id="tooltipMask" class="custom-tooltip-container-mask"></div>`;
           const headerDom = `<div class="custom-tooltip-container-header">
                                 <div class="custom-tooltip-container-header-left">
                                   <div>ID: ${dataId}</div>
-                                  <div class="label">Label: ${labelName.value}</div>
+                                  <div class="label">
+                                    Label: <span id="tooltipLabel">${labelName.value}</span>
+                                  </div>
                                   <div>Vector: ${data?.x?.toFixed(4)},${data?.y?.toFixed(4)}</div>
                                 </div>
-                                <div class="custom-tooltip-container-header-right">View data</div>
+                                <div id="tooltipView" class="custom-tooltip-container-header-right">View data</div>
                               </div>`;
           const contentDom = `<div class="custom-tooltip-container-content">
-                                <img src="${imgSrc.value}" />
+                                <img id="tooltipImg" src="${imgSrc.value}" />
                               </div>`;
-          return `<div v-if="${isLoading.value}" class="custom-tooltip-container" style="background-color:orange">
+
+          return `<div class="custom-tooltip-container" style="background-color:orange">
+                    ${maskDom}
                     ${headerDom}
                     ${contentDom}
                   </div>`;
@@ -276,12 +324,20 @@
 <style lang="less">
   .custom-tooltip-container {
     height: 205px;
+    position: relative;
     display: flex;
     flex-direction: column;
     background: #ffffff;
     border: 1px solid #dddddd;
     border-radius: 4px;
     overflow: hidden;
+    &-mask {
+      position: absolute;
+      width: 223px;
+      height: 205px;
+      z-index: 1;
+      background-color: rgba(255, 255, 255, 0.7);
+    }
     &-header {
       flex: 1;
       width: 100%;
@@ -316,6 +372,7 @@
         border-radius: 4px;
         font-size: 12px;
         color: #fff;
+        cursor: pointer;
       }
     }
     &-content {
