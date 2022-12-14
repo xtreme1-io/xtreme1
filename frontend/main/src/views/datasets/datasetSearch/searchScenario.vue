@@ -1,6 +1,11 @@
 <template>
   <div :class="`${prefixCls}`">
-    <exportModalVue @register="register" :info="info" :classId="result" />
+    <exportModalVue
+      @register="register"
+      :info="info"
+      :classId="result"
+      :classification="classification"
+    />
     <div class="content">
       <div class="flex p-25px">
         <div class="mr-24px cursor-pointer" @click="handleBack">
@@ -27,14 +32,14 @@
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
-        <div class="item" v-for="item in list" :key="item.dataId">
+        <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
           <SearchCard
             :info="info"
             :object2D="object2D"
             :data="dataInfo[item.dataId]"
             :object="item"
           >
-            <Button @click="() => handleSingleAnnotate(item.dataId)" type="primary"
+            <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
               >Annotate</Button
             >
           </SearchCard>
@@ -55,17 +60,17 @@
         </div>
       </div>
       <div>
-        <Radio.Group v-model:value="classification">
-          <Radio
+        <Checkbox.Group v-model:value="classification">
+          <Checkbox
             v-for="item in filterOptions"
             style="display: block"
             :value="item.attributeId + '^' + item.optionName"
             :key="item.attributeId + '^' + item.optionName"
           >
             {{ item.optionName }}
-          </Radio>
+          </Checkbox>
           <!-- <Radio cstyle="display: block" :value="11">11111</Radio> -->
-        </Radio.Group>
+        </Checkbox.Group>
       </div>
     </div>
   </div>
@@ -73,21 +78,23 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Select, Radio } from 'ant-design-vue';
+  import { Select, Checkbox } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
   import { onMounted, ref, watch } from 'vue';
+  import { goToTool } from '/@/utils/business';
   import {
     datasetItemDetail,
     getDatasetClass,
     getScenario,
     getDataByIds,
     getClassificationOptions,
+    takeRecordByData,
   } from '/@/api/business/dataset';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
-  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
   import exportModalVue from './exportModal.vue';
   import { useModal } from '/@/components/Modal';
   const [register, { openModal }] = useModal();
@@ -154,8 +161,12 @@
       datasetType: info.value.type,
       source: 'DATASET_CLASS',
       pageSize: 999,
-      attributeId: classification.value ? classification.value.split('^')[0] : undefined,
-      optionName: classification.value ? classification.value.split('^')[1] : undefined,
+      attributeIds: classification.value
+        ? classification.value.map((item) => item.split('^')[0]).toString()
+        : undefined,
+      optionNames: classification.value
+        ? classification.value.map((item) => item.split('^')[1]).toString()
+        : undefined,
     });
     const _list: any[] = [];
     const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))
@@ -193,8 +204,20 @@
     }
   };
 
-  const handleSingleAnnotate = async (dataId: any) => {
-    console.log(dataId);
+  const handleSingleAnnotate = async (dataId: any, object: any) => {
+    const recordId = await takeRecordByData({
+      datasetId: info.value.id,
+      dataIds: [dataId],
+      dataType: dataTypeEnum.SINGLE_DATA,
+    }).catch(() => {});
+    const trackId = object.classAttributes.trackId;
+    console.log(object);
+    if (!recordId || !trackId) return;
+    // const res = await getLockedByDataset({
+    //   datasetId: info.value.id,
+    // });
+
+    goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
   };
 </script>
 <style lang="less" scoped>

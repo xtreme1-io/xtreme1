@@ -19,7 +19,7 @@ public class ScenarioQuery {
 
     private List<Long> classIds;
 
-    private String attributeId;
+    private List<String> attributeIds;
 
-    private String optionName;
+    private List<String> optionNames;
 }

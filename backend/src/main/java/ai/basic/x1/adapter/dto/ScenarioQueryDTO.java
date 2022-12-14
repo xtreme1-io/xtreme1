@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,9 +27,9 @@ public class ScenarioQueryDTO {
     @ValidStringEnum(message = "source must be one of DATASET_CLASS,ONTOLOGY", enumClass = ScenarioQuerySourceEnum.class)
     private String source;
 
-    private String attributeId;
+    private List<String> attributeIds;
 
-    private String optionName;
+    private List<String> optionNames;
 
     @NotEmpty(message = "datasetType cannot be null")
     @ValidStringEnum(message = "type must be one of LIDAR_FUSION,LIDAR_BASIC,IMAGE", enumClass = DatasetTypeEnum.class)

@@ -20,9 +20,9 @@ public class ScenarioQueryBO extends BaseQueryBO{
 
     private List<Long> classIds;
 
-    private String attributeId;
+    private List<String> attributeIds;
 
-    private String optionName;
+    private List<String> optionNames;
 
     private DatasetTypeEnum datasetType;
 }

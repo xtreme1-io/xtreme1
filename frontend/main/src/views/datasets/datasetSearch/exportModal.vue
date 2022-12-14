@@ -23,7 +23,12 @@
   import { ref } from 'vue';
   import { BasicForm, useForm } from '/@/components/Form';
   import { formSchema } from './schema';
-  import { createByScenario, exportScenario } from '/@/api/business/dataset';
+  import {
+    createByScenario,
+    exportDataRecordCallBack,
+    exportScenario,
+  } from '/@/api/business/dataset';
+  import { downloadByUrl } from '/@/utils/file/download';
   const [register, { closeModal }] = useModalInner();
   const [registerForm, { resetFields, validate }] = useForm({
     labelWidth: 90,
@@ -33,6 +38,7 @@
   const props = defineProps<{
     info: any;
     classId: any;
+    classification: any;
   }>();
   const { prefixCls } = useDesign('export-modal');
   const { t } = useI18n();
@@ -41,19 +47,40 @@
     const data = await validate();
     console.log(data);
     if (data.type === 'Json') {
-      await exportScenario({
+      const res = await exportScenario({
         pageNo: 1,
         pageSize: 9999,
         datasetType: props.info.type,
         classId: props.classId.toString(),
         source: 'DATASET_CLASS',
       });
+
+      const getFile = async () => {
+        const data = await exportDataRecordCallBack({ serialNumbers: res });
+        console.log(data);
+        if (data[0]?.status === 'GENERATING') {
+          setTimeout(getFile, 5000);
+        } else if (data[0]?.status === 'COMPLETED') {
+          downloadByUrl({
+            url: data[0].filePath,
+            fileName: data[0].fileName,
+          });
+        }
+      };
+
+      getFile();
     } else {
       await createByScenario({
         datasetType: props.info.type,
         classId: props.classId.toString(),
         source: 'DATASET_CLASS',
         datasetName: data.datasetName,
+        attributeIds: props.classification
+          ? props.classification.map((item) => item.split('^')[0]).toString()
+          : undefined,
+        optionNames: props.classification
+          ? props.classification.map((item) => item.split('^')[1]).toString()
+          : undefined,
       });
     }
     closeModal();

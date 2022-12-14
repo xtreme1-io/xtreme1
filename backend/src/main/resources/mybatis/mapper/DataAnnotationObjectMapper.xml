@@ -49,7 +49,7 @@
     <sql id="commonSql">
         FROM
         data_annotation_object dao
-        <if test="scenarioQuery.attributeId != null and scenarioQuery.attributeId != ''">
+        <if test="scenarioQuery.attributeIds != null and scenarioQuery.attributeIds.size() > 0">
             LEFT JOIN data_classification_option dco ON dao.data_id = dco.data_id
         </if>
         WHERE
@@ -69,12 +69,18 @@
             </foreach>
         </if>
 
-        <if test="scenarioQuery.attributeId != null and scenarioQuery.attributeId != ''">
-            AND dco.attribute_id = #{scenarioQuery.attributeId}
+        <if test="scenarioQuery.attributeIds != null and scenarioQuery.attributeIds.size() > 0">
+            AND dco.attribute_id IN
+            <foreach collection="scenarioQuery.attributeIds" item="attributeId" index="index" open="(" close=")" separator=",">
+                #{attributeId}
+            </foreach>
         </if>
 
-        <if test="scenarioQuery.optionName != null and scenarioQuery.optionName != ''">
-            AND dco.option_name = #{scenarioQuery.optionName}
+        <if test="scenarioQuery.optionNames != null and scenarioQuery.optionNames.size() > 0">
+            AND dco.option_name IN
+            <foreach collection="scenarioQuery.optionNames" item="optionName" index="index" open="(" close=")" separator=",">
+                #{optionName}
+            </foreach>
         </if>
     </sql>
 
