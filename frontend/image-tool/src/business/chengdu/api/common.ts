@@ -213,3 +213,53 @@ export async function getDataStatusByIds(dataId: string) {
 
     return data[0];
 }
+
+/** Get Data Annotation By DataIds */
+export interface IGetAnnotationParams {
+    classificationValues: any[];
+    dataId: number;
+    objects: any[];
+}
+export async function getAnnotationByDataIds(dataIds: Array<number | string>) {
+    const url = `${Api.DATASET_ANNOTATION}/data/listByDataIds`;
+
+    const res = await get(url, { dataIds: dataIds.join(',') });
+    const data = res.data as IGetAnnotationParams;
+    console.log(data[0]);
+    const { classificationValues } = data[0];
+
+    const classifications = classificationValues.map((item: any) => item.classificationAttributes);
+
+    return {
+        ...data[0],
+        classificationValues: classifications,
+    };
+}
+
+/** Save */
+export interface ISaveAnnotationParams {
+    datasetId: number | string;
+    dataInfos: Array<IDataInfos>;
+}
+export interface IDataInfos {
+    dataId: number;
+    objects: IObjects;
+    dataAnnotations: IAnnotation;
+}
+export interface IObjects {
+    id: number;
+    frontId: string;
+    classId: number;
+    classAttributes: any;
+}
+export interface IAnnotation {
+    id: number;
+    classificationId: string;
+    classificationAttributes: any;
+}
+export async function saveAnnotation(params: ISaveAnnotationParams) {
+    const url = `${Api.DATASET_ANNOTATION}/data/save`;
+
+    const res = await post(url, params);
+    console.log(res);
+}

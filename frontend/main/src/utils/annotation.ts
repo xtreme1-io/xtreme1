@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { Quaternion, Euler, Matrix3, Vector3, Matrix4 } from 'three';
 type IVec3 = {
   x: number;
   y: number;
@@ -12,20 +12,21 @@ type IObject = {
 type Info = { bottom: number; right: number; top: number; left: number };
 type ISize = { width: number; height: number };
 
-const worldMatrix = new THREE.Matrix4();
-const _quat = new THREE.Quaternion();
-const tempCenter = new THREE.Vector3();
-const tempSize = new THREE.Vector3();
-const tempEuler = new THREE.Euler();
+const worldMatrix = new Matrix4();
+const _quat = new Quaternion();
+const tempCenter = new Vector3();
+const tempSize = new Vector3();
+const tempEuler = new Euler();
+const tempMatrix3 = new Matrix3();
 const vertexs = [
-  new THREE.Vector3(0.5, 0.5, 0.5),
-  new THREE.Vector3(0.5, 0.5, -0.5),
-  new THREE.Vector3(0.5, -0.5, 0.5),
-  new THREE.Vector3(0.5, -0.5, -0.5),
-  new THREE.Vector3(-0.5, 0.5, 0.5),
-  new THREE.Vector3(-0.5, 0.5, -0.5),
-  new THREE.Vector3(-0.5, -0.5, 0.5),
-  new THREE.Vector3(-0.5, -0.5, -0.5),
+  new Vector3(0.5, 0.5, 0.5),
+  new Vector3(0.5, 0.5, -0.5),
+  new Vector3(0.5, -0.5, 0.5),
+  new Vector3(0.5, -0.5, -0.5),
+  new Vector3(-0.5, 0.5, 0.5),
+  new Vector3(-0.5, 0.5, -0.5),
+  new Vector3(-0.5, -0.5, 0.5),
+  new Vector3(-0.5, -0.5, -0.5),
 ];
 export interface ICameraInternal {
   fx: number;
@@ -46,7 +47,7 @@ export function createMatrixFromCameraInternal(
   option: ICameraInternal,
   w: number,
   h: number,
-): THREE.Matrix4 {
+): Matrix4 {
   const { fx, fy, cy, cx } = option;
   const near = 0.01;
   const far = 10000;
@@ -56,7 +57,7 @@ export function createMatrixFromCameraInternal(
   //     0,             0,            (near + far) / (near - far),   2*far*near / (near - far),
   //     0,             0,                      -1.0,                       0);
 
-  return new THREE.Matrix4().set(
+  return new Matrix4().set(
     (2 * fx) / w,
     0,
     1 - (2 * cx) / w,
@@ -96,8 +97,33 @@ export function transformToPc(object: IObject, size: ISize, extraInfo: Info) {
   const point2 = toViewCoordinate(-offsetW, +offsetH);
   const point3 = toViewCoordinate(-offsetW, -offsetH);
   const point4 = toViewCoordinate(+offsetW, -offsetH);
-  return [point1, point2, point3, point4];
+  return {
+    center: [centerX, centerY],
+    points: [point1, point2, point3, point4],
+  };
 }
+
+export const focusTransform = (object: IObject, size: ISize, extraInfo: Info, aspect = 1) => {
+  const { left, right, top, bottom } = extraInfo;
+  const { center3D, rotation3D, size3D } = object;
+  const _center = {
+    x: (right + left) / 2,
+    y: (bottom + top) / 2,
+  };
+  const offsetX = ((center3D.x - _center.x) / (left - right)) * size.width;
+  const offsetY = ((center3D.y - _center.y) / (top - bottom)) * size.height;
+  const scale = Math.floor(((right - left) * aspect) / Math.max(size3D.x, size3D.y)) * 0.4;
+  tempMatrix3
+    .identity()
+    .translate(offsetX, offsetY)
+    .scale(scale, scale)
+    .rotate(Math.PI / 2 - rotation3D.z);
+  const el = tempMatrix3.elements;
+  return {
+    matrix3Str: `matrix(${el[0]},${el[1]},${el[3]},${el[4]},${el[6]},${el[7]})`,
+    scale: scale,
+  };
+};
 
 export function getCameraMatrix(item: IImgViewConfig) {
   const projectionMatrix = createMatrixFromCameraInternal(
@@ -106,7 +132,7 @@ export function getCameraMatrix(item: IImgViewConfig) {
     item.imgSize[1],
   );
   const ext = item.cameraExternal;
-  const matrixWorldInverse = new THREE.Matrix4()
+  const matrixWorldInverse = new Matrix4()
     .set(
       ext[0],
       ext[1],
@@ -125,11 +151,11 @@ export function getCameraMatrix(item: IImgViewConfig) {
       ext[14],
       ext[15],
     )
-    .premultiply(new THREE.Matrix4().makeScale(1, -1, -1));
+    .premultiply(new Matrix4().makeScale(1, -1, -1));
   projectionMatrix.multiply(matrixWorldInverse);
   return projectionMatrix;
 }
-export function transformToImage(object: IObject, size: ISize, cameraMatrix: THREE.Matrix4) {
+export function transformToImage(object: IObject, size: ISize, cameraMatrix: Matrix4) {
   const { center3D, rotation3D, size3D } = object;
   tempCenter.set(center3D.x, center3D.y, center3D.z);
   tempEuler.set(rotation3D.x, rotation3D.y, rotation3D.z);
@@ -138,9 +164,9 @@ export function transformToImage(object: IObject, size: ISize, cameraMatrix: THR
     .compose(tempCenter, _quat.setFromEuler(tempEuler, false), tempSize)
     .premultiply(cameraMatrix);
 
-  const _pos = new THREE.Vector3();
-  const min = new THREE.Vector3(Infinity, Infinity, Infinity);
-  const max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
+  const _pos = new Vector3();
+  const min = new Vector3(Infinity, Infinity, Infinity);
+  const max = new Vector3(-Infinity, -Infinity, -Infinity);
   vertexs.forEach((item) => {
     _pos.copy(item);
     _pos.applyMatrix4(worldMatrix);
@@ -182,7 +208,7 @@ export function translateCameraConfig(info: any) {
 
   // 列序转换成行序
   if (info.rowMajor === false || isMatrixColumnMajor(cameraExternal)) {
-    const matrix = new THREE.Matrix4();
+    const matrix = new Matrix4();
     matrix.elements = cameraExternal;
     matrix.transpose();
     cameraExternal = matrix.elements;

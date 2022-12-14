@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.port.dao.mybatis.model.Model;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
 import ai.basic.x1.entity.ModelBO;
 import ai.basic.x1.entity.ModelMessageBO;
+import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ModelDatasetTypeEnum;
 import ai.basic.x1.util.Constants;
 import ai.basic.x1.util.DefaultConverter;
@@ -26,7 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ai.basic.x1.entity.enums.ModelDatasetTypeEnum.*;
+import static ai.basic.x1.entity.enums.ModelDatasetTypeEnum.LIDAR_BASIC;
+import static ai.basic.x1.entity.enums.ModelDatasetTypeEnum.LIDAR_FUSION;
 
 /**
  * @author chenchao
@@ -52,6 +54,12 @@ public class ModelUseCase {
         }
         var modelList = modelDAO.list(modelLambdaQueryWrapper);
         return DefaultConverter.convert(modelList, ModelBO.class);
+    }
+
+    public ModelBO findByModelCode(ModelCodeEnum modelCode) {
+        var model = modelDAO.getOne(new LambdaQueryWrapper<Model>().eq(Model::getModelCode,
+                modelCode));
+        return DefaultConverter.convert(model, ModelBO.class);
     }
 
     public ModelBO findById(Long id) {

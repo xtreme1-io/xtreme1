@@ -60,6 +60,7 @@
           :groundTruthsOption="groundTruthsOption"
           :filterForm="filterForm"
           :datasetType="info?.type"
+          v-model:showAnnotation="showAnnotation"
           @handleMakeFrame="handleMakeFrame"
           @handleSelectAll="handleSelectAll"
           @handleAnnotate="handleAnnotate"
@@ -82,6 +83,7 @@
               :key="i.id"
               :object="objectMap[i.id]"
               @handleSelected="handleSelected"
+              :showAnnotation="showAnnotation"
               :isSelected="selectedList.filter((item) => item === i.id).length > 0"
               :data="i"
               :info="info"
@@ -239,6 +241,7 @@
   const info = ref<DatasetListItem>();
   const start = ref<Nullable<Dayjs>>(null);
   const end = ref<Nullable<Dayjs>>(null);
+  const showAnnotation = ref<boolean>(false);
   const name = ref<string>('');
   const sortField = ref<SortFieldEnum>(SortFieldEnum.NAME);
   const sortType = ref<SortTypeEnum>(SortTypeEnum.ASC);

@@ -143,7 +143,6 @@
   };
 
   const getLidarImgUrl = () => {
-    console.log(props.data);
     const content = props.data.datas && props.data.datas[0]?.content;
     if (content && content[0] && content[0].files) {
       const files = content.filter((record) => record.directoryType?.includes('image'))[0]?.files;

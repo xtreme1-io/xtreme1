@@ -1,6 +1,6 @@
-import { IClassification, IClassificationAttr } from '../type';
-import { AttrType } from 'pc-editor';
-
+import { IAttr, IClassification, IClassificationAttr } from '../type';
+import { AttrType, IClassType } from 'pc-editor';
+import * as THREE from 'three';
 export function traverseClassification2Arr(data: any[]) {
     let classifications = [] as IClassification[];
 
@@ -72,7 +72,100 @@ export function traverseClassification2Arr(data: any[]) {
         });
     }
 }
+export function traverseClass2Arr(data: any) {
+    let classTypes = [] as IClassType[];
+    data.forEach((config: any) => {
+        let classType: IClassType = {
+            id: config.id + '',
+            name: config.name || '',
+            // label: config.name + '-label',
+            label: config.name || '',
+            color: config.color || '#ff0000',
+            attrs: [],
+            type: '',
+        };
 
+        let attributes = config.attributes || [];
+        let toolOption = config.toolTypeOptions || {};
+        if (toolOption.isStandard) {
+            classType.type = 'standard';
+            classType.size3D = new THREE.Vector3(
+                toolOption.length || 0,
+                toolOption.width || 0,
+                toolOption.height || 0,
+            );
+        } else if (toolOption.isConstraints) {
+            let length, width, height;
+            length = toolOption.length || [];
+            width = toolOption.width || [];
+            height = toolOption.height || [];
+            classType.type = 'constraint';
+            classType.sizeMin = new THREE.Vector3(length[0] || 0, width[0] || 0, height[0] || 0);
+            classType.sizeMax = new THREE.Vector3(length[1] || 0, width[1] || 0, height[1] || 0);
+        }
+
+        if (toolOption.points) {
+            classType.points = [toolOption.points, 0];
+        }
+
+        attributes.forEach((option: any) => {
+            let classAttr: IAttr = {
+                id: option.id || option.name,
+                name: option.name,
+                classId: classType.id,
+                label: option.name,
+                required: option.required,
+                type: option.type,
+                options: (option.options || []).map((e: any) => {
+                    return { value: e.name, label: e.name };
+                }),
+                parent: '',
+                parentValue: '',
+                parentAttr: config.name,
+                key: option.name,
+                value: option.type === AttrType.MULTI_SELECTION ? [] : '',
+            };
+            classType.attrs.push(classAttr);
+
+            option.options.forEach((o: any) => {
+                traverseOption(classType, o, classAttr.id, option.name);
+            });
+        });
+
+        classTypes.push(classType);
+    });
+
+    function traverseOption(classType: IClassType, option: any, parent: any, parentAttr: string) {
+        // console.log(option);
+        if (!option.attributes || option.attributes.length === 0) return;
+
+        option.attributes.forEach((attr: any) => {
+            let name = attr.name;
+            let classAttr: IAttr = {
+                id: attr.id || name,
+                key: `${parent}[${option.name}]-${name}`,
+                classId: classType.id,
+                parent,
+                parentAttr,
+                parentValue: option.name,
+                type: attr.type,
+                name,
+                label: name,
+                value: attr.type === AttrType.MULTI_SELECTION ? [] : '',
+                required: attr.required,
+                options: attr.options.map((e: any) => {
+                    return { value: e.name, label: e.name };
+                }),
+            };
+            classType.attrs.push(classAttr);
+            (attr.options || []).forEach((option: any) => {
+                traverseOption(classType, option, classAttr.id, name);
+            });
+        });
+    }
+
+    return classTypes;
+}
 export function copyClassification(
     baseClassifications: IClassification[],
     valueMap: Record<string, any>,
@@ -96,6 +189,31 @@ export function copyClassification(
     });
     return classifications;
 }
+
+export function copyClassType(
+    baseClassifications: IClassType[],
+    valueMap: Record<string, any>,
+) {
+    let classType = [] as IClassType[];
+    baseClassifications.forEach((classification) => {
+        let copyClassType = {} as IClassType;
+        copyClassType = JSON.parse(JSON.stringify(classification));
+
+        copyClassType.attrs.forEach((attr) => {
+            attr.value = attr.type === AttrType.MULTI_SELECTION ? [] : '';
+            if (valueMap[attr.id]) {
+                // 处理成数组
+                if (attr.type === AttrType.MULTI_SELECTION && !Array.isArray(valueMap[attr.id])) {
+                    valueMap[attr.id] = [valueMap[attr.id]];
+                }
+                attr.value = valueMap[attr.id];
+            }
+        });
+        classType.push(copyClassType);
+    });
+    return classType;
+}
+
 export function classificationToSave(classification: IClassification) {
     let attrMap = {} as Record<string, IClassificationAttr>;
     classification.attrs.forEach((attr) => {

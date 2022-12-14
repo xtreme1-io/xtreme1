@@ -45,7 +45,10 @@ export default function useTool() {
             let { dataInfos, seriesFrameId } = await api.getInfoByRecordId(bsState.recordId);
             // state.isSeriesFrame = isSeriesFrame;
             bsState.seriesFrameId = seriesFrameId;
-
+            let dataId = bsState.query.dataId;
+            if (dataId) {
+                dataInfos = dataInfos.filter((data) => data.id === dataId);
+            }
             if (dataInfos.length === 0) {
                 throw '';
             }

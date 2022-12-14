@@ -40,7 +40,7 @@
   <ChooseOntology
     @register="registerChooseOntologyModal"
     :datasetType="props.datasetType"
-    @next="handleNext"
+    @next="handleToClasses"
     @copyAll="handleCopyAll"
   />
   <ChooseClass
@@ -53,6 +53,7 @@
 </template>
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
+  import { useMessage } from '/@/hooks/web/useMessage';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { Dropdown, Menu } from 'ant-design-vue';
   import ImportModal from './import-modal/ImportModal.vue';
@@ -78,26 +79,43 @@
   } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { exportScenario } from '/@/api/business/dataset';
 
   // const { t } = useI18n();
+  const { createMessage } = useMessage();
 
-  const props = defineProps<{ datasetId: string | number; datasetType: datasetTypeEnum }>();
+  const props = defineProps<{
+    datasetId: string | number;
+    datasetType: datasetTypeEnum;
+    selectedList: any[];
+  }>();
   const emits = defineEmits(['fetchList']);
 
   const selectedOntologyId = ref<number | string>();
   /** Copy Modal */
-  const [registerChooseOntologyModal, { openModal: openChooseOntologyModal }] = useModal();
-  const [registerChooseClassModal, { openModal: openChooseClassModal }] = useModal();
-  const [registerConflictModal, { openModal: openConflictModal }] = useModal();
+  const [
+    registerChooseOntologyModal,
+    { openModal: openChooseOntologyModal, closeModal: closeChooseOntologyModal },
+  ] = useModal();
+  const [
+    registerChooseClassModal,
+    { openModal: openChooseClassModal, closeModal: closeChooseClassModal },
+  ] = useModal();
+  const [registerConflictModal, { openModal: openConflictModal, closeModal: closeConflictModal }] =
+    useModal();
   const handleOpenCopy = () => {
     openChooseOntologyModal(true, { isClear: true });
   };
-  const handleNext = (ontologyId) => {
-    console.log(ontologyId);
+  const handleToClasses = (ontologyId, ontologyName) => {
+    closeChooseOntologyModal();
+
     selectedOntologyId.value = ontologyId;
-    openChooseClassModal(true, { ontologyId: selectedOntologyId.value });
+    openChooseClassModal(true, { ontologyId: selectedOntologyId.value, ontologyName });
   };
   const handleBack = (type: ICopyEnum) => {
+    closeChooseClassModal();
+    closeConflictModal();
+
     if (type == ICopyEnum.ONTOLOGY) {
       openChooseOntologyModal(true, {});
     } else if (type == ICopyEnum.CLASSES) {
@@ -110,7 +128,8 @@
       ClassificationSelectedList,
     );
 
-    console.log('conflict result: ', conflictClassList, conflictClassificationList);
+    closeChooseClassModal();
+
     if (conflictClassList.length > 0 || conflictClassificationList.length > 0) {
       openConflictModal(true, {
         type: ICopyEnum.CLASSES,
@@ -121,14 +140,18 @@
       handleConfirm();
     }
   };
-  const handleCopyAll = async (ontologyId: number, type: ICopyEnum) => {
-    selectedOntologyId.value = ontologyId;
+  const handleCopyAll = async (type: ICopyEnum, ontologyId?: number) => {
+    if (ontologyId) selectedOntologyId.value = ontologyId;
+
     await getSelectedOntologyList();
 
     const { conflictClassList, conflictClassificationList } = await getAllConflictResolution(
       ontologyClassList.value,
       ontologyClassificationList.value,
     );
+
+    closeChooseOntologyModal();
+    closeChooseClassModal();
 
     console.log('conflict result: ', conflictClassList, conflictClassificationList);
     if (conflictClassList.length > 0 || conflictClassificationList.length > 0) {
@@ -152,6 +175,9 @@
     const tempClassificationList = [...classificationList, ...noConflictClassificationList.value];
     tempClassificationList.length > 0 && (await copyClassification(tempClassificationList));
 
+    createMessage.success(
+      `Copied ${tempClassList.length} Class(es) and ${tempClassificationList.length} Classification(s)`,
+    );
     emits('fetchList');
   };
   const copyClass = async (list: any[]) => {
@@ -235,7 +261,15 @@
   const handleImport = () => {
     openImportModal();
   };
-  const handleExport = () => {};
+  const handleExport = async () => {
+    await exportScenario({
+      pageNo: 1,
+      pageSize: 9999,
+      datasetType: props.datasetType,
+      classId: props.selectedList.toString(),
+      source: 'DATASET_CLASS',
+    });
+  };
 </script>
 <style lang="less" scoped>
   .ellipsis_box {

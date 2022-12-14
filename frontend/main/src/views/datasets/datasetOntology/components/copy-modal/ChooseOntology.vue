@@ -12,7 +12,7 @@
     :width="1200"
     :height="750"
   >
-    <div class="copy__modal" v-loading="loadingRef">
+    <div class="copy__modal">
       <div class="flex items-center mb-15px justify-end">
         <Button type="primary" @click="handleCopyAll" :disabled="isDisabled">
           <span>Copy Entire Ontology</span>
@@ -30,7 +30,7 @@
         </div>
         <div class="wrapper-inner empty" v-if="cardList.length == 0">
           <div class="empty-wrapper">
-            <img src="../../../../../assets/svg/empty.svg" alt="" />
+            <img src="../../../../../assets/images/class/empty-ontology.png" alt="" />
             <div class="tip">
               There is ontology of this Dataset type available. You can go to
               <span class="high_light" @click="handleToOntology"> Ontology Center</span>
@@ -74,33 +74,33 @@
   });
 
   /** Modal */
-  const [registerModal, { closeModal }] = useModalInner((config) => {
+  const [registerModal, { changeLoading }] = useModalInner((config) => {
+    changeLoading(false);
     if (config.isClear) {
       selectedOntologyId.value = undefined;
     }
     getList();
   });
   const handleNext = () => {
-    closeModal();
-    setTimeout(() => {
-      emits('next', selectedOntologyId.value);
-      // selectedOntologyId.value = undefined;
-    }, 100);
+    const selectedOntologyName = cardList.value.find(
+      (item) => item.id == selectedOntologyId.value,
+    )?.name;
+
+    emits('next', selectedOntologyId.value, selectedOntologyName);
   };
 
   /** Copy All */
   const handleCopyAll = () => {
-    emits('copyAll', selectedOntologyId.value, ICopyEnum.ONTOLOGY);
-    closeModal();
+    emits('copyAll', ICopyEnum.ONTOLOGY, selectedOntologyId.value);
+    changeLoading(true);
   };
 
   /** List */
   const pageNo = ref();
   const total = ref();
-  const cardList = ref([]);
-  const loadingRef = ref<boolean>(false);
+  const cardList = ref<any[]>([]);
   const getList = async (isConcat = false) => {
-    loadingRef.value = true;
+    changeLoading(true);
 
     if (!isConcat) {
       pageNo.value = 1;
@@ -121,7 +121,8 @@
       cardList.value = [];
       total.value = 0;
     }
-    loadingRef.value = false;
+
+    changeLoading(false);
   };
 
   /** Scroll */

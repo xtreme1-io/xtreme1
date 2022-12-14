@@ -23,3 +23,14 @@ export enum ICopyEnum {
   CLASSES = 'CLASSES',
   CONFLICT = 'CONFLICT',
 }
+
+export enum ICopySelectEnum {
+  REPLACE = 'REPLACE',
+  KEEP = 'KEEP',
+  NONE = 'NONE',
+}
+
+export interface IFormState {
+  ontologyId: undefined | string | number;
+  ontologyName: undefined | string;
+}

@@ -96,7 +96,6 @@
   import _ from 'lodash';
   import {
     handleAddUuid,
-    validateName,
     getCreateClassificationParams,
     getDefaultCreateClassificationFormState,
     isObjectChanged,
@@ -111,7 +110,10 @@
     createOntologyClassificationApi,
     createDatasetClassificationApi,
     updateDatasetClassificationApi,
+    validateOntologyClassificationNameApi,
+    validateDatasetClassificationNameApi,
   } from '/@/api/business/classes';
+  import { RuleObject } from 'ant-design-vue/es/form/interface';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -181,6 +183,30 @@
   getDefaultCreateClassificationFormState(formState);
   defineExpose({ formState });
   /** Rules */
+  const validateName = async (_rule: RuleObject, value: string) => {
+    if (!value) {
+      return Promise.reject(t('business.ontology.modal.nameRequired'));
+    } else {
+      const params: any = {
+        id: props.detail?.id,
+        ontologyId: props.ontologyId ?? undefined,
+        datasetId: props.datasetId ?? undefined,
+        name: formState.name,
+      };
+      let res;
+      if (props.isCenter) {
+        res = await validateOntologyClassificationNameApi(params);
+      } else {
+        res = await validateDatasetClassificationNameApi(params);
+      }
+
+      if (!res) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject('Duplicated name');
+      }
+    }
+  };
   const rules = {
     name: [
       { required: true, validator: validateName, trigger: 'change' },

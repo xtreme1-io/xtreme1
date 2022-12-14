@@ -1,8 +1,15 @@
-import { reactive, ref, watchEffect } from 'vue';
-import { transformToPc, mapLinear } from '/@/utils/annotation';
-import { datasetTypeEnum, DatasetListItem, DatasetItem } from '/@/api/business/model/datasetModel';
+import { reactive, ref, watchEffect, watch, computed } from 'vue';
+import { transformToPc, mapLinear, focusTransform } from '/@/utils/annotation';
+import {
+  datasetTypeEnum,
+  DatasetListItem,
+  DatasetItem,
+  fileItem,
+} from '/@/api/business/model/datasetModel';
 import placeImg from '/@/assets/images/dataset/fusion-banner-content.png';
 import placeImgFull from '/@/assets/images/dataset/basic-banner-content.png';
+import { Vector2, Matrix3 } from 'three';
+import { debounce } from 'lodash-es';
 
 export enum I2D_TYPE {
   POLYGON = 'POLYGON',
@@ -96,7 +103,7 @@ export default function useCardObject() {
         const contour = obj.contour || obj;
         const { center3D, rotation3D, size3D } = contour;
         if (center3D && rotation3D && size3D) {
-          const points = transformToPc(contour, size, info);
+          const { points } = transformToPc(contour, size, info);
           target.push({ id: obj.id, points: points.map((pos) => pos.join(',')).join(' ') });
         }
       });
@@ -241,6 +248,7 @@ export default function useCardObject() {
     refs,
     setRef,
     getRef,
+    getSize,
     onImgLoad,
     getImageUrl,
     canPreview,
@@ -338,35 +346,11 @@ export function useImgCard(props: {
         const imgSize = (img?.files || [])[0]?.file?.extraInfo;
 
         const svgElement = ref.querySelector('svg.easy-image') as SVGElement;
-        // const imgElement = ref.querySelector('img') as HTMLImageElement;
-        // const _update = () => {
-        //   if (!imgSize) {
-        //     imgSize = {
-        //       width: imgElement.naturalWidth,
-        //       height: imgElement.naturalHeight,
-        //     };
-        //   }
-        //   const items: any[] = [];
-        //   updatePcImageResult(items, objects, index, svgElement, imgSize);
-        //   img.object = items;
-        //   // imgElement.onload = null;
-        // };
         if (imgSize) {
           const items: any[] = [];
           updatePcImageResult(items, objects, index, svgElement, imgSize);
           img.object = items;
         }
-        // const _load = () => {
-        //   _update();
-        //   imgElement.removeEventListener('load', _load);
-        // };
-        // if (imgSize) {
-        //   _update();
-        // } else if (imgElement.complete && imgElement.src) {
-        //   _update();
-        // } else {
-        //   imgElement.addEventListener('load', _load);
-        // }
       });
     }
     iState.pcImageObject = imgs;
@@ -401,5 +385,418 @@ export function useImgCard(props: {
     size,
     onImgLoad,
     getImageUrl,
+  };
+}
+
+export function useSearchCard(props: {
+  info: DatasetListItem | undefined;
+  object: any;
+  object2D: any;
+  data: DatasetItem;
+}) {
+  const { iState, svg, getSize } = useCardObject();
+  const state = reactive({
+    object2d: [] as any[],
+    imgTransform: '',
+    transform: '',
+    imgIndex: 0,
+  });
+  const cardContainer = ref<HTMLDivElement | null>(null);
+  const getPlaceImg = () => {
+    const placeImgType = props.info?.type === datasetTypeEnum.LIDAR_BASIC ? placeImgFull : placeImg;
+    const pc = props.data
+      ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
+      : { files: null };
+    const file = pc.files && pc.files[0].file;
+    const thumbnailUrl = file?.mediumThumbnail?.url;
+    const url = file?.renderImage?.url;
+    return thumbnailUrl || url || placeImgType;
+  };
+  const getPcImage = (item: any) => {
+    return getUrl(item) || placeImg;
+  };
+  const getUrl = (item: any) => {
+    // const info = (item?.files || [])[0]?.file?.extraInfo;
+    const smallUrl = item?.files && item?.files[0]?.file?.smallThumbnail?.url;
+    const url = item?.files && item?.files[0]?.file?.url;
+    return smallUrl || url;
+  };
+  const getExtraInfo = () => {
+    const pc = props.data
+      ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
+      : { files: null };
+    return pc.files ? pc.files[0].file?.renderImage?.extraInfo : null;
+  };
+  /**
+   * 点云 缩影框
+   */
+  const updatePcObject = () => {
+    const results: { id: string; points: string }[] = [];
+    if (
+      props.info?.type === datasetTypeEnum.LIDAR_FUSION ||
+      props.info?.type === datasetTypeEnum.LIDAR_BASIC
+    ) {
+      const object = props.object.classAttributes;
+      // let size = getSize(svg.value);
+      const info = getExtraInfo();
+
+      const size = getSize(svg.value);
+      if (info && object) {
+        const contour = object.contour || object;
+        const { center3D, rotation3D, size3D } = contour;
+        if (center3D && rotation3D && size3D) {
+          const { center, points } = transformToPc(contour, size, info);
+          const { matrix3Str, scale } = focusTransform(contour, size, info);
+
+          // results.push({ id: obj.id, points: points.map((pos) => pos.join(',')).join(' ') });
+
+          state.imgTransform = matrix3Str;
+
+          const cX = size.width / 2;
+          const cY = size.height / 2;
+          const vec2 = new Vector2();
+          const _center = new Vector2(cX, cY);
+          const rotation3D = contour.rotation3D;
+          const _points = points.map((p) => {
+            return vec2
+              .fromArray([(p[0] - center[0]) * scale + cX, (p[1] - center[1]) * scale + cY])
+              .rotateAround(_center, Math.PI / 2 + rotation3D.z)
+              .toArray();
+          });
+          results.push({
+            id: contour.id,
+            points: _points.map((pos) => pos.join(',')).join(' '),
+          });
+        }
+      }
+    }
+    iState.pcObject = results;
+  };
+  watchEffect(updatePcObject);
+
+  const pcActiveImage = computed(() => {
+    let file: fileItem | undefined;
+    if (props.info?.type === datasetTypeEnum.LIDAR_FUSION) {
+      const imgs = props.data?.content.filter(
+        (content) => content.directoryType && content.directoryType.includes('image'),
+      );
+      const img = imgs.length ? imgs[state.imgIndex] : null;
+      file = img?.files && img?.files[0]?.file;
+    } else if (props.info?.type === datasetTypeEnum.IMAGE) {
+      file = props.data?.content && props.data?.content[0]?.file;
+    }
+    if (file) {
+      const extraInfo = file?.extraInfo;
+      const url = file?.url;
+      const smallUrl = file?.largeThumbnail?.url;
+      return {
+        extraInfo: extraInfo,
+        url: extraInfo ? smallUrl || url : url,
+      };
+    }
+    return {
+      url: '',
+    };
+  });
+
+  const update2d = debounce(() => {
+    if (props.info?.type !== datasetTypeEnum.LIDAR_FUSION) return;
+    const dom = cardContainer.value as HTMLDivElement;
+    if (!dom) return;
+    const img = dom.querySelector('img.img-2d') as HTMLImageElement;
+    const svg = dom.querySelector('svg.easy-svg') as SVGElement;
+    const trackId = props.object.classAttributes.trackId;
+    const objects = props.object2D[trackId];
+    state.transform = '';
+    const object2d: any[] = [];
+    if (img.src && img.complete && objects?.length) {
+      const imgIndex = state.imgIndex;
+      const { naturalWidth, naturalHeight, clientWidth, clientHeight } = updateDom(img, svg);
+      const focusItem = (os: any[]) => {
+        if (!os.length) return;
+
+        const imgToView_X = (x: number) => {
+          return (x / naturalWidth) * clientWidth;
+        };
+        const imgToView_Y = (y: number) => {
+          return (y / naturalHeight) * clientHeight;
+        };
+
+        const getOffsetAndScale = (instance: any) => {
+          const min = new Vector2(Infinity, Infinity);
+          const max = new Vector2(-Infinity, -Infinity);
+          let offsetX = 0;
+          let offsetY = 0;
+          let scale = 1;
+          const info = instance.classAttributes;
+          const contour = info.contour || info;
+          contour.points.forEach((p) => {
+            min.min(p);
+            max.max(p);
+          });
+          offsetX = (clientWidth - imgToView_X(min.x + max.x)) / 2;
+          offsetY = (clientHeight - imgToView_Y(min.y + max.y)) / 2;
+          scale = Math.min(
+            clientWidth / imgToView_X(max.x - min.x),
+            clientHeight / imgToView_Y(max.y - min.y),
+          );
+          return {
+            offsetX,
+            offsetY,
+            scale: scale * 0.4,
+          };
+        };
+        const { offsetX, offsetY, scale } = getOffsetAndScale(os[0]);
+
+        os.forEach((o) => {
+          let points: any[] = [];
+          const info = o.classAttributes;
+          const type = info.type || info.objType;
+          const contour = info.contour || info;
+          const cX = clientWidth / 2;
+          const cY = clientHeight / 2;
+          if (['2D_BOX', 'box2d'].includes(type)) {
+            // const { positions1, positions2 } = o;
+            const P = contour.points.map((p) => {
+              const _x = cX - (cX - imgToView_X(p.x) - offsetX) * scale;
+              const _y = cY - (cY - imgToView_Y(p.y) - offsetY) * scale;
+              return [_x, _y];
+            });
+            points = [
+              P[0],
+              P[1],
+              P[2],
+              P[3],
+              P[0],
+              P[4],
+              P[5],
+              P[6],
+              P[7],
+              P[4],
+              P[5],
+              P[1],
+              P[2],
+              P[6],
+              P[7],
+              P[3],
+            ];
+          } else if (['2D_RECT', 'rect'].includes(type)) {
+            let _points = contour.points;
+            if (_points.length === 2) {
+              _points = [
+                { x: _points[0].x, y: _points[0].y },
+                { x: _points[0].x, y: _points[1].y },
+                { x: _points[1].x, y: _points[1].y },
+                { x: _points[1].x, y: _points[0].y },
+              ];
+            }
+            points = _points.map((p) => {
+              const _x = cX - (cX - imgToView_X(p.x) - offsetX) * scale;
+              const _y = cY - (cY - imgToView_Y(p.y) - offsetY) * scale;
+              return [_x, _y];
+            });
+          }
+
+          if (points.length) {
+            object2d.push({
+              id: o.uuid,
+              points: points.map((p) => p.join(',')).join(' '),
+            });
+          }
+        });
+        updateCssTransform(offsetX, offsetY, scale);
+      };
+      focusItem(
+        objects.filter((o) => {
+          const info = o.classAttributes;
+          const contour = info.contour || info;
+          const index = contour.viewIndex;
+          const flag1 = index === imgIndex;
+          const flag2 = info.trackId === props.object.classAttributes.trackId;
+          return flag1 && flag2;
+        }),
+      );
+    }
+    state.object2d = object2d;
+  }, 200);
+
+  function onChange(n: number) {
+    const imgs = props.data.content.filter(
+      (content) => content.directoryType && content.directoryType.includes('image'),
+    );
+    const length = imgs.length;
+    const index = state.imgIndex + n;
+    state.imgIndex = Math.max(0, Math.min(length - 1, index));
+  }
+
+  const updateCssTransform = (offsetX: number, offsetY: number, scale: number) => {
+    const matrix3 = new Matrix3();
+    matrix3.translate(offsetX, offsetY);
+    matrix3.scale(scale, scale);
+    const el = matrix3.elements;
+    state.transform = `translate(-50%, -50%) matrix(${el[0]},${el[1]},${el[3]},${el[4]},${el[6]},${el[7]})`;
+  };
+
+  const updateDom = (img: HTMLImageElement, svg: SVGElement) => {
+    let { clientHeight, clientWidth, naturalWidth, naturalHeight } = img;
+    const info = pcActiveImage.value?.extraInfo;
+    if (info) {
+      naturalWidth = info.width || naturalWidth;
+      naturalHeight = info.height || naturalHeight;
+    }
+    const aspect = naturalWidth / naturalHeight;
+    const fitAspect = clientWidth / clientHeight;
+    let width: number;
+    let height: number;
+    if (aspect > fitAspect) {
+      width = clientHeight * aspect;
+      height = clientHeight;
+    } else {
+      width = clientWidth;
+      height = clientWidth / aspect;
+    }
+    clientHeight = height;
+    clientWidth = width;
+    img.style.width = width + 'px';
+    img.style.height = height + 'px';
+    img.style.maxWidth = 'none';
+    svg.style.width = width + 'px';
+    svg.style.height = height + 'px';
+    return {
+      clientHeight,
+      clientWidth,
+      naturalWidth,
+      naturalHeight,
+    };
+  };
+
+  const updateImage = debounce(() => {
+    if (props.info?.type !== datasetTypeEnum.IMAGE) return;
+    const dom = cardContainer.value as HTMLDivElement;
+    if (!dom) return;
+    const img = dom.querySelector('img.image') as HTMLImageElement;
+    const svg = dom.querySelector('svg.easy-svg') as SVGElement;
+    state.transform = '';
+    const results: any[] = [];
+    const object = props.object?.classAttributes;
+    if (img.src && img.complete && object) {
+      const { clientHeight, clientWidth, naturalWidth, naturalHeight } = updateDom(img, svg);
+      const imgToView_X = (x: number) => {
+        return (x / naturalWidth) * clientWidth;
+      };
+      const imgToView_Y = (y: number) => {
+        return (y / naturalHeight) * clientHeight;
+      };
+      const getOffsetAndScale = (points: { x: number; y: number }[]) => {
+        const min = new Vector2(Infinity, Infinity);
+        const max = new Vector2(-Infinity, -Infinity);
+        let offsetX = 0;
+        let offsetY = 0;
+        let scale = 1;
+        if (points.length) {
+          points.forEach((p) => {
+            min.min(p);
+            max.max(p);
+          });
+          offsetX = (clientWidth - imgToView_X(min.x + max.x)) / 2;
+          offsetY = (clientHeight - imgToView_Y(min.y + max.y)) / 2;
+          scale = Math.min(
+            clientWidth / imgToView_X(max.x - min.x),
+            clientHeight / imgToView_Y(max.y - min.y),
+          );
+        }
+        return {
+          offsetX,
+          offsetY,
+          scale: scale * 0.3,
+        };
+      };
+      const { contour = {}, id, type, meta = {} } = object;
+      const { points = [], interior = [] } = contour;
+      let _points: any = [];
+      const { scale, offsetX, offsetY } = getOffsetAndScale(points);
+      const cX = clientWidth / 2;
+      const cY = clientHeight / 2;
+      const getPoints = function getPoints(points: { x: number; y: number }[]) {
+        return points
+          .map((point) => {
+            const _x = cX - (cX - imgToView_X(point.x) - offsetX) * scale;
+            const _y = cY - (cY - imgToView_Y(point.y) - offsetY) * scale;
+            return [_x, _y].join(',');
+          })
+          .join(' ');
+      };
+
+      if (type === I2D_TYPE.RECTANGLE) {
+        if (points && points.length === 2) {
+          const newPoints = points.map((point) => {
+            const _x = cX - (cX - imgToView_X(point.x) - offsetX) * scale;
+            const _y = cY - (cY - imgToView_Y(point.y) - offsetY) * scale;
+            return [_x, _y];
+          });
+          const rect = [
+            [newPoints[0][0], newPoints[0][1]].join(','),
+            [newPoints[0][0], newPoints[1][1]].join(','),
+            [newPoints[1][0], newPoints[1][1]].join(','),
+            [newPoints[1][0], newPoints[0][1]].join(','),
+          ];
+          _points = rect.join(' ');
+        } else {
+          _points = getPoints(points);
+        }
+      } else if ([I2D_TYPE.POLYGON, I2D_TYPE.POLYLINE].includes(type)) {
+        _points = getPoints(points);
+      }
+      const hole = interior.map((el: any) => {
+        const coord = el.coordinate;
+        return getPoints(coord);
+      });
+      updateCssTransform(offsetX, offsetY, scale);
+      results.push({
+        points: _points,
+        type: AnnotationTypeMap[type],
+        hole,
+        color: meta.color,
+        uuid: id,
+      });
+    }
+    iState.imageObject = results;
+  }, 200);
+
+  watch(
+    () => [props.object, props.object2D],
+    () => {
+      if (props.info?.type === datasetTypeEnum.LIDAR_FUSION) {
+        const trackId = props.object.classAttributes.trackId;
+        const objects = props.object2D[trackId];
+        state.imgIndex = 0;
+        if (objects?.length && objects[0]) {
+          const object = objects[0].classAttributes;
+          console.log(object);
+          const contour = object?.contour || object;
+          const index = contour?.viewIndex || 0;
+          state.imgIndex = index;
+        }
+        update2d();
+      } else if (props.info?.type === datasetTypeEnum.IMAGE) {
+        updateImage();
+      }
+    },
+    {
+      immediate: true,
+    },
+  );
+
+  return {
+    getPcImage,
+    getPlaceImg,
+    iState,
+    svg,
+    state,
+    cardContainer,
+    update2d,
+    onChange,
+    updateImage,
+    pcActiveImage,
   };
 }

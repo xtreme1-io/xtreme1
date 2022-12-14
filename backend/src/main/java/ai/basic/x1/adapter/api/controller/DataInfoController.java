@@ -193,7 +193,7 @@ public class DataInfoController extends BaseDatasetController {
         return DefaultConverter.convert(modelObjectBO, ModelObjectDTO.class);
     }
 
-    @GetMapping("/findByScenarioPage")
+    @GetMapping("findByScenarioPage")
     public Page<DataAnnotationObjectDTO> findByScenarioPage(@RequestParam(defaultValue = "1") Integer pageNo,
                                                             @RequestParam(defaultValue = "10") Integer pageSize,
                                                             @Validated ScenarioQueryDTO dto) {
