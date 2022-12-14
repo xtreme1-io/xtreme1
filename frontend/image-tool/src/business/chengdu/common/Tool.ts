@@ -330,6 +330,7 @@ export default class Tool {
                 objectInfos.push({
                     id: e.id ?? undefined,
                     frontId: e.uuid,
+                    classId: annotate[0]?.classId ?? undefined,
                     classAttributes: annotate[0] ?? {},
                 });
             });
