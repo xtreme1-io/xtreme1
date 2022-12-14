@@ -643,7 +643,7 @@ public class DataInfoUseCase {
         var dataIds = dataPreAnnotationBO.getDataIds();
         var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
         // Indicates that no new data is locked and there is no old lock record
-        if (insertCount == 0 && !boo) {
+        if (insertCount == 0 || !boo) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
         }
         return dataAnnotationRecord.getId();
