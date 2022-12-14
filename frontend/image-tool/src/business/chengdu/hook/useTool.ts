@@ -35,8 +35,15 @@ export default function useTool() {
             // return;
             throw new Error('No Data');
         }
-        toolState.dataList = dataInfos;
-        toolState.datasetId = dataInfos[0].datasetId + '';
+        if (toolState?.focus?.dataId) {
+            toolState.dataList = dataInfos.filter(
+                (item) => item.dataId == toolState?.focus?.dataId,
+            );
+            toolState.datasetId = dataInfos[0].datasetId + '';
+        } else {
+            toolState.dataList = dataInfos;
+            toolState.datasetId = dataInfos[0].datasetId + '';
+        }
     }
 
     async function loadInfo() {

@@ -87,6 +87,7 @@ export interface IEditorState {
     validStatus: ValidStatus;
     annotationStatus: AnnotateStatus;
     isAnnotated: boolean;
+    focusId?: number;
 }
 
 const tags: IAnnotationTag[] = [
