@@ -36,17 +36,30 @@
                 <Form.Item :label="t('business.class.toolTypeText')" :colon="false">
                   <Select
                     style="width: 160px"
-                    v-model:value="formState.toolType"
-                    @change="handleChangeToolType"
+                    :value="formState.toolType"
+                    :open="showToolTypeDropdown"
                   >
                     <Select.Option v-for="item in toolTypeOption" :key="item.id" :value="item.type">
-                      <div class="img-tool">
+                      <div class="img-tool" @click.stop="handleChangeToolType(item.type)">
                         <img :src="item.img" alt="" />
                         <span>{{ item.text }}</span>
                       </div>
                     </Select.Option>
                   </Select>
                 </Form.Item>
+              </div>
+            </div>
+            <div v-if="showResetBox" class="reset_box">
+              <div>Change toolType will reset your relation to ontology center, continue?</div>
+              <div class="flex justify-end gap-10px">
+                <Button @click="handleCancelResetBox">Cancel</Button>
+                <Button
+                  type="primary"
+                  style="background-color: #fcb17a"
+                  @click="handleConfirmResetBox"
+                >
+                  Reset and Change
+                </Button>
               </div>
             </div>
             <div class="form-wrapper">
@@ -129,12 +142,12 @@
       <div class="content-item">
         <div class="title">
           <span>Attributes ({{ attributesNum }})</span>
-          <TheManage
-            :isCenter="props.isCenter"
-            :activeTab="ClassTypeEnum.CLASS"
-            @manage="handleManageAttr"
-          />
         </div>
+        <TheManage
+          :isCenter="props.isCenter"
+          :activeTab="ClassTypeEnum.CLASS"
+          @manage="handleManageAttr"
+        />
       </div>
     </div>
   </BasicModal>
@@ -158,6 +171,7 @@
   // components
   import { Form, Select, Switch, Input, Tooltip } from 'ant-design-vue';
   import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+  import { Button } from '/@@/Button';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
   import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
   import TheColor from './TheColor.vue';
@@ -176,7 +190,6 @@
     getDefaultCreateClassFormState,
     handleAddUuid,
     isObjectChanged,
-    validateName,
   } from './utils';
   // interface
   import { ICLassForm, IDataSchema, imageConstraintsEnum } from './typing';
@@ -188,8 +201,11 @@
     createOntologyClassApi,
     createDatasetClassApi,
     updateDatasetClassApi,
+    validateOntologyClassNameApi,
+    validateDatasetClassNameApi,
   } from '/@/api/business/classes';
   import _ from 'lodash';
+  import { RuleObject } from 'ant-design-vue/es/form/interface';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -301,6 +317,31 @@
   getDefaultCreateClassFormState(formState);
   defineExpose({ formState });
   /** Rules */
+  const validateName = async (_rule: RuleObject, value: string) => {
+    if (!value) {
+      return Promise.reject(t('business.ontology.modal.nameRequired'));
+    } else {
+      const params: any = {
+        id: props.detail?.id,
+        ontologyId: props.ontologyId ?? undefined,
+        datasetId: props.datasetId ?? undefined,
+        toolType: formState.toolType,
+        name: formState.name,
+      };
+      let res;
+      if (props.isCenter) {
+        res = await validateOntologyClassNameApi(params);
+      } else {
+        res = await validateDatasetClassNameApi(params);
+      }
+
+      if (!res) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject('Duplicated name');
+      }
+    }
+  };
   const rules = {
     name: [
       { required: true, validator: validateName, trigger: 'change' },
@@ -436,11 +477,40 @@
     return showConstraintsForImage.value && formState.isConstraintsForImage;
   });
 
+  /** ToolType Events */
+  const tempToolType = ref<ToolTypeEnum>();
+  const showToolTypeDropdown = ref<boolean>(false);
   const isResetRelations = ref<boolean>(false);
-  const handleChangeToolType = () => {
-    emitter.emit('resetSelect');
+  const showResetBox = ref<boolean>(false);
+  const handleCancelResetBox = () => {
+    showResetBox.value = false;
+  };
+  const handleConfirmResetBox = () => {
+    formState.toolType = tempToolType.value;
     isResetRelations.value = true;
-    // TODO 判断是否继续更改
+    emitter.emit('resetSelect');
+
+    showResetBox.value = false;
+  };
+  const handleChangeToolType = (value) => {
+    console.log(value, showResetBox, formState);
+    tempToolType.value = value;
+    showToolTypeDropdown.value = !showToolTypeDropdown.value;
+
+    if (showResetBox.value) {
+      // if resetBox is show
+      showToolTypeDropdown.value = false;
+    }
+
+    if (value != formState.toolType && formState.ontologyId) {
+      // if toolType changed and has related
+      showResetBox.value = true;
+      showToolTypeDropdown.value = false;
+    } else if (value != formState.toolType) {
+      // if toolType changed and no related
+      formState.toolType = tempToolType.value;
+      showToolTypeDropdown.value = false;
+    }
   };
 
   /** Manage Attributes */
