@@ -92,7 +92,6 @@ export function downloadByUrl({
   if (url.indexOf('?') === -1) {
     // url += '?response-content-type=application%2Foctet-stream';
   }
-
   openWindow(url, { target });
   return true;
 }
