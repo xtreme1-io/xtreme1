@@ -110,20 +110,6 @@
               </template>
             </svg>
           </div>
-          <!-- <img
-            v-for="item in data.content
-              ? data.content
-                  .filter((record) => record?.directoryType?.includes('image'))
-                  .slice(0, 3)
-              : []"
-            :key="item.name"
-            :src="
-              (item?.files && item?.files[0]?.file?.mediumThumbnail?.url) ||
-              (item?.files && item?.files[0]?.file?.url) ||
-              placeImg
-            "
-            alt=""
-          /> -->
         </div>
         <div class="name"> {{ data.name }} </div>
       </template>
@@ -136,12 +122,12 @@
         <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
           <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
         </svg>
-        <div class="p-2 name"> {{ data.name }} </div>
+        <div class="p-2 name bottom"> {{ data.name }} </div>
       </div>
       <div
         v-else-if="info?.type === datasetTypeEnum.IMAGE"
         class="relation-container"
-        style="width: 100%; height: 100%"
+        style="width: 100%; height: 100%; margin-bottom: 5px"
       >
         <img
           class="place image-card"
@@ -197,16 +183,7 @@
             />
           </template>
         </svg>
-        <!-- <img
-          class="place image-card"
-          :src="
-            (data.content &&
-              (data.content[0].file?.mediumThumbnail?.url || data.content[0].file?.url)) ||
-            placeImg
-          "
-          alt=""
-        /> -->
-        <div class="name"> {{ data.name }} </div>
+        <div class="p-2 name bottom"> {{ data.name }} </div>
       </div>
     </div>
   </div>
@@ -219,8 +196,6 @@
   import floder from '/@/assets/images/dataset/frameSeriesImg.png';
   import { Modal } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';
-  // import { useGo } from '/@/hooks/web/usePage';
-  // import { RouteEnum } from '/@/enums/routeEnum';
   import { DatasetItem, DatasetListItem } from '/@/api/business/model/datasetModel';
   import placeImg from '/@/assets/images/dataset/fusion-banner-content.png';
   // import placeImgFull from '/@/assets/images/dataset/basic-banner-content.png';
@@ -400,6 +375,12 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        &.bottom{
+          position: absolute;
+          bottom: 0;
+          background: white;
+          z-index: 2;
+        }
       }
 
       .checkbox{

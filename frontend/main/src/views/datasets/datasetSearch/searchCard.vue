@@ -36,6 +36,43 @@
         <div class="info-msg" v-if="!state.object2d.length">No Camera objects</div>
       </div>
     </template>
+    <!-- Image -->
+    <template v-if="datasetTypeEnum.IMAGE === info.type">
+      <img
+        class="image"
+        alt=""
+        :style="{ transform: state.transform }"
+        @load="updateImage"
+        :src="pcActiveImage?.url"
+      />
+      <svg class="easy-svg" style="color: red" stroke-width="1" stroke="white" fill="transparent">
+        <template v-for="item in iState.imageObject">
+          <polyline
+            v-if="item.type === 'POLYLINE'"
+            :stroke="item.color"
+            :key="item.uuid"
+            :points="item.points"
+          />
+          <template v-else-if="item.hole.length > 0">
+            <mask :id="item.uuid" :key="item.uuid">
+              <polygon :points="item.points" fill="currentColor" />
+              <polygon v-for="(_item, _idx) in item.hole" fill="#000" :key="_idx" :points="_item" />
+            </mask>
+
+            <rect
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              :fill="item.color || '#fff'"
+              :key="item.uuid"
+              :style="{ mask: `url(#${item.uuid})` }"
+            />
+          </template>
+          <polygon v-else :key="item.type + item.uuid" :stroke="item.color" :points="item.points" />
+        </template>
+      </svg>
+    </template>
     <div class="card-info">
       <div class="info-dataName">data: {{ data?.name || '-' }}</div>
       <div class="info-objectName">object: {{ object?.classAttributes?.trackName || '-' }}</div>
@@ -62,8 +99,17 @@
     object: any;
   };
   const props = defineProps<IProps>();
-  const { svg, iState, state, getPlaceImg, cardContainer, update2d, onChange, pcActiveImage } =
-    useSearchCard(props);
+  const {
+    svg,
+    iState,
+    state,
+    getPlaceImg,
+    updateImage,
+    cardContainer,
+    update2d,
+    onChange,
+    pcActiveImage,
+  } = useSearchCard(props);
 </script>
 <style lang="less">
   @prefix-cls: ~'@{namespace}-searchCard';
@@ -72,6 +118,7 @@
     height: 100%;
     position: relative;
     overflow: hidden;
+    background-color: #ededed;
     .pointCloudImg {
       width: 100%;
       height: 100%;
@@ -89,39 +136,43 @@
       transform: translateY(-50%);
       pointer-events: none;
     }
+    .image {
+      position: absolute;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .easy-svg {
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
     .image-pc {
       position: absolute;
       right: 0;
       top: 0;
-      width: 80px;
+      width: 90px;
       height: 70px;
       overflow: hidden;
-      background-color: gray;
+      background-color: transparent;
       z-index: 1;
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+      color: white;
       .img-2d {
         position: absolute;
+        object-fit: cover;
         width: 100%;
         height: 100%;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
       }
-      .easy-svg {
-        pointer-events: none;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 50%;
-        top: 50%;
-        color: white;
-        transform: translate(-50%, -50%);
-      }
-
       .handle-icon {
         pointer-events: all;
         &.left {

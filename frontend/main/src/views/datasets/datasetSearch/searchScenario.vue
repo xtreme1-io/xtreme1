@@ -39,7 +39,7 @@
             :data="dataInfo[item.dataId]"
             :object="item"
           >
-            <Button @click="() => handleSingleAnnotate(item.dataId)" type="primary"
+            <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
               >Annotate</Button
             >
           </SearchCard>
@@ -83,16 +83,18 @@
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
   import { onMounted, ref, watch } from 'vue';
+  import { goToTool } from '/@/utils/business';
   import {
     datasetItemDetail,
     getDatasetClass,
     getScenario,
     getDataByIds,
     getClassificationOptions,
+    takeRecordByData,
   } from '/@/api/business/dataset';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
-  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
   import exportModalVue from './exportModal.vue';
   import { useModal } from '/@/components/Modal';
   const [register, { openModal }] = useModal();
@@ -180,6 +182,8 @@
         return info;
       }, dataInfo.value);
     }
+    console.log(dataInfo.value);
+    console.log(res.list);
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const obj2dMap = {};
       res.list.forEach((item: any) => {
@@ -202,8 +206,20 @@
     }
   };
 
-  const handleSingleAnnotate = async (dataId: any) => {
-    console.log(dataId);
+  const handleSingleAnnotate = async (dataId: any, object: any) => {
+    const recordId = await takeRecordByData({
+      datasetId: info.value.id,
+      dataIds: [dataId],
+      dataType: dataTypeEnum.SINGLE_DATA,
+    }).catch(() => {});
+    const trackId = object.classAttributes.trackId;
+    console.log(object);
+    if (!recordId || !trackId) return;
+    // const res = await getLockedByDataset({
+    //   datasetId: info.value.id,
+    // });
+
+    goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
   };
 </script>
 <style lang="less" scoped>
