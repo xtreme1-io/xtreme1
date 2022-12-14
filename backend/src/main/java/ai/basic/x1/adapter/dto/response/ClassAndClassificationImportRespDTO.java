@@ -1,0 +1,81 @@
+package ai.basic.x1.adapter.dto.response;
+
+import ai.basic.x1.entity.enums.ClassAndClassificationSourceEnum;
+import ai.basic.x1.entity.enums.InputTypeEnum;
+import ai.basic.x1.entity.enums.ToolTypeEnum;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+/**
+ * @author chenchao
+ * @date 2022/12/12
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ClassAndClassificationImportRespDTO {
+
+    private Boolean isDuplicate;
+
+    private ClassAndClassificationSourceEnum desType;
+
+    private Long desId;
+
+    private Integer classTotalSize;
+
+    private Integer classificationTotalSize;
+
+    private List<Class> classes;
+
+    private List<Classification> classifications;
+
+    private List<String> duplicateClassName;
+
+    private List<String> duplicateClassificationName;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Class{
+        private String name;
+
+        private String color;
+
+        private ToolTypeEnum toolType;
+
+        /**
+         * Type configuration properties
+         */
+        private JSONObject toolTypeOptions;
+
+        private JSONArray attributes;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Classification{
+
+        private String name;
+
+        private Boolean isRequired;
+
+        private InputTypeEnum inputType;
+
+        /**
+         * setting
+         */
+        private JSONArray options;
+    }
+
+
+}

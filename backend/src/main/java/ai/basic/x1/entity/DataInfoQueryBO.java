@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.OffsetDateTime;
 
@@ -14,7 +15,7 @@ import java.time.OffsetDateTime;
  * @date 2022/4/2 15:06
  */
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataInfoQueryBO extends BaseQueryBO {
