@@ -499,23 +499,6 @@ export function useSearchCard(props: {
     };
   });
 
-  watch(
-    () => [props.object, props.object2D],
-    () => {
-      if (props.info?.type === datasetTypeEnum.LIDAR_FUSION) {
-        const trackId = props.object.classAttributes.trackId;
-        const objects = props.object2D[trackId];
-        if (objects?.length && objects[0]) {
-          const contour = objects[0].contour || objects[0];
-          const index = contour.viewIndex;
-          state.imgIndex = index;
-        }
-        update2d();
-      } else if (props.info?.type === datasetTypeEnum.IMAGE) {
-        updateImage();
-      }
-    },
-  );
   const update2d = debounce(() => {
     if (props.info?.type !== datasetTypeEnum.LIDAR_FUSION) return;
     const dom = cardContainer.value as HTMLDivElement;
@@ -779,6 +762,31 @@ export function useSearchCard(props: {
     }
     iState.imageObject = results;
   }, 200);
+
+  watch(
+    () => [props.object, props.object2D],
+    () => {
+      if (props.info?.type === datasetTypeEnum.LIDAR_FUSION) {
+        const trackId = props.object.classAttributes.trackId;
+        const objects = props.object2D[trackId];
+        state.imgIndex = 0;
+        if (objects?.length && objects[0]) {
+          const object = objects[0].classAttributes;
+          console.log(object);
+          const contour = object?.contour || object;
+          const index = contour?.viewIndex || 0;
+          state.imgIndex = index;
+        }
+        update2d();
+      } else if (props.info?.type === datasetTypeEnum.IMAGE) {
+        updateImage();
+      }
+    },
+    {
+      immediate: true,
+    },
+  );
+
   return {
     getPcImage,
     getPlaceImg,

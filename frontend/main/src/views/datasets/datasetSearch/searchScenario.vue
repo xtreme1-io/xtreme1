@@ -32,7 +32,7 @@
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
-        <div class="item" v-for="item in list" :key="item.dataId">
+        <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
           <SearchCard
             :info="info"
             :object2D="object2D"
@@ -182,8 +182,6 @@
         return info;
       }, dataInfo.value);
     }
-    console.log(dataInfo.value);
-    console.log(res.list);
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const obj2dMap = {};
       res.list.forEach((item: any) => {
