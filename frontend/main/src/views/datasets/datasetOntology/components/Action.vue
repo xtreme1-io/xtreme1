@@ -61,7 +61,7 @@
       title: 'Delete Data',
       content: 'Are you sure to delete the selected items or series?This action is irreversible',
       okText: t('common.delText'),
-      okButtonProps: { type: 'primary' },
+      okButtonProps: { type: 'primary', danger: true },
       onOk: async () => {
         await deleteSelectedDatasetClassApi(selectedItemIds.value);
         emits('fetchList');

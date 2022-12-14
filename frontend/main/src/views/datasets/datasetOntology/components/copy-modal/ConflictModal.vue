@@ -110,6 +110,7 @@
   /** Modal */
   const backType = ref<ICopyEnum>(ICopyEnum.CLASSES);
   const [registerModal, { closeModal, changeLoading }] = useModalInner((config) => {
+    changeLoading(false);
     backType.value = config.type;
 
     conflictClassList.value = (config.conflictClassList ?? []).map((item) => {

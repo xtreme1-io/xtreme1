@@ -74,24 +74,16 @@
       </div>
     </div>
   </div>
-  <DeleteModal
-    @register="deleteRegister"
-    :id="itemId"
-    :name="itemName"
-    :activeTab="props.activeTab"
-    :isCenter="props.isCenter"
-  />
 </template>
 <script lang="ts" setup>
-  import { computed, ref } from 'vue';
+  import { computed, inject } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
+  import { useMessage } from '/@/hooks/web/useMessage';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { useModal } from '/@/components/Modal';
   import { getDate } from '/@/utils/business/timeFormater';
 
   import { Button, Tooltip, Checkbox } from 'ant-design-vue';
   import { EllipsisOutlined } from '@ant-design/icons-vue';
-  import DeleteModal from './DeleteModal.vue';
   import CreateCard from '../../center/components/CreateCard.vue';
 
   import { ClassTypeEnum } from '/@/api/business/model/classesModel';
@@ -99,11 +91,17 @@
   import deleteSvg from '/@/assets/icons/delete.svg';
   import CardImage from '/@/assets/images/ontology/cardImage.png';
   import { ModalConfirmCustom } from '/@/utils/business/confirm';
-  import { pushAttributesToDatasetApi } from '/@/api/business/classes';
+  import {
+    pushAttributesToDatasetApi,
+    deleteOntologyClassApi,
+    deleteOntologyClassificationApi,
+    deleteDatasetClassApi,
+    deleteDatasetClassificationApi,
+  } from '/@/api/business/classes';
 
+  const { createMessage } = useMessage();
   const { t } = useI18n();
   const { prefixCls } = useDesign('cardItem');
-  const [deleteRegister, { openModal: openDeleteModal }] = useModal();
 
   const props = withDefaults(
     defineProps<{
@@ -123,6 +121,7 @@
   );
 
   const emits = defineEmits(['edit', 'create', 'handleSelected']);
+  const handleRefresh = inject('handleRefresh', Function, true);
 
   /** Push */
   const showPush = computed(() => {
@@ -153,12 +152,50 @@
   };
 
   /** Delete */
-  const itemId = ref('');
-  const itemName = ref('');
   const handleDelete = (item) => {
-    itemId.value = item.id;
-    itemName.value = item.name;
-    openDeleteModal();
+    ModalConfirmCustom({
+      title: 'Delete Data',
+      content: t('business.class.deleteSure') + ' “' + item.name + '” ?',
+      okText: t('common.delText'),
+      okButtonProps: { type: 'primary', danger: true },
+      onOk: async () => {
+        if (props.activeTab == ClassTypeEnum.CLASS) {
+          try {
+            if (props.isCenter) {
+              await deleteOntologyClassApi({ id: item.id });
+            } else {
+              await deleteDatasetClassApi({ id: item.id });
+            }
+
+            const successText =
+              t('business.class.class') + ` "${item.name}" ` + t('business.class.hasDeleted');
+            createMessage.success(successText);
+
+            handleRefresh();
+          } catch (error) {
+            console.log('error', error);
+          }
+        } else {
+          try {
+            if (props.isCenter) {
+              await deleteOntologyClassificationApi({ id: item.id });
+            } else {
+              await deleteDatasetClassificationApi({ id: item.id });
+            }
+
+            const successText =
+              t('business.class.classification') +
+              ` "${item.name}" ` +
+              t('business.class.hasDeleted');
+            createMessage.success(successText);
+
+            handleRefresh();
+          } catch (error) {
+            console.log('error', error);
+          }
+        }
+      },
+    });
   };
 
   const getAttributeLength = (attributes) => {
