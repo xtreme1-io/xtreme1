@@ -47,7 +47,7 @@ public class PreLabelModelMessageHandler extends AbstractModelMessageHandler<Lis
 
 
     @Override
-    boolean modelRun(ModelMessageBO modelMessageBO) {
+    public boolean modelRun(ModelMessageBO modelMessageBO) {
         ApiResult<List<PreModelRespDTO>> apiResult = getRetryAbleApiResult(modelMessageBO);
         Map<String, ModelClass> modelClassMap = modelUseCase.getModelClassMapByModelId(modelMessageBO.getModelId());
         PreLabelModelObjectBO preLabelModelObjectBO = ModelResultConverter.preModelResultConverter(apiResult,
@@ -79,7 +79,7 @@ public class PreLabelModelMessageHandler extends AbstractModelMessageHandler<Lis
     }
 
     @Override
-    ModelCodeEnum getModelCodeEnum() {
+    public ModelCodeEnum getModelCodeEnum() {
         return ModelCodeEnum.PRE_LABEL;
     }
 

@@ -39,7 +39,7 @@ public abstract class AbstractModelMessageHandler<T> {
      * @param modelMessageBO
      * @return
      */
-    abstract boolean modelRun(ModelMessageBO modelMessageBO);
+    public abstract boolean modelRun(ModelMessageBO modelMessageBO);
 
     /**
      * call remote model service implement by subClass
@@ -52,7 +52,7 @@ public abstract class AbstractModelMessageHandler<T> {
      * model code implement by subClass
      * @return
      */
-    abstract ModelCodeEnum getModelCodeEnum();
+    public abstract ModelCodeEnum getModelCodeEnum();
 
     public ApiResult<T> getRetryAbleApiResult(ModelMessageBO modelMessageBO) {
         ApiResult<T> apiResult = null;

@@ -9,9 +9,9 @@ public interface ModelRunSuccessHandler<T> {
 
     /**
      * Called when a model service has been successfully called.
-     * @param requestParam - the request body of model service
+     * @param response - the response body of model service
      * @param message - model message
      */
-    void onModelRunSuccess(T requestParam, ModelMessageBO message);
+    void onModelRunSuccess(T response, ModelMessageBO message);
 
 }

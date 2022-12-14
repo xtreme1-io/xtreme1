@@ -194,4 +194,9 @@ public class CommonConfig implements WebMvcConfigurer {
     public DatasetSimilarityJobUseCase datasetSimilarityJobUseCase() {
         return new DatasetSimilarityJobUseCase();
     }
+
+    @Bean
+    public ModelRecognitionUseCase modelRecognitionUseCase() {
+        return new ModelRecognitionUseCase();
+    }
 }
