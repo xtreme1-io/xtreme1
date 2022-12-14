@@ -49,7 +49,7 @@
     <sql id="commonSql">
         FROM
         data_annotation_object dao
-        <if test="scenarioQuery.attributeId != null and scenarioQuery.attributeId != ''">
+        <if test="scenarioQuery.attributeIds != null and scenarioQuery.attributeIds.size() > 0">
             LEFT JOIN data_classification_option dco ON dao.data_id = dco.data_id
         </if>
         WHERE
