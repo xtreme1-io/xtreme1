@@ -12,7 +12,7 @@
     :width="1200"
     :height="750"
   >
-    <div class="copy__modal" v-loading="loadingRef">
+    <div class="copy__modal">
       <div class="flex items-center mb-15px justify-end">
         <Button type="primary" @click="handleCopyAll" :disabled="isDisabled">
           <span>Copy Entire Ontology</span>
@@ -74,7 +74,8 @@
   });
 
   /** Modal */
-  const [registerModal, { closeModal }] = useModalInner((config) => {
+  const [registerModal, { closeModal, changeLoading }] = useModalInner((config) => {
+    changeLoading(false);
     if (config.isClear) {
       selectedOntologyId.value = undefined;
     }
@@ -91,16 +92,15 @@
   /** Copy All */
   const handleCopyAll = () => {
     emits('copyAll', ICopyEnum.ONTOLOGY, selectedOntologyId.value);
-    closeModal();
+    changeLoading(true);
   };
 
   /** List */
   const pageNo = ref();
   const total = ref();
   const cardList = ref([]);
-  const loadingRef = ref<boolean>(false);
   const getList = async (isConcat = false) => {
-    loadingRef.value = true;
+    changeLoading(true);
 
     if (!isConcat) {
       pageNo.value = 1;
@@ -121,7 +121,8 @@
       cardList.value = [];
       total.value = 0;
     }
-    loadingRef.value = false;
+
+    changeLoading(false);
   };
 
   /** Scroll */

@@ -14,7 +14,7 @@
     <template #title>
       <BackTitle :title="modalTitle" @back="handleBack" />
     </template>
-    <div class="copy__modal" v-loading="loadingRef">
+    <div class="copy__modal">
       <div class="flex items-center mb-15px justify-between">
         <VirtualTab :list="virtualTabList" type="TAG" @toggleTags="handleToggleTags" />
         <div class="ml-2">
@@ -56,6 +56,14 @@
             />
           </ScrollContainer>
         </div>
+        <div class="wrapper-inner empty" v-if="cardList.length == 0">
+          <div class="empty-wrapper">
+            <img src="../../../../../assets/svg/empty.svg" alt="" />
+            <div class="tip">
+              {{ currentVirtualTab === ClassTypeEnum.CLASS ? 'No Class' : 'No Classification' }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </BasicModal>
@@ -92,7 +100,8 @@
   });
 
   /** Modal */
-  const [registerModal, { closeModal }] = useModalInner((params) => {
+  const [registerModal, { closeModal, changeLoading }] = useModalInner((params) => {
+    changeLoading(false);
     ontologyId.value = params.ontologyId;
     getList();
   });
@@ -119,6 +128,7 @@
   /** Copy All */
   const handleCopyAll = () => {
     emits('copyAll', ICopyEnum.CLASSES);
+    changeLoading(true);
   };
 
   /** Virtual */
@@ -194,9 +204,8 @@
   const pageNo = ref();
   const total = ref();
   const cardList = ref([]);
-  const loadingRef = ref<boolean>(false);
   const getList = async (isConcat = false) => {
-    loadingRef.value = true;
+    changeLoading(true);
 
     if (!isConcat) {
       pageNo.value = 1;
@@ -225,7 +234,7 @@
       cardList.value = [];
       total.value = 0;
     }
-    loadingRef.value = false;
+    changeLoading(false);
   };
 
   /** Scroll */

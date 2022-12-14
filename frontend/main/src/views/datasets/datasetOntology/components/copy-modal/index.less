@@ -16,35 +16,25 @@
       background-color: #fff;
       border-radius: 20px;
       // padding: 15px;
-    }
-  }
+      &.empty {
+        .empty-wrapper {
+          display: flex;
+          align-items: center;
+          flex-direction: column;
 
-  .ontology__list {
-    .empty {
-      .empty-wrapper {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-
-        .tip {
-          width: 480px;
-          text-align: center;
-          font-size: 14px;
-          line-height: 20px;
-          color: #666;
-        }
-        .high_light {
-          color: @primary-color;
-          cursor: pointer;
+          .tip {
+            width: 480px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 20px;
+            color: #666;
+          }
+          .high_light {
+            color: @primary-color;
+            cursor: pointer;
+          }
         }
       }
-    }
-  }
-
-  .conflict__list {
-    &-class {
-    }
-    &-classification {
     }
   }
 }

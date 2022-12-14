@@ -6,17 +6,17 @@
     destroyOnClose
     centered
     @cancel="handleCancel"
+    :minHeight="70"
   >
-    <div class="content">
+    <div class="saveTo__content">
       <!-- <div class="text" v-if="hasOntology">{{ t('business.ontology.sync.selectOntology') }}</div> -->
       <div class="text" v-if="!hasOntology">{{ t('business.ontology.sync.noOntology') }}</div>
       <div class="content__form">
-        <Form ref="formRef" :model="formState" :rules="rules">
+        <Form ref="formRef" labelAlign="left" :model="formState" :rules="rules">
           <Form.Item
             v-if="hasOntology"
-            :label="t('business.ontology.ontology')"
-            :labelCol="{ span: 5, offset: 3 }"
-            :wrapperCol="{ span: 12 }"
+            label="Select an ontology to save into"
+            :labelCol="{ span: 9 }"
           >
             <Select
               v-model:value="formState.ontologyId"
@@ -48,6 +48,29 @@
       </div>
       <!-- Conflict -->
       <div v-show="conflictList.length > 0" class="content__table">
+        <div class="header">
+          <div class="icon">
+            <Icon icon="fluent:info-16-filled" color="#FCB17A" class="mr-10px" size="24px" />
+            <span> {{ 'Conflicts' }} </span>
+          </div>
+          <span>
+            Some Classes/ Classifications have already existed in your ontology. To resolve these
+            conflicts, please choose to
+            <span class="weight">Keep</span>
+            Original or to
+            <span class="weight">Replace</span>
+            Original with New Classes/ Classifications.
+          </span>
+        </div>
+        <div class="title">Classes</div>
+        <div class="action">
+          <span class="highLight" @click="handleToggleKeepAll(ICopySelectEnum.REPLACE)">
+            Replace All
+          </span>
+          <span class="highLight" @click="handleToggleKeepAll(ICopySelectEnum.KEEP)">
+            Keep All
+          </span>
+        </div>
         <CustomTable ref="tableRef" class="table" :type="props.activeTab" :list="conflictList" />
       </div>
     </div>
@@ -60,7 +83,7 @@
         v-if="hasOntology"
         type="primary"
         @click="handleSaveTo"
-        :disabled="!isDisabled"
+        :disabled="!isConfirmDisabled"
         :loading="isLoading"
       >
         {{ t('common.confirmText') }}
@@ -79,11 +102,12 @@
   </BasicModal>
 </template>
 <script lang="ts" setup>
-  import { ref, reactive, computed, inject } from 'vue';
+  import { ref, reactive, computed, inject, watch } from 'vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { Form, Select, Input } from 'ant-design-vue';
   import { Button } from '/@@/Button';
+  import { Icon } from '/@/components/Icon';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import CustomTable from '../copy-modal/CustomTable.vue';
   // import SaveToConflictModal from './SaveToConflictModal.vue';
@@ -167,24 +191,30 @@
   const handleSelectOntology = (e) => {
     formState.ontologyId = e;
     handleToConflict(e);
+    isConfirmDisabled.value = false;
   };
 
+  const isConfirmDisabled = ref<boolean>(false);
   const isLoading = ref<boolean>(false);
-  const hasResolved = computed(() => {
-    return conflictList.value.every((item) => item.isKeep != ICopySelectEnum.NONE);
-  });
-  const isDisabled = computed(() => {
-    return formState.ontologyId && hasResolved.value && !isLoading.value;
-  });
-
   /** Conflict */
+  const handleToggleKeepAll = (isKeep: ICopySelectEnum) => {
+    conflictList.value.forEach((item) => (item.isKeep = isKeep));
+  };
   const conflictList = ref<any[]>([]);
   const noConflictList = ref<any[]>([]);
+  watch(
+    conflictList,
+    () => {
+      isConfirmDisabled.value = conflictList.value.every(
+        (item) => item.isKeep != ICopySelectEnum.NONE,
+      );
+    },
+    { deep: true },
+  );
   const handleToConflict = async (ontologyId) => {
-    console.log('handleToConflict', ontologyId);
     if (!ontologyId) return;
     changeLoading(true);
-    isLoading.value = true;
+    isConfirmDisabled.value = true;
 
     const postData: getOntologyClassesParams = {
       pageNo: 1,
@@ -211,7 +241,7 @@
         });
       }
       changeLoading(false);
-      isLoading.value = false;
+      isConfirmDisabled.value = false;
     }, 500);
   };
 
@@ -287,15 +317,49 @@
   };
 </script>
 <style scoped lang="less">
-  .content {
+  .saveTo__content {
     width: 100%;
     display: flex;
     flex-direction: column;
-    text-align: center;
+    // text-align: center;
     margin: 0 auto;
-    padding: 10px 26px;
-    &__table {
+    padding: 26px 26px 0;
+    .content__table {
+      height: 100%;
+      flex: 1;
       display: flex;
+      flex-direction: column;
+      gap: 8px;
+      .header {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 20px;
+        color: #666666;
+        margin-bottom: 14px;
+        .icon {
+          display: flex;
+          align-items: center;
+          color: #333;
+          font-size: 16px;
+          font-weight: 500;
+        }
+      }
+      .title {
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        color: #333;
+      }
+      .action {
+        display: flex;
+        gap: 20px;
+        height: 16px;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+        color: @primary-color;
+        cursor: pointer;
+      }
       .table {
         flex: 1;
         height: 100%;
@@ -303,12 +367,8 @@
     }
   }
 
-  :deep(.ant-select-dropdown) {
-    top: 36px !important;
-  }
-
-  :deep(.ant-select-selection-item) {
-    text-align: left;
+  :deep(.ant-select) {
+    width: 160px;
   }
 
   .btn {
