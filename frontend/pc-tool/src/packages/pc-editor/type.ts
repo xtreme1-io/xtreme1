@@ -130,6 +130,14 @@ export interface IAttr {
     label?: string;
     required: boolean;
     options: { value: any; label: string }[];
+
+    classId: string;
+    parent: string;
+    parentAttr: string;
+    parentValue: any;
+    key: string;
+    value: any;
+    leafFlag?: boolean;
 }
 
 export interface IClassType {

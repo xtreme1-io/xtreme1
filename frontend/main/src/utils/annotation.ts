@@ -17,6 +17,7 @@ const _quat = new THREE.Quaternion();
 const tempCenter = new THREE.Vector3();
 const tempSize = new THREE.Vector3();
 const tempEuler = new THREE.Euler();
+const tempMatrix3 = new THREE.Matrix3();
 const vertexs = [
   new THREE.Vector3(0.5, 0.5, 0.5),
   new THREE.Vector3(0.5, 0.5, -0.5),
@@ -96,8 +97,33 @@ export function transformToPc(object: IObject, size: ISize, extraInfo: Info) {
   const point2 = toViewCoordinate(-offsetW, +offsetH);
   const point3 = toViewCoordinate(-offsetW, -offsetH);
   const point4 = toViewCoordinate(+offsetW, -offsetH);
-  return [point1, point2, point3, point4];
+  return {
+    center: [centerX, centerY],
+    points: [point1, point2, point3, point4],
+  };
 }
+
+export const focusTransform = (object: IObject, size: ISize, extraInfo: Info, aspect = 1) => {
+  const { left, right, top, bottom } = extraInfo;
+  const { center3D, rotation3D, size3D } = object;
+  const _center = {
+    x: (right + left) / 2,
+    y: (bottom + top) / 2,
+  };
+  const offsetX = ((center3D.x - _center.x) / (left - right)) * size.width;
+  const offsetY = ((center3D.y - _center.y) / (top - bottom)) * size.height;
+  const scale = Math.floor(((right - left) * aspect) / Math.max(size3D.x, size3D.y)) * 0.6;
+  tempMatrix3
+    .identity()
+    .translate(offsetX, offsetY)
+    .scale(scale, scale)
+    .rotate(Math.PI / 2 - rotation3D.z);
+  const el = tempMatrix3.elements;
+  return {
+    matrix3Str: `matrix(${el[0]},${el[1]},${el[3]},${el[4]},${el[6]},${el[7]})`,
+    scale: scale,
+  };
+};
 
 export function getCameraMatrix(item: IImgViewConfig) {
   const projectionMatrix = createMatrixFromCameraInternal(

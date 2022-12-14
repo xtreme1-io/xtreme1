@@ -314,7 +314,7 @@ export const hasOntologyApi = (params: { datasetId: number }) =>
   });
 
 export const getScenario = (params: any) =>
-  defHttp.get<ResponseUploadRecord[]>({
+  defHttp.get<any>({
     url: `${Api.DATA}/findByScenarioPage`,
     params,
     headers: {
@@ -323,9 +323,49 @@ export const getScenario = (params: any) =>
     },
   });
 
+export const getDataByIds = (params: any) =>
+  defHttp.get<any[]>({
+    url: `${Api.DATA}/listByIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 export const getDatasetClass = (id) =>
-  defHttp.get<ResponseUploadRecord[]>({
+  defHttp.get<any>({
     url: `${Api.DATASET_CLASS}/findAll/${id}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const exportScenario = (params) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/scenarioExport`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const createByScenario = (params) =>
+  defHttp.post<any>({
+    url: `${Api.DATASET}/createByScenario`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getClassificationOptions = (params) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/classificationOption/findAll`,
+    params,
     headers: {
       // @ts-ignore
       ignoreCancelToken: true,

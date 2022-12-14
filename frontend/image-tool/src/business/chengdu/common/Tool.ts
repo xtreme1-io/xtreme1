@@ -17,6 +17,7 @@ import * as utils from '../utils';
 import * as api from '../api';
 import BSError from './BSError';
 import * as THREE from 'three';
+import { classificationToSave, saveToClassificationValue } from '../utils';
 
 type AnnotateObject = any;
 
@@ -39,7 +40,7 @@ export default class Tool {
         showLoading && this.editor.showLoading(true);
         try {
             await this.loadResource();
-            await Promise.all([this.loadObject(), this.loadClassification()]);
+            await Promise.all([this.loadObject()]);
         } catch (error: any) {
             this.handleErr(error);
         }
@@ -48,46 +49,45 @@ export default class Tool {
 
         this.dataResource.load();
     }
-    async loadClassification() {
-        let datInfo = this.state.dataList[this.state.dataIndex];
 
-        if (
-            this.state.classifications.length > 0 &&
-            (!datInfo.classifications || datInfo.classifications.length === 0)
-        ) {
+    async loadObject() {
+        console.log('======= loadObject =======');
+        const dataInfo = this.state.dataList[this.state.dataIndex];
+
+        const objects = this.dataManager.getDataObject(dataInfo.dataId);
+        if (!objects) {
             try {
-                let valueMap = await api.getDataClassification(datInfo.dataId);
-                let classifications = [] as IClassification[];
+                const res = await api.getAnnotationByDataIds([dataInfo.dataId]);
+
+                // objects ==>
+                const annotationObject = res.objects ?? [];
+                const annotates = utils.convertObject2Annotate(annotationObject, this.editor);
+                this.editor.state.isAnnotated = annotates.length > 0;
+                this.dataManager.setDataObject(dataInfo.dataId, annotates);
+
+                // classification ==>
+                const annotationClassification = res.classificationValues ?? [];
+                console.log(annotationClassification);
+                const classifications = [] as IClassification[];
                 this.state.classifications.forEach((classification) => {
                     let copyClassification = {} as IClassification;
                     copyClassification = JSON.parse(JSON.stringify(classification));
-
                     copyClassification.attrs.forEach((attr) => {
+                        console.log('attr', attr);
                         attr.value = attr.type === AttrType.MULTI_SELECTION ? [] : '';
-                        if (valueMap[attr.id]) attr.value = valueMap[attr.id];
+                        const target = annotationClassification.find(
+                            (item: any) => item.id == attr.classificationId,
+                        );
+                        if (target) {
+                            const classificationAttributes = saveToClassificationValue(
+                                target.values,
+                            );
+                            attr.value = classificationAttributes[attr.id];
+                        }
                     });
                     classifications.push(copyClassification);
                 });
-                datInfo.classifications = classifications;
-            } catch (error: any) {
-                this.handleErr(new BSError('', 'Load Classification Err', error));
-            }
-        }
-    }
-
-    async loadObject() {
-        let datInfo = this.state.dataList[this.state.dataIndex];
-
-        let objects = this.dataManager.getDataObject(datInfo.dataId);
-        if (!objects) {
-            try {
-                let data = await api.getDataObject(datInfo.dataId);
-                datInfo.queryTime = data.queryTime;
-                let annotates = utils.convertObject2Annotate(data.objects, this.editor);
-                // let annotates = data.objects;
-                console.log('load annotates', annotates);
-                this.editor.state.isAnnotated = annotates.length > 0;
-                this.dataManager.setDataObject(datInfo.dataId, annotates);
+                dataInfo.classifications = classifications;
             } catch (error: any) {
                 this.handleErr(new BSError('', 'Load Object Error', error));
             }
@@ -99,7 +99,6 @@ export default class Tool {
         this.setFilterFromData();
         this.loadDataFromManager();
     }
-
     getMaxId(dataId?: string) {
         let { dataIndex, dataList } = this.state;
         let curData = dataList[dataIndex];
@@ -310,99 +309,80 @@ export default class Tool {
 
         if (!this.needSave()) return;
 
+        // currentData
+        const currentData = state.dataList[state.dataIndex];
+        // class
         let classMap = {};
         editor.state.classTypes.forEach((e) => {
             classMap[e.name] = e;
         });
 
-        let dataInfos = [] as any[];
-        let classValueInfos = [] as any[];
-        let queryTime = state.dataList[0].queryTime;
+        const dataInfos = [] as any;
         state.dataList.forEach((dataMeta) => {
             if (!dataMeta.needSave) return;
-            let annotates = this.dataManager.getDataObject(dataMeta.dataId) || [];
-            if (new Date(dataMeta.queryTime).getTime() > new Date(queryTime).getTime())
-                queryTime = dataMeta.queryTime;
 
-            // result object
-            let data = utils.convertAnnotate2Object(annotates);
-            // let data = annotates;
-            let infos = [] as any[];
-            data.forEach((e) => {
-                infos.push({
-                    id: e.uuid ? e.uuid : undefined,
-                    frontId: e.frontId,
-                    classId: e.classType ? classMap[e.classType]?.id : '',
-                    source: e.modelRun ? 'MODEL' : 'ARTIFICIAL',
-                    modelRunId: utils.empty(e.modelRun) ? undefined : +(e.modelRun as any),
-                    modelClassName: e.modelClass || undefined,
-                    modelConfidence: e.confidence || undefined,
-                    classAttributes: e,
-                    // classAttributes: JSON.stringify(e),
+            // object  ==>
+            const objectInfos = [] as any[];
+            const annotates = this.dataManager.getDataObject(dataMeta.dataId) || [];
+            console.log(annotates);
+            annotates.forEach((e) => {
+                const annotate = utils.convertAnnotate2Object([e], editor);
+                objectInfos.push({
+                    id: e.id ?? undefined,
+                    frontId: e.uuid,
+                    classId: annotate[0]?.classId ?? undefined,
+                    classAttributes: annotate[0] ?? {},
                 });
             });
-            dataInfos.push({ dataId: dataMeta.dataId, objects: infos });
+            // const data = utils.convertAnnotate2Object(annotates, editor); // 转换数据
+            // data.forEach((e) => {
+            //     console.log('object ==>', e);
+            //     objectInfos.push(e);
+            // });
 
-            // class value
-            // dataMeta
-            let valueInfos = [] as any[];
-            (dataMeta.classifications || []).forEach((classification) => {
-                let classificationAttributes = {};
-
-                let attrMap = {} as Record<string, IClassificationAttr>;
-                classification.attrs.forEach((attr) => {
-                    attrMap[attr.id] = attr;
-                });
-                classification.attrs.forEach((attr) => {
-                    let visible = isAttrVisible(attr, attrMap);
-                    if (visible) {
-                        classificationAttributes[attr.id] = attr.value;
-                    }
-                    // classificationAttributes[attr.id] = attr.value;
-                });
-
-                valueInfos.push({
+            // classification ==>
+            const classificationInfos = [] as any[];
+            (dataMeta.classifications || []).forEach((classification: any) => {
+                const newClassification = classificationToSave(classification);
+                const classificationAttributes = {
+                    id: +classification.id,
+                    values: newClassification,
+                };
+                classificationInfos.push({
                     id: undefined,
-                    classificationId: +classification.id,
-                    classificationAttributes: classificationAttributes,
+                    classificationId: classification.id,
+                    classificationAttributes,
                 });
             });
-            valueInfos.length > 0 &&
-                classValueInfos.push({ dataId: dataMeta.dataId, dataAnnotations: valueInfos });
+
+            dataInfos.push({
+                dataId: dataMeta.dataId,
+                objects: objectInfos,
+                dataAnnotations: classificationInfos,
+            });
         });
-
-        let objectInfo = {
-            datasetId: state.datasetId,
-            queryTime: queryTime,
-            dataInfos: dataInfos,
-        };
-
-        let classificationInfo = {
-            datasetId: state.datasetId,
-            queryTime: queryTime,
-            dataInfos: classValueInfos,
-        };
-
-        // console.log(classValueInfos);
-        let saveObject = api.saveObject(objectInfo).then((keyMap) => {
-            this.updateBackId(keyMap);
-        });
-        let saves = [saveObject] as Promise<any>[];
-        if (classValueInfos.length > 0) {
-            saves.push(api.saveDataClassification(classificationInfo));
-        }
-        state.saving = true;
 
         try {
-            await Promise.all(saves);
+            state.saving = true;
+            const saveParams = {
+                datasetId: currentData.datasetId,
+                dataInfos,
+            };
+            console.log(saveParams);
+
+            await api.saveAnnotation(saveParams);
+
             state.dataList.forEach((e) => {
                 e.needSave = false;
             });
             editor.showMsg('success', 'Save Success');
-        } catch (e: any) {
-            this.editor.showMsg('error', 'Save Error');
+            state.saving = false;
+            return true;
+        } catch (error: any) {
+            this.editor.showMsg('error', error.message || 'Save Error');
+            state.saving = false;
+            return false;
         }
-        state.saving = false;
 
         // tool
         function isAttrVisible(

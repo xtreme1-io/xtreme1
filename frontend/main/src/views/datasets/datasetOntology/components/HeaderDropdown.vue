@@ -78,10 +78,15 @@
   } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { exportScenario } from '/@/api/business/dataset';
 
   // const { t } = useI18n();
 
-  const props = defineProps<{ datasetId: string | number; datasetType: datasetTypeEnum }>();
+  const props = defineProps<{
+    datasetId: string | number;
+    datasetType: datasetTypeEnum;
+    selectedList: any[];
+  }>();
   const emits = defineEmits(['fetchList']);
 
   const selectedOntologyId = ref<number | string>();
@@ -121,8 +126,9 @@
       handleConfirm();
     }
   };
-  const handleCopyAll = async (ontologyId: number, type: ICopyEnum) => {
-    selectedOntologyId.value = ontologyId;
+  const handleCopyAll = async (type: ICopyEnum, ontologyId?: number) => {
+    if (ontologyId) selectedOntologyId.value = ontologyId;
+
     await getSelectedOntologyList();
 
     const { conflictClassList, conflictClassificationList } = await getAllConflictResolution(
@@ -235,7 +241,15 @@
   const handleImport = () => {
     openImportModal();
   };
-  const handleExport = () => {};
+  const handleExport = async () => {
+    await exportScenario({
+      pageNo: 1,
+      pageSize: 9999,
+      datasetType: props.datasetType,
+      classId: props.selectedList.toString(),
+      source: 'DATASET_CLASS',
+    });
+  };
 </script>
 <style lang="less" scoped>
   .ellipsis_box {

@@ -4,7 +4,13 @@
     :actionList="actionList"
     :functionMap="functionMap"
   />
-  <SaveToModal :datasetType="datasetType" :activeTab="activeTab" @register="registerSaveToModal" />
+  <SaveToModal
+    @register="registerSaveToModal"
+    :activeTab="activeTab"
+    :datasetType="datasetType"
+    :datasetId="props.datasetId"
+    :selectedList="props.selectedList"
+  />
 </template>
 <script lang="ts" setup>
   import { computed } from 'vue';
@@ -12,7 +18,7 @@
   // import { useMessage } from '/@/hooks/web/useMessage';
   import { Modal } from 'ant-design-vue';
   import { useModal } from '/@/components/Modal';
-  import SaveToModal from './copy-modal/SaveToModal.vue';
+  import SaveToModal from './saveTo/SaveToModal.vue';
 
   import { ActionSelect } from '/@/components/BasicCustom/ActionSelect';
   import { actionList } from './actionList';
@@ -24,9 +30,10 @@
   // const { createMessage } = useMessage();
 
   const props = defineProps<{
-    selectedList: any[];
-    datasetType: datasetTypeEnum;
     activeTab: ClassTypeEnum;
+    datasetType: datasetTypeEnum;
+    datasetId: string | number;
+    selectedList: any[];
   }>();
   const emits = defineEmits(['selectAll', 'unSelect', 'fetchList']);
 
@@ -45,7 +52,7 @@
   /** Save To */
   const [registerSaveToModal, { openModal: openSaveToModal }] = useModal();
   const handleSaveToOntology = () => {
-    openSaveToModal();
+    openSaveToModal(true, {});
   };
 
   /** Delete */

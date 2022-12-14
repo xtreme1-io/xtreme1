@@ -321,6 +321,16 @@ export const getDatasetClassificationApi = (params: getDatasetClassesParams) =>
     },
   });
 
+/** get dataset classification by name */
+export const getDatasetClassificationAllApi = (params: { datasetId: string }) =>
+  defHttp.get<any>({
+    url: `${Api.DATASET_CLASSIFICATION}/findAll/${params.datasetId}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 /** create dataset classification */
 export const createDatasetClassificationApi = (params: datasetSaveEditClassificationParams) =>
   defHttp.post<null>({

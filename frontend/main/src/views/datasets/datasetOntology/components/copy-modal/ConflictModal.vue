@@ -7,6 +7,7 @@
     @cancel="handleCancel"
     @ok="handleConfirm"
     okText="Confirm"
+    :okButtonProps="{ disabled: isDisabled }"
     :width="1000"
     :height="750"
   >
@@ -28,10 +29,16 @@
         <div class="wrapper-inner">
           <div class="title">Classes</div>
           <div class="action">
-            <span class="highLight" @click="handleToggleKeepAll(ClassTypeEnum.CLASS, false)">
+            <span
+              class="highLight"
+              @click="handleToggleKeepAll(ClassTypeEnum.CLASS, ICopySelectEnum.REPLACE)"
+            >
               Replace All
             </span>
-            <span class="highLight" @click="handleToggleKeepAll(ClassTypeEnum.CLASS, true)">
+            <span
+              class="highLight"
+              @click="handleToggleKeepAll(ClassTypeEnum.CLASS, ICopySelectEnum.KEEP)"
+            >
               Keep All
             </span>
           </div>
@@ -47,13 +54,13 @@
           <div class="action">
             <span
               class="highLight"
-              @click="handleToggleKeepAll(ClassTypeEnum.CLASSIFICATION, false)"
+              @click="handleToggleKeepAll(ClassTypeEnum.CLASSIFICATION, ICopySelectEnum.REPLACE)"
             >
               Replace All
             </span>
             <span
               class="highLight"
-              @click="handleToggleKeepAll(ClassTypeEnum.CLASSIFICATION, true)"
+              @click="handleToggleKeepAll(ClassTypeEnum.CLASSIFICATION, ICopySelectEnum.KEEP)"
             >
               Keep All
             </span>
@@ -70,12 +77,12 @@
   </BasicModal>
 </template>
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
   // import { useI18n } from '/@/hooks/web/useI18n';
   // components
   import emitter from 'tiny-emitter/instance';
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { ICopyEnum } from './data';
+  import { ICopyEnum, ICopySelectEnum } from './data';
   import CustomTable from './CustomTable.vue';
   import BackTitle from './BackTitle.vue';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
@@ -85,7 +92,6 @@
   const emits = defineEmits(['back', 'confirm']);
 
   const modalTitle = ref<string>('Copy from Ontology Center');
-  // const isDisabled = ref<boolean>(true);
 
   const conflictClassList = ref<any[]>([]);
   const conflictClassificationList = ref<any[]>([]);
@@ -98,12 +104,13 @@
   const [registerModal, { closeModal }] = useModalInner((config) => {
     backType.value = config.type;
 
-    conflictClassList.value = config.conflictClassList.map((item) => {
-      item.isKeep = false;
+    conflictClassList.value = (config.conflictClassList ?? []).map((item) => {
+      item.isKeep = ICopySelectEnum.NONE;
       return item;
     });
-    conflictClassificationList.value = config.conflictClassificationList.map((item) => {
-      item.isKeep = false;
+
+    conflictClassificationList.value = (config.conflictClassificationList ?? []).map((item) => {
+      item.isKeep = ICopySelectEnum.NONE;
       return item;
     });
   });
@@ -115,7 +122,8 @@
   };
 
   /** Toggle keep */
-  const handleToggleKeepAll = (type: ClassTypeEnum, isKeep: boolean) => {
+  const handleToggleKeepAll = (type: ClassTypeEnum, isKeep: ICopySelectEnum) => {
+    console.log(type, isKeep);
     if (type == ClassTypeEnum.CLASS) {
       conflictClassList.value.forEach((item) => (item.isKeep = isKeep));
     } else {
@@ -124,9 +132,19 @@
   };
 
   /** Confirm Conflict */
+  const isDisabled = computed(() => {
+    return !(
+      conflictClassList.value.every((item) => item.isKeep != ICopySelectEnum.NONE) &&
+      conflictClassificationList.value.every((item) => item.isKeep != ICopySelectEnum.NONE)
+    );
+  });
   const handleConfirm = () => {
-    const classList = conflictClassList.value.filter((item) => !item.isKeep);
-    const classificationList = conflictClassificationList.value.filter((item) => !item.isKeep);
+    const classList = conflictClassList.value.filter(
+      (item) => item.isKeep == ICopySelectEnum.REPLACE,
+    );
+    const classificationList = conflictClassificationList.value.filter(
+      (item) => item.isKeep == ICopySelectEnum.REPLACE,
+    );
 
     emits('confirm', classList, classificationList);
     closeModal();

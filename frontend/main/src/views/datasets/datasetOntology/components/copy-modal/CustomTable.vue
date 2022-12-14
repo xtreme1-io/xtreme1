@@ -3,7 +3,10 @@
     <div v-if="showTable" class="table-wrapper">
       <BasicTable @register="registerTable">
         <template #name="{ record }">
-          <div class="flex items-center justify-center gap-20px">
+          <div class="flex items-center justify-center gap-10px">
+            <div v-if="record.toolType" class="flex items-center justify-center w-24px h-24px">
+              <img class="w-16px h-16px" :src="toolTypeImg[record.toolType]" />
+            </div>
             <span class="action active">{{ record.name }}</span>
           </div>
         </template>
@@ -11,12 +14,16 @@
           <div class="flex items-center justify-center gap-20px">
             <span
               class="action"
-              :class="!record.isKeep ? 'active' : ''"
+              :class="record.isKeep == ICopySelectEnum.REPLACE ? 'active' : ''"
               @click="handleReplace(record)"
             >
               Replace
             </span>
-            <span class="action" :class="record.isKeep ? 'active' : ''" @click="handleKeep(record)">
+            <span
+              class="action"
+              :class="record.isKeep == ICopySelectEnum.KEEP ? 'active' : ''"
+              @click="handleKeep(record)"
+            >
               Keep
             </span>
           </div>
@@ -34,12 +41,19 @@
 <script lang="ts" setup>
   import { computed, nextTick, watch } from 'vue';
   import { BasicTable, useTable } from '/@/components/Table';
-  import _ from 'lodash';
   import { ClassTypeEnum } from '/@/api/business/model/classModel';
+  import { ICopySelectEnum } from './data';
+  import { toolTypeImg } from '/@/views/ontology/classes/attributes/data';
 
-  const props = withDefaults(defineProps<{ list: any[]; type: ClassTypeEnum }>(), {
-    list: () => [],
-  });
+  const props = withDefaults(
+    defineProps<{
+      list: any[];
+      type: ClassTypeEnum;
+    }>(),
+    {
+      list: () => [],
+    },
+  );
 
   const showTable = computed(() => {
     return props.list.length > 0;
@@ -67,6 +81,7 @@
     ],
     showIndexColumn: false,
     pagination: true,
+    canResize: false,
     actionColumn: {
       width: '50%',
       title: 'Resolution',
@@ -76,12 +91,10 @@
   });
 
   const handleReplace = (record) => {
-    record.isKeep = false;
-    console.log(props.list);
+    record.isKeep = ICopySelectEnum.REPLACE;
   };
   const handleKeep = (record) => {
-    record.isKeep = true;
-    console.log(props.list);
+    record.isKeep = ICopySelectEnum.KEEP;
   };
 </script>
 <style lang="less" scoped>

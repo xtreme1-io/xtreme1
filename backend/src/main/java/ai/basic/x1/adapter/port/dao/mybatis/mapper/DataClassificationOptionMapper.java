@@ -16,7 +16,5 @@ public interface DataClassificationOptionMapper extends BaseMapper<DataClassific
 
     Page<DataClassificationOption> statisticsDataByOption(Page<DataClassificationOption> page, @Param("datasetId") Long datasetId);
 
-    List<DataClassificationOption> findByClassIds(@Param("classIds") List<Long> classIds);
-
     List<DataClassificationOption> statisticsDatasetDataClassification(@Param("datasetId") Long datasetId, @Param("classificationId") Long classificationId);
 }
