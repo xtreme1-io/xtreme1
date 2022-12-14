@@ -1,6 +1,11 @@
 <template>
   <div :class="`${prefixCls}`">
-    <exportModalVue @register="register" :info="info" :classId="result" />
+    <exportModalVue
+      @register="register"
+      :info="info"
+      :classId="result"
+      :classification="classification"
+    />
     <div class="content">
       <div class="flex p-25px">
         <div class="mr-24px cursor-pointer" @click="handleBack">
@@ -55,17 +60,17 @@
         </div>
       </div>
       <div>
-        <Radio.Group v-model:value="classification">
-          <Radio
+        <Checkbox.Group v-model:value="classification">
+          <Checkbox
             v-for="item in filterOptions"
             style="display: block"
             :value="item.attributeId + '^' + item.optionName"
             :key="item.attributeId + '^' + item.optionName"
           >
             {{ item.optionName }}
-          </Radio>
+          </Checkbox>
           <!-- <Radio cstyle="display: block" :value="11">11111</Radio> -->
-        </Radio.Group>
+        </Checkbox.Group>
       </div>
     </div>
   </div>
@@ -73,7 +78,7 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Select, Radio } from 'ant-design-vue';
+  import { Select, Checkbox } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
@@ -154,8 +159,12 @@
       datasetType: info.value.type,
       source: 'DATASET_CLASS',
       pageSize: 999,
-      attributeId: classification.value ? classification.value.split('^')[0] : undefined,
-      optionName: classification.value ? classification.value.split('^')[1] : undefined,
+      attributeIds: classification.value
+        ? classification.value.map((item) => item.split('^')[0]).toString()
+        : undefined,
+      optionNames: classification.value
+        ? classification.value.map((item) => item.split('^')[1]).toString()
+        : undefined,
     });
     const _list: any[] = [];
     const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))

@@ -33,6 +33,7 @@
   const props = defineProps<{
     info: any;
     classId: any;
+    classification: any;
   }>();
   const { prefixCls } = useDesign('export-modal');
   const { t } = useI18n();
@@ -54,6 +55,12 @@
         classId: props.classId.toString(),
         source: 'DATASET_CLASS',
         datasetName: data.datasetName,
+        attributeIds: props.classification
+          ? props.classification.map((item) => item.split('^')[0]).toString()
+          : undefined,
+        optionNames: props.classification
+          ? props.classification.map((item) => item.split('^')[1]).toString()
+          : undefined,
       });
     }
     closeModal();
