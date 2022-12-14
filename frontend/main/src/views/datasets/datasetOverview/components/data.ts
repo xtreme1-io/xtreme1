@@ -60,18 +60,6 @@ export const defaultScatterOptions = {
   pointStyle: {
     fillOpacity: 1,
   },
-  brush: {
-    enabled: false,
-    // 圈选高亮，不指定默认为: filter
-    action: 'highlight',
-    mask: {
-      style: {
-        fill: 'rgba(0,0,0,0.15)',
-        stroke: 'rgba(0,0,0,0.45)',
-        lineWidth: 0.5,
-      },
-    },
-  },
 };
 
 export const classificationBarOptions = {
