@@ -20,7 +20,8 @@
               block
               border
               @click="
-                () => {
+                (e) => {
+                  e.stopPropagation();
                   handleView(data.id, isFrame());
                 }
               "
@@ -34,7 +35,8 @@
               block
               border
               @click="
-                () => {
+                (e) => {
+                  e.stopPropagation();
                   emits('handleAnotateFrame', data.id);
                 }
               "
@@ -43,7 +45,19 @@
             </Button>
           </div>
           <div class="openBtn">
-            <Button type="danger" block border @click="handleDel">Delete</Button>
+            <Button
+              type="danger"
+              block
+              border
+              @click="
+                (e) => {
+                  e.stopPropagation();
+                  handleDel(e);
+                }
+              "
+            >
+              Delete
+            </Button>
           </div>
         </div>
         <div class="wrapper" v-else>
@@ -53,7 +67,8 @@
               block
               border
               @click="
-                () => {
+                (e) => {
+                  e.stopPropagation();
                   handleView(data.id, isFrame());
                 }
               "
@@ -67,7 +82,8 @@
               block
               border
               @click="
-                () => {
+                (e) => {
+                  e.stopPropagation();
                   handleAnnotate(data.id);
                 }
               "
@@ -76,7 +92,19 @@
             </Button>
           </div>
           <div class="openBtn">
-            <Button type="danger" block border @click="handleDel">Delete</Button>
+            <Button
+              type="danger"
+              block
+              border
+              @click="
+                (e) => {
+                  e.stopPropagation();
+                  handleDel(e);
+                }
+              "
+            >
+              Delete
+            </Button>
           </div>
         </div>
       </div>
