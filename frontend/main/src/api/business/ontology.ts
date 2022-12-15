@@ -128,3 +128,13 @@ export const importClass = (params: any) =>
     },
     params,
   );
+
+export const mergeClass = (params: any) =>
+  defHttp.post<any>({
+    url: `${Api.ONTOLOGY}/saveClassAndClassificationBatch`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
