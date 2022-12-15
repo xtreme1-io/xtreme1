@@ -1,5 +1,6 @@
 <template>
   <div class="h-36px inline-flex gap-10px items-center">
+    <ImportModal @register="importRegister" type="ONTOLOGY" />
     <Dropdown placement="bottomRight" trigger="click" overlayClassName="headerDropdown">
       <div class="ellipsis_box">
         <Icon class="ellipsis_box-icon" icon="gridicons:ellipsis" :size="18" />
@@ -30,12 +31,25 @@
 <script lang="ts" setup>
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { Dropdown, Menu } from 'ant-design-vue';
-
-  /** Import */
-  const handleImport = () => {};
-
-  /** Export */
-  const handleExport = () => {};
+  import { useModal } from '/@/components/Modal';
+  import { exportClass } from '/@/api/business/ontology';
+  import ImportModal from '../../../datasets/datasetOntology/components/import-modal/ImportModal.vue';
+  import { useRoute } from 'vue-router';
+  const { query } = useRoute();
+  const { id } = query;
+  const [importRegister, { openModal: openImportModal }] = useModal();
+  const handleImport = () => {
+    openImportModal();
+  };
+  const handleExport = async () => {
+    await exportClass({
+      sourceId: id,
+      sourceType: 'ONTOLOGY',
+      responseType: 'blob',
+    });
+    // downloadByData(res, 111);
+    // downloadByUrl()
+  };
 </script>
 <style lang="less" scoped>
   .ellipsis_box {

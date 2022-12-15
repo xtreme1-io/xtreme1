@@ -10,6 +10,7 @@ import {
   ValidateOntologyNameParams,
 } from './model/ontologyModel';
 import { datasetTypeEnum } from './model/datasetModel';
+import { ContentTypeEnum } from '/@/enums/httpEnum';
 
 enum Api {
   ONTOLOGY = '/ontology',
@@ -105,3 +106,26 @@ export const getOntologyByTeamApi = (params: FindOntologyByTeamParams) =>
       ignoreCancelToken: true,
     },
   });
+
+export const exportClass = (params: any) =>
+  defHttp.get<null>({
+    url: `${Api.ONTOLOGY}/exportAsJson`,
+    params,
+    headers: {
+      'content-type': 'octet-stream;charset=UTF-8',
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const importClass = (params: any) =>
+  defHttp.uploadFile<any>(
+    {
+      url: `/api${Api.ONTOLOGY}/importByJson`,
+      headers: {
+        // @ts-ignore
+        ignoreCancelToken: true,
+      },
+    },
+    params,
+  );
