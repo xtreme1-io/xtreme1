@@ -321,7 +321,6 @@
     position: relative;
     width: 272px;
     height: 175px;
-    will-change: transform;
     transform: translateZ(0);
     .lockInfo{
       position: absolute;

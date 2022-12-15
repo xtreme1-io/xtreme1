@@ -509,8 +509,7 @@ export function useSearchCard(props: {
     if (!dom) return;
     const img = dom.querySelector('img.img-2d') as HTMLImageElement;
     const svg = dom.querySelector('svg.easy-svg') as SVGElement;
-    const trackId = props.object.classAttributes.trackId;
-    const objects = props.object2D[trackId];
+    const objects = props.object2D;
     state.transform = '';
     const object2d: any[] = [];
     if (img.src && img.complete && objects?.length) {
@@ -540,11 +539,11 @@ export function useSearchCard(props: {
           });
           offsetX = (naturalWidth - (min.x + max.x)) / 2;
           offsetY = (naturalHeight - (min.y + max.y)) / 2;
-          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y));
+          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y)) * 0.4;
           return {
             offsetX,
             offsetY,
-            scale: scale * 0.4,
+            scale: scale,
           };
         };
         const { offsetX, offsetY, scale } = getOffsetAndScale(os[0]);
@@ -703,12 +702,12 @@ export function useSearchCard(props: {
           });
           offsetX = (naturalWidth - (min.x + max.x)) / 2;
           offsetY = (naturalHeight - (min.y + max.y)) / 2;
-          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y));
+          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y)) * 0.3;
         }
         return {
           offsetX,
           offsetY,
-          scale: scale * 0.3,
+          scale: scale,
         };
       };
       const { contour = {}, id, type, meta = {} } = object;
@@ -767,8 +766,7 @@ export function useSearchCard(props: {
     () => [props.object, props.object2D],
     () => {
       if (props.info?.type === datasetTypeEnum.LIDAR_FUSION) {
-        const trackId = props.object.classAttributes.trackId;
-        const objects = props.object2D[trackId];
+        const objects = props.object2D;
         state.imgIndex = 0;
         if (objects?.length && objects[0]) {
           const object = objects[0].classAttributes;
