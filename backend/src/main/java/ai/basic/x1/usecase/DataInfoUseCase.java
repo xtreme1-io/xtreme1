@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -633,17 +634,19 @@ public class DataInfoUseCase {
         lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId, dataPreAnnotationBO.getDatasetId());
         lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
         var dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
-        var boo = true;
         if (ObjectUtil.isNull(dataAnnotationRecord)) {
-            boo = false;
             dataAnnotationRecord = DataAnnotationRecord.builder()
                     .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
-            dataAnnotationRecordDAO.save(dataAnnotationRecord);
+            try {
+                dataAnnotationRecordDAO.save(dataAnnotationRecord);
+            } catch (DuplicateKeyException duplicateKeyException) {
+                dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+            }
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
         var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
         // Indicates that no new data is locked and there is no old lock record
-        if (insertCount == 0 || !boo) {
+        if (insertCount == 0) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
         }
         return dataAnnotationRecord.getId();
