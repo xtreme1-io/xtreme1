@@ -274,8 +274,8 @@
     // max.value = await getMaxCountApi({ datasetId: id as unknown as number });
     // endCount.value = max.value;
     info.value = await datasetItemDetail({ id: id as string });
-    setDatasetBreadcrumb(info.value.name, info.value.type);
     getSelectOptions();
+    setDatasetBreadcrumb(info.value.name, info.value.type);
   });
 
   let filterForm = reactive({
@@ -289,16 +289,16 @@
   let timeout;
   onMounted(async () => {
     console.log(scrollRef.value);
+    fetchStatusNum();
+    getLockedData();
+    fetchList(filterForm);
+    document.addEventListener('visibilitychange', getLockedData);
     handleScroll(scrollRef, () => {
       if (total.value > list.value.length) {
         pageNo.value++;
         fetchList(filterForm, true);
       }
     });
-    getLockedData();
-    fetchList(filterForm);
-    fetchStatusNum();
-    document.addEventListener('visibilitychange', getLockedData);
     watch(filterForm, () => {
       /* ... */
       clearTimeout(timeout);

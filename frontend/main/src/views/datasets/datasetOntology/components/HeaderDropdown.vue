@@ -270,18 +270,10 @@
     openImportModal();
   };
 
-  const handleDuplicate = () => {
-    // openConflictModal(true, {
-    //   type: type,
-    //   conflictClassList,
-    //   conflictClassificationList,
-    // });
-  };
   const handleExport = async () => {
     await exportClass({
       sourceId: props.datasetId,
       sourceType: 'DATASET',
-      responseType: 'blob',
     });
     // downloadByData(res, 111);
     // downloadByUrl()
