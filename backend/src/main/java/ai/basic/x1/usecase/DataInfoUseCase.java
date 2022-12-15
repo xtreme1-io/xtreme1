@@ -634,21 +634,32 @@ public class DataInfoUseCase {
         lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId, dataPreAnnotationBO.getDatasetId());
         lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
         var dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+        var boo = true;
         if (ObjectUtil.isNull(dataAnnotationRecord)) {
             dataAnnotationRecord = DataAnnotationRecord.builder()
                     .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
             try {
                 dataAnnotationRecordDAO.save(dataAnnotationRecord);
             } catch (DuplicateKeyException duplicateKeyException) {
+                boo = false;
                 dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
             }
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
         var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
-        // Indicates that no new data is locked and there is no old lock record
-        if (insertCount == 0) {
-            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+        var isFilterData = dataPreAnnotationBO.getIsFilterData();
+        if (ObjectUtil.isNotNull(isFilterData) && isFilterData) {
+            if (insertCount == 0) {
+                throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+            }
+
+        } else {
+            // Indicates that no new data is locked and there is no old lock record
+            if (insertCount == 0 && !boo) {
+                throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+            }
         }
+
         return dataAnnotationRecord.getId();
     }
 

@@ -24,4 +24,6 @@ public class DataAnnotateDTO {
     @NotEmpty(message = "not allow null")
     private List<Long> dataIds;
 
+    private Boolean isFilterData;
+
 }
