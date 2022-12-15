@@ -14,6 +14,7 @@
       <span class="tip">Uploading...</span>
       <Button @click="handleCancel"> Cancel </Button>
     </div>
+    <ConflictModal @register="registerConflictModal" @back="handleBack" @confirm="handleConfirm" />
     <div class="upload__content--footer">
       <span @click="handleDownload">Download Excel Template</span>
       <span @click="handleView"> View Help Document</span>
@@ -27,17 +28,22 @@
   import { SvgIcon } from '/@/components/Icon';
   import { Button } from '/@@/Button';
   import { ref } from 'vue';
-  import { importClass } from '/@/api/business/ontology';
+  import { importClass, mergeClass } from '/@/api/business/ontology';
   import { useRoute } from 'vue-router';
   import { getBufferWithFile } from '/@/components/Upload/src/helper';
+  import ConflictModal from '../copy-modal/ConflictModal.vue';
+  import { useModal } from '/@/components/Modal';
+  import { ICopyEnum } from '../copy-modal/data';
+  const [registerConflictModal, { openModal: openConflictModal, closeModal: closeConflictModal }] =
+    useModal();
   const uploading = ref(false);
   const { query } = useRoute();
   const { id } = query;
   const props = defineProps<{
     type?: string;
   }>();
-  const emits = defineEmits(['closeModal']);
-
+  const emits = defineEmits(['callback', 'close']);
+  const data = ref();
   // const { t } = useI18n();
   const { createMessage } = useMessage();
   /** Upload */
@@ -62,9 +68,31 @@
           file: resultImg,
         });
         console.log('upload', res);
-        emits('closeModal');
+        if (res.data.isDuplicate === true) {
+          data.value = res.data;
+          openConflictModal(true, {
+            type: ICopyEnum.CLASSES,
+            conflictClassList: res.data.classes.filter((item) =>
+              res.data.duplicateClassName.includes(item.name),
+            ),
+            conflictClassificationList: res.data.classifications.filter((item) =>
+              res.data.duplicateClassificationName.includes(item.name),
+            ),
+          });
+          // emits('close');
+        } else {
+          emits('callback', 'success', {
+            validClassSize: res.data.validClassSize,
+            validClassificationSize: res.data.validClassificationSize,
+            classTotalSize: res.data.classTotalSize,
+            classificationTotalSize: res.data.classificationTotalSize,
+          });
+        }
+
         uploading.value = false;
-      } catch (_) {}
+      } catch (_) {
+        emits('callback', 'error');
+      }
     };
     getBufferWithFile(fileList[0]).then(upload);
     return false;
@@ -74,6 +102,32 @@
 
   const handleDownload = () => {};
   const handleView = () => {};
+
+  const handleBack = () => {};
+
+  const handleConfirm = async (classList: any[] = [], classificationList: any[] = []) => {
+    // console.log(classList, classificationList);
+    let classes;
+    let classifications;
+    if (classList.length !== data.value.duplicateClassName.length) {
+      const list = data.value.duplicateClassName.filter(
+        (item) => !classList.map((record) => record.name).includes(item),
+      );
+      classes = data.value.classes.filter((k) => !list.includes(k.name));
+    }
+    if (classificationList.length !== data.value.duplicateClassificationName.length) {
+      const list = data.value.duplicateClassificationName.filter(
+        (item) => !classificationList.map((record) => record.name).includes(item),
+      );
+      classifications = data.value.classifications.filter((k) => !list.includes(k.name));
+    }
+    await mergeClass({
+      ...data.value,
+      classes,
+      classifications,
+    });
+    emits('close');
+  };
 </script>
 <style lang="less" scoped>
   .upload__content {

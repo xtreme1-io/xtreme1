@@ -1,10 +1,14 @@
 <template>
   <div class="success__content">
     <Icon icon="ep:success-filled" color="#7FF0B3" size="50" />
-    <div class="success__content--tip">Imported 35 Class(es) and 4 Classification(s)</div>
+    <div class="success__content--tip">
+      Imported {{ infoNum?.validClassSize }} Class(es) and
+      {{ infoNum?.validClassificationSize }} Classification(s)
+    </div>
     <div class="success__content--fail">
-      Failed to import 5 Class(es) and 4 Classification(s), because they don't fit the required
-      format.
+      Failed to import {{ infoNum?.classTotalSize - infoNum?.validClassSize }} Class(es) and
+      {{ infoNum?.classificationTotalSize - infoNum?.validClassificationSize }} Classification(s),
+      because they don't fit the required format.
     </div>
     <Button type="primary" ghost @click="handleReupload"> Close </Button>
   </div>
@@ -13,10 +17,14 @@
   // import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { Button } from '/@@/Button';
-
+  const emits = defineEmits(['close']);
   // const { t } = useI18n();
-
-  const handleReupload = () => {};
+  defineProps<{
+    infoNum: any;
+  }>();
+  const handleReupload = () => {
+    emits('close');
+  };
 </script>
 <style lang="less" scoped>
   .success__content {

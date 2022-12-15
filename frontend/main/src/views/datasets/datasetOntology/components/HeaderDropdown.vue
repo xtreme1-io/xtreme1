@@ -35,7 +35,14 @@
     </Dropdown>
   </div>
   <!-- Modal -->
-  <ImportModal @register="importRegister" />
+  <ImportModal
+    @register="importRegister"
+    @fetchList="
+      () => {
+        emits('fetchList');
+      }
+    "
+  />
   <!-- Copy -->
   <ChooseOntology
     @register="registerChooseOntologyModal"
@@ -79,8 +86,6 @@
   } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { exportClass } from '/@/api/business/ontology';
-  import { downloadByUrl } from '/@/utils/file/download';
 
   // const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -156,6 +161,7 @@
 
     console.log('conflict result: ', conflictClassList, conflictClassificationList);
     if (conflictClassList.length > 0 || conflictClassificationList.length > 0) {
+      console.log(conflictClassList, conflictClassificationList);
       openConflictModal(true, {
         type: type,
         conflictClassList,
@@ -262,12 +268,17 @@
   const handleImport = () => {
     openImportModal();
   };
+
   const handleExport = async () => {
-    await exportClass({
-      sourceId: props.datasetId,
-      sourceType: 'DATASET',
-      responseType: 'blob',
-    });
+    // const res = await exportClass({
+    //   sourceId: props.datasetId,
+    //   sourceType: 'DATASET',
+    // });
+    window.open(
+      window.location.origin +
+        '/api/ontology/exportAsJson' +
+        `?sourceId=${props.datasetId}&sourceType=DATASET`,
+    );
     // downloadByData(res, 111);
     // downloadByUrl()
   };

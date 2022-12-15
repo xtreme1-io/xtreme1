@@ -107,6 +107,7 @@ export const getOntologyByTeamApi = (params: FindOntologyByTeamParams) =>
   });
 
 export const exportClass = (params: any) =>
+  // axios.get(`/api${Api.ONTOLOGY}/exportAsJson`, { params });
   defHttp.get<null>({
     url: `${Api.ONTOLOGY}/exportAsJson`,
     params,
@@ -128,3 +129,13 @@ export const importClass = (params: any) =>
     },
     params,
   );
+
+export const mergeClass = (params: any) =>
+  defHttp.post<any>({
+    url: `${Api.ONTOLOGY}/saveClassAndClassificationBatch`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });

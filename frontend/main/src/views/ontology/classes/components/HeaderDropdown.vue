@@ -32,7 +32,6 @@
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { Dropdown, Menu } from 'ant-design-vue';
   import { useModal } from '/@/components/Modal';
-  import { exportClass } from '/@/api/business/ontology';
   import ImportModal from '../../../datasets/datasetOntology/components/import-modal/ImportModal.vue';
   import { useRoute } from 'vue-router';
   const { query } = useRoute();
@@ -42,11 +41,14 @@
     openImportModal();
   };
   const handleExport = async () => {
-    await exportClass({
-      sourceId: id,
-      sourceType: 'ONTOLOGY',
-      responseType: 'blob',
-    });
+    // await exportClass({
+    //   sourceId: id,
+    //   sourceType: 'ONTOLOGY',
+    //   responseType: 'blob',
+    // });
+    window.open(
+      window.location.origin + '/api/ontology/exportAsJson' + `?sourceId=${id}&sourceType=ONTOLOGY`,
+    );
     // downloadByData(res, 111);
     // downloadByUrl()
   };
