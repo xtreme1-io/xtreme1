@@ -32,6 +32,10 @@ public class ClassAndClassificationImportRespDTO {
 
     private Integer classificationTotalSize;
 
+    private Integer validClassSize;
+
+    private Integer validClassificationSize;
+
     private List<Class> classes;
 
     private List<Classification> classifications;

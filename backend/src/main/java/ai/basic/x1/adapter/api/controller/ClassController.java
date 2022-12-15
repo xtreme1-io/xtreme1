@@ -39,7 +39,7 @@ public class ClassController {
     }
 
     @GetMapping("/findAll/{ontologyId}")
-    public List<ClassDTO> findAllByOntologyId(@PathVariable Long ontologyId, @RequestParam ToolTypeEnum toolType) {
+    public List<ClassDTO> findAllByOntologyId(@PathVariable Long ontologyId, @RequestParam(required = false) ToolTypeEnum toolType) {
         return DefaultConverter.convert(classUseCase.findAll(ontologyId, toolType), ClassDTO.class);
     }
 
