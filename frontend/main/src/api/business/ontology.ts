@@ -107,6 +107,7 @@ export const getOntologyByTeamApi = (params: FindOntologyByTeamParams) =>
   });
 
 export const exportClass = (params: any) =>
+  // axios.get(`/api${Api.ONTOLOGY}/exportAsJson`, { params });
   defHttp.get<null>({
     url: `${Api.ONTOLOGY}/exportAsJson`,
     params,

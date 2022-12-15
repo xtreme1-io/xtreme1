@@ -86,7 +86,6 @@
   } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { exportClass } from '/@/api/business/ontology';
 
   // const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -271,10 +270,15 @@
   };
 
   const handleExport = async () => {
-    await exportClass({
-      sourceId: props.datasetId,
-      sourceType: 'DATASET',
-    });
+    // const res = await exportClass({
+    //   sourceId: props.datasetId,
+    //   sourceType: 'DATASET',
+    // });
+    window.open(
+      window.location.origin +
+        '/api/ontology/exportAsJson' +
+        `?sourceId=${props.datasetId}&sourceType=DATASET`,
+    );
     // downloadByData(res, 111);
     // downloadByUrl()
   };
