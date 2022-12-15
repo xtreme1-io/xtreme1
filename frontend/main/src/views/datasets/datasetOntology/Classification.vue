@@ -10,14 +10,19 @@
           :datasetType="datasetType"
           :datasetId="datasetId"
           @fetchList="handleRefresh"
+          :selectedList="selectedList"
         />
       </div>
       <div class="mb-15px">
         <Action
+          :activeTab="activeTab"
+          :datasetType="datasetType"
+          :datasetId="datasetId"
           :selectedList="selectedList"
           :list="cardList"
           @selectAll="handleSelectAll"
           @unSelect="handleUnSelect"
+          @fetchList="handleRefresh"
         />
       </div>
       <div style="height: calc(100vh - 154px)">

@@ -37,6 +37,7 @@ export interface IToolState {
     resultActive?: any;
     seriesFrameId?: any;
     resultFilter?: any;
+    focus?: any;
 }
 
 export interface IDataMeta {

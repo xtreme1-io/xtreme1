@@ -79,7 +79,8 @@
   } from '/@/api/business/classes';
   import { validateClassConflict, validateClassificationConflict } from './utils';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { exportScenario } from '/@/api/business/dataset';
+  import { exportClass } from '/@/api/business/ontology';
+  import { downloadByUrl } from '/@/utils/file/download';
 
   // const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -262,13 +263,13 @@
     openImportModal();
   };
   const handleExport = async () => {
-    await exportScenario({
-      pageNo: 1,
-      pageSize: 9999,
-      datasetType: props.datasetType,
-      classId: props.selectedList.toString(),
-      source: 'DATASET_CLASS',
+    await exportClass({
+      sourceId: props.datasetId,
+      sourceType: 'DATASET',
+      responseType: 'blob',
     });
+    // downloadByData(res, 111);
+    // downloadByUrl()
   };
 </script>
 <style lang="less" scoped>

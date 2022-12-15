@@ -1,7 +1,7 @@
 <template>
   <div class="upload__content">
-    <div v-if="true" class="upload__content--dragger">
-      <Upload.Dragger :multiple="true" :showUploadList="false" :beforeUpload="beforeUpload">
+    <div v-if="!uploading" class="upload__content--dragger">
+      <Upload.Dragger :multiple="false" :showUploadList="false" :beforeUpload="beforeUpload">
         <SvgIcon size="60" name="upload" />
         <div class="dragger-placeholder">
           <span>{{ 'Click to select file or drag and drop file here' }}</span>
@@ -10,7 +10,7 @@
       </Upload.Dragger>
     </div>
     <div class="upload__content--progress" v-else>
-      <Progress type="circle" :showInfo="false" :width="50" :percent="35" />
+      <Spin />
       <span class="tip">Uploading...</span>
       <Button @click="handleCancel"> Cancel </Button>
     </div>
@@ -23,24 +23,50 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { Upload, Progress } from 'ant-design-vue';
+  import { Upload, Spin } from 'ant-design-vue';
   import { SvgIcon } from '/@/components/Icon';
   import { Button } from '/@@/Button';
+  import { ref } from 'vue';
+  import { importClass } from '/@/api/business/ontology';
+  import { useRoute } from 'vue-router';
+  import { getBufferWithFile } from '/@/components/Upload/src/helper';
+  const uploading = ref(false);
+  const { query } = useRoute();
+  const { id } = query;
+  const props = defineProps<{
+    type?: string;
+  }>();
+  const emits = defineEmits(['closeModal']);
 
   // const { t } = useI18n();
   const { createMessage } = useMessage();
   /** Upload */
   const beforeUpload = (_, fileList: File[]) => {
-    const excelType = ['image/jpeg', 'image/png'];
+    const excelType = ['application/json'];
 
     const isExcel = fileList.every((file) => excelType.includes(file.type));
     if (!isExcel) {
-      return createMessage.error('You can only upload zip/gzip/tar/jpg/jpeg/png file!');
+      return createMessage.error('You can only upload json file!');
     }
 
     console.log('beforeUpload: ', fileList);
     // emits('closeUpload', fileList, CompressSourceType.LOCAL);
-
+    uploading.value = true;
+    const upload = async ({ file: resultImg }) => {
+      try {
+        const res: any = await importClass({
+          data: {
+            desId: id,
+            desType: props.type || 'DATASET',
+          },
+          file: resultImg,
+        });
+        console.log('upload', res);
+        emits('closeModal');
+        uploading.value = false;
+      } catch (_) {}
+    };
+    getBufferWithFile(fileList[0]).then(upload);
     return false;
   };
 

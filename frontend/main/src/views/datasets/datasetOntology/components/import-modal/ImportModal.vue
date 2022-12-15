@@ -10,7 +10,7 @@
     :height="400"
   >
     <div class="import__modal">
-      <UploadContent />
+      <UploadContent @closeModal="closeModal" :type="type" />
       <!-- <ErrorContent /> -->
       <!-- <SuccessContent /> -->
     </div>
@@ -24,13 +24,15 @@
   import UploadContent from './UploadContent.vue';
   // import ErrorContent from './ErrorContent.vue';
   // import SuccessContent from './SuccessContent.vue';
-
+  defineProps<{
+    type?: string;
+  }>();
   // const { t } = useI18n();
   // const { createMessage } = useMessage();
 
   const modalTitle = 'Import Class/Classifications by Excel';
 
-  const [registerModal] = useModalInner();
+  const [registerModal, { closeModal }] = useModalInner();
 </script>
 <style scoped lang="less">
   .import__modal {

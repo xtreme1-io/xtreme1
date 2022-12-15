@@ -270,6 +270,9 @@ export default class Tool {
         this.editor.state.imageUrl = data.dataConfig.url;
         this.editor.state.annotationStatus = data.annotationStatus;
         this.editor.state.validStatus = data.validStatus;
+        if (this.state?.focus?.focusId) {
+            this.editor.state.focusId = this.state?.focus?.focusId;
+        }
 
         this.editor.loadImage(resource.image);
     }
