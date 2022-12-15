@@ -121,7 +121,7 @@
           </Select>
         </div>
         <div class="custom-item">
-          <Radio.Group v-model:value="sortType">
+          <Radio.Group name="sortType" v-model:value="sortType">
             <Radio v-for="item in SortTypeOption" :key="item.value" :value="item.value">
               <span class="radioText">{{ item.label }}</span>
             </Radio>
@@ -138,7 +138,7 @@
             <DatePicker v-model:start="start" v-model:end="end" />
           </CollContainer>
           <CollContainer icon="mdi:calendar-month" title="Status">
-            <Radio.Group v-model:value="annotationStatus">
+            <Radio.Group name="status" v-model:value="annotationStatus">
               <Radio :value="undefined">
                 <SvgIcon name="annotated" />
                 <span class="ml-2">All</span>
