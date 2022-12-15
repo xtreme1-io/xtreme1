@@ -166,7 +166,7 @@ public class OntologyUseCase {
                 validClasses.forEach(clazz -> clazz.setOntologyId(desId));
                 List<Class> alreadyExistClasses = classDAO.getBaseMapper().getClasses(desId, DefaultConverter.convert(validClasses, Class.class));
                 if (ObjectUtil.isNotEmpty(alreadyExistClasses)) {
-                    result.setDuplicateClassName(alreadyExistClasses.stream().map(Class::getName).collect(toList()));
+                    result.setDuplicateClassName(DefaultConverter.convert(alreadyExistClasses, ClassAndClassificationImportBO.ClassIdentifier.class));
 
                     canInsert = false;
                 }
@@ -175,7 +175,7 @@ public class OntologyUseCase {
                 validDatasetClasses.forEach(clazz -> clazz.setDatasetId(desId));
                 List<DatasetClass> alreadyExistDatasetClasses = datasetClassDAO.getBaseMapper().getDatasetClasses(desId, DefaultConverter.convert(validDatasetClasses, DatasetClass.class));
                 if (ObjectUtil.isNotEmpty(alreadyExistDatasetClasses)) {
-                    result.setDuplicateClassName(alreadyExistDatasetClasses.stream().map(DatasetClass::getName).collect(toList()));
+                    result.setDuplicateClassName(DefaultConverter.convert(alreadyExistDatasetClasses, ClassAndClassificationImportBO.ClassIdentifier.class));
                     canInsert = false;
                 }
             }
@@ -289,7 +289,7 @@ public class OntologyUseCase {
 
     private static void filterClass(JSONArray classesJson) {
         Iterator<Object> classIterator = classesJson.iterator();
-        Set<String> classNameSet = new HashSet<>();
+        Set<Map> classNameSet = new HashSet<>();
         while (classIterator.hasNext()) {
             JSONObject clazz = (JSONObject) classIterator.next();
             boolean isRemove = false;
@@ -297,12 +297,14 @@ public class OntologyUseCase {
                 isRemove = true;
             } else if (clazz.get("name").toString().length() > 256) {
                 isRemove = true;
-            } else if (classNameSet.contains(clazz.get("name").toString())) {
-                isRemove = true;
             }
             if (ObjectUtil.isNull(clazz.get("toolType"))) {
                 isRemove = true;
             } else if (EnumUtil.notContains(ToolTypeEnum.class, clazz.get("toolType").toString())) {
+                isRemove = true;
+            }
+            long count = classNameSet.stream().filter(map -> map.get("toolType").equals(clazz.get("toolType").toString()) && map.get("name").equals(clazz.get("name").toString())).count();
+            if (count != 0) {
                 isRemove = true;
             }
             if (ObjectUtil.isNotNull(clazz.get("toolTypeOptions")) && !(clazz.get("toolTypeOptions") instanceof JSONObject)) {
@@ -314,7 +316,10 @@ public class OntologyUseCase {
             if (isRemove) {
                 classIterator.remove();
             } else {
-                classNameSet.add(clazz.get("name").toString());
+                Map<String,String> map = new HashMap(4);
+                map.put("toolType", clazz.get("toolType").toString());
+                map.put("name", clazz.get("name").toString());
+                classNameSet.add(map);
             }
         }
     }
@@ -324,7 +329,7 @@ public class OntologyUseCase {
         if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(param.getSourceType())) {
             LambdaQueryWrapper<Class> classWrapper = new LambdaQueryWrapper<Class>().eq(Class::getOntologyId, param.getSourceId());
             List<Class> classes = classDAO.list(classWrapper);
-            classes.forEach(clazz->removeId(clazz.getAttributes()));
+            classes.forEach(clazz -> removeId(clazz.getAttributes()));
             exportBO.setClasses(DefaultConverter.convert(classes, ClassAndClassificationExportBO.Class.class));
             LambdaQueryWrapper<Classification> classificationWrapper = new LambdaQueryWrapper<Classification>().eq(Classification::getOntologyId, param.getSourceId());
             List<Classification> classifications = classificationDAO.list(classificationWrapper);
@@ -333,7 +338,7 @@ public class OntologyUseCase {
         } else if (ClassAndClassificationSourceEnum.DATASET.equals(param.getSourceType())) {
             LambdaQueryWrapper<DatasetClass> datasetClassWrapper = new LambdaQueryWrapper<DatasetClass>().eq(DatasetClass::getDatasetId, param.getSourceId());
             List<DatasetClass> classes = datasetClassDAO.list(datasetClassWrapper);
-            classes.forEach(clazz->removeId(clazz.getAttributes()));
+            classes.forEach(clazz -> removeId(clazz.getAttributes()));
             exportBO.setClasses(DefaultConverter.convert(classes, ClassAndClassificationExportBO.Class.class));
             LambdaQueryWrapper<DatasetClassification> datasetClassificationWrapper = new LambdaQueryWrapper<DatasetClassification>().eq(DatasetClassification::getDatasetId, param.getSourceId());
             List<DatasetClassification> classifications = datasetClassificationDAO.list(datasetClassificationWrapper);

@@ -40,7 +40,7 @@ public class ClassAndClassificationImportBO {
 
     private List<Classification> classifications;
 
-    private List<String> duplicateClassName;
+    private List<ClassIdentifier> duplicateClassName;
 
     private List<String> duplicateClassificationName;
 
@@ -61,6 +61,16 @@ public class ClassAndClassificationImportBO {
         private JSONObject toolTypeOptions;
 
         private JSONArray attributes;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ClassIdentifier{
+        private String name;
+
+        private ToolTypeEnum toolType;
     }
 
     @Data
