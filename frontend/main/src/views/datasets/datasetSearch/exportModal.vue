@@ -30,7 +30,7 @@
   } from '/@/api/business/dataset';
   import { downloadByUrl } from '/@/utils/file/download';
   const [register, { closeModal }] = useModalInner();
-  const [registerForm, { resetFields, validate }] = useForm({
+  const [registerForm, { validate }] = useForm({
     labelWidth: 90,
     schemas: formSchema,
     showActionButtonGroup: false,
@@ -39,6 +39,7 @@
     info: any;
     classId: any;
     classification: any;
+    type?: string;
   }>();
   const { prefixCls } = useDesign('export-modal');
   const { t } = useI18n();
@@ -52,7 +53,7 @@
         pageSize: 9999,
         datasetType: props.info.type,
         classId: props.classId.toString(),
-        source: 'DATASET_CLASS',
+        source: props.type || 'DATASET_CLASS',
       });
 
       const getFile = async () => {
@@ -73,7 +74,7 @@
       await createByScenario({
         datasetType: props.info.type,
         classId: props.classId.toString(),
-        source: 'DATASET_CLASS',
+        source: props.type || 'DATASET_CLASS',
         datasetName: data.datasetName,
         attributeIds: props.classification
           ? props.classification.map((item) => item.split('^')[0]).toString()

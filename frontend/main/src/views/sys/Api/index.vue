@@ -16,7 +16,7 @@
       <div>Expiration Date</div>
       <div class="flex items-center">
         <div class="w-420px">
-          <DatePicker style="width: 100%" v-model:value="date" />
+          <DatePicker style="width: 100%" v-model:value="date" :disabledDate="disabledDate" />
         </div>
         <div class="ml-2"> <Checkbox v-model:checked="isNever" />Never Expire </div>
       </div>
@@ -38,9 +38,10 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { Button, DatePicker, Checkbox, message } from 'ant-design-vue';
   import Icon from '/@/components/Icon';
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, unref } from 'vue';
   import { createToken, deleteToken, getTokenInfo } from '/@/api/business/api';
-  import moment from 'moment';
+  import moment, { Moment } from 'moment';
+  import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
   const { prefixCls } = useDesign('api');
   // const { t } = useI18n();
   const info = ref();
@@ -52,6 +53,10 @@
 
   const getInfo = async () => {
     info.value = await getTokenInfo();
+  };
+
+  const disabledDate = (current: Moment) => {
+    return current < moment(new Date());
   };
 
   const handleCreate = async () => {
@@ -68,7 +73,14 @@
     getInfo();
   };
 
-  const handleCopy = async () => {};
+  function handleCopy() {
+    const { isSuccessRef } = useCopyToClipboard(info.value?.token || '');
+    unref(isSuccessRef) &&
+      message.success({
+        content: 'successfully copied to clipboard',
+        duration: 5,
+      });
+  }
 
   const handleDelete = async () => {
     await deleteToken({ id: info.value.id });

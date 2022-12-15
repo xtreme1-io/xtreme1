@@ -10,7 +10,6 @@ import {
   ValidateOntologyNameParams,
 } from './model/ontologyModel';
 import { datasetTypeEnum } from './model/datasetModel';
-import { ContentTypeEnum } from '/@/enums/httpEnum';
 
 enum Api {
   ONTOLOGY = '/ontology',

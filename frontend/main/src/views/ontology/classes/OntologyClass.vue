@@ -88,6 +88,7 @@
   const { createMessage } = useMessage();
   const loadingRef = ref<boolean>(false);
   const route = useRoute();
+  const { id } = route.query;
   const pathArr = route.path.split('/');
   const pageType = pathArr[pathArr.length - 1].toLocaleUpperCase();
   const ontologyId = Number(route.query.id);
@@ -102,7 +103,9 @@
           ? RouteChildEnum.DATASETS_CLASS
           : RouteChildEnum.DATASETS_CLASSIFICATION,
       active: true,
-      params: {},
+      params: {
+        id: id,
+      },
       icon: Ontology,
       activeIcon: OntologyActive,
     },
@@ -110,7 +113,9 @@
       name: t('business.ontology.scenario'),
       url: RouteChildEnum.ONTOLOGY_SCENARIO,
       active: false,
-      params: {},
+      params: {
+        id: id,
+      },
       icon: Scenario,
       activeIcon: ScenarioActive,
     },
