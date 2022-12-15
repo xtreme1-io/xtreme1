@@ -34,7 +34,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .authenticationEntryPoint(new JSONAuthenticationEntryPoint(new ApiResult(UsecaseCode.LOGIN_STATUS_TIMEOUT,
                                 UsecaseCode.LOGIN_STATUS_TIMEOUT.getMessage()), HttpStatus.UNAUTHORIZED)))
                 .authorizeRequests(authConfigurer -> authConfigurer.
-                        antMatchers("/actuator/**", "/user/register", "/user/login").permitAll()
+                        antMatchers("/actuator/**", "/user/register", "/user/login", "/ontology/exportAsJson")
+                        .permitAll()
                         .anyRequest().authenticated());
     }
 
