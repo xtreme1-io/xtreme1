@@ -101,16 +101,36 @@ public class OntologyController {
     public ClassAndClassificationImportRespDTO saveClassAndClassificationBatch(@RequestBody ClassAndClassificationImportRespDTO dto) throws IOException {
         if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(dto.getDesType())) {
             List<ClassBO> classes = DefaultConverter.convert(dto.getClasses(), ClassBO.class);
+            if (ObjectUtil.isEmpty(classes)){
+                dto.setValidClassSize(0);
+            }else {
+                dto.setValidClassSize(classes.size());
+                classes.forEach(c -> c.setOntologyId(dto.getDesId()));
+            }
             List<ClassificationBO> classifications = DefaultConverter.convert(dto.getClassifications(), ClassificationBO.class);
-            classes.forEach(c -> c.setOntologyId(dto.getDesId()));
-            classifications.forEach(c -> c.setOntologyId(dto.getDesId()));
+            if (ObjectUtil.isEmpty(classifications)){
+                dto.setValidClassificationSize(0);
+            }else {
+                dto.setValidClassificationSize(classifications.size());
+                classifications.forEach(c -> c.setOntologyId(dto.getDesId()));
+            }
             ontologyUseCase.saveOrUpdateBatch(classes, null, classifications, null);
 
         } else {
             List<DatasetClassBO> classes = DefaultConverter.convert(dto.getClasses(), DatasetClassBO.class);
+            if (ObjectUtil.isEmpty(classes)){
+                dto.setValidClassSize(0);
+            }else {
+                dto.setValidClassSize(classes.size());
+                classes.forEach(c -> c.setDatasetId(dto.getDesId()));
+            }
             List<DatasetClassificationBO> classifications = DefaultConverter.convert(dto.getClassifications(), DatasetClassificationBO.class);
-            classes.forEach(c -> c.setDatasetId(dto.getDesId()));
-            classifications.forEach(c -> c.setDatasetId(dto.getDesId()));
+            if (ObjectUtil.isEmpty(classifications)){
+                dto.setValidClassificationSize(0);
+            }else {
+                dto.setValidClassificationSize(classifications.size());
+                classifications.forEach(c -> c.setDatasetId(dto.getDesId()));
+            }
             ontologyUseCase.saveOrUpdateBatch(null, classes, null, classifications);
         }
         return dto;
