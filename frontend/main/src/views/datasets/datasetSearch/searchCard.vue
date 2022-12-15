@@ -119,6 +119,8 @@
     position: relative;
     overflow: hidden;
     background-color: #ededed;
+    will-change: transform;
+    transform: translateZ(0);
     .pointCloudImg {
       width: 100%;
       height: 100%;

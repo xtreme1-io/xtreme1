@@ -11,22 +11,25 @@ import placeImgFull from '/@/assets/images/dataset/basic-banner-content.png';
 import { Vector2, Matrix3 } from 'three';
 import { debounce } from 'lodash-es';
 
-export enum I2D_TYPE {
+export enum OBJECT_TYPE {
   POLYGON = 'POLYGON',
   RECTANGLE = 'RECTANGLE',
   POLYLINE = 'POLYLINE',
+  RECT = '2D_RECT',
+  BOX2D = '2D_BOX',
+  BOX3D = '3D_BOX',
 }
 
-const AnnotationTypeMap = {
-  '2D_RECT': '2D_RECT',
-  '2D_BOX': '2D_BOX',
-  '3D_BOX': '3D_BOX',
-  '3d': '3D_BOX',
-  rect: '2D_RECT',
-  box2d: '2D_BOX',
-  POLYGON: 'POLYGON',
-  RECTANGLE: 'RECTANGLE',
-  POLYLINE: 'POLYLINE',
+const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
+  '2D_RECT': OBJECT_TYPE.RECT,
+  '2D_BOX': OBJECT_TYPE.BOX2D,
+  '3D_BOX': OBJECT_TYPE.BOX3D,
+  '3d': OBJECT_TYPE.BOX3D,
+  rect: OBJECT_TYPE.RECT,
+  box2d: OBJECT_TYPE.BOX2D,
+  POLYGON: OBJECT_TYPE.POLYGON,
+  RECTANGLE: OBJECT_TYPE.RECTANGLE,
+  POLYLINE: OBJECT_TYPE.POLYLINE,
 };
 
 export default function useCardObject() {
@@ -135,7 +138,7 @@ export default function useCardObject() {
         const contour = item.contour || item;
         if (contour?.viewIndex !== index) return;
         const type = AnnotationTypeMap[item.type || item.objType];
-        if (type === '2D_RECT') {
+        if (type === OBJECT_TYPE.RECT) {
           let points = contour.points;
           if (points.length === 2) {
             points = [
@@ -157,7 +160,7 @@ export default function useCardObject() {
               })
               .join(' '),
           });
-        } else if (type === '2D_BOX') {
+        } else if (type === OBJECT_TYPE.BOX2D) {
           const P = contour.points;
           target.push({
             id: item.id,
@@ -209,7 +212,7 @@ export default function useCardObject() {
       const { contour = {}, id, type, meta = {} } = item;
       const { points = [], interior = [] } = contour;
       let _points: any = [];
-      if (type === I2D_TYPE.RECTANGLE) {
+      if (type === OBJECT_TYPE.RECTANGLE) {
         if (points && points.length === 2) {
           const newPoints = points.map((p) => {
             return [
@@ -225,7 +228,7 @@ export default function useCardObject() {
           ];
           _points = rect.join(' ');
         }
-      } else if ([I2D_TYPE.POLYGON, I2D_TYPE.POLYLINE].includes(type)) {
+      } else if ([OBJECT_TYPE.POLYGON, OBJECT_TYPE.POLYLINE].includes(type)) {
         _points = getPoints(points);
       }
       const hole = interior.map((el: any) => {
@@ -283,7 +286,7 @@ export function useImgCard(props: {
     return pc.files ? pc.files[0].file?.renderImage?.extraInfo : null;
   };
   /**
-   * 点云 缩影框
+   * Point cloud miniature object
    */
   const updatePcObject = () => {
     const results: { id: string; points: string }[] = [];
@@ -293,7 +296,7 @@ export function useImgCard(props: {
         props.info?.type === datasetTypeEnum.LIDAR_BASIC)
     ) {
       const objects = (props.object || []).filter(
-        (item) => item.type === '3D_BOX' || item.objType === '3d',
+        (item) => AnnotationTypeMap[item.type || item.objType] === OBJECT_TYPE.BOX3D,
       );
       // let size = getSize(svg.value);
       const info = getExtraInfo();
@@ -303,7 +306,7 @@ export function useImgCard(props: {
   };
   watchEffect(updatePcObject);
   /**
-   * 图片 缩影框
+   * Image miniature object
    */
   const updateImageObject = () => {
     let results: any[] = [];
@@ -319,7 +322,7 @@ export function useImgCard(props: {
   };
   watchEffect(updateImageObject);
   /**
-   * 点云融合图片缩影框
+   * Point cloud fusion image miniature object
    */
   const updatePcImageObject = () => {
     const imgs: any[] = props.data.content
@@ -428,7 +431,7 @@ export function useSearchCard(props: {
     return pc.files ? pc.files[0].file?.renderImage?.extraInfo : null;
   };
   /**
-   * 点云 缩影框
+   * Point cloud Miniature object
    */
   const updatePcObject = () => {
     const results: { id: string; points: string }[] = [];
@@ -441,14 +444,13 @@ export function useSearchCard(props: {
       const info = getExtraInfo();
 
       const size = getSize(svg.value);
+      state.imgTransform = '';
       if (info && object) {
         const contour = object.contour || object;
         const { center3D, rotation3D, size3D } = contour;
         if (center3D && rotation3D && size3D) {
           const { center, points } = transformToPc(contour, size, info);
           const { matrix3Str, scale } = focusTransform(contour, size, info);
-
-          // results.push({ id: obj.id, points: points.map((pos) => pos.join(',')).join(' ') });
 
           state.imgTransform = matrix3Str;
 
@@ -498,7 +500,9 @@ export function useSearchCard(props: {
       url: '',
     };
   });
-
+  /**
+   * Point cloud fusion Image Miniature object
+   */
   const update2d = debounce(() => {
     if (props.info?.type !== datasetTypeEnum.LIDAR_FUSION) return;
     const dom = cardContainer.value as HTMLDivElement;
@@ -534,12 +538,9 @@ export function useSearchCard(props: {
             min.min(p);
             max.max(p);
           });
-          offsetX = (clientWidth - imgToView_X(min.x + max.x)) / 2;
-          offsetY = (clientHeight - imgToView_Y(min.y + max.y)) / 2;
-          scale = Math.min(
-            clientWidth / imgToView_X(max.x - min.x),
-            clientHeight / imgToView_Y(max.y - min.y),
-          );
+          offsetX = (naturalWidth - (min.x + max.x)) / 2;
+          offsetY = (naturalHeight - (min.y + max.y)) / 2;
+          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y));
           return {
             offsetX,
             offsetY,
@@ -553,13 +554,13 @@ export function useSearchCard(props: {
           const info = o.classAttributes;
           const type = info.type || info.objType;
           const contour = info.contour || info;
-          const cX = clientWidth / 2;
-          const cY = clientHeight / 2;
-          if (['2D_BOX', 'box2d'].includes(type)) {
+          const cX = naturalWidth / 2;
+          const cY = naturalHeight / 2;
+          if (AnnotationTypeMap[type] === OBJECT_TYPE.BOX2D) {
             // const { positions1, positions2 } = o;
             const P = contour.points.map((p) => {
-              const _x = cX - (cX - imgToView_X(p.x) - offsetX) * scale;
-              const _y = cY - (cY - imgToView_Y(p.y) - offsetY) * scale;
+              const _x = imgToView_X(cX - (cX - p.x - offsetX) * scale);
+              const _y = imgToView_Y(cY - (cY - p.y - offsetY) * scale);
               return [_x, _y];
             });
             points = [
@@ -580,7 +581,7 @@ export function useSearchCard(props: {
               P[7],
               P[3],
             ];
-          } else if (['2D_RECT', 'rect'].includes(type)) {
+          } else if (AnnotationTypeMap[type] === OBJECT_TYPE.RECT) {
             let _points = contour.points;
             if (_points.length === 2) {
               _points = [
@@ -591,8 +592,8 @@ export function useSearchCard(props: {
               ];
             }
             points = _points.map((p) => {
-              const _x = cX - (cX - imgToView_X(p.x) - offsetX) * scale;
-              const _y = cY - (cY - imgToView_Y(p.y) - offsetY) * scale;
+              const _x = imgToView_X(cX - (cX - p.x - offsetX) * scale);
+              const _y = imgToView_Y(cY - (cY - p.y - offsetY) * scale);
               return [_x, _y];
             });
           }
@@ -604,7 +605,7 @@ export function useSearchCard(props: {
             });
           }
         });
-        updateCssTransform(offsetX, offsetY, scale);
+        updateCssTransform(imgToView_X(offsetX), imgToView_Y(offsetY), scale);
       };
       focusItem(
         objects.filter((o) => {
@@ -669,7 +670,9 @@ export function useSearchCard(props: {
       naturalHeight,
     };
   };
-
+  /**
+   * Image Miniature object
+   */
   const updateImage = debounce(() => {
     if (props.info?.type !== datasetTypeEnum.IMAGE) return;
     const dom = cardContainer.value as HTMLDivElement;
@@ -698,12 +701,9 @@ export function useSearchCard(props: {
             min.min(p);
             max.max(p);
           });
-          offsetX = (clientWidth - imgToView_X(min.x + max.x)) / 2;
-          offsetY = (clientHeight - imgToView_Y(min.y + max.y)) / 2;
-          scale = Math.min(
-            clientWidth / imgToView_X(max.x - min.x),
-            clientHeight / imgToView_Y(max.y - min.y),
-          );
+          offsetX = (naturalWidth - (min.x + max.x)) / 2;
+          offsetY = (naturalHeight - (min.y + max.y)) / 2;
+          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y));
         }
         return {
           offsetX,
@@ -715,23 +715,23 @@ export function useSearchCard(props: {
       const { points = [], interior = [] } = contour;
       let _points: any = [];
       const { scale, offsetX, offsetY } = getOffsetAndScale(points);
-      const cX = clientWidth / 2;
-      const cY = clientHeight / 2;
+      const cX = naturalWidth / 2;
+      const cY = naturalHeight / 2;
       const getPoints = function getPoints(points: { x: number; y: number }[]) {
         return points
           .map((point) => {
-            const _x = cX - (cX - imgToView_X(point.x) - offsetX) * scale;
-            const _y = cY - (cY - imgToView_Y(point.y) - offsetY) * scale;
+            const _x = imgToView_X(cX - (cX - point.x - offsetX) * scale);
+            const _y = imgToView_Y(cY - (cY - point.y - offsetY) * scale);
             return [_x, _y].join(',');
           })
           .join(' ');
       };
 
-      if (type === I2D_TYPE.RECTANGLE) {
+      if (type === OBJECT_TYPE.RECTANGLE) {
         if (points && points.length === 2) {
           const newPoints = points.map((point) => {
-            const _x = cX - (cX - imgToView_X(point.x) - offsetX) * scale;
-            const _y = cY - (cY - imgToView_Y(point.y) - offsetY) * scale;
+            const _x = imgToView_X(cX - (cX - point.x - offsetX) * scale);
+            const _y = imgToView_Y(cY - (cY - point.y - offsetY) * scale);
             return [_x, _y];
           });
           const rect = [
@@ -744,14 +744,14 @@ export function useSearchCard(props: {
         } else {
           _points = getPoints(points);
         }
-      } else if ([I2D_TYPE.POLYGON, I2D_TYPE.POLYLINE].includes(type)) {
+      } else if ([OBJECT_TYPE.POLYGON, OBJECT_TYPE.POLYLINE].includes(type)) {
         _points = getPoints(points);
       }
       const hole = interior.map((el: any) => {
         const coord = el.coordinate;
         return getPoints(coord);
       });
-      updateCssTransform(offsetX, offsetY, scale);
+      updateCssTransform(imgToView_X(offsetX), imgToView_Y(offsetY), scale);
       results.push({
         points: _points,
         type: AnnotationTypeMap[type],
@@ -772,7 +772,6 @@ export function useSearchCard(props: {
         state.imgIndex = 0;
         if (objects?.length && objects[0]) {
           const object = objects[0].classAttributes;
-          console.log(object);
           const contour = object?.contour || object;
           const index = contour?.viewIndex || 0;
           state.imgIndex = index;
