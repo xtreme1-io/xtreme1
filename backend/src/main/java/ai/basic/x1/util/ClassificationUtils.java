@@ -79,7 +79,7 @@ public class ClassificationUtils {
                     .dataId(dataAnnotation.getDataId())
                     .classificationId(dataAnnotation.getClassificationId())
                     .attributeId(leafNode.id)
-                    .optionName(leafNode.name)
+                    .optionName((String) leafNode.value)
                     .optionPath(paths)
                     .createdBy(dataAnnotation.getCreatedBy())
                     .createdAt(OffsetDateTime.now()).build());
