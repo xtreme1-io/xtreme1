@@ -24,7 +24,7 @@
       <div class="chart_wrapper">
         <div class="title">Progress</div>
         <div class="chartContainer">
-          <div ref="plotRef" class="chartContainer__box" @mousewheel.prevent></div>
+          <div ref="plotRef" class="chartContainer__box"></div>
         </div>
       </div>
     </div>
