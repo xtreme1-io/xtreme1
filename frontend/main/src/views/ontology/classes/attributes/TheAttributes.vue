@@ -6,7 +6,7 @@
     wrapClassName="ontology-class-modal"
     :width="650"
     :height="700"
-    :closeFunc="handleCancel"
+    :closeFunc="(handleCancel as any)"
     @ok="handleConfirm"
     :okText="okText"
     :closable="false"
