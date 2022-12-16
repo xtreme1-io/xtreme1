@@ -52,7 +52,7 @@ public class ModelController {
                 ModelObjectDTO.class);
     }
 
-    @PostMapping("/point_cloud/recognition")
+    @PostMapping("/pointCloud/recognition")
     public ModelObjectDTO pointCloudRecognition(@Validated @RequestBody ModelRecognitionRequestDTO modelRecognitionRequest) {
         return DefaultConverter.convert(modelRecognitionUseCase.recognition(buildModelMessageBO(modelRecognitionRequest, ModelCodeEnum.PRE_LABEL)),
                 ModelObjectDTO.class);
