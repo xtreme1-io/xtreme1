@@ -232,6 +232,17 @@ export const takeRecordByData = (params: takeRecordParams) =>
     },
   });
 
+export const checkRootByDataId = async (recordId: string, dataId: string) => {
+  const res = await defHttp.get<any>({
+    url: `${Api.DATA}/findDataAnnotationRecord/${recordId}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+  return (res?.datas || []).some((item) => item.dataId === dataId);
+};
+
 export const takeRecordByDataModel = (params: takeRecordParams) =>
   defHttp.post<null>({
     url: `${Api.DATA}/annotateWithModel`,
