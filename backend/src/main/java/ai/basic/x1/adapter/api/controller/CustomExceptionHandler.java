@@ -30,6 +30,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<ApiResult> handle(Throwable throwable) {
+        log.error("throwable",throwable);
         if (throwable instanceof ApiException) {
             var e = (ApiException) throwable;
             return ResponseEntity
@@ -41,8 +42,6 @@ public class CustomExceptionHandler {
                     .ok()
                     .body(new ApiResult(e.getCode(), e.getMessage()));
         } else {
-            log.error("unknown exception", throwable);
-
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResult(UsecaseCode.UNKNOWN, throwable.toString()));
@@ -51,6 +50,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResult<?>> constraintViolationException(ConstraintViolationException exception) {
+        log.error("ValidationException",exception);
         Set<ConstraintViolation<?>> constraintViolations = exception.getConstraintViolations();
         Iterator<ConstraintViolation<?>> iterator = constraintViolations.iterator();
         StringBuilder builder = new StringBuilder();
@@ -64,6 +64,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ApiResult> validException(BindException bindException) {
+        log.error("bindException",bindException);
         List<String> errorMsgList = new ArrayList<>();
         for (ObjectError objectError : bindException.getAllErrors()) {
             if (objectError instanceof FieldError) {

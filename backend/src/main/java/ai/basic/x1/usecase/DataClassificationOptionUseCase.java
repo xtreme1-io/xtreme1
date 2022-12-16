@@ -2,8 +2,10 @@ package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.DataClassificationOptionDAO;
+import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataClassificationOption;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
 import ai.basic.x1.entity.DataAnnotationClassificationBO;
 import ai.basic.x1.entity.DataClassificationOptionBO;
 import ai.basic.x1.util.ClassificationUtils;
@@ -22,6 +24,9 @@ public class DataClassificationOptionUseCase {
 
     @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
+
+    @Autowired
+    private DatasetClassificationDAO datasetClassificationDAO;
 
 
     public void saveBatch(List<DataAnnotationClassificationBO> dataAnnotations) {
@@ -43,15 +48,23 @@ public class DataClassificationOptionUseCase {
         dataClassificationOptionDAO.getBaseMapper().insertBatch(options);
     }
 
-    public List<DataClassificationOptionBO> statisticsDataByOption(Long datasetId, int pageNo,
-                                                                   int pageSize) {
-
-        var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<DataClassificationOption>(pageNo, pageSize);
+    public List<DataClassificationOptionBO> statisticsDataByOption(Long datasetId) {
+        var existClassificationIds = getExistClassificationIds(datasetId);
+        if (CollUtil.isEmpty(existClassificationIds)) {
+            return List.of();
+        }
         var records = dataClassificationOptionDAO.getBaseMapper()
-                .statisticsDataByOption(page, datasetId).getRecords();
+                .statisticsDataByOption(datasetId, existClassificationIds);
 
         setOptionPath(records);
         return DefaultConverter.convert(records, DataClassificationOptionBO.class);
+    }
+
+    private List<Long> getExistClassificationIds(Long datasetId) {
+        return datasetClassificationDAO.list(new LambdaQueryWrapper<DatasetClassification>()
+                .select(DatasetClassification::getId)
+                .eq(DatasetClassification::getDatasetId, datasetId)
+        ).stream().map(DatasetClassification::getId).collect(Collectors.toList());
     }
 
     private void setOptionPath(List<DataClassificationOption> options) {

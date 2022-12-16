@@ -26,7 +26,6 @@
         SELECT dao.class_id AS classId,
             count(*) AS objectAmount
         FROM data d INNER JOIN data_annotation_object dao ON d.id = dao.data_id
-                    INNER JOIN dataset_class dc ON dc.id = dao.class_id
         WHERE d.dataset_id = #{datasetId} AND d.is_deleted = FALSE
         GROUP BY dao.class_id
         ORDER BY objectAmount

@@ -133,24 +133,19 @@ public class DatasetController extends BaseDatasetController {
     }
 
     @GetMapping("{datasetId}/statistics/classObject")
-    public ClassStatisticsDTO statisticsClassObject(@PathVariable("datasetId") Long datasetId,
-                                                    @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
-                                                    @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
+    public ClassStatisticsDTO statisticsClassObject(@PathVariable("datasetId") Long datasetId) {
         return ClassStatisticsDTO.builder()
                 .toolTypeUnits(
                         DefaultConverter.convert(datasetClassUseCase.statisticsObjectByToolType(datasetId), ToolTypeStatisticsUnitDTO.class)
                 )
                 .classUnits(
-                        DefaultConverter.convert(datasetClassUseCase.statisticObjectByClass(datasetId,
-                                pageNo, pageSize), ClassStatisticsUnitDTO.class))
+                        DefaultConverter.convert(datasetClassUseCase.statisticObjectByClass(datasetId), ClassStatisticsUnitDTO.class))
                 .build();
     }
 
     @GetMapping("{datasetId}/statistics/classificationData")
-    public List<DataClassificationOptionDTO> statisticsClassificationData(@PathVariable("datasetId") Long datasetId,
-                                                                          @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
-                                                                          @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
-        var results = dataClassificationOptionUseCase.statisticsDataByOption(datasetId, pageNo, pageSize);
+    public List<DataClassificationOptionDTO> statisticsClassificationData(@PathVariable("datasetId") Long datasetId) {
+        var results = dataClassificationOptionUseCase.statisticsDataByOption(datasetId);
         return DefaultConverter.convert(results, DataClassificationOptionDTO.class);
     }
 
