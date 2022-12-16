@@ -643,6 +643,13 @@ public class DataInfoUseCase {
             } catch (DuplicateKeyException duplicateKeyException) {
                 boo = false;
                 dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+                var dataEditLambdaQueryWrapper = Wrappers.lambdaQuery(DataEdit.class);
+                dataEditLambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, dataAnnotationRecord.getId());
+                var list = dataEditDAO.list(dataEditLambdaQueryWrapper);
+                var dataIds = list.stream().map(DataEdit::getDataId).collect(Collectors.toList());
+                if (CollectionUtil .isNotEmpty(dataIds) && dataIds.contains(dataPreAnnotationBO.getDataIds().get(0))) {
+                    return dataAnnotationRecord.getId();
+                }
             }
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
