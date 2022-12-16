@@ -44,7 +44,7 @@ export const defaultScatterOptions = {
   shape: 'circle',
   limitInPlot: false,
   legend: {
-    offsetX: 10,
+    offsetX: 5,
     position: 'right-top',
     radio: null, // 隐藏图例后的 radio 按钮
     marker: {

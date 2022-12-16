@@ -93,6 +93,7 @@
     () => props.ontologyId,
     (newValue) => {
       if (newValue) getClassList();
+      else classList.value = [];
     },
   );
 

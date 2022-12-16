@@ -101,8 +101,8 @@
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
   import Data from '/@/assets/svg/tags/data.svg';
   import DataActive from '/@/assets/svg/tags/dataActive.svg';
-  import Ontology from '/@/assets/svg/tags/class.svg';
-  import OntologyActive from '/@/assets/svg/tags/classActive.svg';
+  import Ontology from '/@/assets/svg/tags/ontology.svg';
+  import OntologyActive from '/@/assets/svg/tags/ontologyActive.svg';
   import { setDatasetBreadcrumb } from '/@/utils/business';
   import { CardTypeEnum } from '/@/views/ontology/classes/attributes/data';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
