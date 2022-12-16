@@ -53,7 +53,12 @@
         FROM data d
                  INNER JOIN data_classification_option cds
                             ON d.id = cds.data_id
-        WHERE cds.dataset_id = #{datasetId} AND d.is_deleted = FALSE
+        WHERE cds.dataset_id = #{datasetId}
+          AND cds.classification_id IN
+          <foreach collection="existClassificationIds" item="classificationId" open="(" separator="," close=")">
+              #{classificationId}
+          </foreach>
+          AND d.is_deleted = FALSE
         GROUP BY cds.attribute_id, cds.option_name
         ORDER BY dataAmount DESC
     </select>

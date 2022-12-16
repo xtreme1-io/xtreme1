@@ -14,7 +14,8 @@ public interface DataClassificationOptionMapper extends BaseMapper<DataClassific
 
     int insertBatch(List<DataClassificationOption> list);
 
-    List<DataClassificationOption> statisticsDataByOption(@Param("datasetId") Long datasetId);
+    List<DataClassificationOption> statisticsDataByOption(@Param("datasetId") Long datasetId,
+                                                          @Param("existClassificationIds") List<Long> existClassificationIds);
 
     List<DataClassificationOption> statisticsDatasetDataClassification(@Param("datasetId") Long datasetId, @Param("classificationId") Long classificationId);
 }

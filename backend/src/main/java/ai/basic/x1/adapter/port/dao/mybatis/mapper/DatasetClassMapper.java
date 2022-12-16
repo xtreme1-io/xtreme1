@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface DatasetClassMapper extends ExtendBaseMapper<DatasetClass> {
 
-    Page<ClassStatisticsUnit> statisticsObjectByClass(Page<ClassStatisticsUnit> page, @Param("datasetId") Long datasetId);
+    List<ClassStatisticsUnit> statisticsObjectByClass(@Param("datasetId") Long datasetId);
 
     List<ToolTypeStatisticsUnit> statisticsObjectByToolType(@Param("datasetId") Long datasetId);
 
