@@ -503,7 +503,7 @@
   };
 
   const handleSelectAll = () => {
-    selectedList.value = list.value.map((item) => item.id);
+    selectedList.value = list.value.filter((item) => !item.lockedBy).map((item) => item.id);
   };
   const handleUnselectAll = () => {
     selectedList.value = [];
