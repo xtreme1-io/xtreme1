@@ -1,6 +1,5 @@
 package ai.basic.x1.usecase;
 
-import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.UserDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.User;
 import ai.basic.x1.adapter.port.minio.MinioProp;
@@ -13,7 +12,6 @@ import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
@@ -173,7 +171,6 @@ public class UserUseCase {
 
         var avatarIdMap = new HashMap<Long, String>(avatarIds.size());
         try {
-            log.info("wrapUser requestContext:" + JSONUtil.toJsonStr(RequestContextHolder.getContext()));
             fileUseCase.findByIds(avatarIds).forEach(file -> avatarIdMap.put(file.getId(), file.getUrl()));
         } catch (Exception e) {
             log.error("get user avatar url fail" + e);

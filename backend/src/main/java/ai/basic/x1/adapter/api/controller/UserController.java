@@ -19,7 +19,6 @@ import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -113,7 +112,6 @@ public class UserController extends BaseController {
 
     @GetMapping("/logged")
     public UserDTO logged(@LoggedUser LoggedUserDTO loggedUserDTO) {
-        log.info("logged requestContext:" + JSONUtil.toJsonStr(RequestContextHolder.getContext()));
         return UserDTO.fromBO(userUseCase.findById(loggedUserDTO.getId()));
     }
 

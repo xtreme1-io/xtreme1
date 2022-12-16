@@ -54,8 +54,8 @@ public class CommonConfig implements WebMvcConfigurer {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(UserTokenUseCase userTokenUseCase,
-                                                           UserUseCase userUseCase) {
-        return new JwtAuthenticationFilter(userTokenUseCase, userUseCase);
+                                                           AuthUseCase authUseCase) {
+        return new JwtAuthenticationFilter(userTokenUseCase, authUseCase);
     }
 
     @Override
@@ -178,6 +178,11 @@ public class CommonConfig implements WebMvcConfigurer {
     @Bean
     public UserTokenUseCase userTokenUseCase() {
         return new UserTokenUseCase();
+    }
+
+    @Bean
+    public AuthUseCase authUseCase() {
+        return new AuthUseCase();
     }
 
     @Bean

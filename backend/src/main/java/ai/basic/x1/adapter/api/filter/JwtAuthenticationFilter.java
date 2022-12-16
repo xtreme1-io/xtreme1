@@ -1,6 +1,7 @@
 package ai.basic.x1.adapter.api.filter;
 
 import ai.basic.x1.adapter.dto.LoggedUserDTO;
+import ai.basic.x1.usecase.AuthUseCase;
 import ai.basic.x1.usecase.UserTokenUseCase;
 import ai.basic.x1.usecase.UserUseCase;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +21,11 @@ public class JwtAuthenticationFilter implements Filter {
 
     private UserTokenUseCase userTokenUseCase;
 
-    private UserUseCase userUseCase;
+    private AuthUseCase authUseCase;
 
-    public JwtAuthenticationFilter(UserTokenUseCase userTokenUseCase, UserUseCase userUseCase) {
+    public JwtAuthenticationFilter(UserTokenUseCase userTokenUseCase, AuthUseCase authUseCase) {
         this.userTokenUseCase = userTokenUseCase;
-        this.userUseCase = userUseCase;
+        this.authUseCase = authUseCase;
     }
 
     @Override
@@ -51,7 +52,7 @@ public class JwtAuthenticationFilter implements Filter {
             return;
         }
 
-        var userBO = userUseCase.findById(payload.getUserId());
+        var userBO = authUseCase.findById(payload.getUserId());
         if (userBO == null) {
             chain.doFilter(request, response);
             return;
