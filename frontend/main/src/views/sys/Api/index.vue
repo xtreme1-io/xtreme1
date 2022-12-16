@@ -1,6 +1,6 @@
 <template>
   <div :class="`${prefixCls}`">
-    <div>My Token</div>
+    <div class="mb-2 font-bold">My Token</div>
     <div class="flex">
       <div class="w-420px whitespace-nowrap overflow-x-scroll mr-2">
         <span>{{ info?.token }}</span>
@@ -13,15 +13,18 @@
       />
     </div>
     <template v-if="!info">
-      <div>Expiration Date</div>
+      <div class="mt-2 mb-2 font-bold">Expiration Date</div>
       <div class="flex items-center">
-        <div class="w-420px">
+        <div class="w-420px mr-2" v-if="!isNever">
           <DatePicker style="width: 100%" v-model:value="date" :disabledDate="disabledDate" />
         </div>
-        <div class="ml-2"> <Checkbox v-model:checked="isNever" />Never Expire </div>
+        <div>
+          <Checkbox v-model:checked="isNever" />
+          <span class="ml-2">Never Expire</span>
+        </div>
       </div>
     </template>
-    <div>
+    <div class="mb-2 mt-2">
       Go to our Documents to see how to use this token in APIs
       <Icon icon="ic:sharp-open-in-new" />
     </div>
@@ -34,7 +37,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-  // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { Button, DatePicker, Checkbox, message } from 'ant-design-vue';
   import Icon from '/@/components/Icon';
@@ -90,6 +92,7 @@
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-api';
   .@{prefix-cls} {
+    height: 100vh;
     background: #fff;
     color: #333;
     padding: 40px;
