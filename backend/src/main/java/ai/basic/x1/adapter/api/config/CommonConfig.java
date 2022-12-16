@@ -1,10 +1,7 @@
 package ai.basic.x1.adapter.api.config;
 
 import ai.basic.x1.adapter.api.annotation.user.LoggedUserArgumentResolver;
-import ai.basic.x1.adapter.api.context.RequestContextInterceptor;
-import ai.basic.x1.adapter.api.filter.JwtAuthenticationFilter;
 import ai.basic.x1.adapter.api.filter.JwtHelper;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSimilarityJob;
 import ai.basic.x1.usecase.*;
 import ai.basic.x1.util.lock.DistributedLock;
 import ai.basic.x1.util.lock.IDistributedLock;
@@ -17,7 +14,6 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -52,21 +48,12 @@ public class CommonConfig implements WebMvcConfigurer {
         return new JwtHelper(jwtSecret, jwtIssuer, jwtExpireHours);
     }
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(UserTokenUseCase userTokenUseCase,
-                                                           AuthUseCase authUseCase) {
-        return new JwtAuthenticationFilter(userTokenUseCase, authUseCase);
-    }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new LoggedUserArgumentResolver());
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new RequestContextInterceptor());
-    }
 
     @Bean
     public UserUseCase userUsecase() {
@@ -150,7 +137,7 @@ public class CommonConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public DataAnnotationClassificationUseCase dataAnnotationClassificationUseCase(){
+    public DataAnnotationClassificationUseCase dataAnnotationClassificationUseCase() {
         return new DataAnnotationClassificationUseCase();
     }
 
@@ -178,11 +165,6 @@ public class CommonConfig implements WebMvcConfigurer {
     @Bean
     public UserTokenUseCase userTokenUseCase() {
         return new UserTokenUseCase();
-    }
-
-    @Bean
-    public AuthUseCase authUseCase() {
-        return new AuthUseCase();
     }
 
     @Bean
