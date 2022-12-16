@@ -64,9 +64,10 @@ services:
       start_period: 10s
       retries: 10
   backend:
-    image: basicai/xtreme1-backend:v0.5.2
-    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
-    # build: ./backend
+    # By default, Compose will pull image from Docker Hub when no local image found.
+    image: basicai/xtreme1-backend
+    # You can execute "docker compose build" to build or update the local image from source.
+    build: ./backend
     ports:
       - 8290:8080
     # volumes:
@@ -93,9 +94,10 @@ services:
       minio:
         condition: service_healthy
   frontend:
-    image: basicai/xtreme1-frontend:v0.5.2
-    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
-    # build: ./frontend
+    # By default, Compose will pull image from Docker Hub when no local image found.
+    image: basicai/xtreme1-frontend
+    # You can execute "docker compose build" to build or update the local image from source.
+    build: ./frontend
     ports:
       - 8291:8080
   image-object-detection:
