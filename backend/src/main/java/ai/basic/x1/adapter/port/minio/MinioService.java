@@ -3,14 +3,13 @@ package ai.basic.x1.adapter.port.minio;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.entity.PresignedUrlBO;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.HttpStatus;
-import cn.hutool.http.HttpUtil;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +17,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static ai.basic.x1.util.Constants.*;
+import static ai.basic.x1.util.Constants.MINIO;
+import static ai.basic.x1.util.Constants.SLANTING_BAR;
 
 /**
  * @author fyb
@@ -92,7 +91,7 @@ public class MinioService {
             throws IOException, ServerException, InsufficientDataException, ErrorResponseException,
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
-        uploadFileWithoutUrl(bucketName,fileName,inputStream,contentType,size);
+        uploadFileWithoutUrl(bucketName, fileName, inputStream, contentType, size);
         return getUrl(bucketName, fileName);
     }
 
@@ -108,6 +107,7 @@ public class MinioService {
                 .build();
         extendMinioClient.putObject(putArgs);
     }
+
     /**
      * batch upload files
      *
@@ -218,8 +218,17 @@ public class MinioService {
     }
 
     private String replaceUrl(String url) {
-        return url.replace(minioProp.getEndpoint(), RequestContextHolder.getContext().getRequestInfo().getForwardedProto() + "://" +
-                RequestContextHolder.getContext().getRequestInfo().getHost() +
+        var proto = "http";
+        var host = "localhost";
+        if (ObjectUtil.isNotNull(RequestContextHolder.getContext()) && ObjectUtil.isNotNull(RequestContextHolder.getContext().getRequestInfo())) {
+            var forwardedProto = RequestContextHolder.getContext().getRequestInfo().getForwardedProto();
+            proto = ObjectUtil.isNotNull(forwardedProto) ? forwardedProto : proto;
+
+            var forwardedHost = RequestContextHolder.getContext().getRequestInfo().getHost();
+            host = ObjectUtil.isNotNull(forwardedHost) ? forwardedHost : host;
+        }
+        return url.replace(minioProp.getEndpoint(), proto + "://" +
+                host +
                 SLANTING_BAR + MINIO + SLANTING_BAR);
     }
 }
