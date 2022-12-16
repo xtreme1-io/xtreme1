@@ -2,6 +2,7 @@ package ai.basic.x1.util;
 
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataClassificationOption;
 import ai.basic.x1.entity.DataAnnotationClassificationBO;
+import ai.basic.x1.entity.enums.InputTypeEnum;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
@@ -43,7 +44,7 @@ public class ClassificationUtils {
                     t -> t));
 
             return classificationNodes.stream()
-                    .filter(e -> e.isLeaf)
+                    .filter(e -> e.isLeaf && !Objects.equals(e.getType(), InputTypeEnum.TEXT))
                     .map(leafNode -> convert(leafNode, classificationNodeMap, dataAnnotation))
                     .flatMap(Collection::stream)
                     .collect(Collectors.toList());
@@ -119,6 +120,7 @@ public class ClassificationUtils {
         private String name;
         private Object value;
         private Boolean isLeaf;
+        private InputTypeEnum type;
     }
 
 }
