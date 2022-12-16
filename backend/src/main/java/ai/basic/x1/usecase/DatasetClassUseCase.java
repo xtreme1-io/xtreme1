@@ -165,18 +165,16 @@ public class DatasetClassUseCase {
         }
     }
 
-    public List<ClassStatisticsUnitBO> statisticObjectByClass(Long datasetId, int pageNo,
-                                                              int pageSize) {
-        var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<ClassStatisticsUnit>(pageNo,
-                pageSize);
-        var pageResults = datasetClassDAO.getBaseMapper().statisticsObjectByClass(page, datasetId);
-        if (CollUtil.isEmpty(pageResults.getRecords())) {
+    public List<ClassStatisticsUnitBO> statisticObjectByClass(Long datasetId) {
+
+        var classStatisticsUnits = datasetClassDAO.getBaseMapper().statisticsObjectByClass(datasetId);
+        if (CollUtil.isEmpty(classStatisticsUnits)) {
             return List.of();
         }
-        var classIds = pageResults.getRecords().stream().map(ClassStatisticsUnit::getClassId)
+        var classIds = classStatisticsUnits.stream().map(ClassStatisticsUnit::getClassId)
                 .collect(toList());
         Map<Long, DatasetClassBO> classMap = getClassMap(classIds);
-        return pageResults.getRecords().stream().map(e -> {
+        return classStatisticsUnits.stream().map(e -> {
             var cla = classMap.getOrDefault(e.getClassId(), new DatasetClassBO());
             return ClassStatisticsUnitBO.builder()
                     .toolType(cla.getToolType())
