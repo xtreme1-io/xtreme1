@@ -4,6 +4,7 @@ import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.entity.PresignedUrlBO;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpStatus;
 import io.minio.*;
 import io.minio.errors.*;
@@ -222,10 +223,10 @@ public class MinioService {
         var host = "localhost";
         if (ObjectUtil.isNotNull(RequestContextHolder.getContext()) && ObjectUtil.isNotNull(RequestContextHolder.getContext().getRequestInfo())) {
             var forwardedProto = RequestContextHolder.getContext().getRequestInfo().getForwardedProto();
-            proto = ObjectUtil.isNotNull(forwardedProto) ? forwardedProto : proto;
+            proto = StrUtil.isNotEmpty(forwardedProto) ? forwardedProto : proto;
 
             var forwardedHost = RequestContextHolder.getContext().getRequestInfo().getHost();
-            host = ObjectUtil.isNotNull(forwardedHost) ? forwardedHost : host;
+            host = StrUtil.isNotEmpty(forwardedHost) ? forwardedHost : host;
         }
         return url.replace(minioProp.getEndpoint(), proto + "://" +
                 host +
