@@ -37,7 +37,7 @@ public class ModelController {
     private ModelRecognitionUseCase modelRecognitionUseCase;
 
     @GetMapping("/list")
-    public List<ModelDTO> findAll(ModelDTO modelDTO){
+    public List<ModelDTO> findAll(ModelDTO modelDTO) {
         return DefaultConverter.convert(modelUseCase.findAll(DefaultConverter.convert(modelDTO, ModelBO.class)), ModelDTO.class);
     }
 
@@ -46,12 +46,22 @@ public class ModelController {
         return DefaultConverter.convert(modelUseCase.findById(id), ModelDTO.class);
     }
 
-    @PostMapping("/recognition")
+    @PostMapping("/image/recognition")
     public ModelObjectDTO recognition(@Validated @RequestBody ModelRecognitionRequestDTO modelRecognitionRequest) {
+        return DefaultConverter.convert(modelRecognitionUseCase.recognition(buildModelMessageBO(modelRecognitionRequest, ModelCodeEnum.COCO_80)),
+                ModelObjectDTO.class);
+    }
+
+    @PostMapping("/point_cloud/recognition")
+    public ModelObjectDTO pointCloudRecognition(@Validated @RequestBody ModelRecognitionRequestDTO modelRecognitionRequest) {
+        return DefaultConverter.convert(modelRecognitionUseCase.recognition(buildModelMessageBO(modelRecognitionRequest, ModelCodeEnum.PRE_LABEL)),
+                ModelObjectDTO.class);
+
+    }
+
+    private ModelMessageBO buildModelMessageBO(ModelRecognitionRequestDTO modelRecognitionRequest, ModelCodeEnum modelCodeEnum) {
         var dataInfo = dataInfoUseCase.findById(modelRecognitionRequest.getDataId());
-        var modelCode = Enum.valueOf(ModelCodeEnum.class,
-                modelRecognitionRequest.getModelCode());
-        var model = modelUseCase.findByModelCode(modelCode);
+        var model = modelUseCase.findByModelCode(modelCodeEnum);
         var message = ModelMessageBO.builder()
                 .dataInfo(dataInfo)
                 .datasetId(dataInfo.getDatasetId())
@@ -63,10 +73,7 @@ public class ModelController {
                 .resultFilterParam(JSONUtil.parseObj(modelRecognitionRequest.toPreModelParamDTO()))
                 .createdBy(RequestContextHolder.getContext().getUserInfo().getId())
                 .build();
-
-        return DefaultConverter.convert(modelRecognitionUseCase.recognition(message),
-                ModelObjectDTO.class);
-
+        return message;
     }
 
 }
