@@ -647,7 +647,7 @@ public class DataInfoUseCase {
                 dataEditLambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, dataAnnotationRecord.getId());
                 var list = dataEditDAO.list(dataEditLambdaQueryWrapper);
                 var dataIds = list.stream().map(DataEdit::getDataId).collect(Collectors.toList());
-                if (CollectionUtil .isNotEmpty(dataIds) && dataIds.contains(dataPreAnnotationBO.getDataIds().get(0))) {
+                if (CollectionUtil.isNotEmpty(dataIds) && dataIds.contains(dataPreAnnotationBO.getDataIds().get(0))) {
                     return dataAnnotationRecord.getId();
                 }
             }
@@ -1589,5 +1589,36 @@ public class DataInfoUseCase {
             boo = false;
         }
         return boo;
+    }
+
+    public DataResultBO getDataAndResult(Long datasetId, List<Long> dataIds) {
+        var dataset = datasetDAO.getById(datasetId);
+        if (ObjectUtil.isNull(dataset)) {
+            throw new UsecaseException(DATASET_NOT_FOUND);
+        }
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        lambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        if (CollectionUtil.isNotEmpty(dataIds)) {
+            lambdaQueryWrapper.in(DataInfo::getId, dataIds);
+        }
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.list(lambdaQueryWrapper), DataInfoBO.class);
+        if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+            setDataInfoBOListFile(dataInfoBOList);
+        }
+        var dataInfoQueryBO = DataInfoQueryBO.builder().datasetType(dataset.getType()).build();
+        var dataExportBOList = processData(dataInfoBOList, dataInfoQueryBO);
+        var exportTime = TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN);
+        var data = new ArrayList<DataExportBaseBO>();
+        var results = new ArrayList<DataResultExportBO>();
+        dataExportBOList.forEach(dataExportBO -> {
+            if (ObjectUtil.isNotNull(dataExportBO.getData())) {
+                data.add(dataExportBO.getData());
+            }
+            if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
+                results.add(dataExportBO.getResult());
+            }
+        });
+        return DataResultBO.builder().version(version).datasetId(dataset.getId())
+                .datasetName(dataset.getName()).exportTime(exportTime).data(data).results(results).build();
     }
 }

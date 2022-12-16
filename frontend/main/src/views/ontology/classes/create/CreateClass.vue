@@ -486,10 +486,9 @@
     showResetBox.value = false;
   };
   const handleConfirmResetBox = () => {
+    relatedNum.value = 0;
     formState.toolType = tempToolType.value;
     isResetRelations.value = true;
-    emitter.emit('resetSelect');
-
     showResetBox.value = false;
   };
   const handleChangeToolType = (value) => {
@@ -502,14 +501,28 @@
       showToolTypeDropdown.value = false;
     }
 
-    if (value != formState.toolType && formState.ontologyId) {
-      // if toolType changed and has related
-      showResetBox.value = true;
-      showToolTypeDropdown.value = false;
-    } else if (value != formState.toolType) {
-      // if toolType changed and no related
-      formState.toolType = tempToolType.value;
-      showToolTypeDropdown.value = false;
+    if (value == formState.toolType) {
+      return;
+    }
+
+    if (props.isCenter) {
+      // if is ontology center
+      if (relatedNum.value > 0) {
+        showResetBox.value = true;
+        showToolTypeDropdown.value = false;
+      } else {
+        formState.toolType = tempToolType.value;
+        showToolTypeDropdown.value = false;
+      }
+    } else {
+      if (formState.ontologyId) {
+        // if toolType changed and has related
+        showResetBox.value = true;
+        showToolTypeDropdown.value = false;
+      } else {
+        formState.toolType = tempToolType.value;
+        showToolTypeDropdown.value = false;
+      }
     }
   };
 
@@ -533,6 +546,8 @@
   /** Cancel */
   const handleCancel = () => {
     isResetRelations.value = false;
+    showResetBox.value = false;
+    showToolTypeDropdown.value = false;
     getDefaultCreateClassFormState(formState);
     updateDetail({});
     closeModal();

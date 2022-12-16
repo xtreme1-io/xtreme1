@@ -3,7 +3,10 @@ package ai.basic.x1.adapter.api.controller;
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.adapter.exception.ApiException;
-import ai.basic.x1.entity.*;
+import ai.basic.x1.entity.DataInfoQueryBO;
+import ai.basic.x1.entity.DataInfoUploadBO;
+import ai.basic.x1.entity.DataPreAnnotationBO;
+import ai.basic.x1.entity.ScenarioQueryBO;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
 import ai.basic.x1.usecase.*;
@@ -13,6 +16,8 @@ import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -91,7 +96,7 @@ public class DataInfoController extends BaseDatasetController {
 
     @GetMapping("listByIds")
     public List<DataInfoDTO> listByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
-        var dataInfoBos = dataInfoUsecase.listByIds(dataIds,false);
+        var dataInfoBos = dataInfoUsecase.listByIds(dataIds, false);
         if (CollectionUtil.isNotEmpty(dataInfoBos)) {
             return dataInfoBos.stream().map(this::convertDataInfoDTO).collect(Collectors.toList());
         }
@@ -214,7 +219,7 @@ public class DataInfoController extends BaseDatasetController {
     @GetMapping("classificationOption/findAll")
     public List<DataClassificationOptionDTO> findClassificationOption(@RequestParam Long classId) {
         var options = dataClassificationOptionUseCase.findByClassIds(List.of(classId));
-         return DefaultConverter.convert(options, DataClassificationOptionDTO.class);
+        return DefaultConverter.convert(options, DataClassificationOptionDTO.class);
     }
 
     @GetMapping("scenarioExport")
@@ -230,6 +235,11 @@ public class DataInfoController extends BaseDatasetController {
             scenarioQueryBO.setClassIds(Collections.singletonList(scenarioQueryDTO.getClassId()));
         }
         return String.valueOf(dataInfoUsecase.scenarioExport(scenarioQueryBO));
+    }
+
+    @GetMapping("getDataAndResult")
+    public JSONObject getDataAndResult(@NotNull(message = "cannot be null") @RequestParam(required = false) Long datasetId, @RequestParam(required = false) List<Long> dataIds) {
+        return JSONUtil.parseObj(JSONUtil.toJsonStr(dataInfoUsecase.getDataAndResult(datasetId, dataIds)));
     }
 
 }

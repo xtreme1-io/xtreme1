@@ -128,8 +128,6 @@
     return props.isCenter && props.activeTab == ClassTypeEnum.CLASS;
   });
   const handlePush = (item) => {
-    console.log(item);
-
     const relatedNum = item.datasetClassNum ?? 0;
     ModalConfirmCustom({
       title: 'Push to All',
@@ -143,6 +141,9 @@
       },
       onOk: async () => {
         await pushAttributesToDatasetApi({ id: item.id });
+        createMessage.success(
+          `Success override all ${relatedNum} related classes by current attributes`,
+        );
       },
     });
   };

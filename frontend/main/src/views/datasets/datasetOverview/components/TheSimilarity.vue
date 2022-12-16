@@ -131,7 +131,6 @@
       }
     });
 
-    console.log(optionMap);
     scatterList.value = scatterList.value.map((item: any) => {
       const option = optionMap[item.id];
       if (Array.isArray(option)) {
