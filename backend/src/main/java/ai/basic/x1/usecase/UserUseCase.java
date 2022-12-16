@@ -170,7 +170,11 @@ public class UserUseCase {
         }
 
         var avatarIdMap = new HashMap<Long, String>(avatarIds.size());
-        fileUseCase.findByIds(avatarIds).forEach(file -> avatarIdMap.put(file.getId(), file.getUrl()));
+        try {
+            fileUseCase.findByIds(avatarIds).forEach(file -> avatarIdMap.put(file.getId(), file.getUrl()));
+        } catch (Exception e) {
+            log.error("get user avatar url fail" + e);
+        }
         users.forEach(user -> user.setAvatarUrl(avatarIdMap.get(user.getAvatarId())));
         return users;
     }
