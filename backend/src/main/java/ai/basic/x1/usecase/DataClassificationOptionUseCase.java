@@ -43,12 +43,10 @@ public class DataClassificationOptionUseCase {
         dataClassificationOptionDAO.getBaseMapper().insertBatch(options);
     }
 
-    public List<DataClassificationOptionBO> statisticsDataByOption(Long datasetId, int pageNo,
-                                                                   int pageSize) {
+    public List<DataClassificationOptionBO> statisticsDataByOption(Long datasetId) {
 
-        var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<DataClassificationOption>(pageNo, pageSize);
         var records = dataClassificationOptionDAO.getBaseMapper()
-                .statisticsDataByOption(page, datasetId).getRecords();
+                .statisticsDataByOption(datasetId);
 
         setOptionPath(records);
         return DefaultConverter.convert(records, DataClassificationOptionBO.class);

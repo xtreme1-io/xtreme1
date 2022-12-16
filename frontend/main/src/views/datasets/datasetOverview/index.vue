@@ -4,20 +4,23 @@
       <VirtualTab :list="tabList" />
     </div>
     <div class="content">
-      <TheSimilarity :datasetId="id as unknown as number" />
-      <!-- <TheProgress :datasetId="(id as unknown as number)" /> -->
-      <!-- <TheDistribution :datasetId="(id as unknown as number)" /> -->
+      <TheProgress :datasetId="(id as unknown as number)" />
+      <TheSimilarity
+        v-if="datasetType == datasetTypeEnum.IMAGE"
+        :datasetId="id as unknown as number"
+      />
+      <TheDistribution :datasetId="(id as unknown as number)" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
   // vue
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   // components
   import { VirtualTab } from '/@@/VirtualTab';
-  // import TheProgress from './components/TheProgress.vue';
+  import TheProgress from './components/TheProgress.vue';
   import TheSimilarity from './components/TheSimilarity.vue';
-  // import TheDistribution from './components/TheDistribution.vue';
+  import TheDistribution from './components/TheDistribution.vue';
   // icons
   import Scenario from '/@/assets/svg/tags/scenario.svg';
   import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
@@ -30,11 +33,15 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import { RouteChildEnum } from '/@/enums/routeEnum';
   import { useRoute } from 'vue-router';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { datasetItemDetail } from '/@/api/business/dataset';
+  import { setDatasetBreadcrumb } from '/@/utils/business';
 
   const { t } = useI18n();
   const { prefixCls } = useDesign('datasetOverview');
   const { query } = useRoute();
   const { id } = query;
+  const datasetId = Number(id);
 
   const loadingRef = ref<boolean>(false);
 
@@ -62,6 +69,18 @@
       activeIcon: OntologyActive,
     },
   ];
+
+  /** DatasetType */
+  const datasetType = ref<datasetTypeEnum>(datasetTypeEnum.IMAGE);
+  const getDatasetType = async () => {
+    const res = await datasetItemDetail({ id: datasetId });
+    datasetType.value = res.type;
+    setDatasetBreadcrumb(res.name, res.type);
+  };
+
+  onMounted(() => {
+    getDatasetType();
+  });
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-datasetOverview';

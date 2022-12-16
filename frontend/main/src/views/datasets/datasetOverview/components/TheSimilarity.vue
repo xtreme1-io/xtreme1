@@ -57,7 +57,7 @@
       </div>
     </div>
     <div class="chartContainer">
-      <div ref="plotRef" class="chartContainer__box" @mousewheel.prevent></div>
+      <div ref="plotRef" class="chartContainer__box"></div>
     </div>
   </div>
 </template>
@@ -111,7 +111,7 @@
         classificationId: String(selectClassificationId.value),
       };
       const res = await getSimilarityClassificationApi(params);
-      similarList.value = res.dataSimilarityList.map((item: any) => {
+      similarList.value = (res?.dataSimilarityList ?? []).map((item: any) => {
         item.key = item.attributeId + ':' + item.optionName;
         return item;
       });
@@ -178,12 +178,12 @@
   const imgSrc = ref<string>();
   const labelName = ref<string>();
   const getDataInfo = _.debounce(async (id) => {
+    lastDataId.value = id;
     const maskDom: any = document.querySelector('#tooltipMask');
     if (maskDom) {
-      maskDom.style.display = 'block';
+      maskDom.style.display = 'flex';
     }
 
-    console.log('debounce getDataInfo');
     isLoading.value = true;
     const res: any = await datasetDetailApi({ id });
     imgSrc.value = res?.content?.[0]?.file?.url;
@@ -194,17 +194,17 @@
   }, 1500);
 
   const getToolTipDom = (id) => {
-    const maskDom: any = document.querySelector('#tooltipMask');
     const labelDom = document.querySelector('#tooltipLabel');
-    const viewDom = document.querySelector('#tooltipView');
-    const imgDom = document.querySelector('#tooltipImg');
-
     if (labelDom) {
       labelDom.innerHTML = labelName.value as string;
     }
+
+    const imgDom = document.querySelector('#tooltipImg');
     if (imgDom) {
       imgDom.setAttribute('src', imgSrc.value as string);
     }
+
+    const viewDom = document.querySelector('#tooltipView');
     if (viewDom) {
       viewDom.addEventListener('click', () => {
         console.log('view');
@@ -213,7 +213,7 @@
       });
     }
 
-    console.log('getToolTipDom', maskDom);
+    const maskDom: any = document.querySelector('#tooltipMask');
     if (maskDom) {
       maskDom.style.display = 'none';
     }
@@ -255,7 +255,6 @@
           const data = items[0]?.data || {};
           const dataId = data?.id ?? undefined;
           if (dataId && dataId != lastDataId.value) {
-            lastDataId.value = dataId;
             getDataInfo(dataId);
           } else {
             setTimeout(() => {
@@ -263,8 +262,10 @@
             });
           }
 
-          // TODO loading
-          const maskDom = `<div id="tooltipMask" class="custom-tooltip-container-mask"></div>`;
+          // mask & loading
+          const maskDom = `<div id="tooltipMask" class="custom-tooltip-container-mask">
+                            <div class="loading"></div>
+                          </div>`;
           const headerDom = `<div class="custom-tooltip-container-header">
                                 <div class="custom-tooltip-container-header-left">
                                   <div>ID: ${dataId}</div>
@@ -335,8 +336,30 @@
       position: absolute;
       width: 223px;
       height: 205px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       z-index: 1;
-      background-color: rgba(255, 255, 255, 0.7);
+      background-color: rgba(0, 0, 0, 0.5);
+      .loading {
+        width: 30px;
+        height: 30px;
+        border: 2px solid #fff;
+        border-top-color: transparent;
+        border-radius: 100%;
+
+        animation: circle infinite 0.75s linear;
+      }
+
+      // 转转转动画
+      @keyframes circle {
+        0% {
+          transform: rotate(0);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     }
     &-header {
       flex: 1;

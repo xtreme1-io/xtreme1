@@ -31,7 +31,7 @@
         <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
           <SearchCard
             :info="info"
-            :object2D="object2D"
+            :object2D="object2D[item?.classAttributes?.trackId]"
             :data="dataInfo[item.dataId]"
             :object="item"
           >
@@ -73,7 +73,9 @@
     getDataByIds,
     getClassificationOptions,
     takeRecordByData,
+    checkRootByDataId,
   } from '/@/api/business/dataset';
+  import { useMessage } from '/@/hooks/web/useMessage';
   import SearchCard from '../../datasets/datasetSearch/searchCard.vue';
   import { useRoute } from 'vue-router';
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -82,6 +84,7 @@
   import { getAllClassByOntologyIdApi } from '/@/api/business/classes';
   import { getOntologyInfoApi } from '/@/api/business/ontology';
   const { t } = useI18n();
+  const { createMessage } = useMessage();
   const { prefixCls } = useDesign('ontologyScenario');
   const loadingRef = ref<boolean>(false);
   const [register, { openModal }] = useModal();
@@ -218,8 +221,15 @@
       dataType: dataTypeEnum.SINGLE_DATA,
     }).catch(() => {});
     const trackId = object.classAttributes.trackId;
-    console.log(object);
-    if (!recordId || !trackId) return;
+    const errMsg = 'The selected data has been annotated by others';
+    if (!recordId || !trackId) {
+      return createMessage.error(errMsg);
+    }
+
+    const status = await checkRootByDataId(recordId, dataId);
+    if (!status) {
+      return createMessage.error(errMsg);
+    }
     // const res = await getLockedByDataset({
     //   datasetId: info.value.id,
     // });

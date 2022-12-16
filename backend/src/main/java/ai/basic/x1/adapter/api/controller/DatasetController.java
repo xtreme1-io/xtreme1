@@ -147,10 +147,8 @@ public class DatasetController extends BaseDatasetController {
     }
 
     @GetMapping("{datasetId}/statistics/classificationData")
-    public List<DataClassificationOptionDTO> statisticsClassificationData(@PathVariable("datasetId") Long datasetId,
-                                                                          @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
-                                                                          @RequestParam(value = "pageSize", defaultValue = "100") Integer pageSize) {
-        var results = dataClassificationOptionUseCase.statisticsDataByOption(datasetId, pageNo, pageSize);
+    public List<DataClassificationOptionDTO> statisticsClassificationData(@PathVariable("datasetId") Long datasetId) {
+        var results = dataClassificationOptionUseCase.statisticsDataByOption(datasetId);
         return DefaultConverter.convert(results, DataClassificationOptionDTO.class);
     }
 

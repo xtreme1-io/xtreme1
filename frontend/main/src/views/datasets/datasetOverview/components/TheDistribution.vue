@@ -4,10 +4,22 @@
     <div class="chartContainer">
       <Tabs v-model:activeKey="activeKey" @change="handleChange">
         <Tabs.TabPane :key="tabPaneEnum.CLASS" tab="Classes" forceRender>
-          <div ref="plotClassRef" class="chartContainer__box" @mousewheel.prevent></div>
+          <div>
+            <div class="class-legend">
+              <div
+                class="class-legend-item"
+                v-for="(item, index) in currentToolTypeImg"
+                :key="index"
+              >
+                <img :src="item.img" alt="" />
+                <span>{{ formatEnum(item.label) }}</span>
+              </div>
+            </div>
+            <div ref="plotClassRef" class="chartContainer__box"></div>
+          </div>
         </Tabs.TabPane>
         <Tabs.TabPane :key="tabPaneEnum.CLASSIFICATION" tab="Classifications" forceRender>
-          <div ref="plotClassificationRef" class="chartContainer__box" @mousewheel.prevent></div>
+          <div ref="plotClassificationRef" class="chartContainer__box"></div>
         </Tabs.TabPane>
       </Tabs>
     </div>
@@ -23,6 +35,7 @@
   import { IClassificationData, IClassUnits } from '/@/api/business/dataset/model/overviewModel';
   import _ from 'lodash';
   import { formatEnum } from '/@/utils/business';
+  import { toolTypeImg } from '/@/views/ontology/classes/attributes/data';
 
   const activeKey = ref<tabPaneEnum>(tabPaneEnum.CLASS);
 
@@ -42,10 +55,10 @@
   const getClassObject = async () => {
     const params = { datasetId: props.datasetId };
     const res = await getClassObjectApi(params);
-
+    getToolTypeImg(res.classUnits ?? []);
     const dataLength = res.classUnits.length;
     let itemLength = 0;
-
+    console.log(res.classUnits);
     const tempClassData: any[] = [];
     const groupClassData = _.groupBy(res.classUnits, 'toolType');
     Object.keys(groupClassData).forEach((item) => {
@@ -91,6 +104,17 @@
     classData.value = tempClassData.map((item: any) => {
       item.yKey = item.toolType + ':' + item.name;
       return item;
+    });
+  };
+  const currentToolTypeImg = ref<any[]>([]);
+  const getToolTypeImg = (list) => {
+    const toolTypeList = list.map((item) => item.toolType);
+    Object.keys(toolTypeImg).forEach((item) => {
+      if (toolTypeList.includes(item))
+        currentToolTypeImg.value.push({
+          label: item,
+          img: toolTypeImg[item],
+        });
     });
   };
 
@@ -150,4 +174,30 @@
 </script>
 <style lang="less" scoped>
   @import './index.less';
+
+  .class-legend {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    &-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid @primary-color;
+      border-radius: 4px;
+      background: #f0f7ff;
+      img {
+        width: 12px;
+        height: 12px;
+      }
+      span {
+        font-weight: 400;
+        font-size: 14px;
+        color: #333333;
+      }
+    }
+  }
 </style>
