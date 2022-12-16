@@ -85,7 +85,7 @@
   // router to class
   const handleRouter = (item) => {
     setDatasetBreadcrumb(item.name);
-    go(`${RouteEnum.ONTOLOGY}/class?id=${item.id}&teamId=${item.teamId}`);
+    go(`${RouteEnum.ONTOLOGY}/class?id=${item.id}`);
   };
   // rename
   const itemId = ref<number | string>(0);
