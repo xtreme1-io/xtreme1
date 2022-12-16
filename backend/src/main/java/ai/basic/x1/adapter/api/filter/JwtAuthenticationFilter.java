@@ -27,8 +27,6 @@ import static ai.basic.x1.util.Constants.*;
  * @author Jagger Wang
  */
 @Slf4j
-@Component
-@Order(2)
 public class JwtAuthenticationFilter implements Filter {
 
     private UserTokenUseCase userTokenUseCase;
@@ -42,9 +40,9 @@ public class JwtAuthenticationFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String token = null;
         var req = (HttpServletRequest) request;
         buildRequestContext(req);
+        String token = null;
         var authorization = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorization != null && authorization.startsWith("Bearer ")) {
             token = authorization.split(" ")[1].trim();

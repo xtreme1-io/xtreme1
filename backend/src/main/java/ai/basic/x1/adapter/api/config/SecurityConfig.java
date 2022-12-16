@@ -2,6 +2,9 @@ package ai.basic.x1.adapter.api.config;
 
 import ai.basic.x1.adapter.api.filter.JwtAuthenticationFilter;
 import ai.basic.x1.adapter.dto.ApiResult;
+import ai.basic.x1.adapter.port.dao.mybatis.model.UserToken;
+import ai.basic.x1.usecase.UserTokenUseCase;
+import ai.basic.x1.usecase.UserUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
+import javax.annotation.Resource;
+
 /**
  * @author Jagger Wang
  */
@@ -20,7 +25,9 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private UserTokenUseCase userTokenUseCase;
+    @Autowired
+    private UserUseCase userUseCase;
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -29,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors(corsConfigurer -> corsConfigurer.disable())
                 .csrf(csrfConfigurer -> csrfConfigurer.disable())
                 // Need to be after AnonymousAuthenticationFilter, otherwise JWT authentication will be overriden.
-                .addFilterAfter(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class)
+                .addFilterAfter(new JwtAuthenticationFilter(userTokenUseCase, userUseCase), AnonymousAuthenticationFilter.class)
                 .exceptionHandling(exceptionConfigurer -> exceptionConfigurer
                         .authenticationEntryPoint(new JSONAuthenticationEntryPoint(new ApiResult(UsecaseCode.LOGIN_STATUS_TIMEOUT,
                                 UsecaseCode.LOGIN_STATUS_TIMEOUT.getMessage()), HttpStatus.UNAUTHORIZED)))
