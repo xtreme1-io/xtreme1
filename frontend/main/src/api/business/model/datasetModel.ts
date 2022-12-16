@@ -203,6 +203,7 @@ export interface takeRecordParams {
   dataType: dataTypeEnum;
   modelId?: Nullable<number>;
   modelCode?: modelCode;
+  isFilterData?: boolean;
   resultFilterParam?: Nullable<PreModelParam>;
 }
 

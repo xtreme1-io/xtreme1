@@ -31,7 +31,7 @@
         <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
           <SearchCard
             :info="info"
-            :object2D="object2D"
+            :object2D="object2D[item?.classAttributes?.trackId]"
             :data="dataInfo[item.dataId]"
             :object="item"
           >
