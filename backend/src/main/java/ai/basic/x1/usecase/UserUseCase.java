@@ -136,7 +136,7 @@ public class UserUseCase {
     public Long uploadAvatar(MultipartFile multipartFile, Long userId) {
         var mimeType = FileUtil.getMimeType(multipartFile.getOriginalFilename());
         var originalFilename = multipartFile.getOriginalFilename();
-        var path = String.format("/user/avatar/%s/%s-%s", userId, System.currentTimeMillis(),
+        var path = String.format("user/avatar/%s/%s-%s", userId, System.currentTimeMillis(),
                 originalFilename);
         var bucketName = minioProp.getBucketName();
         var fileSize = multipartFile.getSize();
