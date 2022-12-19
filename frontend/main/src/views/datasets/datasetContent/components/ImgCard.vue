@@ -172,13 +172,14 @@
       </div>
       <div
         v-else-if="info?.type === datasetTypeEnum.IMAGE"
-        class="relation-container"
+        class="relation-container image-loading"
         style="width: 100%; height: 100%; margin-bottom: 5px"
       >
         <img
           class="place image-card"
           ref="svg"
-          @load="() => onImgLoad(data)"
+          @load="(e) => onHandleImgLoad(e, data)"
+          @error="onHandleImgLoad"
           :src="getImageUrl(data) || placeImg"
           alt=""
         />
@@ -289,9 +290,12 @@
     handleTrigger(true);
   };
 
-  const onHandleImgLoad = (event: Event) => {
+  const onHandleImgLoad = (event: Event, data?: any) => {
     const target = event.target as HTMLImageElement;
     target?.parentElement?.classList.remove('image-loading');
+    if (data) {
+      onImgLoad(data);
+    }
   };
 
   const handleLeave = () => {
