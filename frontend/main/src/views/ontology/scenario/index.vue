@@ -23,6 +23,7 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
+            <img :src="toolTypeImg[item.toolType]" alt="" />
             {{ item.name }}
           </Select.Option>
         </Select>
@@ -84,6 +85,7 @@
   import { useModal } from '/@/components/Modal';
   import { getAllClassByOntologyIdApi } from '/@/api/business/classes';
   import { getOntologyInfoApi } from '/@/api/business/ontology';
+  import { toolTypeImg } from '../classes/attributes/data';
   const { t } = useI18n();
   const { createMessage } = useMessage();
   const { prefixCls } = useDesign('ontologyScenario');

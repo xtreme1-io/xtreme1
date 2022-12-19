@@ -27,7 +27,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            {{ item.name }}
+            <div class="inline-flex items-center">
+              <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
+              {{ item.name }}
+            </div>
           </Select.Option>
         </Select>
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
@@ -102,6 +105,7 @@
   import exportModalVue from './exportModal.vue';
   import { useModal } from '/@/components/Modal';
   import CollContainer from '/@@/CollContainer/index.vue';
+  import { toolTypeImg } from '../../ontology/classes/attributes/data';
   const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;
