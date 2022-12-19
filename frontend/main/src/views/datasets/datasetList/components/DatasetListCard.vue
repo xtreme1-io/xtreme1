@@ -189,7 +189,7 @@
   const go = useGo();
   const handleGo = (id) => {
     setDatasetBreadcrumb(props.data.name, props.data.type);
-    go(`${RouteEnum.DATASETS}/data?id=${id}`);
+    go(`${RouteEnum.DATASETS}/overview?id=${id}`);
   };
   const handleRename = (e, data) => {
     e.stopPropagation();

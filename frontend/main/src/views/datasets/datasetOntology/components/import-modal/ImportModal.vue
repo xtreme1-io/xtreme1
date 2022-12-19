@@ -11,7 +11,7 @@
   >
     <div class="import__modal">
       <UploadContent v-if="content === 'upload'" @callback="callBack" :type="type" @close="close" />
-      <ErrorContent v-else-if="content === 'error'" />
+      <ErrorContent v-else-if="content === 'error'" @callback="callBack" />
       <SuccessContent v-else :infoNum="infoNum" @close="close" />
     </div>
   </BasicModal>
@@ -33,7 +33,7 @@
   // const { createMessage } = useMessage();
   const content = ref('upload');
   const infoNum = ref<any>();
-  const modalTitle = 'Import Class/Classifications by Excel';
+  const modalTitle = 'Import Class/Classifications by Json';
 
   const [registerModal, { closeModal }] = useModalInner();
   const callBack = (type, data) => {

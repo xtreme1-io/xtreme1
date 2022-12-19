@@ -391,7 +391,6 @@
       const dataIds = tempList.map((e) => e.id);
       if (dataIds.length)
         datasetObjectApi({ dataIds: dataIds.toString() }).then((res) => {
-          console.log(res);
           const map = {};
           res.reduce((res, item) => {
             const { objects, dataId } = item;
@@ -402,7 +401,6 @@
             return map;
           }, map);
           Object.assign(objectMap.value, map);
-          console.log(objectMap.value);
         });
 
       fetchStatusNum();

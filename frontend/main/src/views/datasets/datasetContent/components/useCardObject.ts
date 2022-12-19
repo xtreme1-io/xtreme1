@@ -669,10 +669,17 @@ export function useSearchCard(props: {
       naturalHeight,
     };
   };
+
+  const onHandleImgLoad = () => {
+    const target = cardContainer.value as HTMLImageElement;
+    target?.parentElement?.classList.remove('image-loading');
+  };
+
   /**
    * Image Miniature object
    */
   const updateImage = debounce(() => {
+    onHandleImgLoad();
     if (props.info?.type !== datasetTypeEnum.IMAGE) return;
     const dom = cardContainer.value as HTMLDivElement;
     if (!dom) return;
@@ -785,6 +792,7 @@ export function useSearchCard(props: {
   );
 
   return {
+    onHandleImgLoad,
     getPcImage,
     getPlaceImg,
     iState,

@@ -633,10 +633,11 @@ public class DataInfoUseCase {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationRecord.class);
         lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId, dataPreAnnotationBO.getDatasetId());
         lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
+        log.info("datasetId:{},userId:{}",dataPreAnnotationBO.getDatasetId(),userId);
         var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) ? dataPreAnnotationBO.getIsFilterData() : false;
         var boo = true;
         var dataAnnotationRecord = DataAnnotationRecord.builder()
-                .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+                .datasetId(dataPreAnnotationBO.getDatasetId()).createdBy(userId).serialNo(serialNo).build();
         try {
             dataAnnotationRecordDAO.save(dataAnnotationRecord);
         } catch (DuplicateKeyException duplicateKeyException) {
@@ -651,14 +652,14 @@ public class DataInfoUseCase {
             }
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
-        var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+        var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO,userId);
         if (isFilterData) {
             if (insertCount == 0) {
                 throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
             }
         } else {
             // Indicates that no new data is locked and there is no old lock record
-            if (insertCount == 0 && !boo) {
+            if (insertCount == 0 && boo) {
                 throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
             }
         }
@@ -691,7 +692,7 @@ public class DataInfoUseCase {
      * @param dataIds              Data id collection
      * @param dataAnnotationRecord Data annotation record
      */
-    private Integer batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord) {
+    private Integer batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord,Long userId) {
         var insertCount = 0;
         if (CollectionUtil.isEmpty(dataIds)) {
             return insertCount;
@@ -702,7 +703,8 @@ public class DataInfoUseCase {
                 .annotationRecordId(dataAnnotationRecordId)
                 .datasetId(dataAnnotationRecord.getDatasetId())
                 .modelId(dataAnnotationRecord.getModelId())
-                .modelVersion(dataAnnotationRecord.getModelVersion());
+                .modelVersion(dataAnnotationRecord.getModelVersion())
+                .createdBy(userId);
         for (var dataId : dataIds) {
             var dataEdit = dataEditBuilder.dataId(dataId).build();
             dataEditSubList.add(dataEdit);

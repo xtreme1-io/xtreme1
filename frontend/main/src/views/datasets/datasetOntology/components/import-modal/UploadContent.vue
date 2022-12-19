@@ -5,7 +5,7 @@
         <SvgIcon size="60" name="upload" />
         <div class="dragger-placeholder">
           <span>{{ 'Click to select file or drag and drop file here' }}</span>
-          <span>{{ 'Supported file type: xlsx' }}</span>
+          <span>{{ 'Supported file type: json' }}</span>
         </div>
       </Upload.Dragger>
     </div>
@@ -16,7 +16,7 @@
     </div>
     <ConflictModal @register="registerConflictModal" @back="handleBack" @confirm="handleConfirm" />
     <div class="upload__content--footer">
-      <span @click="handleDownload">Download Excel Template</span>
+      <span @click="handleDownload">Download Json Template</span>
       <span @click="handleView"> View Help Document</span>
     </div>
   </div>
@@ -73,9 +73,9 @@
           openConflictModal(true, {
             type: ICopyEnum.CLASSES,
             conflictClassList: res.data.classes.filter((item) =>
-              res.data.duplicateClassName.includes(item.name),
+              res.data.duplicateClassName.map((r) => r.name).includes(item.name),
             ),
-            conflictClassificationList: res.data.classifications.filter((item) =>
+            conflictClassificationList: res.data.classifications?.filter((item) =>
               res.data.duplicateClassificationName.includes(item.name),
             ),
           });
@@ -91,6 +91,7 @@
 
         uploading.value = false;
       } catch (_) {
+        console.log(_);
         emits('callback', 'error');
       }
     };
@@ -109,13 +110,19 @@
     // console.log(classList, classificationList);
     let classes;
     let classifications;
-    if (classList.length !== data.value.duplicateClassName.length) {
+    if (
+      data.value.duplicateClassName !== null &&
+      classList.length !== data.value.duplicateClassName?.length
+    ) {
       const list = data.value.duplicateClassName.filter(
-        (item) => !classList.map((record) => record.name).includes(item),
+        (item) => !classList.map((record) => record.name).includes(item.name),
       );
       classes = data.value.classes.filter((k) => !list.includes(k.name));
     }
-    if (classificationList.length !== data.value.duplicateClassificationName.length) {
+    if (
+      data.value.duplicateClassificationName !== null &&
+      classificationList.length !== data.value.duplicateClassificationName?.length
+    ) {
       const list = data.value.duplicateClassificationName.filter(
         (item) => !classificationList.map((record) => record.name).includes(item),
       );

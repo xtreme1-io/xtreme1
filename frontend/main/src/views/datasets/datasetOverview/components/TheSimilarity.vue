@@ -1,74 +1,78 @@
 <template>
-  <div class="chart_wrapper">
+  <div class="chart_wrapper" v-loading="isLoading">
     <div class="title">Data Similarity Map</div>
-    <div class="flex justify-between mb-20px" style="padding-right: 16.5%">
-      <div class="flex gap-4px items-center">
-        <span className="select-label">Display By</span>
-        <Select
-          style="width: 200px"
-          :value="selectClassificationId"
-          @change="handleChangeClassification"
-        >
-          <Select.Option v-for="item in classificationList" :key="item.id">
-            {{ item.name }}
-          </Select.Option>
-        </Select>
-      </div>
-      <div class="flex gap-4px items-center">
-        <span v-if="!selectedBrush" className="select-label">Select data by</span>
-        <div
-          v-else
-          class="flex items-center gap-4px text-primary cursor-pointer"
-          @click="handleChangeBrush()"
-        >
-          <Icon icon="ion:arrow-back" />
-          <span>Back</span>
-        </div>
-        <div class="brush_container">
-          <div
-            class="brush-item"
-            :class="selectedBrush == brushEnum.PATH ? 'active' : ''"
-            @click="handleChangeBrush(brushEnum.PATH)"
+    <ChartEmpty v-if="!hasData" class="py-80px" />
+    <template v-else>
+      <div class="flex justify-between mb-20px" style="padding-right: 16.5%">
+        <div class="flex gap-4px items-center">
+          <span className="select-label">Display By</span>
+          <Select
+            style="width: 200px"
+            :value="selectClassificationId"
+            @change="handleChangeClassification"
           >
-            <SvgIcon
-              :name="
-                selectedBrush == brushEnum.PATH
-                  ? 'dataset-overview-path-inactive'
-                  : 'dataset-overview-path'
-              "
-              :size="24"
-            />
-          </div>
+            <Select.Option v-for="item in classificationList" :key="item.id">
+              {{ item.name }}
+            </Select.Option>
+          </Select>
+        </div>
+        <div class="flex gap-4px items-center">
+          <span v-if="!selectedBrush" className="select-label">Select data by</span>
           <div
-            class="brush-item"
-            :class="selectedBrush == brushEnum.RECT ? 'active' : ''"
-            @click="handleChangeBrush(brushEnum.RECT)"
+            v-else
+            class="flex items-center gap-4px text-primary cursor-pointer"
+            @click="handleChangeBrush()"
           >
-            <SvgIcon
-              :name="
-                selectedBrush == brushEnum.RECT
-                  ? 'dataset-overview-rect-inactive'
-                  : 'dataset-overview-rect'
-              "
-              :size="24"
-            />
+            <Icon icon="ion:arrow-back" />
+            <span>Back</span>
+          </div>
+          <div class="brush_container">
+            <div
+              class="brush-item"
+              :class="selectedBrush == brushEnum.PATH ? 'active' : ''"
+              @click="handleChangeBrush(brushEnum.PATH)"
+            >
+              <SvgIcon
+                :name="
+                  selectedBrush == brushEnum.PATH
+                    ? 'dataset-overview-path-inactive'
+                    : 'dataset-overview-path'
+                "
+                :size="24"
+              />
+            </div>
+            <div
+              class="brush-item"
+              :class="selectedBrush == brushEnum.RECT ? 'active' : ''"
+              @click="handleChangeBrush(brushEnum.RECT)"
+            >
+              <SvgIcon
+                :name="
+                  selectedBrush == brushEnum.RECT
+                    ? 'dataset-overview-rect-inactive'
+                    : 'dataset-overview-rect'
+                "
+                :size="24"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="chartContainer">
-      <div ref="plotRef" class="chartContainer__box"></div>
-    </div>
+      <div class="chartContainer">
+        <div ref="plotRef" class="chartContainer__box"></div>
+      </div>
+    </template>
   </div>
 </template>
 <script lang="ts" setup>
   import axios from 'axios';
-  import { onMounted, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { useGo } from '/@/hooks/web/usePage';
   import { RouteEnum } from '/@/enums/routeEnum';
   import { setDatasetBreadcrumb } from '/@/utils/business';
   import { Select } from 'ant-design-vue';
   import Icon, { SvgIcon } from '/@/components/Icon';
+  import ChartEmpty from './ChartEmpty.vue';
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
   import { defaultScatterOptions } from './data';
   import {
@@ -158,17 +162,24 @@
 
   /** List */
   const scatterList = ref<any[]>([]);
+  const hasData = computed(() => {
+    return scatterList.value.length > 0;
+  });
   const getSimilarityRecord = async () => {
-    const params = { datasetId: props.datasetId as string };
-    const res = await getSimilarityRecordApi(params);
-    const url = res?.resultUrl;
-    if (url) {
-      const response = await axios.get(url);
-      scatterList.value = (response.data ?? []).map((item) => {
-        item.option = optionEnum.NO_OPTIONS;
-        return item;
-      });
-    }
+    isLoading.value = true;
+    try {
+      const params = { datasetId: props.datasetId as string };
+      const res = await getSimilarityRecordApi(params);
+      const url = res?.resultUrl;
+      if (url) {
+        const response = await axios.get(url);
+        scatterList.value = (response.data ?? []).map((item) => {
+          item.option = optionEnum.NO_OPTIONS;
+          return item;
+        });
+      }
+    } catch (error) {}
+    isLoading.value = false;
   };
 
   /** DataInfo */
@@ -206,9 +217,8 @@
     const viewDom = document.querySelector('#tooltipView');
     if (viewDom) {
       viewDom.addEventListener('click', () => {
-        console.log('view');
         setDatasetBreadcrumb(labelName.value, datasetTypeEnum.IMAGE);
-        go(`${RouteEnum.DATASETS}/data?id=${id}`);
+        go(`${RouteEnum.DATASETS}/data?id=${props.datasetId}&dataId=${id}`);
       });
     }
 
@@ -222,6 +232,7 @@
   onMounted(async () => {
     await getClassificationList();
     await getSimilarityRecord();
+    if (scatterList.value.length == 0) return;
 
     chartRef.value = setPlot(PlotEnum.SCATTER, plotRef.value, {
       data: scatterList.value,
@@ -276,7 +287,7 @@
                                 <div id="tooltipView" class="custom-tooltip-container-header-right">View data</div>
                               </div>`;
           const contentDom = `<div class="custom-tooltip-container-content">
-                                <img id="tooltipImg" src="${imgSrc.value}" />
+                                <img id="tooltipImg" src="${imgSrc.value}" onError={{  this.src = ''}} />
                               </div>`;
 
           return `<div class="custom-tooltip-container" style="background-color:orange">
