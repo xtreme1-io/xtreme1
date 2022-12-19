@@ -37,7 +37,9 @@
             Original with New Classes/ Classifications.
           </span>
         </div>
-        <div class="title">Classes</div>
+        <div class="title">
+          {{ props.activeTab == ClassTypeEnum.CLASS ? 'Classes' : 'Classifications' }}
+        </div>
         <div class="action">
           <span class="highLight" @click="handleToggleKeepAll(ICopySelectEnum.REPLACE)">
             Replace All
