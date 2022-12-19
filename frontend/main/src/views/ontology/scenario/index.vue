@@ -242,5 +242,23 @@
       align-items: center;
       justify-content: center;
     }
+    .list {
+      background: white;
+      margin-top: 20px;
+      margin-left: 25px;
+      margin-right: 25px;
+      padding: 12px;
+      border-radius: 8px;
+      .item {
+        width: 240px;
+        height: 240px;
+        background-color: white;
+        display: inline-block;
+        margin: 6px;
+        position: relative;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+    }
   }
 </style>
