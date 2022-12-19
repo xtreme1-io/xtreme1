@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author Jagger Wang
  */
 @SpringBootApplication(scanBasePackages = "ai.basic.x1.adapter", exclude = {UserDetailsServiceAutoConfiguration.class})
+@EnableScheduling
 @Slf4j
 public class Application {
 
