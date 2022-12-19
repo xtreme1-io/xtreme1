@@ -73,7 +73,6 @@ public class JwtAuthenticationFilter implements Filter {
                 chain.doFilter(request, response);
                 return;
             }
-            log.info("userId is {}", userBO.getId());
             var loggedUserDTO = new LoggedUserDTO(userBO.getUsername(), userBO.getPassword(), userBO.getId());
             var authentication = new UsernamePasswordAuthenticationToken(
                     loggedUserDTO, loggedUserDTO.getPassword(), loggedUserDTO.getAuthorities());
