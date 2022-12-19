@@ -16,12 +16,15 @@
   // import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
   import { Button } from '/@@/Button';
+  const emits = defineEmits(['callback']);
 
   // const { t } = useI18n();
 
   const handleDownload = () => {};
   const handleView = () => {};
-  const handleReupload = () => {};
+  const handleReupload = () => {
+    emits('callback', 'upload');
+  };
 </script>
 <style lang="less" scoped>
   .error__content {
