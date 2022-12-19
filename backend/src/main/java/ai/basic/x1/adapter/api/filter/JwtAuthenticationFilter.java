@@ -41,6 +41,10 @@ public class JwtAuthenticationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         var req = (HttpServletRequest) request;
+        if("/actuator/".startsWith(req.getRequestURI())){
+            chain.doFilter(request, response);
+            return;
+        }
         buildRequestContext(req);
         String token = null;
         var authorization = req.getHeader(HttpHeaders.AUTHORIZATION);
@@ -91,7 +95,7 @@ public class JwtAuthenticationFilter implements Filter {
     }
 
     private void buildRequestContext(HttpServletRequest httpServletRequest) {
-        if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
+        if (ObjectUtil.isNull(RequestContextHolder.getContext()) && !"/actuator".startsWith(httpServletRequest.getRequestURI())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
             log.info("request uri is {}",httpServletRequest.getRequestURI());
             log.info("host is {}", httpServletRequest.getHeader(HOST));
