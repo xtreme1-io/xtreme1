@@ -171,7 +171,7 @@
       datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'ONTOLOGY',
-      pageSize: 999,
+      pageSize: 9999,
       attributeIds: classification.value
         ? classification.value.map((item) => item.split('^')[0]).toString()
         : undefined,

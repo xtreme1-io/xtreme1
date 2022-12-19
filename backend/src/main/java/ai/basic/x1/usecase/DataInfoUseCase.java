@@ -1,5 +1,6 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
@@ -633,6 +634,7 @@ public class DataInfoUseCase {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationRecord.class);
         lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId, dataPreAnnotationBO.getDatasetId());
         lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
+        log.info("userId:{}",RequestContextHolder.getContext().getUserInfo().getId());
         log.info("datasetId:{},userId:{}",dataPreAnnotationBO.getDatasetId(),userId);
         var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) ? dataPreAnnotationBO.getIsFilterData() : false;
         var boo = true;
