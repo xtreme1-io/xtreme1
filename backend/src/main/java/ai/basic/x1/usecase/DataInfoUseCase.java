@@ -633,40 +633,35 @@ public class DataInfoUseCase {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationRecord.class);
         lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId, dataPreAnnotationBO.getDatasetId());
         lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
-        var dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+        var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) ? dataPreAnnotationBO.getIsFilterData() : false;
         var boo = true;
-        if (ObjectUtil.isNull(dataAnnotationRecord)) {
-            dataAnnotationRecord = DataAnnotationRecord.builder()
-                    .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
-            try {
-                dataAnnotationRecordDAO.save(dataAnnotationRecord);
-            } catch (DuplicateKeyException duplicateKeyException) {
-                boo = false;
-                dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
-                var dataEditLambdaQueryWrapper = Wrappers.lambdaQuery(DataEdit.class);
-                dataEditLambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, dataAnnotationRecord.getId());
-                var list = dataEditDAO.list(dataEditLambdaQueryWrapper);
-                var dataIds = list.stream().map(DataEdit::getDataId).collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(dataIds) && dataIds.contains(dataPreAnnotationBO.getDataIds().get(0))) {
-                    return dataAnnotationRecord.getId();
-                }
+        var dataAnnotationRecord = DataAnnotationRecord.builder()
+                .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+        try {
+            dataAnnotationRecordDAO.save(dataAnnotationRecord);
+        } catch (DuplicateKeyException duplicateKeyException) {
+            boo = false;
+            dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+            var dataEditLambdaQueryWrapper = Wrappers.lambdaQuery(DataEdit.class);
+            dataEditLambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, dataAnnotationRecord.getId());
+            var list = dataEditDAO.list(dataEditLambdaQueryWrapper);
+            var dataIds = list.stream().map(DataEdit::getDataId).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(dataIds) && dataIds.contains(dataPreAnnotationBO.getDataIds().get(0)) && isFilterData) {
+                return dataAnnotationRecord.getId();
             }
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
         var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
-        var isFilterData = dataPreAnnotationBO.getIsFilterData();
-        if (ObjectUtil.isNotNull(isFilterData) && isFilterData) {
+        if (isFilterData) {
             if (insertCount == 0) {
                 throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
             }
-
         } else {
             // Indicates that no new data is locked and there is no old lock record
             if (insertCount == 0 && !boo) {
                 throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
             }
         }
-
         return dataAnnotationRecord.getId();
     }
 
