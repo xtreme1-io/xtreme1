@@ -60,17 +60,18 @@
         </div>
       </div>
       <div>
-        <Checkbox.Group v-model:value="classification">
-          <Checkbox
-            v-for="item in filterOptions"
-            style="display: block"
-            :value="item.attributeId + '^' + item.optionName"
-            :key="item.attributeId + '^' + item.optionName"
-          >
-            {{ item.optionName }}
-          </Checkbox>
-          <!-- <Radio cstyle="display: block" :value="11">11111</Radio> -->
-        </Checkbox.Group>
+        <CollContainer icon="mdi:calendar-month" title="Status">
+          <Checkbox.Group style="margin-top: 5px" v-model:value="classification">
+            <Checkbox
+              v-for="item in filterOptions"
+              style="display: block"
+              :value="item.attributeId + '^' + item.optionName"
+              :key="item.attributeId + '^' + item.optionName"
+            >
+              {{ item.optionName }}
+            </Checkbox>
+          </Checkbox.Group>
+        </CollContainer>
       </div>
     </div>
   </div>
@@ -99,6 +100,7 @@
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
   import exportModalVue from './exportModal.vue';
   import { useModal } from '/@/components/Modal';
+  import CollContainer from '/@@/CollContainer/index.vue';
   const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;

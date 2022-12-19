@@ -169,7 +169,7 @@
       classId: result.value.toString(),
       datasetId: info.value.id,
       datasetType: info.value.type,
-      source: 'DATASET_CLASS',
+      source: 'ONTOLOGY',
       pageSize: 999,
       attributeIds: classification.value
         ? classification.value.map((item) => item.split('^')[0]).toString()
