@@ -75,9 +75,8 @@
     getDataByIds,
     getClassificationOptions,
     takeRecordByData,
-    checkRootByDataId,
   } from '/@/api/business/dataset';
-  import { useMessage } from '/@/hooks/web/useMessage';
+  // import { useMessage } from '/@/hooks/web/useMessage';
   import SearchCard from '../../datasets/datasetSearch/searchCard.vue';
   import { useRoute } from 'vue-router';
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -87,7 +86,6 @@
   import { getOntologyInfoApi } from '/@/api/business/ontology';
   import { toolTypeImg } from '../classes/attributes/data';
   const { t } = useI18n();
-  const { createMessage } = useMessage();
   const { prefixCls } = useDesign('ontologyScenario');
   const loadingRef = ref<boolean>(false);
   const [register, { openModal }] = useModal();
@@ -222,21 +220,10 @@
       datasetId: info.value.id,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
+      isFilterData: true,
     }).catch(() => {});
     const trackId = object.classAttributes.trackId;
-    const errMsg = 'The selected data has been annotated by others';
-    if (!recordId || !trackId) {
-      return createMessage.error(errMsg);
-    }
-
-    const status = await checkRootByDataId(recordId, dataId);
-    if (!status) {
-      return createMessage.error(errMsg);
-    }
-    // const res = await getLockedByDataset({
-    //   datasetId: info.value.id,
-    // });
-
+    if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
   };
 </script>
