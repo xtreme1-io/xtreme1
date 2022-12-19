@@ -19,6 +19,7 @@ import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
+import kotlin.jvm.functions.Function3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -84,19 +86,19 @@ public class ExportUseCase {
     }
 
 
-    public <T, Q extends BaseQueryBO> Long asyncExportDataZip(String fileName, Long serialNumber,
-                Q query, Function<Q, Page<T>> fun, Function2<List<T>, Q, List<DataExportBO>> processData) {
+    public <T, Q extends BaseQueryBO> Long asyncExportDataZip(String fileName, Long serialNumber, Map<Long,String> classMap,
+                Q query, Function<Q, Page<T>> fun, Function3<List<T>, Q,Map<Long,String>, List<DataExportBO>> processData) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<ExportRecord>();
         lambdaQueryWrapper.in(ExportRecord::getSerialNumber, serialNumber);
         var exportRecord = exportRecordDAO.getOne(lambdaQueryWrapper);
         var srcPath = String.format("%s%s", tempPath, FileUtil.getPrefix(fileName));
         FileUtil.mkdir(srcPath);
-        getDataAndUpload(exportRecord, srcPath, query,fun,processData);
+        getDataAndUpload(exportRecord, srcPath,classMap, query,fun,processData);
         return serialNumber;
     }
 
-    private <T, Q extends BaseQueryBO> void getDataAndUpload(ExportRecord record, String srcPath, Q query,
-                                                             Function<Q, Page<T>> fun, Function2<List<T>, Q, List<DataExportBO>> processData) {
+    private <T, Q extends BaseQueryBO> void getDataAndUpload(ExportRecord record, String srcPath,Map<Long,String> classMap, Q query,
+                                                             Function<Q, Page<T>> fun, Function3<List<T>, Q,Map<Long,String>, List<DataExportBO>> processData) {
         var rootPath = String.format("%s/%s", record.getCreatedBy(),
                 TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
         var exportRecordBOBuilder = ExportRecordBO.builder()
@@ -110,7 +112,7 @@ public class ExportUseCase {
             if (CollectionUtil.isEmpty(page.getList())) {
                 break;
             }
-            writeFile(page.getList(), srcPath, query,processData);
+            writeFile(page.getList(), srcPath,classMap, query,processData);
             var listSize = page.getList().size();
             var exportRecordBO = exportRecordBOBuilder
                     .generatedNum((page.getPageNo() - 1) * page.getPageSize() + listSize)
@@ -145,8 +147,8 @@ public class ExportUseCase {
 
     }
 
-    private <T, Q extends BaseQueryBO>  void writeFile(List<T> list, String zipPath, Q query,Function2<List<T>, Q, List<DataExportBO>> processData) {
-        var dataExportBOList = processData.apply(list,query);
+    private <T, Q extends BaseQueryBO>  void writeFile(List<T> list, String zipPath,Map<Long,String> classMap, Q query,Function3<List<T>, Q,Map<Long,String>, List<DataExportBO>> processData) {
+        var dataExportBOList = processData.invoke(list,query,classMap);
         var jsonConfig = JSONConfig.create().setIgnoreNullValue(false);
         dataExportBOList.forEach(dataExportBO -> {
             var dataExportBaseBO = dataExportBO.getData();
