@@ -75,7 +75,7 @@ public class JwtAuthenticationFilter implements Filter {
         var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
-        buildRequestUserInfo();
+        buildRequestUserInfo(loggedUserDTO);
         chain.doFilter(request, response);
         return;
     }
@@ -89,27 +89,20 @@ public class JwtAuthenticationFilter implements Filter {
     private void buildRequestContext(HttpServletRequest httpServletRequest) {
         if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
+            log.info("host is {}", httpServletRequest.getHeader(HOST));
+            log.info("X-Forwarded-Proto is {}", httpServletRequest.getHeader(X_FORWARDED_PROTO));
+            log.info("X-Real-Ip is {}", httpServletRequest.getHeader(X_REAL_IP));
+            log.info("X-Forwarded-For is {}", httpServletRequest.getHeader(X_FORWARDED_FOR));
+            log.info("X-User-Agent is {}", httpServletRequest.getHeader(X_UA));
             requestContext.setRequestInfo(RequestInfo.builder().host(httpServletRequest.getHeader(HOST)).forwardedProto(httpServletRequest.getHeader(X_FORWARDED_PROTO))
                     .realIp(httpServletRequest.getHeader(X_REAL_IP)).forwardedFor(httpServletRequest.getHeader(X_FORWARDED_FOR)).userAgent(httpServletRequest.getHeader(X_UA)).build());
             RequestContextHolder.setContext(requestContext);
         }
     }
 
-    private void buildRequestUserInfo() {
+    private void buildRequestUserInfo(LoggedUserDTO loggedUserDTO) {
         if (ObjectUtil.isNull(RequestContextHolder.getContext().getUserInfo())) {
-            LoggedUserDTO loggedUserDTO = getLoggedUserDTO();
-            if (ObjectUtil.isNotNull(loggedUserDTO)) {
-                RequestContextHolder.getContext().setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
-            }
+            RequestContextHolder.getContext().setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
         }
-    }
-
-    private LoggedUserDTO getLoggedUserDTO() {
-        var securityContext = SecurityContextHolder.getContext();
-        var authentication = securityContext.getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return null;
-        }
-        return (LoggedUserDTO) authentication.getPrincipal();
     }
 }
