@@ -89,6 +89,7 @@ public class JwtAuthenticationFilter implements Filter {
     private void buildRequestContext(HttpServletRequest httpServletRequest) {
         if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
+            log.info("request uri is {}",httpServletRequest.getRequestURI());
             log.info("host is {}", httpServletRequest.getHeader(HOST));
             log.info("X-Forwarded-Proto is {}", httpServletRequest.getHeader(X_FORWARDED_PROTO));
             log.info("X-Real-Ip is {}", httpServletRequest.getHeader(X_REAL_IP));
