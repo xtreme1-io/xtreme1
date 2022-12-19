@@ -95,7 +95,7 @@ public class JwtAuthenticationFilter implements Filter {
     }
 
     private void buildRequestContext(HttpServletRequest httpServletRequest) {
-        if (ObjectUtil.isNull(RequestContextHolder.getContext()) && !"/actuator".startsWith(httpServletRequest.getRequestURI())) {
+        if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
             log.info("request uri is {}",httpServletRequest.getRequestURI());
             log.info("host is {}", httpServletRequest.getHeader(HOST));
