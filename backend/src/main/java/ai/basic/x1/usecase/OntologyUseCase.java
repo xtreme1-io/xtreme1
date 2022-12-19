@@ -161,22 +161,24 @@ public class OntologyUseCase {
             result.setValidClassSize(classesJson.size());
             setId(classesJson);
             result.setClasses(classesJson.toList(ClassAndClassificationImportBO.Class.class));
-            if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(desType)) {
-                validClasses = classesJson.toList(ClassBO.class);
-                validClasses.forEach(clazz -> clazz.setOntologyId(desId));
-                List<Class> alreadyExistClasses = classDAO.getBaseMapper().getClasses(desId, DefaultConverter.convert(validClasses, Class.class));
-                if (ObjectUtil.isNotEmpty(alreadyExistClasses)) {
-                    result.setDuplicateClassName(DefaultConverter.convert(alreadyExistClasses, ClassAndClassificationImportBO.ClassIdentifier.class));
+            if (ObjectUtil.isNotEmpty(classesJson)){
+                if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(desType)) {
+                    validClasses = classesJson.toList(ClassBO.class);
+                    validClasses.forEach(clazz -> clazz.setOntologyId(desId));
+                    List<Class> alreadyExistClasses = classDAO.getBaseMapper().getClasses(desId, DefaultConverter.convert(validClasses, Class.class));
+                    if (ObjectUtil.isNotEmpty(alreadyExistClasses)) {
+                        result.setDuplicateClassName(DefaultConverter.convert(alreadyExistClasses, ClassAndClassificationImportBO.ClassIdentifier.class));
 
-                    canInsert = false;
-                }
-            } else if (ClassAndClassificationSourceEnum.DATASET.equals(desType)) {
-                validDatasetClasses = classesJson.toList(DatasetClassBO.class);
-                validDatasetClasses.forEach(clazz -> clazz.setDatasetId(desId));
-                List<DatasetClass> alreadyExistDatasetClasses = datasetClassDAO.getBaseMapper().getDatasetClasses(desId, DefaultConverter.convert(validDatasetClasses, DatasetClass.class));
-                if (ObjectUtil.isNotEmpty(alreadyExistDatasetClasses)) {
-                    result.setDuplicateClassName(DefaultConverter.convert(alreadyExistDatasetClasses, ClassAndClassificationImportBO.ClassIdentifier.class));
-                    canInsert = false;
+                        canInsert = false;
+                    }
+                } else if (ClassAndClassificationSourceEnum.DATASET.equals(desType)) {
+                    validDatasetClasses = classesJson.toList(DatasetClassBO.class);
+                    validDatasetClasses.forEach(clazz -> clazz.setDatasetId(desId));
+                    List<DatasetClass> alreadyExistDatasetClasses = datasetClassDAO.getBaseMapper().getDatasetClasses(desId, DefaultConverter.convert(validDatasetClasses, DatasetClass.class));
+                    if (ObjectUtil.isNotEmpty(alreadyExistDatasetClasses)) {
+                        result.setDuplicateClassName(DefaultConverter.convert(alreadyExistDatasetClasses, ClassAndClassificationImportBO.ClassIdentifier.class));
+                        canInsert = false;
+                    }
                 }
             }
         } else {
@@ -193,30 +195,32 @@ public class OntologyUseCase {
             result.setValidClassificationSize(classificationsJson.size());
             setId(classificationsJson);
             result.setClassifications(classificationsJson.toList(ClassAndClassificationImportBO.Classification.class));
-            if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(desType)) {
-                validClassifications = classificationsJson.toList(ClassificationBO.class);
-                validClassifications.forEach(clazz -> clazz.setOntologyId(desId));
-                var classificationWrapper = new LambdaQueryWrapper<Classification>()
-                        .eq(Classification::getOntologyId, desId)
-                        .in(Classification::getName, validClassifications.stream().map(ClassificationBO::getName).collect(toList()));
-                List<Classification> alreadyExistClassifications = classificationDAO.list(classificationWrapper);
-                if (ObjectUtil.isNotEmpty(alreadyExistClassifications)) {
-                    result.setDuplicateClassificationName(alreadyExistClassifications.stream().map(Classification::getName).collect(toList()));
-
-                    canInsert = false;
-                }
-            } else if (ClassAndClassificationSourceEnum.DATASET.equals(desType)) {
-                validDatasetClassifications = classificationsJson.toList(DatasetClassificationBO.class);
-                validDatasetClassifications.forEach(clazz -> clazz.setDatasetId(desId));
-                var classificationWrapper = new LambdaQueryWrapper<DatasetClassification>()
-                        .eq(DatasetClassification::getDatasetId, desId)
-                        .in(DatasetClassification::getName, validDatasetClassifications.stream().map(DatasetClassificationBO::getName).collect(toList()));
-                List<DatasetClassification> alreadyExistClassifications = datasetClassificationDAO.list(classificationWrapper);
-                if (ObjectUtil.isNotEmpty(alreadyExistClassifications)) {
-                    result.setDuplicateClassificationName(alreadyExistClassifications.stream().map(DatasetClassification::getName).collect(toList()));
-                    canInsert = false;
+            if(ObjectUtil.isNotEmpty(classificationsJson)){
+                if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(desType)) {
+                    validClassifications = classificationsJson.toList(ClassificationBO.class);
+                    validClassifications.forEach(clazz -> clazz.setOntologyId(desId));
+                    var classificationWrapper = new LambdaQueryWrapper<Classification>()
+                            .eq(Classification::getOntologyId, desId)
+                            .in(Classification::getName, validClassifications.stream().map(ClassificationBO::getName).collect(toList()));
+                    List<Classification> alreadyExistClassifications = classificationDAO.list(classificationWrapper);
+                    if (ObjectUtil.isNotEmpty(alreadyExistClassifications)) {
+                        result.setDuplicateClassificationName(alreadyExistClassifications.stream().map(Classification::getName).collect(toList()));
+                        canInsert = false;
+                    }
+                } else if (ClassAndClassificationSourceEnum.DATASET.equals(desType)) {
+                    validDatasetClassifications = classificationsJson.toList(DatasetClassificationBO.class);
+                    validDatasetClassifications.forEach(clazz -> clazz.setDatasetId(desId));
+                    var classificationWrapper = new LambdaQueryWrapper<DatasetClassification>()
+                            .eq(DatasetClassification::getDatasetId, desId)
+                            .in(DatasetClassification::getName, validDatasetClassifications.stream().map(DatasetClassificationBO::getName).collect(toList()));
+                    List<DatasetClassification> alreadyExistClassifications = datasetClassificationDAO.list(classificationWrapper);
+                    if (ObjectUtil.isNotEmpty(alreadyExistClassifications)) {
+                        result.setDuplicateClassificationName(alreadyExistClassifications.stream().map(DatasetClassification::getName).collect(toList()));
+                        canInsert = false;
+                    }
                 }
             }
+
         } else {
             result.setClassificationTotalSize(0);
             result.setValidClassificationSize(0);
