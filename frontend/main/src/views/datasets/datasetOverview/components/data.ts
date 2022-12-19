@@ -40,9 +40,16 @@ export const defaultScatterOptions = {
   xField: 'x',
   yField: 'y',
   colorField: 'option',
-  size: 10,
+  size: 3,
   shape: 'circle',
   limitInPlot: false,
+  yAxis: {
+    grid: {
+      line: {
+        style: { stroke: '#ddd', lineWidth: 2, lineDash: [4, 5], strokeOpacity: 0.7 },
+      },
+    },
+  },
   legend: {
     offsetX: 5,
     position: 'right-top',
