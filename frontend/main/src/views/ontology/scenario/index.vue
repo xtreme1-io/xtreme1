@@ -219,7 +219,7 @@
 
   const handleSingleAnnotate = async (dataId: any, object: any) => {
     const recordId = await takeRecordByData({
-      datasetId: info.value.id,
+      datasetId: object.datasetId || info.value.id,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
       isFilterData: true,
