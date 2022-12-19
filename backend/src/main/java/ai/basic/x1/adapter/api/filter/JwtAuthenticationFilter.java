@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         var req = (HttpServletRequest) request;
-        buildRequestContext(req);
+
         String token = null;
         var authorization = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorization != null && authorization.startsWith("Bearer ")) {
@@ -75,6 +75,7 @@ public class JwtAuthenticationFilter implements Filter {
         var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
+        buildRequestContext(req);
 
         chain.doFilter(request, response);
         return;
