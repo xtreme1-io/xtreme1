@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.api.controller;
 
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.OntologyDTO;
 import ai.basic.x1.adapter.dto.request.ClassAndClassificationImportReqDTO;
 import ai.basic.x1.adapter.dto.response.ClassAndClassificationImportRespDTO;
