@@ -101,16 +101,16 @@ public class OntologyController {
     public ClassAndClassificationImportRespDTO saveClassAndClassificationBatch(@RequestBody ClassAndClassificationImportRespDTO dto) throws IOException {
         if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(dto.getDesType())) {
             List<ClassBO> classes = DefaultConverter.convert(dto.getClasses(), ClassBO.class);
-            if (ObjectUtil.isEmpty(classes)){
+            if (ObjectUtil.isEmpty(classes)) {
                 dto.setValidClassSize(0);
-            }else {
+            } else {
                 dto.setValidClassSize(classes.size());
                 classes.forEach(c -> c.setOntologyId(dto.getDesId()));
             }
             List<ClassificationBO> classifications = DefaultConverter.convert(dto.getClassifications(), ClassificationBO.class);
-            if (ObjectUtil.isEmpty(classifications)){
+            if (ObjectUtil.isEmpty(classifications)) {
                 dto.setValidClassificationSize(0);
-            }else {
+            } else {
                 dto.setValidClassificationSize(classifications.size());
                 classifications.forEach(c -> c.setOntologyId(dto.getDesId()));
             }
@@ -118,16 +118,16 @@ public class OntologyController {
 
         } else {
             List<DatasetClassBO> classes = DefaultConverter.convert(dto.getClasses(), DatasetClassBO.class);
-            if (ObjectUtil.isEmpty(classes)){
+            if (ObjectUtil.isEmpty(classes)) {
                 dto.setValidClassSize(0);
-            }else {
+            } else {
                 dto.setValidClassSize(classes.size());
                 classes.forEach(c -> c.setDatasetId(dto.getDesId()));
             }
             List<DatasetClassificationBO> classifications = DefaultConverter.convert(dto.getClassifications(), DatasetClassificationBO.class);
-            if (ObjectUtil.isEmpty(classifications)){
+            if (ObjectUtil.isEmpty(classifications)) {
                 dto.setValidClassificationSize(0);
-            }else {
+            } else {
                 dto.setValidClassificationSize(classifications.size());
                 classifications.forEach(c -> c.setDatasetId(dto.getDesId()));
             }
@@ -141,14 +141,14 @@ public class OntologyController {
             ClassAndClassificationExportParamBO param = ClassAndClassificationExportParamBO.builder().sourceId(sourceId).sourceType(sourceType).build();
         String sourceName = "";
 
-        if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(sourceType)){
+        if (ClassAndClassificationSourceEnum.ONTOLOGY.equals(sourceType)) {
             OntologyBO ontologyBO = ontologyUseCase.findById(sourceId);
-            if (ObjectUtil.isNotNull(ontologyBO)){
+            if (ObjectUtil.isNotNull(ontologyBO)) {
                 sourceName = ontologyBO.getName();
             }
-        }else {
+        } else {
             DatasetBO datasetBO = datasetUseCase.findById(sourceId);
-            if (ObjectUtil.isNotNull(datasetBO)){
+            if (ObjectUtil.isNotNull(datasetBO)) {
                 sourceName = datasetBO.getName();
             }
         }
