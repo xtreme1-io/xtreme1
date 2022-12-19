@@ -57,12 +57,10 @@
   };
 
   const handleCancel = () => {
-    console.log('cancel');
     showPullBox.value = false;
     showPushBox.value = false;
   };
   const handleOverride = () => {
-    console.log('override');
     if (showPullBox.value) {
       emitter.emit('pullClass');
     } else {

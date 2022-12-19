@@ -2,14 +2,13 @@
   <BasicModal
     v-bind="$attrs"
     @register="registerModal"
-    centered
     destroyOnClose
     @cancel="handleCancel"
     @ok="handleConfirm"
     okText="Confirm"
     :okButtonProps="{ disabled: isDisabled }"
     :width="1000"
-    :height="750"
+    :height="680"
   >
     <template #title>
       <div class="flex items-center">
@@ -52,12 +51,14 @@
               Keep All
             </span>
           </div>
-          <CustomTable
-            ref="classRef"
-            class="table"
-            :type="ClassTypeEnum.CLASS"
-            :list="conflictClassList"
-          />
+          <template v-if="hasData">
+            <CustomTable
+              ref="classRef"
+              class="table"
+              :type="ClassTypeEnum.CLASS"
+              :list="conflictClassList"
+            />
+          </template>
         </div>
         <div class="wrapper-inner">
           <div class="title">Classifications</div>
@@ -75,12 +76,14 @@
               Keep All
             </span>
           </div>
-          <CustomTable
-            ref="classificationRef"
-            class="table"
-            :type="ClassTypeEnum.CLASSIFICATION"
-            :list="conflictClassificationList"
-          />
+          <template v-if="hasData">
+            <CustomTable
+              ref="classificationRef"
+              class="table"
+              :type="ClassTypeEnum.CLASSIFICATION"
+              :list="conflictClassificationList"
+            />
+          </template>
         </div>
       </div>
     </div>
@@ -103,6 +106,9 @@
 
   const conflictClassList = ref<any[]>([]);
   const conflictClassificationList = ref<any[]>([]);
+  const hasData = computed(() => {
+    return conflictClassList.value.length > 0 || conflictClassificationList.value.length > 0;
+  });
 
   const classificationRef = ref();
   const classRef = ref();

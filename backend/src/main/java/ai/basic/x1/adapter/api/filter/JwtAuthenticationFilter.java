@@ -77,12 +77,16 @@ public class JwtAuthenticationFilter implements Filter {
         SecurityContextHolder.setContext(securityContext);
         buildRequestUserInfo(loggedUserDTO);
         chain.doFilter(request, response);
+        cleanRequest();
         return;
     }
 
     @Override
     public void destroy() {
         SecurityContextHolder.clearContext();
+    }
+
+    private void cleanRequest(){
         RequestContextHolder.cleanContext();
     }
 
