@@ -197,7 +197,7 @@
     }
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const obj2dMap = {};
-      res.list.forEach((item: any) => {
+      res.list?.forEach((item: any) => {
         const type = item.classAttributes.type || item.classAttributes.objType;
         const info = item.classAttributes;
         if (['2D_RECT', '2D_BOX', 'rect', 'box2d'].includes(type)) {
@@ -213,7 +213,7 @@
       object2D.value = obj2dMap;
       list.value = _list;
     } else {
-      list.value = res.list;
+      list.value = res.list || [];
     }
   };
 
