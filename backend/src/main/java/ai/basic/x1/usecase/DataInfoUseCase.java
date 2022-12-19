@@ -121,7 +121,7 @@ public class DataInfoUseCase {
     private UploadRecordDAO uploadRecordDAO;
 
     @Autowired
-    private DatasetSimilarityRecordUseCase datasetSimilarityRecordUseCase;
+    private DatasetSimilarityJobUseCase datasetSimilarityJobUseCase;
 
     @Autowired
     private DataAnnotationClassificationDAO dataAnnotationClassificationDAO;
@@ -548,7 +548,7 @@ public class DataInfoUseCase {
         var uploadRecordBO = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
-        datasetSimilarityRecordUseCase.generateDatasetSimilarityRecord(datasetId);
+        datasetSimilarityJobUseCase.submitJob(datasetId);
     }
 
     private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -609,7 +609,7 @@ public class DataInfoUseCase {
             }
             var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
-            datasetSimilarityRecordUseCase.generateDatasetSimilarityRecord(datasetId);
+            datasetSimilarityJobUseCase.submitJob(datasetId);
         } else {
             var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
