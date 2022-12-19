@@ -65,7 +65,7 @@
 
       <div class="panel flex items-center">
         <!-- <img class="mr-2" width="36" :src="avatarUrl || ava" alt="" /> -->
-        <ProfileAvatar class="mr-2" :avatarUrl="avatarUrl" :nickname="nickname" :size="36" />
+        <ProfileAvatar class="mr-2" :avatarUrl="avatarUrl" :nickname="nickname" :size="31" />
         <div v-if="!type" class="panel-name">{{ nickname }}</div>
       </div>
     </Popover>

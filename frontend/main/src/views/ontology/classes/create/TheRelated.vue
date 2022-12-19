@@ -156,7 +156,6 @@
 
   emitter.off('pushClass');
   emitter.on('pushClass', async () => {
-    console.log('pushClass');
     if (props.classId) {
       changeLoading(true);
 
@@ -172,12 +171,13 @@
       }
 
       changeLoading(false);
+    } else {
+      message.warning('Please pick one class you want to relate to at first');
     }
   });
 
   emitter.off('pullClass');
   emitter.on('pullClass', async () => {
-    console.log('pullClass');
     if (props.classId) {
       changeLoading(true);
 
@@ -191,6 +191,8 @@
       }
 
       changeLoading(false);
+    } else {
+      message.warning('Please pick one class you want to relate to at first');
     }
   });
 </script>

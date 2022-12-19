@@ -25,7 +25,7 @@
           @fetchList="handleRefresh"
         />
       </div>
-      <div style="height: calc(100vh - 154px)">
+      <div style="height: calc(100vh - 200px)">
         <ScrollContainer ref="scrollRef">
           <ClassCard
             :selectedList="selectedList"
@@ -66,7 +66,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, unref, provide, onBeforeMount } from 'vue';
+  import { ref, unref, provide, onMounted } from 'vue';
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from '/@/views/ontology/classes/components/SearchForm.vue';
   // import SearchForm1 from '/@/views/ontology/classes/components/SearchForm.vue';
@@ -254,7 +254,7 @@
   };
 
   const scrollRef = ref<Nullable<ScrollActionType>>(null);
-  onBeforeMount(() => {
+  onMounted(() => {
     handleScroll(scrollRef, () => {
       if (total.value > cardList.value.length) {
         pageNo.value++;
@@ -311,9 +311,12 @@
   .@{prefix-cls} {
     display: flex;
     height: 100%;
+    // height: calc(100% - 30px);
 
     .classes__left {
       flex: 1;
+      // height: 100%;
+      // height: calc(100% - 30px);
       position: relative;
       display: flex;
       flex-direction: column;

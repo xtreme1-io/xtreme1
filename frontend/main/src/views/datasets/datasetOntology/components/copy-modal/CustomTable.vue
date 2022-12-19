@@ -80,8 +80,8 @@
       },
     ],
     showIndexColumn: false,
-    pagination: true,
-    canResize: false,
+    pagination: false,
+    // canResize: false,
     actionColumn: {
       width: '50%',
       title: 'Resolution',

@@ -62,9 +62,9 @@ export default {
     },
     model: {
       modelRun: 'Model Run',
-      modelRunDesc: 'Allow member to run all Basic AI build-in models in dataset',
+      modelRunDesc: 'Allow member to run all Xtreme1 build-in models in dataset',
       modelTool: 'Model-assist Tool',
-      modelToolDesc: 'Allow member to run all Basic AI build-in models in annotation tools',
+      modelToolDesc: 'Allow member to run all Xtreme1 build-in models in annotation tools',
     },
   },
   admin: {

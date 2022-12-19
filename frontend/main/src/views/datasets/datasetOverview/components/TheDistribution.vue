@@ -4,7 +4,8 @@
     <div class="chartContainer">
       <Tabs v-model:activeKey="activeKey" @change="handleChange">
         <Tabs.TabPane :key="tabPaneEnum.CLASS" tab="Classes" forceRender>
-          <div>
+          <ChartEmpty v-if="!hasClassData" tip="No Classes" class="py-80px" />
+          <div v-else>
             <div class="class-legend">
               <div
                 class="class-legend-item"
@@ -19,16 +20,18 @@
           </div>
         </Tabs.TabPane>
         <Tabs.TabPane :key="tabPaneEnum.CLASSIFICATION" tab="Classifications" forceRender>
-          <div ref="plotClassificationRef" class="chartContainer__box"></div>
+          <ChartEmpty v-if="!hasClassificationData" tip="No Classifications" class="py-80px" />
+          <div v-else ref="plotClassificationRef" class="chartContainer__box"></div>
         </Tabs.TabPane>
       </Tabs>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import { onMounted, ref, unref } from 'vue';
+  import { computed, onMounted, ref, unref } from 'vue';
   import { Tabs } from 'ant-design-vue';
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
+  import ChartEmpty from './ChartEmpty.vue';
   import { classificationBarOptions, classOptions } from './data';
   import { tabPaneEnum } from './typing';
   import { getClassificationDataApi, getClassObjectApi } from '/@/api/business/dataset/overview';
@@ -51,6 +54,9 @@
 
   /** Class */
   const classData = ref<Array<IClassUnits>>([]);
+  const hasClassData = computed(() => {
+    return classData.value.length > 0;
+  });
   const annotations = ref<any[]>([]);
   const getClassObject = async () => {
     const params = { datasetId: props.datasetId };
@@ -120,6 +126,9 @@
 
   /** Classification */
   const classificationData = ref<Array<IClassificationData>>([]);
+  const hasClassificationData = computed(() => {
+    return classificationData.value.length > 0;
+  });
   const getClassificationObject = async () => {
     const params = { datasetId: props.datasetId };
     const res = await getClassificationDataApi(params);

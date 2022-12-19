@@ -1,7 +1,7 @@
 <template>
   <div :class="`${prefixCls}`">
     <div class="wrapper">
-      <div class="welcome">Welcome to Basic AI!</div>
+      <div class="welcome">Welcome to Xtreme1!</div>
 
       <div class="text-center href-card mb-7">
         <div

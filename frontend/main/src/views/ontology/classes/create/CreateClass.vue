@@ -84,14 +84,14 @@
                     <Switch v-model:checked="formState.isStandard" />
                   </Form.Item>
                 </div>
-                <TheStandard
-                  :isStandard="(formState.isStandard as boolean)"
-                  v-model:points="formState.points"
-                  v-model:length="formState.length"
-                  v-model:width="formState.width"
-                  v-model:height="formState.height"
-                />
               </div>
+              <TheStandard
+                :isStandard="(formState.isStandard as boolean)"
+                v-model:points="formState.points"
+                v-model:length="formState.length"
+                v-model:width="formState.width"
+                v-model:height="formState.height"
+              />
             </template>
             <!-- Image -->
             <Form.Item
@@ -251,7 +251,10 @@
 
         formState.name = props.detail.name;
         formState.color = props.detail.color ?? '#7dfaf2';
-        formState.toolType = props.detail.toolType;
+        // to avoid import error
+        const isError = toolTypeOption.value.some((item) => item.type != props.detail.toolType);
+        formState.toolType = isError ? ToolTypeEnum.BOUNDING_BOX : props.detail.toolType;
+
         nextTick(() => {
           formState.ontologyId = props.detail?.ontologyId;
           formState.classId = props.detail?.classId;

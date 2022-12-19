@@ -68,14 +68,14 @@ public class JwtAuthenticationFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
-
+        log.info("userId is {}", userBO.getId());
         var loggedUserDTO = new LoggedUserDTO(userBO.getUsername(), userBO.getPassword(), userBO.getId());
         var authentication = new UsernamePasswordAuthenticationToken(
                 loggedUserDTO, loggedUserDTO.getPassword(), loggedUserDTO.getAuthorities());
         var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
-
+        buildRequestUserInfo(loggedUserDTO);
         chain.doFilter(request, response);
         return;
     }
@@ -87,26 +87,23 @@ public class JwtAuthenticationFilter implements Filter {
     }
 
     private void buildRequestContext(HttpServletRequest httpServletRequest) {
-
         if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
-            LoggedUserDTO loggedUserDTO = getLoggedUserDTO();
-            if (ObjectUtil.isNotNull(loggedUserDTO)) {
-                requestContext.setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
-            }
+            log.info("request uri is {}",httpServletRequest.getRequestURI());
+            log.info("host is {}", httpServletRequest.getHeader(HOST));
+            log.info("X-Forwarded-Proto is {}", httpServletRequest.getHeader(X_FORWARDED_PROTO));
+            log.info("X-Real-Ip is {}", httpServletRequest.getHeader(X_REAL_IP));
+            log.info("X-Forwarded-For is {}", httpServletRequest.getHeader(X_FORWARDED_FOR));
+            log.info("X-User-Agent is {}", httpServletRequest.getHeader(X_UA));
             requestContext.setRequestInfo(RequestInfo.builder().host(httpServletRequest.getHeader(HOST)).forwardedProto(httpServletRequest.getHeader(X_FORWARDED_PROTO))
                     .realIp(httpServletRequest.getHeader(X_REAL_IP)).forwardedFor(httpServletRequest.getHeader(X_FORWARDED_FOR)).userAgent(httpServletRequest.getHeader(X_UA)).build());
             RequestContextHolder.setContext(requestContext);
         }
     }
 
-    private LoggedUserDTO getLoggedUserDTO() {
-        var securityContext = SecurityContextHolder.getContext();
-        var authentication = securityContext.getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return null;
+    private void buildRequestUserInfo(LoggedUserDTO loggedUserDTO) {
+        if (ObjectUtil.isNull(RequestContextHolder.getContext().getUserInfo())) {
+            RequestContextHolder.getContext().setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
         }
-
-        return (LoggedUserDTO) authentication.getPrincipal();
     }
 }

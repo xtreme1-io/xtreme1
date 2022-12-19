@@ -98,7 +98,7 @@
         </FormItem>
         <div class="mt-5">
           <FormItem class="text-sm text-left">
-            Registration means that I agree to the BasicAI
+            Registration means that I agree to the Xtreme1
             <span class="tips"> Privacy Policy </span> and <span class="tips"> Terms </span>
           </FormItem>
         </div>

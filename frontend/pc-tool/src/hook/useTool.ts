@@ -15,7 +15,6 @@ export default function useTool() {
             //     config[0].constraint = true;
             //     config[0].size3D = new THREE.Vector3(4, 4, 4);
             // }
-
             editor.setClassTypes(config);
         } catch (error) {
             throw new BSError('', editor.lang('load-class-error'), error);

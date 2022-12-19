@@ -176,59 +176,6 @@ export async function getDataSetClass(datasetId: string) {
     data = data.data || [];
 
     let classTypes = traverseClass2Arr(data);
-    // data.forEach((config: any) => {
-    //     let classType: IClassType = {
-    //         id: config.id + '',
-    //         name: config.name || '',
-    //         // label: config.name + '-label',
-    //         label: config.name || '',
-    //         color: config.color || '#ff0000',
-    //         attrs: [],
-    //         type: '',
-    //     };
-
-    //     let attributes = config.attributes || [];
-    //     let toolOption = config.toolTypeOptions || {};
-
-    //     if (toolOption.isStandard) {
-    //         classType.type = 'standard';
-    //         classType.size3D = new THREE.Vector3(
-    //             toolOption.length || 0,
-    //             toolOption.width || 0,
-    //             toolOption.height || 0,
-    //         );
-    //     } else if (toolOption.isConstraints) {
-    //         let length, width, height;
-    //         length = toolOption.length || [];
-    //         width = toolOption.width || [];
-    //         height = toolOption.height || [];
-    //         classType.type = 'constraint';
-    //         classType.sizeMin = new THREE.Vector3(length[0] || 0, width[0] || 0, height[0] || 0);
-    //         classType.sizeMax = new THREE.Vector3(length[1] || 0, width[1] || 0, height[1] || 0);
-    //     }
-
-    //     if (toolOption.points) {
-    //         classType.points = [toolOption.points, 0];
-    //     }
-
-    //     attributes.forEach((config: any) => {
-    //         let options = (config.options || []).map((e: any) => {
-    //             // return { value: e.name, label: e.name + '-label' };
-    //             return { value: e.name, label: e.name };
-    //         });
-    //         classType.attrs.push({
-    //             id: config.id || config.name,
-    //             name: config.name,
-    //             // label: config.name + '-label',
-    //             label: config.name,
-    //             required: config.required,
-    //             type: config.type,
-    //             options: options,
-    //         });
-    //     });
-
-    //     classTypes.push(classType);
-    // });
 
     return classTypes;
 }
