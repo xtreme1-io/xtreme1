@@ -43,7 +43,7 @@ export const defaultScatterOptions = {
   size: 3,
   shape: 'circle',
   limitInPlot: false,
-  yAxis: {
+  xAxis: {
     grid: {
       line: {
         style: { stroke: '#ddd', lineWidth: 2, lineDash: [4, 5], strokeOpacity: 0.7 },

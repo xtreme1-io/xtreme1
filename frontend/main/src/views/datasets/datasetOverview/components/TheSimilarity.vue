@@ -10,6 +10,7 @@
             style="width: 200px"
             :value="selectClassificationId"
             @change="handleChangeClassification"
+            allowClear
           >
             <Select.Option v-for="item in classificationList" :key="item.id">
               {{ item.name }}
@@ -73,6 +74,7 @@
   import { Select } from 'ant-design-vue';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import ChartEmpty from './ChartEmpty.vue';
+  import emptyImg from '/@/assets/images/placeImg.png';
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
   import { defaultScatterOptions } from './data';
   import {
@@ -83,8 +85,8 @@
   import { brushEnum, optionEnum } from './typing';
   import { ISimilarityList } from '/@/api/business/dataset/model/overviewModel';
   import { datasetDetailApi } from '/@/api/business/dataset';
-  import _ from 'lodash';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import _ from 'lodash';
 
   const go = useGo();
   const props = defineProps<{ datasetId: number | string }>();
@@ -119,10 +121,11 @@
         item.key = item.attributeId + ':' + item.optionName;
         return item;
       });
-
-      updateScatterList();
-      chartRef.value.update({ data: scatterList.value });
+    } else {
+      similarList.value = [];
     }
+    updateScatterList();
+    chartRef.value.update({ data: scatterList.value });
   };
   const updateScatterList = () => {
     const optionMap = {} as Record<number, ISimilarityList[]>;
@@ -161,6 +164,7 @@
   };
 
   /** List */
+  const isLoading = ref<boolean>(false);
   const scatterList = ref<any[]>([]);
   const hasData = computed(() => {
     return scatterList.value.length > 0;
@@ -183,10 +187,9 @@
   };
 
   /** DataInfo */
-  const isLoading = ref<boolean>(false);
   const lastDataId = ref<number>();
-  const imgSrc = ref<string>();
-  const labelName = ref<string>();
+  const imgSrc = ref<string>(emptyImg);
+  const labelName = ref<string>('');
   const getDataInfo = _.debounce(async (id) => {
     lastDataId.value = id;
     const maskDom: any = document.querySelector('#tooltipMask');
@@ -194,11 +197,9 @@
       maskDom.style.display = 'flex';
     }
 
-    isLoading.value = true;
     const res: any = await datasetDetailApi({ id });
     imgSrc.value = res?.content?.[0]?.file?.url;
     labelName.value = res.name;
-    isLoading.value = false;
 
     getToolTipDom(id);
   }, 1500);
@@ -265,6 +266,8 @@
           const data = items[0]?.data || {};
           const dataId = data?.id ?? undefined;
           if (dataId && dataId != lastDataId.value) {
+            imgSrc.value = emptyImg;
+            labelName.value = '';
             getDataInfo(dataId);
           } else {
             setTimeout(() => {
@@ -287,7 +290,7 @@
                                 <div id="tooltipView" class="custom-tooltip-container-header-right">View data</div>
                               </div>`;
           const contentDom = `<div class="custom-tooltip-container-content">
-                                <img id="tooltipImg" src="${imgSrc.value}" onError={{  this.src = ''}} />
+                                <img id="tooltipImg" src="${imgSrc.value}" onError="{{  this.src = ''}}" />
                               </div>`;
 
           return `<div class="custom-tooltip-container" style="background-color:orange">

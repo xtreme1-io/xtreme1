@@ -159,9 +159,9 @@
     closeChooseOntologyModal();
     closeChooseClassModal();
 
-    console.log('conflict result: ', conflictClassList, conflictClassificationList);
+    // console.log('conflict result: ', conflictClassList, conflictClassificationList);
     if (conflictClassList.length > 0 || conflictClassificationList.length > 0) {
-      console.log(conflictClassList, conflictClassificationList);
+      // console.log(conflictClassList, conflictClassificationList);
       openConflictModal(true, {
         type: type,
         conflictClassList,

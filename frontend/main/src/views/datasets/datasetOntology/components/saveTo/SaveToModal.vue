@@ -161,7 +161,6 @@
       const { list: classificationList } = await getOntologyClassificationApi(postData);
       res = validateClassificationConflict(props.selectedList, classificationList);
     }
-
     setTimeout(() => {
       noConflictList.value = [...res.noConflictList];
       conflictList.value = [...res.conflictList];
