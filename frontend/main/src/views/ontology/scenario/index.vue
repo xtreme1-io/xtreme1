@@ -170,7 +170,7 @@
     console.log(classification.value);
     const res = await getScenario({
       classId: result.value.toString(),
-      datasetId: info.value.id,
+      // datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'ONTOLOGY',
       pageSize: 9999,
