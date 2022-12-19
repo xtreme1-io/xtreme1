@@ -34,6 +34,7 @@
   import ConflictModal from '../copy-modal/ConflictModal.vue';
   import { useModal } from '/@/components/Modal';
   import { ICopyEnum } from '../copy-modal/data';
+  import { downloadByCorsUrl, downloadByUrl } from '/@/utils/file/download';
   const [registerConflictModal, { openModal: openConflictModal, closeModal: closeConflictModal }] =
     useModal();
   const uploading = ref(false);
@@ -101,7 +102,11 @@
 
   const handleCancel = () => {};
 
-  const handleDownload = () => {};
+  const handleDownload = () => {
+    downloadByUrl({
+      url: 'https://basicai-asset.s3.us-west-2.amazonaws.com/xtreme1/class-and-classification-template.json',
+    });
+  };
   const handleView = () => {};
 
   const handleBack = () => {};
