@@ -20,6 +20,11 @@ public class DataResultObjectExportBO {
     private String type;
 
     /**
+     * Class name
+     */
+    private String className;
+
+    /**
      * Track id
      */
     private String trackId;
