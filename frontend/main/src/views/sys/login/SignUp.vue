@@ -67,7 +67,7 @@
           <span class="tips">Registration Link Sent! Please check your email</span>
         </FormItem>
         <FormItem class="text-sm text-left">
-          Registration means that I agree to the BasicAI
+          Registration means that I agree to the Xtreme1
           <a target="_blank" class="tips" href="https://www.basic.ai/privacypolicy">
             Privacy Policy
           </a>

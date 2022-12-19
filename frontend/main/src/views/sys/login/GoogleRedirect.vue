@@ -2,7 +2,7 @@
   <div class="app-loading">
     <div class="app-loading-wrap">
       <img src="../../../assets/images/logo.png" class="app-loading-logo" alt="Logo" />
-      <div class="app-loading-title">Basic AI</div>
+      <div class="app-loading-title">Xtreme1</div>
     </div>
   </div>
 </template>

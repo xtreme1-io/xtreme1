@@ -19,6 +19,7 @@
       </div>
       <div class="flex pl-25px pr-25px">
         <Select
+          dropdownClassName="custom-search-scenario"
           v-model:value="result"
           showSearch
           mode="multiple"
@@ -26,7 +27,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            {{ item.name }}
+            <div class="inline-flex items-center">
+              <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
+              {{ item.name }}
+            </div>
           </Select.Option>
         </Select>
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
@@ -60,17 +64,18 @@
         </div>
       </div>
       <div>
-        <Checkbox.Group v-model:value="classification">
-          <Checkbox
-            v-for="item in filterOptions"
-            style="display: block"
-            :value="item.attributeId + '^' + item.optionName"
-            :key="item.attributeId + '^' + item.optionName"
-          >
-            {{ item.optionName }}
-          </Checkbox>
-          <!-- <Radio cstyle="display: block" :value="11">11111</Radio> -->
-        </Checkbox.Group>
+        <CollContainer icon="mdi:calendar-month" title="Status">
+          <Checkbox.Group style="margin-top: 5px" v-model:value="classification">
+            <Checkbox
+              v-for="item in filterOptions"
+              style="display: block"
+              :value="item.attributeId + '^' + item.optionName"
+              :key="item.attributeId + '^' + item.optionName"
+            >
+              {{ item.optionName }}
+            </Checkbox>
+          </Checkbox.Group>
+        </CollContainer>
       </div>
     </div>
   </div>
@@ -91,14 +96,16 @@
     getDataByIds,
     getClassificationOptions,
     takeRecordByData,
-    checkRootByDataId,
+    // checkRootByDataId,
   } from '/@/api/business/dataset';
-  import { useMessage } from '/@/hooks/web/useMessage';
+  // import { useMessage } from '/@/hooks/web/useMessage';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
   import exportModalVue from './exportModal.vue';
   import { useModal } from '/@/components/Modal';
+  import CollContainer from '/@@/CollContainer/index.vue';
+  import { toolTypeImg } from '../../ontology/classes/attributes/data';
   const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;
@@ -112,7 +119,6 @@
   const filterOptions = ref();
   const dataInfo = ref<Record<string, any>>({});
   const object2D = ref<Record<string, any>>({});
-  const { createMessage } = useMessage();
 
   const handleChange = (e) => {
     if (e.length === 0) {
@@ -133,7 +139,7 @@
     window.history.go(-1);
   };
 
-  watch(classification, (res) => {
+  watch(classification, () => {
     fetchList();
   });
 
@@ -163,7 +169,7 @@
       datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'DATASET_CLASS',
-      pageSize: 999,
+      pageSize: 9999,
       attributeIds: classification.value
         ? classification.value.map((item) => item.split('^')[0]).toString()
         : undefined,
@@ -212,21 +218,10 @@
       datasetId: info.value.id,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
+      isFilterData: true,
     }).catch(() => {});
     const trackId = object.classAttributes.trackId;
-    const errMsg = 'The selected data has been annotated by others';
-    if (!recordId || !trackId) {
-      return createMessage.error(errMsg);
-    }
-
-    const status = await checkRootByDataId(recordId, dataId);
-    if (!status) {
-      return createMessage.error(errMsg);
-    }
-    // const res = await getLockedByDataset({
-    //   datasetId: info.value.id,
-    // });
-
+    if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
   };
 </script>
