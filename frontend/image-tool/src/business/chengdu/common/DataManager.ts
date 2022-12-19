@@ -4,6 +4,7 @@ import * as api from '../api';
 import * as utils from '../utils';
 import { Event, ICmdName, ICmdOption } from 'editor';
 import { isArray } from 'lodash';
+import { convertModelRunResult } from '../utils';
 
 let timer: any;
 
@@ -246,7 +247,7 @@ export default class DataManager {
                                 objects = objects.filter(
                                     (e) => e.confidence && e.confidence >= 0.5,
                                 );
-                                _this.modelMap[dataMeta.dataId] = objects;
+                                _this.modelMap[dataMeta.dataId] = convertModelRunResult(objects);
                             } else {
                                 dataMeta.model = undefined;
                                 if (dataMeta.dataId === curData.dataId)
