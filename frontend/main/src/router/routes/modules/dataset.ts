@@ -62,17 +62,17 @@ const dataset: AppRouteModule = {
     //     hideMenu: true,
     //   },
     // },
-    {
-      path: 'task',
-      name: 'DatasetsTaskPage',
-      component: () => import('/@/views/datasets/datasetTask/index.vue'),
-      meta: {
-        title: t('routes.datasets.task'),
-        // affix: true,
-        hideMenu: true,
-        currentActiveMenu: currentActiveMenu,
-      },
-    },
+    // {
+    //   path: 'task',
+    //   name: 'DatasetsTaskPage',
+    //   component: () => import('/@/views/datasets/datasetTask/index.vue'),
+    //   meta: {
+    //     title: t('routes.datasets.task'),
+    //     // affix: true,
+    //     hideMenu: true,
+    //     currentActiveMenu: currentActiveMenu,
+    //   },
+    // },
     {
       path: 'overview',
       name: 'DatasetsOverviewPage',
