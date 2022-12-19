@@ -19,6 +19,7 @@
       </div>
       <div class="flex pl-25px pr-25px">
         <Select
+          dropdownClassName="custom-search-scenario"
           v-model:value="result"
           showSearch
           mode="multiple"
@@ -26,7 +27,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            {{ item.name }}
+            <div class="inline-flex items-center">
+              <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
+              {{ item.name }}
+            </div>
           </Select.Option>
         </Select>
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
@@ -60,17 +64,18 @@
         </div>
       </div>
       <div>
-        <Checkbox.Group v-model:value="classification">
-          <Checkbox
-            v-for="item in filterOptions"
-            style="display: block"
-            :value="item.attributeId + '^' + item.optionName"
-            :key="item.attributeId + '^' + item.optionName"
-          >
-            {{ item.optionName }}
-          </Checkbox>
-          <!-- <Radio cstyle="display: block" :value="11">11111</Radio> -->
-        </Checkbox.Group>
+        <CollContainer icon="mdi:calendar-month" title="Status">
+          <Checkbox.Group style="margin-top: 5px" v-model:value="classification">
+            <Checkbox
+              v-for="item in filterOptions"
+              style="display: block"
+              :value="item.attributeId + '^' + item.optionName"
+              :key="item.attributeId + '^' + item.optionName"
+            >
+              {{ item.optionName }}
+            </Checkbox>
+          </Checkbox.Group>
+        </CollContainer>
       </div>
     </div>
   </div>
@@ -99,6 +104,8 @@
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
   import exportModalVue from './exportModal.vue';
   import { useModal } from '/@/components/Modal';
+  import CollContainer from '/@@/CollContainer/index.vue';
+  import { toolTypeImg } from '../../ontology/classes/attributes/data';
   const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;
