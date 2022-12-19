@@ -75,7 +75,7 @@ public class JwtAuthenticationFilter implements Filter {
         var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
-        buildRequestUserInfo();
+        buildRequestUserInfo(loggedUserDTO);
         chain.doFilter(request, response);
         return;
     }
@@ -95,21 +95,9 @@ public class JwtAuthenticationFilter implements Filter {
         }
     }
 
-    private void buildRequestUserInfo() {
+    private void buildRequestUserInfo(LoggedUserDTO loggedUserDTO) {
         if (ObjectUtil.isNull(RequestContextHolder.getContext().getUserInfo())) {
-            LoggedUserDTO loggedUserDTO = getLoggedUserDTO();
-            if (ObjectUtil.isNotNull(loggedUserDTO)) {
-                RequestContextHolder.getContext().setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
-            }
+            RequestContextHolder.getContext().setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
         }
-    }
-
-    private LoggedUserDTO getLoggedUserDTO() {
-        var securityContext = SecurityContextHolder.getContext();
-        var authentication = securityContext.getAuthentication();
-        if (authentication instanceof AnonymousAuthenticationToken) {
-            return null;
-        }
-        return (LoggedUserDTO) authentication.getPrincipal();
     }
 }
