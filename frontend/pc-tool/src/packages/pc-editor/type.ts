@@ -61,7 +61,7 @@ export interface IObjectV2 {
     backId?: string;
     frontId?: string;
     classType?: string;
-    classValues?: string[][];
+    classValues?: any[];
     // classValues?: Record<string, any>;
     modelConfidence?: number;
     modelClass?: string;

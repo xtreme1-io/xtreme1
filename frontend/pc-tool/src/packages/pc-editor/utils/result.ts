@@ -1,32 +1,82 @@
 import * as THREE from 'three';
 import { Box, Rect, Box2D, AnnotateObject } from 'pc-render';
-import { IUserData, IClassType, Const, IObject, ObjectType, IObjectV2 } from '../type';
+import {
+    IUserData,
+    IClassType,
+    Const,
+    IObject,
+    ObjectType,
+    IObjectV2,
+    AttrType,
+    IAttr,
+} from '../type';
 import Editor from '../Editor';
 import * as createUtils from './create';
 import { empty } from './common';
+import { isAttrHasValue, isAttrVisible } from './classType';
 
 let position = new THREE.Vector3();
 let rotation = new THREE.Euler();
 let scale = new THREE.Vector3();
 let center = new THREE.Vector2();
 let size = new THREE.Vector2();
-function objToArray(obj: Record<string, any> = {}) {
-    let data = [] as any[];
-    Object.keys(obj).forEach((key) => {
-        let value = obj[key];
-        if (empty(value)) return;
-        data.push({
-            id: key,
-            pid: null,
-            name: '',
-            value: value,
-            alias: '',
-            isLeaf: true,
+
+function copyClassAttrs(classType: IClassType, valueMap: Record<string, any> = {}) {
+    let copyClassAttrs = JSON.parse(JSON.stringify(classType.attrs)) as IAttr[];
+    copyClassAttrs.forEach((attr) => {
+        attr.value = attr.type === AttrType.MULTI_SELECTION ? [] : '';
+        if (valueMap[attr.id]) {
+            if (attr.type === AttrType.MULTI_SELECTION && !Array.isArray(valueMap[attr.id])) {
+                valueMap[attr.id] = [valueMap[attr.id]];
+            }
+            attr.value = valueMap[attr.id];
+        }
+    });
+    return copyClassAttrs;
+}
+function objToArray(obj: Record<string, any> = {}, classType?: IClassType) {
+    if (!classType) {
+        let data = [] as any[];
+        Object.keys(obj).forEach((key) => {
+            let value = obj[key];
+            if (empty(value)) return;
+            data.push({
+                id: key,
+                pid: null,
+                name: '',
+                value: value,
+                alias: '',
+                isLeaf: true,
+            });
         });
+        return data;
+    }
+    let copyAttrs = copyClassAttrs(classType, obj);
+    let attrMap = {} as Record<string, IAttr>;
+    copyAttrs.forEach((attr) => {
+        attrMap[attr.id] = attr;
+    });
+    let attrs = copyAttrs.filter((e) => isAttrVisible(e, attrMap) && isAttrHasValue(e));
+
+    attrs.forEach((e) => (e.leafFlag = true));
+    attrs.forEach((e) => {
+        let parent = e.parent && attrMap[e.parent] ? attrMap[e.parent] : null;
+        if (parent) parent.leafFlag = false;
+    });
+
+    let data = attrs.map((e) => {
+        return {
+            id: e.id,
+            pid: e.parent ? e.parent : null,
+            name: e.name,
+            value: e.value,
+            alias: e.label,
+            isLeaf: !!e.leafFlag,
+        };
     });
     return data;
 }
-export function translateToObjectV2(object: IObject) {
+export function translateToObjectV2(object: IObject, baseClassType: IClassType) {
     let objectV2: IObjectV2 = {
         id: object.id,
         type: object.objType,
@@ -39,7 +89,7 @@ export function translateToObjectV2(object: IObject) {
         trackName: object.trackName,
         classId: object.classId,
         // classValues: object.attrs,
-        classValues: objToArray(object.attrs),
+        classValues: objToArray(object.attrs, baseClassType),
         modelConfidence: object.confidence,
         modelClass: object.modelClass,
         meta: {
@@ -112,7 +162,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         // userData.isStandard = obj.isStandard || false;
         userData.trackId = obj.trackId || '';
         userData.trackName = obj.trackName || '';
-        
+
         userData.classType = classConfig?.name || '';
         userData.classId = obj.classId || '';
         userData.confidence = obj.confidence || undefined;

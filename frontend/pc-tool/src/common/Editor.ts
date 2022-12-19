@@ -51,7 +51,7 @@ export default class Editor extends BaseEditor {
             let infos = [] as any[];
             let dataAnnotations = [] as any[];
             data.forEach((e) => {
-                let objectV2 = utils.translateToObjectV2(e);
+                let objectV2 = utils.translateToObjectV2(e, classMap[e.classType || '']);
                 infos.push({
                     id: e.backId || undefined,
                     frontId: e.frontId,
