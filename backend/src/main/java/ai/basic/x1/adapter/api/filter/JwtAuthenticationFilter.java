@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         var req = (HttpServletRequest) request;
-
+        buildRequestContext(req);
         String token = null;
         var authorization = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorization != null && authorization.startsWith("Bearer ")) {
@@ -75,8 +75,7 @@ public class JwtAuthenticationFilter implements Filter {
         var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
-        buildRequestContext(req);
-
+        buildRequestUserInfo();
         chain.doFilter(request, response);
         return;
     }
@@ -88,16 +87,20 @@ public class JwtAuthenticationFilter implements Filter {
     }
 
     private void buildRequestContext(HttpServletRequest httpServletRequest) {
-
         if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
-            LoggedUserDTO loggedUserDTO = getLoggedUserDTO();
-            if (ObjectUtil.isNotNull(loggedUserDTO)) {
-                requestContext.setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
-            }
             requestContext.setRequestInfo(RequestInfo.builder().host(httpServletRequest.getHeader(HOST)).forwardedProto(httpServletRequest.getHeader(X_FORWARDED_PROTO))
                     .realIp(httpServletRequest.getHeader(X_REAL_IP)).forwardedFor(httpServletRequest.getHeader(X_FORWARDED_FOR)).userAgent(httpServletRequest.getHeader(X_UA)).build());
             RequestContextHolder.setContext(requestContext);
+        }
+    }
+
+    private void buildRequestUserInfo() {
+        if (ObjectUtil.isNull(RequestContextHolder.getContext().getUserInfo())) {
+            LoggedUserDTO loggedUserDTO = getLoggedUserDTO();
+            if (ObjectUtil.isNotNull(loggedUserDTO)) {
+                RequestContextHolder.getContext().setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
+            }
         }
     }
 
@@ -107,7 +110,6 @@ public class JwtAuthenticationFilter implements Filter {
         if (authentication instanceof AnonymousAuthenticationToken) {
             return null;
         }
-
         return (LoggedUserDTO) authentication.getPrincipal();
     }
 }
