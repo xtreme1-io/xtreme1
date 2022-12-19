@@ -23,8 +23,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            <img :src="toolTypeImg[item.toolType]" alt="" />
-            {{ item.name }}
+            <div class="inline-flex items-center">
+              <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
+              {{ item.name }}
+            </div>
           </Select.Option>
         </Select>
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
@@ -168,7 +170,7 @@
     console.log(classification.value);
     const res = await getScenario({
       classId: result.value.toString(),
-      datasetId: info.value.id,
+      // datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'ONTOLOGY',
       pageSize: 9999,
