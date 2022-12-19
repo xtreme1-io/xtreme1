@@ -18,14 +18,14 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         console.log(obj);
         const annotate: any = {
             id: e.id,
-            color: classMap[obj.meta?.classType]?.color ?? '#dedede',
-            coordinate: obj.contour.points,
-            interior: obj.contour?.interior || [],
+            color: classMap[obj?.meta?.classType]?.color ?? '#dedede',
+            coordinate: obj?.contour?.points ?? [],
+            interior: obj?.contour?.interior || [],
             type: obj?.type.toLocaleLowerCase(),
-            version: obj.version,
+            version: obj?.version,
             userData: {
-                ...obj.meta,
-                attrs: arrayToObj(obj.classValues),
+                ...obj?.meta,
+                attrs: arrayToObj(obj?.classValues),
                 modelClass: obj.modelClass,
                 confidence: obj.modelConfidence,
                 createdAt: obj.createdAt,
@@ -100,6 +100,23 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
         objects.push(newInfo);
     });
     return objects;
+}
+
+export function convertModelRunResult(objects: any[]) {
+    const newObjects = objects.map((item) => {
+        return {
+            classAttributes: {
+                meta: {},
+                contour: {
+                    points: item.points,
+                },
+                type: item.objType,
+                modelClass: item.modelClass,
+                modelConfidence: item.confidence,
+            },
+        };
+    });
+    return newObjects;
 }
 
 function objToArray(obj: Record<string, any> = {}) {
