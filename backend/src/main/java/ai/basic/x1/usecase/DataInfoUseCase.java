@@ -637,7 +637,7 @@ public class DataInfoUseCase {
         var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) ? dataPreAnnotationBO.getIsFilterData() : false;
         var boo = true;
         var dataAnnotationRecord = DataAnnotationRecord.builder()
-                .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+                .datasetId(dataPreAnnotationBO.getDatasetId()).createdBy(userId).serialNo(serialNo).build();
         try {
             dataAnnotationRecordDAO.save(dataAnnotationRecord);
         } catch (DuplicateKeyException duplicateKeyException) {
