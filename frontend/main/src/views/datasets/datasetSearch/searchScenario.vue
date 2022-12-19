@@ -178,7 +178,7 @@
         : undefined,
     });
     const _list: any[] = [];
-    const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))
+    const dataIds = Array.from(new Set(res.list?.map((item) => item.dataId)))
       .filter((item: any) => !dataInfo.value[item])
       .toString();
     if (dataIds.length) {
