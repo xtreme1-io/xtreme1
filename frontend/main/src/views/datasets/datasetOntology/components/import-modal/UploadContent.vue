@@ -110,13 +110,19 @@
     // console.log(classList, classificationList);
     let classes;
     let classifications;
-    if (classList.length !== data.value.duplicateClassName.length) {
+    if (
+      data.value.duplicateClassName !== null &&
+      classList.length !== data.value.duplicateClassName?.length
+    ) {
       const list = data.value.duplicateClassName.filter(
         (item) => !classList.map((record) => record.name).includes(item.name),
       );
       classes = data.value.classes.filter((k) => !list.includes(k.name));
     }
-    if (classificationList.length !== data.value.duplicateClassificationName.length) {
+    if (
+      data.value.duplicateClassificationName !== null &&
+      classificationList.length !== data.value.duplicateClassificationName?.length
+    ) {
       const list = data.value.duplicateClassificationName.filter(
         (item) => !classificationList.map((record) => record.name).includes(item),
       );

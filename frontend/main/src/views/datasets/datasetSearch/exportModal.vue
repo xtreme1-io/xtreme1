@@ -28,8 +28,10 @@
     exportDataRecordCallBack,
     exportScenario,
   } from '/@/api/business/dataset';
-  import { downloadByUrl } from '/@/utils/file/download';
+  import { downloadByCorsUrl } from '/@/utils/file/download';
+  import { useMessage } from '/@/hooks/web/useMessage';
   const [register, { closeModal }] = useModalInner();
+  const { createMessage } = useMessage();
   const [registerForm, { validate }] = useForm({
     labelWidth: 90,
     schemas: formSchema,
@@ -62,10 +64,11 @@
         if (data[0]?.status === 'GENERATING') {
           setTimeout(getFile, 5000);
         } else if (data[0]?.status === 'COMPLETED') {
-          downloadByUrl({
+          downloadByCorsUrl({
             url: data[0].filePath,
             fileName: data[0].fileName,
           });
+          createMessage.success('exporting...');
         }
       };
 

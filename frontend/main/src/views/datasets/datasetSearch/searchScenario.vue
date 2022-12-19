@@ -19,6 +19,7 @@
       </div>
       <div class="flex pl-25px pr-25px">
         <Select
+          dropdownClassName="custom-search-scenario"
           v-model:value="result"
           showSearch
           mode="multiple"

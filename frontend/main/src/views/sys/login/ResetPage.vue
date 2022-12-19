@@ -3,7 +3,7 @@
     <div class="content">
       <img class="logo-img" :src="logoImg" alt="" />
       <div class="info">
-        At <span class="link cursor-pointer" @click="handleGoPortal">BasicAI</span> we are committed
+        At <span class="link cursor-pointer" @click="handleGoPortal">Xtreme1</span> we are committed
         to building the world’s most seamless training data platform to help your team collect,
         annotate, and deploy custom ML data sets at scale.
       </div>

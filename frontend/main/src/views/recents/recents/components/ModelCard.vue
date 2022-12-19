@@ -6,7 +6,7 @@
         <div class="title">title</div>
         <div class="text">2022-01-24</div>
         <div class="title">Model type</div>
-        <div class="text">BasicAI</div>
+        <div class="text">Xtreme1</div>
       </div>
     </div>
     <div class="name">Architecture</div>
