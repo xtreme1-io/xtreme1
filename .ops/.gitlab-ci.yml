@@ -5,7 +5,7 @@ stages:
 
 variables:
   APP_NAME: "xtreme1"
-  APP_VERSION: "0.5.2"
+  APP_VERSION: "0.5.5"
 
   FRONTEND_PACKAGE_DIR: "dist"
   BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
