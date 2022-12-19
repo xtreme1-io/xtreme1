@@ -96,9 +96,9 @@
     getDataByIds,
     getClassificationOptions,
     takeRecordByData,
-    checkRootByDataId,
+    // checkRootByDataId,
   } from '/@/api/business/dataset';
-  import { useMessage } from '/@/hooks/web/useMessage';
+  // import { useMessage } from '/@/hooks/web/useMessage';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -119,7 +119,6 @@
   const filterOptions = ref();
   const dataInfo = ref<Record<string, any>>({});
   const object2D = ref<Record<string, any>>({});
-  const { createMessage } = useMessage();
 
   const handleChange = (e) => {
     if (e.length === 0) {
@@ -140,7 +139,7 @@
     window.history.go(-1);
   };
 
-  watch(classification, (res) => {
+  watch(classification, () => {
     fetchList();
   });
 
@@ -219,21 +218,10 @@
       datasetId: info.value.id,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
+      isFilterData: true,
     }).catch(() => {});
     const trackId = object.classAttributes.trackId;
-    const errMsg = 'The selected data has been annotated by others';
-    if (!recordId || !trackId) {
-      return createMessage.error(errMsg);
-    }
-
-    const status = await checkRootByDataId(recordId, dataId);
-    if (!status) {
-      return createMessage.error(errMsg);
-    }
-    // const res = await getLockedByDataset({
-    //   datasetId: info.value.id,
-    // });
-
+    if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
   };
 </script>
