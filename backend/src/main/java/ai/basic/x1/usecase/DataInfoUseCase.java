@@ -652,7 +652,7 @@ public class DataInfoUseCase {
             }
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
-        var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
+        var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO,userId);
         if (isFilterData) {
             if (insertCount == 0) {
                 throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
@@ -692,7 +692,7 @@ public class DataInfoUseCase {
      * @param dataIds              Data id collection
      * @param dataAnnotationRecord Data annotation record
      */
-    private Integer batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord) {
+    private Integer batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord,Long userId) {
         var insertCount = 0;
         if (CollectionUtil.isEmpty(dataIds)) {
             return insertCount;
@@ -703,7 +703,8 @@ public class DataInfoUseCase {
                 .annotationRecordId(dataAnnotationRecordId)
                 .datasetId(dataAnnotationRecord.getDatasetId())
                 .modelId(dataAnnotationRecord.getModelId())
-                .modelVersion(dataAnnotationRecord.getModelVersion());
+                .modelVersion(dataAnnotationRecord.getModelVersion())
+                .createdBy(userId);
         for (var dataId : dataIds) {
             var dataEdit = dataEditBuilder.dataId(dataId).build();
             dataEditSubList.add(dataEdit);
