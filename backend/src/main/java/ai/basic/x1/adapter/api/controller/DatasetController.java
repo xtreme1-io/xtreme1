@@ -88,6 +88,13 @@ public class DatasetController extends BaseDatasetController {
                 datasetDTO.setInvalidCount(datasetStatisticsBO.getInvalidCount());
                 datasetDTO.setItemCount(datasetStatisticsBO.getItemCount());
             }
+            if (CollectionUtil.isNotEmpty(datasetBO.getDatas())) {
+                var dataInfoDTOS = new ArrayList<DataInfoDTO>();
+                datasetBO.getDatas().forEach(dataInfoBO -> {
+                    dataInfoDTOS.add(convertDataInfoDTO(dataInfoBO));
+                });
+                datasetDTO.setDatas(dataInfoDTOS);
+            }
             return datasetDTO;
         });
     }

@@ -11987,6 +11987,11 @@ vue-demi@*:
   resolved "https://registry.npmjs.org/vue-demi/-/vue-demi-0.13.11.tgz"
   integrity sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A==
 
+vue-demi@^0.12.5:
+  version "0.12.5"
+  resolved "https://registry.npmmirror.com/vue-demi/-/vue-demi-0.12.5.tgz#8eeed566a7d86eb090209a11723f887d28aeb2d1"
+  integrity sha512-BREuTgTYlUr0zw0EZn3hnhC3I6gPWv+Kwh4MCih6QcAeaTlaIX0DwOVN0wHej7hSvDPecz4jygy/idsgKfW58Q==
+
 vue-eslint-parser@^8.0.1:
   version "8.3.0"
   resolved "https://registry.npmjs.org/vue-eslint-parser/-/vue-eslint-parser-8.3.0.tgz"
@@ -12038,6 +12043,13 @@ vue-types@^4.1.1:
   integrity sha512-DNQZmJuOvovLUIp0BENRkdnZHbI0V4e2mNvjAZOAXKD56YGvRchtUYOXA/XqTxdv7Ng5SJLZqRKRpAhm5NLaPQ==
   dependencies:
     is-plain-object "5.0.0"
+
+vue3-lazyload@^0.3.6:
+  version "0.3.6"
+  resolved "https://registry.npmmirror.com/vue3-lazyload/-/vue3-lazyload-0.3.6.tgz#87c509e7f0139ea5e00eb76c368519905ad19678"
+  integrity sha512-UcVnEN9JzxeFBa7nNAPWKXHTtvVAzWYhBSvRU+Gmx9MdTGLWKwjZiNSyB1Os25jr9HaFHWY0DaU8uugXkGu9Gw==
+  dependencies:
+    vue-demi "^0.12.5"
 
 vue@^3.2.21:
   version "3.2.39"
