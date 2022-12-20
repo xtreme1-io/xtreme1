@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author fyb
@@ -20,6 +21,11 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataInfoQueryDTO {
+
+    /**
+     * Data id
+     */
+    private List<Long> ids;
 
     /**
      * Dataset id
