@@ -118,7 +118,7 @@
             class="pointCloudImg h-83px"
             @error="onHandleImgLoad"
             @load="onHandleImgLoad"
-            :src="getPlaceImg()"
+            v-lazy="getPlaceImg()"
             alt=""
           />
           <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
@@ -136,7 +136,7 @@
               :key="item"
               @error="onHandleImgLoad"
               @load="onHandleImgLoad"
-              :src="getPcImage(iState.pcImageObject[item])"
+              v-lazy="getPcImage(iState.pcImageObject[item])"
               alt=""
             />
             <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
