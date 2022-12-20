@@ -95,6 +95,7 @@ public class DatasetUseCase {
                 var datasetName = datasetInitialInfo.getName();
                 var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
                 datasetLambdaQueryWrapper.eq(Dataset::getName, datasetName);
+                datasetLambdaQueryWrapper.last("limit 1");
                 var dataset = datasetDAO.getOne(datasetLambdaQueryWrapper);
                 if (ObjectUtil.isNull(dataset)) {
                     var userBO = userUseCase.findByUsername(datasetInitialInfo.getUserName());
@@ -114,7 +115,7 @@ public class DatasetUseCase {
                         log.error("Decompression file error", e);
                     }
                     var dataInfoUploadBO = DataInfoUploadBO.builder().datasetId(datasetId).type(LIDAR_FUSION)
-                            .userId(userBO.getId()).savePath(filePath).baseSavePath(baseSavePath).build();
+                            .userId(userBO.getId()).savePath(filePath).baseSavePath(baseSavePath).fileName(FileUtil.getPrefix(datasetInitialInfo.getFileName())).build();
                     dataInfoUseCase.parsePointCloudUploadFile(dataInfoUploadBO);
                     var datasetClassPropertiesList = datasetInitialInfo.getClasses();
                     var datasetClassBOList = DefaultConverter.convert(datasetClassPropertiesList, DatasetClassBO.class);
