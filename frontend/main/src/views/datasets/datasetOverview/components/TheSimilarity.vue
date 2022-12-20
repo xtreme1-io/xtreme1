@@ -90,7 +90,7 @@
   import { LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import ChartEmpty from './ChartEmpty.vue';
-  import emptyImg from '/@/assets/images/placeImg.png';
+  import emptyImg from '/@/assets/images/ontology/overview-empty-img.svg';
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
   import { defaultScatterOptions } from './data';
   import {

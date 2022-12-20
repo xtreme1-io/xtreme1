@@ -6,7 +6,7 @@
         <Tabs.TabPane :key="tabPaneEnum.CLASS" tab="Classes" forceRender>
           <ChartEmpty v-if="!hasClassData" tip="No Classes" class="py-80px" />
           <div v-else>
-            <div class="class-legend">
+            <!-- <div class="class-legend">
               <div
                 class="class-legend-item"
                 v-for="(item, index) in currentToolTypeImg"
@@ -15,7 +15,7 @@
                 <img :src="item.img" alt="" />
                 <span>{{ formatEnum(item.label) }}</span>
               </div>
-            </div>
+            </div> -->
             <div ref="plotClassRef" class="chartContainer__box"></div>
           </div>
         </Tabs.TabPane>
