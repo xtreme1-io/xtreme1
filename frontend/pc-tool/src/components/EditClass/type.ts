@@ -49,7 +49,7 @@ export interface IState {
     resultStatus: ResultStatus | '';
     resultInstances: IInstanceItem[];
     annotateType: AnnotateType | '';
-    attrs: IClassType[];
+    attrs: IAttr[];
     // msgInfo
     showMsgType: MsgType | '';
     //

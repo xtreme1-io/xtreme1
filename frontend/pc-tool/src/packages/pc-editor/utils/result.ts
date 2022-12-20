@@ -13,7 +13,7 @@ import {
 import Editor from '../Editor';
 import * as createUtils from './create';
 import { empty } from './common';
-import { isAttrHasValue, isAttrVisible } from './classType';
+import { copyClassAttrs, isClassAttrHasValue, isClassAttrVisible } from './classType';
 
 let position = new THREE.Vector3();
 let rotation = new THREE.Euler();
@@ -21,19 +21,6 @@ let scale = new THREE.Vector3();
 let center = new THREE.Vector2();
 let size = new THREE.Vector2();
 
-function copyClassAttrs(classType: IClassType, valueMap: Record<string, any> = {}) {
-    let copyClassAttrs = JSON.parse(JSON.stringify(classType.attrs)) as IAttr[];
-    copyClassAttrs.forEach((attr) => {
-        attr.value = attr.type === AttrType.MULTI_SELECTION ? [] : '';
-        if (valueMap[attr.id]) {
-            if (attr.type === AttrType.MULTI_SELECTION && !Array.isArray(valueMap[attr.id])) {
-                valueMap[attr.id] = [valueMap[attr.id]];
-            }
-            attr.value = valueMap[attr.id];
-        }
-    });
-    return copyClassAttrs;
-}
 function objToArray(obj: Record<string, any> = {}, classType?: IClassType) {
     if (!classType) {
         let data = [] as any[];
@@ -56,7 +43,7 @@ function objToArray(obj: Record<string, any> = {}, classType?: IClassType) {
     copyAttrs.forEach((attr) => {
         attrMap[attr.id] = attr;
     });
-    let attrs = copyAttrs.filter((e) => isAttrVisible(e, attrMap) && isAttrHasValue(e));
+    let attrs = copyAttrs.filter((e) => isClassAttrVisible(e, attrMap) && isClassAttrHasValue(e));
 
     attrs.forEach((e) => (e.leafFlag = true));
     attrs.forEach((e) => {
@@ -65,11 +52,14 @@ function objToArray(obj: Record<string, any> = {}, classType?: IClassType) {
     });
 
     let data = attrs.map((e) => {
+        const isParentMulti = e.parent && attrMap[e.parent]?.type === AttrType.MULTI_SELECTION;
         return {
             id: e.id,
             pid: e.parent ? e.parent : null,
             name: e.name,
             value: e.value,
+            type: e.type,
+            pvalue: isParentMulti ? e.parentValue : undefined,
             alias: e.label,
             isLeaf: !!e.leafFlag,
         };

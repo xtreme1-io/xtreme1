@@ -190,30 +190,6 @@ export function copyClassification(
     return classifications;
 }
 
-export function copyClassType(
-    baseClassifications: IClassType[],
-    valueMap: Record<string, any>,
-) {
-    let classType = [] as IClassType[];
-    baseClassifications.forEach((classification) => {
-        let copyClassType = {} as IClassType;
-        copyClassType = JSON.parse(JSON.stringify(classification));
-
-        copyClassType.attrs.forEach((attr) => {
-            attr.value = attr.type === AttrType.MULTI_SELECTION ? [] : '';
-            if (valueMap[attr.id]) {
-                // 处理成数组
-                if (attr.type === AttrType.MULTI_SELECTION && !Array.isArray(valueMap[attr.id])) {
-                    valueMap[attr.id] = [valueMap[attr.id]];
-                }
-                attr.value = valueMap[attr.id];
-            }
-        });
-        classType.push(copyClassType);
-    });
-    return classType;
-}
-
 export function classificationToSave(classification: IClassification) {
     let attrMap = {} as Record<string, IClassificationAttr>;
     classification.attrs.forEach((attr) => {
@@ -227,14 +203,16 @@ export function classificationToSave(classification: IClassification) {
         let parent = e.parent && attrMap[e.parent] ? attrMap[e.parent] : null;
         if (parent) parent.leafFlag = false;
     });
-
     let data = attrs.map((e) => {
+        const isParentMulti = e.parent && attrMap[e.parent]?.type === AttrType.MULTI_SELECTION;
         return {
             id: e.id,
             pid: e.parent ? e.parent : null,
             name: e.name,
             value: e.value,
             alias: e.label,
+            pvalue: isParentMulti ? e.parentValue : undefined,
+            type: e.type,
             isLeaf: !!e.leafFlag,
         };
     });
