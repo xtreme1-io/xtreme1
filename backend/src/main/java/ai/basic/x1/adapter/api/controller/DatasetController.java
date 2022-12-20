@@ -78,16 +78,7 @@ public class DatasetController extends BaseDatasetController {
         }
         var datasetIds = datasetBOList.stream().map(datasetBO -> datasetBO.getId()).collect(Collectors.toList());
         var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(datasetIds);
-        var dataInfoBOList = new ArrayList<DataInfoBO>();
-        datasetBOList.forEach(datasetBO -> {
-            var datas = datasetBO.getDatas();
-            if (!datasetBO.getType().equals(DatasetTypeEnum.IMAGE) && CollectionUtil.isNotEmpty(datas)) {
-                dataInfoBOList.add(CollectionUtil.getFirst(datas));
-            } else {
-                dataInfoBOList.addAll(datas);
-            }
-        });
-        var dataMap = dataInfoUsecase.getDataInfoListFileMap(dataInfoBOList);
+        dataInfoUsecase.setDatasetSixData(datasetBOList);
         return datasetBOPage.convert(datasetBO -> {
             var datasetDTO = DefaultConverter.convert(datasetBO, DatasetDTO.class);
             var datasetStatisticsBO = datasetStatisticsMap.get(datasetBO.getId());
@@ -96,10 +87,6 @@ public class DatasetController extends BaseDatasetController {
                 datasetDTO.setNotAnnotatedCount(datasetStatisticsBO.getNotAnnotatedCount());
                 datasetDTO.setInvalidCount(datasetStatisticsBO.getInvalidCount());
                 datasetDTO.setItemCount(datasetStatisticsBO.getItemCount());
-            }
-            var dataInfoBOS = dataMap.get(datasetBO.getId());
-            if (CollectionUtil.isNotEmpty(dataInfoBOS)) {
-                datasetDTO.setDatas(dataInfoBOS.stream().map(dataInfoBO -> convertDataInfoDTO(dataInfoBO)).collect(Collectors.toList()));
             }
             return datasetDTO;
         });

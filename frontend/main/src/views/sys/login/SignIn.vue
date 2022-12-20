@@ -31,7 +31,7 @@
         layout="vertical"
         :hideRequiredMark="true"
         v-show="getShow"
-        @keypress.enter="handleEnter"
+        @keypress.enter="handleLogin"
       >
         <FormItem
           :label="t('sys.login.email')"

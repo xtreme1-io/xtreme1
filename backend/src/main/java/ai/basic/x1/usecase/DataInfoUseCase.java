@@ -1649,4 +1649,34 @@ public class DataInfoUseCase {
         return DataResultBO.builder().version(version).datasetId(dataset.getId())
                 .datasetName(dataset.getName()).exportTime(exportTime).data(data).results(results).build();
     }
+
+    public void setDatasetSixData(List<DatasetBO> datasetBOList) {
+        if (CollectionUtil.isEmpty(datasetBOList)) {
+            return;
+        }
+        var datasetIds = new ArrayList<Long>();
+        var datasetTypeMap = new HashMap<Long, DatasetTypeEnum>();
+        datasetBOList.forEach(datasetBO -> {
+            datasetIds.add(datasetBO.getId());
+            datasetTypeMap.put(datasetBO.getId(), datasetBO.getType());
+        });
+        var datasetSixDataList = dataInfoDAO.getBaseMapper().selectSixDataIdByDatasetIds(datasetIds);
+        var dataIds = new HashSet<Long>();
+        datasetSixDataList.forEach(datasetSixData -> {
+            var datasetType = datasetTypeMap.get(datasetSixData.getDatasetId());
+            var ids = StrUtil.splitToLong(datasetSixData.getDataIds(), ",");
+            if (null != ids && ids.length > 0) {
+                if (IMAGE.equals(datasetType)) {
+                    CollectionUtil.addAll(dataIds, ids);
+                } else {
+                    dataIds.add(ids[0]);
+                }
+            }
+        });
+        if (CollectionUtil.isNotEmpty(dataIds)) {
+            var dataInfoBOList = listByIds(new ArrayList<>(dataIds), false);
+            var dataMap = dataInfoBOList.stream().collect(Collectors.groupingBy(DataInfoBO::getDatasetId));
+            datasetBOList.forEach(datasetBO -> datasetBO.setDatas(dataMap.get(datasetBO.getId())));
+        }
+    }
 }

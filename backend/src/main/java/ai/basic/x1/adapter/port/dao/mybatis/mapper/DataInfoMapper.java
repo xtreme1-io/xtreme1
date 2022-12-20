@@ -3,6 +3,7 @@ package ai.basic.x1.adapter.port.dao.mybatis.mapper;
 
 import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendBaseMapper;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSixData;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetStatistics;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -31,5 +32,12 @@ public interface DataInfoMapper extends ExtendBaseMapper<DataInfo> {
      * @return Data info
      */
     List<DataInfo> listByIds(@Param("ids") List<Long> ids, @Param("isQueryDeletedData") Boolean isQueryDeletedData);
+
+    /**
+     * Get six data info
+     * @param datasetIds datasetId collection
+     * @return
+     */
+    List<DatasetSixData> selectSixDataIdByDatasetIds(@Param("datasetIds") List<Long> datasetIds);
 
 }
