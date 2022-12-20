@@ -32,13 +32,15 @@
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
-        <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
-          <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
-            <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
-              >Annotate</Button
-            >
-          </SearchCard>
-        </div>
+        <template v-for="item in list">
+          <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
+            <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
+              <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
+                >Annotate</Button
+              >
+            </SearchCard>
+          </div>
+        </template>
       </div>
       <div class="empty" v-else>
         <div class="text-center">

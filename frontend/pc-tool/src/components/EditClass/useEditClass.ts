@@ -54,7 +54,6 @@ export default function useEditClass() {
         showMsgType: '',
         //
     });
-
     watch(
         () => [state.confidenceRange, state.instances],
         () => {
@@ -278,7 +277,7 @@ export default function useEditClass() {
         //     return { ...e, value };
         // });
         // state.attrs = newAttrs;
-        state.attrs = utils.copyClassType(editorState.classTypes, attrs);
+        state.attrs = utils.copyClassAttrs(classConfig, attrs);
         trackAttrs = JSON.parse(JSON.stringify(attrs));
     }
 
