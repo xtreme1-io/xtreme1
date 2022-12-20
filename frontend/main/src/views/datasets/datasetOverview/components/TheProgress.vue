@@ -74,9 +74,10 @@
         shared: false,
         title: 'Progress',
         formatter: (data) => {
+          console.log(data);
           return {
             name: data.type,
-            value: Math.round((data.count / totalCount.value) * 100) + '%',
+            value: ((data.count / totalCount.value) * 100).toFixed(2) + '%',
           };
         },
       },
