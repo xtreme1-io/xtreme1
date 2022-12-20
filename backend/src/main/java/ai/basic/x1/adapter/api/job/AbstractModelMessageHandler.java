@@ -36,6 +36,7 @@ public abstract class AbstractModelMessageHandler<T> {
 
     /**
      * model run implement by subClass
+     *
      * @param modelMessageBO
      * @return
      */
@@ -43,6 +44,7 @@ public abstract class AbstractModelMessageHandler<T> {
 
     /**
      * call remote model service implement by subClass
+     *
      * @param modelMessageBO
      * @return
      */
@@ -50,6 +52,7 @@ public abstract class AbstractModelMessageHandler<T> {
 
     /**
      * model code implement by subClass
+     *
      * @return
      */
     public abstract ModelCodeEnum getModelCodeEnum();
@@ -65,6 +68,7 @@ public abstract class AbstractModelMessageHandler<T> {
                 stopWatch.stop();
                 break;
             } catch (Throwable throwable) {
+                log.error("call remote service is error", throwable);
                 if (stopWatch.isRunning()) {
                     stopWatch.stop();
                 }
