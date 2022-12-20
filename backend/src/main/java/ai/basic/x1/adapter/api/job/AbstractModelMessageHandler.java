@@ -73,7 +73,6 @@ public abstract class AbstractModelMessageHandler<T> {
         if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
             return apiResult;
         } else {
-            log.warn("call remote service is error.result is {}", JSONUtil.toJsonStr(apiResult));
             if (apiResult != null) {
                 return new ApiResult<>(apiResult.getCode(), apiResult.getMessage());
             } else {
