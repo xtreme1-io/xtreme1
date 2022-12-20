@@ -15,9 +15,6 @@ public abstract class BaseController {
     @Autowired
     protected ObjectMapper objectMapper;
 
-    @Autowired
-    protected JwtHelper jwtHelper;
-
     protected LoggedUserDTO loggedUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof AnonymousAuthenticationToken) {
