@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author fyb
@@ -19,6 +20,11 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DataInfoQueryBO extends BaseQueryBO {
+
+    /**
+     * Data id
+     */
+    private List<Long> ids;
 
     /**
      * Dataset id

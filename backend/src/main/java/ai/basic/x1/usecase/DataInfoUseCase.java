@@ -218,9 +218,14 @@ public class DataInfoUseCase {
         if (ObjectUtil.isNotEmpty(queryBO.getCreateStartTime()) && ObjectUtil.isNotEmpty(queryBO.getCreateEndTime())) {
             lambdaQueryWrapper.ge(DataInfo::getCreatedAt, queryBO.getCreateStartTime()).le(DataInfo::getCreatedAt, queryBO.getCreateEndTime());
         }
+
+        if (CollectionUtil.isNotEmpty(queryBO.getIds())) {
+            lambdaQueryWrapper.in(DataInfo::getId, queryBO.getIds());
+        }
         if (StrUtil.isNotBlank(queryBO.getSortField())) {
             lambdaQueryWrapper.last(" order by " + queryBO.getSortField().toLowerCase() + " " + queryBO.getAscOrDesc());
         }
+
         var dataInfoPage = dataInfoDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()), lambdaQueryWrapper);
         var dataInfoBOPage = DefaultConverter.convert(dataInfoPage, DataInfoBO.class);
         var dataInfoBOList = dataInfoBOPage.getList();
