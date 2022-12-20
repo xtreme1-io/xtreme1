@@ -377,7 +377,7 @@
           : undefined,
     };
     if (dataId) {
-      params.dataIds = [dataId].toString();
+      params.ids = [dataId].toString();
     }
 
     try {
