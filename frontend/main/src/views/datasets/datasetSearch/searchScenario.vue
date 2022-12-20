@@ -33,7 +33,7 @@
             </div>
           </Select.Option>
         </Select>
-        <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
+        <Button class="ml-20px" type="default" @click="handleExport">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
         <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
@@ -78,7 +78,7 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Select, Checkbox } from 'ant-design-vue';
+  import { Select, Checkbox, message } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
@@ -226,6 +226,13 @@
     const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
+  };
+
+  const handleExport = () => {
+    if (!result.value) {
+      return message.error('please select a class first');
+    }
+    openModal();
   };
 </script>
 <style lang="less" scoped>
