@@ -44,7 +44,7 @@ public class ClassificationUtils {
                     t -> t));
 
             return classificationNodes.stream()
-                    .filter(e -> e.isLeaf && !Objects.equals(e.getType(), InputTypeEnum.TEXT))
+                    .filter(e -> e.isLeaf && !Objects.equals(e.getInputType(), InputTypeEnum.TEXT))
                     .map(leafNode -> convert(leafNode, classificationNodeMap, dataAnnotation))
                     .flatMap(Collection::stream)
                     .collect(Collectors.toList());
@@ -120,7 +120,7 @@ public class ClassificationUtils {
         private String name;
         private Object value;
         private Boolean isLeaf;
-        private InputTypeEnum type;
+        private InputTypeEnum inputType;
     }
 
 }
