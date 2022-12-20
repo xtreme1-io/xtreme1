@@ -182,7 +182,7 @@
         : undefined,
     });
     const _list: any[] = [];
-    const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))
+    const dataIds = Array.from(new Set(res.list?.map((item) => item.dataId)))
       .filter((item: any) => !dataInfo.value[item])
       .toString();
     if (dataIds.length) {
@@ -197,7 +197,7 @@
     }
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const obj2dMap = {};
-      res.list.forEach((item: any) => {
+      res.list?.forEach((item: any) => {
         const type = item.classAttributes.type || item.classAttributes.objType;
         const info = item.classAttributes;
         if (['2D_RECT', '2D_BOX', 'rect', 'box2d'].includes(type)) {
@@ -213,13 +213,13 @@
       object2D.value = obj2dMap;
       list.value = _list;
     } else {
-      list.value = res.list;
+      list.value = res.list || [];
     }
   };
 
   const handleSingleAnnotate = async (dataId: any, object: any) => {
     const recordId = await takeRecordByData({
-      datasetId: info.value.id,
+      datasetId: object.datasetId || info.value.id,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
       isFilterData: true,
@@ -241,6 +241,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .list {
+      background: white;
+      margin-top: 20px;
+      margin-left: 25px;
+      margin-right: 25px;
+      padding: 12px;
+      border-radius: 8px;
+      .item {
+        width: 240px;
+        height: 240px;
+        background-color: white;
+        display: inline-block;
+        margin: 6px;
+        position: relative;
+        border-radius: 6px;
+        overflow: hidden;
+      }
     }
   }
 </style>

@@ -1,40 +1,38 @@
 <template>
-  <div>
-    <div v-if="showTable" class="table-wrapper">
-      <BasicTable @register="registerTable">
-        <template #name="{ record }">
-          <div class="flex items-center justify-center gap-10px">
-            <div v-if="record.toolType" class="flex items-center justify-center w-24px h-24px">
-              <img class="w-16px h-16px" :src="toolTypeImg[record.toolType]" />
-            </div>
-            <span class="action active">{{ record.name }}</span>
+  <div v-if="showTable" class="table-wrapper">
+    <BasicTable @register="registerTable">
+      <template #name="{ record }">
+        <div class="flex items-center justify-center gap-10px">
+          <div v-if="record.toolType" class="flex items-center justify-center w-24px h-24px">
+            <img class="w-16px h-16px" :src="toolTypeImg[record.toolType]" />
           </div>
-        </template>
-        <template #action="{ record }">
-          <div class="flex items-center justify-center gap-20px">
-            <span
-              class="action"
-              :class="record.isKeep == ICopySelectEnum.REPLACE ? 'active' : ''"
-              @click="handleReplace(record)"
-            >
-              Replace
-            </span>
-            <span
-              class="action"
-              :class="record.isKeep == ICopySelectEnum.KEEP ? 'active' : ''"
-              @click="handleKeep(record)"
-            >
-              Keep
-            </span>
-          </div>
-        </template>
-      </BasicTable>
-    </div>
-    <div v-else class="table-wrapper">
-      <div class="empty-wrapper">
-        <img src="../../../../../assets/svg/empty.svg" alt="" />
-        <div class="tip"> No conflict </div>
-      </div>
+          <span class="action active">{{ record.name }}</span>
+        </div>
+      </template>
+      <template #action="{ record }">
+        <div class="flex items-center justify-center gap-20px">
+          <span
+            class="action"
+            :class="record.isKeep == ICopySelectEnum.REPLACE ? 'active' : ''"
+            @click="handleReplace(record)"
+          >
+            Replace
+          </span>
+          <span
+            class="action"
+            :class="record.isKeep == ICopySelectEnum.KEEP ? 'active' : ''"
+            @click="handleKeep(record)"
+          >
+            Keep
+          </span>
+        </div>
+      </template>
+    </BasicTable>
+  </div>
+  <div v-else class="table-wrapper">
+    <div class="empty-wrapper">
+      <img src="../../../../../assets/svg/empty.svg" alt="" />
+      <div class="tip"> No conflict </div>
     </div>
   </div>
 </template>
@@ -81,7 +79,7 @@
     ],
     showIndexColumn: false,
     pagination: false,
-    // canResize: false,
+    canResize: false,
     actionColumn: {
       width: '50%',
       title: 'Resolution',

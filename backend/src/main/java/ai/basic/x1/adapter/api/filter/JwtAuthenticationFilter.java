@@ -41,44 +41,53 @@ public class JwtAuthenticationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         var req = (HttpServletRequest) request;
-        buildRequestContext(req);
-        String token = null;
-        var authorization = req.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authorization != null && authorization.startsWith("Bearer ")) {
-            token = authorization.split(" ")[1].trim();
-        }
-
-        if (token == null) {
-            token = req.getParameter("token");
-        }
-
-        if (token == null) {
+        if (req.getRequestURI().startsWith("/actuator/")) {
             chain.doFilter(request, response);
             return;
         }
+        try {
+            buildRequestContext(req);
+            String token = null;
+            var authorization = req.getHeader(HttpHeaders.AUTHORIZATION);
+            if (authorization != null && authorization.startsWith("Bearer ")) {
+                token = authorization.split(" ")[1].trim();
+            }
 
-        var payload = userTokenUseCase.getPayload(token);
-        if (payload == null) {
+            if (token == null) {
+                token = req.getParameter("token");
+            }
+
+            if (token == null) {
+                chain.doFilter(request, response);
+                return;
+            }
+
+            var payload = userTokenUseCase.getPayload(token);
+            if (payload == null) {
+                chain.doFilter(request, response);
+                return;
+            }
+
+            var userBO = userUseCase.findById(payload.getUserId());
+            if (userBO == null) {
+                chain.doFilter(request, response);
+                return;
+            }
+            var loggedUserDTO = new LoggedUserDTO(userBO.getUsername(), userBO.getPassword(), userBO.getId());
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    loggedUserDTO, loggedUserDTO.getPassword(), loggedUserDTO.getAuthorities());
+            var securityContext = SecurityContextHolder.createEmptyContext();
+            securityContext.setAuthentication(authentication);
+            SecurityContextHolder.setContext(securityContext);
+            buildRequestUserInfo(loggedUserDTO);
             chain.doFilter(request, response);
             return;
+        } catch (Throwable throwable) {
+            log.error("jwtAuthenticationFilter error", throwable);
+        } finally {
+            cleanRequest();
         }
 
-        var userBO = userUseCase.findById(payload.getUserId());
-        if (userBO == null) {
-            chain.doFilter(request, response);
-            return;
-        }
-        log.info("userId is {}", userBO.getId());
-        var loggedUserDTO = new LoggedUserDTO(userBO.getUsername(), userBO.getPassword(), userBO.getId());
-        var authentication = new UsernamePasswordAuthenticationToken(
-                loggedUserDTO, loggedUserDTO.getPassword(), loggedUserDTO.getAuthorities());
-        var securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(authentication);
-        SecurityContextHolder.setContext(securityContext);
-        buildRequestUserInfo(loggedUserDTO);
-        chain.doFilter(request, response);
-        cleanRequest();
-        return;
     }
 
     @Override
@@ -86,19 +95,10 @@ public class JwtAuthenticationFilter implements Filter {
         SecurityContextHolder.clearContext();
     }
 
-    private void cleanRequest(){
-        RequestContextHolder.cleanContext();
-    }
 
     private void buildRequestContext(HttpServletRequest httpServletRequest) {
         if (ObjectUtil.isNull(RequestContextHolder.getContext())) {
             RequestContext requestContext = RequestContextHolder.createEmptyContent();
-            log.info("request uri is {}",httpServletRequest.getRequestURI());
-            log.info("host is {}", httpServletRequest.getHeader(HOST));
-            log.info("X-Forwarded-Proto is {}", httpServletRequest.getHeader(X_FORWARDED_PROTO));
-            log.info("X-Real-Ip is {}", httpServletRequest.getHeader(X_REAL_IP));
-            log.info("X-Forwarded-For is {}", httpServletRequest.getHeader(X_FORWARDED_FOR));
-            log.info("X-User-Agent is {}", httpServletRequest.getHeader(X_UA));
             requestContext.setRequestInfo(RequestInfo.builder().host(httpServletRequest.getHeader(HOST)).forwardedProto(httpServletRequest.getHeader(X_FORWARDED_PROTO))
                     .realIp(httpServletRequest.getHeader(X_REAL_IP)).forwardedFor(httpServletRequest.getHeader(X_FORWARDED_FOR)).userAgent(httpServletRequest.getHeader(X_UA)).build());
             RequestContextHolder.setContext(requestContext);
@@ -110,4 +110,9 @@ public class JwtAuthenticationFilter implements Filter {
             RequestContextHolder.getContext().setUserInfo(UserInfo.builder().id(loggedUserDTO.getId()).build());
         }
     }
+
+    private void cleanRequest() {
+        RequestContextHolder.cleanContext();
+    }
+
 }

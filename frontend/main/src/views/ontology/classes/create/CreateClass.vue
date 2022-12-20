@@ -120,7 +120,7 @@
           Related to
           <Tooltip :overlayStyle="{ width: '320px' }">
             <template #title>
-              This can only be linked to {{ formState.toolType }}
+              This can only be linked to {{ formatEnum(formState.toolType) }}
               classes in ontology center, after that you can scenario search across datasets
             </template>
             <ExclamationCircleOutlined style="transform: rotate(180deg)" />
@@ -206,6 +206,7 @@
   } from '/@/api/business/classes';
   import _ from 'lodash';
   import { RuleObject } from 'ant-design-vue/es/form/interface';
+  import { formatEnum } from '/@/utils/business';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();

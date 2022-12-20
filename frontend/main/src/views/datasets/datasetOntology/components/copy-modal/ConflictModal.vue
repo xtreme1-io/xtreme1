@@ -8,7 +8,7 @@
     okText="Confirm"
     :okButtonProps="{ disabled: isDisabled }"
     :width="1000"
-    :height="680"
+    :height="600"
   >
     <template #title>
       <div class="flex items-center">
@@ -34,7 +34,7 @@
           Original with New Classes/ Classifications.
         </span>
       </div>
-      <div class="conflict__list">
+      <div class="conflict__list h-518px">
         <div class="wrapper-inner">
           <div class="title">Classes</div>
           <div class="action">
@@ -51,14 +51,14 @@
               Keep All
             </span>
           </div>
-          <template v-if="hasData">
+          <div v-if="hasData" class="custom_table">
             <CustomTable
               ref="classRef"
               class="table"
               :type="ClassTypeEnum.CLASS"
               :list="conflictClassList"
             />
-          </template>
+          </div>
         </div>
         <div class="wrapper-inner">
           <div class="title">Classifications</div>
@@ -76,14 +76,14 @@
               Keep All
             </span>
           </div>
-          <template v-if="hasData">
+          <div v-if="hasData" class="custom_table">
             <CustomTable
               ref="classificationRef"
               class="table"
               :type="ClassTypeEnum.CLASSIFICATION"
               :list="conflictClassificationList"
             />
-          </template>
+          </div>
         </div>
       </div>
     </div>
@@ -182,7 +182,7 @@
 </script>
 <style scoped lang="less">
   .copy__modal {
-    min-height: 600px;
+    height: 600px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -200,9 +200,8 @@
     }
     .conflict__list {
       flex: 1;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 40px;
+      display: flex;
+      gap: 0 40px;
       .wrapper-inner {
         height: 100%;
         flex: 1;
@@ -226,9 +225,16 @@
           color: @primary-color;
           cursor: pointer;
         }
-        .table {
+        .custom_table {
           flex: 1;
-          height: 100%;
+          overflow-y: overlay;
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+          .table {
+            height: 100%;
+            width: 100%;
+          }
         }
       }
     }
