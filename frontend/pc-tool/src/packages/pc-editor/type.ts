@@ -369,6 +369,7 @@ export interface IDataResource {
     pointsData: Record<PointAttr, number[]>;
     intensityRange?: [number, number];
     ground?: number;
+    name?: string;
 }
 
 export interface IResourceLoader {

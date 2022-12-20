@@ -198,7 +198,7 @@ export async function getDataFile(dataId: string) {
         });
     });
 
-    return configs;
+    return { configs, name: data[0]?.name || ''};
 }
 
 export async function getUserInfo() {
