@@ -64,7 +64,6 @@
     getToolTypeImg(res.classUnits ?? []);
     const dataLength = res.classUnits.length;
     let itemLength = 0;
-    console.log(res.classUnits);
     const tempClassData: any[] = [];
     const groupClassData = _.groupBy(
       res.classUnits.sort((a, b) => b.objectAmount - a.objectAmount),
@@ -73,8 +72,6 @@
     Object.keys(groupClassData).forEach((item) => {
       tempClassData.push(...groupClassData[item]);
       const length = groupClassData[item].length;
-
-      console.log(item);
 
       unref(annotations).push({
         type: 'text',
