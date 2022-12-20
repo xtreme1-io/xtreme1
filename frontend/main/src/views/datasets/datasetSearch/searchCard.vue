@@ -78,7 +78,7 @@
     </template>
     <div class="card-info">
       <div class="info-dataName">data: {{ data?.name || '-' }}</div>
-      <div class="info-objectName">object: {{ object?.classAttributes?.trackName || '-' }}</div>
+      <div class="info-objectName">object: {{ getObjectName() || '-' }}</div>
     </div>
     <div class="operation"> <slot></slot></div>
   </div>
@@ -98,7 +98,7 @@
   type IProps = {
     info: DatasetListItem;
     data: DatasetItem;
-    object2D: any;
+    // object2D: any;
     object: any;
   };
   const props = defineProps<IProps>();
@@ -114,6 +114,10 @@
     onChange,
     pcActiveImage,
   } = useSearchCard(props);
+  const getObjectName = () => {
+    const obj = Array.isArray(props.object) ? props.object[0] : props.object;
+    return obj?.classAttributes?.trackName;
+  };
 </script>
 <style lang="less">
   @prefix-cls: ~'@{namespace}-searchCard';

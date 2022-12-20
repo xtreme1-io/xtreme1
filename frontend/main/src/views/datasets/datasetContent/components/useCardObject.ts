@@ -394,7 +394,7 @@ export function useImgCard(props: {
 export function useSearchCard(props: {
   info: DatasetListItem | undefined;
   object: any;
-  object2D: any;
+  // object2D: any;
   data: DatasetItem;
 }) {
   const { iState, svg, getSize } = useCardObject();
@@ -433,13 +433,24 @@ export function useSearchCard(props: {
   /**
    * Point cloud Miniature object
    */
+  const get3D = () => {
+    return props.object?.find(
+      ({ classAttributes: { type, objType } }) =>
+        AnnotationTypeMap[type || objType] === OBJECT_TYPE.BOX3D,
+    );
+  };
+  const get2D = () => {
+    return props.object?.filter(({ classAttributes: { type, objType } }) =>
+      [OBJECT_TYPE.BOX2D, OBJECT_TYPE.RECT].includes(AnnotationTypeMap[type || objType]),
+    );
+  };
   const updatePcObject = () => {
     const results: { id: string; points: string }[] = [];
     if (
       props.info?.type === datasetTypeEnum.LIDAR_FUSION ||
       props.info?.type === datasetTypeEnum.LIDAR_BASIC
     ) {
-      const object = props.object.classAttributes;
+      const object = get3D()?.classAttributes;
       // let size = getSize(svg.value);
       const info = getExtraInfo();
 
@@ -509,7 +520,7 @@ export function useSearchCard(props: {
     if (!dom) return;
     const img = dom.querySelector('img.img-2d') as HTMLImageElement;
     const svg = dom.querySelector('svg.easy-svg') as SVGElement;
-    const objects = props.object2D;
+    const objects = get2D();
     state.transform = '';
     const object2d: any[] = [];
     if (img.src && img.complete && objects?.length) {
@@ -612,8 +623,8 @@ export function useSearchCard(props: {
           const contour = info.contour || info;
           const index = contour.viewIndex;
           const flag1 = index === imgIndex;
-          const flag2 = info.trackId === props.object.classAttributes.trackId;
-          return flag1 && flag2;
+          // const flag2 = info.trackId === props.object.classAttributes.trackId;
+          return flag1;
         }),
       );
     }
@@ -672,7 +683,7 @@ export function useSearchCard(props: {
 
   const onHandleImgLoad = () => {
     const target = cardContainer.value as HTMLImageElement;
-    target?.parentElement?.classList.remove('image-loading');
+    target?.classList.remove('image-loading');
   };
 
   /**
@@ -770,10 +781,10 @@ export function useSearchCard(props: {
   }, 200);
 
   watch(
-    () => [props.object, props.object2D],
+    () => props.object,
     () => {
       if (props.info?.type === datasetTypeEnum.LIDAR_FUSION) {
-        const objects = props.object2D;
+        const objects = get2D();
         state.imgIndex = 0;
         if (objects?.length && objects[0]) {
           const object = objects[0].classAttributes;
