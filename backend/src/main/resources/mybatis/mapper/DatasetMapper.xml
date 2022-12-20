@@ -13,8 +13,6 @@
         <result column="created_by" property="createdBy"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="updated_by" property="updatedBy"/>
-        <association property="datas" column="id" select="queryData">
-        </association>
     </resultMap>
 
     <!-- 通用查询映射结果 -->
