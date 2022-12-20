@@ -64,12 +64,15 @@
     getToolTypeImg(res.classUnits ?? []);
     const dataLength = res.classUnits.length;
     let itemLength = 0;
-    console.log(res.classUnits);
     const tempClassData: any[] = [];
-    const groupClassData = _.groupBy(res.classUnits, 'toolType');
+    const groupClassData = _.groupBy(
+      res.classUnits.sort((a, b) => b.objectAmount - a.objectAmount),
+      'toolType',
+    );
     Object.keys(groupClassData).forEach((item) => {
       tempClassData.push(...groupClassData[item]);
       const length = groupClassData[item].length;
+
       unref(annotations).push({
         type: 'text',
         top: true,
@@ -78,7 +81,7 @@
           const key = (groupClassData[item][middle - 1] as any).yKey;
           return [key, 'min'];
         },
-        content: formatEnum(item),
+        content: item == 'null' ? 'N/A' : formatEnum(item),
         style: {
           fontSize: 12,
           fontWeight: '300',

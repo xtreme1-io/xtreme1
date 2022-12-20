@@ -117,7 +117,6 @@
   const dataInfo = ref<Record<string, any>>({});
 
   const handleChange = (e) => {
-    console.log(e);
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];

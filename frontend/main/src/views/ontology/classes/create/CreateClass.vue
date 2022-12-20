@@ -132,7 +132,7 @@
             :datasetId="props.datasetId"
             :isCenter="props.isCenter"
             :toolType="formState.toolType"
-            :datasetType="props.datasetType as datasetTypeEnum "
+            :datasetType="props.datasetType as datasetTypeEnum"
             v-model:ontologyId="formState.ontologyId"
             v-model:classId="formState.classId"
             @update="handleUpdateDataSchema"
@@ -146,6 +146,10 @@
         <TheManage
           :isCenter="props.isCenter"
           :activeTab="ClassTypeEnum.CLASS"
+          :toolType="formState.toolType"
+          :datasetType="props.datasetType as datasetTypeEnum"
+          :classId="formState.classId"
+          :ontologyId="formState.ontologyId"
           @manage="handleManageAttr"
         />
       </div>

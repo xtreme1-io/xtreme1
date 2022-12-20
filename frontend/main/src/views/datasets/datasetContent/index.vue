@@ -249,7 +249,7 @@
   const lockedNum = ref<number>(0);
 
   const type = ref<PageTypeEnum>();
-  const { id } = query;
+  const { id, dataId } = query;
   const [register, { openModal }] = useModal();
   const [frameRegister, { openModal: openFrameModal }] = useModal();
   const scrollRef = ref<Nullable<ScrollActionType>>(null);
@@ -360,11 +360,12 @@
 
   const fetchList = async (filter?, fetchType?) => {
     open();
-    const params = {
+    let params = {
       pageNo: pageNo.value,
       pageSize: 100,
       datasetId: id as string,
       // listType: listTypeEnum.list,
+
       ...filter,
       createStartTime:
         filter.createStartTime && filter.createEndTime
@@ -375,6 +376,10 @@
           ? setEndTime(filter.createEndTime)
           : undefined,
     };
+    if (dataId) {
+      params.dataIds = [dataId].toString();
+    }
+
     try {
       let tempList: DatasetItem[];
       if (fetchType) {

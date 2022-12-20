@@ -111,7 +111,6 @@
   /** Class List */
   const classList = ref<ontologyClassItem[]>([]);
   const getClassList = async () => {
-    console.log(props, '>>', props.ontologyId);
     if (props.ontologyId) {
       const res = await getAllClassByOntologyIdApi({
         ontologyId: props.ontologyId,
