@@ -327,11 +327,11 @@ export function useImgCard(props: {
   const updatePcImageObject = () => {
     const imgs: any[] = props.data.content
       ? props.data.content
-          .filter((record) => record?.directoryType?.includes('image'))
-          .slice(0, 3)
-          .map((img) => {
-            return Object.assign({}, img, { object: null });
-          })
+        .filter((record) => record?.directoryType?.includes('image'))
+        .slice(0, 3)
+        .map((img) => {
+          return Object.assign({}, img, { object: null });
+        })
       : [];
     if (
       props.showAnnotation !== false &&
@@ -493,7 +493,7 @@ export function useSearchCard(props: {
       const imgs = props.data?.content.filter(
         (content) => content.directoryType && content.directoryType.includes('image'),
       );
-      const img = imgs.length ? imgs[state.imgIndex] : null;
+      const img = imgs?.length ? imgs[state.imgIndex] : null;
       file = img?.files && img?.files[0]?.file;
     } else if (props.info?.type === datasetTypeEnum.IMAGE) {
       file = props.data?.content && props.data?.content[0]?.file;

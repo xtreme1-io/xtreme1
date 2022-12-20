@@ -115,9 +115,11 @@
   const dataInfo = ref<Record<string, any>>({});
 
   const handleChange = (e) => {
+    console.log(e);
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];
+      list.value = [];
     } else if (e[1]) {
       result.value = [e[1]];
       fetchList();
