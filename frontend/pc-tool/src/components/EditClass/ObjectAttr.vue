@@ -77,9 +77,7 @@
                 v-for="item in state.attrs"
                 :key="state.objectId + state.classType + item.id"
             >
-                <template v-for="attr in item.attrs" :key="attr.id + '#' + state.classType">
-                    <AttrValue v-if="isAttrVisible(attr)" @change="onAttChange" :item="attr" />
-                </template>
+                <AttrValue v-if="isAttrVisible(item)" @change="onAttChange" :item="item" />
             </div>
         </div>
     </div>
@@ -178,9 +176,7 @@
         () => {
             if (props.state.attrs.length) {
                 props.state.attrs.forEach((e) => {
-                    e.attrs.forEach((attr) => {
-                        attrMap[attr.id] = attr;
-                    });
+                    attrMap[e.id] = e;
                 });
             }
         },
