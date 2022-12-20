@@ -6,6 +6,7 @@ import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -59,25 +60,20 @@ public abstract class AbstractModelMessageHandler<T> {
 
     public ApiResult<T> getRetryAbleApiResult(ModelMessageBO modelMessageBO) {
         ApiResult<T> apiResult = null;
-        StopWatch stopWatch = new StopWatch();
         int count = 0;
         while (count <= RETRY_COUNT && ObjectUtil.isNull(apiResult)) {
             try {
-                stopWatch.start();
                 apiResult = callRemoteService(modelMessageBO);
-                stopWatch.stop();
                 break;
             } catch (Throwable throwable) {
                 log.error("call remote service is error", throwable);
-                if (stopWatch.isRunning()) {
-                    stopWatch.stop();
-                }
             }
             count++;
         }
         if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
             return apiResult;
         } else {
+            log.warn("call remote service is error.result is {}", JSONUtil.toJsonStr(apiResult));
             if (apiResult != null) {
                 return new ApiResult<>(apiResult.getCode(), apiResult.getMessage());
             } else {
