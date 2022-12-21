@@ -17,7 +17,7 @@
           This page allows you to search your data in this dataset by search ontologies
         </div>
       </div>
-      <div class="flex pl-25px pr-25px">
+      <div class="flex pl-25px pr-25px custom-search-scenario">
         <Select
           dropdownClassName="custom-search-scenario"
           v-model:value="result"
@@ -27,7 +27,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            <div class="inline-flex items-center">
+            <div
+              class="inline-flex items-center"
+              :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
+            >
               <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
               {{ item.name }}
             </div>
