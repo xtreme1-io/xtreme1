@@ -132,7 +132,7 @@ public class DataAnnotationObjectUseCase {
         var dataAnnotationObjectBOPage = DefaultConverter.convert(page, DataAnnotationObjectBO.class);
         var dataAnnotationObjectBOList = dataAnnotationObjectBOPage.getList();
         if (CollectionUtil.isNotEmpty(dataAnnotationObjectBOList)) {
-            var dataIds = dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getId).collect(Collectors.toList());
+            var dataIds = dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
             var userIdMap = dataEditUseCase.getDataEditByDataIds(dataIds);
             var userIds = userIdMap.values();
             if (CollectionUtil.isNotEmpty(userIds)) {
