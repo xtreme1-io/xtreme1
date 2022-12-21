@@ -31,18 +31,20 @@
         </Select>
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
       </div>
-      <div class="list" v-if="list.length > 0">
-        <template v-for="item in list">
-          <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
-            <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
-              <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
-                >Annotate</Button
-              >
-            </SearchCard>
-          </div>
-        </template>
+      <div class="list" v-show="list.length > 0">
+        <ScrollContainer ref="scrollRef">
+          <template v-for="item in list">
+            <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
+              <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
+                <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary">
+                  Annotate
+                </Button>
+              </SearchCard>
+            </div>
+          </template>
+        </ScrollContainer>
       </div>
-      <div class="empty" v-else>
+      <div class="empty" v-show="list.length === 0">
         <div class="text-center">
           <img class="inline-block mb-4" width="136" :src="datasetEmpty" alt="" />
           <div>Current Scenario is Empty</div>
@@ -84,6 +86,8 @@
   import { getAllClassByOntologyIdApi } from '/@/api/business/classes';
   import { getOntologyInfoApi } from '/@/api/business/ontology';
   import { toolTypeImg } from '../classes/attributes/data';
+  import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
+  import { handleScroll } from '/@/utils/business/scrollListener';
   const { t } = useI18n();
   const { prefixCls } = useDesign('ontologyScenario');
   const loadingRef = ref<boolean>(false);
@@ -98,6 +102,10 @@
   const classification = ref();
   const filterOptions = ref();
   const dataInfo = ref<Record<string, any>>({});
+  const pageNo = ref<number>(1);
+  const total = ref<number>(0);
+  const scrollRef = ref<Nullable<ScrollActionType>>(null);
+
   /** Virtual Tab */
   const tabListOntology = [
     {
@@ -144,6 +152,12 @@
   onMounted(() => {
     getInfo();
     fetchOption();
+    handleScroll(scrollRef, () => {
+      if (total.value > list.value.length) {
+        pageNo.value++;
+        fetchList(true);
+      }
+    });
   });
 
   const getOptions = async (id) => {
@@ -162,14 +176,15 @@
     options.value = list;
   };
 
-  const fetchList = async () => {
+  const fetchList = async (flag?) => {
     console.log(classification.value);
     const res = await getScenario({
       classId: result.value.toString(),
       // datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'ONTOLOGY',
-      pageSize: 9999,
+      pageNo: pageNo.value,
+      pageSize: 20,
       attributeIds: classification.value
         ? classification.value.map((item) => item.split('^')[0]).toString()
         : undefined,
@@ -216,10 +231,19 @@
           _list.push(e);
         });
       });
-      list.value = _list;
+      if (flag) {
+        list.value = list.value.concat(_list) || [];
+      } else {
+        list.value = _list;
+      }
     } else {
-      list.value = res.list || [];
+      if (flag) {
+        list.value = list.value.concat(res.list) || [];
+      } else {
+        list.value = res.list || [];
+      }
     }
+    total.value = res.total;
   };
 
   const handleSingleAnnotate = async (dataId: any, object: any) => {
@@ -254,6 +278,7 @@
       margin-right: 25px;
       padding: 12px;
       border-radius: 8px;
+      height: calc(100vh - 230px);
       .item {
         width: 240px;
         height: 240px;
