@@ -73,6 +73,8 @@ public class ClassBO {
 
     private Long datasetClassNum;
 
+    private OffsetDateTime createdAt;
+
     @Data
     @Builder
     public static class DatasetClass {

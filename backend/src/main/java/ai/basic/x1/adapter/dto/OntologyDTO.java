@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 
 /**
  * @author chenchao
@@ -35,4 +36,6 @@ public class OntologyDTO {
      * class number in this ontology
      */
     private Integer classNum;
+
+    private OffsetDateTime createdAt;
 }
