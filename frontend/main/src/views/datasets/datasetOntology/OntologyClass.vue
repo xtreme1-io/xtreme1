@@ -19,7 +19,6 @@
           :datasetType="datasetType"
           :datasetId="datasetId"
           :selectedList="selectedList"
-          :list="cardList"
           @selectAll="handleSelectAll"
           @unSelect="handleUnSelect"
           @fetchList="handleRefresh"
