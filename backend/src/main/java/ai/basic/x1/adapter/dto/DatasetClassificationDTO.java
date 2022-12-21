@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 
 /**
  * @author chenchao
@@ -54,4 +55,6 @@ public class DatasetClassificationDTO {
     private SortByEnum sortBy;
 
     private SortEnum ascOrDesc;
+
+    private OffsetDateTime createdAt;
 }
