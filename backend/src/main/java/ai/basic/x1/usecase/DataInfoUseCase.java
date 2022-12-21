@@ -196,6 +196,10 @@ public class DataInfoUseCase {
             var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
             dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDataId, ids);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
+            var dataInfo = dataInfoDAO.getOne(Wrappers.lambdaQuery(DataInfo.class).in(DataInfo::getId, ids).last("limit 1"));
+            if (ObjectUtil.isNotNull(dataInfo)) {
+                datasetSimilarityJobUseCase.submitJob(dataInfo.getDatasetId());
+            }
         })));
     }
 
