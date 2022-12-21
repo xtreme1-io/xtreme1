@@ -67,7 +67,7 @@ public class ModelController {
         var model = modelUseCase.findByModelCode(modelCodeEnum);
         var preModelParam = modelRecognitionRequest.toPreModelParamDTO();
         if (model.getModelCode() == ModelCodeEnum.COCO_80) {
-            preModelParam.setClasses(getImageClassLabelId(model.getId(), modelRecognitionRequest.getClasses()));
+            preModelParam.setClasses(getImageClassLabelIds(model.getId(), modelRecognitionRequest.getClasses()));
         }
         var message = ModelMessageBO.builder()
                 .dataInfo(dataInfo)
@@ -83,7 +83,7 @@ public class ModelController {
         return message;
     }
 
-    private List<String> getImageClassLabelId(Long modelId, List<String> classLabelNames) {
+    private List<String> getImageClassLabelIds(Long modelId, List<String> classLabelNames) {
         var classLabelMap = modelUseCase.getModelClassMapByModelId(modelId)
                 .entrySet().stream()
                 .collect(Collectors.toMap(e -> e.getValue().getName().toUpperCase(), Map.Entry::getKey,
