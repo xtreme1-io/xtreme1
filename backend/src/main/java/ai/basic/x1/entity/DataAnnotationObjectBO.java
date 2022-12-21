@@ -35,4 +35,9 @@ public class DataAnnotationObjectBO {
 
     private String frontId;
 
+    /**
+     * Locked Person's Name
+     */
+    private String lockedBy;
+
 }

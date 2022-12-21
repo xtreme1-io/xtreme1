@@ -3,12 +3,16 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
 import ai.basic.x1.adapter.port.dao.mybatis.query.ScenarioQuery;
 import ai.basic.x1.entity.DataAnnotationObjectBO;
+import ai.basic.x1.entity.DataInfoBO;
 import ai.basic.x1.entity.ScenarioQueryBO;
+import ai.basic.x1.entity.UserBO;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -28,6 +32,12 @@ public class DataAnnotationObjectUseCase {
 
     @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
+
+    @Autowired
+    private DataEditUseCase dataEditUseCase;
+
+    @Autowired
+    private UserUseCase userUseCase;
 
     /**
      * query results of annotation
@@ -119,7 +129,20 @@ public class DataAnnotationObjectUseCase {
     public Page<DataAnnotationObjectBO> findByScenarioPage(Integer pageNo, Integer pageSize, ScenarioQueryBO scenarioQueryBO) {
         var page = dataAnnotationObjectDAO.getBaseMapper().findByScenarioPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize),
                 DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
-        return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
+        var dataAnnotationObjectBOPage = DefaultConverter.convert(page, DataAnnotationObjectBO.class);
+        var dataAnnotationObjectBOList = dataAnnotationObjectBOPage.getList();
+        if (CollectionUtil.isNotEmpty(dataAnnotationObjectBOList)) {
+            var dataIds = dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getId).collect(Collectors.toList());
+            var userIdMap = dataEditUseCase.getDataEditByDataIds(dataIds);
+            var userIds = userIdMap.values();
+            if (CollectionUtil.isNotEmpty(userIds)) {
+                var userBOS = userUseCase.findByIds(ListUtil.toList(userIds));
+                var userMap = userBOS.stream()
+                        .collect(Collectors.toMap(UserBO::getId, UserBO::getNickname, (k1, k2) -> k1));
+                dataAnnotationObjectBOList.forEach(dataAnnotationObjectBO -> dataAnnotationObjectBO.setLockedBy(userMap.get(userIdMap.get(dataAnnotationObjectBO.getDataId()))));
+            }
+        }
+        return dataAnnotationObjectBOPage;
     }
 
     public List<DataAnnotationObjectBO> listByScenario(ScenarioQueryBO scenarioQueryBO) {
