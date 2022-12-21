@@ -116,6 +116,15 @@ services:
     profiles:
       - model
     runtime: nvidia
+  image-vect-visualization:
+    image: basicai/xtreme1-image-vect-visualization
+    ports:
+      - 8294:5000
+    # You need to explicitly specify model profile to start this service.
+    profiles:
+      - model
+    # You can specify nvidia runtime to use GPU.
+    # runtime: nvidia
 volumes:
   mysql-data:
   redis-data:

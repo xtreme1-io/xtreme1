@@ -51,4 +51,6 @@ public class ClassificationBO {
 
     private String ascOrDesc;
 
+    private OffsetDateTime createdAt;
+
 }

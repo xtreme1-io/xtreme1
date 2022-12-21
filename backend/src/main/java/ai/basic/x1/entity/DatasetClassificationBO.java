@@ -50,4 +50,6 @@ public class DatasetClassificationBO {
     private String ascOrDesc;
 
     private List<Long> classificationIds;
+
+    private OffsetDateTime createdAt;
 }

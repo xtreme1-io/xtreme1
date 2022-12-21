@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -66,6 +67,8 @@ public class ClassDTO {
     private List<DatasetClass> datasetClasses;
 
     private Long datasetClassNum;
+
+    private OffsetDateTime createdAt;
 
     @Data
     public static class DatasetClass {

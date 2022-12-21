@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 
 /**
 * @author chenchao
@@ -52,4 +53,5 @@ public class ClassificationDTO {
 
     private SortEnum ascOrDesc;
 
+    private OffsetDateTime createdAt;
 }

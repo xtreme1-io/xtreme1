@@ -76,5 +76,7 @@ public class DatasetClassBO {
 
     private List<Long> classIds;
 
+    private OffsetDateTime createdAt;
+
 
 }
