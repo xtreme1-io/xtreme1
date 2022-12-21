@@ -326,4 +326,8 @@ public class DatasetUseCase {
 
     }
 
+    public Long countObject(Long datasetId) {
+        return datasetDAO.getBaseMapper().countObject(datasetId);
+    }
+
 }
