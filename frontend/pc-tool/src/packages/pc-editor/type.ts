@@ -58,6 +58,7 @@ export interface IObjectV2 {
     trackId?: string;
     trackName?: string;
     classId?: string;
+    className?: string;
     backId?: string;
     frontId?: string;
     classType?: string;
