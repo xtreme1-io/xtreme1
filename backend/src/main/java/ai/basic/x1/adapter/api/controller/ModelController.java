@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author chenchao
@@ -62,6 +65,10 @@ public class ModelController {
     private ModelMessageBO buildModelMessageBO(ModelRecognitionRequestDTO modelRecognitionRequest, ModelCodeEnum modelCodeEnum) {
         var dataInfo = dataInfoUseCase.findById(modelRecognitionRequest.getDataId());
         var model = modelUseCase.findByModelCode(modelCodeEnum);
+        var preModelParam = modelRecognitionRequest.toPreModelParamDTO();
+        if (model.getModelCode() == ModelCodeEnum.COCO_80) {
+            preModelParam.setClasses(getImageClassLabelId(model.getId(), modelRecognitionRequest.getClasses()));
+        }
         var message = ModelMessageBO.builder()
                 .dataInfo(dataInfo)
                 .datasetId(dataInfo.getDatasetId())
@@ -70,10 +77,25 @@ public class ModelController {
                 .modelCode(model.getModelCode())
                 .modelVersion(model.getVersion())
                 .modelSerialNo(IdUtil.getSnowflakeNextId())
-                .resultFilterParam(JSONUtil.parseObj(modelRecognitionRequest.toPreModelParamDTO()))
+                .resultFilterParam(JSONUtil.parseObj(preModelParam))
                 .createdBy(RequestContextHolder.getContext().getUserInfo().getId())
                 .build();
         return message;
+    }
+
+    private List<String> getImageClassLabelId(Long modelId, List<String> classLabelNames) {
+        var classLabelMap = modelUseCase.getModelClassMapByModelId(modelId)
+                .entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getValue().getName().toUpperCase(), Map.Entry::getKey,
+                        (o1, o2) -> o2));
+        var classLabelIds = new ArrayList<String>();
+        for (String classLabelName : classLabelNames) {
+            classLabelName = classLabelName.replace('_', ' ').toUpperCase();
+            if (classLabelMap.containsKey(classLabelName)) {
+                classLabelIds.add(classLabelMap.get(classLabelName));
+            }
+        }
+        return classLabelIds;
     }
 
 }
