@@ -117,7 +117,7 @@ services:
       - model
     runtime: nvidia
   image-vect-visualization:
-    image: basicai/xtreme1-image-vect-visualization
+    image: basicai/xtreme1-image-vect-visualization-cpu
     ports:
       - 8294:5000
     # You need to explicitly specify model profile to start this service.

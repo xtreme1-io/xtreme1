@@ -78,6 +78,8 @@ const transform: AxiosTransform = {
         userStore.setToken(undefined);
         userStore.logout(true);
         break;
+      case ResultEnum.DATASET_DATA_EXIST_ANNOTATE:
+        return Promise.reject(responseData);
       default:
         if (message) {
           timeoutMsg = message;
@@ -254,7 +256,8 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
   );
 }
 export const defHttp = createAxios();
-const regexIP = /^((25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
+const regexIP =
+  /^((25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))$/;
 if (document.domain !== 'localhost') {
   if (regexIP.test(document.domain)) {
     document.domain = location.hostname;
@@ -266,7 +269,6 @@ if (document.domain !== 'localhost') {
       document.domain = list.slice(list.length - 2).join('.');
     }
   }
-
 } else {
   document.domain = 'localhost';
 }

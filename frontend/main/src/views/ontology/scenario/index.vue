@@ -13,7 +13,7 @@
       type="ONTOLOGY"
     />
     <div class="content mt-20px">
-      <div class="flex">
+      <div class="flex custom-search-scenario">
         <Select
           dropdownClassName="custom-search-scenario"
           v-model:value="result"
@@ -23,7 +23,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            <div class="inline-flex items-center">
+            <div
+              class="inline-flex items-center"
+              :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
+            >
               <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
               {{ item.name }}
             </div>
@@ -35,8 +38,16 @@
         <ScrollContainer ref="scrollRef">
           <template v-for="item in list">
             <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
-              <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
-                <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary">
+              <SearchCard
+                :showInfo="true"
+                :info="info"
+                :data="dataInfo[item.dataId]"
+                :object="item"
+              >
+                <Button
+                  @click="() => handleSingleAnnotate(dataInfo[item.dataId], item)"
+                  type="primary"
+                >
                   Annotate
                 </Button>
               </SearchCard>
@@ -57,6 +68,7 @@
   // vue
   // components
   import { VirtualTab } from '/@@/VirtualTab';
+  import { message } from 'ant-design-vue';
   // icons
   import Ontology from '/@/assets/svg/tags/ontology.svg';
   import OntologyActive from '/@/assets/svg/tags/ontologyActive.svg';
@@ -88,6 +100,7 @@
   import { toolTypeImg } from '../classes/attributes/data';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { handleScroll } from '/@/utils/business/scrollListener';
+  import { ResultEnum } from '/@/enums/httpEnum';
   const { t } = useI18n();
   const { prefixCls } = useDesign('ontologyScenario');
   const loadingRef = ref<boolean>(false);
@@ -209,7 +222,7 @@
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const tempMap = {};
       res.list?.forEach((item: any) => {
-        const { classAttributes: info, dataId, id, datasetId } = item;
+        const { classAttributes: info, dataId, id, datasetId, lockedBy, datasetName } = item;
         // const type = info.type || info.objType;
 
         if (!tempMap[dataId]) {
@@ -222,6 +235,8 @@
             datasetId: datasetId,
             id: id,
             trackId: info.trackId,
+            lockedBy: lockedBy,
+            datasetName: datasetName,
           });
         }
         tempMap[dataId][info.trackId].push(item);
@@ -246,16 +261,24 @@
     total.value = res.total;
   };
 
-  const handleSingleAnnotate = async (dataId: any, object: any) => {
+  const handleSingleAnnotate = async (data: any, object: any) => {
     const recordId = await takeRecordByData({
       datasetId: object.datasetId || info.value.id,
-      dataIds: [dataId],
+      dataIds: [object.dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
       isFilterData: true,
-    }).catch(() => {});
+    }).catch((error: any = {}) => {
+      const { code, message: msg } = error;
+      if (code === ResultEnum.DATASET_DATA_EXIST_ANNOTATE) {
+        message.error(`${data.name} is being edited by ${object.lockedBy}`);
+      } else {
+        message.error(msg || 'error');
+      }
+      return null;
+    });
     const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
-    goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
+    goToTool({ recordId: recordId, dataId: object.dataId, focus: trackId }, info.value?.type);
   };
 </script>
 <style lang="less" scoped>

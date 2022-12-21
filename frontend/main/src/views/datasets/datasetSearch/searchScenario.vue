@@ -17,7 +17,7 @@
           This page allows you to search your data in this dataset by search ontologies
         </div>
       </div>
-      <div class="flex pl-25px pr-25px">
+      <div class="flex pl-25px pr-25px custom-search-scenario">
         <Select
           dropdownClassName="custom-search-scenario"
           v-model:value="result"
@@ -27,7 +27,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            <div class="inline-flex items-center">
+            <div
+              class="inline-flex items-center"
+              :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
+            >
               <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
               {{ item.name }}
             </div>
@@ -40,7 +43,9 @@
           <template v-for="item in list">
             <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
               <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
-                <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
+                <Button
+                  @click="() => handleSingleAnnotate(dataInfo[item.dataId], item)"
+                  type="primary"
                   >Annotate</Button
                 >
               </SearchCard>
@@ -97,7 +102,6 @@
     takeRecordByData,
     // checkRootByDataId,
   } from '/@/api/business/dataset';
-  // import { useMessage } from '/@/hooks/web/useMessage';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -107,6 +111,7 @@
   import { toolTypeImg } from '../../ontology/classes/attributes/data';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { handleScroll } from '/@/utils/business/scrollListener';
+  import { ResultEnum } from '/@/enums/httpEnum';
   const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;
@@ -204,7 +209,7 @@
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const tempMap = {};
       res.list?.forEach((item: any) => {
-        const { classAttributes: info, dataId, id, datasetId } = item;
+        const { classAttributes: info, dataId, id, datasetId, lockedBy, datasetName } = item;
         // const type = info.type || info.objType;
 
         if (!tempMap[dataId]) {
@@ -217,6 +222,8 @@
             datasetId: datasetId,
             id: id,
             trackId: info.trackId,
+            lockedBy: lockedBy,
+            datasetName: datasetName,
           });
         }
         tempMap[dataId][info.trackId].push(item);
@@ -241,16 +248,24 @@
     total.value = res.total;
   };
 
-  const handleSingleAnnotate = async (dataId: any, object: any) => {
+  const handleSingleAnnotate = async (data: any, object: any) => {
     const recordId = await takeRecordByData({
       datasetId: object.datasetId || info.value.id,
-      dataIds: [dataId],
+      dataIds: [object.dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
       isFilterData: true,
-    }).catch(() => {});
+    }).catch((error: any = {}) => {
+      const { code, message: msg } = error;
+      if (code === ResultEnum.DATASET_DATA_EXIST_ANNOTATE) {
+        message.error(`${data.name} is being edited by ${object.lockedBy}`);
+      } else {
+        message.error(msg || 'error');
+      }
+      return null;
+    });
     const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
-    goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
+    goToTool({ recordId: recordId, dataId: object.dataId, focus: trackId }, info.value?.type);
   };
 
   const handleExport = () => {
