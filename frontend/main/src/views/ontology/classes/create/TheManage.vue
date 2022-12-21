@@ -21,7 +21,7 @@
         {{ ontologyName }}?
       </div>
       <div class="flex justify-end gap-10px">
-        <Button @click="handleCancel">Cancel</Button>
+        <Button @click="handleCloseBox">Cancel</Button>
         <Button type="primary" class="override" @click="handleOverride"> Override </Button>
       </div>
     </div>
@@ -62,20 +62,12 @@
   });
 
   const ontologyName = computed(() => {
-    if (props.ontologyId) {
-      const target = ontologyList.value.find((item) => item.id == props.ontologyId);
-      return target?.name;
-    } else {
-      return '';
-    }
+    const target = ontologyList.value.find((item) => item.id == props.ontologyId);
+    return target?.name ?? '';
   });
   const className = computed(() => {
-    if (props.classId) {
-      const target = classList.value.find((item) => item.id == props.classId);
-      return target?.name;
-    } else {
-      return '';
-    }
+    const target = classList.value.find((item) => item.id == props.classId);
+    return target?.name ?? '';
   });
   /** Ontology List */
   const ontologyList = ref<OntologyListItem[]>([]);
@@ -87,14 +79,20 @@
     getOntologyList();
   });
   watch(
-    () => props.classId,
+    () => props.ontologyId,
     () => {
       setTimeout(async () => {
         await getClassList();
-      });
+      }, 100);
     },
     {
       immediate: true,
+    },
+  );
+  watch(
+    () => props.classId,
+    () => {
+      handleCloseBox();
     },
   );
 
@@ -133,7 +131,7 @@
     }
   };
 
-  const handleCancel = () => {
+  const handleCloseBox = () => {
     showPullBox.value = false;
     showPushBox.value = false;
   };
@@ -143,13 +141,13 @@
     } else {
       emitter.emit('pushClass');
     }
-    handleCancel();
+    handleCloseBox();
   };
 
   /** Manage */
   const handleManageAttr = () => {
     emits('manage');
-    handleCancel();
+    handleCloseBox();
   };
 </script>
 <style lang="less" scoped>

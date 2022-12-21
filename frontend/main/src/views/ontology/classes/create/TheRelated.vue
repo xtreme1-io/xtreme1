@@ -85,7 +85,7 @@
   watch(
     () => props.toolType,
     () => {
-      emits('update:ontologyId', undefined);
+      // emits('update:ontologyId', undefined);
       emits('update:classId', undefined);
     },
   );
