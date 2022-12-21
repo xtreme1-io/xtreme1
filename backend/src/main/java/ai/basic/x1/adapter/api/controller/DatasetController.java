@@ -116,7 +116,7 @@ public class DatasetController extends BaseDatasetController {
     @GetMapping("{datasetId}/statistics/dataStatus")
     public DatasetStatisticsDTO statisticsDataStatus(@PathVariable("datasetId") Long datasetId) {
         var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(List.of(datasetId));
-        var objectCount = dataAnnotationObjectUseCase.countObjectByDatasetId(datasetId);
+        var objectCount = datasetUsecase.countObject(datasetId);
         var statisticsInfo = datasetStatisticsMap.getOrDefault(datasetId,
                 DatasetStatisticsBO.createEmpty(datasetId));
 
