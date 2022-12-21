@@ -500,7 +500,6 @@
     showResetBox.value = false;
   };
   const handleChangeToolType = (value) => {
-    console.log(value, showResetBox, formState);
     tempToolType.value = value;
     showToolTypeDropdown.value = !showToolTypeDropdown.value;
 
