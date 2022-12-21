@@ -4,9 +4,9 @@
             <span :class="blocking ? 'close disable' : 'close'" @click="blocking ? null : onClose()"
                 ><CloseOutlined /><span style="margin-left: 4px">{{ $$('btn-close') }}</span></span
             >
-            <div class="task-header-info" v-if="bsState.datasetName">
-                <span :title="bsState.datasetName || ''" class="task-header-name">{{
-                    bsState.datasetName || ''
+            <div class="task-header-info">
+                <span :title="iState.dataName || ''" class="task-header-name">{{
+                    iState.dataName || ''
                 }}</span>
                 <i class="iconfont icon-a-Jobinformation task-header-icon"></i>
             </div>

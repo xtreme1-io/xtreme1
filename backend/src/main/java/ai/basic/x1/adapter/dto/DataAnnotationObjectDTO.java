@@ -29,4 +29,9 @@ public class DataAnnotationObjectDTO {
     private Integer objectCount;
 
     private String frontId;
+
+    /**
+     * Locked Person's Name
+     */
+    private String lockedBy;
 }

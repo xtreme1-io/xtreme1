@@ -23,25 +23,24 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            <img :src="toolTypeImg[item.toolType]" alt="" />
-            {{ item.name }}
+            <div class="inline-flex items-center">
+              <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
+              {{ item.name }}
+            </div>
           </Select.Option>
         </Select>
         <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
-        <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
-          <SearchCard
-            :info="info"
-            :object2D="object2D[item?.classAttributes?.trackId]"
-            :data="dataInfo[item.dataId]"
-            :object="item"
-          >
-            <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
-              >Annotate</Button
-            >
-          </SearchCard>
-        </div>
+        <template v-for="item in list">
+          <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
+            <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
+              <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
+                >Annotate</Button
+              >
+            </SearchCard>
+          </div>
+        </template>
       </div>
       <div class="empty" v-else>
         <div class="text-center">
@@ -99,7 +98,6 @@
   const classification = ref();
   const filterOptions = ref();
   const dataInfo = ref<Record<string, any>>({});
-  const object2D = ref<Record<string, any>>({});
   /** Virtual Tab */
   const tabListOntology = [
     {
@@ -168,7 +166,7 @@
     console.log(classification.value);
     const res = await getScenario({
       classId: result.value.toString(),
-      datasetId: info.value.id,
+      // datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'ONTOLOGY',
       pageSize: 9999,
@@ -180,7 +178,7 @@
         : undefined,
     });
     const _list: any[] = [];
-    const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))
+    const dataIds = Array.from(new Set(res.list?.map((item) => item.dataId)))
       .filter((item: any) => !dataInfo.value[item])
       .toString();
     if (dataIds.length) {
@@ -194,35 +192,44 @@
       }, dataInfo.value);
     }
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
-      const obj2dMap = {};
-      res.list.forEach((item: any) => {
-        const type = item.classAttributes.type || item.classAttributes.objType;
-        const info = item.classAttributes;
-        if (['2D_RECT', '2D_BOX', 'rect', 'box2d'].includes(type)) {
-          if (!obj2dMap[info.trackId]) {
-            obj2dMap[info.trackId] = [];
-          }
-          obj2dMap[info.trackId].push(item);
-        } else {
-          _list.push(item);
+      const tempMap = {};
+      res.list?.forEach((item: any) => {
+        const { classAttributes: info, dataId, id, datasetId } = item;
+        // const type = info.type || info.objType;
+
+        if (!tempMap[dataId]) {
+          tempMap[dataId] = {};
         }
+
+        if (!tempMap[dataId][info.trackId]) {
+          tempMap[dataId][info.trackId] = Object.assign([], {
+            dataId: dataId,
+            datasetId: datasetId,
+            id: id,
+            trackId: info.trackId,
+          });
+        }
+        tempMap[dataId][info.trackId].push(item);
       });
-      Object.assign(object2D.value, obj2dMap);
-      object2D.value = obj2dMap;
+      Object.values(tempMap).forEach((t: any) => {
+        Object.values(t).forEach((e) => {
+          _list.push(e);
+        });
+      });
       list.value = _list;
     } else {
-      list.value = res.list;
+      list.value = res.list || [];
     }
   };
 
   const handleSingleAnnotate = async (dataId: any, object: any) => {
     const recordId = await takeRecordByData({
-      datasetId: info.value.id,
+      datasetId: object.datasetId || info.value.id,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
       isFilterData: true,
     }).catch(() => {});
-    const trackId = object.classAttributes.trackId;
+    const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
   };
@@ -239,6 +246,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .list {
+      background: white;
+      margin-top: 20px;
+      margin-left: 25px;
+      margin-right: 25px;
+      padding: 12px;
+      border-radius: 8px;
+      .item {
+        width: 240px;
+        height: 240px;
+        background-color: white;
+        display: inline-block;
+        margin: 6px;
+        position: relative;
+        border-radius: 6px;
+        overflow: hidden;
+      }
     }
   }
 </style>

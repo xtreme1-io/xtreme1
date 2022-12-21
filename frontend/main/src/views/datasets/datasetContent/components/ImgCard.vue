@@ -118,7 +118,7 @@
             class="pointCloudImg h-83px"
             @error="onHandleImgLoad"
             @load="onHandleImgLoad"
-            :src="getPlaceImg()"
+            v-lazy="getPlaceImg()"
             alt=""
           />
           <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
@@ -136,7 +136,7 @@
               :key="item"
               @error="onHandleImgLoad"
               @load="onHandleImgLoad"
-              :src="getPcImage(iState.pcImageObject[item])"
+              v-lazy="getPcImage(iState.pcImageObject[item])"
               alt=""
             />
             <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
@@ -379,6 +379,9 @@
     height: 175px;
     transform: translateZ(0);
      .image-loading{
+        img{
+          opacity: 0;
+        }
       background: linear-gradient(45deg,rgba(190,190,190,.2) 25%,rgba(129,129,129,.24) 37%,rgba(190,190,190,.2) 63%);
       background-size: 400% 100%;
       animation: animation-loading 1.4s ease infinite;

@@ -78,16 +78,7 @@ public class DatasetController extends BaseDatasetController {
         }
         var datasetIds = datasetBOList.stream().map(datasetBO -> datasetBO.getId()).collect(Collectors.toList());
         var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(datasetIds);
-        var dataInfoBOList = new ArrayList<DataInfoBO>();
-        datasetBOList.forEach(datasetBO -> {
-            var datas = datasetBO.getDatas();
-            if (!datasetBO.getType().equals(DatasetTypeEnum.IMAGE) && CollectionUtil.isNotEmpty(datas)) {
-                dataInfoBOList.add(CollectionUtil.getFirst(datas));
-            } else {
-                dataInfoBOList.addAll(datas);
-            }
-        });
-        var dataMap = dataInfoUsecase.getDataInfoListFileMap(dataInfoBOList);
+        dataInfoUsecase.setDatasetSixData(datasetBOList);
         return datasetBOPage.convert(datasetBO -> {
             var datasetDTO = DefaultConverter.convert(datasetBO, DatasetDTO.class);
             var datasetStatisticsBO = datasetStatisticsMap.get(datasetBO.getId());
@@ -97,9 +88,12 @@ public class DatasetController extends BaseDatasetController {
                 datasetDTO.setInvalidCount(datasetStatisticsBO.getInvalidCount());
                 datasetDTO.setItemCount(datasetStatisticsBO.getItemCount());
             }
-            var dataInfoBOS = dataMap.get(datasetBO.getId());
-            if (CollectionUtil.isNotEmpty(dataInfoBOS)) {
-                datasetDTO.setDatas(dataInfoBOS.stream().map(dataInfoBO -> convertDataInfoDTO(dataInfoBO)).collect(Collectors.toList()));
+            if (CollectionUtil.isNotEmpty(datasetBO.getDatas())) {
+                var dataInfoDTOS = new ArrayList<DataInfoDTO>();
+                datasetBO.getDatas().forEach(dataInfoBO -> {
+                    dataInfoDTOS.add(convertDataInfoDTO(dataInfoBO));
+                });
+                datasetDTO.setDatas(dataInfoDTOS);
             }
             return datasetDTO;
         });
@@ -122,7 +116,7 @@ public class DatasetController extends BaseDatasetController {
     @GetMapping("{datasetId}/statistics/dataStatus")
     public DatasetStatisticsDTO statisticsDataStatus(@PathVariable("datasetId") Long datasetId) {
         var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(List.of(datasetId));
-        var objectCount = dataAnnotationObjectUseCase.countObjectByDatasetId(datasetId);
+        var objectCount = datasetUsecase.countObject(datasetId);
         var statisticsInfo = datasetStatisticsMap.getOrDefault(datasetId,
                 DatasetStatisticsBO.createEmpty(datasetId));
 

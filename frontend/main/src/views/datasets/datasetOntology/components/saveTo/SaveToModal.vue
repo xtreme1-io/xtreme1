@@ -5,7 +5,7 @@
     :title="t('business.ontology.sync.saveToOntology')"
     destroyOnClose
     centered
-    @cancel="handleCancel"
+    @cancel="afterCancel"
     :minHeight="70"
   >
     <div class="saveTo__content">
@@ -37,7 +37,9 @@
             Original with New Classes/ Classifications.
           </span>
         </div>
-        <div class="title">Classes</div>
+        <div class="title">
+          {{ props.activeTab == ClassTypeEnum.CLASS ? 'Classes' : 'Classifications' }}
+        </div>
         <div class="action">
           <span class="highLight" @click="handleToggleKeepAll(ICopySelectEnum.REPLACE)">
             Replace All
@@ -46,7 +48,9 @@
             Keep All
           </span>
         </div>
-        <CustomTable ref="tableRef" class="table" :type="props.activeTab" :list="conflictList" />
+        <div class="custom_table">
+          <CustomTable ref="tableRef" class="table" :type="props.activeTab" :list="conflictList" />
+        </div>
       </div>
     </div>
     <!-- 重写按钮 -->
@@ -105,10 +109,13 @@
     getOntologyList();
   });
   const handleCancel = () => {
+    afterCancel();
+    closeModal();
+  };
+  const afterCancel = () => {
     selectedOntologyId.value = undefined;
     conflictList.value = [];
     noConflictList.value = [];
-    closeModal();
   };
 
   /** Ontology List */
@@ -225,12 +232,16 @@
 </script>
 <style scoped lang="less">
   .saveTo__content {
+    max-height: 600px;
     width: 100%;
     display: flex;
     flex-direction: column;
     // text-align: center;
     margin: 0 auto;
     padding: 26px 26px 0;
+    .content__select {
+      height: 40px;
+    }
     .content__table {
       height: 100%;
       flex: 1;
@@ -268,9 +279,16 @@
         color: @primary-color;
         cursor: pointer;
       }
-      .table {
+      .custom_table {
         flex: 1;
-        height: 100%;
+        overflow-y: overlay;
+        &::-webkit-scrollbar-track {
+          background-color: transparent;
+        }
+        .table {
+          height: 100%;
+          width: 100%;
+        }
       }
     }
   }

@@ -33,21 +33,18 @@
             </div>
           </Select.Option>
         </Select>
-        <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
+        <Button class="ml-20px" type="default" @click="handleExport">Export Result</Button>
       </div>
       <div class="list" v-if="list.length > 0">
-        <div class="item" v-for="item in list" :key="item.dataId + '#' + item.id">
-          <SearchCard
-            :info="info"
-            :object2D="object2D[item?.classAttributes?.trackId]"
-            :data="dataInfo[item.dataId]"
-            :object="item"
-          >
-            <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
-              >Annotate</Button
-            >
-          </SearchCard>
-        </div>
+        <template v-for="item in list">
+          <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
+            <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
+              <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
+                >Annotate</Button
+              >
+            </SearchCard>
+          </div>
+        </template>
       </div>
       <div class="empty" v-else>
         <div class="text-center">
@@ -83,7 +80,7 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Select, Checkbox } from 'ant-design-vue';
+  import { Select, Checkbox, message } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
@@ -118,12 +115,12 @@
   const classification = ref();
   const filterOptions = ref();
   const dataInfo = ref<Record<string, any>>({});
-  const object2D = ref<Record<string, any>>({});
 
   const handleChange = (e) => {
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];
+      list.value = [];
     } else if (e[1]) {
       result.value = [e[1]];
       fetchList();
@@ -178,7 +175,7 @@
         : undefined,
     });
     const _list: any[] = [];
-    const dataIds = Array.from(new Set(res.list.map((item) => item.dataId)))
+    const dataIds = Array.from(new Set(res.list?.map((item) => item.dataId)))
       .filter((item: any) => !dataInfo.value[item])
       .toString();
     if (dataIds.length) {
@@ -192,37 +189,53 @@
       }, dataInfo.value);
     }
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
-      const obj2dMap = {};
-      res.list.forEach((item: any) => {
-        const type = item.classAttributes.type || item.classAttributes.objType;
-        const info = item.classAttributes;
-        if (['2D_RECT', '2D_BOX', 'rect', 'box2d'].includes(type)) {
-          if (!obj2dMap[info.trackId]) {
-            obj2dMap[info.trackId] = [];
-          }
-          obj2dMap[info.trackId].push(item);
-        } else {
-          _list.push(item);
+      const tempMap = {};
+      res.list?.forEach((item: any) => {
+        const { classAttributes: info, dataId, id, datasetId } = item;
+        // const type = info.type || info.objType;
+
+        if (!tempMap[dataId]) {
+          tempMap[dataId] = {};
         }
+
+        if (!tempMap[dataId][info.trackId]) {
+          tempMap[dataId][info.trackId] = Object.assign([], {
+            dataId: dataId,
+            datasetId: datasetId,
+            id: id,
+            trackId: info.trackId,
+          });
+        }
+        tempMap[dataId][info.trackId].push(item);
       });
-      Object.assign(object2D.value, obj2dMap);
-      object2D.value = obj2dMap;
+      Object.values(tempMap).forEach((t: any) => {
+        Object.values(t).forEach((e) => {
+          _list.push(e);
+        });
+      });
       list.value = _list;
     } else {
-      list.value = res.list;
+      list.value = res.list || [];
     }
   };
 
   const handleSingleAnnotate = async (dataId: any, object: any) => {
     const recordId = await takeRecordByData({
-      datasetId: info.value.id,
+      datasetId: object.datasetId || info.value.id,
       dataIds: [dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
       isFilterData: true,
     }).catch(() => {});
-    const trackId = object.classAttributes.trackId;
+    const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
+  };
+
+  const handleExport = () => {
+    if (!result.value) {
+      return message.error('please select a class first');
+    }
+    openModal();
   };
 </script>
 <style lang="less" scoped>

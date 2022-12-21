@@ -6,7 +6,7 @@
         <Tabs.TabPane :key="tabPaneEnum.CLASS" tab="Classes" forceRender>
           <ChartEmpty v-if="!hasClassData" tip="No Classes" class="py-80px" />
           <div v-else>
-            <div class="class-legend">
+            <!-- <div class="class-legend">
               <div
                 class="class-legend-item"
                 v-for="(item, index) in currentToolTypeImg"
@@ -15,7 +15,7 @@
                 <img :src="item.img" alt="" />
                 <span>{{ formatEnum(item.label) }}</span>
               </div>
-            </div>
+            </div> -->
             <div ref="plotClassRef" class="chartContainer__box"></div>
           </div>
         </Tabs.TabPane>
@@ -64,12 +64,15 @@
     getToolTypeImg(res.classUnits ?? []);
     const dataLength = res.classUnits.length;
     let itemLength = 0;
-    console.log(res.classUnits);
     const tempClassData: any[] = [];
-    const groupClassData = _.groupBy(res.classUnits, 'toolType');
+    const groupClassData = _.groupBy(
+      res.classUnits.sort((a, b) => b.objectAmount - a.objectAmount),
+      'toolType',
+    );
     Object.keys(groupClassData).forEach((item) => {
       tempClassData.push(...groupClassData[item]);
       const length = groupClassData[item].length;
+
       unref(annotations).push({
         type: 'text',
         top: true,
@@ -78,7 +81,7 @@
           const key = (groupClassData[item][middle - 1] as any).yKey;
           return [key, 'min'];
         },
-        content: formatEnum(item),
+        content: item == 'null' ? 'N/A' : formatEnum(item),
         style: {
           fontSize: 12,
           fontWeight: '300',

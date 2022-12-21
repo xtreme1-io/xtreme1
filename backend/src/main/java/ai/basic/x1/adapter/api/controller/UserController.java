@@ -54,9 +54,7 @@ public class UserController extends BaseController {
         var user =  UserDTO.fromBO(userUseCase.create(authDto.getUsername(),
                 authDto.getPassword()));
         return UserLoginResponseDTO.builder()
-                .token(jwtHelper.generateToken(JwtPayload.builder()
-                        .userId(user.getId())
-                        .build()))
+                .token(userTokenUseCase.generateGatewayToken(user.getId()).getToken())
                 .user(user)
                 .build();
     }

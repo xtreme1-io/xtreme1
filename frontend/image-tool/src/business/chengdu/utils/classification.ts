@@ -197,6 +197,7 @@ export function classificationToSave(classification: IClassification) {
             name: e.name,
             value: e.value,
             alias: e.label,
+            type: e.type,
             isLeaf: !!e.leafFlag,
         };
     });

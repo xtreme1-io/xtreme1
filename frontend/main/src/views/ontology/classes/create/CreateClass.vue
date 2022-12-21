@@ -120,7 +120,7 @@
           Related to
           <Tooltip :overlayStyle="{ width: '320px' }">
             <template #title>
-              This can only be linked to {{ formState.toolType }}
+              This can only be linked to {{ formatEnum(formState.toolType) }}
               classes in ontology center, after that you can scenario search across datasets
             </template>
             <ExclamationCircleOutlined style="transform: rotate(180deg)" />
@@ -132,7 +132,7 @@
             :datasetId="props.datasetId"
             :isCenter="props.isCenter"
             :toolType="formState.toolType"
-            :datasetType="props.datasetType as datasetTypeEnum "
+            :datasetType="props.datasetType as datasetTypeEnum"
             v-model:ontologyId="formState.ontologyId"
             v-model:classId="formState.classId"
             @update="handleUpdateDataSchema"
@@ -146,6 +146,10 @@
         <TheManage
           :isCenter="props.isCenter"
           :activeTab="ClassTypeEnum.CLASS"
+          :toolType="formState.toolType"
+          :datasetType="props.datasetType as datasetTypeEnum"
+          :classId="formState.classId"
+          :ontologyId="formState.ontologyId"
           @manage="handleManageAttr"
         />
       </div>
@@ -206,6 +210,7 @@
   } from '/@/api/business/classes';
   import _ from 'lodash';
   import { RuleObject } from 'ant-design-vue/es/form/interface';
+  import { formatEnum } from '/@/utils/business';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -495,7 +500,6 @@
     showResetBox.value = false;
   };
   const handleChangeToolType = (value) => {
-    console.log(value, showResetBox, formState);
     tempToolType.value = value;
     showToolTypeDropdown.value = !showToolTypeDropdown.value;
 

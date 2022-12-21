@@ -43,4 +43,21 @@
             AND d.is_deleted=#{isQueryDeletedData}
         </if>
     </select>
+
+    <select id="selectSixDataIdByDatasetIds" resultType="ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSixData">
+        SELECT
+            SUBSTRING_INDEX( GROUP_CONCAT( id ), ',', 6 ) AS dataIds,d.dataset_id
+        FROM
+            data d
+        WHERE
+            d.dataset_id IN
+            <foreach collection="datasetIds" index="index" item="datasetId" open="("
+                     separator=","
+                     close=")">
+                #{datasetId}
+            </foreach>
+            AND d.is_deleted = 0
+        GROUP BY
+            dataset_id
+    </select>
 </mapper>

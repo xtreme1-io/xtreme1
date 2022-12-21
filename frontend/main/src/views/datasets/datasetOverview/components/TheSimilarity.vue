@@ -1,6 +1,21 @@
 <template>
   <div class="chart_wrapper" v-loading="isLoading">
-    <div class="title">Data Similarity Map</div>
+    <div class="title flex items-center gap-8px">
+      Data Similarity Map
+      <div v-if="isCalculating" class="flex items-center gap-6px">
+        <Spin :indicator="indicator" />
+        <span style="font-size: 14px; color: #000">Calculating</span>
+        <Tooltip placement="top" :overlayStyle="{ width: '237px' }">
+          <template #title>
+            <span>
+              Calculating your dataset similarity, current chart may be inconsistent with final
+              result
+            </span>
+          </template>
+          <InfoCircleOutlined style="color: #ccc; font-size: 15px" />
+        </Tooltip>
+      </div>
+    </div>
     <ChartEmpty v-if="!hasData" class="py-80px" />
     <template v-else>
       <div class="flex justify-between mb-20px" style="padding-right: 16.5%">
@@ -67,14 +82,15 @@
 </template>
 <script lang="ts" setup>
   import axios from 'axios';
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, ref, h } from 'vue';
   import { useGo } from '/@/hooks/web/usePage';
   import { RouteEnum } from '/@/enums/routeEnum';
   import { setDatasetBreadcrumb } from '/@/utils/business';
-  import { Select } from 'ant-design-vue';
+  import { Select, Spin, Tooltip } from 'ant-design-vue';
+  import { LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import ChartEmpty from './ChartEmpty.vue';
-  import emptyImg from '/@/assets/images/placeImg.png';
+  import emptyImg from '/@/assets/images/ontology/overview-empty-img.svg';
   import { useG2plot, PlotEnum } from '/@/hooks/web/useG2plot';
   import { defaultScatterOptions } from './data';
   import {
@@ -93,6 +109,13 @@
 
   const { setPlot } = useG2plot();
   const plotRef = ref<HTMLElement | null>(null);
+
+  const indicator = h(LoadingOutlined, {
+    style: {
+      fontSize: '18px',
+    },
+    spin: true,
+  });
 
   /** Classification List */
   const selectClassificationId = ref<number>();
@@ -165,6 +188,7 @@
 
   /** List */
   const isLoading = ref<boolean>(false);
+  const isCalculating = ref<boolean>(false);
   const scatterList = ref<any[]>([]);
   const hasData = computed(() => {
     return scatterList.value.length > 0;
@@ -174,6 +198,7 @@
     try {
       const params = { datasetId: props.datasetId as string };
       const res = await getSimilarityRecordApi(params);
+      isCalculating.value = res ? res?.isHistoryData : true;
       const url = res?.resultUrl;
       if (url) {
         const response = await axios.get(url);

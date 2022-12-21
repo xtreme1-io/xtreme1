@@ -98,6 +98,7 @@ export const classificationBarOptions = {
       },
     },
   },
+  interactions: [{ type: 'element-highlight' }, { type: 'element-selected' }],
   minBarWidth: 20,
   maxBarWidth: 20,
 };
@@ -124,16 +125,25 @@ export const classOptions = {
     showTitle: false,
     customContent: (_, items) => {
       const data = items[0]?.data || {};
+      console.log(data);
 
-      const titleDom = `<div class="flex">
-                          <span class="w-12px h-12px rounded-12px mr-10px" style="background-color: ${
-                            data.color
-                          }"></span>
-                          <span class="w-12px h-12px mr-4px">
-                            <img src="${toolTypeImg[data.toolType]}" />
-                          </span>
-                          <span class="text-12px" style="color:#333">${data.name}</span>
-                        </div>`;
+      let titleDom: any = '';
+      if (data.toolType) {
+        titleDom = `<div class="flex">
+                      <span class="w-12px h-12px rounded-12px mr-10px" style="background-color: ${
+                        data.color
+                      }"></span>
+                      <span class="w-12px h-12px mr-4px">
+                      <img src="${toolTypeImg[data.toolType]}" />
+                      </span>
+                      <span class="text-12px" style="color:#333">${data.name}</span>
+                    </div>`;
+      } else {
+        titleDom = `<div class="flex">
+                      <span class="w-12px h-12px rounded-12px mr-10px" style="background-color: ${data.color}"></span>
+                      <span class="text-12px" style="color:#333">${data.name}</span>
+                    </div>`;
+      }
       const tempDom = `<div style="color:#666">Counts: ${data.objectAmount}</div>`;
 
       return `<div class="flex flex-col gap-8px py-12px">
@@ -142,6 +152,7 @@ export const classOptions = {
               </div>`;
     },
   },
+  interactions: [{ type: 'element-highlight' }, { type: 'element-selected' }],
   legend: false,
   minBarWidth: 20,
   maxBarWidth: 20,

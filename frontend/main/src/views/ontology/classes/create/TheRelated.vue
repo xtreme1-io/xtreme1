@@ -85,7 +85,7 @@
   watch(
     () => props.toolType,
     () => {
-      emits('update:ontologyId', undefined);
+      // emits('update:ontologyId', undefined);
       emits('update:classId', undefined);
     },
   );
@@ -111,7 +111,6 @@
   /** Class List */
   const classList = ref<ontologyClassItem[]>([]);
   const getClassList = async () => {
-    console.log(props, '>>', props.ontologyId);
     if (props.ontologyId) {
       const res = await getAllClassByOntologyIdApi({
         ontologyId: props.ontologyId,
