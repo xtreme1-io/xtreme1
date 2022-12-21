@@ -184,6 +184,8 @@ public class DataInfoUseCase {
         if (count > 0) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_OTHERS_ANNOTATING);
         }
+        var dataInfo = dataInfoDAO.getOne(Wrappers.lambdaQuery(DataInfo.class).in(DataInfo::getId, ids).last("limit 1"));
+
         var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
         dataInfoLambdaUpdateWrapper.in(DataInfo::getId, ids);
         dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
@@ -196,7 +198,6 @@ public class DataInfoUseCase {
             var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
             dataAnnotationClassificationLambdaUpdateWrapper.in(DataAnnotationClassification::getDataId, ids);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
-            var dataInfo = dataInfoDAO.getOne(Wrappers.lambdaQuery(DataInfo.class).in(DataInfo::getId, ids).last("limit 1"));
             if (ObjectUtil.isNotNull(dataInfo)) {
                 datasetSimilarityJobUseCase.submitJob(dataInfo.getDatasetId());
             }
