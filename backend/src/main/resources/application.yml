@@ -96,7 +96,7 @@ pointcloud:
 
 dataset:
   similarity:
-    url: http://similarity-service:5000/api/v1/calcSimilarity
+    url: http://image-vect-visualization:5000/api/v1/calcSimilarity
 
 management:
   endpoint:
