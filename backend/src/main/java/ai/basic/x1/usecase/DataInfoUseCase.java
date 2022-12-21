@@ -191,10 +191,10 @@ public class DataInfoUseCase {
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
-            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDataId, ids);
+            dataAnnotationObjectLambdaUpdateWrapper.in(DataAnnotationObject::getDataId, ids);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
             var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
-            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDataId, ids);
+            dataAnnotationClassificationLambdaUpdateWrapper.in(DataAnnotationClassification::getDataId, ids);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
             var dataInfo = dataInfoDAO.getOne(Wrappers.lambdaQuery(DataInfo.class).in(DataInfo::getId, ids).last("limit 1"));
             if (ObjectUtil.isNotNull(dataInfo)) {
