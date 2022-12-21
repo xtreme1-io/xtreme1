@@ -112,7 +112,7 @@
           </Form>
         </div>
       </div>
-      <div v-if="props.isCenter" class="content-item">
+      <div v-if="props.isCenter" class="content-item mb-20px">
         <div class="title">Related by ({{ relatedNum }})</div>
       </div>
       <div v-else class="content-item">
