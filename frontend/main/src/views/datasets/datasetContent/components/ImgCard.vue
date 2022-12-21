@@ -379,6 +379,9 @@
     height: 175px;
     transform: translateZ(0);
      .image-loading{
+        img{
+          opacity: 0;
+        }
       background: linear-gradient(45deg,rgba(190,190,190,.2) 25%,rgba(129,129,129,.24) 37%,rgba(190,190,190,.2) 63%);
       background-size: 400% 100%;
       animation: animation-loading 1.4s ease infinite;
