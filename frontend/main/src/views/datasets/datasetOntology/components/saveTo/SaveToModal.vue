@@ -25,16 +25,17 @@
       <div v-show="conflictList.length > 0" class="content__table">
         <div class="header">
           <div class="icon">
-            <Icon icon="fluent:info-16-filled" color="#FCB17A" class="mr-10px" size="24px" />
-            <span> {{ 'Conflicts' }} </span>
+            <Icon icon="fluent:info-16-filled" color="#FCB17A" class="mr-10px" size="20px" />
+            <span class="title"> {{ 'Conflicts' }} </span>
           </div>
-          <span>
-            Some Classes/ Classifications have already existed in your ontology. To resolve these
-            conflicts, please choose to
-            <span class="weight">Keep</span>
-            Original or to
-            <span class="weight">Replace</span>
-            Original with New Classes/ Classifications.
+          <span v-if="props.activeTab == ClassTypeEnum.CLASS">
+            Some Classes have already existed in Destination ontology. To resolve these conflicts,
+            please choose to Keep Destination or to Replace Destination with New Classes.
+          </span>
+          <span v-else>
+            Some Classifications have already existed in Destination ontology. To resolve these
+            conflicts, please choose to Keep Destination or to Replace Destination with New
+            Classifications.
           </span>
         </div>
         <div class="title">
@@ -258,9 +259,6 @@
         .icon {
           display: flex;
           align-items: center;
-          color: #333;
-          font-size: 16px;
-          font-weight: 500;
         }
       }
       .title {
