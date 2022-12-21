@@ -77,8 +77,10 @@
       </svg>
     </template>
     <div class="card-info">
-      <div class="info-dataName">data: {{ data?.name || '-' }}</div>
-      <div class="info-objectName">object: {{ getObjectName() || '-' }}</div>
+      <div v-if="showInfo" class="info-dataName">Dataset: {{ object?.datasetName || '-' }}</div>
+      <div v-if="showInfo" class="info-dataName">Class: {{ getObjectClass() || '-' }}</div>
+      <div class="info-dataName">Data: {{ data?.name || '-' }}</div>
+      <div class="info-objectName">Object: {{ getObjectName() || '-' }}</div>
     </div>
     <div class="operation"> <slot></slot></div>
   </div>
@@ -98,6 +100,7 @@
   type IProps = {
     info: DatasetListItem;
     data: DatasetItem;
+    showInfo?: boolean;
     // object2D: any;
     object: any;
   };
@@ -117,6 +120,11 @@
   const getObjectName = () => {
     const obj = Array.isArray(props.object) ? props.object[0] : props.object;
     return obj?.classAttributes?.trackName;
+  };
+  const getObjectClass = () => {
+    const obj = Array.isArray(props.object) ? props.object[0] : props.object;
+    const info = obj?.classAttributes || {};
+    return info.className || info.classType || info.mete?.className || info.mete?.classType;
   };
 </script>
 <style lang="less">
