@@ -19,7 +19,6 @@
           :datasetType="datasetType"
           :datasetId="datasetId"
           :selectedList="selectedList"
-          :list="cardList"
           @selectAll="handleSelectAll"
           @unSelect="handleUnSelect"
           @fetchList="handleRefresh"
@@ -256,7 +255,6 @@
   const scrollRef = ref<Nullable<ScrollActionType>>(null);
   onMounted(() => {
     handleScroll(scrollRef, () => {
-      console.log('scroll');
       if (total.value > cardList.value.length) {
         pageNo.value++;
         getList(true);

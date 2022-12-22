@@ -112,7 +112,7 @@
           </Form>
         </div>
       </div>
-      <div v-if="props.isCenter" class="content-item">
+      <div v-if="props.isCenter" class="content-item mb-20px">
         <div class="title">Related by ({{ relatedNum }})</div>
       </div>
       <div v-else class="content-item">
@@ -257,8 +257,12 @@
         formState.name = props.detail.name;
         formState.color = props.detail.color ?? '#7dfaf2';
         // to avoid import error
-        const isError = toolTypeOption.value.some((item) => item.type != props.detail.toolType);
-        formState.toolType = isError ? ToolTypeEnum.BOUNDING_BOX : props.detail.toolType;
+        const isCorrect = toolTypeOption.value.some((item) => item.type == props.detail.toolType);
+        formState.toolType = isCorrect
+          ? props.detail.toolType
+          : props.datasetType == datasetTypeEnum.IMAGE
+          ? ToolTypeEnum.BOUNDING_BOX
+          : ToolTypeEnum.CUBOID;
 
         nextTick(() => {
           formState.ontologyId = props.detail?.ontologyId;

@@ -2,7 +2,7 @@
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
 
-![](https://img.shields.io/badge/Release-v0.5.2-green) 
+![](https://img.shields.io/badge/Release-v0.5.5-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
@@ -100,8 +100,8 @@ Two build-in models only can be running on Linux server with [NVIDIA Driver](htt
 Click the latest release on the right of repository home, select asset whose name likes `xtreme1-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
 
 ```bash
-wget https://github.com/basicai/xtreme1/releases/download/v0.5.2/xtreme1-v0.5.2.zip
-unzip -d xtreme1-v0.5.2 xtreme1-v0.5.2.zip
+wget https://github.com/basicai/xtreme1/releases/download/v0.5.5/xtreme1-v0.5.5.zip
+unzip -d xtreme1-v0.5.5 xtreme1-v0.5.5.zip
 ```
 
 ### Start all services
@@ -194,9 +194,21 @@ cd xtreme1
 
 ### Build images and run services
 
-By default, Docker Compose will pull image from Docker Hub when no local image found, but it may be not the newest. you can execute `docker compose build` to build or update the local image from source, and then execute `docker compose up` to run the newest version, be sure to run `docker compose build` when source changed.
+The `docker-compose.yml` default will pull application images from Docker Hub, if you want to build images from source code, you can comment service's image line and uncomment build line.
 
-> You should not commit your change to `docker-compose.yml`, but you can override it using `docker-compose.override.yml`. Or you can create an new `docker-compose.develop.yml`, and specify this file when running Docker Compose command like `docker compose -f docker-compose.develop.yml build`.
+```yaml
+services:
+  backend:
+    # image: basicai/xtreme1-backend
+    build: ./backend
+  frontend:
+    # image: basicai/xtreme1-frontend
+    build: ./frontend
+```
+
+Then when you run `docker compose up`, it will first build `backend` and `frontend` image and start services. Be sure to run `docker compose build` when code changed, as up command will only build image when it not exist.
+
+> You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already added into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
 
 To get more development guides, you can read the README in each application service's directory.
 

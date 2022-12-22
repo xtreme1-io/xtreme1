@@ -345,7 +345,7 @@ public class DataInfoUseCase {
     public PresignedUrlBO generatePresignedUrl(String fileName, Long datasetId, Long userId) {
         var objectName = String.format("%s/%s/%s/%s", userId, datasetId, UUID.randomUUID().toString().replace("-", ""), fileName);
         try {
-            return minioService.generatePresignedUrl(minioProp.getBucketName(), objectName);
+            return minioService.generatePresignedUrl(minioProp.getBucketName(), objectName,Boolean.TRUE);
         } catch (Exception e) {
             log.error("Minio generate presigned url error", e);
             throw new UsecaseException("Minio generate presigned url error!");
@@ -1460,8 +1460,8 @@ public class DataInfoUseCase {
         PresignedUrlBO binaryPreSignUrlBO;
         PresignedUrlBO imagePreSignUrlBO;
         try {
-            binaryPreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), binaryPath);
-            imagePreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), imagePath);
+            binaryPreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), binaryPath, Boolean.FALSE);
+            imagePreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), imagePath, Boolean.FALSE);
 
         } catch (Throwable throwable) {
             log.error("generate preSignUrl error!", throwable);

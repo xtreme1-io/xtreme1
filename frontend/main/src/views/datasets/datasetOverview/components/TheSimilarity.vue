@@ -286,6 +286,7 @@
             padding: 0,
           },
         },
+        offset: -3,
         customContent: (_, items) => {
           if (!_) return;
           const data = items[0]?.data || {};

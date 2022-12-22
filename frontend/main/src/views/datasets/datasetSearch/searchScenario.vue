@@ -17,7 +17,7 @@
           This page allows you to search your data in this dataset by search ontologies
         </div>
       </div>
-      <div class="flex pl-25px pr-25px">
+      <div class="flex pl-25px pr-25px custom-search-scenario">
         <Select
           dropdownClassName="custom-search-scenario"
           v-model:value="result"
@@ -27,7 +27,10 @@
           @change="handleChange"
         >
           <Select.Option v-for="item in options" :key="item.id" :value="item.id">
-            <div class="inline-flex items-center">
+            <div
+              class="inline-flex items-center"
+              :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
+            >
               <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
               {{ item.name }}
             </div>
@@ -35,18 +38,22 @@
         </Select>
         <Button class="ml-20px" type="default" @click="handleExport">Export Result</Button>
       </div>
-      <div class="list" v-if="list.length > 0">
-        <template v-for="item in list">
-          <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
-            <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
-              <Button @click="() => handleSingleAnnotate(item.dataId, item)" type="primary"
-                >Annotate</Button
-              >
-            </SearchCard>
-          </div>
-        </template>
+      <div class="list" v-show="list.length > 0">
+        <ScrollContainer ref="scrollRef">
+          <template v-for="item in list">
+            <div class="item" v-if="dataInfo[item.dataId]" :key="item.dataId + '#' + item.id">
+              <SearchCard :info="info" :data="dataInfo[item.dataId]" :object="item">
+                <Button
+                  @click="() => handleSingleAnnotate(dataInfo[item.dataId], item)"
+                  type="primary"
+                  >Annotate</Button
+                >
+              </SearchCard>
+            </div>
+          </template>
+        </ScrollContainer>
       </div>
-      <div class="empty" v-else>
+      <div class="empty" v-show="list.length === 0">
         <div class="text-center">
           <img class="inline-block mb-4" width="136" :src="datasetEmpty" alt="" />
           <div>Current Scenario is Empty</div>
@@ -95,7 +102,6 @@
     takeRecordByData,
     // checkRootByDataId,
   } from '/@/api/business/dataset';
-  // import { useMessage } from '/@/hooks/web/useMessage';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -103,6 +109,9 @@
   import { useModal } from '/@/components/Modal';
   import CollContainer from '/@@/CollContainer/index.vue';
   import { toolTypeImg } from '../../ontology/classes/attributes/data';
+  import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
+  import { handleScroll } from '/@/utils/business/scrollListener';
+  import { ResultEnum } from '/@/enums/httpEnum';
   const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;
@@ -115,6 +124,9 @@
   const classification = ref();
   const filterOptions = ref();
   const dataInfo = ref<Record<string, any>>({});
+  const pageNo = ref<number>(1);
+  const total = ref<number>(0);
+  const scrollRef = ref<Nullable<ScrollActionType>>(null);
 
   const handleChange = (e) => {
     if (e.length === 0) {
@@ -143,6 +155,12 @@
   onMounted(() => {
     getInfo();
     fetchOption();
+    handleScroll(scrollRef, () => {
+      if (total.value > list.value.length) {
+        pageNo.value++;
+        fetchList(true);
+      }
+    });
   });
 
   const getOptions = async (id) => {
@@ -159,14 +177,14 @@
     options.value = list;
   };
 
-  const fetchList = async () => {
-    console.log(classification.value);
+  const fetchList = async (flag?) => {
     const res = await getScenario({
       classId: result.value.toString(),
       datasetId: info.value.id,
       datasetType: info.value.type,
       source: 'DATASET_CLASS',
-      pageSize: 9999,
+      pageNo: pageNo.value,
+      pageSize: 20,
       attributeIds: classification.value
         ? classification.value.map((item) => item.split('^')[0]).toString()
         : undefined,
@@ -191,7 +209,7 @@
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const tempMap = {};
       res.list?.forEach((item: any) => {
-        const { classAttributes: info, dataId, id, datasetId } = item;
+        const { classAttributes: info, dataId, id, datasetId, lockedBy, datasetName } = item;
         // const type = info.type || info.objType;
 
         if (!tempMap[dataId]) {
@@ -204,6 +222,8 @@
             datasetId: datasetId,
             id: id,
             trackId: info.trackId,
+            lockedBy: lockedBy,
+            datasetName: datasetName,
           });
         }
         tempMap[dataId][info.trackId].push(item);
@@ -213,22 +233,39 @@
           _list.push(e);
         });
       });
-      list.value = _list;
+      if (flag) {
+        list.value = list.value.concat(_list) || [];
+      } else {
+        list.value = _list;
+      }
     } else {
-      list.value = res.list || [];
+      if (flag) {
+        list.value = list.value.concat(res.list) || [];
+      } else {
+        list.value = res.list || [];
+      }
     }
+    total.value = res.total;
   };
 
-  const handleSingleAnnotate = async (dataId: any, object: any) => {
+  const handleSingleAnnotate = async (data: any, object: any) => {
     const recordId = await takeRecordByData({
       datasetId: object.datasetId || info.value.id,
-      dataIds: [dataId],
+      dataIds: [object.dataId],
       dataType: dataTypeEnum.SINGLE_DATA,
       isFilterData: true,
-    }).catch(() => {});
+    }).catch((error: any = {}) => {
+      const { code, message: msg } = error;
+      if (code === ResultEnum.DATASET_DATA_EXIST_ANNOTATE) {
+        message.error(`${data.name} is being edited by ${object.lockedBy}`);
+      } else {
+        message.error(msg || 'error');
+      }
+      return null;
+    });
     const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
-    goToTool({ recordId: recordId, dataId: dataId, focus: trackId }, info.value?.type);
+    goToTool({ recordId: recordId, dataId: object.dataId, focus: trackId }, info.value?.type);
   };
 
   const handleExport = () => {
@@ -257,6 +294,7 @@
       margin-right: 25px;
       padding: 12px;
       border-radius: 8px;
+      height: calc(100vh - 230px);
       .item {
         width: 240px;
         height: 240px;

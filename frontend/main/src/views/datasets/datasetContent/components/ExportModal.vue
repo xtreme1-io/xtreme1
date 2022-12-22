@@ -55,8 +55,8 @@
   const selectValue = ref<string>('');
   const selectOption = [
     {
-      value: 'Xtreme1 v0.5',
-      label: 'Xtreme1 v0.5',
+      value: 'Xtreme1 v0.5.5',
+      label: 'Xtreme1 v0.5.5',
     },
   ];
 

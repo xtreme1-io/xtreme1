@@ -78,6 +78,7 @@ export function translateToObjectV2(object: IObject, baseClassType: IClassType) 
         frontId: object.id,
         trackName: object.trackName,
         classId: object.classId,
+        className: object.classType,
         // classValues: object.attrs,
         classValues: objToArray(object.attrs, baseClassType),
         modelConfidence: object.confidence,
@@ -86,6 +87,7 @@ export function translateToObjectV2(object: IObject, baseClassType: IClassType) 
             lastTime: object.lastTime,
             updateTime: object.updateTime,
             isProjection: object.isProjection,
+            classType: object.classType,
         },
         contour: {
             viewIndex: object.viewIndex,

@@ -134,7 +134,7 @@
       datasetId?: Nullable<number>;
       title: string;
       isCenter?: boolean;
-      isPreview: boolean;
+      isPreview?: boolean;
     }>(),
     {
       isCenter: true,
