@@ -66,8 +66,8 @@ services:
   backend:
     # By default, Compose will pull image from Docker Hub when no local image found.
     image: basicai/xtreme1-backend
-    # You can execute "docker compose build" to build or update the local image from source.
-    #build: ./backend
+    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
+    # build: ./backend
     ports:
       - 8290:8080
     # volumes:
@@ -96,8 +96,8 @@ services:
   frontend:
     # By default, Compose will pull image from Docker Hub when no local image found.
     image: basicai/xtreme1-frontend
-    # You can execute "docker compose build" to build or update the local image from source.
-    #build: ./frontend
+    # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
+    # build: ./frontend
     ports:
       - 8291:8080
   image-object-detection:
@@ -120,11 +120,10 @@ services:
     image: basicai/xtreme1-image-vect-visualization-cpu
     ports:
       - 8294:5000
-    # You need to explicitly specify model profile to start this service.
-    profiles:
-      - model
-    # You can specify nvidia runtime to use GPU.
-    # runtime: nvidia
+  pcd-tools:
+    image: basicai/xtreme1-pcd-tools
+    ports:
+      - 8295:5000
 volumes:
   mysql-data:
   redis-data:

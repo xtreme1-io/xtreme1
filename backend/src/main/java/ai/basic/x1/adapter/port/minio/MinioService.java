@@ -195,11 +195,12 @@ public class MinioService {
     /**
      * Get pre-upload url and access url
      *
-     * @param bucketName Bucket name
-     * @param objectName File path
+     * @param bucketName   Bucket name
+     * @param objectName   File path
+     * @param isReplaceUrl Whether to replace with the external network address
      * @return Pre-signed url
      */
-    public PresignedUrlBO generatePresignedUrl(String bucketName, String objectName)
+    public PresignedUrlBO generatePresignedUrl(String bucketName, String objectName, Boolean isReplaceUrl)
             throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
@@ -212,11 +213,16 @@ public class MinioService {
         var region = extendMinioClient.getRegion(builder.build());
         // This must be PUT, if it is GET, it is the file access address. If it is a POST upload, an error will be reported.
         var preUrl = extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
+        if (isReplaceUrl) {
+            preUrl = replaceUrl(preUrl);
+        }
         var accessUrl = getInternalUrl(bucketName, objectName);
         return PresignedUrlBO.builder()
                 .accessUrl(accessUrl)
-                .presignedUrl(replaceUrl(preUrl)).build();
+                .presignedUrl(preUrl).build();
     }
+
+
 
     private String replaceUrl(String url) {
         var proto = "http";
