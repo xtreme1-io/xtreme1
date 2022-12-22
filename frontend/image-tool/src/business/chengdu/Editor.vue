@@ -40,7 +40,7 @@
                                         "
                                     >
                                         <span class="size-item">
-                                            长度: {{ sizeData.length.toFixed(0) }}px
+                                            Length: {{ sizeData.length.toFixed(0) }}px
                                         </span>
                                     </template>
                                     <template
