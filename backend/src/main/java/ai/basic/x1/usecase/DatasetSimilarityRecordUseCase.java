@@ -118,7 +118,7 @@ public class DatasetSimilarityRecordUseCase {
                                         addIds.add(dataId);
                                     }
                                 }
-                                if (!CollUtil.isEmpty(addIds) && CollUtil.isEmpty(deletedIds)) {
+                                if (!(CollUtil.isEmpty(addIds) && CollUtil.isEmpty(deletedIds))) {
                                     datasetSimilarityRecord = DatasetSimilarityRecord.builder().datasetId(datasetId)
                                             .serialNumber(IdUtil.fastSimpleUUID())
                                             .status(SimilarityStatusEnum.SUBMITTED)
