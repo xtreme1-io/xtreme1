@@ -32,7 +32,7 @@
             </div>
           </Select.Option>
         </Select>
-        <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
+        <Button class="ml-20px" type="default" @click="handleExport">Export Result</Button>
       </div>
       <div class="list" v-show="list.length > 0">
         <ScrollContainer ref="scrollRef">
@@ -147,6 +147,7 @@
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];
+      list.value = [];
     } else if (e[1]) {
       result.value = [e[1]];
       fetchList();
@@ -280,6 +281,13 @@
     const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: object.dataId, focus: trackId }, info.value?.type);
+  };
+
+  const handleExport = () => {
+    if (!result.value || result.value.length === 0) {
+      return message.error('please select a class first');
+    }
+    openModal();
   };
 </script>
 <style lang="less" scoped>

@@ -270,7 +270,7 @@
   };
 
   const handleExport = () => {
-    if (!result.value) {
+    if (!result.value || result.value.length === 0) {
       return message.error('please select a class first');
     }
     openModal();
