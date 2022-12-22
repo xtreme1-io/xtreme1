@@ -67,7 +67,7 @@ services:
     # By default, Compose will pull image from Docker Hub when no local image found.
     image: basicai/xtreme1-backend
     # You can execute "docker compose build" to build or update the local image from source.
-    #build: ./backend
+    build: ./backend
     ports:
       - 8290:8080
     # volumes:
@@ -97,7 +97,7 @@ services:
     # By default, Compose will pull image from Docker Hub when no local image found.
     image: basicai/xtreme1-frontend
     # You can execute "docker compose build" to build or update the local image from source.
-    #build: ./frontend
+    build: ./frontend
     ports:
       - 8291:8080
   image-object-detection:
