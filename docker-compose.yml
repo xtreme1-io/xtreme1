@@ -120,6 +120,10 @@ services:
     image: basicai/xtreme1-image-vect-visualization-cpu
     ports:
       - 8294:5000
+  pcd-tools:
+    image: basicai/xtreme1-pcd-tools
+    ports:
+      - 8295:5000
 volumes:
   mysql-data:
   redis-data:
