@@ -1,9 +1,6 @@
 package ai.basic.x1.adapter.dto.response;
+import ai.basic.x1.adapter.dto.DataAnnotationClassificationDTO;
 import ai.basic.x1.adapter.dto.DataAnnotationObjectDTO;
-import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
-import ai.basic.x1.entity.DataAnnotationClassificationBO;
-import ai.basic.x1.entity.DataAnnotationObjectBO;
-import cn.hutool.json.JSONArray;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +26,7 @@ public class DataAnnotationResultDTO {
    /**
     * Classification 属性取值
     */
-   private List<DataAnnotationClassificationBO> classificationValues;
+   private List<DataAnnotationClassificationDTO> classificationValues;
 
    /**
     * Data 包含的 Object 列表
