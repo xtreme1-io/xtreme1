@@ -343,6 +343,15 @@ export const getDataByIds = (params: any) =>
       ignoreCancelToken: true,
     },
   });
+export const getRelationByIds = (params: any) =>
+  defHttp.get<any[]>({
+    url: `${Api.DATA}/listRelationByIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
 
 export const getDatasetClass = (id) =>
   defHttp.get<any>({
