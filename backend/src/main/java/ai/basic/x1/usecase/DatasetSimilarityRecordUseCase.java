@@ -237,7 +237,7 @@ public class DatasetSimilarityRecordUseCase {
                     DatasetSimilarityRecordBO datasetSimilarityRecordBO = DefaultConverter.convert(lastDatasetSimilarityRecord, DatasetSimilarityRecordBO.class);
                     datasetSimilarityRecordBO.setIsHistoryData(Boolean.FALSE);
                     try {
-                        String resultUrl = minioService.getUrl(minioProp.getBucketName(), String.format(Constants.SIMILARITY_RESULT_PATH_FORMAT, firstSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase()));
+                        String resultUrl = minioService.getUrl(minioProp.getBucketName(), String.format(Constants.SIMILARITY_RESULT_PATH_FORMAT, lastDatasetSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase()));
                         datasetSimilarityRecordBO.setResultUrl(resultUrl);
                     } catch (Throwable throwable) {
                         log.error("get result url error", throwable);
