@@ -129,20 +129,7 @@ public class DataAnnotationObjectUseCase {
     public Page<DataAnnotationObjectBO> findByScenarioPage(Integer pageNo, Integer pageSize, ScenarioQueryBO scenarioQueryBO) {
         var page = dataAnnotationObjectDAO.getBaseMapper().findByScenarioPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize),
                 DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
-        var dataAnnotationObjectBOPage = DefaultConverter.convert(page, DataAnnotationObjectBO.class);
-        var dataAnnotationObjectBOList = dataAnnotationObjectBOPage.getList();
-        if (CollectionUtil.isNotEmpty(dataAnnotationObjectBOList)) {
-            var dataIds = dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
-            var userIdMap = dataEditUseCase.getDataEditByDataIds(dataIds);
-            var userIds = userIdMap.values();
-            if (CollectionUtil.isNotEmpty(userIds)) {
-                var userBOS = userUseCase.findByIds(ListUtil.toList(userIds));
-                var userMap = userBOS.stream()
-                        .collect(Collectors.toMap(UserBO::getId, UserBO::getNickname, (k1, k2) -> k1));
-                dataAnnotationObjectBOList.forEach(dataAnnotationObjectBO -> dataAnnotationObjectBO.setLockedBy(userMap.get(userIdMap.get(dataAnnotationObjectBO.getDataId()))));
-            }
-        }
-        return dataAnnotationObjectBOPage;
+        return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
     }
 
     public List<DataAnnotationObjectBO> listByScenario(ScenarioQueryBO scenarioQueryBO) {
