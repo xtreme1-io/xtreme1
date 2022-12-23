@@ -31,6 +31,11 @@ public class DataInfoBO {
     private Long datasetId;
 
     /**
+     * Dataset name
+     */
+    private String datasetName;
+
+    /**
      * Data name
      */
     private String name;

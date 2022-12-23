@@ -103,6 +103,15 @@ public class DataInfoController extends BaseDatasetController {
         return List.of();
     }
 
+    @GetMapping("listRelationByIds")
+    public List<DataInfoDTO> listRelationByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
+        var dataInfoBos = dataInfoUsecase.listRelationByIds(dataIds, false);
+        if (CollectionUtil.isNotEmpty(dataInfoBos)) {
+            return dataInfoBos.stream().map(this::convertDataInfoDTO).collect(Collectors.toList());
+        }
+        return List.of();
+    }
+
     @GetMapping("getDataStatusByIds")
     public List<DataInfoStatusDTO> getDataStatusByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
         var dataInfoBOS = dataInfoUsecase.getDataStatusByIds(dataIds);
