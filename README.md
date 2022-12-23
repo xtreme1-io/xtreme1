@@ -194,19 +194,19 @@ cd xtreme1
 
 ### Build images and run services
 
-The `docker-compose.yml` default will pull application images from Docker Hub, if you want to build images from source code, you can comment service's image line and uncomment build line.
+The `docker-compose.yml` default will pull application images from Docker Hub, if you want to build images from source code, you can uncomment each service's build line.
 
 ```yaml
 services:
   backend:
-    # image: basicai/xtreme1-backend
+    image: basicai/xtreme1-backend
     build: ./backend
   frontend:
-    # image: basicai/xtreme1-frontend
+    image: basicai/xtreme1-frontend
     build: ./frontend
 ```
 
-Then when you run `docker compose up`, it will first build `backend` and `frontend` image and start services. Be sure to run `docker compose build` when code changed, as up command will only build image when it not exist.
+Then you can execute `docker compose build` to build `backend` and `frontend` images from local source, and execute `docker compose up` to run the newest services, be sure to run `docker compose build` again when source changed.
 
 > You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already added into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
 
