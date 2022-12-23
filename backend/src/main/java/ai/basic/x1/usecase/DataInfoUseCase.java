@@ -327,7 +327,7 @@ public class DataInfoUseCase {
             }
             var datasetList = datasetDAO.listByIds(datasetIds);
             var datasetMap = datasetList.stream().collect(Collectors.toMap(Dataset::getId,Dataset::getName));
-            dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setDatasetName(datasetMap.get(dataInfoBO.getDatasetName())));
+            dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setDatasetName(datasetMap.get(dataInfoBO.getDatasetId())));
         }
         return dataInfoBOList;
     }
