@@ -15,13 +15,18 @@
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
   import Icon from '/@/components/Icon';
+  import { openWindow } from '/@/utils';
   import { Button } from '/@@/Button';
   const emits = defineEmits(['callback']);
 
   // const { t } = useI18n();
 
   const handleDownload = () => {};
-  const handleView = () => {};
+  const handleView = () => {
+    openWindow(
+      'https://docs.xtreme1.io/xtreme1-docs/product-guides/ontology/import-class-classification',
+    );
+  };
   const handleReupload = () => {
     emits('callback', 'upload');
   };

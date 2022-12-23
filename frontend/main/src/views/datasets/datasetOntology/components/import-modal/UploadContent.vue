@@ -34,7 +34,8 @@
   import ConflictModal from '../copy-modal/ConflictModal.vue';
   import { useModal } from '/@/components/Modal';
   import { ICopyEnum } from '../copy-modal/data';
-  import { downloadByCorsUrl, downloadByUrl } from '/@/utils/file/download';
+  import { downloadByUrl } from '/@/utils/file/download';
+  import { openWindow } from '/@/utils';
   const [registerConflictModal, { openModal: openConflictModal, closeModal: closeConflictModal }] =
     useModal();
   const uploading = ref(false);
@@ -107,7 +108,11 @@
       url: 'https://basicai-asset.s3.us-west-2.amazonaws.com/xtreme1/class-and-classification-template.json',
     });
   };
-  const handleView = () => {};
+  const handleView = () => {
+    openWindow(
+      'https://docs.xtreme1.io/xtreme1-docs/product-guides/ontology/import-class-classification',
+    );
+  };
 
   const handleBack = () => {};
 
