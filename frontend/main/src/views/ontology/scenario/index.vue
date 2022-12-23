@@ -32,7 +32,7 @@
             </div>
           </Select.Option>
         </Select>
-        <Button class="ml-20px" type="default" @click="openModal">Export Result</Button>
+        <Button class="ml-20px" type="default" @click="handleExport">Export Result</Button>
       </div>
       <div class="list" v-show="list.length > 0">
         <ScrollContainer ref="scrollRef">
@@ -85,7 +85,7 @@
   import { goToTool } from '/@/utils/business';
   import {
     getScenario,
-    getDataByIds,
+    getRelationByIds,
     getClassificationOptions,
     takeRecordByData,
   } from '/@/api/business/dataset';
@@ -147,6 +147,7 @@
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];
+      list.value = [];
     } else if (e[1]) {
       result.value = [e[1]];
       fetchList();
@@ -210,7 +211,7 @@
       .filter((item: any) => !dataInfo.value[item])
       .toString();
     if (dataIds.length) {
-      const datas = await getDataByIds({
+      const datas = await getRelationByIds({
         datasetId: info.value.id,
         dataIds: dataIds,
       });
@@ -222,7 +223,7 @@
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const tempMap = {};
       res.list?.forEach((item: any) => {
-        const { classAttributes: info, dataId, id, datasetId, lockedBy, datasetName } = item;
+        const { classAttributes: info, dataId, id, datasetId, lockedBy } = item;
         // const type = info.type || info.objType;
 
         if (!tempMap[dataId]) {
@@ -236,7 +237,6 @@
             id: id,
             trackId: info.trackId,
             lockedBy: lockedBy,
-            datasetName: datasetName,
           });
         }
         tempMap[dataId][info.trackId].push(item);
@@ -270,7 +270,9 @@
     }).catch((error: any = {}) => {
       const { code, message: msg } = error;
       if (code === ResultEnum.DATASET_DATA_EXIST_ANNOTATE) {
-        message.error(`${data.name} is being edited by ${object.lockedBy}`);
+        message.error(
+          `${data.name} is being edited by ${data.lockedBy || object.lockedBy || 'others'}`,
+        );
       } else {
         message.error(msg || 'error');
       }
@@ -279,6 +281,13 @@
     const trackId = object.trackId || object.classAttributes.trackId;
     if (!recordId || !trackId) return;
     goToTool({ recordId: recordId, dataId: object.dataId, focus: trackId }, info.value?.type);
+  };
+
+  const handleExport = () => {
+    if (!result.value || result.value.length === 0) {
+      return message.error('please select a class first');
+    }
+    openModal();
   };
 </script>
 <style lang="less" scoped>

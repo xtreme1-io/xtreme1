@@ -77,7 +77,7 @@
       </svg>
     </template>
     <div class="card-info">
-      <div v-if="showInfo" class="info-dataName">Dataset: {{ object?.datasetName || '-' }}</div>
+      <div v-if="showInfo" class="info-dataName">Dataset: {{ data?.datasetName || '-' }}</div>
       <div v-if="showInfo" class="info-dataName">Class: {{ getObjectClass() || '-' }}</div>
       <div class="info-dataName">Data: {{ data?.name || '-' }}</div>
       <div class="info-objectName">Object: {{ getObjectName() || '-' }}</div>

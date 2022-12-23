@@ -303,6 +303,38 @@ public class DataInfoUseCase {
     /**
      * Query data object list according to id collection
      *
+     * @param ids                id collection
+     * @param isQueryDeletedData Whether to query to delete data
+     * @return Collection of data objects
+     */
+    public List<DataInfoBO> listRelationByIds(List<Long> ids, Boolean isQueryDeletedData) {
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.getBaseMapper().listByIds(ids, isQueryDeletedData), DataInfoBO.class);
+        if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+            setDataInfoBOListFile(dataInfoBOList);
+            var dataIds = new ArrayList<Long>();
+            var datasetIds = new HashSet<Long>();
+            dataInfoBOList.forEach(dataInfoBO -> {
+                dataIds.add(dataInfoBO.getId());
+                datasetIds.add(dataInfoBO.getDatasetId());
+            });
+            var userIdMap = dataEditUseCase.getDataEditByDataIds(dataIds);
+            var userIds = userIdMap.values();
+            if (CollectionUtil.isNotEmpty(userIds)) {
+                var userBOS = userUseCase.findByIds(ListUtil.toList(userIds));
+                var userMap = userBOS.stream()
+                        .collect(Collectors.toMap(UserBO::getId, UserBO::getNickname, (k1, k2) -> k1));
+                dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setLockedBy(userMap.get(userIdMap.get(dataInfoBO.getId()))));
+            }
+            var datasetList = datasetDAO.listByIds(datasetIds);
+            var datasetMap = datasetList.stream().collect(Collectors.toMap(Dataset::getId,Dataset::getName));
+            dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setDatasetName(datasetMap.get(dataInfoBO.getDatasetId())));
+        }
+        return dataInfoBOList;
+    }
+
+    /**
+     * Query data object list according to id collection
+     *
      * @param ids id collection
      * @return Collection of data objects
      */

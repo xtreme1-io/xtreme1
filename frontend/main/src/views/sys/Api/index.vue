@@ -24,7 +24,7 @@
         </div>
       </div>
     </template>
-    <div class="mb-2 mt-2">
+    <div class="mb-2 mt-2 cursor-pointer" @click="handleOpen">
       Go to our Documents to see how to use this token in APIs
       <Icon icon="ic:sharp-open-in-new" />
     </div>
@@ -44,6 +44,7 @@
   import { createToken, deleteToken, getTokenInfo } from '/@/api/business/api';
   import moment, { Moment } from 'moment';
   import { useCopyToClipboard } from '/@/hooks/web/useCopyToClipboard';
+  import { openWindow } from '/@/utils';
   const { prefixCls } = useDesign('api');
   // const { t } = useI18n();
   const info = ref();
@@ -87,6 +88,10 @@
   const handleDelete = async () => {
     await deleteToken({ id: info.value.id });
     getInfo();
+  };
+
+  const handleOpen = () => {
+    openWindow('https://docs.xtreme1.io/xtreme1-docs/developer-reference/api-document');
   };
 </script>
 <style lang="less" scoped>

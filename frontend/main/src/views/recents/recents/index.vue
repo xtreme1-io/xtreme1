@@ -57,7 +57,7 @@
   };
 
   const handleGoDocs = () => {
-    window.open('https://docs.basic.ai/docs');
+    window.open('https://docs.xtreme1.io/');
   };
 </script>
 <style lang="less" scoped>

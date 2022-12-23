@@ -148,6 +148,7 @@ export interface DatasetItem {
   type: dataTypeEnum;
   name: string;
   lockedBy: Nullable<string>;
+  datasetName?: string;
 }
 
 export interface DatasetListItem {
