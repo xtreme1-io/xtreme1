@@ -97,7 +97,7 @@
     datasetItemDetail,
     getDatasetClass,
     getScenario,
-    getDataByIds,
+    getRelationByIds,
     getClassificationOptions,
     takeRecordByData,
     // checkRootByDataId,
@@ -197,7 +197,7 @@
       .filter((item: any) => !dataInfo.value[item])
       .toString();
     if (dataIds.length) {
-      const datas = await getDataByIds({
+      const datas = await getRelationByIds({
         datasetId: info.value.id,
         dataIds: dataIds,
       });
@@ -209,7 +209,7 @@
     if (info.value.type === datasetTypeEnum.LIDAR_FUSION) {
       const tempMap = {};
       res.list?.forEach((item: any) => {
-        const { classAttributes: info, dataId, id, datasetId, lockedBy, datasetName } = item;
+        const { classAttributes: info, dataId, id, datasetId, lockedBy } = item;
         // const type = info.type || info.objType;
 
         if (!tempMap[dataId]) {
@@ -223,7 +223,6 @@
             id: id,
             trackId: info.trackId,
             lockedBy: lockedBy,
-            datasetName: datasetName,
           });
         }
         tempMap[dataId][info.trackId].push(item);
@@ -257,7 +256,9 @@
     }).catch((error: any = {}) => {
       const { code, message: msg } = error;
       if (code === ResultEnum.DATASET_DATA_EXIST_ANNOTATE) {
-        message.error(`${data.name} is being edited by ${object.lockedBy}`);
+        message.error(
+          `${data.name} is being edited by ${data.lockedBy || object.lockedBy || 'others'}`,
+        );
       } else {
         message.error(msg || 'error');
       }

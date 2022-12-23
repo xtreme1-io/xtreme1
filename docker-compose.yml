@@ -65,7 +65,7 @@ services:
       retries: 10
   backend:
     # By default, Compose will pull image from Docker Hub when no local image found.
-    image: basicai/xtreme1-backend
+    image: basicai/xtreme1-backend:v0.5.5
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./backend
     ports:
@@ -95,7 +95,7 @@ services:
         condition: service_healthy
   frontend:
     # By default, Compose will pull image from Docker Hub when no local image found.
-    image: basicai/xtreme1-frontend
+    image: basicai/xtreme1-frontend:v0.5.5
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./frontend
     ports:
