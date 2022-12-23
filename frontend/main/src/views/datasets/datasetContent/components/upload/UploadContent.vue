@@ -5,7 +5,11 @@
         <Icon class="icon" icon="eva:info-fill" size="24" />
         <div class="text">
           <span>Get our </span>
-          <a class="highlight" href="https://docs.xtreme1.io/docs/upload" target="_blank">
+          <a
+            class="highlight"
+            href="https://docs.xtreme1.io/xtreme1-docs/product-guides/upload-dataset"
+            target="_blank"
+          >
             open data or check documentations
           </a>
           <span> for data formats and upload guides.</span>
