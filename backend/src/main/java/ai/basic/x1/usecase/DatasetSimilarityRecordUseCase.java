@@ -92,7 +92,7 @@ public class DatasetSimilarityRecordUseCase {
                     }
                 } else {
                     //increment
-                    DatasetSimilarityRecord lastDatasetSimilarityRecord = CollUtil.getLast(datasetSimilarityRecords);
+                    DatasetSimilarityRecord lastDatasetSimilarityRecord = CollUtil.getFirst(datasetSimilarityRecords);
                     if (lastDatasetSimilarityRecord.getStatus() == SimilarityStatusEnum.COMPLETED) {
                         //submit data
                         SimilarityDataInfo dataInfo = lastDatasetSimilarityRecord.getDataInfo();
@@ -122,6 +122,8 @@ public class DatasetSimilarityRecordUseCase {
                                             .type(SimilarityTypeEnum.INCREMENT)
                                             .dataInfo(SimilarityDataInfo.builder().fullDataIds(dataIds).addDataIds(addIds).deletedIds(deletedIds).build()).build();
                                 }
+                            } else {
+                                datasetSimilarityRecordDAO.remove(Wrappers.lambdaQuery(DatasetSimilarityRecord.class).eq(DatasetSimilarityRecord::getDatasetId,datasetId));
                             }
                         }
                     }
