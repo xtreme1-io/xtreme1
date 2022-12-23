@@ -32,6 +32,11 @@ public class DataInfoDTO {
     private Long datasetId;
 
     /**
+     * Dataset name
+     */
+    private String datasetName;
+
+    /**
      * Data name
      */
     private String name;
