@@ -34,10 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -210,11 +207,12 @@ public class DatasetSimilarityRecordUseCase {
         List<DatasetSimilarityRecord> list = datasetSimilarityRecordDAO.list(Wrappers.lambdaQuery(DatasetSimilarityRecord.class)
                 .eq(DatasetSimilarityRecord::getDatasetId, datasetId).orderByDesc(DatasetSimilarityRecord::getCreatedAt).last(" LIMIT 2"));
         if (CollUtil.isNotEmpty(list)) {
-
+            list.sort(Comparator.comparing(DatasetSimilarityRecord::getId));
             DatasetSimilarityRecord firstSimilarityRecord = CollUtil.getFirst(list);
-            if (firstSimilarityRecord.getStatus() == SimilarityStatusEnum.COMPLETED || list.size() == 1) {
+            DatasetSimilarityRecord lastDatasetSimilarityRecord = CollUtil.getLast(list);
+            if (list.size() == 1) {
                 DatasetSimilarityRecordBO datasetSimilarityRecordBO = DefaultConverter.convert(firstSimilarityRecord, DatasetSimilarityRecordBO.class);
-                datasetSimilarityRecordBO.setIsHistoryData(false);
+                datasetSimilarityRecordBO.setIsHistoryData(Boolean.FALSE);
                 if (firstSimilarityRecord.getStatus() == SimilarityStatusEnum.COMPLETED) {
                     try {
                         String resultUrl = minioService.getUrl(minioProp.getBucketName(), String.format(Constants.SIMILARITY_RESULT_PATH_FORMAT, firstSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase()));
@@ -225,10 +223,28 @@ public class DatasetSimilarityRecordUseCase {
                 }
                 return datasetSimilarityRecordBO;
             } else {
-                DatasetSimilarityRecord lastDatasetSimilarityRecord = CollUtil.getLast(list);
-                DatasetSimilarityRecordBO datasetSimilarityRecordBO = DefaultConverter.convert(lastDatasetSimilarityRecord, DatasetSimilarityRecordBO.class);
-                datasetSimilarityRecordBO.setIsHistoryData(true);
-                return datasetSimilarityRecordBO;
+                if (lastDatasetSimilarityRecord.getStatus() == SimilarityStatusEnum.SUBMITTED) {
+                    DatasetSimilarityRecordBO datasetSimilarityRecordBO = DefaultConverter.convert(firstSimilarityRecord, DatasetSimilarityRecordBO.class);
+                    datasetSimilarityRecordBO.setIsHistoryData(Boolean.TRUE);
+                    try {
+                        String resultUrl = minioService.getUrl(minioProp.getBucketName(), String.format(Constants.SIMILARITY_RESULT_PATH_FORMAT, firstSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase()));
+                        datasetSimilarityRecordBO.setResultUrl(resultUrl);
+                    } catch (Throwable throwable) {
+                        log.error("get result url error", throwable);
+                    }
+                    return datasetSimilarityRecordBO;
+                } else {
+                    DatasetSimilarityRecordBO datasetSimilarityRecordBO = DefaultConverter.convert(lastDatasetSimilarityRecord, DatasetSimilarityRecordBO.class);
+                    datasetSimilarityRecordBO.setIsHistoryData(Boolean.FALSE);
+                    try {
+                        String resultUrl = minioService.getUrl(minioProp.getBucketName(), String.format(Constants.SIMILARITY_RESULT_PATH_FORMAT, firstSimilarityRecord.getSerialNumber() + Constants.JSON_SUFFIX.toLowerCase()));
+                        datasetSimilarityRecordBO.setResultUrl(resultUrl);
+                    } catch (Throwable throwable) {
+                        log.error("get result url error", throwable);
+                    }
+
+                    return datasetSimilarityRecordBO;
+                }
             }
         }
         return null;
@@ -241,8 +257,8 @@ public class DatasetSimilarityRecordUseCase {
     }
 
     private DatasetSimilarityBO buildDatasetSimilarityBO(List<DataClassificationOption> dataClassificationOptions) {
-        String noOptionStr="No Options";
-        String multiOptionStr="Multiple Options";
+        String noOptionStr = "No Options";
+        String multiOptionStr = "Multiple Options";
         if (CollUtil.isNotEmpty(dataClassificationOptions)) {
             DatasetSimilarityBO datasetSimilarityBO = new DatasetSimilarityBO();
             List<String> options = new ArrayList<>();
@@ -251,10 +267,10 @@ public class DatasetSimilarityRecordUseCase {
             for (DataClassificationOption dataClassificationOption : dataClassificationOptions) {
                 dataSimilarityBOS.add(DataSimilarityBO.builder().attributeId(dataClassificationOption.getAttributeId())
                         .optionCount(dataClassificationOption.getOptionCount())
-                        .optionName(dataClassificationOption.getOptionCount()==1? dataClassificationOption.getOptionName():multiOptionStr)
+                        .optionName(dataClassificationOption.getOptionCount() == 1 ? dataClassificationOption.getOptionName() : multiOptionStr)
                         .id(dataClassificationOption.getDataId())
                         .optionPaths(dataClassificationOption.getOptionPaths()).build());
-                if (!options.contains(dataClassificationOption.getOptionName()) && dataClassificationOption.getOptionCount()==1) {
+                if (!options.contains(dataClassificationOption.getOptionName()) && dataClassificationOption.getOptionCount() == 1) {
                     options.add(dataClassificationOption.getOptionName());
                 }
             }
