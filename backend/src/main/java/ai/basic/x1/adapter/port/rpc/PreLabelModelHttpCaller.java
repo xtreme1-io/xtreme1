@@ -34,7 +34,7 @@ public class PreLabelModelHttpCaller {
                     .body(requestBody, ContentType.JSON.getValue());
             HttpResponse httpResponse = httpRequest.execute();
             stopWatch.stop();
-            log.info(String.format("call trackingModelService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
+            log.info(String.format("call preLabelModelService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
             if (httpResponse.getStatus() == HttpStatus.HTTP_OK) {
                 ApiResult<List<PreModelRespDTO>> apiResult = JSONUtil.toBean(httpResponse.body(), new TypeReference<>() {
                 }, false);

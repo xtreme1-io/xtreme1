@@ -15,7 +15,6 @@ export default function useTool() {
             //     config[0].constraint = true;
             //     config[0].size3D = new THREE.Vector3(4, 4, 4);
             // }
-
             editor.setClassTypes(config);
         } catch (error) {
             throw new BSError('', editor.lang('load-class-error'), error);
@@ -45,7 +44,10 @@ export default function useTool() {
             let { dataInfos, seriesFrameId } = await api.getInfoByRecordId(bsState.recordId);
             // state.isSeriesFrame = isSeriesFrame;
             bsState.seriesFrameId = seriesFrameId;
-
+            let dataId = bsState.query.dataId;
+            if (dataId) {
+                dataInfos = dataInfos.filter((data) => data.id === dataId);
+            }
             if (dataInfos.length === 0) {
                 throw '';
             }
@@ -71,8 +73,6 @@ export default function useTool() {
             Object.assign(editor.bsState.user, {
                 id: data.id,
                 nickname: data.nickname,
-                email: data.email,
-                status: data.status,
                 username: data.username,
             });
         } catch (error) {

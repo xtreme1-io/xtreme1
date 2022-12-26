@@ -2,16 +2,22 @@ package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
+import ai.basic.x1.adapter.exception.ApiException;
 import ai.basic.x1.entity.DataInfoQueryBO;
 import ai.basic.x1.entity.DataInfoUploadBO;
 import ai.basic.x1.entity.DataPreAnnotationBO;
+import ai.basic.x1.entity.ScenarioQueryBO;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
+import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
 import ai.basic.x1.usecase.*;
+import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,18 +46,28 @@ public class DataInfoController extends BaseDatasetController {
 
     @Autowired
     protected UploadUseCase uploadUseCase;
+
     @Autowired
     protected DatasetUseCase datasetUseCase;
 
     @Autowired
     protected DataAnnotationRecordUseCase dataAnnotationRecordUseCase;
 
+    @Autowired
+    protected DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
+
+    @Autowired
+    protected ClassUseCase classUseCase;
+
+    @Autowired
+    private DataClassificationOptionUseCase dataClassificationOptionUseCase;
+
     @PostMapping("upload")
-    public Long upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
+    public String upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);
         assert dataInfoUploadBO != null;
         dataInfoUploadBO.setUserId(userDTO.getId());
-        return dataInfoUsecase.upload(dataInfoUploadBO);
+        return String.valueOf(dataInfoUsecase.upload(dataInfoUploadBO));
     }
 
     @GetMapping("findUploadRecordBySerialNumbers")
@@ -79,7 +96,16 @@ public class DataInfoController extends BaseDatasetController {
 
     @GetMapping("listByIds")
     public List<DataInfoDTO> listByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
-        var dataInfoBos = dataInfoUsecase.listByIds(dataIds);
+        var dataInfoBos = dataInfoUsecase.listByIds(dataIds, false);
+        if (CollectionUtil.isNotEmpty(dataInfoBos)) {
+            return dataInfoBos.stream().map(this::convertDataInfoDTO).collect(Collectors.toList());
+        }
+        return List.of();
+    }
+
+    @GetMapping("listRelationByIds")
+    public List<DataInfoDTO> listRelationByIds(@NotEmpty(message = "dataIds cannot be null") @RequestParam(required = false) List<Long> dataIds) {
+        var dataInfoBos = dataInfoUsecase.listRelationByIds(dataIds, false);
         if (CollectionUtil.isNotEmpty(dataInfoBos)) {
             return dataInfoBos.stream().map(this::convertDataInfoDTO).collect(Collectors.toList());
         }
@@ -134,10 +160,10 @@ public class DataInfoController extends BaseDatasetController {
     }
 
     @GetMapping("export")
-    public Long export(@Validated DataInfoQueryDTO dataInfoQueryDTO) {
+    public String export(@Validated DataInfoQueryDTO dataInfoQueryDTO) {
         var dataInfoQueryBO = DefaultConverter.convert(dataInfoQueryDTO, DataInfoQueryBO.class);
         assert dataInfoQueryBO != null;
-        return dataInfoUsecase.export(dataInfoQueryBO);
+        return String.valueOf(dataInfoUsecase.export(dataInfoQueryBO));
     }
 
     @GetMapping("findExportRecordBySerialNumbers")
@@ -166,7 +192,7 @@ public class DataInfoController extends BaseDatasetController {
     }
 
     @PostMapping("modelAnnotate")
-    public Long modelAnnotate(@Validated @RequestBody DataModelAnnotateDTO dataModelAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
+    public String modelAnnotate(@Validated @RequestBody DataModelAnnotateDTO dataModelAnnotateDTO, @LoggedUser LoggedUserDTO loggedUserDTO) {
         var resultFilterParam = dataModelAnnotateDTO.getResultFilterParam();
         var modelCode = EnumUtil.fromString(ModelCodeEnum.class, dataModelAnnotateDTO.getModelCode());
         ModelParamUtils.valid(resultFilterParam, modelCode);
@@ -179,6 +205,50 @@ public class DataInfoController extends BaseDatasetController {
                                                 @RequestParam(required = false) List<Long> dataIds) {
         var modelObjectBO = dataInfoUsecase.getModelAnnotateResult(serialNo, dataIds);
         return DefaultConverter.convert(modelObjectBO, ModelObjectDTO.class);
+    }
+
+    @GetMapping("findByScenarioPage")
+    public Page<DataAnnotationObjectDTO> findByScenarioPage(@RequestParam(defaultValue = "1") Integer pageNo,
+                                                            @RequestParam(defaultValue = "10") Integer pageSize,
+                                                            @Validated ScenarioQueryDTO dto) {
+        var scenarioQueryBO = DefaultConverter.convert(dto, ScenarioQueryBO.class);
+        if (dto.getSource().equals(ScenarioQuerySourceEnum.ONTOLOGY.name())) {
+            var datasetClassIds = classUseCase.findDatasetClassIdsByClassId(dto.getClassId());
+            if (CollectionUtil.isEmpty(datasetClassIds)) {
+                return new Page<>();
+            }
+            scenarioQueryBO.setClassIds(datasetClassIds);
+        } else {
+            scenarioQueryBO.setClassIds(Collections.singletonList(dto.getClassId()));
+        }
+        var page = dataAnnotationObjectUseCase.findByScenarioPage(pageNo, pageSize, scenarioQueryBO);
+        return DefaultConverter.convert(page, DataAnnotationObjectDTO.class);
+    }
+
+    @GetMapping("classificationOption/findAll")
+    public List<DataClassificationOptionDTO> findClassificationOption(@RequestParam Long classId) {
+        var options = dataClassificationOptionUseCase.findByClassIds(List.of(classId));
+        return DefaultConverter.convert(options, DataClassificationOptionDTO.class);
+    }
+
+    @GetMapping("scenarioExport")
+    public String scenarioExport(@Validated ScenarioQueryDTO scenarioQueryDTO) {
+        var scenarioQueryBO = DefaultConverter.convert(scenarioQueryDTO, ScenarioQueryBO.class);
+        if (scenarioQueryDTO.getSource().equals(ScenarioQuerySourceEnum.ONTOLOGY.name())) {
+            var datasetClassIds = classUseCase.findDatasetClassIdsByClassId(scenarioQueryDTO.getClassId());
+            if (CollectionUtil.isEmpty(datasetClassIds)) {
+                throw new ApiException(UsecaseCode.DATASET_DATA_SCENARIO_NOT_FOUND);
+            }
+            scenarioQueryBO.setClassIds(datasetClassIds);
+        } else {
+            scenarioQueryBO.setClassIds(Collections.singletonList(scenarioQueryDTO.getClassId()));
+        }
+        return String.valueOf(dataInfoUsecase.scenarioExport(scenarioQueryBO));
+    }
+
+    @GetMapping("getDataAndResult")
+    public JSONObject getDataAndResult(@NotNull(message = "cannot be null") @RequestParam(required = false) Long datasetId, @RequestParam(required = false) List<Long> dataIds) {
+        return JSONUtil.parseObj(JSONUtil.toJsonStr(dataInfoUsecase.getDataAndResult(datasetId, dataIds)));
     }
 
 }

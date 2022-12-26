@@ -15,7 +15,11 @@
       <div class="content">
         <div class="flex items-center gap-8px">
           <Icon icon="eva:info-fill" size="20" color="#57CCEF" />
-          <span style="color: #666">Click here to check out our data format explanation</span>
+          <span style="color: #666"
+            >Click
+            <a href="https://docs.xtreme1.io/xtreme1-docs/export-data" target="_blank">here</a> to
+            check out our data format explanation</span
+          >
         </div>
         <div class="flex items-center gap-10px">
           <div class="whitespace-nowrap" style="color: #333">Export Format</div>
@@ -55,8 +59,8 @@
   const selectValue = ref<string>('');
   const selectOption = [
     {
-      value: 'Xtreme1 v0.5',
-      label: 'Xtreme1 v0.5',
+      value: 'Xtreme1 v0.5.5',
+      label: 'Xtreme1 v0.5.5',
     },
   ];
 

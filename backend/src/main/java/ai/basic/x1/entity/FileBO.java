@@ -40,6 +40,11 @@ public class FileBO {
     private String path;
 
     /**
+     *  The path in the compressed package
+     */
+    private String zipPath;
+
+    /**
      * File type
      */
     private String type;

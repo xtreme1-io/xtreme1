@@ -15,22 +15,22 @@ import { utils } from 'pc-editor';
 // import BSError from '../common/BSError';
 import * as THREE from 'three';
 
-let { empty, queryStr, traverseClassification2Arr } = utils;
+let { empty, queryStr, traverseClassification2Arr, traverseClass2Arr } = utils;
 
 export async function getUrl(url: string) {
     return get(url, null, { headers: { 'x-request-type': 'resource' } });
 }
 
 export async function saveObject(config: any) {
-    let url = '/api/annotate/object/save';
+    let url = '/api/annotate/data/save';
     let data = await post(url, config);
     data = data.data || [];
-
+    console.log(data);
     let keyMap = {} as Record<string, Record<string, string>>;
     data.forEach((e: any) => {
-        let dataId = e.dataId + '';
+        let dataId = e.dataId;
         keyMap[dataId] = keyMap[dataId] || {};
-        keyMap[dataId][e.frontId + ''] = e.id + '';
+        keyMap[dataId][e.frontId] = e.id;
     });
 
     return keyMap;
@@ -39,24 +39,28 @@ export async function saveObject(config: any) {
 export async function getDataObject(dataIds: string[] | string) {
     if (!Array.isArray(dataIds)) dataIds = [dataIds];
 
-    let url = '/api/annotate/object/listByDataIds';
+    let url = '/api/annotate/data/listByDataIds';
     let argsStr = queryStr({ dataIds });
     let data = await get(`${url}?${argsStr}`);
     data = data.data || [];
-
     let objectsMap = {} as Record<string, IObject[]>;
+    let classificationMap = {};
     // let objects = [] as IObject[];
-    data.dataAnnotationObjects.forEach((e: any) => {
-        let dataId = e.dataId;
-        objectsMap[dataId] = objectsMap[dataId] || [];
-
-        e.classAttributes.uuid = e.id + '';
-        e.classAttributes.modelRun = empty(e.modelRunId) ? '' : e.modelRunId + '';
-        e.classAttributes.modelRunLabel = empty(e.modelRunNo) ? '' : e.modelRunNo + '';
-        objectsMap[dataId].push(e.classAttributes);
+    data.forEach((e: any) => {
+        const { dataId, objects, classificationValues } = e;
+        objectsMap[dataId] = objects.map((o: any) => {
+            return utils.translateToObject(Object.assign(o.classAttributes, { backId: o.id }));
+        });
+        classificationMap[dataId] = classificationValues.reduce((map: any, c: any) => {
+            return Object.assign(
+                map,
+                utils.saveToClassificationValue(c.classificationAttributes.values),
+            );
+        }, {});
     });
     return {
         objectsMap,
+        classificationMap,
         queryTime: data.queryDate,
     };
 }
@@ -121,9 +125,9 @@ export async function getInfoByRecordId(recordId: string) {
     (data.datas || []).forEach((config: any) => {
         dataInfos.push({
             // id: config.id,
-            id: config.dataId,
-            datasetId: config.datasetId,
-            teamId: config.teamId,
+            id: config.dataId + '',
+            datasetId: config.datasetId + '',
+            teamId: config.teamId + '',
             // config: [],
             // viewConfig: [],
             pointsUrl: '',
@@ -171,59 +175,7 @@ export async function getDataSetClass(datasetId: string) {
     let data = await get(url);
     data = data.data || [];
 
-    let classTypes = [] as IClassType[];
-    data.forEach((config: any) => {
-        let classType: IClassType = {
-            id: config.id + '',
-            name: config.name || '',
-            // label: config.name + '-label',
-            label: config.name || '',
-            color: config.color || '#ff0000',
-            attrs: [],
-            type: '',
-        };
-
-        let attributes = config.attributes || [];
-        let toolOption = config.toolTypeOptions || {};
-
-        if (toolOption.isStandard) {
-            classType.type = 'standard';
-            classType.size3D = new THREE.Vector3(
-                toolOption.length || 0,
-                toolOption.width || 0,
-                toolOption.height || 0,
-            );
-        } else if (toolOption.isConstraints) {
-            let length, width, height;
-            length = toolOption.length || [];
-            width = toolOption.width || [];
-            height = toolOption.height || [];
-            classType.type = 'constraint';
-            classType.sizeMin = new THREE.Vector3(length[0] || 0, width[0] || 0, height[0] || 0);
-            classType.sizeMax = new THREE.Vector3(length[1] || 0, width[1] || 0, height[1] || 0);
-        }
-
-        if (toolOption.points) {
-            classType.points = [toolOption.points, 0];
-        }
-
-        attributes.forEach((config: any) => {
-            let options = (config.options || []).map((e: any) => {
-                // return { value: e.name, label: e.name + '-label' };
-                return { value: e.name, label: e.name };
-            });
-            classType.attrs.push({
-                name: config.name,
-                // label: config.name + '-label',
-                label: config.name,
-                required: config.required,
-                type: config.type,
-                options: options,
-            });
-        });
-
-        classTypes.push(classType);
-    });
+    let classTypes = traverseClass2Arr(data);
 
     return classTypes;
 }
@@ -246,15 +198,13 @@ export async function getDataFile(dataId: string) {
         });
     });
 
-    return configs;
+    return { configs, name: data[0]?.name || ''};
 }
 
 export async function getUserInfo() {
-    let url = `/api/user/user/logged`;
-    let {
-        data: { user, team, roles },
-    } = await get(url);
-    return user;
+    let url = `/api/user/logged`;
+    let { data } = await get(url);
+    return data;
 }
 export async function getDataSetInfo(datasetId: string) {
     let url = `/api/dataset/info/${datasetId}`;

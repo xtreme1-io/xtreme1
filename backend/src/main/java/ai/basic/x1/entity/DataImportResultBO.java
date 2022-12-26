@@ -1,6 +1,5 @@
 package ai.basic.x1.entity;
 
-import cn.hutool.json.JSONObject;
 import lombok.Data;
 
 import java.util.List;
@@ -12,21 +11,7 @@ import java.util.List;
 public class DataImportResultBO {
 
     /**
-     * Data result information
+     * Annotation results
      */
-    private ResultBO result;
-
-    @Data
-    public static class ResultBO {
-
-        /**
-         * Result name
-         */
-        private String resultName;
-
-        /**
-         * Annotation results
-         */
-        private List<JSONObject> objects;
-    }
+    private List<DataAnnotationResultObjectBO> objects;
 }

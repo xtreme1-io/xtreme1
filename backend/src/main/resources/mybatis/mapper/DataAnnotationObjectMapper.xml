@@ -1,4 +1,87 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.DataAnnotationObjectMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject">
+        <id column="id" property="id" />
+        <result column="dataset_id" property="datasetId" />
+        <result column="data_id" property="dataId" />
+        <result column="class_id" property="classId" />
+        <result column="class_attributes" property="classAttributes"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="created_at" property="createdAt" />
+        <result column="created_by" property="createdBy" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="updated_by" property="updatedBy" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, dataset_id, data_id, class_id, class_attributes, created_at, created_by, updated_at, updated_by
+    </sql>
+
+    <select id="listByScenario" resultMap="BaseResultMap">
+        SELECT DISTINCT
+        dao.id,
+        dao.dataset_id,
+        dao.data_id,
+        dao.class_id,
+        dao.class_attributes
+        <include refid="commonSql"/>
+    </select>
+
+    <select id="findByScenarioPage" resultMap="BaseResultMap">
+        SELECT DISTINCT
+            dao.id,
+            dao.dataset_id,
+            dao.data_id,
+            dao.class_id,
+            dao.class_attributes
+        <include refid="commonSql"/>
+    </select>
+
+    <select id="findDataIdByScenarioPage" resultMap="BaseResultMap">
+        SELECT DISTINCT
+            dao.data_id
+        <include refid="commonSql"/>
+    </select>
+
+    <sql id="commonSql">
+        FROM
+        data_annotation_object dao
+        <if test="scenarioQuery.attributeIds != null and scenarioQuery.attributeIds.size() > 0">
+            LEFT JOIN data_classification_option dco ON dao.data_id = dco.data_id
+        </if>
+        WHERE
+        dao.class_id IN
+        <foreach collection="scenarioQuery.classIds" item="classId" index="index" open="(" close=")" separator=",">
+            #{classId}
+        </foreach>
+
+        <if test="scenarioQuery.datasetId != null">
+            AND dao.dataset_id = #{scenarioQuery.datasetId}
+        </if>
+
+        <if test="scenarioQuery.dataIds != null and scenarioQuery.dataIds.size() > 0">
+            AND dao.data_id IN
+            <foreach collection="scenarioQuery.dataIds" item="dataId" index="index" open="(" close=")" separator=",">
+                #{dataId}
+            </foreach>
+        </if>
+
+        <if test="scenarioQuery.attributeIds != null and scenarioQuery.attributeIds.size() > 0">
+            AND dco.attribute_id IN
+            <foreach collection="scenarioQuery.attributeIds" item="attributeId" index="index" open="(" close=")" separator=",">
+                #{attributeId}
+            </foreach>
+        </if>
+
+        <if test="scenarioQuery.optionNames != null and scenarioQuery.optionNames.size() > 0">
+            AND dco.option_name IN
+            <foreach collection="scenarioQuery.optionNames" item="optionName" index="index" open="(" close=")" separator=",">
+                #{optionName}
+            </foreach>
+        </if>
+    </sql>
+
 </mapper>

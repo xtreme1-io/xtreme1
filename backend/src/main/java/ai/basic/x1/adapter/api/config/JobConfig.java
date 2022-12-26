@@ -32,14 +32,27 @@ import static ai.basic.x1.util.Constants.*;
  */
 @Configuration
 public class JobConfig {
+    private static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
     @Bean
     public Executor redisStreamExecutor() {
-        int processors = Runtime.getRuntime().availableProcessors();
         AtomicInteger index = new AtomicInteger(1);
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(processors, processors, 0, TimeUnit.SECONDS,
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(PROCESSORS, PROCESSORS, 0, TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(), r -> {
             Thread thread = new Thread(r);
-            thread.setName("redisConsumer-" + index.getAndIncrement());
+            thread.setName("redisConsumer-executor" + index.getAndIncrement());
+            thread.setDaemon(true);
+            return thread;
+        });
+        return executor;
+    }
+
+    @Bean
+    public Executor similarityExecutor() {
+        AtomicInteger index = new AtomicInteger(1);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(PROCESSORS, PROCESSORS, 0, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(), r -> {
+            Thread thread = new Thread(r);
+            thread.setName("similarity-executor" + index.getAndIncrement());
             thread.setDaemon(true);
             return thread;
         });

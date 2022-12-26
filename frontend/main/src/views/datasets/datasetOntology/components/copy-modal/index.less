@@ -1,0 +1,42 @@
+.copy__modal {
+  padding: 20px;
+  padding-bottom: 12px;
+
+  .wrapper-outer {
+    padding: 20px;
+    background: #e6f7fd;
+    border-radius: 20px;
+
+    .wrapper-inner {
+      height: 450px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #fff;
+      border-radius: 20px;
+      // padding: 15px;
+      &.empty {
+        .empty-wrapper {
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          img {
+            height: 140px;
+          }
+          .tip {
+            width: 480px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 20px;
+            color: #666;
+          }
+          .high_light {
+            color: @primary-color;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 
 /**
  * @author chenchao
@@ -24,20 +25,10 @@ public class DatasetClassificationDTO {
 
     private Long id;
 
-    /**
-     * The id of the inherited ontology
-     */
-    private Long ontologyId;
-
-    /**
-     * The id of the inherited classification in the ontology
-     */
-    private Long classificationId;
-
-    @NotNull(groups = GroupSave.class)
+    @NotNull
     private Long datasetId;
 
-    @NotNull(groups = GroupSave.class)
+    @NotNull
     @Length(max = 256, message = "The length of name should be less than 256.")
     private String name;
 
@@ -65,8 +56,5 @@ public class DatasetClassificationDTO {
 
     private SortEnum ascOrDesc;
 
-
-    public interface GroupSave {
-
-    }
+    private OffsetDateTime createdAt;
 }

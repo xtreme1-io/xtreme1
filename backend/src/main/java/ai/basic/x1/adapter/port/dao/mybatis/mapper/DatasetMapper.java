@@ -23,4 +23,6 @@ public interface DatasetMapper extends BaseMapper<Dataset> {
      * @return Dataset paging information
      */
     Page<Dataset> selectDatasetPage(Page<Dataset> page, @Param(Constants.WRAPPER) Wrapper<Dataset> queryWrapper);
+
+    Long countObject(@Param("datasetId") Long datasetId);
 }

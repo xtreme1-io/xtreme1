@@ -1,8 +1,11 @@
 package ai.basic.x1.usecase;
 
 
+import ai.basic.x1.adapter.port.dao.ClassificationDAO;
 import ai.basic.x1.adapter.port.dao.DatasetClassificationDAO;
-import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetClassification;
+import ai.basic.x1.adapter.port.dao.mybatis.model.*;
+import ai.basic.x1.adapter.port.dao.mybatis.model.Class;
+import ai.basic.x1.entity.DatasetClassBO;
 import ai.basic.x1.entity.DatasetClassificationBO;
 import ai.basic.x1.entity.enums.SortByEnum;
 import ai.basic.x1.entity.enums.SortEnum;
@@ -13,13 +16,12 @@ import ai.basic.x1.util.Page;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author fyb
@@ -30,33 +32,28 @@ public class DatasetClassificationUseCase {
     @Autowired
     private DatasetClassificationDAO datasetClassificationDAO;
 
+    @Autowired
+    private ClassificationDAO classificationDAO;
+
     @Transactional(rollbackFor = Throwable.class)
     public void saveDatasetClassification(DatasetClassificationBO datasetClassificationBO) {
         Assert.notNull(datasetClassificationBO.getDatasetId(),()->"datasetId can not be null");
         Assert.notNull(datasetClassificationBO.getName(),()->"name can not be null");
 
-
-        if (Objects.nonNull(datasetClassificationBO.getId())){
-            if (findById(datasetClassificationBO.getId()) == null) {
-                throw new UsecaseException(UsecaseCode.NOT_FOUND);
-            }
-        }
-        if (nameExists(datasetClassificationBO)){
+        DatasetClassification datasetClassification = DefaultConverter.convert(datasetClassificationBO, DatasetClassification.class);
+        try {
+            datasetClassificationDAO.saveOrUpdate(datasetClassification);
+        } catch (DuplicateKeyException e) {
             throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
         }
-
-        DatasetClassification datasetClassification = DefaultConverter.convert(datasetClassificationBO, DatasetClassification.class);
-        LambdaUpdateWrapper<DatasetClassification> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper.eq(DatasetClassification::getId, datasetClassificationBO.getId());
-        datasetClassificationDAO.saveOrUpdate(datasetClassification, lambdaUpdateWrapper);
     }
 
-    public boolean nameExists(DatasetClassificationBO bo) {
-        LambdaQueryWrapper<DatasetClassification> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(DatasetClassification::getName, bo.getName());
-        lambdaQueryWrapper.eq(DatasetClassification::getDatasetId,bo.getDatasetId());
-        if (ObjectUtil.isNotEmpty(bo.getId())) {
-            lambdaQueryWrapper.ne(DatasetClassification::getId, bo.getId());
+    public boolean validateName(Long id, Long datasetId, String name) {
+        LambdaQueryWrapper<DatasetClassification> lambdaQueryWrapper = new LambdaQueryWrapper<DatasetClassification>()
+                .eq(DatasetClassification::getName, name)
+                .eq(DatasetClassification::getDatasetId, datasetId);
+        if (ObjectUtil.isNotEmpty(id)) {
+            lambdaQueryWrapper.ne(DatasetClassification::getId, id);
         }
         return datasetClassificationDAO.getBaseMapper().exists(lambdaQueryWrapper);
     }
@@ -91,12 +88,11 @@ public class DatasetClassificationUseCase {
     /**
      * delete classification,logic delete
      *
-     * @param id     id
-     * @return true-false
+     * @param id id
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Boolean deleteClassification(Long id) {
-        return datasetClassificationDAO.removeById(id);
+    public void deleteClassification(Long id) {
+        datasetClassificationDAO.removeById(id);
     }
 
     public List<DatasetClassificationBO> findAll(Long datasetId) {
@@ -113,5 +109,24 @@ public class DatasetClassificationUseCase {
             classificationLambdaQueryWrapper.orderBy(SortByEnum.NAME.name().equals(sortBy),isAsc,DatasetClassification::getName);
             classificationLambdaQueryWrapper.orderBy(SortByEnum.CREATE_TIME.name().equals(sortBy),isAsc,DatasetClassification::getCreatedAt);
         }
+    }
+
+    public void copyFromOntologyCenter(DatasetClassificationBO datasetClassificationBO) {
+        Long datasetId = datasetClassificationBO.getDatasetId();
+        List<Classification> classifications = classificationDAO.listByIds(datasetClassificationBO.getClassificationIds());
+        List<DatasetClassification> datasetClassifications = DefaultConverter.convert(classifications, DatasetClassification.class);
+        datasetClassifications.forEach(entity -> entity.setDatasetId(datasetId));
+        datasetClassificationDAO.getBaseMapper().saveOrUpdateBatch(datasetClassifications);
+    }
+
+    public void deleteClassifications(List<Long> datasetClassificationIds) {
+        datasetClassificationDAO.getBaseMapper().deleteBatchIds(datasetClassificationIds);
+    }
+
+    public void saveToOntologyCenter(Long ontologyId, List<Long> datasetClassificationIds) {
+        List<DatasetClassificationBO> datasetClassBOs = DefaultConverter.convert(datasetClassificationDAO.listByIds(datasetClassificationIds), DatasetClassificationBO.class);
+        List<Classification> classifications = DefaultConverter.convert(datasetClassBOs, Classification.class);
+        classifications.forEach(entity -> entity.setOntologyId(ontologyId));
+        classificationDAO.getBaseMapper().saveOrUpdateBatch(classifications);
     }
 }

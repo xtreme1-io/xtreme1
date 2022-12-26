@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author chenchao
@@ -38,8 +39,6 @@ public class ClassBO {
 
     private JSONArray attributes;
 
-    private Boolean isDeleted;
-
     /**
      * Query value, create start time
      */
@@ -64,5 +63,24 @@ public class ClassBO {
      * the number of class
      */
     private Integer classNum;
+
+    /**
+     * Whether to reset the relationship with the class in the dataset
+     */
+    private Boolean isResetRelations;
+
+    private List<DatasetClass> datasetClasses;
+
+    private Long datasetClassNum;
+
+    private OffsetDateTime createdAt;
+
+    @Data
+    @Builder
+    public static class DatasetClass {
+        private Long id;
+
+        private String name;
+    }
 
 }

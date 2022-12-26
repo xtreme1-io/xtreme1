@@ -1,15 +1,12 @@
 package ai.basic.x1.adapter.api.controller;
 
-import ai.basic.x1.adapter.dto.DatasetDTO;
-import ai.basic.x1.adapter.dto.DatasetQueryDTO;
+import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.adapter.dto.request.DatasetRequestDTO;
 import ai.basic.x1.adapter.exception.ApiException;
-import ai.basic.x1.entity.DataInfoBO;
-import ai.basic.x1.entity.DatasetBO;
-import ai.basic.x1.entity.DatasetQueryBO;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
-import ai.basic.x1.usecase.DataInfoUseCase;
-import ai.basic.x1.usecase.DatasetUseCase;
+import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
+import ai.basic.x1.usecase.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
@@ -21,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +36,18 @@ public class DatasetController extends BaseDatasetController {
 
     @Autowired
     protected DataInfoUseCase dataInfoUsecase;
+
+    @Autowired
+    private DatasetClassUseCase datasetClassUseCase;
+
+    @Autowired
+    private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
+
+    @Autowired
+    private DataClassificationOptionUseCase dataClassificationOptionUseCase;
+
+    @Autowired
+    private ClassUseCase classUseCase;
 
 
     @PostMapping("create")
@@ -67,16 +78,7 @@ public class DatasetController extends BaseDatasetController {
         }
         var datasetIds = datasetBOList.stream().map(datasetBO -> datasetBO.getId()).collect(Collectors.toList());
         var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(datasetIds);
-        var dataInfoBOList = new ArrayList<DataInfoBO>();
-        datasetBOList.forEach(datasetBO -> {
-            var datas = datasetBO.getDatas();
-            if (!datasetBO.getType().equals(DatasetTypeEnum.IMAGE) && CollectionUtil.isNotEmpty(datas)) {
-                dataInfoBOList.add(CollectionUtil.getFirst(datas));
-            } else {
-                dataInfoBOList.addAll(datas);
-            }
-        });
-        var dataMap = dataInfoUsecase.getDataInfoListFileMap(dataInfoBOList);
+        dataInfoUsecase.setDatasetSixData(datasetBOList);
         return datasetBOPage.convert(datasetBO -> {
             var datasetDTO = DefaultConverter.convert(datasetBO, DatasetDTO.class);
             var datasetStatisticsBO = datasetStatisticsMap.get(datasetBO.getId());
@@ -86,9 +88,12 @@ public class DatasetController extends BaseDatasetController {
                 datasetDTO.setInvalidCount(datasetStatisticsBO.getInvalidCount());
                 datasetDTO.setItemCount(datasetStatisticsBO.getItemCount());
             }
-            var dataInfoBOS = dataMap.get(datasetBO.getId());
-            if (CollectionUtil.isNotEmpty(dataInfoBOS)) {
-                datasetDTO.setDatas(dataInfoBOS.stream().map(dataInfoBO -> convertDataInfoDTO(dataInfoBO)).collect(Collectors.toList()));
+            if (CollectionUtil.isNotEmpty(datasetBO.getDatas())) {
+                var dataInfoDTOS = new ArrayList<DataInfoDTO>();
+                datasetBO.getDatas().forEach(dataInfoBO -> {
+                    dataInfoDTOS.add(convertDataInfoDTO(dataInfoBO));
+                });
+                datasetDTO.setDatas(dataInfoDTOS);
             }
             return datasetDTO;
         });
@@ -106,6 +111,52 @@ public class DatasetController extends BaseDatasetController {
     @GetMapping("findOntologyIsExistByDatasetId")
     public Boolean findOntologyIsExistByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId) {
         return datasetUsecase.findOntologyIsExistByDatasetId(datasetId);
+    }
+
+    @GetMapping("{datasetId}/statistics/dataStatus")
+    public DatasetStatisticsDTO statisticsDataStatus(@PathVariable("datasetId") Long datasetId) {
+        var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(List.of(datasetId));
+        var objectCount = datasetUsecase.countObject(datasetId);
+        var statisticsInfo = datasetStatisticsMap.getOrDefault(datasetId,
+                DatasetStatisticsBO.createEmpty(datasetId));
+
+        var result = DefaultConverter.convert(statisticsInfo, DatasetStatisticsDTO.class);
+        result.setItemCount(statisticsInfo.getItemCount());
+        result.setObjectCount(objectCount.intValue());
+        return result;
+    }
+
+    @GetMapping("{datasetId}/statistics/classObject")
+    public ClassStatisticsDTO statisticsClassObject(@PathVariable("datasetId") Long datasetId) {
+        return ClassStatisticsDTO.builder()
+                .toolTypeUnits(
+                        DefaultConverter.convert(datasetClassUseCase.statisticsObjectByToolType(datasetId), ToolTypeStatisticsUnitDTO.class)
+                )
+                .classUnits(
+                        DefaultConverter.convert(datasetClassUseCase.statisticObjectByClass(datasetId), ClassStatisticsUnitDTO.class))
+                .build();
+    }
+
+    @GetMapping("{datasetId}/statistics/classificationData")
+    public List<DataClassificationOptionDTO> statisticsClassificationData(@PathVariable("datasetId") Long datasetId) {
+        var results = dataClassificationOptionUseCase.statisticsDataByOption(datasetId);
+        return DefaultConverter.convert(results, DataClassificationOptionDTO.class);
+    }
+
+    @PostMapping("createByScenario")
+    public void createByScenario(@RequestBody @Validated DatasetScenarioDTO dto) {
+        var datasetScenarioBO = DefaultConverter.convert(dto, DatasetScenarioBO.class);
+        if (dto.getSource().equals(ScenarioQuerySourceEnum.ONTOLOGY.name())) {
+            var datasetClassIds = classUseCase.findDatasetClassIdsByClassId(dto.getClassId());
+            if (CollectionUtil.isEmpty(datasetClassIds)) {
+                throw new ApiException(UsecaseCode.DATASET_DATA_SCENARIO_NOT_FOUND);
+            }
+            datasetScenarioBO.setClassIds(datasetClassIds);
+        } else {
+            datasetScenarioBO.setClassIds(Collections.singletonList(dto.getClassId()));
+        }
+        datasetScenarioBO.setOntologyClassId(dto.getClassId());
+        datasetUsecase.createByScenario(datasetScenarioBO);
     }
 
 }

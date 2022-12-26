@@ -64,7 +64,8 @@ services:
       start_period: 10s
       retries: 10
   backend:
-    image: basicai/xtreme1-backend:v0.5.2
+    # By default, Compose will pull image from Docker Hub when no local image found.
+    image: basicai/xtreme1-backend:v0.5.5
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./backend
     ports:
@@ -93,7 +94,8 @@ services:
       minio:
         condition: service_healthy
   frontend:
-    image: basicai/xtreme1-frontend:v0.5.2
+    # By default, Compose will pull image from Docker Hub when no local image found.
+    image: basicai/xtreme1-frontend:v0.5.5
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./frontend
     ports:
@@ -114,6 +116,14 @@ services:
     profiles:
       - model
     runtime: nvidia
+  image-vect-visualization:
+    image: basicai/xtreme1-image-vect-visualization-cpu
+    ports:
+      - 8294:5000
+  pcd-tools:
+    image: basicai/xtreme1-pcd-tools
+    ports:
+      - 8295:5000
 volumes:
   mysql-data:
   redis-data:

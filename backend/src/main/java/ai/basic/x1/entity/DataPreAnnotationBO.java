@@ -29,4 +29,6 @@ public class DataPreAnnotationBO {
 
     private JSONObject resultFilterParam;
 
+    private Boolean isFilterData;
+
 }

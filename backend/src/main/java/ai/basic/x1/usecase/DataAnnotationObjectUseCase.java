@@ -3,9 +3,16 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
+import ai.basic.x1.adapter.port.dao.mybatis.query.ScenarioQuery;
 import ai.basic.x1.entity.DataAnnotationObjectBO;
+import ai.basic.x1.entity.DataInfoBO;
+import ai.basic.x1.entity.ScenarioQueryBO;
+import ai.basic.x1.entity.UserBO;
 import ai.basic.x1.util.DefaultConverter;
+import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -14,10 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +35,9 @@ public class DataAnnotationObjectUseCase {
 
     @Autowired
     private DataEditUseCase dataEditUseCase;
+
+    @Autowired
+    private UserUseCase userUseCase;
 
     /**
      * query results of annotation
@@ -49,10 +56,9 @@ public class DataAnnotationObjectUseCase {
      * @param deleteDataIds           data id that need delete all objects
      */
     @Transactional(rollbackFor = Exception.class)
-    public List<DataAnnotationObjectBO> saveDataAnnotationObject(List<DataAnnotationObjectBO> dataAnnotationObjectBOs, Set<Long> deleteDataIds) {
+    public List<DataAnnotationObjectBO> save(List<DataAnnotationObjectBO> dataAnnotationObjectBOs, Set<Long> deleteDataIds) {
         Set<Long> dataIds = dataAnnotationObjectBOs.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toSet());
         dataIds.addAll(deleteDataIds);
-        dataEditUseCase.checkLock(dataIds);
         removeAllObjectByDataIds(deleteDataIds);
         List<DataAnnotationObjectBO> dataAnnotationObjectBOS = updateDataAnnotationObject(dataAnnotationObjectBOs);
         return dataAnnotationObjectBOS;
@@ -114,4 +120,28 @@ public class DataAnnotationObjectUseCase {
         deleteWrapper.in(DataAnnotationObject::getDataId, dataIds);
         dataAnnotationObjectDAO.remove(deleteWrapper);
     }
+
+    public Long countObjectByDatasetId(Long datasetId) {
+        return dataAnnotationObjectDAO.count(new LambdaQueryWrapper<DataAnnotationObject>()
+                .eq(DataAnnotationObject::getDatasetId, datasetId));
+    }
+
+    public Page<DataAnnotationObjectBO> findByScenarioPage(Integer pageNo, Integer pageSize, ScenarioQueryBO scenarioQueryBO) {
+        var page = dataAnnotationObjectDAO.getBaseMapper().findByScenarioPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize),
+                DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
+        return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
+    }
+
+    public List<DataAnnotationObjectBO> listByScenario(ScenarioQueryBO scenarioQueryBO) {
+        var dataAnnotationObjectList = dataAnnotationObjectDAO.getBaseMapper().listByScenario(DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
+        return DefaultConverter.convert(dataAnnotationObjectList, DataAnnotationObjectBO.class);
+    }
+
+    public Page<DataAnnotationObjectBO> findDataIdByScenarioPage(ScenarioQueryBO scenarioQueryBO) {
+        var page = dataAnnotationObjectDAO.getBaseMapper().findDataIdByScenarioPage(
+                new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(scenarioQueryBO.getPageNo(), scenarioQueryBO.getPageSize()),
+                DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
+        return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
+    }
+
 }

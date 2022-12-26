@@ -76,7 +76,7 @@ export type MergeFrameParams = {
 
 export interface DatasetParams extends BasicPageParams, SortType {
   datasetId: Nullable<string | number>;
-  type: dataTypeEnum;
+  type?: dataTypeEnum;
   name?: string;
   createStartTime?: number;
   createEndTime?: number;
@@ -111,12 +111,15 @@ export interface fileItem {
   createdAt: string;
   updatedAt: string;
   mediumThumbnail?: imgUrlObj;
+  largeThumbnail?: imgUrlObj;
+  extraInfo?: any;
   url: string;
   renderImage?: imgUrlObj;
 }
 
 export interface imgUrlObj {
   url: string;
+  extraInfo?: any;
 }
 
 export interface content {
@@ -145,6 +148,7 @@ export interface DatasetItem {
   type: dataTypeEnum;
   name: string;
   lockedBy: Nullable<string>;
+  datasetName?: string;
 }
 
 export interface DatasetListItem {
@@ -200,6 +204,7 @@ export interface takeRecordParams {
   dataType: dataTypeEnum;
   modelId?: Nullable<number>;
   modelCode?: modelCode;
+  isFilterData?: boolean;
   resultFilterParam?: Nullable<PreModelParam>;
 }
 

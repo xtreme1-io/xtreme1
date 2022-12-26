@@ -1,0 +1,113 @@
+.create_content {
+  padding: 0px 26px;
+  display: flex;
+  flex-direction: column;
+  // &.class_create {
+  //   min-height: 280px;
+  // }
+  .content-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .title {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 19px;
+      color: #333333;
+    }
+    .content {
+      padding-left: 10px;
+    }
+    .form-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      &-left {
+        width: 260px;
+      }
+      &-right {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+    }
+  }
+  .reset_box {
+    padding: 10px;
+    background: #ffffff;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #333333;
+    transform: translateY(-20px);
+  }
+}
+
+// form-item
+:deep(.ant-form-item) {
+  // height: 28px;
+  // margin-bottom: 20px;
+  display: flex;
+  flex-wrap: nowrap;
+  .ant-form-item-control-input {
+    width: 160px;
+    height: 28px;
+    .ant-input-affix-wrapper {
+      padding: 4px 10px;
+    }
+  }
+  .ant-select {
+    width: 160px;
+    .ant-select-selector {
+      height: 28px;
+    }
+  }
+}
+
+// Select input
+.ant-select-item-option {
+  padding: 5px;
+}
+.ant-select-item-option-content {
+  .img-tool {
+    border: none;
+    display: flex;
+    align-items: center;
+    // transform: translateY(5px);
+    img {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+    }
+  }
+}
+
+// select
+:deep(.ant-select) {
+  .ant-select-selector {
+    padding-left: 7px !important;
+  }
+  .ant-select-selection-item {
+    display: flex;
+    align-items: center;
+    .img-tool {
+      border: none;
+      display: flex;
+      align-items: center;
+      img {
+        width: 16px;
+        height: 16px;
+        margin-right: 10px;
+      }
+    }
+  }
+}

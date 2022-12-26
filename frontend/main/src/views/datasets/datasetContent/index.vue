@@ -60,6 +60,7 @@
           :groundTruthsOption="groundTruthsOption"
           :filterForm="filterForm"
           :datasetType="info?.type"
+          v-model:showAnnotation="showAnnotation"
           @handleMakeFrame="handleMakeFrame"
           @handleSelectAll="handleSelectAll"
           @handleAnnotate="handleAnnotate"
@@ -80,7 +81,9 @@
             <ImgCard
               v-for="i in list"
               :key="i.id"
+              :object="objectMap[i.id]"
               @handleSelected="handleSelected"
+              :showAnnotation="showAnnotation"
               :isSelected="selectedList.filter((item) => item === i.id).length > 0"
               :data="i"
               :info="info"
@@ -118,7 +121,7 @@
           </Select>
         </div>
         <div class="custom-item">
-          <Radio.Group v-model:value="sortType">
+          <Radio.Group name="sortType" v-model:value="sortType">
             <Radio v-for="item in SortTypeOption" :key="item.value" :value="item.value">
               <span class="radioText">{{ item.label }}</span>
             </Radio>
@@ -135,7 +138,7 @@
             <DatePicker v-model:start="start" v-model:end="end" />
           </CollContainer>
           <CollContainer icon="mdi:calendar-month" title="Status">
-            <Radio.Group v-model:value="annotationStatus">
+            <Radio.Group name="status" v-model:value="annotationStatus">
               <Radio :value="undefined">
                 <SvgIcon name="annotated" />
                 <span class="ml-2">All</span>
@@ -175,6 +178,7 @@
   import { useDesign } from '/@/hooks/web/useDesign';
   import {
     datasetApi,
+    datasetObjectApi,
     deleteBatchDataset,
     getLockedByDataset,
     getStatusNum,
@@ -237,6 +241,7 @@
   const info = ref<DatasetListItem>();
   const start = ref<Nullable<Dayjs>>(null);
   const end = ref<Nullable<Dayjs>>(null);
+  const showAnnotation = ref<boolean>(false);
   const name = ref<string>('');
   const sortField = ref<SortFieldEnum>(SortFieldEnum.NAME);
   const sortType = ref<SortTypeEnum>(SortTypeEnum.ASC);
@@ -244,7 +249,7 @@
   const lockedNum = ref<number>(0);
 
   const type = ref<PageTypeEnum>();
-  const { id } = query;
+  const { id, dataId } = query;
   const [register, { openModal }] = useModal();
   const [frameRegister, { openModal: openFrameModal }] = useModal();
   const scrollRef = ref<Nullable<ScrollActionType>>(null);
@@ -263,13 +268,14 @@
       value: '-1',
     },
   ]);
+  const objectMap = ref<Record<string, any>>({});
   onBeforeMount(async () => {
     // fetchList({});
     // max.value = await getMaxCountApi({ datasetId: id as unknown as number });
     // endCount.value = max.value;
     info.value = await datasetItemDetail({ id: id as string });
-    setDatasetBreadcrumb(info.value.name, info.value.type);
     getSelectOptions();
+    setDatasetBreadcrumb(info.value.name, info.value.type);
   });
 
   let filterForm = reactive({
@@ -281,26 +287,25 @@
     annotationStatus: annotationStatus,
   });
   let timeout;
-  watch(filterForm, () => {
-    /* ... */
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      fetchFilterFun(filterForm);
-    }, 400);
-  });
-
   onMounted(async () => {
     console.log(scrollRef.value);
+    fetchStatusNum();
+    getLockedData();
+    fetchList(filterForm);
+    document.addEventListener('visibilitychange', getLockedData);
     handleScroll(scrollRef, () => {
       if (total.value > list.value.length) {
         pageNo.value++;
         fetchList(filterForm, true);
       }
     });
-    getLockedData();
-    fetchList(filterForm);
-    fetchStatusNum();
-    document.addEventListener('visibilitychange', getLockedData);
+    watch(filterForm, () => {
+      /* ... */
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        fetchFilterFun(filterForm);
+      }, 400);
+    });
   });
 
   const fetchStatusNum = async () => {
@@ -355,11 +360,12 @@
 
   const fetchList = async (filter?, fetchType?) => {
     open();
-    const params = {
+    let params = {
       pageNo: pageNo.value,
       pageSize: 100,
       datasetId: id as string,
       // listType: listTypeEnum.list,
+
       ...filter,
       createStartTime:
         filter.createStartTime && filter.createEndTime
@@ -370,16 +376,38 @@
           ? setEndTime(filter.createEndTime)
           : undefined,
     };
+    if (dataId) {
+      params.ids = [dataId].toString();
+    }
+
     try {
+      let tempList: DatasetItem[];
       if (fetchType) {
         const res: DatasetGetResultModel = await datasetApi(params);
+        tempList = res.list;
         list.value = list.value.concat(res.list);
         total.value = res.total;
       } else {
         const res: DatasetGetResultModel = await datasetApi(params);
+        tempList = res.list;
         list.value = res.list;
         total.value = res.total;
       }
+      const dataIds = tempList.map((e) => e.id);
+      if (dataIds.length)
+        datasetObjectApi({ dataIds: dataIds.toString() }).then((res) => {
+          const map = {};
+          res.reduce((res, item) => {
+            const { objects, dataId } = item;
+            if (!res[dataId]) {
+              res[dataId] = [];
+            }
+            res[dataId] = objects.map((o) => o.classAttributes);
+            return map;
+          }, map);
+          Object.assign(objectMap.value, map);
+        });
+
       fetchStatusNum();
     } catch (error) {
       console.log(error);
@@ -478,7 +506,7 @@
   };
 
   const handleSelectAll = () => {
-    selectedList.value = list.value.map((item) => item.id);
+    selectedList.value = list.value.filter((item) => !item.lockedBy).map((item) => item.id);
   };
   const handleUnselectAll = () => {
     selectedList.value = [];

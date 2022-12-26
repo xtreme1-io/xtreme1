@@ -1,8 +1,19 @@
 import * as THREE from 'three';
 import { Box, Rect, Box2D, AnnotateObject } from 'pc-render';
-import { IUserData, IClassType, Const, IObject, ObjectType } from '../type';
+import {
+    IUserData,
+    IClassType,
+    Const,
+    IObject,
+    ObjectType,
+    IObjectV2,
+    AttrType,
+    IAttr,
+} from '../type';
 import Editor from '../Editor';
 import * as createUtils from './create';
+import { empty } from './common';
+import { copyClassAttrs, isClassAttrHasValue, isClassAttrVisible } from './classType';
 
 let position = new THREE.Vector3();
 let rotation = new THREE.Euler();
@@ -10,6 +21,117 @@ let scale = new THREE.Vector3();
 let center = new THREE.Vector2();
 let size = new THREE.Vector2();
 
+function objToArray(obj: Record<string, any> = {}, classType?: IClassType) {
+    if (!classType) {
+        let data = [] as any[];
+        Object.keys(obj).forEach((key) => {
+            let value = obj[key];
+            if (empty(value)) return;
+            data.push({
+                id: key,
+                pid: null,
+                name: '',
+                value: value,
+                alias: '',
+                isLeaf: true,
+            });
+        });
+        return data;
+    }
+    let copyAttrs = copyClassAttrs(classType, obj);
+    let attrMap = {} as Record<string, IAttr>;
+    copyAttrs.forEach((attr) => {
+        attrMap[attr.id] = attr;
+    });
+    let attrs = copyAttrs.filter((e) => isClassAttrVisible(e, attrMap) && isClassAttrHasValue(e));
+
+    attrs.forEach((e) => (e.leafFlag = true));
+    attrs.forEach((e) => {
+        let parent = e.parent && attrMap[e.parent] ? attrMap[e.parent] : null;
+        if (parent) parent.leafFlag = false;
+    });
+
+    let data = attrs.map((e) => {
+        const isParentMulti = e.parent && attrMap[e.parent]?.type === AttrType.MULTI_SELECTION;
+        return {
+            id: e.id,
+            pid: e.parent ? e.parent : null,
+            name: e.name,
+            value: e.value,
+            type: e.type,
+            pvalue: isParentMulti ? e.parentValue : undefined,
+            alias: e.label,
+            isLeaf: !!e.leafFlag,
+        };
+    });
+    return data;
+}
+export function translateToObjectV2(object: IObject, baseClassType: IClassType) {
+    let objectV2: IObjectV2 = {
+        id: object.id,
+        type: object.objType,
+        version: object.version,
+        createdBy: object.createdBy,
+        createdAt: object.createdAt,
+        trackId: object.trackId,
+        backId: object.backId,
+        frontId: object.id,
+        trackName: object.trackName,
+        classId: object.classId,
+        className: object.classType,
+        // classValues: object.attrs,
+        classValues: objToArray(object.attrs, baseClassType),
+        modelConfidence: object.confidence,
+        modelClass: object.modelClass,
+        meta: {
+            lastTime: object.lastTime,
+            updateTime: object.updateTime,
+            isProjection: object.isProjection,
+            classType: object.classType,
+        },
+        contour: {
+            viewIndex: object.viewIndex,
+            pointN: object.pointN,
+            points: object.points,
+        },
+    };
+
+    if (object.center3D) objectV2.contour.center3D = object.center3D;
+    if (object.size3D) objectV2.contour.size3D = object.size3D;
+    if (object.rotation3D) objectV2.contour.rotation3D = object.rotation3D;
+    return objectV2;
+}
+export function translateToObject(objectV2: IObjectV2): IObject {
+    let object = {
+        ...objectV2,
+        ...objectV2.meta,
+        ...objectV2.contour,
+        confidence: objectV2.modelConfidence,
+        objType: objectV2.type || objectV2['objType'],
+        attrs: arrayToObj(objectV2.classValues || []),
+    } as IObject;
+    return object;
+}
+function arrayToObj(data: any[] = []) {
+    let values = {} as Record<string, any>;
+
+    if (Array.isArray(data)) {
+        data.forEach((e) => {
+            if (Array.isArray(e)) return;
+            values[e.id] = e.value;
+        });
+    }
+
+    return values;
+}
+function bindInfo(target: any, info: IObject) {
+    Object.assign(target, {
+        lastTime: info.lastTime,
+        updateTime: info.updateTime,
+        createdAt: info.createdAt,
+        createdBy: info.createdBy,
+    });
+}
 export function convertObject2Annotate(objects: IObject[], editor: Editor) {
     let annotates = [] as AnnotateObject[];
     let classMap = {} as Record<string, IClassType>;
@@ -19,51 +141,58 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
 
     objects.forEach((obj) => {
         let userData = {} as IUserData;
+
+        let classConfig = editor.getClassType(obj.classId as string);
+        if (!obj.classId && obj.classType) {
+            classConfig = editor.getClassType(obj.classType);
+        }
         userData.id = obj.id;
-        userData.backId = obj.uuid;
+        userData.backId = obj.backId;
         // userData.invisibleFlag = obj.invisibleFlag;
         // userData.refId = obj.refId;
         userData.isProjection = obj.isProjection || false;
         // userData.isStandard = obj.isStandard || false;
         userData.trackId = obj.trackId || '';
         userData.trackName = obj.trackName || '';
-        userData.classType = obj.classType || '';
+
+        userData.classType = classConfig?.name || '';
+        userData.classId = obj.classId || '';
         userData.confidence = obj.confidence || undefined;
         userData.modelClass = obj.modelClass || '';
         userData.modelRun = obj.modelRun || '';
         userData.modelRunLabel = obj.modelRunLabel || '';
         userData.attrs = obj.attrs || {};
         userData.pointN = obj.pointN || 0;
-        // userData.resultStatus = obj.resultStatus;
-        // userData.resultType = obj.resultType;
-
-        let classType = userData.classType;
-        let classConfig = classType && classMap[classType] ? classMap[classType] : null;
-
-        if (obj.objType === ObjectType.TYPE_3D) {
+        if (obj.objType === ObjectType.TYPE_3D_BOX || obj.objType === ObjectType.TYPE_3D) {
             position.set(obj.center3D.x, obj.center3D.y, obj.center3D.z);
             rotation.set(obj.rotation3D.x, obj.rotation3D.y, obj.rotation3D.z);
             scale.set(obj.size3D.x, obj.size3D.y, obj.size3D.z);
 
             let box = createUtils.createAnnotate3D(editor, position, scale, rotation, userData);
-            if (obj.uuid) box.uuid = obj.uuid;
+            if (obj.frontId) box.uuid = obj.frontId;
             if (classConfig) {
                 box.color.setStyle(classConfig.color);
                 // box.editConfig.resize = !userData.isStandard && userData.resultType !== Const.Fixed;
             }
-
+            bindInfo(box, obj);
             annotates.push(box);
-        } else if (obj.objType === ObjectType.TYPE_RECT) {
+        } else if (
+            obj.objType === ObjectType.TYPE_2D_RECT ||
+            obj.objType === ObjectType.TYPE_RECT
+        ) {
             let bbox = getBBox(obj.points as any);
             center.set((bbox.xMax + bbox.xMin) / 2, (bbox.yMax + bbox.yMin) / 2);
             size.set(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
             let rect = createUtils.createAnnotateRect(editor, center, size, userData);
-            if (obj.uuid) rect.uuid = obj.uuid;
 
             rect.viewId = `${editor.state.config.imgViewPrefix}-${obj.viewIndex}`;
             if (classConfig) rect.color = classConfig.color;
+            bindInfo(rect, obj);
             annotates.push(rect);
-        } else if (obj.objType === ObjectType.TYPE_BOX2D) {
+        } else if (
+            obj.objType === ObjectType.TYPE_2D_BOX ||
+            obj.objType === ObjectType.TYPE_BOX2D
+        ) {
             let positions1 = [] as THREE.Vector2[];
             let positions2 = [] as THREE.Vector2[];
             obj.points.forEach((e: any, index: number) => {
@@ -79,10 +208,10 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
                 positions2 as any,
                 userData,
             );
-            if (obj.uuid) box2d.uuid = obj.uuid;
-
+            if (obj.frontId) box2d.uuid = obj.frontId;
             box2d.viewId = `${editor.state.config.imgViewPrefix}-${obj.viewIndex}`;
             if (classConfig) box2d.color = classConfig.color;
+            bindInfo(box2d, obj);
             annotates.push(box2d);
         }
     });
@@ -103,18 +232,32 @@ function getBBox(points: THREE.Vector2[]) {
     });
     return { xMax, xMin, yMax, yMin };
 }
-
+export function updateObjectVersion(obj: any) {
+    let version = obj.version || 1;
+    if (!obj.version) {
+        version = 1;
+    } else if (obj.updateTime > obj.lastTime) {
+        version++;
+    }
+    obj.lastTime = obj.updateTime;
+    obj.version = version;
+}
 export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Editor) {
     let objects = [] as IObject[];
 
     annotates.forEach((obj) => {
         let userData = editor.getObjectUserData(obj) as Required<IUserData>;
         let points = obj instanceof Box ? [] : get2DPoints(obj as any);
-
+        let classConfig = editor.getClassType(userData.classType);
+        updateObjectVersion(obj as any);
+        let bsObj = obj as any;
         let info: IObject = {
             frontId: obj.uuid,
             uuid: userData.backId || undefined,
             objType: getObjType(obj),
+            version: bsObj.version,
+            createdBy: bsObj.createdBy,
+            createdAt: bsObj.createdAt,
             id: userData.id,
             // refId: userData.refId || '',
             // invisibleFlag: !!userData.invisibleFlag,
@@ -124,7 +267,8 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
             trackName: userData.trackName || '',
             // resultStatus: userData.resultStatus || '',
             // resultType: userData.resultType || '',
-            classType: userData.classType || '',
+            classId: classConfig ? classConfig.id : '',
+            classType: classConfig ? classConfig.name : '',
             confidence: userData.confidence || undefined,
             modelRun: userData.modelRun || '',
             modelClass: userData.modelClass || '',
@@ -154,10 +298,10 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
 }
 
 function getObjType(annotate: AnnotateObject): ObjectType {
-    let type: ObjectType = ObjectType.TYPE_3D;
-    if (annotate instanceof Box) type = ObjectType.TYPE_3D;
-    else if (annotate instanceof Rect) type = ObjectType.TYPE_RECT;
-    else if (annotate instanceof Box2D) type = ObjectType.TYPE_BOX2D;
+    let type: ObjectType = ObjectType.TYPE_3D_BOX;
+    if (annotate instanceof Box) type = ObjectType.TYPE_3D_BOX;
+    else if (annotate instanceof Rect) type = ObjectType.TYPE_2D_RECT;
+    else if (annotate instanceof Box2D) type = ObjectType.TYPE_2D_BOX;
     return type;
 }
 

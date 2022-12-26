@@ -57,4 +57,9 @@ public class DataInfoUploadBO {
      */
     private Long uploadRecordId;
 
+    /**
+     * File name
+     */
+    private String fileName;
+
 }

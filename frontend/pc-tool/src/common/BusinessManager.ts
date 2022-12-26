@@ -17,7 +17,7 @@ export default class BusinessManager extends BaseBusinessManager {
     }
 
     async loadFrameConfig(data: IFrame): Promise<IDataResource> {
-        let fileConfig = await api.getDataFile(data.id + '');
+        let { configs: fileConfig, name } = await api.getDataFile(data.id + '');
         if (fileConfig.filter((e) => e.dirName === 'pointCloud').length === 0) {
             throw this.editor.lang('no-point-data');
         }
@@ -36,6 +36,7 @@ export default class BusinessManager extends BaseBusinessManager {
             pointsData: {},
             viewConfig: info.config,
             time: 0,
+            name: name,
         };
         return config;
 
@@ -53,6 +54,7 @@ export default class BusinessManager extends BaseBusinessManager {
 
     async getFrameObject(frame: IFrame | IFrame[]): Promise<{
         objectsMap: Record<string, IObject[]>;
+        classificationMap: Record<string, IObject[]>;
         queryTime: string;
     }> {
         let data = await api.getDataObject(

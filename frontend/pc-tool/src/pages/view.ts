@@ -24,6 +24,7 @@ export function view(): IPageHandler {
         editor.showLoading(true);
         try {
             await loadDataSetInfo();
+            await loadUserInfo();
             await Promise.all([loadDateSetClassification(), loadClasses(), loadDataInfo()]);
 
             await editor.loadFrame(0, false);

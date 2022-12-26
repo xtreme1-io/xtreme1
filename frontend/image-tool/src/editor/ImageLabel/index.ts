@@ -498,6 +498,18 @@ export class ImageLabel extends EventEmitter {
                 objects: data,
             },
         });
+        setTimeout(() => {
+            console.log('fromJSON', this.editor.state.focusId);
+            if (this.editor.state?.focusId) {
+                const focusShape = data.find(
+                    (item: any) => item.intId == this.editor.state?.focusId,
+                );
+                console.log(focusShape);
+                if (focusShape.uuid) {
+                    this.selectShapeById(focusShape.uuid + '');
+                }
+            }
+        }, 300);
     }
     toJSON() {
         let data: any = [];

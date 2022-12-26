@@ -27,6 +27,7 @@ import { BasicIdParams } from '/@/api/model/baseModel';
 enum Api {
   DATASET = '/dataset',
   DATA = '/data',
+  DATASET_CLASS = '/datasetClass',
 }
 
 /**
@@ -46,6 +47,16 @@ export const datasetListApi = (params: ListParams) =>
 export const datasetApi = (params: DatasetParams) =>
   defHttp.get<DatasetGetResultModel>({
     url: `${Api.DATA}/findByPage`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const datasetObjectApi = (params: { dataIds: string }) =>
+  defHttp.get<any>({
+    url: `/annotate/data/listByDataIds`,
     params,
     headers: {
       // @ts-ignore
@@ -221,6 +232,17 @@ export const takeRecordByData = (params: takeRecordParams) =>
     },
   });
 
+export const checkRootByDataId = async (recordId: string, dataId: string) => {
+  const res = await defHttp.get<any>({
+    url: `${Api.DATA}/findDataAnnotationRecord/${recordId}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+  return (res?.datas || []).some((item) => item.dataId === dataId);
+};
+
 export const takeRecordByDataModel = (params: takeRecordParams) =>
   defHttp.post<null>({
     url: `${Api.DATA}/annotateWithModel`,
@@ -295,6 +317,74 @@ export const getStatusNum = (params: { datasetId: number }) =>
 export const hasOntologyApi = (params: { datasetId: number }) =>
   defHttp.get<ResponseUploadRecord[]>({
     url: `${Api.DATASET}/findOntologyIsExistByDatasetId`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getScenario = (params: any) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/findByScenarioPage`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getDataByIds = (params: any) =>
+  defHttp.get<any[]>({
+    url: `${Api.DATA}/listByIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+export const getRelationByIds = (params: any) =>
+  defHttp.get<any[]>({
+    url: `${Api.DATA}/listRelationByIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getDatasetClass = (id) =>
+  defHttp.get<any>({
+    url: `${Api.DATASET_CLASS}/findAll/${id}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const exportScenario = (params) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/scenarioExport`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const createByScenario = (params) =>
+  defHttp.post<any>({
+    url: `${Api.DATASET}/createByScenario`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getClassificationOptions = (params) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/classificationOption/findAll`,
     params,
     headers: {
       // @ts-ignore

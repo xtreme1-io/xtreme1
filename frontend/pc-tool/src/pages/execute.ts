@@ -2,6 +2,7 @@ import { IAction, IPageHandler } from '../type';
 import { useInjectEditor } from '../state';
 import modes from '../config/mode';
 import useTool from '../hook/useTool';
+import { Box } from 'pc-render';
 // import BSError from '../common/BSError';
 
 export function execute(): IPageHandler {
@@ -32,7 +33,7 @@ export function execute(): IPageHandler {
         try {
             // get data list by record id
             await loadRecord();
-            // await loadUserInfo();
+            await loadUserInfo();
             await loadDataSetInfo();
             await Promise.all([
                 // load dataset Classification
@@ -45,6 +46,7 @@ export function execute(): IPageHandler {
 
             // load first data
             await editor.loadFrame(0, false);
+            focusObject();
         } catch (error: any) {
             editor.handleErr(error, editor.lang('load-error'));
         }
@@ -52,6 +54,16 @@ export function execute(): IPageHandler {
         editor.showLoading(false);
         if (bsState.query.type === 'modelRun') {
             editor.dataManager.pollDataModelResult();
+        }
+    }
+
+    function focusObject() {
+        let trackId = editor.bsState.query.focus;
+        if (trackId) {
+            editor.selectByTrackId(trackId);
+            let selection = editor.pc.selection;
+            let object3D = selection.find((item) => item instanceof Box) as Box;
+            object3D && editor.focusObject(object3D);
         }
     }
 

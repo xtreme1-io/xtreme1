@@ -32,10 +32,7 @@ public class Ontology {
      * type
      */
     private DatasetTypeEnum type;
-    /**
-     * deleted: 1 yes,0 no
-     */
-    private Boolean isDeleted;
+
     /**
      * create time
      */

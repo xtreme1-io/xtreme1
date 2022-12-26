@@ -62,6 +62,12 @@ export default function UseFlow() {
         Object.assign(state.query, query || {});
         state.recordId = (query.recordId as string) || '';
         state.datasetId = (query.datasetId as string) || '';
+        if (query.dataId as string) {
+            state.focus = {
+                dataId: (query.dataId as string) || '',
+                focusId: +(query.focus as string),
+            };
+        }
     }
 
     return {

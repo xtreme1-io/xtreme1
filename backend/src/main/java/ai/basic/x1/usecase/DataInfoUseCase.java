@@ -1,22 +1,29 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
+import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
+import ai.basic.x1.adapter.port.rpc.PointCloudConvertRenderHttpCaller;
+import ai.basic.x1.adapter.port.rpc.dto.*;
 import ai.basic.x1.entity.*;
-import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
-import ai.basic.x1.entity.enums.DataStatusEnum;
-import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.entity.enums.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
+import ai.basic.x1.util.Constants;
 import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.date.TemporalAccessorUtil;
+import cn.hutool.core.img.Img;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.lang.UUID;
@@ -24,8 +31,6 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONConfig;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -35,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -83,7 +89,7 @@ public class DataInfoUseCase {
     private MinioProp minioProp;
 
     @Autowired
-    private DataAnnotationUseCase dataAnnotationUseCase;
+    private DataAnnotationClassificationUseCase dataAnnotationClassificationUseCase;
 
     @Autowired
     private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
@@ -115,7 +121,16 @@ public class DataInfoUseCase {
     @Autowired
     private UploadRecordDAO uploadRecordDAO;
 
-    @Value("${file.tempPath:/tmp/x1/}")
+    @Autowired
+    private DatasetSimilarityJobUseCase datasetSimilarityJobUseCase;
+
+    @Autowired
+    private DataAnnotationClassificationDAO dataAnnotationClassificationDAO;
+
+    @Autowired
+    private DatasetClassUseCase datasetClassUseCase;
+
+    @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
     @Value("${export.data.version}")
@@ -139,10 +154,17 @@ public class DataInfoUseCase {
     @Value("${file.prefix.small:small}")
     private String small;
 
+    @Autowired
+    private PointCloudConvertRenderHttpCaller pointCloudConvertRenderHttpCaller;
+
+
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
 
     private static final ExecutorService parseExecutorService = ThreadUtil.newExecutor(5);
 
+    private static final Integer PC_RENDER_IMAGE_WIDTH = 2000;
+    private static final Integer PC_RENDER_IMAGE_HEIGHT = 2000;
+    private static final Integer RETRY_COUNT = 3;
     /**
      * Filter out files whose file suffix is not image, and discard the file when it returns false
      */
@@ -162,10 +184,24 @@ public class DataInfoUseCase {
         if (count > 0) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_OTHERS_ANNOTATING);
         }
+        var dataInfo = dataInfoDAO.getOne(Wrappers.lambdaQuery(DataInfo.class).in(DataInfo::getId, ids).last("limit 1"));
+
         var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
         dataInfoLambdaUpdateWrapper.in(DataInfo::getId, ids);
         dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
         dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
+            var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
+            dataAnnotationObjectLambdaUpdateWrapper.in(DataAnnotationObject::getDataId, ids);
+            dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
+            var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
+            dataAnnotationClassificationLambdaUpdateWrapper.in(DataAnnotationClassification::getDataId, ids);
+            dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
+            if (ObjectUtil.isNotNull(dataInfo)) {
+                datasetSimilarityJobUseCase.submitJob(dataInfo.getDatasetId());
+            }
+        })));
     }
 
     /**
@@ -187,9 +223,14 @@ public class DataInfoUseCase {
         if (ObjectUtil.isNotEmpty(queryBO.getCreateStartTime()) && ObjectUtil.isNotEmpty(queryBO.getCreateEndTime())) {
             lambdaQueryWrapper.ge(DataInfo::getCreatedAt, queryBO.getCreateStartTime()).le(DataInfo::getCreatedAt, queryBO.getCreateEndTime());
         }
+
+        if (CollectionUtil.isNotEmpty(queryBO.getIds())) {
+            lambdaQueryWrapper.in(DataInfo::getId, queryBO.getIds());
+        }
         if (StrUtil.isNotBlank(queryBO.getSortField())) {
             lambdaQueryWrapper.last(" order by " + queryBO.getSortField().toLowerCase() + " " + queryBO.getAscOrDesc());
         }
+
         var dataInfoPage = dataInfoDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()), lambdaQueryWrapper);
         var dataInfoBOPage = DefaultConverter.convert(dataInfoPage, DataInfoBO.class);
         var dataInfoBOList = dataInfoBOPage.getList();
@@ -247,13 +288,46 @@ public class DataInfoUseCase {
     /**
      * Query data object list according to id collection
      *
-     * @param ids id collection
+     * @param ids                id collection
+     * @param isQueryDeletedData Whether to query to delete data
      * @return Collection of data objects
      */
-    public List<DataInfoBO> listByIds(List<Long> ids) {
-        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.listByIds(ids), DataInfoBO.class);
+    public List<DataInfoBO> listByIds(List<Long> ids, Boolean isQueryDeletedData) {
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.getBaseMapper().listByIds(ids, isQueryDeletedData), DataInfoBO.class);
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
             setDataInfoBOListFile(dataInfoBOList);
+        }
+        return dataInfoBOList;
+    }
+
+    /**
+     * Query data object list according to id collection
+     *
+     * @param ids                id collection
+     * @param isQueryDeletedData Whether to query to delete data
+     * @return Collection of data objects
+     */
+    public List<DataInfoBO> listRelationByIds(List<Long> ids, Boolean isQueryDeletedData) {
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.getBaseMapper().listByIds(ids, isQueryDeletedData), DataInfoBO.class);
+        if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+            setDataInfoBOListFile(dataInfoBOList);
+            var dataIds = new ArrayList<Long>();
+            var datasetIds = new HashSet<Long>();
+            dataInfoBOList.forEach(dataInfoBO -> {
+                dataIds.add(dataInfoBO.getId());
+                datasetIds.add(dataInfoBO.getDatasetId());
+            });
+            var userIdMap = dataEditUseCase.getDataEditByDataIds(dataIds);
+            var userIds = userIdMap.values();
+            if (CollectionUtil.isNotEmpty(userIds)) {
+                var userBOS = userUseCase.findByIds(ListUtil.toList(userIds));
+                var userMap = userBOS.stream()
+                        .collect(Collectors.toMap(UserBO::getId, UserBO::getNickname, (k1, k2) -> k1));
+                dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setLockedBy(userMap.get(userIdMap.get(dataInfoBO.getId()))));
+            }
+            var datasetList = datasetDAO.listByIds(datasetIds);
+            var datasetMap = datasetList.stream().collect(Collectors.toMap(Dataset::getId,Dataset::getName));
+            dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setDatasetName(datasetMap.get(dataInfoBO.getDatasetId())));
         }
         return dataInfoBOList;
     }
@@ -303,7 +377,7 @@ public class DataInfoUseCase {
     public PresignedUrlBO generatePresignedUrl(String fileName, Long datasetId, Long userId) {
         var objectName = String.format("%s/%s/%s/%s", userId, datasetId, UUID.randomUUID().toString().replace("-", ""), fileName);
         try {
-            return minioService.generatePresignedUrl(minioProp.getBucketName(), objectName);
+            return minioService.generatePresignedUrl(minioProp.getBucketName(), objectName,Boolean.TRUE);
         } catch (Exception e) {
             log.error("Minio generate presigned url error", e);
             throw new UsecaseException("Minio generate presigned url error!");
@@ -332,19 +406,22 @@ public class DataInfoUseCase {
         var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
         if (!boo) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ERROR.getMessage());
-            throw new UsecaseException(DATASET_DATA_FILE_URL_ERROR);
+            log.error("File url error,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         var dataset = datasetDAO.getById(dataInfoUploadBO.getDatasetId());
         if (ObjectUtil.isNull(dataset)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_NOT_FOUND.getMessage());
-            throw new UsecaseException(DATASET_NOT_FOUND);
+            log.error("Dataset not found,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         dataInfoUploadBO.setType(dataset.getType());
         var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
         var mimeType = FileUtil.getMimeType(fileUrl);
         if (!validateUrlFileSuffix(dataInfoUploadBO, mimeType)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_FORMAT_ERROR.getMessage());
-            throw new UsecaseException(DATASET_DATA_FILE_FORMAT_ERROR);
+            log.error("Incorrect file format,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+            return uploadRecordBO.getSerialNumber();
         }
         dataInfoUploadBO.setUploadRecordId(uploadRecordBO.getId());
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
@@ -388,28 +465,25 @@ public class DataInfoUseCase {
      */
     public Long export(DataInfoQueryBO dataInfoQueryBO) {
         var dataset = datasetDAO.getById(dataInfoQueryBO.getDatasetId());
-        var fileName = String.format("%s-%s.json", dataset.getName(), TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
+        var fileName = String.format("%s-%s.zip", dataset.getName(), TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
         var serialNumber = exportUseCase.createExportRecord(fileName);
         dataInfoQueryBO.setPageNo(PAGE_NO);
         dataInfoQueryBO.setPageSize(PAGE_SIZE);
         dataInfoQueryBO.setDatasetType(dataset.getType());
-        var exportTime = TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.UTC_MS_PATTERN);
-        var dataExportBaseBO = DataExportBaseBO.builder()
-                .datasetName(dataset.getName())
-                .exportTime(exportTime)
-                .version(version)
-                .contents(List.of()).build();
-        var exportStr = JSONUtil.toJsonStr(dataExportBaseBO, JSONConfig.create());
-        var firstCoent = exportStr.substring(0, exportStr.length() - 2);
-        var lastContent = exportStr.substring(exportStr.length() - 2);
-        exportUseCase.asyncExportJson(fileName, serialNumber,
-                firstCoent, lastContent, dataInfoQueryBO,
-                this::findByPage,
-                this::processData);
+        var datasetClassBOList = datasetClassUseCase.findAll(dataInfoQueryBO.getDatasetId());
+        var classMap = new HashMap<Long, String>();
+        if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
+            classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
+        }
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, dataInfoQueryBO,
+                        this::findByPage,
+                        this::processData))));
         return serialNumber;
     }
 
     public void parsePointCloudUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+        var errorBuilder = new StringBuilder();
         var datasetId = dataInfoUploadBO.getDatasetId();
         var userId = dataInfoUploadBO.getUserId();
         var datasetType = dataInfoUploadBO.getType();
@@ -419,7 +493,10 @@ public class DataInfoUseCase {
         log.info("Get point_cloud datasetId:{},size:{}", datasetId, pointCloudList.size());
         if (CollectionUtil.isEmpty(pointCloudList)) {
             uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, POINT_CLOUD_COMPRESSED_FILE_ERROR.getMessage());
-            throw new UsecaseException(POINT_CLOUD_COMPRESSED_FILE_ERROR);
+            log.error("The format of the compression package is incorrect. It must contain point_cloud,userId:{},datasetId:{},fileUrl:{}",
+                    userId, datasetId, dataInfoUploadBO.getFileUrl());
+            uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, POINT_CLOUD_COMPRESSED_FILE_ERROR.getMessage());
+            return;
         }
         var totalDataNum = pointCloudList.stream()
                 .filter(pointCloudFile -> !validDirectoryFormat(pointCloudFile.getParentFile(), datasetType))
@@ -439,6 +516,7 @@ public class DataInfoUseCase {
             var dataNameList = getDataNames(pointCloudFile.getParentFile(), datasetType);
             if (CollectionUtil.isEmpty(dataNameList)) {
                 log.error("The file in {} folder is empty", pointCloudFile.getParentFile().getName());
+                errorBuilder.append("The file in ").append(pointCloudFile.getParentFile().getName()).append(" folder is empty;");
                 return;
             }
             log.info("Get data name,pointCloudParentName:{},dataName:{} ", pointCloudFile.getParentFile().getName(), JSONUtil.toJsonStr(dataNameList));
@@ -461,8 +539,8 @@ public class DataInfoUseCase {
                         if (CollectionUtil.isNotEmpty(dataFiles)) {
                             var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                             var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
-                            handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList);
-                            var fileNodeList = assembleContent(userId, dataFiles, rootPath);
+                            handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
+                            var fileNodeList = assembleContent(dataFiles, rootPath, dataInfoUploadBO);
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
                             var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
@@ -481,14 +559,13 @@ public class DataInfoUseCase {
                     countDownLatch.countDown();
                 }
             }))));
-
             try {
                 countDownLatch.await();
             } catch (InterruptedException e) {
                 log.error("Parse point cloud count down latch error", e);
             }
         });
-        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
+        var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
     }
 
@@ -502,10 +579,12 @@ public class DataInfoUseCase {
                 .createdBy(userId)
                 .isDeleted(false);
         var file = FileUtil.file(dataInfoUploadBO.getSavePath());
+        var imageExtraInfoBO = ImageExtraInfoBO.builder().height(Img.from(file).getImg().getHeight(null))
+                .width(Img.from(file).getImg().getWidth(null)).build();
         var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
         var path = fileUrl.replace(minioProp.getEndpoint(), "").replace(minioProp.getBucketName() + "/", "");
         var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(minioProp.getBucketName())
-                .size(file.length()).path(path).type(FileUtil.getMimeType(path)).build();
+                .size(file.length()).path(path).type(FileUtil.getMimeType(path)).extraInfo(JSONUtil.parseObj(imageExtraInfoBO)).build();
         var fileBOS = fileUseCase.saveBatchFile(userId, Collections.singletonList(fileBO));
         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(FILE).build();
@@ -520,6 +599,7 @@ public class DataInfoUseCase {
         var uploadRecordBO = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+        datasetSimilarityJobUseCase.submitJob(datasetId);
     }
 
     private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -530,6 +610,7 @@ public class DataInfoUseCase {
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
         var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>();
+        var errorBuilder = new StringBuilder();
         var dataInfoBOBuilder = DataInfoBO.builder().datasetId(datasetId).status(DataStatusEnum.VALID)
                 .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
                 .createdAt(OffsetDateTime.now())
@@ -546,13 +627,13 @@ public class DataInfoUseCase {
             list.forEach(fl -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
                 try {
                     var dataInfoBOList = new ArrayList<DataInfoBO>();
-                    var fileBOS = uploadFileList(userId, rootPath, tempPath, fl);
+                    var fileBOS = uploadFileList(rootPath, fl, dataInfoUploadBO);
                     createUploadThumbnail(userId, fileBOS, rootPath);
                     fileBOS.forEach(fileBO -> {
                         var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                         var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
                         var file = FileUtil.file(tempPath + fileBO.getPath().replace(rootPath, ""));
-                        handleDataResult(file.getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList);
+                        handleDataResult(file.getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                                 .fileId(fileBO.getId()).type(FILE).build();
                         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).tempDataId(tempDataId).build();
@@ -577,8 +658,9 @@ public class DataInfoUseCase {
             } catch (InterruptedException e) {
                 log.error("Parse image count down latch error", e);
             }
-            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).status(PARSE_COMPLETED).build();
+            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+            datasetSimilarityJobUseCase.submitJob(datasetId);
         } else {
             var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
@@ -602,19 +684,36 @@ public class DataInfoUseCase {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationRecord.class);
         lambdaQueryWrapper.eq(DataAnnotationRecord::getDatasetId, dataPreAnnotationBO.getDatasetId());
         lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
-        var dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+        log.info("userId:{}", RequestContextHolder.getContext().getUserInfo().getId());
+        log.info("datasetId:{},userId:{}", dataPreAnnotationBO.getDatasetId(), userId);
+        var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) ? dataPreAnnotationBO.getIsFilterData() : false;
         var boo = true;
-        if (ObjectUtil.isNull(dataAnnotationRecord)) {
-            boo = false;
-            dataAnnotationRecord = DataAnnotationRecord.builder()
-                    .datasetId(dataPreAnnotationBO.getDatasetId()).serialNo(serialNo).build();
+        var dataAnnotationRecord = DataAnnotationRecord.builder()
+                .datasetId(dataPreAnnotationBO.getDatasetId()).createdBy(userId).serialNo(serialNo).build();
+        try {
             dataAnnotationRecordDAO.save(dataAnnotationRecord);
+        } catch (DuplicateKeyException duplicateKeyException) {
+            boo = false;
+            dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
+            var dataEditLambdaQueryWrapper = Wrappers.lambdaQuery(DataEdit.class);
+            dataEditLambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, dataAnnotationRecord.getId());
+            var list = dataEditDAO.list(dataEditLambdaQueryWrapper);
+            var dataIds = list.stream().map(DataEdit::getDataId).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(dataIds) && dataIds.contains(dataPreAnnotationBO.getDataIds().get(0)) && isFilterData) {
+                return dataAnnotationRecord.getId();
+            }
         }
         var dataIds = dataPreAnnotationBO.getDataIds();
-        var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO);
-        // Indicates that no new data is locked and there is no old lock record
-        if (insertCount == 0 && !boo) {
-            throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+        var insertCount = batchInsertDataEdit(dataIds, dataAnnotationRecord.getId(), dataPreAnnotationBO, userId);
+        if (isFilterData) {
+            if (insertCount == 0) {
+                throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+            }
+        } else {
+            // Indicates that no new data is locked and there is no old lock record
+            if (insertCount == 0 && boo) {
+                throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_ANNOTATE);
+            }
         }
         return dataAnnotationRecord.getId();
     }
@@ -645,7 +744,7 @@ public class DataInfoUseCase {
      * @param dataIds              Data id collection
      * @param dataAnnotationRecord Data annotation record
      */
-    private Integer batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord) {
+    private Integer batchInsertDataEdit(List<Long> dataIds, Long dataAnnotationRecordId, DataPreAnnotationBO dataAnnotationRecord, Long userId) {
         var insertCount = 0;
         if (CollectionUtil.isEmpty(dataIds)) {
             return insertCount;
@@ -656,7 +755,8 @@ public class DataInfoUseCase {
                 .annotationRecordId(dataAnnotationRecordId)
                 .datasetId(dataAnnotationRecord.getDatasetId())
                 .modelId(dataAnnotationRecord.getModelId())
-                .modelVersion(dataAnnotationRecord.getModelVersion());
+                .modelVersion(dataAnnotationRecord.getModelVersion())
+                .createdBy(userId);
         for (var dataId : dataIds) {
             var dataEdit = dataEditBuilder.dataId(dataId).build();
             dataEditSubList.add(dataEdit);
@@ -677,11 +777,11 @@ public class DataInfoUseCase {
      * @return Serial number
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Long modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
+    public String modelAnnotate(DataPreAnnotationBO dataPreAnnotationBO, Long userId) {
         var modelBO = modelUseCase.findById(dataPreAnnotationBO.getModelId());
         var serialNo = IdUtil.getSnowflakeNextId();
         batchInsertModelDataResult(dataPreAnnotationBO, modelBO, userId, serialNo);
-        return serialNo;
+        return String.valueOf(serialNo);
     }
 
     /**
@@ -715,7 +815,7 @@ public class DataInfoUseCase {
             }
             i++;
         }
-        var dataInfoBOList = listByIds(dataIds);
+        var dataInfoBOList = listByIds(dataIds, false);
         var dataMap = dataInfoBOList.stream().collect(Collectors.toMap(DataInfoBO::getId, dataInfoBO -> dataInfoBO));
         for (var dataId : dataIds) {
             modelMessageBO.setDataId(dataId);
@@ -759,6 +859,7 @@ public class DataInfoUseCase {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
         var path = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        dataInfoUploadBO.setFileName(FileUtil.getPrefix(path));
         var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
         var savePath = baseSavePath + FileUtil.getName(path);
         FileUtil.mkParentDirs(savePath);
@@ -1017,7 +1118,8 @@ public class DataInfoUseCase {
      * @param dataAnnotationObjectBO     Data annotation object
      * @param dataAnnotationObjectBOList Data annotation object list
      */
-    public void handleDataResult(File file, String dataName, DataAnnotationObjectBO dataAnnotationObjectBO, List<DataAnnotationObjectBO> dataAnnotationObjectBOList) {
+    public void handleDataResult(File file, String dataName, DataAnnotationObjectBO dataAnnotationObjectBO,
+                                 List<DataAnnotationObjectBO> dataAnnotationObjectBOList, StringBuilder errorBuilder) {
         var resultFile = FileUtil.loopFiles(file).stream()
                 .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && getFileName(fc).equals(dataName)
                         && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
@@ -1025,10 +1127,19 @@ public class DataInfoUseCase {
             try {
                 var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
                 var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
-                result.getResult().getObjects().forEach(object -> {
+                if (CollectionUtil.isEmpty(result.getObjects())) {
+                    log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
+                    errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
+                    return;
+                }
+                result.getObjects().forEach(object -> {
                     var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
-                    Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(object);
-                    dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
+                    object.setId(IdUtil.randomUUID());
+                    object.setVersion(0);
+                    Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
+                    if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
+                        dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
+                    }
                 });
             } catch (Exception e) {
                 log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
@@ -1039,11 +1150,12 @@ public class DataInfoUseCase {
     /**
      * Assemble the content of a single frame
      *
-     * @param dataFiles Data composition file
-     * @param rootPath  Root path
+     * @param dataFiles        Data composition file
+     * @param rootPath         Root path
+     * @param dataInfoUploadBO Compression package name
      * @return content
      */
-    private List<DataInfoBO.FileNodeBO> assembleContent(Long userId, List<File> dataFiles, String rootPath) {
+    private List<DataInfoBO.FileNodeBO> assembleContent(List<File> dataFiles, String rootPath, DataInfoUploadBO dataInfoUploadBO) {
         var nodeList = new ArrayList<DataInfoBO.FileNodeBO>();
         var files = new ArrayList<File>();
         dataFiles.forEach(dataFile -> {
@@ -1054,8 +1166,13 @@ public class DataInfoUseCase {
                     .files(getDirList(dataFile, rootPath, files)).build();
             nodeList.add(node);
         });
-        var fileBOS = uploadFileList(userId, rootPath, tempPath, files);
-        createUploadThumbnail(userId, fileBOS, rootPath);
+        var fileBOS = uploadFileList(rootPath, files, dataInfoUploadBO);
+        createUploadThumbnail(dataInfoUploadBO.getUserId(), fileBOS, rootPath);
+        fileBOS.forEach(fileBO -> {
+            if (fileBO.getName().toUpperCase().endsWith(PCD_SUFFIX)) {
+                handelPointCloudConvertRender(fileBO);
+            }
+        });
         var fileIdMap = fileBOS.stream().collect(Collectors.toMap(FileBO::getPathHash, FileBO::getId));
         replaceFileId(nodeList, fileIdMap);
         nodeList.sort(Comparator.comparing(DataInfoBO.FileNodeBO::getName));
@@ -1126,11 +1243,12 @@ public class DataInfoUseCase {
     /**
      * Batch upload files
      *
-     * @param rootPath Path prefix
-     * @param files    File list
+     * @param rootPath         Path prefix
+     * @param files            File list
+     * @param dataInfoUploadBO Data upload information
      * @return File information list
      */
-    public List<FileBO> uploadFileList(Long userId, String rootPath, String tempPath, List<File> files) {
+    public List<FileBO> uploadFileList(String rootPath, List<File> files, DataInfoUploadBO dataInfoUploadBO) {
         var bucketName = minioProp.getBucketName();
         try {
             minioService.uploadFileList(bucketName, rootPath, tempPath, files);
@@ -1140,13 +1258,20 @@ public class DataInfoUseCase {
 
         var fileBOS = new ArrayList<FileBO>();
         files.forEach(file -> {
-            var path = rootPath + file.getAbsolutePath().replace(tempPath, "");
+            var zipPath = file.getAbsolutePath().replace(dataInfoUploadBO.getBaseSavePath(), "");
+            var path = String.format("%s%s", rootPath, file.getAbsolutePath().replace(tempPath, ""));
+            zipPath = zipPath.startsWith(dataInfoUploadBO.getFileName()) ? zipPath : String.format("%s/%s", dataInfoUploadBO.getFileName(), zipPath);
             var mimeType = FileUtil.getMimeType(path);
             var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(bucketName)
-                    .size(file.length()).path(path).type(mimeType).build();
+                    .size(file.length()).path(path).zipPath(zipPath).type(mimeType).build();
+            if (Constants.IMAGE_DATA_TYPE.contains(mimeType)) {
+                var imageExtraInfoBO = ImageExtraInfoBO.builder().height(Img.from(file).getImg().getHeight(null))
+                        .width(Img.from(file).getImg().getWidth(null)).build();
+                fileBO.setExtraInfo(JSONUtil.parseObj(imageExtraInfoBO));
+            }
             fileBOS.add(fileBO);
         });
-        return fileUseCase.saveBatchFile(userId, fileBOS);
+        return fileUseCase.saveBatchFile(dataInfoUploadBO.getUserId(), fileBOS);
     }
 
 
@@ -1190,36 +1315,45 @@ public class DataInfoUseCase {
      *
      * @param dataList Data list
      * @param queryBO  Data query parameters
+     * @param classMap Class id and class name associated map
      * @return Data export collection
      */
-    private List<DataExportBO> processData(List<DataInfoBO> dataList, DataInfoQueryBO queryBO) {
+    public List<DataExportBO> processData(List<DataInfoBO> dataList, DataInfoQueryBO queryBO, Map<Long, String> classMap) {
         if (CollectionUtil.isEmpty(dataList)) {
             return List.of();
         }
         var dataInfoExportBOList = new ArrayList<DataExportBO>();
         var dataIds = dataList.stream().map(DataInfoBO::getId).collect(Collectors.toList());
-        var dataAnnotationList = dataAnnotationUseCase.findByDataIds(dataIds);
-        Map<Long, List<DataAnnotationBO>> dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
-                Collectors.groupingBy(DataAnnotationBO::getDataId)) : Map.of();
+        var dataAnnotationList = dataAnnotationClassificationUseCase.findByDataIds(dataIds);
+        Map<Long, List<DataAnnotationClassificationBO>> dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
+                Collectors.groupingBy(DataAnnotationClassificationBO::getDataId)) : Map.of();
         var dataAnnotationObjectList = dataAnnotationObjectUseCase.findByDataIds(dataIds);
         Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
                 dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
                 : Map.of();
         dataList.forEach(dataInfoBO -> {
             var dataId = dataInfoBO.getId();
-            var map = assembleExportDataContent(dataInfoBO.getContent(), queryBO.getDatasetType());
-            var result = new DataExportBO.Result();
+            var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());
             var annotationList = dataAnnotationMap.get(dataId);
             var objectList = dataAnnotationObjectMap.get(dataId);
+            var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
             if (CollectionUtil.isNotEmpty(annotationList)) {
-                result.setClassifications(annotationList.stream().map(dataAnnotationBO ->
-                        JSONUtil.parse(dataAnnotationBO.getClassificationAttributes())).collect(Collectors.toList()));
+                var classificationAttributes = annotationList.stream().map(dataAnnotationBO -> dataAnnotationBO.getClassificationAttributes()).collect(Collectors.toList());
+                dataResultExportBO.setClassificationValues(JSONUtil.parseArray(classificationAttributes));
             }
             if (CollectionUtil.isNotEmpty(objectList)) {
-                result.setObjects(objectList.stream().map(DataAnnotationObjectBO::getClassAttributes).collect(Collectors.toList()));
+                var objects = new ArrayList<DataResultObjectExportBO>();
+                objectList.forEach(o -> {
+                    var dataResultObjectExportBO = DefaultConverter.convert(o.getClassAttributes(), DataResultObjectExportBO.class);
+                    dataResultObjectExportBO.setClassName(classMap.get(o.getClassId()));
+                    objects.add(dataResultObjectExportBO);
+                });
+                dataResultExportBO.setObjects(objects);
             }
-            map.put(RESULT, result);
-            var dataInfoExportBO = DataExportBO.builder().name(dataInfoBO.getName()).data(JSONUtil.parseObj(map)).build();
+            var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
+            if (CollectionUtil.isNotEmpty(annotationList) || CollectionUtil.isNotEmpty(objectList)) {
+                dataInfoExportBO.setResult(dataResultExportBO);
+            }
             dataInfoExportBOList.add(dataInfoExportBO);
         });
         return dataInfoExportBOList;
@@ -1228,45 +1362,63 @@ public class DataInfoUseCase {
     /**
      * Assemble the export data content
      *
-     * @param content File node list
-     * @return content map
+     * @return data information
      */
-    private Map<String, Object> assembleExportDataContent(List<DataInfoBO.FileNodeBO> content, DatasetTypeEnum datasetType) {
-        var map = new TreeMap<String, Object>(Comparator.naturalOrder());
-        for (DataInfoBO.FileNodeBO f : content) {
-            if (f.getName().equals(POINT_CLOUD)) {
-                map.put(f.getName(), handlePointCloudContent(f.getFiles()));
+    private DataExportBaseBO assembleExportDataContent(DataInfoBO dataInfoBO, DatasetTypeEnum datasetType) {
+        DataExportBaseBO dataExportBaseBO = new DataExportBaseBO();
+        dataExportBaseBO.setId(dataInfoBO.getId());
+        dataExportBaseBO.setName(dataInfoBO.getName());
+        dataExportBaseBO.setType(datasetType.name());
+        dataExportBaseBO.setVersion(version);
+        String pointCloudUrl = null;
+        String pointCloudZipPath = null;
+        String cameraConfigUrl = null;
+        String cameraConfigZipPath = null;
+        var images = new ArrayList<LidarFusionDataExportBO.LidarFusionImageBO>();
+        for (DataInfoBO.FileNodeBO f : dataInfoBO.getContent()) {
+            var relationFileBO = FILE.equals(f.getType()) ? f.getFile() : CollectionUtil.getFirst(f.getFiles()).getFile();
+            if (f.getName().equals(StrUtil.toCamelCase(POINT_CLOUD))) {
+                pointCloudUrl = relationFileBO.getUrl();
+                pointCloudZipPath = relationFileBO.getZipPath();
+            } else if (f.getName().equals(StrUtil.toCamelCase(CAMERA_CONFIG))) {
+                cameraConfigUrl = relationFileBO.getUrl();
+                cameraConfigZipPath = relationFileBO.getZipPath();
             } else {
-                var type = f.getType();
-                var url = FILE.equals(type) ? f.getFile().getUrl() : CollectionUtil.getFirst(f.getFiles()).getFile().getUrl();
-                if (IMAGE.equals(datasetType)) {
-                    map.put(IMAGE.name().toLowerCase(), url);
-                } else {
-                    map.put(f.getName(), url);
-                }
+                var url = relationFileBO.getUrl();
+                var zipPath = relationFileBO.getZipPath();
+                var lidarFusionImageBO = DefaultConverter.convert(relationFileBO.getExtraInfo(), LidarFusionDataExportBO.LidarFusionImageBO.class);
+                lidarFusionImageBO = ObjectUtil.isNull(lidarFusionImageBO) ? new LidarFusionDataExportBO.LidarFusionImageBO() : lidarFusionImageBO;
+                lidarFusionImageBO.setUrl(url);
+                lidarFusionImageBO.setZipPath(zipPath);
+                images.add(lidarFusionImageBO);
             }
         }
-        return map;
-    }
-
-    /**
-     * Assemble the content below point_content
-     *
-     * @param list File node list
-     * @return File information collection
-     */
-    private List<Object> handlePointCloudContent(List<DataInfoBO.FileNodeBO> list) {
-        var pointCloudList = new ArrayList<>();
-        list.forEach(l -> {
-            if (l.getType().equals(FILE)) {
-                pointCloudList.add(l.getFile().getUrl());
-            } else {
-                var json = new JSONObject();
-                json.set(l.getName(), handlePointCloudContent(l.getFiles()));
-                pointCloudList.add(json);
-            }
-        });
-        return pointCloudList;
+        switch (datasetType) {
+            case LIDAR_FUSION:
+                dataExportBaseBO = DefaultConverter.convert(dataExportBaseBO, LidarFusionDataExportBO.class);
+                ((LidarFusionDataExportBO) dataExportBaseBO).setPointCloudUrl(pointCloudUrl);
+                ((LidarFusionDataExportBO) dataExportBaseBO).setPointCloudZipPath(pointCloudZipPath);
+                ((LidarFusionDataExportBO) dataExportBaseBO).setCameraConfigUrl(cameraConfigUrl);
+                ((LidarFusionDataExportBO) dataExportBaseBO).setCameraConfigZipPath(cameraConfigZipPath);
+                ((LidarFusionDataExportBO) dataExportBaseBO).setCameraImages(images);
+                break;
+            case LIDAR_BASIC:
+                dataExportBaseBO = DefaultConverter.convert(dataExportBaseBO, LidarBasicDataExportBO.class);
+                ((LidarBasicDataExportBO) dataExportBaseBO).setPointCloudUrl(pointCloudUrl);
+                ((LidarBasicDataExportBO) dataExportBaseBO).setPointCloudZipPath(pointCloudZipPath);
+                break;
+            case IMAGE:
+                dataExportBaseBO = DefaultConverter.convert(dataExportBaseBO, ImageDataExportBO.class);
+                var image = CollectionUtil.getFirst(images);
+                ((ImageDataExportBO) dataExportBaseBO).setImageUrl(image.getUrl());
+                ((ImageDataExportBO) dataExportBaseBO).setImageZipPath(image.getZipPath());
+                ((ImageDataExportBO) dataExportBaseBO).setWidth(image.getWidth());
+                ((ImageDataExportBO) dataExportBaseBO).setHeight(image.getHeight());
+                break;
+            default:
+                break;
+        }
+        return dataExportBaseBO;
     }
 
     /**
@@ -1321,4 +1473,252 @@ public class DataInfoUseCase {
         }
     }
 
+
+    public void handelPointCloudConvertRender(FileBO pcdFileBO) {
+        String filePath = pcdFileBO.getPath();
+        String basePath = "";
+        String fileName;
+        String binaryFileName = "";
+        String imageFileName = "";
+        if (filePath.contains(Constants.SLANTING_BAR)) {
+            basePath = filePath.substring(0, filePath.lastIndexOf(Constants.SLANTING_BAR) + 1);
+            fileName = filePath.substring(filePath.lastIndexOf(Constants.SLANTING_BAR) + 1);
+            binaryFileName = "binary-" + fileName;
+            imageFileName = "render-" + UUID.randomUUID().toString() + ".png";
+        }
+
+        String binaryPath = String.format("%s%s", basePath, binaryFileName);
+        String imagePath = String.format("%s%s", basePath, imageFileName);
+        PresignedUrlBO binaryPreSignUrlBO;
+        PresignedUrlBO imagePreSignUrlBO;
+        try {
+            binaryPreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), binaryPath, Boolean.FALSE);
+            imagePreSignUrlBO = minioService.generatePresignedUrl(pcdFileBO.getBucketName(), imagePath, Boolean.FALSE);
+
+        } catch (Throwable throwable) {
+            log.error("generate preSignUrl error!", throwable);
+            return;
+        }
+        List<PointCloudCRRespDTO> pointCloudCRRespDTOS = callPointCloudConvertRender(pcdFileBO, binaryPreSignUrlBO, imagePreSignUrlBO);
+        if (CollUtil.isNotEmpty(pointCloudCRRespDTOS)) {
+            for (PointCloudCRRespDTO pointCloudCRRespDTO : pointCloudCRRespDTOS) {
+                if (pointCloudCRRespDTO.getCode() == 0) {
+                    FileBO binaryPcdFile = FileBO.builder().name(binaryFileName)
+                            .originalName(binaryFileName)
+                            .path(binaryPath)
+                            .type(pcdFileBO.getType())
+                            .size(pointCloudCRRespDTO.getBinaryPcdSize())
+                            .bucketName(pcdFileBO.getBucketName())
+                            .createdAt(OffsetDateTime.now())
+                            .createdBy(pcdFileBO.getCreatedBy())
+                            .relation(RelationEnum.BINARY)
+                            .relationId(pcdFileBO.getId())
+                            .pathHash(ByteUtil.bytesToLong(SecureUtil.md5().digest(binaryPath))).build();
+                    FileBO imageFile = FileBO.builder().name(imageFileName)
+                            .originalName(imageFileName)
+                            .path(imagePath)
+                            .type(FileUtil.getMimeType(imageFileName))
+                            .size(pointCloudCRRespDTO.getImageSize())
+                            .bucketName(pcdFileBO.getBucketName())
+                            .createdAt(OffsetDateTime.now())
+                            .createdBy(pcdFileBO.getCreatedBy())
+                            .relation(RelationEnum.POINT_CLOUD_RENDER_IMAGE)
+                            .relationId(pcdFileBO.getId())
+                            .pathHash(ByteUtil.bytesToLong(SecureUtil.md5().digest(imagePath)))
+                            .extraInfo(JSONUtil.parseObj(pointCloudCRRespDTO.getPointCloudRange())
+                                    .set("width", PC_RENDER_IMAGE_WIDTH)
+                                    .set("height", PC_RENDER_IMAGE_HEIGHT))
+                            .build();
+                    fileUseCase.saveBatchFile(pcdFileBO.getCreatedBy(), List.of(binaryPcdFile, imageFile));
+                }
+            }
+        }
+    }
+
+    /**
+     * Export data
+     *
+     * @param scenarioQueryBO Query parameters
+     * @return Serial number
+     */
+    public Long scenarioExport(ScenarioQueryBO scenarioQueryBO) {
+        var fileName = String.format("%s-%s.zip", "export", TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
+        var serialNumber = exportUseCase.createExportRecord(fileName);
+        scenarioQueryBO.setPageNo(PAGE_NO);
+        scenarioQueryBO.setPageSize(PAGE_SIZE_100);
+        var datasetClassBOList = datasetClassUseCase.findByIds(scenarioQueryBO.getClassIds());
+        var classMap = new HashMap<Long, String>();
+        if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
+            classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
+        }
+        executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, scenarioQueryBO,
+                        dataAnnotationObjectUseCase::findDataIdByScenarioPage,
+                        this::processScenarioData))));
+        return serialNumber;
+    }
+
+
+    public List<DataExportBO> processScenarioData(List<DataAnnotationObjectBO> dataAnnotationObjectBOList, ScenarioQueryBO queryBO, Map<Long, String> classMap) {
+        if (CollectionUtil.isEmpty(dataAnnotationObjectBOList)) {
+            return List.of();
+        }
+        var dataInfoExportBOList = new ArrayList<DataExportBO>();
+        var dataIds = dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList());
+        queryBO.setDataIds(dataIds);
+        var dataAnnotationObjectList = dataAnnotationObjectUseCase.listByScenario(queryBO);
+        Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
+                dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
+                : Map.of();
+        var dataList = listByIds(dataIds, false);
+        dataList.forEach(dataInfoBO -> {
+            var dataId = dataInfoBO.getId();
+            var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());
+            var objectList = dataAnnotationObjectMap.get(dataId);
+            var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
+            if (CollectionUtil.isNotEmpty(objectList)) {
+                var objects = new ArrayList<DataResultObjectExportBO>();
+                objectList.forEach(o -> {
+                    var dataResultObjectExportBO = DefaultConverter.convert(o.getClassAttributes(), DataResultObjectExportBO.class);
+                    dataResultObjectExportBO.setClassName(classMap.get(o.getClassId()));
+                    objects.add(dataResultObjectExportBO);
+                });
+                dataResultExportBO.setObjects(objects);
+            }
+            var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
+            if (CollectionUtil.isNotEmpty(objectList)) {
+                dataInfoExportBO.setResult(dataResultExportBO);
+            }
+            dataInfoExportBOList.add(dataInfoExportBO);
+        });
+        return dataInfoExportBOList;
+    }
+
+    private List<PointCloudCRRespDTO> callPointCloudConvertRender(FileBO relationFileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {
+        PointCloudCRReqDTO pointCloudCRReqDTO = PointCloudCRReqDTO.builder()
+                .data(List.of(buildPointCloutFileInfo(relationFileBO, binaryPreSignUrlBO, imagePreSignUrlBO)))
+                .type(1)
+                .renderParam(buildRenderParam())
+                .convertParam(ConvertParam.builder().extraFields(Arrays.asList("rgb")).build()).build();
+        ApiResult<List<PointCloudCRRespDTO>> apiResult = null;
+
+        StopWatch stopWatch = new StopWatch();
+        int count = 0;
+        while (count <= RETRY_COUNT && ObjectUtil.isNull(apiResult)) {
+            try {
+                stopWatch.start();
+                apiResult = pointCloudConvertRenderHttpCaller.callConvertRender(pointCloudCRReqDTO);
+                stopWatch.stop();
+                log.info("call pointCloudConvertRender took:{},req:{},resp:{}", stopWatch.getLastTaskTimeMillis(), JSONUtil.toJsonStr(pointCloudCRReqDTO), JSONUtil.toJsonStr(apiResult));
+                break;
+            } catch (Throwable throwable) {
+                if (stopWatch.isRunning()) {
+                    stopWatch.stop();
+                }
+                log.error("call pointCloudConvertRender service error! req:{}, resp:{}", JSONUtil.toJsonStr(pointCloudCRReqDTO), JSONUtil.toJsonStr(apiResult), throwable);
+            }
+            count++;
+        }
+        if (ObjectUtil.isNull(apiResult) || apiResult.getCode() != UsecaseCode.OK) {
+            return null;
+        }
+        return apiResult.getData();
+    }
+
+    private PointCloudFileInfo buildPointCloutFileInfo(FileBO fileBO, PresignedUrlBO binaryPreSignUrlBO, PresignedUrlBO imagePreSignUrlBO) {
+        PointCloudFileInfo pointCloudFileInfo = PointCloudFileInfo.builder().pointCloudFile(fileBO.getInternalUrl())
+                .uploadBinaryPcdPath(binaryPreSignUrlBO.getPresignedUrl())
+                .uploadImagePath(imagePreSignUrlBO.getPresignedUrl())
+                .build();
+        return pointCloudFileInfo;
+
+    }
+
+    private RenderParam buildRenderParam() {
+        return RenderParam.builder().colors(List.of(6313414l, 3640543l, 1886145l, 3402883l, 8385883l))
+                .zRange(null)
+                .width(PC_RENDER_IMAGE_WIDTH)
+                .height(PC_RENDER_IMAGE_HEIGHT)
+                .numStd(3).build();
+    }
+
+    private Boolean verifyDataResult(DataAnnotationResultObjectBO dataAnnotationResultObjectBO, Long dataId, String dataName) {
+        var boo = true;
+        var types = List.of(ObjectTypeEnum.RECTANGLE.getValue(),
+                ObjectTypeEnum.TWO_D_BOX.getValue(), ObjectTypeEnum.THREE_D_BOX.getValue(), ObjectTypeEnum.THREE_D_SEGMENT_POINTS);
+        if (!types.contains(dataAnnotationResultObjectBO.getType())) {
+            log.error("Object type error，dataId:{},dataName:{}", dataId, dataName);
+            boo = false;
+        } else if (ObjectUtil.isNull(dataAnnotationResultObjectBO.getContour())) {
+            log.error("Contour miss，dataId:{},dataName:{}", dataId, dataName);
+            boo = false;
+        }
+        return boo;
+    }
+
+    public DataResultBO getDataAndResult(Long datasetId, List<Long> dataIds) {
+        var dataset = datasetDAO.getById(datasetId);
+        if (ObjectUtil.isNull(dataset)) {
+            throw new UsecaseException(DATASET_NOT_FOUND);
+        }
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        lambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        if (CollectionUtil.isNotEmpty(dataIds)) {
+            lambdaQueryWrapper.in(DataInfo::getId, dataIds);
+        }
+        var dataInfoBOList = DefaultConverter.convert(dataInfoDAO.list(lambdaQueryWrapper), DataInfoBO.class);
+        if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+            setDataInfoBOListFile(dataInfoBOList);
+        }
+        var dataInfoQueryBO = DataInfoQueryBO.builder().datasetType(dataset.getType()).build();
+        var datasetClassBOList = datasetClassUseCase.findAll(dataInfoQueryBO.getDatasetId());
+        var classMap = new HashMap<Long, String>();
+        if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
+            classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
+        }
+        var dataExportBOList = processData(dataInfoBOList, dataInfoQueryBO, classMap);
+        var exportTime = TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN);
+        var data = new ArrayList<DataExportBaseBO>();
+        var results = new ArrayList<DataResultExportBO>();
+        dataExportBOList.forEach(dataExportBO -> {
+            if (ObjectUtil.isNotNull(dataExportBO.getData())) {
+                data.add(dataExportBO.getData());
+            }
+            if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
+                results.add(dataExportBO.getResult());
+            }
+        });
+        return DataResultBO.builder().version(version).datasetId(dataset.getId())
+                .datasetName(dataset.getName()).exportTime(exportTime).data(data).results(results).build();
+    }
+
+    public void setDatasetSixData(List<DatasetBO> datasetBOList) {
+        if (CollectionUtil.isEmpty(datasetBOList)) {
+            return;
+        }
+        var datasetIds = new ArrayList<Long>();
+        var datasetTypeMap = new HashMap<Long, DatasetTypeEnum>();
+        datasetBOList.forEach(datasetBO -> {
+            datasetIds.add(datasetBO.getId());
+            datasetTypeMap.put(datasetBO.getId(), datasetBO.getType());
+        });
+        var datasetSixDataList = dataInfoDAO.getBaseMapper().selectSixDataIdByDatasetIds(datasetIds);
+        var dataIds = new HashSet<Long>();
+        datasetSixDataList.forEach(datasetSixData -> {
+            var datasetType = datasetTypeMap.get(datasetSixData.getDatasetId());
+            var ids = StrUtil.splitToLong(datasetSixData.getDataIds(), ",");
+            if (null != ids && ids.length > 0) {
+                if (IMAGE.equals(datasetType)) {
+                    CollectionUtil.addAll(dataIds, ids);
+                } else {
+                    dataIds.add(ids[0]);
+                }
+            }
+        });
+        if (CollectionUtil.isNotEmpty(dataIds)) {
+            var dataInfoBOList = listByIds(new ArrayList<>(dataIds), false);
+            var dataMap = dataInfoBOList.stream().collect(Collectors.groupingBy(DataInfoBO::getDatasetId));
+            datasetBOList.forEach(datasetBO -> datasetBO.setDatas(dataMap.get(datasetBO.getId())));
+        }
+    }
 }

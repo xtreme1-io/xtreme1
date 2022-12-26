@@ -1,5 +1,6 @@
 export default {
   ontology: '本体',
+  scenario: 'Scenario Search',
   // 空列表
   emptyOntology: 'Empty Ontology',
   emptyClass: '空类别',

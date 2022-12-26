@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 /**
  * @author chenchao
  * @date 2022/4/6
@@ -25,10 +27,10 @@ public class OntologyBO {
      */
     private DatasetTypeEnum type;
 
-    private Boolean isDeleted;
-
     /**
      * number of class in one ontology
      */
     private Integer classNum;
+
+    private OffsetDateTime createdAt;
 }

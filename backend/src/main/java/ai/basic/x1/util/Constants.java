@@ -80,6 +80,8 @@ public interface Constants {
 
     String MINIO = "minio";
 
+    String DATA = "data";
+
 
     String QUESTION_MARK = "?";
 
@@ -91,6 +93,7 @@ public interface Constants {
 
     Integer PAGE_SIZE = 1000;
 
+    Integer PAGE_SIZE_100 = 100;
 
     Set<String> COMPRESSED_DATA_TYPE = new HashSet<>() {{
         add("application/zip");
@@ -113,7 +116,10 @@ public interface Constants {
     }};
 
 
-    String MODEL_RUN_STREAM_KEY = "ai:basic:x1:model_run";
+    String MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:modelRun";
     String MODEL_RUN_CONSUMER_GROUP = "default-group";
-    String MODEL_RUN_CONSUMER_NAME = "consumer";
+    String MODEL_RUN_CONSUMER_NAME = "model-consumer";
+
+    String SIMILARITY_RESULT_PATH_FORMAT="datasetSimilarity/result/%s";
+    String SIMILARITY_SUBMIT_FILE_PATH_FORMAT="datasetSimilarity/commit/%s";
 }

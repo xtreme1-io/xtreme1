@@ -29,7 +29,8 @@ export default class PointCloud extends THREE.EventDispatcher {
     timeStamp: number = 0;
     //
     material: PointsMaterial = new PointsMaterial();
-
+    selectColor: THREE.Color = new THREE.Color(1, 0, 0);
+    highlightColor: THREE.Color = new THREE.Color(1, 0, 0);
     private renderTimer: number = 0;
 
     constructor() {

@@ -13,8 +13,6 @@
         <result column="created_by" property="createdBy"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="updated_by" property="updatedBy"/>
-        <association property="datas" column="id" select="queryData">
-        </association>
     </resultMap>
 
     <!-- 通用查询映射结果 -->
@@ -46,5 +44,11 @@
 
     <select id="queryData" resultMap="DataInfoResultMap">
         select * from `data` where dataset_id =#{id} AND is_deleted=0 ORDER BY name ASC limit 6;
+    </select>
+
+    <select id="countObject" resultType="java.lang.Long">
+        select count(*) from `data` d inner join data_annotation_object dao
+            on d.id = dao.data_id
+        where d.dataset_id = #{datasetId} and d.is_deleted = FALSE
     </select>
 </mapper>

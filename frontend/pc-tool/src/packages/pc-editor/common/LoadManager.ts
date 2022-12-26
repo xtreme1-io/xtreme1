@@ -24,7 +24,7 @@ export default class LoadManager {
 
         showLoading && this.editor.showLoading(true);
         try {
-            await Promise.all([this.loadObject(), this.loadResource(), this.loadClassification()]);
+            await Promise.all([this.loadObjectAndClassification(), this.loadResource()]);
             // if (!this.editor.playManager.playing) this.editor.dataResource.load();
         } catch (error: any) {
             this.editor.handleErr(error);
@@ -63,8 +63,8 @@ export default class LoadManager {
         }
     }
 
-    async loadObject() {
-        let { frameIndex, frames } = this.editor.state;
+    async loadObjectAndClassification() {
+        let { frameIndex, frames, classifications } = this.editor.state;
         let frame = frames[frameIndex];
 
         let objects = this.editor.dataManager.getFrameObject(frame.id);
@@ -74,6 +74,11 @@ export default class LoadManager {
                 let data = await this.editor.businessManager.getFrameObject(frame);
                 frame.queryTime = data.queryTime;
                 // this.setTrackData(data.objectsMap);
+
+                frame.classifications = utils.copyClassification(
+                    classifications,
+                    data.classificationMap[frame.id] || {},
+                );
 
                 let objects = data.objectsMap[frame.id] || [];
                 let annotates = utils.convertObject2Annotate(objects, this.editor);

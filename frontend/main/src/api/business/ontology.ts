@@ -7,7 +7,9 @@ import {
   DeleteOntologyParams,
   FindOntologyByTeamParams,
   ResponseOntologyParams,
+  ValidateOntologyNameParams,
 } from './model/ontologyModel';
+import { datasetTypeEnum } from './model/datasetModel';
 
 enum Api {
   ONTOLOGY = '/ontology',
@@ -26,10 +28,21 @@ export const getOntologyApi = (params: GetOntologyParams) =>
     },
   });
 
-/** create/save ontology */
-export const createEditOntologyApi = (params: SaveOntologyParams | UpdateOntologyParams) =>
+/** create ontology */
+export const createOntologyApi = (params: SaveOntologyParams) =>
   defHttp.post<null>({
-    url: `${Api.ONTOLOGY}/save`,
+    url: `${Api.ONTOLOGY}/create`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** update ontology */
+export const updateOntologyApi = (params: UpdateOntologyParams) =>
+  defHttp.post<null>({
+    url: `${Api.ONTOLOGY}/update/${params.id}`,
     params,
     headers: {
       // @ts-ignore
@@ -47,12 +60,9 @@ export const deleteOntologyApi = (params: DeleteOntologyParams) =>
     },
   });
 
-/**
- * get ontology by team
- */
-export const getOntologyByTeamApi = (params: FindOntologyByTeamParams) =>
+export const getAllOntologyApi = (params: { type?: datasetTypeEnum }) =>
   defHttp.get<OntologyListItem[]>({
-    url: `${Api.ONTOLOGY}/find`,
+    url: `${Api.ONTOLOGY}/findAll`,
     params,
     headers: {
       // @ts-ignore
@@ -73,9 +83,56 @@ export const getOntologyInfoApi = (params: { id: string }) =>
   });
 
 /** validate ontology name */
-export const validateNameApi = (params: { name: string }) =>
-  defHttp.post<boolean>({
-    url: `${Api.ONTOLOGY}/validateName/${params.name}`,
+export const validateOntologyNameApi = (params: ValidateOntologyNameParams) =>
+  defHttp.get<boolean>({
+    url: `${Api.ONTOLOGY}/validateName`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/**
+ * get ontology by team
+ */
+export const getOntologyByTeamApi = (params: FindOntologyByTeamParams) =>
+  defHttp.get<OntologyListItem[]>({
+    url: `${Api.ONTOLOGY}/find`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const exportClass = (params: any) =>
+  // axios.get(`/api${Api.ONTOLOGY}/exportAsJson`, { params });
+  defHttp.get<null>({
+    url: `${Api.ONTOLOGY}/exportAsJson`,
+    params,
+    headers: {
+      'content-type': 'octet-stream;charset=UTF-8',
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const importClass = (params: any) =>
+  defHttp.uploadFile<any>(
+    {
+      url: `/api${Api.ONTOLOGY}/importByJson`,
+      headers: {
+        // @ts-ignore
+        ignoreCancelToken: true,
+      },
+    },
+    params,
+  );
+
+export const mergeClass = (params: any) =>
+  defHttp.post<any>({
+    url: `${Api.ONTOLOGY}/saveClassAndClassificationBatch`,
     params,
     headers: {
       // @ts-ignore

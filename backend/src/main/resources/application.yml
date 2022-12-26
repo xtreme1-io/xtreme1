@@ -6,6 +6,8 @@ server:
   shutdown: graceful
 
 spring:
+  main:
+    allow-circular-references: true
   application:
     name: xtreme1
   datasource:
@@ -22,7 +24,7 @@ spring:
     password:
 
 jwt:
-  secret: v662+!pb&7#N4m0Vdc9@9tJ8@^3p&DVQ
+  secret: G6j7j#$&YOy9&p(s2b@v53^)38E!cG49
   issuer: BasicAI
   expireHours: 120
 
@@ -46,9 +48,9 @@ minio:
 
 export:
   data:
-    version: Basic AI Community V1.0
+    version: Basic AI V1.0
 file:
-  tempPath: /tmp/x1/
+  tempPath: /tmp/xtreme1/
   size:
     large: 400
     medium: 200
@@ -88,6 +90,13 @@ model:
       url: http://image-object-detection:5000/basic_predict
     preModel:
       url: http://point-cloud-object-detection:5000/pointcloud/3dbox
+pointcloud:
+  convertRender:
+    url: http://pcd-tools:5000/pointcloud/convert_render
+
+dataset:
+  similarity:
+    url: http://image-vect-visualization:5000/api/v1/calcSimilarity
 
 management:
   endpoint:

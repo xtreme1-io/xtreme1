@@ -187,6 +187,7 @@ import { claimApi } from '/@/api/business/claim'; import { StageTypeEnum } from
           width: 100%;
           height: 100%;
           padding: 4px 4px;
+
         }
       }
 

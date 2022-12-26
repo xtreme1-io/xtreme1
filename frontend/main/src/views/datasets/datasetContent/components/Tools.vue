@@ -39,6 +39,10 @@
         <VirtualTab :list="tabList" />
       </div>
       <div class="view-actions">
+        <Button class="mr-2" type="default" @click="handleGoSearch" :size="ButtonSize.LG">
+          <Icon icon="ic:twotone-manage-search" size="20" />
+          Scenario Search
+        </Button>
         <Button type="primary" @click="handleOpenUpload" :size="ButtonSize.LG" noBorder>
           {{ t('business.datasetContent.upload') }}
         </Button>
@@ -93,8 +97,12 @@
             </Menu>
           </template>
         </Dropdown>
+        <div class="check">
+          <Checkbox class="small" :checked="showAnnotation" @change="onShowAnnotation" />
+          <span class="inline-block ml-2">Preview annotation objects</span>
+        </div>
       </div>
-      <div class="view-actions" v-if="false">
+      <!-- <div class="view-actions" v-if="false">
         <div class="num-wrapper">
           <div class="num-input">1000</div>
           <div class="num-count">/10000</div>
@@ -104,12 +112,19 @@
             <Slider :value="sliderValue" @change="setSlider" :min="1" :max="8" />
           </div>
         </div>
-      </div>
-      <div
-        class="bg-white h-28px w-36px text-center leading-7 rounded cursor-pointer"
-        @click="reloadList"
-      >
-        <SvgIcon name="reload" />
+      </div> -->
+      <div class="flex items-center">
+        <div class="view-tag mr-2" v-if="dataId">
+          <Icon icon="mdi:filter-minus" />
+          Filtering by selected data
+          <Icon icon="material-symbols:close" class="cursor-pointer" @click="handleDeleteDataId" />
+        </div>
+        <div
+          class="bg-white h-28px w-36px text-center leading-7 rounded cursor-pointer"
+          @click="reloadList"
+        >
+          <SvgIcon name="reload" />
+        </div>
       </div>
     </div>
     <!-- Export -->
@@ -184,7 +199,7 @@
   import { useRoute } from 'vue-router';
   import { RouteChildEnum } from '/@/enums/routeEnum';
 
-  import { Slider, Dropdown, Menu, Divider, Progress, Tooltip } from 'ant-design-vue';
+  import { Dropdown, Menu, Divider, Progress, Tooltip, Checkbox } from 'ant-design-vue';
   import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon/index';
   import { Button, ButtonSize } from '/@@/Button';
@@ -208,13 +223,17 @@
   import { ModelListItem } from '/@/api/business/model/modelsModel';
   import { downloadByCorsUrl } from '/@/utils/file/download';
 
+  import Scenario from '/@/assets/svg/tags/scenario.svg';
+  import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
   import Data from '/@/assets/svg/tags/data.svg';
   import DataActive from '/@/assets/svg/tags/dataActive.svg';
-  import Ontology from '/@/assets/svg/tags/class.svg';
-  import OntologyActive from '/@/assets/svg/tags/classActive.svg';
+  import Ontology from '/@/assets/svg/tags/ontology.svg';
+  import OntologyActive from '/@/assets/svg/tags/ontologyActive.svg';
   import DownloadIcon from '/@/assets/svg/dataset/download.svg';
   import { Authority } from '/@/components/Authority';
+  import { useGo } from '/@/hooks/web/usePage';
 
+  const go = useGo();
   const makeFrameDisable = ref<boolean>(false);
   const annotateAndModelRun = ref<boolean>(false);
   const flagReactive = reactive({
@@ -222,10 +241,17 @@
     annotateAndModelRun,
   });
   const { query } = useRoute();
-  const { id } = query;
+  const { id, dataId } = query;
   const { t } = useI18n();
 
   const tabList = [
+    {
+      name: t('business.dataset.overview'),
+      url: RouteChildEnum.DATASETS_OVERVIEW,
+      params: { id: id },
+      icon: Scenario,
+      activeIcon: ScenarioActive,
+    },
     {
       name: t('business.datasetContent.data'),
       url: RouteChildEnum.DATASETS_DATA,
@@ -251,6 +277,7 @@
     groundTruthsOption: any;
     modelrunOption: ModelListItem[];
     filterForm: any;
+    showAnnotation: boolean;
     datasetType: datasetTypeEnum | undefined;
   }>();
 
@@ -275,6 +302,7 @@
     'handleMakeFrame',
     'handleMultipleFrame',
     'handleModelRun',
+    'update:showAnnotation',
   ]);
 
   const reloadList = () => {
@@ -309,6 +337,10 @@
       fileList.value = [];
       uploadUrl.value = '';
     }
+  };
+
+  const handleGoSearch = () => {
+    go(RouteChildEnum.SEARCH_SCENARIO + `?id=${id}`);
   };
 
   /** Export */
@@ -424,6 +456,13 @@
   const collState = ref(true);
   const handleColl = () => {
     collState.value = !unref(collState);
+  };
+  const onShowAnnotation = (e: any) => {
+    emits('update:showAnnotation', e.target.checked);
+  };
+
+  const handleDeleteDataId = () => {
+    window.location.replace(window.location.href.split('?')[0] + `?id=${id}`);
   };
 </script>
 <style lang="less" scoped>

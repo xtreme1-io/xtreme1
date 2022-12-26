@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 /**
  * @author Jagger Wang
  */
@@ -15,5 +17,7 @@ import lombok.NoArgsConstructor;
 public class JwtPayload {
 
     private Long userId;
+
+    private Date expireTime;
 
 }

@@ -1,15 +1,18 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.api.filter.JwtPayload;
 import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.adapter.dto.UserDTO;
+import ai.basic.x1.adapter.dto.UserTokenDTO;
+import ai.basic.x1.adapter.dto.request.CreateApiTokenRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserAuthRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserDeleteRequestDTO;
 import ai.basic.x1.adapter.dto.request.UserUpdateRequestDTO;
 import ai.basic.x1.adapter.dto.response.UserLoginResponseDTO;
 import ai.basic.x1.entity.UserBO;
-import ai.basic.x1.usecase.ModelUseCase;
+import ai.basic.x1.usecase.UserTokenUseCase;
 import ai.basic.x1.usecase.UserUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
@@ -20,9 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 
 /**
  * @author Jagger Wang、Zhujh
@@ -40,16 +47,14 @@ public class UserController extends BaseController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private ModelUseCase modelUseCase;
+    private UserTokenUseCase userTokenUseCase;
 
     @PostMapping("/register")
     public UserLoginResponseDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
         var user =  UserDTO.fromBO(userUseCase.create(authDto.getUsername(),
                 authDto.getPassword()));
         return UserLoginResponseDTO.builder()
-                .token(jwtHelper.generateToken(JwtPayload.builder()
-                        .userId(user.getId())
-                        .build()))
+                .token(userTokenUseCase.generateGatewayToken(user.getId()).getToken())
                 .user(user)
                 .build();
     }
@@ -65,10 +70,9 @@ public class UserController extends BaseController {
         }
         userUseCase.loginSuccessProcess(user);
 
+        var token = userTokenUseCase.generateGatewayToken(user.getId()).getToken();
         return UserLoginResponseDTO.builder()
-                .token(jwtHelper.generateToken(JwtPayload.builder()
-                        .userId(user.getId())
-                        .build()))
+                .token(token)
                 .user(UserDTO.fromBO(user))
                 .build();
     }
@@ -117,6 +121,35 @@ public class UserController extends BaseController {
     public UserDTO info(@PathVariable Long id) {
         var user = userUseCase.findById(id);
         return UserDTO.fromBO(user);
+    }
+
+    @GetMapping("/api/token/info")
+    public UserTokenDTO findApiToken() {
+        var userId = RequestContextHolder.getContext().getUserInfo().getId();
+        return DefaultConverter.convert(userTokenUseCase.getApiToken(userId), UserTokenDTO.class);
+    }
+
+    @PostMapping("/api/token/create")
+    public UserTokenDTO createApiToken(@RequestBody CreateApiTokenRequestDTO createApiToken) {
+        var userId = RequestContextHolder.getContext().getUserInfo().getId();
+        OffsetDateTime expireAt = null;
+        if (StringUtils.hasLength(createApiToken.getExpireAt())) {
+            try {
+                expireAt = OffsetDateTime.parse(createApiToken.getExpireAt());
+                expireAt = OffsetDateTime.of(expireAt.toLocalDate(), LocalTime.MIDNIGHT,
+                        expireAt.getOffset());
+            } catch (Exception e) {
+                throw new UsecaseException(UsecaseCode.UNKNOWN, "The date format is incorrect");
+            }
+        }
+        var result = userTokenUseCase.generateApiToken(userId, expireAt);
+        return DefaultConverter.convert(result, UserTokenDTO.class);
+    }
+
+    @PostMapping("/api/token/delete/{id}")
+    public void deleteApiToken(@PathVariable("id") Long id) {
+        var userId = RequestContextHolder.getContext().getUserInfo().getId();
+        userTokenUseCase.deleteApiToken(id, userId);
     }
 
 }

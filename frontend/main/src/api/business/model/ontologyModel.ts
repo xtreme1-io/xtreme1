@@ -1,5 +1,5 @@
+import { datasetTypeEnum } from './datasetModel';
 import { BasicPageParams, BasicIdParams, BasicFetchResult } from '/@/api/model/baseModel';
-import { datasetTypeEnum } from './ontologyClassesModel';
 
 /** list item */
 export interface OntologyListItem {
@@ -16,6 +16,7 @@ export interface OntologyListItem {
 /** list request params */
 export interface GetOntologyParams extends BasicPageParams {
   name?: string;
+  type?: datasetTypeEnum;
 }
 
 /** list response params */
@@ -37,6 +38,12 @@ export type DeleteOntologyParams = BasicIdParams;
 
 /** get ontology by team name */
 export interface FindOntologyByTeamParams {
-  name: string;
+  name?: string;
   type: datasetTypeEnum;
+}
+
+export interface ValidateOntologyNameParams {
+  id?: string;
+  name?: string;
+  type?: datasetTypeEnum;
 }

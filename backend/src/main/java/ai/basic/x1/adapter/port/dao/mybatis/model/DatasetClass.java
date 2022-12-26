@@ -26,16 +26,6 @@ public class DatasetClass {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * The id of the inherited ontology
-     */
-    private Long ontologyId;
-
-    /**
-     * The id of the inherited class in the ontology
-     */
-    private Long classId;
-
     private Long datasetId;
 
     private String name;
@@ -52,12 +42,6 @@ public class DatasetClass {
 
     @TableField(value = "attributes", typeHandler = JacksonTypeHandler.class)
     private JSONArray attributes;
-
-    /**
-     * logic delete
-     */
-    @TableLogic
-    private Boolean isDeleted;
 
     /**
      * create time

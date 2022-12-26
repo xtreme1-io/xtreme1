@@ -1,6 +1,6 @@
 import { reactive, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useClipboard } from '@vueuse/core';
-import { AttrType, IClassType, Event, IUserData, Const } from 'pc-editor';
+import { AttrType, IClassType, Event, utils, IUserData, Const } from 'pc-editor';
 import { AnnotateObject, Box, Rect } from 'pc-render';
 import { useInjectState } from '../../state';
 import { IState, IInstanceItem, MsgType, IControl } from './type';
@@ -54,16 +54,6 @@ export default function useEditClass() {
         showMsgType: '',
         //
     });
-
-    // let { needUpdate = defaultNeedUpdate } = option;
-
-    // editor.addEventListener(Event.SHOW_CLASS_INFO, (data: any) => {
-    //     let trackIds = data.data.id;
-
-    //     state.showType = 'msg';
-    //     handleObject(trackIds);
-    // });
-
     watch(
         () => [state.confidenceRange, state.instances],
         () => {
@@ -277,11 +267,17 @@ export default function useEditClass() {
         let classConfig = _.find(editorState.classTypes, (e) => e.name === classType);
         if (!classConfig) return;
         let attrs = userData.attrs || {};
-        let newAttrs = classConfig.attrs.map((e) => {
-            let defaultValue = e.type === AttrType.MULTI_SELECTION ? [] : '';
-            return { ...e, value: e.name in attrs ? attrs[e.name] : defaultValue };
-        });
-        state.attrs = newAttrs;
+        // let newAttrs = classConfig.attrs.map((e) => {
+        //     let defaultValue = e.type === AttrType.MULTI_SELECTION ? [] : '';
+        //     // The array type may be a single value
+        //     if (e.type === AttrType.MULTI_SELECTION && attrs[e.id] && !Array.isArray(attrs[e.id])) {
+        //         attrs[e.id] = [attrs[e.id]];
+        //     }
+        //     let value = e.id in attrs ? attrs[e.id] : defaultValue;
+        //     return { ...e, value };
+        // });
+        // state.attrs = newAttrs;
+        state.attrs = utils.copyClassAttrs(classConfig, attrs);
         trackAttrs = JSON.parse(JSON.stringify(attrs));
     }
 
@@ -398,6 +394,7 @@ export default function useEditClass() {
 
     function onAttChange(name: string, value: any) {
         trackAttrs[name] = value;
+        console.log(trackAttrs);
         updateTrackAttr();
         state.resultStatus = Const.True_Value;
     }

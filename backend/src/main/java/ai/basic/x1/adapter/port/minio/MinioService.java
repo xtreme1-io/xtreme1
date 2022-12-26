@@ -3,6 +3,9 @@ package ai.basic.x1.adapter.port.minio;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.entity.PresignedUrlBO;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpStatus;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
@@ -20,7 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static ai.basic.x1.util.Constants.*;
+import static ai.basic.x1.util.Constants.MINIO;
+import static ai.basic.x1.util.Constants.SLANTING_BAR;
 
 /**
  * @author fyb
@@ -49,6 +53,31 @@ public class MinioService {
         }
     }
 
+
+    /**
+     * check object exist
+     *
+     * @param bucketName
+     * @param objectName
+     */
+    public boolean checkObjectExist(String bucketName, String objectName) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, InternalException, XmlParserException, ErrorResponseException {
+        var bucketExistsArgs = BucketExistsArgs.builder().bucket(bucketName).build();
+        boolean existBucket = extendMinioClient.bucketExists(bucketExistsArgs);
+        if (existBucket) {
+            var statObjectArgs = StatObjectArgs.builder().bucket(bucketName).object(objectName).build();
+            try {
+                var statObjectResponse = extendMinioClient.statObject(statObjectArgs);
+                return !statObjectResponse.object().isEmpty();
+            } catch (ErrorResponseException errorResponseException) {
+                if (errorResponseException.response().code() == HttpStatus.HTTP_NOT_FOUND) {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+
     /**
      * Upload file
      *
@@ -63,6 +92,11 @@ public class MinioService {
             throws IOException, ServerException, InsufficientDataException, ErrorResponseException,
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
+        uploadFileWithoutUrl(bucketName, fileName, inputStream, contentType, size);
+        return getUrl(bucketName, fileName);
+    }
+
+    public void uploadFileWithoutUrl(String bucketName, String fileName, InputStream inputStream, String contentType, long size) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, InternalException, XmlParserException, ErrorResponseException {
         createBucket(bucketName);
         //partSize:-1 is auto setting
         long partSize = -1;
@@ -73,7 +107,6 @@ public class MinioService {
                 .contentType(contentType)
                 .build();
         extendMinioClient.putObject(putArgs);
-        return getUrl(bucketName, fileName);
     }
 
     /**
@@ -162,11 +195,12 @@ public class MinioService {
     /**
      * Get pre-upload url and access url
      *
-     * @param bucketName Bucket name
-     * @param objectName File path
+     * @param bucketName   Bucket name
+     * @param objectName   File path
+     * @param isReplaceUrl Whether to replace with the external network address
      * @return Pre-signed url
      */
-    public PresignedUrlBO generatePresignedUrl(String bucketName, String objectName)
+    public PresignedUrlBO generatePresignedUrl(String bucketName, String objectName, Boolean isReplaceUrl)
             throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
             NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException,
             InternalException {
@@ -179,15 +213,29 @@ public class MinioService {
         var region = extendMinioClient.getRegion(builder.build());
         // This must be PUT, if it is GET, it is the file access address. If it is a POST upload, an error will be reported.
         var preUrl = extendMinioClient.getPresignedObjectUrl(builder.region(region).build());
+        if (isReplaceUrl) {
+            preUrl = replaceUrl(preUrl);
+        }
         var accessUrl = getInternalUrl(bucketName, objectName);
         return PresignedUrlBO.builder()
                 .accessUrl(accessUrl)
-                .presignedUrl(replaceUrl(preUrl)).build();
+                .presignedUrl(preUrl).build();
     }
 
+
+
     private String replaceUrl(String url) {
-        return url.replace(minioProp.getEndpoint(), RequestContextHolder.getContext().getRequestInfo().getForwardedProto() + "://" +
-                RequestContextHolder.getContext().getRequestInfo().getHost() +
+        var proto = "http";
+        var host = "localhost";
+        if (ObjectUtil.isNotNull(RequestContextHolder.getContext()) && ObjectUtil.isNotNull(RequestContextHolder.getContext().getRequestInfo())) {
+            var forwardedProto = RequestContextHolder.getContext().getRequestInfo().getForwardedProto();
+            proto = StrUtil.isNotEmpty(forwardedProto) ? forwardedProto : proto;
+
+            var forwardedHost = RequestContextHolder.getContext().getRequestInfo().getHost();
+            host = StrUtil.isNotEmpty(forwardedHost) ? forwardedHost : host;
+        }
+        return url.replace(minioProp.getEndpoint(), proto + "://" +
+                host +
                 SLANTING_BAR + MINIO + SLANTING_BAR);
     }
 }

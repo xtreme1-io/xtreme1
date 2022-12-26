@@ -30,6 +30,17 @@
           <Icon style="color: #aaa" size="16" icon="ion:person-circle" />
           My Team
         </p>
+        <p
+          class="cursor-pointer p-3 m-0 hover:bg-blue-50"
+          @click="
+            () => {
+              handleGo(RouteEnum.Apis);
+            }
+          "
+        >
+          <Icon style="color: #aaa" size="16" icon="ion:person-circle" />
+          My APIs
+        </p>
         <Divider style="margin: 0" />
         <p class="cursor-pointer p-3 hover:bg-blue-50" @click="handleLoginOut">
           <Icon style="color: #aaa" icon="icomoon-free:exit" />
@@ -54,7 +65,7 @@
 
       <div class="panel flex items-center">
         <!-- <img class="mr-2" width="36" :src="avatarUrl || ava" alt="" /> -->
-        <ProfileAvatar class="mr-2" :avatarUrl="avatarUrl" :nickname="nickname" :size="36" />
+        <ProfileAvatar class="mr-2" :avatarUrl="avatarUrl" :nickname="nickname" :size="31" />
         <div v-if="!type" class="panel-name">{{ nickname }}</div>
       </div>
     </Popover>

@@ -62,21 +62,21 @@ const dataset: AppRouteModule = {
     //     hideMenu: true,
     //   },
     // },
-    {
-      path: 'task',
-      name: 'DatasetsTaskPage',
-      component: () => import('/@/views/datasets/datasetTask/index.vue'),
-      meta: {
-        title: t('routes.datasets.task'),
-        // affix: true,
-        hideMenu: true,
-        currentActiveMenu: currentActiveMenu,
-      },
-    },
+    // {
+    //   path: 'task',
+    //   name: 'DatasetsTaskPage',
+    //   component: () => import('/@/views/datasets/datasetTask/index.vue'),
+    //   meta: {
+    //     title: t('routes.datasets.task'),
+    //     // affix: true,
+    //     hideMenu: true,
+    //     currentActiveMenu: currentActiveMenu,
+    //   },
+    // },
     {
       path: 'overview',
       name: 'DatasetsOverviewPage',
-      component: () => import('/@/views/datasets/datasetContent/index.vue'),
+      component: () => import('/@/views/datasets/datasetOverview/index.vue'),
       meta: {
         title: t('routes.datasets.overview'),
         // affix: true,
@@ -106,6 +106,19 @@ const dataset: AppRouteModule = {
         sessionTitle: 'breadcrumbTitle',
         sessionInfo: 'breadcrumbType',
         title: t('routes.datasets.ontology'),
+        // affix: true,
+        hideMenu: true,
+        currentActiveMenu: currentActiveMenu,
+      },
+    },
+    {
+      path: 'searchScenario',
+      name: 'searchScenario',
+      component: () => import('/@/views/datasets/datasetSearch/searchScenario.vue'),
+      meta: {
+        sessionTitle: 'breadcrumbTitle',
+        sessionInfo: 'breadcrumbType',
+        title: 'searchScenario',
         // affix: true,
         hideMenu: true,
         currentActiveMenu: currentActiveMenu,

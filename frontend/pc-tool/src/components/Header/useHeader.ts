@@ -1,6 +1,6 @@
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import { useInjectEditor } from '../../state';
-import { IFrame, StatusType } from 'pc-editor';
+import { Event, IFrame, StatusType } from 'pc-editor';
 import * as _ from 'lodash';
 import * as api from '../../api';
 import * as locale from './lang';
@@ -16,13 +16,19 @@ export default function useHeader() {
     let dataIndex = ref(state.frameIndex + 1);
     let iState = reactive({
         fullScreen: false,
+        dataName: '',
     });
     watch(
         () => state.frameIndex,
         () => {
             if (dataIndex.value !== state.frameIndex + 1) dataIndex.value = state.frameIndex + 1;
+            updateName();
         },
     );
+
+    onMounted(() => {
+        editor.addEventListener(Event.RESOURCE_LOAD_COMPLETE, updateName);
+    });
 
     let currentFrame = computed(() => {
         let { frameIndex, frames } = editor.state;
@@ -51,6 +57,11 @@ export default function useHeader() {
             });
         }, 400);
     }
+
+    let updateName = () => {
+        const { id } = currentFrame.value;
+        iState.dataName = editor.dataResource.dataMap[id]?.name || '';
+    };
     function onSave() {
         editor.saveObject();
     }

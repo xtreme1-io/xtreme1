@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
+import java.time.OffsetDateTime;
 
 /**
  * @author chenchao
@@ -35,14 +35,14 @@ public class DatasetClassDTO {
      */
     private Long classId;
 
-    @NotNull(message = "not allowed null!",groups = GroupSave.class)
+    @NotNull(message = "not allowed null!")
     private Long datasetId;
 
-    @NotEmpty(message = "not allowed null!",groups = GroupSave.class)
+    @NotEmpty(message = "not allowed null!")
     @Length(max = 256,message = "The length of name should be less than 256.")
     private String name;
 
-    @NotEmpty(message = "not allowed null!",groups = GroupSave.class)
+    @NotEmpty(message = "not allowed null!")
     private String color;
 
     private ToolTypeEnum toolType;
@@ -53,9 +53,5 @@ public class DatasetClassDTO {
 
     private Integer datasetClassNum;
 
-    /**
-     * dedicated business logic groupings
-     */
-    public interface GroupSave extends Default {
-    }
+    private OffsetDateTime createdAt;
 }

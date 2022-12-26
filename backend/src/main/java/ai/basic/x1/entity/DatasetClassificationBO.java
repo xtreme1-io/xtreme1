@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author chenchao
@@ -21,16 +22,6 @@ public class DatasetClassificationBO {
 
     private Long id;
 
-    /**
-     * The id of the inherited ontology
-     */
-    private Long ontologyId;
-
-    /**
-     * The id of the inherited classification in the ontology
-     */
-    private Long classificationId;
-
     private Long datasetId;
 
     private String name;
@@ -41,8 +32,6 @@ public class DatasetClassificationBO {
      * input type:'RADIO','MULTI_SELECTION','DROPDOWN','TEXT'
      */
     private InputTypeEnum inputType;
-
-    private Boolean isDeleted;
 
     private Boolean isRequired;
 
@@ -59,4 +48,8 @@ public class DatasetClassificationBO {
     private String sortBy;
 
     private String ascOrDesc;
+
+    private List<Long> classificationIds;
+
+    private OffsetDateTime createdAt;
 }

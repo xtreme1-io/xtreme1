@@ -1,7 +1,7 @@
 <template>
   <div :class="`${prefixCls}`">
     <div class="wrapper">
-      <div class="welcome">Welcome to Basic AI!</div>
+      <div class="welcome">Welcome to Xtreme1!</div>
 
       <div class="text-center href-card mb-7">
         <div
@@ -57,7 +57,7 @@
   };
 
   const handleGoDocs = () => {
-    window.open('https://docs.basic.ai/docs');
+    window.open('https://docs.xtreme1.io/');
   };
 </script>
 <style lang="less" scoped>

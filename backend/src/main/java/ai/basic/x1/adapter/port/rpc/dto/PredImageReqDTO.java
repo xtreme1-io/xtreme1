@@ -31,7 +31,7 @@ public class PredImageReqDTO {
         private String imgUrl;
 
         @JsonProperty(value = "image_id", access = JsonProperty.Access.READ_ONLY)
-        private Long imageId;
+        private String imageId;
 
     }
 

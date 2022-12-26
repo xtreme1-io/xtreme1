@@ -35,23 +35,23 @@
       <template v-else>
         <div class="img-content" v-if="data.type === datasetTypeEnum.IMAGE">
           <div class="img" v-for="(item, index) in new Array(6)" :key="item">
-            <img :src="getImgUrl(index)" alt="" />
+            <img v-lazy="getImgUrl(index)" alt="" />
           </div>
         </div>
         <div class="img-content" v-else-if="data.type === datasetTypeEnum.LIDAR_FUSION">
           <div class="wrapper">
             <div class="banner-img">
-              <img class="pcRender" :src="getPcImgUrl()" alt="" />
+              <img class="pcRender" v-lazy="getPcImgUrl()" alt="" />
             </div>
             <div class="img-fusion-camera">
-              <img v-for="item in new Array(3)" :key="item" :src="getLidarImgUrl()" alt="" />
+              <img v-for="item in new Array(3)" :key="item" v-lazy="getLidarImgUrl()" alt="" />
             </div>
           </div>
         </div>
         <div class="img-content" v-else>
           <div class="wrapper">
             <div class="banner-img-full">
-              <img class="pcRender" :src="getPcImgUrl()" alt="" />
+              <img class="pcRender" v-lazy="getPcImgUrl()" alt="" />
             </div>
           </div>
         </div>
@@ -143,7 +143,6 @@
   };
 
   const getLidarImgUrl = () => {
-    console.log(props.data);
     const content = props.data.datas && props.data.datas[0]?.content;
     if (content && content[0] && content[0].files) {
       const files = content.filter((record) => record.directoryType?.includes('image'))[0]?.files;
@@ -190,7 +189,7 @@
   const go = useGo();
   const handleGo = (id) => {
     setDatasetBreadcrumb(props.data.name, props.data.type);
-    go(`${RouteEnum.DATASETS}/data?id=${id}`);
+    go(`${RouteEnum.DATASETS}/overview?id=${id}`);
   };
   const handleRename = (e, data) => {
     e.stopPropagation();
@@ -261,7 +260,7 @@
       border-radius: 12px;
       position: relative;
       margin: 0 10px;
-
+      overflow:hidden;
 
       &:hover{
         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);

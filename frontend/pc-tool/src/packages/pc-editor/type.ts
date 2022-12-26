@@ -37,6 +37,10 @@ export enum ObjectType {
     TYPE_3D = '3d',
     TYPE_RECT = 'rect',
     TYPE_BOX2D = 'box2d',
+    // new
+    TYPE_3D_BOX = '3D_BOX',
+    TYPE_2D_RECT = '2D_RECT',
+    TYPE_2D_BOX = '2D_BOX',
 }
 
 // export interface IModelRun {
@@ -44,7 +48,40 @@ export enum ObjectType {
 //     modelClass?: string;
 //     modelRunLabel?: string;
 // }
+export interface IObjectV2 {
+    id?: string;
+    type?: ObjectType;
+    version?: number;
+    createdBy?: number;
+    createdAt?: string;
 
+    trackId?: string;
+    trackName?: string;
+    classId?: string;
+    className?: string;
+    backId?: string;
+    frontId?: string;
+    classType?: string;
+    classValues?: any[];
+    // classValues?: Record<string, any>;
+    modelConfidence?: number;
+    modelClass?: string;
+    contour: {
+        viewIndex?: number;
+        pointN?: number;
+        points?: THREE.Vector3[] | THREE.Vector2[];
+        center3D?: THREE.Vector3;
+        rotation3D?: THREE.Vector3;
+        size3D?: THREE.Vector3;
+        [k: string]: any;
+    };
+    meta?: {
+        [k: string]: any;
+    };
+    // other
+    sourceId?: string;
+    sourceType?: string;
+}
 export interface IUserData {
     id?: string;
     // track id
@@ -60,10 +97,14 @@ export interface IUserData {
     modelRunLabel?: string;
     project?: string;
     classType?: string;
+    classId?: string;
     attrs?: Record<string, any>;
     // info
     pointN?: number;
     // [key: string]: any;
+    version?: number;
+    createdBy?: any;
+    createdAt?: string;
 }
 
 export interface IObject extends IUserData {
@@ -76,6 +117,7 @@ export interface IObject extends IUserData {
     center3D: THREE.Vector3;
     rotation3D: THREE.Vector3;
     size3D: THREE.Vector3;
+    [key: string]: any;
 }
 
 // export interface IUserInfo {
@@ -83,11 +125,20 @@ export interface IObject extends IUserData {
 // }
 
 export interface IAttr {
+    id: string;
     type: AttrType;
     name: string;
     label?: string;
     required: boolean;
     options: { value: any; label: string }[];
+
+    classId: string;
+    parent: string;
+    parentAttr: string;
+    parentValue: any;
+    key: string;
+    value: any;
+    leafFlag?: boolean;
 }
 
 export interface IClassType {
@@ -149,8 +200,6 @@ export interface IConfig {
     pointSize: number;
     heightRange: [number, number];
     groundEnable: boolean;
-    trimMin: THREE.Vector3;
-    trimMax: THREE.Vector3;
     // setting
     pointColorMode: 'height' | 'intensity';
     pointIntensity: [number, number];
@@ -166,6 +215,10 @@ export interface IConfig {
 
     //
     FILTER_ALL: string;
+    aspectRatio: number;
+    maxViewHeight: string;
+    maxViewWidth: string;
+    limitRect2Image: boolean;
 }
 
 export interface IAnnotationInfo {
@@ -231,6 +284,7 @@ export interface IClassificationAttr {
     parent: string;
     parentAttr: string;
     parentValue: any;
+    key: string;
     id: string;
     type: AttrType;
     name: string;
@@ -238,6 +292,7 @@ export interface IClassificationAttr {
     required: boolean;
     options: { value: any; label: string }[];
     value: any;
+    leafFlag?: boolean;
 }
 
 export interface IFrame {
@@ -261,7 +316,7 @@ export interface IFrame {
     // flow
     dataStatus: 'INVALID' | 'VALID';
     annotationStatus: 'ANNOTATED' | 'NOT_ANNOTATED' | 'INVALID';
-    // skipped: boolean;
+    skipped: boolean;
 }
 
 export interface IFilter {
@@ -315,6 +370,7 @@ export interface IDataResource {
     pointsData: Record<PointAttr, number[]>;
     intensityRange?: [number, number];
     ground?: number;
+    name?: string;
 }
 
 export interface IResourceLoader {
