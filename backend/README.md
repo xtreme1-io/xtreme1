@@ -61,9 +61,6 @@ For using base services started by Docker Compose, you can save the following co
 ```yaml
 debug: false
 
-server:
-  port: 8280
-
 spring:
   datasource:
     url: jdbc:mysql://localhost:8191/x1_community
@@ -98,7 +95,7 @@ mvn package
 java -Dspring.profiles.active=local -jar target/xtreme1-backend-0.5.5-SNAPSHOT.jar
 ```
 
-Now you can access the backend service at `http://localhost:8280/`.
+Now you can access the backend service at `http://localhost:8080/`.
 
 ## Coding Standards
 

@@ -1,5 +1,12 @@
 debug: false
 
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: info
+    ai.basic.basicai.user.adapter.port.dao.mybatis.mapper: info
+  request:
+    maxPayloadLength: 100000
+
 server:
   address: 0.0.0.0
   port: 8080
@@ -23,6 +30,26 @@ spring:
     port: 6379
     password:
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics,prometheus"
+  # Probes for none Kubernetes env.
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  # Probes for Kubernetes env.
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  metrics:
+    tags:
+      application: xtreme1
+
 jwt:
   secret: G6j7j#$&YOy9&p(s2b@v53^)38E!cG49
   issuer: BasicAI
@@ -36,7 +63,6 @@ mybatis-plus:
       logic-not-delete-value: 0
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath:/mybatis/mapper/*.xml
   type-aliases-package: ai.basic.x1.adapter.port.dao.mybatis.model
 
@@ -97,9 +123,3 @@ pointcloud:
 dataset:
   similarity:
     url: http://image-vect-visualization:5000/api/v1/calcSimilarity
-
-management:
-  endpoint:
-    health:
-      probes:
-        enabled: true
