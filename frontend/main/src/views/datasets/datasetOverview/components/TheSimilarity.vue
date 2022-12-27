@@ -227,7 +227,7 @@
     labelName.value = res.name;
 
     getToolTipDom(id);
-  }, 1500);
+  });
 
   const getToolTipDom = (id) => {
     const labelDom = document.querySelector('#tooltipLabel');
