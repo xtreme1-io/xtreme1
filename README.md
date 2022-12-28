@@ -5,9 +5,9 @@
 ![](https://img.shields.io/badge/Release-v0.5.5-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
-[![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/BasicAIteam)
+[![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/Xtreme1io)
 [![Online](https://img.shields.io/badge/Xtreme1_Online-App-yellow)](https://app.basic.ai/#/login)
-[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.basic.ai/) 
+[![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.xtreme1.io/) 
 </div>
 
 # Intro #
@@ -16,8 +16,10 @@ BasicAI launched the world's first open-source platform for multisensory trainin
 Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2D image and 3D point cloud dataset ML challenges.
 The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2D/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
 
+It is now hosted in [LF AI & Data Foundation](https://medium.com/multisensory-data-training/xtreme1-the-first-open-source-labeling-annotation-and-visualization-project-is-debuting-at-the-da1d157d1512) as a sandbox project.
+
 # Join community #
-[Website](https://basic.ai) | [Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/BasicAIteam) |  [LinkedIn](https://www.linkedin.com/company/basicaius/about/?viewAsMember=true) | [Issues](https://github.com/basicai/xtreme1/issues) 
+[Website](https://basic.ai) | [Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
 
 Join the Xtreme1 community on Slack to share your suggestions, advice, and questions with us.
 
@@ -25,9 +27,9 @@ Join the Xtreme1 community on Slack to share your suggestions, advice, and quest
 
 # Key features #
 
-Image Bounding-box Annotation - [YOLOR](https://github.com/WongKinYiu/yolor) |  Image Segmentation Annotation - [RITM](https://github.com/saic-vul/ritm_interactive_segmentation)
+Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/yolor) & [RITM](https://github.com/saic-vul/ritm_interactive_segmentation) |  Lidar-camera Fusion (Frame series) Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
 :-------------------------:|:-------------------------:
-![](/docs/images/image-bbox-model.gif)  |  ![](/docs/images/2d-seg-model.gif)
+![](/docs/images/2d_gif.gif)  |  ![](/docs/images/3d_gif.gif)
 
  :one: Supports data labeling for images, 3D LiDAR and 2D/3D Sensor Fusion datasets
  
@@ -38,66 +40,24 @@ Image Bounding-box Annotation - [YOLOR](https://github.com/WongKinYiu/yolor) |  
  :four: Data management and quality monitoring
  
  :five: Find labeling errors and fix them
- 
 
  :six: Model results visualization to help you evaluate your model
 
+<img src="/docs/images/2d_v.gif" width="300">
 
-3D Point Cloud Cuboid Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) |  2D & 3D Fusion Object Tracking Annotation - [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
-:-------------------------:|:-------------------------:
-![](/docs/images/3d-annotation.gif)  |  ![](/docs/images/3d-track-model.gif)
+Image Data Curation (Visualizing & Debug) - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE) 
+![](/docs/images/2d_v.gif)  |  ![](/docs/images/3d_v2.gif)
 
 # Quick start
 
 * Get early access to [Xtreme1 online version](https://app.basic.ai/#/login/) without any installation :rocket:
 
-* [Install and start Xtreme1](#install-and-start-xtreme1) :cd:
-* [Build Xtreme1 from source code](#build-xtreme1-from-source-code) :wrench:
+* [Install and Quick start](https://docs.xtreme1.io/xtreme1-docs/get-started/quick-start) :cd:
+* [Install with Docker](https://docs.xtreme1.io/xtreme1-docs/get-started/install-with-docker) 🐋
+* [Build Xtreme1 from source code](https://docs.xtreme1.io/xtreme1-docs/get-started/install-from-source) :wrench:
 
-## Install and Start Xtreme1
-
-### Prerequisites 
-
-#### Operating System Requirements
-
-Any OS can install the Xtreme1 platform with Docker Compose (installing [Docker Desktop](https://docs.docker.com/desktop/) on Mac, Windows, and Linux devices). On the Linux server, you can install Docker Engine with [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/).
-
-#### Hardware Requirements
-
-| Component  | Recommended configuration |
-| ------------- | ------------- |
-| CPU | AMD64 or ARM64 |
-| RAM | 2GB or higher |
-| Hard Drive | 10GB+ free disk space (depends on data size) |
-
-#### Software Requirements
-
-For Mac, Windows, and Linux with desktop:
-
-| Software | Version |
-| ------------- | ------------- |
-| Docker Desktop | 4.1 or newer |
-
-For Linux server:
-
-| Software | Version |
-| ------------- | ------------- |
-| Docker Engine | 20.10 or newer |
-| Docker Compose Plugin | 2.0 or newer |
-
-#### :warning: (Build-in) Models Deployment Requirements
-
-Two build-in models only can be running on Linux server with [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
-
-| Component | Recommended configuration |
-| ------------- | ------------- |
-| GPU | Nvidia Tesla T4 or other similar Nvidia GPU  |
-| GPU RAM | 6G or higher |
-| RAM | 4G or higher |
-
-### Download release package
-
-Click the latest release on the right of repository home, select asset whose name likes `xtreme1-<version>.zip`, and double click the downloaded package to unzip it. Or use the following command to download the package and unzip it, you should replace the version number to the lastest.
+## Download package
+Download the latest release package and unzip it.
 
 ```bash
 wget https://github.com/basicai/xtreme1/releases/download/v0.5.5/xtreme1-v0.5.5.zip
@@ -106,42 +66,18 @@ unzip -d xtreme1-v0.5.5 xtreme1-v0.5.5.zip
 
 ### Start all services
 
-Enter into the release package directory, and execute the following command to start all services. It need a few minutes to init database and prepare a test dataset, if everything shows ok in console, you can open address `http://localhost:8190` in your browser (Google Chrome is recommended) to try out Xtreme1. You can replace `localhost` to ip address if you want to access from another computer.
-
 ```bash
 docker compose up
 ```
 
-> :warning: Some Docker images, such as `MySQL`, do not support ARM architecture, if your computer is using ARM CPU, such as Apple M1, you can add Docker Compose override file `docker-compose.override.yml`, which contains the following content. It will force using `amd64` image to run on `ARM64` platform through QEMU emulation, but the performance will be affected.
+Visit [https://localhost:8190](https://localhost:8190) in the browser (Google Chrome is recommended) to try out Xtreme1!
 
-```yaml
-services:
-  mysql:
-    platform: linux/amd64
-```
-<img src="https://www.basic.ai/_nuxt/img/4f457dd.png" alt="xtreme1_lidar_page">
-
-### Docker Compose advanced commands
+⚠️ Install built-in models
+You need to explicitly specify a model profile to enable model services.
 
 ```bash
-# Start in foreground.
-docker compose up
-
-# Or add -d option to run in background.
-docker compose up -d
-
-# When up finished, you can start or stop all or specific service.
-docker compose start
-docker compose stop
-
-# Stop all services and delete all containers, but data volumes will be kept.
-docker compose down
-
-# Delete volumes together, you will lose all your data in mysql, redis and minio, be careful!
-docker compose down -v
+docker compose --profile model up
 ```
-
-Docker compose will pull all service images from Docker Hub, including basic services `mysql`, `redis`, `minio`, and application services `backend`, `frontend`. You can find the username, password, hot binding port to access MySQL, Redis and MinIO in `docker-compose.yml`, for example you can access MinIO console at `http://localhost:8194`. We use Docker volume to save data, so you won't lose any data between container recreating.
 
 ### Enable model services
 
@@ -161,66 +97,20 @@ Docker compose will pull all service images from Docker Hub, including basic ser
 
 ```
 
-```bash
-# You need to explicitly specify model profile to enable model services.
-docker compose --profile model up
-```
+For more installation, development and deployment, check out [Xtreme1 Docs](docs.xtreme1.io/).
 
-
-## Build Xtreme1 from source code
-
-### Enable Docker BuildKit
-
-We are using Docker BuildKit to accelerate the building speed, such as cache Maven and NPM packages between builds. By default BuildKit is not enabled in Docker Desktop, you can enable it as following. For more details, you can check the official document [Build images with BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/).
-
-```bash
-# Set environment variable to enable BuildKit just for once.
-DOCKER_BUILDKIT=1 docker build .
-DOCKER_BUILDKIT=1 docker compose up
-
-# Or edit Docker daemon.json to enable BuildKit by default, the content can be something like '{ "features": { "buildkit": true } }'.
-vi /etc/docker/daemon.json
-
-# You can clear builder cache if you encounter some package version related problem.
-docker builder prune
- ```
-
-### Clone repository
-
-```bash
-git clone https://github.com/basicai/xtreme1.git
-cd xtreme1
-```
-
-### Build images and run services
-
-The `docker-compose.yml` default will pull application images from Docker Hub, if you want to build images from source code, you can uncomment each service's build line.
-
-```yaml
-services:
-  backend:
-    image: basicai/xtreme1-backend
-    build: ./backend
-  frontend:
-    image: basicai/xtreme1-frontend
-    build: ./frontend
-```
-
-Then you can execute `docker compose build` to build `backend` and `frontend` images from local source, and execute `docker compose up` to run the newest services, be sure to run `docker compose build` again when source changed.
-
-> You should not commit your change to `docker-compose.yml`, to avoid this, you can copy `docker-compose.yml` to a new file `docker-compose.develop.yml`, and modify this file as your development need, as this file is already added into `.gitignore`. And you need to specify this specific file when running Docker Compose command, such as `docker compose -f docker-compose.develop.yml build`.
-
-To get more development guides, you can read the README in each application service's directory.
 
 # License #
-This software is licensed under the Apache 2.0 LICENSE © BasicAI.
+This software is licensed under the Apache 2.0 LICENSE. Xtreme1 is a trademark of LF AI Projects.
+![](LFAI_DATA_horizontal-color.png width="200")
 
 If Xtreme1 is part of your development process / project / publication, please cite us ❤️ :
 ```bash
-@misc{BasicAI,
+@misc{Xtreme1,
 title = {Xtreme1 - The Next GEN Platform For Multisensory Training Data},
 year = {2022},
-note = {Software available from https://github.com/basicai/xtreme1/},
-url={https://basic.ai/},
-author = {BasicAI},
+note = {Software available from https://github.com/xtreme1-io/xtreme1/},
+url={https://xtreme1.io/},
+author = {LF AI Projects},
 }
+```
