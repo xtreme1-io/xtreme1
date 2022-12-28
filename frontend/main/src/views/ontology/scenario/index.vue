@@ -145,6 +145,7 @@
   ];
 
   const handleChange = (e) => {
+    pageNo.value = 1;
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];
