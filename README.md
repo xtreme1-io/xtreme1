@@ -1,7 +1,6 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-
 ![](https://img.shields.io/badge/Release-v0.5.5-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
@@ -19,7 +18,7 @@ The built-in AI-assisted tools take your annotation efforts to the next level of
 It is now hosted in [LF AI & Data Foundation](https://medium.com/multisensory-data-training/xtreme1-the-first-open-source-labeling-annotation-and-visualization-project-is-debuting-at-the-da1d157d1512) as a sandbox project.
 
 # Join community #
-[Website](https://basic.ai) | [Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
+[Website](https://xtreme1.io) | [Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
 
 Join the Xtreme1 community on Slack to share your suggestions, advice, and questions with us.
 
@@ -29,7 +28,7 @@ Join the Xtreme1 community on Slack to share your suggestions, advice, and quest
 
 Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/yolor) & [RITM](https://github.com/saic-vul/ritm_interactive_segmentation) |  Lidar-camera Fusion (Frame series) Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
 :-------------------------:|:-------------------------:
-![](/docs/images/2d_gif.gif)  |  ![](/docs/images/3d_gif.gif)
+![](/docs/images/image_ai.gif)  |  ![](/docs/images/3d_ai.gif)
 
  :one: Supports data labeling for images, 3D LiDAR and 2D/3D Sensor Fusion datasets
  
@@ -43,10 +42,9 @@ Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/y
 
  :six: Model results visualization to help you evaluate your model
 
-<img src="/docs/images/2d_v.gif" width="300">
-
-Image Data Curation (Visualizing & Debug) - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE) 
-![](/docs/images/2d_v.gif)  |  ![](/docs/images/3d_v2.gif)
+Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE)  |  Lidar-camera Fusion Data Curation (Filter by Class name X Cross Dataset)
+:-------------------------:|:-------------------------:
+![](/docs/images/2d_v.gif) |  <img src="/docs/images/dv.png" width="640"> 
 
 # Quick start
 
@@ -64,7 +62,7 @@ wget https://github.com/basicai/xtreme1/releases/download/v0.5.5/xtreme1-v0.5.5.
 unzip -d xtreme1-v0.5.5 xtreme1-v0.5.5.zip
 ```
 
-### Start all services
+## Start all services
 
 ```bash
 docker compose up
@@ -72,14 +70,14 @@ docker compose up
 
 Visit [https://localhost:8190](https://localhost:8190) in the browser (Google Chrome is recommended) to try out Xtreme1!
 
-⚠️ Install built-in models
+## ⚠️ Install built-in models
 You need to explicitly specify a model profile to enable model services.
 
 ```bash
 docker compose --profile model up
 ```
 
-### Enable model services
+## Enable model services
 
 > Make sure you have installed [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker). But you do not need to install the CUDA Toolkit, as it already contained in the model image.
 
@@ -94,15 +92,16 @@ docker compose --profile model up
   },
   "default-runtime": "nvidia"
 }
-
 ```
 
 For more installation, development and deployment, check out [Xtreme1 Docs](docs.xtreme1.io/).
 
+![](/docs/images/3d_annotation2.png) 
 
 # License #
 This software is licensed under the Apache 2.0 LICENSE. Xtreme1 is a trademark of LF AI Projects.
-![](LFAI_DATA_horizontal-color.png width="200")
+
+<img src="/docs/images/LFAI_DATA_horizontal-color.png" width="250">
 
 If Xtreme1 is part of your development process / project / publication, please cite us ❤️ :
 ```bash
