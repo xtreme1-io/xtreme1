@@ -35,23 +35,23 @@
       <template v-else>
         <div class="img-content" v-if="data.type === datasetTypeEnum.IMAGE">
           <div class="img" v-for="(item, index) in new Array(6)" :key="item">
-            <img v-lazy="getImgUrl(index)" alt="" />
+            <img v-lazyload="getImgUrl(index)" alt="" />
           </div>
         </div>
         <div class="img-content" v-else-if="data.type === datasetTypeEnum.LIDAR_FUSION">
           <div class="wrapper">
             <div class="banner-img">
-              <img class="pcRender" v-lazy="getPcImgUrl()" alt="" />
+              <img class="pcRender" v-lazyload="getPcImgUrl()" alt="" />
             </div>
             <div class="img-fusion-camera">
-              <img v-for="item in new Array(3)" :key="item" v-lazy="getLidarImgUrl()" alt="" />
+              <img v-for="item in new Array(3)" :key="item" v-lazyload="getLidarImgUrl()" alt="" />
             </div>
           </div>
         </div>
         <div class="img-content" v-else>
           <div class="wrapper">
             <div class="banner-img-full">
-              <img class="pcRender" v-lazy="getPcImgUrl()" alt="" />
+              <img class="pcRender" v-lazyload="getPcImgUrl()" alt="" />
             </div>
           </div>
         </div>
