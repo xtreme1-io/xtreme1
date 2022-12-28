@@ -7,7 +7,7 @@ class LazyLoader {
   loadN = 0;
   loadMax = 4;
   constructor() {
-    this.load = debounce(this.load.bind(this), 100);
+    this.load = debounce(this.load.bind(this), 50);
 
     this.observer = new IntersectionObserver((changes) => {
       for (const change of changes) {
@@ -63,6 +63,7 @@ class LazyLoader {
 
     this._loadImage(image, (image as any).dataSrc).then(() => {
       image.setAttribute('data-loaded', '1');
+      image?.parentElement?.classList.remove('image-loading');
       this.loadN--;
       this.removeImage(image);
       this.load();

@@ -327,11 +327,11 @@ export function useImgCard(props: {
   const updatePcImageObject = () => {
     const imgs: any[] = props.data.content
       ? props.data.content
-        .filter((record) => record?.directoryType?.includes('image'))
-        .slice(0, 3)
-        .map((img) => {
-          return Object.assign({}, img, { object: null });
-        })
+          .filter((record) => record?.directoryType?.includes('image'))
+          .slice(0, 3)
+          .map((img) => {
+            return Object.assign({}, img, { object: null });
+          })
       : [];
     if (
       props.showAnnotation !== false &&

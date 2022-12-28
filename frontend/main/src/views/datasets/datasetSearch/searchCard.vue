@@ -136,16 +136,6 @@
     overflow: hidden;
     background-color: #ededed;
     transform: translateZ(0);
-    &.image-loading {
-      background: linear-gradient(
-        45deg,
-        rgba(190, 190, 190, 0.2) 25%,
-        rgba(129, 129, 129, 0.24) 37%,
-        rgba(190, 190, 190, 0.2) 63%
-      );
-      background-size: 400% 100%;
-      animation: animation-loading 1.4s ease infinite;
-    }
     .pointCloudImg {
       width: 100%;
       height: 100%;
@@ -285,14 +275,6 @@
       }
     }
 
-    @keyframes animation-loading {
-      0% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0 50%;
-      }
-    }
     @keyframes operationHover {
       0% {
         opacity: 0;

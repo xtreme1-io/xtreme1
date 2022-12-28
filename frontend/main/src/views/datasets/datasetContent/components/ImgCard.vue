@@ -114,13 +114,7 @@
       </div>
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
         <div class="place relation-container image-loading">
-          <img
-            class="pointCloudImg h-83px"
-            @error="onHandleImgLoad"
-            @load="onHandleImgLoad"
-            v-lazy="getPlaceImg()"
-            alt=""
-          />
+          <img class="pointCloudImg h-83px" v-lazyload="getPlaceImg()" alt="" />
           <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
             <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
           </svg>
@@ -132,13 +126,7 @@
             :ref="(e) => setRef(e, index)"
             :key="item"
           >
-            <img
-              :key="item"
-              @error="onHandleImgLoad"
-              @load="onHandleImgLoad"
-              v-lazy="getPcImage(iState.pcImageObject[item])"
-              alt=""
-            />
+            <img :key="item" v-lazyload="getPcImage(iState.pcImageObject[item])" alt="" />
             <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
               <template v-for="_item in iState.pcImageObject[item]?.object || []">
                 <polygon v-if="_item.type === '2D_RECT'" :key="_item.id" :points="_item.points" />
@@ -158,13 +146,7 @@
         v-else-if="info?.type === datasetTypeEnum.LIDAR_BASIC"
         style="width: 100%; height: 100%"
       >
-        <img
-          class="object-cover pointCloudImg image-loading"
-          @error="onHandleImgLoad"
-          @load="onHandleImgLoad"
-          :src="getPlaceImg()"
-          alt=""
-        />
+        <img class="object-cover pointCloudImg image-loading" v-lazyload="getPlaceImg()" alt="" />
         <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
           <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
         </svg>
@@ -178,9 +160,8 @@
         <img
           class="place image-card"
           ref="svg"
-          @load="(e) => onHandleImgLoad(e, data)"
-          @error="onHandleImgLoad"
-          :src="getImageUrl(data) || placeImg"
+          @load="() => onImgLoad(data)"
+          v-lazyload="getImageUrl(data) || placeImg"
           alt=""
         />
         <svg
@@ -290,13 +271,13 @@
     handleTrigger(true);
   };
 
-  const onHandleImgLoad = (event: Event, data?: any) => {
-    const target = event.target as HTMLImageElement;
-    target?.parentElement?.classList.remove('image-loading');
-    if (data) {
-      onImgLoad(data);
-    }
-  };
+  // const onHandleImgLoad = (event: Event, data?: any) => {
+  //   const target = event.target as HTMLImageElement;
+  //   target?.parentElement?.classList.remove('image-loading');
+  //   if (data) {
+  //     onImgLoad(data);
+  //   }
+  // };
 
   const handleLeave = () => {
     handleTrigger(false);
@@ -378,23 +359,6 @@
     width: 272px;
     height: 175px;
     transform: translateZ(0);
-     .image-loading{
-        img{
-          opacity: 0;
-        }
-      background: linear-gradient(45deg,rgba(190,190,190,.2) 25%,rgba(129,129,129,.24) 37%,rgba(190,190,190,.2) 63%);
-      background-size: 400% 100%;
-      animation: animation-loading 1.4s ease infinite;
-     }
-
-     @keyframes animation-loading {
-      0% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0 50%;
-      }
-    }
     .lockInfo{
       position: absolute;
       right: 20px;
