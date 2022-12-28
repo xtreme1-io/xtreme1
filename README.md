@@ -10,7 +10,7 @@
 </div>
 
 # Intro #
-BasicAI launched the world's first open-source platform for multisensory training data. 
+Xtreme1 is the world's first open-source platform for multisensory training data.
 
 Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2D image and 3D point cloud dataset ML challenges.
 The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2D/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
@@ -58,7 +58,7 @@ Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xi
 Download the latest release package and unzip it.
 
 ```bash
-wget https://github.com/basicai/xtreme1/releases/download/v0.5.5/xtreme1-v0.5.5.zip
+wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.5.5/xtreme1-v0.5.5.zip
 unzip -d xtreme1-v0.5.5 xtreme1-v0.5.5.zip
 ```
 
