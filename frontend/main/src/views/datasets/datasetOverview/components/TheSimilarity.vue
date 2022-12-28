@@ -223,7 +223,7 @@
     }
 
     const res: any = await datasetDetailApi({ id });
-    imgSrc.value = res?.content?.[0]?.file?.url;
+    imgSrc.value = res?.content?.[0]?.file?.largeThumbnail?.url ?? res?.content?.[0]?.file?.url;
     labelName.value = res.name;
 
     getToolTipDom(id);
