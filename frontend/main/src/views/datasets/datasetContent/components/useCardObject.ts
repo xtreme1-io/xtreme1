@@ -737,10 +737,10 @@ export function useSearchCard(props: {
           offsetY = (naturalHeight - (min.y + max.y)) / 2;
           scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y)) * zoom;
           scale = Math.max(scale, 1);
-          let __x = Math.max(clientWidth * scale - contentWidth, 0) / 2;
-          let __y = Math.max(clientHeight * scale - contentHeight, 0) / 2;
-          __x = (__x / clientWidth) * naturalWidth;
-          __y = (__y / clientHeight) * naturalHeight;
+          const _sWidth = clientWidth * scale;
+          const _sHeight = clientHeight * scale;
+          const __x = (Math.max((_sWidth - contentWidth) / 2, 0) / _sWidth) * naturalWidth;
+          const __y = (Math.max((_sHeight - contentHeight) / 2, 0) / _sHeight) * naturalHeight;
           offsetX = Math.max(-__x, Math.min(__x, offsetX));
           offsetY = Math.max(-__y, Math.min(__y, offsetY));
         }
