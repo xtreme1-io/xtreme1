@@ -502,6 +502,9 @@ export function useSearchCard(props: {
       const extraInfo = file?.extraInfo;
       const url = file?.url;
       const smallUrl = file?.largeThumbnail?.url;
+      // if (props.info?.type === datasetTypeEnum.IMAGE) {
+      //   smallUrl = url;
+      // }
       return {
         extraInfo: extraInfo,
         url: extraInfo ? smallUrl || url : url,
@@ -650,6 +653,8 @@ export function useSearchCard(props: {
 
   const updateDom = (img: HTMLImageElement, svg: SVGElement) => {
     let { clientHeight, clientWidth, naturalWidth, naturalHeight } = img;
+    const contentWidth = clientWidth;
+    const contentHeight = clientHeight;
     const info = pcActiveImage.value?.extraInfo;
     if (info) {
       naturalWidth = info.width || naturalWidth;
@@ -678,6 +683,8 @@ export function useSearchCard(props: {
       clientWidth,
       naturalWidth,
       naturalHeight,
+      contentWidth,
+      contentHeight,
     };
   };
 
@@ -700,7 +707,14 @@ export function useSearchCard(props: {
     const results: any[] = [];
     const object = props.object?.classAttributes;
     if (img.src && img.complete && object) {
-      const { clientHeight, clientWidth, naturalWidth, naturalHeight } = updateDom(img, svg);
+      const {
+        clientHeight,
+        clientWidth,
+        naturalWidth,
+        naturalHeight,
+        contentHeight,
+        contentWidth,
+      } = updateDom(img, svg);
       const imgToView_X = (x: number) => {
         return (x / naturalWidth) * clientWidth;
       };
@@ -713,6 +727,7 @@ export function useSearchCard(props: {
         let offsetX = 0;
         let offsetY = 0;
         let scale = 1;
+        const zoom = 0.8;
         if (points.length) {
           points.forEach((p) => {
             min.min(p);
@@ -720,7 +735,14 @@ export function useSearchCard(props: {
           });
           offsetX = (naturalWidth - (min.x + max.x)) / 2;
           offsetY = (naturalHeight - (min.y + max.y)) / 2;
-          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y)) * 0.3;
+          scale = Math.min(naturalWidth / (max.x - min.x), naturalHeight / (max.y - min.y)) * zoom;
+          scale = Math.max(scale, 1);
+          let __x = Math.max(clientWidth * scale - contentWidth, 0) / 2;
+          let __y = Math.max(clientHeight * scale - contentHeight, 0) / 2;
+          __x = (__x / clientWidth) * naturalWidth;
+          __y = (__y / clientHeight) * naturalHeight;
+          offsetX = Math.max(-__x, Math.min(__x, offsetX));
+          offsetY = Math.max(-__y, Math.min(__y, offsetY));
         }
         return {
           offsetX,
