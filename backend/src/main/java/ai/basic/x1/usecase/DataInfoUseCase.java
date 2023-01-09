@@ -1671,7 +1671,7 @@ public class DataInfoUseCase {
             setDataInfoBOListFile(dataInfoBOList);
         }
         var dataInfoQueryBO = DataInfoQueryBO.builder().datasetType(dataset.getType()).build();
-        var datasetClassBOList = datasetClassUseCase.findAll(dataInfoQueryBO.getDatasetId());
+        var datasetClassBOList = datasetClassUseCase.findAll(datasetId);
         var classMap = new HashMap<Long, String>();
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
