@@ -176,31 +176,39 @@ public class DataInfoUseCase {
     /**
      * Batch delete
      *
-     * @param ids Data id collection
+     * @param datasetId dataset id
+     * @param ids       Data id collection
      */
     @Transactional(rollbackFor = Exception.class)
-    public void deleteBatch(List<Long> ids) {
+    public void deleteBatch(Long datasetId, List<Long> ids) {
+
+        var dataInfoLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        dataInfoLambdaQueryWrapper.in(DataInfo::getId, ids);
+        var dataCount = dataInfoDAO.count(dataInfoLambdaQueryWrapper);
+        if (dataCount <= 0) {
+            throw new UsecaseException(UsecaseCode.DATA_NOT_FOUND);
+        }
         var count = dataEditDAO.count(Wrappers.lambdaQuery(DataEdit.class).in(DataEdit::getDataId, ids));
         if (count > 0) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_OTHERS_ANNOTATING);
         }
-        var dataInfo = dataInfoDAO.getOne(Wrappers.lambdaQuery(DataInfo.class).in(DataInfo::getId, ids).last("limit 1"));
-
         var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+        dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, datasetId);
         dataInfoLambdaUpdateWrapper.in(DataInfo::getId, ids);
         dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
         dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
+            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId,datasetId);
             dataAnnotationObjectLambdaUpdateWrapper.in(DataAnnotationObject::getDataId, ids);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
             var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId,datasetId);
             dataAnnotationClassificationLambdaUpdateWrapper.in(DataAnnotationClassification::getDataId, ids);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
-            if (ObjectUtil.isNotNull(dataInfo)) {
-                datasetSimilarityJobUseCase.submitJob(dataInfo.getDatasetId());
-            }
+            datasetSimilarityJobUseCase.submitJob(datasetId);
         })));
     }
 
@@ -326,7 +334,7 @@ public class DataInfoUseCase {
                 dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setLockedBy(userMap.get(userIdMap.get(dataInfoBO.getId()))));
             }
             var datasetList = datasetDAO.listByIds(datasetIds);
-            var datasetMap = datasetList.stream().collect(Collectors.toMap(Dataset::getId,Dataset::getName));
+            var datasetMap = datasetList.stream().collect(Collectors.toMap(Dataset::getId, Dataset::getName));
             dataInfoBOList.forEach(dataInfoBO -> dataInfoBO.setDatasetName(datasetMap.get(dataInfoBO.getDatasetId())));
         }
         return dataInfoBOList;
@@ -377,7 +385,7 @@ public class DataInfoUseCase {
     public PresignedUrlBO generatePresignedUrl(String fileName, Long datasetId, Long userId) {
         var objectName = String.format("%s/%s/%s/%s", userId, datasetId, UUID.randomUUID().toString().replace("-", ""), fileName);
         try {
-            return minioService.generatePresignedUrl(minioProp.getBucketName(), objectName,Boolean.TRUE);
+            return minioService.generatePresignedUrl(minioProp.getBucketName(), objectName, Boolean.TRUE);
         } catch (Exception e) {
             log.error("Minio generate presigned url error", e);
             throw new UsecaseException("Minio generate presigned url error!");
