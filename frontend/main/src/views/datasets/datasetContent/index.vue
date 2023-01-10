@@ -448,6 +448,7 @@
         return new Promise(async (resolve) => {
           await deleteBatchDataset({
             ids: selectedList.value,
+            datasetId: id as unknown as number,
           });
           fixedFetchList();
           resolve(1);
