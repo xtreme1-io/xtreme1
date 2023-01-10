@@ -445,6 +445,7 @@
         danger: true,
       },
       onOk() {
+        console.log(id);
         return new Promise(async (resolve) => {
           await deleteBatchDataset({
             ids: selectedList.value,
@@ -459,10 +460,11 @@
     });
   };
 
-  const handleDeleteSingle = async (id, callback) => {
+  const handleDeleteSingle = async (dataId, callback) => {
     try {
       await deleteBatchDataset({
-        ids: [id],
+        ids: [dataId],
+        datasetId: id as unknown as number,
       });
     } catch (e) {}
     fixedFetchList();
