@@ -26,44 +26,7 @@
                 v-for="item in state.attrs"
                 :key="state.objectId + state.classType + item.name"
             >
-                <div class="name" :span="10">
-                    {{ item.name }}
-                    <span
-                        v-if="
-                            item.type === AttrType.RADIO || item.type === AttrType.MULTI_SELECTION
-                        "
-                        >{{ item.type === AttrType.RADIO ? '(Radio)' : '(CheckBox)' }}</span
-                    >
-                </div>
-                <div class="value" :span="14">
-                    <Radio
-                        :name="item.name"
-                        v-model:value="item.value"
-                        @change="onAttChange"
-                        :options="item.options"
-                        v-if="item.type === AttrType.RADIO"
-                    />
-                    <Select
-                        :name="item.name"
-                        v-model:value="item.value"
-                        @change="onAttChange"
-                        :options="item.options"
-                        v-else-if="item.type === AttrType.DROPDOWN"
-                    />
-                    <Text
-                        :name="item.name"
-                        v-model:value="item.value"
-                        @change="onAttChange"
-                        v-else-if="item.type === AttrType.TEXT"
-                    />
-                    <Check
-                        :name="item.name"
-                        v-model:value="item.value"
-                        @change="onAttChange"
-                        :options="item.options"
-                        v-else-if="item.type === AttrType.MULTI_SELECTION"
-                    />
-                </div>
+                <AttrValue @change="onAttChange" :item="(item as any)" :isDisable="false" />
             </div>
         </div>
         <CloseCircleOutlined @click="onClose" class="close" />
@@ -84,10 +47,7 @@
     import { DisconnectOutlined, CloseCircleOutlined } from '@ant-design/icons-vue';
     import * as _ from 'lodash';
 
-    import Radio from './sub/Radio.vue';
-    import Select from './sub/Select.vue';
-    import Text from './sub/Text.vue';
-    import Check from './sub/Check.vue';
+    import AttrValue from './sub/AttrValue.vue';
     // ***************Props and Emits***************
     // const emit = defineEmits(['close']);
     // let props = defineProps(['data']);
@@ -177,6 +137,7 @@
 
     function onChange(name: string) {
         if (!state.objectId) return;
+
         let obj = editor.tool?.shapes.getItemById(state.objectId);
         state.classType = name;
 
@@ -220,7 +181,6 @@
         let classType = userData.classType || '';
         classType && updateAttrInfo(object, classType);
     }
-
     let onAttChange = _.debounce((name: string, value: any) => {
         if (!state.objectId) return;
         let object = editor.tool?.shapes.getItemById(state.objectId);
@@ -230,12 +190,10 @@
         if (!object.userData.attrs) object.userData.attrs = {};
         // object.userData.attrs[name] = value;
         let attrs = JSON.parse(JSON.stringify(object.userData.attrs));
+        console.log(attrs);
+
         attrs[name] = value;
         object.updateAttrs(attrs);
-        // editor.cmdManager.execute('update-userData', {
-        //     object,
-        //     userData: { attrs },
-        // });
     }, 100);
 
     function updateAttrInfo(object: AnnotateObject, classType: string) {
@@ -245,12 +203,11 @@
         if (!object.userData.attrs) object.userData.attrs = {};
         let attrs = object.userData.attrs;
 
-        let newAttrs = classConfig.attrs.map((e) => {
+        let newAttrs = classConfig.attrs.map((e: any) => {
             let defaultValue = e.type === AttrType.MULTI_SELECTION ? [] : '';
-            return { ...e, value: e.name in attrs ? attrs[e.name] : defaultValue };
+            return { ...e, value: e.id in attrs ? attrs[e.id] : defaultValue };
         });
-
-        // console.log(newAttrs);
+        console.log(newAttrs);
         state.attrs = newAttrs;
     }
 </script>

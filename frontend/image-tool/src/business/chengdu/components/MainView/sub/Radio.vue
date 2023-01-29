@@ -1,5 +1,5 @@
 <template>
-    <a-radio-group v-model:value="value" size="small" @change="onChange" v-bind="$attrs">
+    <a-radio-group v-model:value="value" size="small" v-bind="$attrs">
         <a-radio v-for="item in props.options" :value="item.value">{{
             item.label || item.value
         }}</a-radio>
@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, getCurrentInstance } from 'vue';
+    import { computed } from 'vue';
 
     interface IOption {
         value: string;
@@ -21,19 +21,16 @@
     }
 
     // ***************Props and Emits***************
-    let emit = defineEmits(['update:value', 'change']);
-    let props = defineProps<IProps>();
+    const emits = defineEmits(['update:value', 'change']);
+    const props = defineProps<IProps>();
     // *********************************************
-
-    // let instance = getCurrentInstance();
-    // debugger;
-
-    let value = ref(props.value || '');
-    function onChange() {
-        // console.log(value.value);
-        emit('update:value', value.value);
-        emit('change', props.name, value.value);
-    }
+    const value = computed({
+        get: () => {
+            return props.value;
+        },
+        set: (newVal) => {
+            emits('update:value', newVal);
+            emits('change', props.name, newVal);
+        },
+    });
 </script>
-
-<style lang="less"></style>
