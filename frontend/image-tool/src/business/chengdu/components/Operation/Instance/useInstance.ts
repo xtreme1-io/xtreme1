@@ -1,6 +1,12 @@
 import { reactive, ref, createVNode, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import * as _ from 'lodash';
-import { IUserData, Event, ToolType2AnnotatteType } from 'editor';
+import {
+    IUserData,
+    Event,
+    ToolType2AnnotatteType,
+    AnnotateType2ToolType,
+    AnnotateType,
+} from 'editor';
 import type { IInstanceList, IInstanceState, IItem, IItemAttrs } from './type';
 import { useInjectEditor, useInjectEditorState } from '../../../../../editor/inject';
 import useItem from './useItem';
@@ -76,7 +82,9 @@ export default function useInstance() {
         editorState.classTypes.forEach((e) => {
             classConfigMap[e.name] = e;
         });
+        // console.log('state.list ==>', state.list);
 
+        // TODO classType 作为Map有bug, classType可能会重复
         let existMap: Record<string, Record<string, IItem>> = {};
         let classMap: Record<string, IItem[]> = {};
         state.list.forEach((info) => {
@@ -92,6 +100,7 @@ export default function useInstance() {
         state.noClassList.data.forEach((data) => {
             existMap[''][data.id] = data;
         });
+        // console.log(existMap, classMap);
 
         let objectMap: Record<string, Record<string, IItem>> = {};
         objects.forEach((obj: any) => {
@@ -158,14 +167,16 @@ export default function useInstance() {
                 }
 
                 if (!classMap[classType]) {
-                    let color = classConfigMap[classType]
-                        ? classConfigMap[classType].color
-                        : obj.color || '#ffffff';
+                    let { color, toolType } = getColor(obj);
+                    // let color = classConfigMap[classType]
+                    //     ? classConfigMap[classType].color
+                    //     : obj.color || '#ffffff';
                     // let bgColor = colord(color).alpha(0.3).toRgbString();
                     let insList: IInstanceList = {
                         classType,
                         color,
-                        annotateType: ToolType2AnnotatteType[classConfigMap[classType]?.toolType],
+                        // annotateType: ToolType2AnnotatteType[classConfigMap[classType]?.toolType],
+                        annotateType: ToolType2AnnotatteType[toolType],
                         // bgColor,
                         data: [],
                         visible: true,
@@ -477,6 +488,32 @@ export default function useInstance() {
                 });
             }
         });
+    }
+
+    // 根据 obj.classType 和 obj.toolType 获取颜色。，防止 name 重复
+    function getColor(obj: any) {
+        const classIdMap: Record<string, any> = {};
+        editorState.classTypes.forEach((e) => {
+            classIdMap[e.id] = e;
+        });
+        const classType = obj.userData.classType || obj.userData.modelClass || '';
+        const toolType = AnnotateType2ToolType[obj.type] || AnnotateType.RECTANGLE || '';
+
+        let targetClassType: any;
+        Object.keys(classIdMap).forEach((item: any) => {
+            const tempObj = classIdMap?.[item];
+            if (tempObj?.name == classType && tempObj?.toolType == toolType) {
+                targetClassType = tempObj;
+            }
+        });
+
+        const color = targetClassType ? targetClassType.color : obj.color || '#ffffff';
+        console.log('getColor: ', classType, toolType, targetClassType, color);
+
+        return {
+            color,
+            toolType,
+        };
     }
 
     return {

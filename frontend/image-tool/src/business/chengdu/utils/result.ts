@@ -23,7 +23,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
 
     objects.forEach((e: IObject) => {
         const obj = e.classAttributes;
-        console.log(obj);
+        // console.log(obj);
 
         // 用 classId 查找唯一，直接使用 classType 可能会有重复
         let targetClassType: any = classIdMap[obj.classId];

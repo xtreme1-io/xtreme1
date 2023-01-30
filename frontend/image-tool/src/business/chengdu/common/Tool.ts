@@ -73,7 +73,7 @@ export default class Tool {
                     let copyClassification = {} as IClassification;
                     copyClassification = JSON.parse(JSON.stringify(classification));
                     copyClassification.attrs.forEach((attr) => {
-                        console.log('attr', attr);
+                        // console.log('attr', attr);
                         attr.value = attr.type === AttrType.MULTI_SELECTION ? [] : '';
                         const target = annotationClassification.find(
                             (item: any) => item.id == attr.classificationId,

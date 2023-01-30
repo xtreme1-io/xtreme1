@@ -140,8 +140,12 @@
 
         let obj = editor.tool?.shapes.getItemById(state.objectId);
         state.classType = name;
+        const toolType = AnnotateType2ToolType[obj.type];
 
-        let classConfig = _.find(editorState.classTypes, (e) => e.name === name) as IClassType;
+        let classConfig = _.find(
+            editorState.classTypes,
+            (e) => e.name === name && e.toolType == toolType,
+        ) as IClassType;
         obj.updateClassType({ attrs: {}, classType: state.classType, color: classConfig.color });
         updateAttrInfo(obj as any, state.classType);
     }
@@ -190,14 +194,22 @@
         if (!object.userData.attrs) object.userData.attrs = {};
         // object.userData.attrs[name] = value;
         let attrs = JSON.parse(JSON.stringify(object.userData.attrs));
-        console.log(attrs);
+        // console.log(attrs);
 
         attrs[name] = value;
         object.updateAttrs(attrs);
     }, 100);
 
     function updateAttrInfo(object: AnnotateObject, classType: string) {
-        let classConfig = _.find(editorState.classTypes, (e) => e.name === classType);
+        console.log(editorState.classTypes);
+
+        const toolType = AnnotateType2ToolType[object.type];
+        let classConfig = _.find(
+            editorState.classTypes,
+            (e) => e.name === classType && e.toolType == toolType,
+        );
+        // console.log('updateAttrInfo', classConfig);
+
         if (!classConfig) return;
 
         if (!object.userData.attrs) object.userData.attrs = {};
@@ -207,7 +219,7 @@
             let defaultValue = e.type === AttrType.MULTI_SELECTION ? [] : '';
             return { ...e, value: e.id in attrs ? attrs[e.id] : defaultValue };
         });
-        console.log(newAttrs);
+        // console.log(newAttrs);
         state.attrs = newAttrs;
     }
 </script>
