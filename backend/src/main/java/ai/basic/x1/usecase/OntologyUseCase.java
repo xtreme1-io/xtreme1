@@ -337,7 +337,7 @@ public class OntologyUseCase {
             exportBO.setClasses(DefaultConverter.convert(classes, ClassAndClassificationExportBO.Class.class));
             LambdaQueryWrapper<Classification> classificationWrapper = new LambdaQueryWrapper<Classification>().eq(Classification::getOntologyId, param.getSourceId());
             List<Classification> classifications = classificationDAO.list(classificationWrapper);
-            classifications.forEach(classification -> removeId(classification.getOptions()));
+            classifications.forEach(classification -> removeId(classification.getAttribute()));
             exportBO.setClassifications(DefaultConverter.convert(classifications, ClassAndClassificationExportBO.Classification.class));
         } else if (ClassAndClassificationSourceEnum.DATASET.equals(param.getSourceType())) {
             LambdaQueryWrapper<DatasetClass> datasetClassWrapper = new LambdaQueryWrapper<DatasetClass>().eq(DatasetClass::getDatasetId, param.getSourceId());
@@ -346,7 +346,7 @@ public class OntologyUseCase {
             exportBO.setClasses(DefaultConverter.convert(classes, ClassAndClassificationExportBO.Class.class));
             LambdaQueryWrapper<DatasetClassification> datasetClassificationWrapper = new LambdaQueryWrapper<DatasetClassification>().eq(DatasetClassification::getDatasetId, param.getSourceId());
             List<DatasetClassification> classifications = datasetClassificationDAO.list(datasetClassificationWrapper);
-            classifications.forEach(classification -> removeId(classification.getOptions()));
+            classifications.forEach(classification -> removeId(classification.getAttribute()));
             exportBO.setClassifications(DefaultConverter.convert(classifications, ClassAndClassificationExportBO.Classification.class));
         } else {
             throw new UsecaseException(UsecaseCode.UNKNOWN);
@@ -375,23 +375,29 @@ public class OntologyUseCase {
         });
     }
 
+    private void removeId(JSONObject jsonObject){
+        if (ObjectUtil.isNull(jsonObject)){
+            return;
+        }
+        jsonObject.remove("id");
+        if (ObjectUtil.isNotNull(jsonObject.get("attributes"))) {
+            JSONArray attributes = (JSONArray) jsonObject.get("attributes");
+            if (ObjectUtil.isNotEmpty(attributes)) {
+                removeId(attributes);
+            }
+        }
+        if (ObjectUtil.isNotNull(jsonObject.get("options"))) {
+            JSONArray options = (JSONArray) jsonObject.get("options");
+            if (ObjectUtil.isNotEmpty(options)) {
+                removeId(options);
+            }
+        }
+    }
+
     private void removeId(JSONArray array) {
         if (ObjectUtil.isNotEmpty(array)) {
             array.forEach(o -> {
-                JSONObject jsonObject = (JSONObject) o;
-                jsonObject.remove("id");
-                if (ObjectUtil.isNotNull(jsonObject.get("attributes"))) {
-                    JSONArray attributes = (JSONArray) jsonObject.get("attributes");
-                    if (ObjectUtil.isNotEmpty(attributes)) {
-                        removeId(attributes);
-                    }
-                }
-                if (ObjectUtil.isNotNull(jsonObject.get("options"))) {
-                    JSONArray options = (JSONArray) jsonObject.get("options");
-                    if (ObjectUtil.isNotEmpty(options)) {
-                        removeId(options);
-                    }
-                }
+                removeId((JSONObject) o);
             });
         }
     }
