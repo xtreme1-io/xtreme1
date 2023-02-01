@@ -151,10 +151,11 @@ export const getCreateClassificationParams = (config) => {
   const { formState, props, dataSchema } = config;
 
   const params: any = {
+    ontologyId: props.ontologyId ?? undefined,
     name: formState.name,
     inputType: formState.inputType,
     isRequired: formState.isRequired,
-    options: [...dataSchema.options],
+    attribute: {},
   };
   // isUpdate
   if (props.detail?.id) {
@@ -162,10 +163,18 @@ export const getCreateClassificationParams = (config) => {
   }
   // isCenter
   if (props.isCenter) {
-    params.ontologyId = props.ontologyId;
   } else {
-    params.datasetId = props.datasetId;
+    params.datasetId = props.datasetId ?? undefined;
+    params.classificationId = props.classificationId ?? undefined;
   }
+
+  params.attribute = {
+    id: props.detail?.attribute?.id ?? v4(),
+    name: formState.name,
+    type: formState.inputType,
+    required: formState.isRequired,
+    options: [...dataSchema.options],
+  };
 
   return params;
 };

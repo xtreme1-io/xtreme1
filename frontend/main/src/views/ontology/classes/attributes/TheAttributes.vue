@@ -313,8 +313,6 @@
   provide('handleUpdateValid', handleUpdateValid);
 
   const handleConfirm = () => {
-    console.log('Confirm ==>', dataSchema.value);
-    debugger;
     if (component.value) {
       emitter.emit('validateForm', { type: attributeOptionEnum.CONFIRM });
     } else {
