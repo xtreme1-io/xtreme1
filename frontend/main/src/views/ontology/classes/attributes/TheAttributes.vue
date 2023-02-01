@@ -171,12 +171,12 @@
 
   /** DataSchema */
   const dataSchema = ref<IDataSchema>({});
-  const handleSetDataSchema = (setOption) => {
+  const handleSetDataSchema = async (setOption) => {
     console.log(setOption);
     if (props.activeTab === ClassTypeEnum.CLASS) {
-      setClassSchema(dataSchema.value, indexList.value, setOption);
+      await setClassSchema(dataSchema.value, indexList.value, setOption);
     } else {
-      setSchema(dataSchema.value, indexList.value, setOption);
+      await setSchema(dataSchema.value, indexList.value, setOption);
     }
     // has changed
     isChangedByUser.value = true;
@@ -313,6 +313,8 @@
   provide('handleUpdateValid', handleUpdateValid);
 
   const handleConfirm = () => {
+    console.log('Confirm ==>', dataSchema.value);
+    debugger;
     if (component.value) {
       emitter.emit('validateForm', { type: attributeOptionEnum.CONFIRM });
     } else {
