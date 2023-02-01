@@ -353,19 +353,18 @@
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-img-card';
   .@{prefix-cls}{
-    // padding: 0 10px;
-    // margin-bottom: 20px;
+    
     position: relative;
-    width: 272px;
-    height: 175px;
+   
     transform: translateZ(0);
     .lockInfo{
       position: absolute;
-      right: 20px;
+      padding: 0 10px;
+     width: 100%;
+     text-align: center;
       top: 6px;
       color: white;
       z-index: 1;
-      max-width: 150px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -375,14 +374,13 @@
         position: relative;
         display: inline-flex;
         width: 100%;
-        // height: 100%;
+        height: 100%;
         justify-content: center;
         align-items: center;
         background: #ffffff;
         border: 1px solid #cccccc;
         box-sizing: border-box;
         border-radius: 4px;
-        height: 100%;
 
         img {
           width: 80px;
@@ -396,30 +394,14 @@
 
     .img{
       position: relative;
-      width: 272px;
-      height: 175px;
+      width: 100%;
+      height: 100%;
       border: 1px solid #CCCCCC;
       box-sizing: border-box;
-      padding: 6px;
-      border-radius: 4px;
+      border-radius: 12px;
       background: #fff;
-
-      .name{
-        width: 100%;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 400;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        &.bottom{
-          position: absolute;
-          bottom: 0;
-          background: white;
-          z-index: 2;
-        }
-      }
-
+      overflow: hidden;
+      cursor: pointer;
       .checkbox{
         position: absolute;
         top: 10px;
@@ -480,9 +462,21 @@
 
         &.image-card{
           width: 100%;
-          height: 100%;
-          object-fit: cover;
+          height: calc(100% - 40px);
+          object-fit: fill;
           margin-bottom: 5px
+        }
+      }
+
+      .name{
+        width: 100%;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 400;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        &.bottom{
         }
       }
       .easy-pc {
