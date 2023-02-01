@@ -21,7 +21,10 @@
 
   import { ActionSelect } from '/@/components/BasicCustom/ActionSelect';
   import { actionList } from './actionList';
-  import { deleteSelectedDatasetClassApi } from '/@/api/business/classes';
+  import {
+    deleteSelectedDatasetClassApi,
+    deleteSelectedDatasetClassificationApi,
+  } from '/@/api/business/classes';
   import { ClassTypeEnum } from '/@/api/business/model/classesModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { ModalConfirmCustom } from '/@/utils/business/confirm';
@@ -63,7 +66,11 @@
       okText: t('common.delText'),
       okButtonProps: { type: 'primary', danger: true },
       onOk: async () => {
-        await deleteSelectedDatasetClassApi(selectedItemIds.value);
+        if (props.activeTab == ClassTypeEnum.CLASS) {
+          await deleteSelectedDatasetClassApi(selectedItemIds.value);
+        } else {
+          await deleteSelectedDatasetClassificationApi(selectedItemIds.value);
+        }
         emits('fetchList');
       },
     });
