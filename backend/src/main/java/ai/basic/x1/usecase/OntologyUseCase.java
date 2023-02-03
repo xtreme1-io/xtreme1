@@ -89,9 +89,11 @@ public class OntologyUseCase {
         return DefaultConverter.convert(ontologyDAO.getById(id), OntologyBO.class);
     }
 
-    public void saveOntology(OntologyBO ontologyBO) {
+    public Long saveOntology(OntologyBO ontologyBO) {
         try {
-            ontologyDAO.saveOrUpdate(DefaultConverter.convert(ontologyBO, Ontology.class));
+            Ontology ontology = DefaultConverter.convert(ontologyBO, Ontology.class);
+            ontologyDAO.saveOrUpdate(ontology);
+            return ontology.getId();
         } catch (DuplicateKeyException e) {
             throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
         }
