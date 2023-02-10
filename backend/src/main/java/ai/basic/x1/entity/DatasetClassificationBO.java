@@ -2,6 +2,7 @@ package ai.basic.x1.entity;
 
 import ai.basic.x1.entity.enums.InputTypeEnum;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ public class DatasetClassificationBO {
 
     private String name;
 
-    private JSONArray options;
+    private JSONObject attribute;
 
     /**
      * input type:'RADIO','MULTI_SELECTION','DROPDOWN','TEXT'

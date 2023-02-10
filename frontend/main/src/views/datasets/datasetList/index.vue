@@ -21,6 +21,7 @@
           viewClass="dataset-list-card-scroll"
         >
           <ListCard
+          class="listcard"
             v-for="item in list"
             :key="item.id"
             :data="item"
@@ -77,7 +78,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, provide, reactive, watch, onMounted, unref } from 'vue';
+  import { ref, provide, reactive, watch, onMounted, unref, watchEffect } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { Button, ButtonSize } from '/@@/Button';
@@ -104,6 +105,7 @@
   import CustomRadio from '/@@/CustomRadio/index.vue';
   import { useLoading } from '/@/components/Loading';
   import Icon, { SvgIcon } from '/@/components/Icon';
+import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
   const annotationStatus = ref<any>();
   const start = ref<Nullable<Dayjs>>(null);
   const type = ref<Nullable<string>>(null);
@@ -129,7 +131,10 @@
   const [openFullLoading, closeFullLoading] = useLoading({
     target: listPage,
   });
-
+  let { cardHeight, cardWidth, paddingX } = useFlowLayout('basic-datasetList-list', 105);
+  watchEffect(() => {
+    cardHeight, cardWidth, paddingX;
+  });
   onMounted(() => {
     setTimeout(() => {
       fetchList(filterForm);
@@ -271,7 +276,6 @@
       width: 100%;
       display: flex;
     }
-
     &-list {
       flex: 1;
       width: 80%;
@@ -280,9 +284,15 @@
 
       :deep(.dataset-list-card-scroll) {
         display: grid;
-        // grid-template-columns: repeat(auto-fit, 272px);
-        grid-template-columns: repeat(auto-fit, 272px);
-        gap: 10px;
+        grid-template-columns: repeat(auto-fill, v-bind(cardWidth));
+        // gap: 10px;
+        justify-content: center;
+
+        .listcard {
+          margin: 0;
+          padding: v-bind(paddingX);
+          height: v-bind(cardHeight);
+        }
       }
     }
   }

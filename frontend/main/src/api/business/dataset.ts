@@ -113,7 +113,7 @@ export const insertUploadPointCloudApi = (params: InsertPointCloudParams) =>
     },
   });
 
-export const deleteBatchDataset = (params: { ids: number[] }) =>
+export const deleteBatchDataset = (params: { ids: number[]; datasetId: number }) =>
   defHttp.post<null>({
     url: `${Api.DATA}/deleteBatch`,
     params,

@@ -13,19 +13,19 @@
       <template v-if="data.datas === null">
         <div style="width: 100%">
           <img
-            style="width: 100%; height: 144px"
+            style="width: 100%;"
             v-if="data.type === datasetTypeEnum.IMAGE"
             :src="imageEmpty"
             alt=""
           />
           <img
-            style="width: 100%; height: 144px"
+            style="width: 100%;"
             v-if="data.type === datasetTypeEnum.LIDAR_FUSION"
             :src="fusionEmpty"
             alt=""
           />
           <img
-            style="width: 100%; height: 144px"
+            style="width: 100%; "
             v-if="data.type === datasetTypeEnum.LIDAR_BASIC"
             :src="basicEmpty"
             alt=""
@@ -256,10 +256,10 @@
     }
 
     .card-content{
-      // padding: 10px;
+      width: 100%;
+        height: 100%;
       background: #fff;
       border: 1px solid #CCCCCC;
-      height: 253px;
       border-radius: 12px;
       position: relative;
       margin: 0 10px;
@@ -269,9 +269,9 @@
       &:hover{
         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
       }
-
       .img-content{
         width: 100%;
+        height: calc(100% - 105px);
         display: flex;
         flex-wrap: wrap;
         border-radius: 12px 12px 0 0;
@@ -280,11 +280,9 @@
         .wrapper{
           width: 100%;
           display: flex;
-          height: 144px;
-
+          // height: 144px;
           .banner-img{
             flex: 1;
-
             .pcRender{
               width: 100%;
               height: 100%;
@@ -298,13 +296,14 @@
         }
 
         .img-fusion-camera{
+          width: 33.3%;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
           // flex: 1;
 
           img{
-            width: 82px;
+            width: 100%;
             flex: 1;
           }
         }
@@ -312,7 +311,10 @@
         .img{
           flex-shrink: 0;
           width: 33.3%;
-          height: 72px;
+          img{
+            width: 100%;
+            height: 100%;
+          }
         }
 
         img{

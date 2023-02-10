@@ -79,6 +79,7 @@
         >
           <ScrollContainer ref="scrollRef">
             <ImgCard
+            class="listcard"
               v-for="i in list"
               :key="i.id"
               :object="objectMap[i.id]"
@@ -225,6 +226,7 @@
   import TipModal from './components/TipModal.vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import { getModelAllApi } from '/@/api/business/models';
+import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
   //   useModal();
@@ -445,9 +447,11 @@
         danger: true,
       },
       onOk() {
+        console.log(id);
         return new Promise(async (resolve) => {
           await deleteBatchDataset({
             ids: selectedList.value,
+            datasetId: id as unknown as number,
           });
           fixedFetchList();
           resolve(1);
@@ -458,10 +462,11 @@
     });
   };
 
-  const handleDeleteSingle = async (id, callback) => {
+  const handleDeleteSingle = async (dataId, callback) => {
     try {
       await deleteBatchDataset({
-        ids: [id],
+        ids: [dataId],
+        datasetId: id as unknown as number,
       });
     } catch (e) {}
     fixedFetchList();
@@ -615,7 +620,40 @@
     pageNo.value = 1;
     selectedList.value = [];
   };
+  let { cardHeight, cardWidth, paddingX } = useFlowLayout('list', 30);
+
+  // watch(sliderWidthValue, (count) => {
+  //   changeWidth(count);
+  // });
+  // watch(cardWidth, (count) => {
+  //   sliderWidthValue.value = parseInt(count);
+  // });
+  // watchEffect(() => {
+  //   cardHeight, paddingX;
+  // });
 </script>
 <style lang="less" scoped>
   @import url(./index.less);
+  .list {
+    margin: 0 -10px;
+    position: relative;
+    display: flex;
+    height: calc(100vh - 187px);
+
+    :deep(.scrollbar__view) {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, v-bind(cardWidth)) !important;
+      gap: 0px !important;
+      justify-content: center;
+    }
+
+    .listcard {
+      // margin: 0 !important;
+      
+      margin: v-bind(paddingX) !important;
+      height: v-bind(cardHeight) !important;
+    }
+  }
+
 </style>

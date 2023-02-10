@@ -1,4 +1,4 @@
-import { IUserData, Editor, IClassType } from 'editor/index';
+import { IUserData, Editor, IClassType, IAttr, AnnotateType2ToolType } from 'editor/index';
 // @ts-ignore
 import uuid from 'uuid/v4';
 import { empty } from './common';
@@ -9,16 +9,29 @@ type IAnnotateObject = any;
 // TODO 获取数据的转换
 export function convertObject2Annotate(objects: IObject[], editor: Editor) {
     const annotates = [] as IAnnotateObject[];
+
     const classMap = {} as Record<string, IClassType>;
     editor.state.classTypes.forEach((e) => {
         classMap[e.name] = e;
     });
+
+    // 用 classIdMap 来映射，防止 name 重复
+    const classIdMap = {};
+    editor.state.classTypes.forEach((e) => {
+        classIdMap[e.id] = e;
+    });
+
     objects.forEach((e: IObject) => {
         const obj = e.classAttributes;
-        console.log(obj);
+        // console.log(obj);
+
+        // 用 classId 查找唯一，直接使用 classType 可能会有重复
+        let targetClassType: any = classIdMap[obj.classId];
+        // console.log(targetClassType);
+
         const annotate: any = {
             id: e.id,
-            color: classMap[obj?.meta?.classType]?.color ?? '#dedede',
+            color: targetClassType?.color ?? '#dedede',
             coordinate: obj?.contour?.points ?? [],
             interior: obj?.contour?.interior || [],
             type: obj?.type.toLocaleLowerCase(),
@@ -55,9 +68,31 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
     editor.state.classTypes.forEach((e) => {
         classMap[e.name] = e;
     });
+    // console.log('===>', classMap);
+
+    // 用 classIdMap 来映射，防止 name 重复
+    const classIdMap = {};
+    editor.state.classTypes.forEach((e) => {
+        classIdMap[e.id] = e;
+    });
+    // console.log('===>', classIdMap);
 
     annotates.forEach((obj: any) => {
-        const userData = obj.userData as Required<IUserData>;
+        const userData = {
+            ...obj.userData,
+            toolType: AnnotateType2ToolType[obj.type],
+        } as any;
+
+        // 用 name + toolType 查找唯一，防止 name 重复
+        let targetClassType: any;
+        Object.keys(classIdMap).forEach((item: any) => {
+            const tempObj = classIdMap?.[item];
+            if (tempObj?.name == userData.classType && tempObj?.toolType == userData.toolType) {
+                targetClassType = tempObj;
+            }
+        });
+        // console.log('>>>', userData);
+        // console.log(targetClassType);
 
         // updateVersion
         let version = obj.userData.version || 0;
@@ -66,7 +101,7 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
         }
         obj.userData.lastTime = obj.userData.updateTime;
         obj.userData.version = version;
-        // console.log(obj);
+
         // debugger;
         const newInfo: any = {
             id: obj.uuid,
@@ -76,8 +111,8 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
             createdBy: userData.createdBy,
             trackId: obj.intId,
             trackName: obj.intId,
-            classId: userData.classType ? classMap[userData.classType]?.id : '',
-            classValues: objToArray(userData.attrs || []),
+            classId: userData.classType ? targetClassType?.id : '',
+            classValues: objToArray(userData.attrs || [], targetClassType ?? {}),
             modelConfidence: userData.confidence || undefined,
             modelClass: userData.modelClass || undefined,
             contour: {
@@ -119,17 +154,30 @@ export function convertModelRunResult(objects: any[]) {
     return newObjects;
 }
 
-function objToArray(obj: Record<string, any> = {}) {
-    let data = [] as any[];
+function objToArray(obj: Record<string, any> = {}, baseClassType?: IClassType) {
+    // const attrMap = {} as Record<string, IAttr>;
+    const attrMap = {} as Record<string, any>;
+    const attrs = baseClassType?.attrs || [];
+
+    attrs.forEach((attr: any) => {
+        attrMap[attr.id] = attr;
+    });
+    // console.log('attrMap', attrMap);
+
+    const data = [] as any[];
+    // console.log(obj);
+
     Object.keys(obj).forEach((key) => {
+        // console.log(key);
+
         let value = obj[key];
         if (empty(value)) return;
         data.push({
-            id: key,
+            id: attrMap[key]?.id,
             pid: null,
-            name: '',
+            name: attrMap[key]?.name || '',
             value: value,
-            alias: '',
+            alias: attrMap[key]?.label || '',
             isLeaf: true,
         });
     });

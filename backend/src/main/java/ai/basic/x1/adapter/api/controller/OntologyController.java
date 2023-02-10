@@ -66,8 +66,8 @@ public class OntologyController {
     }
 
     @PostMapping("/create")
-    public void create(@Validated @RequestBody OntologyDTO ontologyDTO) {
-        save(ontologyDTO);
+    public Long create(@Validated @RequestBody OntologyDTO ontologyDTO) {
+        return save(ontologyDTO);
     }
 
     @PostMapping("/update/{id}")
@@ -76,8 +76,9 @@ public class OntologyController {
         save(ontologyDTO);
     }
 
-    public void save(OntologyDTO ontologyDTO) {
-        ontologyUseCase.saveOntology(DefaultConverter.convert(ontologyDTO, OntologyBO.class));
+    public Long save(OntologyDTO ontologyDTO) {
+        DefaultConverter.convert(ontologyDTO, OntologyBO.class);
+        return ontologyUseCase.saveOntology(DefaultConverter.convert(ontologyDTO, OntologyBO.class));
     }
 
     @PostMapping("/delete/{id}")

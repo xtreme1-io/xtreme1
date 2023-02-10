@@ -36,11 +36,10 @@ export const attributeBase = (list): FormSchema[] => {
       label: '',
       component: 'Switch',
       suffix: t('business.ontology.modal.required'),
-      defaultValue: false,
       colProps: { span: 12 },
       componentProps: {
-        onChange: () => {
-          emitter.emit('handleSaveForm');
+        onChange: (e) => {
+          emitter.emit('handleSaveForm', { required: e });
         },
       },
     },

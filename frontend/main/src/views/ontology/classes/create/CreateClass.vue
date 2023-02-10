@@ -45,6 +45,9 @@
                         <span>{{ item.text }}</span>
                       </div>
                     </Select.Option>
+                    <template #suffixIcon>
+                      <DownOutlined @click.stop="showToolTypeDropdown = !showToolTypeDropdown" />
+                    </template>
                   </Select>
                 </Form.Item>
               </div>
@@ -174,7 +177,7 @@
   import { ref, reactive, computed, watch, unref, inject, nextTick, provide } from 'vue';
   // components
   import { Form, Select, Switch, Input, Tooltip } from 'ant-design-vue';
-  import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+  import { ExclamationCircleOutlined, DownOutlined } from '@ant-design/icons-vue';
   import { Button } from '/@@/Button';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
   import { useModal, BasicModal, useModalInner } from '/@/components/Modal';

@@ -363,6 +363,17 @@ export const deleteDatasetClassificationApi = (params: BasicIdParams) =>
     },
   });
 
+/** delete dataset classification batch */
+export const deleteSelectedDatasetClassificationApi = (params: Array<BasicIdParams>) =>
+  defHttp.post<null>({
+    url: `${Api.DATASET_CLASSIFICATION}/deleteByIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 /** get dataset classification detail by id */
 export const getDatasetClassificationByIdApi = (params: BasicIdParams) =>
   defHttp.get<datasetClassificationItem>({
