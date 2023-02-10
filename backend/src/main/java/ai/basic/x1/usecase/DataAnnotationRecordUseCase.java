@@ -82,6 +82,20 @@ public class DataAnnotationRecordUseCase {
     }
 
     /**
+     * unlock data by user id
+     *
+     * @param userId   user id
+     */
+    public void unLockByUserId(Long userId) {
+        var dataAnnotationRecordLambdaQueryWrapper = new LambdaQueryWrapper<DataAnnotationRecord>();
+        dataAnnotationRecordLambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
+        dataAnnotationRecordDAO.remove(dataAnnotationRecordLambdaQueryWrapper);
+        var dataEditLambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();
+        dataEditLambdaQueryWrapper.eq(DataEdit::getCreatedBy, userId);
+        dataEditDAO.remove(dataEditLambdaQueryWrapper);
+    }
+
+    /**
      * clean model running result
      *
      * @param serialNo serial number

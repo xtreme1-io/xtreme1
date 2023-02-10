@@ -74,6 +74,11 @@ public interface Constants {
      */
     String JSON_SUFFIX = ".JSON";
 
+    /**
+     * image
+     */
+    String IMAGE = "image";
+
     String RESULT = "result";
 
     String SLANTING_BAR = "/";

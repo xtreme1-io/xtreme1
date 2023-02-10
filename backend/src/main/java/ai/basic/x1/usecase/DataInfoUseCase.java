@@ -58,6 +58,7 @@ import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DataUploadSourceEnum.LOCAL;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
 import static ai.basic.x1.entity.enums.RelationEnum.*;
 import static ai.basic.x1.entity.enums.UploadStatusEnum.*;
 import static ai.basic.x1.usecase.exception.UsecaseCode.*;
@@ -170,7 +171,7 @@ public class DataInfoUseCase {
      */
     private final FileFilter filefilter = file -> {
         //if the file extension is image return true, else false
-        return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath()));
+        return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath())) && Constants.IMAGE.equals(FileUtil.getName(file.getParentFile()));
     };
 
     /**
@@ -613,7 +614,7 @@ public class DataInfoUseCase {
     private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 2, filefilter);
+        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, filefilter);
         var rootPath = String.format("%s/%s/", userId, datasetId);
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
