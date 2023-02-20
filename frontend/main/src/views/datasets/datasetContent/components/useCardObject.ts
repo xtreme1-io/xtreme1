@@ -1,5 +1,5 @@
 import { reactive, ref, watchEffect, watch, computed } from 'vue';
-import { transformToPc, mapLinear, focusTransform } from '/@/utils/annotation';
+import { transformToPc, focusTransform } from '/@/utils/annotation';
 import {
   datasetTypeEnum,
   DatasetListItem,
@@ -33,7 +33,7 @@ const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
 };
 
 export default function useCardObject() {
-  const svg = ref(null);
+  const svg = ref<any>(null);
   const refs = ref({});
   const iState = reactive({
     pcObject: [] as any[],
@@ -85,23 +85,27 @@ export default function useCardObject() {
     const { clientWidth, clientHeight } = imgDom as HTMLImageElement;
     const naturalWidth = info?.width || imgDom.naturalWidth;
     const naturalHeight = info?.height || imgDom.naturalHeight;
-    const aspect = naturalWidth / naturalHeight;
-    const fitAspect = clientWidth / clientHeight;
+    // const aspect = naturalWidth / naturalHeight;
+    // const fitAspect = clientWidth / clientHeight;
 
     size.value.width = naturalWidth;
     size.value.height = naturalHeight;
-    if (aspect > fitAspect) {
-      size.value.svgWidth = clientHeight * aspect;
-      size.value.svgHeight = clientHeight;
-    } else {
-      size.value.svgWidth = clientWidth;
-      size.value.svgHeight = clientWidth / aspect;
-    }
+    size.value.svgWidth = clientWidth;
+    size.value.svgHeight = clientHeight;
+    // if (aspect > fitAspect) {
+    //   size.value.svgWidth = clientHeight * aspect;
+    //   size.value.svgHeight = clientHeight;
+    // } else {
+    //   size.value.svgWidth = clientWidth;
+    //   size.value.svgHeight = clientWidth / aspect;
+    // }
     size.value.init = true;
   };
   const updatePcResult = (target: any[], objects: any[], info: any) => {
     const size = getSize(svg.value);
-    if (info)
+    const dom = svg.value as SVGElement;
+    if (info) {
+      dom?.setAttribute('viewBox', `0 0 ${size.width} ${size.height}`);
       objects.forEach((obj) => {
         const contour = obj.contour || obj;
         const { center3D, rotation3D, size3D } = contour;
@@ -110,7 +114,32 @@ export default function useCardObject() {
           target.push({ id: obj.id, points: points.map((pos) => pos.join(',')).join(' ') });
         }
       });
+    }
   };
+
+  const transformPos = (nWidth: number, nHeight: number, cWidth: number, cHeight: number) => {
+    const aspect = nWidth / nHeight;
+    const fitAspect = cWidth / cHeight;
+    let _w: number;
+    let _h: number;
+    let _offsetX = 0;
+    let _offsetY = 0;
+    if (aspect > fitAspect) {
+      _w = cHeight * aspect;
+      _h = cHeight;
+      _offsetX = _w - cWidth;
+    } else {
+      _w = cWidth;
+      _h = cWidth / aspect;
+      _offsetY = _h - cHeight;
+    }
+    return (pos: { x: number; y: number }) => {
+      const _x = (pos.x / nWidth) * _w - _offsetX / 2;
+      const _y = (pos.y / nHeight) * _h - _offsetY / 2;
+      return [_x, _y];
+    };
+  };
+
   const updatePcImageResult = (
     target: any[],
     objects: any[],
@@ -120,20 +149,27 @@ export default function useCardObject() {
   ) => {
     // const imgName = img.name
     if (svg && imgSize) {
-      const aspect = imgSize.width / imgSize.height;
+      // const aspect = imgSize.width / imgSize.height;
       const contextNode = svg.parentElement as HTMLDivElement;
-      const contextAspect = contextNode.clientWidth / contextNode.clientHeight;
-      let width: number;
-      let height: number;
-      if (aspect > contextAspect) {
-        height = contextNode.clientHeight;
-        width = aspect * height;
-      } else {
-        width = contextNode.clientWidth;
-        height = width / aspect;
-      }
-      svg.style.width = width + 'px';
-      svg.style.height = height + 'px';
+      svg?.setAttribute('viewBox', `0 0 ${contextNode.clientWidth} ${contextNode.clientHeight}`);
+      // const contextAspect = contextNode.clientWidth / contextNode.clientHeight;
+      const convert = transformPos(
+        imgSize.width,
+        imgSize.height,
+        contextNode.clientWidth,
+        contextNode.clientHeight,
+      );
+      // let width: number;
+      // let height: number;
+      // if (aspect > contextAspect) {
+      //   height = contextNode.clientHeight;
+      //   width = aspect * height;
+      // } else {
+      //   width = contextNode.clientWidth;
+      //   height = width / aspect;
+      // }
+      // svg.style.width = width + 'px';
+      // svg.style.height = height + 'px';
       objects.forEach((item) => {
         const contour = item.contour || item;
         if (contour?.viewIndex !== index) return;
@@ -153,10 +189,7 @@ export default function useCardObject() {
             type: type,
             points: points
               .map((point) => {
-                return [
-                  (point.x * width) / imgSize.width,
-                  (point.y * height) / imgSize.height,
-                ].join(',');
+                return convert(point).join(',');
               })
               .join(' '),
           });
@@ -184,10 +217,7 @@ export default function useCardObject() {
               P[3],
             ]
               .map((point) => {
-                return [
-                  (point.x * width) / imgSize.width,
-                  (point.y * height) / imgSize.height,
-                ].join(',');
+                return convert(point).join(',');
               })
               .join(' '),
           });
@@ -196,14 +226,12 @@ export default function useCardObject() {
     }
   };
   const updateImageResult = (objects: any[]) => {
+    const { width, height, svgWidth, svgHeight } = size.value;
+    const convert = transformPos(width, height, svgWidth, svgHeight);
     const getPoints = function getPoints(points: { x: number; y: number }[]) {
       return points
         .map((point) => {
-          const points = [
-            mapLinear(point.x, 0, size.value.width, 0, size.value.svgWidth),
-            mapLinear(point.y, 0, size.value.height, 0, size.value.svgHeight),
-          ].join(',');
-
+          const points = convert(point).join(',');
           return points;
         })
         .join(' ');
@@ -215,10 +243,7 @@ export default function useCardObject() {
       if (type === OBJECT_TYPE.RECTANGLE) {
         if (points && points.length === 2) {
           const newPoints = points.map((p) => {
-            return [
-              mapLinear(p.x, 0, size.value.width, 0, size.value.svgWidth),
-              mapLinear(p.y, 0, size.value.height, 0, size.value.svgHeight),
-            ];
+            return convert(p);
           });
           const rect = [
             [newPoints[0][0], newPoints[0][1]].join(','),
@@ -397,7 +422,12 @@ export function useSearchCard(props: {
   // object2D: any;
   data: DatasetItem;
 }) {
-  const { iState, svg, getSize } = useCardObject();
+  const iState = reactive({
+    pcObject: [] as any[],
+    pcImageObject: [] as any[],
+    imageObject: [] as any[],
+  });
+  const svg = ref<any>(null);
   const state = reactive({
     object2d: [] as any[],
     imgTransform: '',
@@ -418,6 +448,19 @@ export function useSearchCard(props: {
   const getPcImage = (item: any) => {
     return getUrl(item) || placeImg;
   };
+
+  const getSize = (element: SVGElement | null | undefined) => {
+    const size = {
+      width: 0,
+      height: 0,
+    };
+    if (element) {
+      size.width = element.clientWidth;
+      size.height = element.clientHeight;
+    }
+    return size;
+  };
+
   const getUrl = (item: any) => {
     // const info = (item?.files || [])[0]?.file?.extraInfo;
     const smallUrl = item?.files && item?.files[0]?.file?.smallThumbnail?.url;
@@ -434,7 +477,9 @@ export function useSearchCard(props: {
    * Point cloud Miniature object
    */
   const get3D = () => {
-    return props.object?.find(
+    if (!props.object) return;
+    const objects = Array.isArray(props.object) ? props.object : [props.object];
+    return objects.find(
       ({ classAttributes: { type, objType } }) =>
         AnnotationTypeMap[type || objType] === OBJECT_TYPE.BOX3D,
     );
