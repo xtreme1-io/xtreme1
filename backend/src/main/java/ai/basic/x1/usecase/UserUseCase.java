@@ -57,6 +57,9 @@ public class UserUseCase {
     @Autowired
     private MinioProp minioProp;
 
+    @Autowired
+    private DataAnnotationRecordUseCase dataAnnotationRecordUseCase;
+
     public UserBO create(String username, String password) {
         var existUser = findByUsername(username);
         if (existUser != null) {
@@ -74,6 +77,7 @@ public class UserUseCase {
         if (CollUtil.isNotEmpty(ids)) {
             ids.remove(currentUserId);
             userDAO.removeByIds(ids);
+            ids.forEach(userId -> dataAnnotationRecordUseCase.unLockByUserId(userId));
         }
     }
 
