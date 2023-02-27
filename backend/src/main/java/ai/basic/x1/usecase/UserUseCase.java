@@ -77,7 +77,7 @@ public class UserUseCase {
         if (CollUtil.isNotEmpty(ids)) {
             ids.remove(currentUserId);
             userDAO.removeByIds(ids);
-            ids.forEach(userId -> dataAnnotationRecordUseCase.unLockByUserId(userId));
+            dataAnnotationRecordUseCase.unLockByUserIds(ids);
         }
     }
 

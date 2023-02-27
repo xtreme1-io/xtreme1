@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 import static ai.basic.x1.usecase.exception.UsecaseCode.DATASET_DATA_UNLOCK_ID_ERROR;
 
@@ -84,14 +85,14 @@ public class DataAnnotationRecordUseCase {
     /**
      * unlock data by user id
      *
-     * @param userId   user id
+     * @param userIds   user id
      */
-    public void unLockByUserId(Long userId) {
+    public void unLockByUserIds(Set<Long> userIds) {
         var dataAnnotationRecordLambdaQueryWrapper = new LambdaQueryWrapper<DataAnnotationRecord>();
-        dataAnnotationRecordLambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
+        dataAnnotationRecordLambdaQueryWrapper.in(DataAnnotationRecord::getCreatedBy, userIds);
         dataAnnotationRecordDAO.remove(dataAnnotationRecordLambdaQueryWrapper);
         var dataEditLambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();
-        dataEditLambdaQueryWrapper.eq(DataEdit::getCreatedBy, userId);
+        dataEditLambdaQueryWrapper.in(DataEdit::getCreatedBy, userIds);
         dataEditDAO.remove(dataEditLambdaQueryWrapper);
     }
 
