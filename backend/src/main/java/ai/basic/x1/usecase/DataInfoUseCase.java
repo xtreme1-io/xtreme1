@@ -202,11 +202,11 @@ public class DataInfoUseCase {
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
-            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId,datasetId);
+            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId, datasetId);
             dataAnnotationObjectLambdaUpdateWrapper.in(DataAnnotationObject::getDataId, ids);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
             var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
-            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId,datasetId);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId, datasetId);
             dataAnnotationClassificationLambdaUpdateWrapper.in(DataAnnotationClassification::getDataId, ids);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
             datasetSimilarityJobUseCase.submitJob(datasetId);
@@ -498,7 +498,7 @@ public class DataInfoUseCase {
         var datasetType = dataInfoUploadBO.getType();
         var pointCloudList = new ArrayList<File>();
         findPointCloudList(dataInfoUploadBO.getBaseSavePath(), pointCloudList);
-        var rootPath = String.format("%s/%s/", userId, datasetId);
+        var rootPath = String.format("%s/%s", userId, datasetId);
         log.info("Get point_cloud datasetId:{},size:{}", datasetId, pointCloudList.size());
         if (CollectionUtil.isEmpty(pointCloudList)) {
             uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, POINT_CLOUD_COMPRESSED_FILE_ERROR.getMessage());
@@ -1129,8 +1129,8 @@ public class DataInfoUseCase {
      */
     public void handleDataResult(File file, String dataName, DataAnnotationObjectBO dataAnnotationObjectBO,
                                  List<DataAnnotationObjectBO> dataAnnotationObjectBOList, StringBuilder errorBuilder) {
-        var resultFile = FileUtil.loopFiles(file).stream()
-                .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && getFileName(fc).equals(dataName)
+        var resultFile = FileUtil.loopFiles(file, 2, null).stream()
+                .filter(fc -> JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fc)) && dataName.equals(FileUtil.getPrefix(fc))
                         && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
         if (resultFile.isPresent()) {
             try {
@@ -1207,7 +1207,7 @@ public class DataInfoUseCase {
                     .type(DIRECTORY)
                     .files(getDirList(node, rootPath, files)).build();
         } else {
-            var path = rootPath + node.getAbsolutePath().replace(tempPath, "");
+            var path = rootPath + FileUtil.getAbsolutePath(node.getAbsolutePath()).replace(FileUtil.getAbsolutePath(FileUtil.file(tempPath).getAbsolutePath()), "");
             var fileId = ByteUtil.bytesToLong(SecureUtil.md5().digest(path));
             files.add(node);
             return DataInfoBO.FileNodeBO.builder()
@@ -1267,8 +1267,9 @@ public class DataInfoUseCase {
 
         var fileBOS = new ArrayList<FileBO>();
         files.forEach(file -> {
-            var zipPath = file.getAbsolutePath().replace(dataInfoUploadBO.getBaseSavePath(), "");
-            var path = String.format("%s%s", rootPath, file.getAbsolutePath().replace(tempPath, ""));
+            var startingPosition = FileUtil.getAbsolutePath(FileUtil.file(dataInfoUploadBO.getBaseSavePath()).getAbsolutePath()).length() + 1;
+            var zipPath = FileUtil.getAbsolutePath(file.getAbsolutePath()).substring(startingPosition);
+            var path = String.format("%s%s", rootPath, FileUtil.getAbsolutePath(file.getAbsolutePath()).replace(FileUtil.getAbsolutePath(FileUtil.file(tempPath).getAbsolutePath()), ""));
             zipPath = zipPath.startsWith(dataInfoUploadBO.getFileName()) ? zipPath : String.format("%s/%s", dataInfoUploadBO.getFileName(), zipPath);
             var mimeType = FileUtil.getMimeType(path);
             var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(bucketName)
