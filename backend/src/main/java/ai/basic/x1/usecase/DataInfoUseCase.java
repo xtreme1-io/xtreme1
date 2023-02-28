@@ -600,7 +600,7 @@ public class DataInfoUseCase {
         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file))
                 .content(Collections.singletonList(fileNodeBO)).build();
         dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
-        var rootPath = String.format("%s/%s/", userId, datasetId);
+        var rootPath = String.format("%s/%s", userId, datasetId);
         var newSavePath = tempPath + fileBO.getPath().replace(rootPath, "");
         FileUtil.copy(dataInfoUploadBO.getSavePath(), newSavePath, true);
         createUploadThumbnail(userId, fileBOS, rootPath);
@@ -615,7 +615,7 @@ public class DataInfoUseCase {
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
         var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, filefilter);
-        var rootPath = String.format("%s/%s/", userId, datasetId);
+        var rootPath = String.format("%s/%s", userId, datasetId);
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
         var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>();
