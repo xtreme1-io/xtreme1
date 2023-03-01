@@ -16,10 +16,12 @@ export default {
     lidar: '雷达',
   },
   detail: {
+    usage: '使用量',
     creator: '创建者',
     createTime: '创建时间',
     overview: '概述',
     runs: '运行',
+    settings: '设置',
   },
   overviewPage: {
     description: '描述',

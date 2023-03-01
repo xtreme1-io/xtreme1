@@ -66,6 +66,7 @@ export default {
     enterNewName: 'Please enter a new name.',
     datasetType: {
       image: 'Image',
+      lidar: 'Lidar',
       lidarBasic: 'Lidar Basic',
       lidarFusion: 'Lidar Fusion',
     },

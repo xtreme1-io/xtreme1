@@ -23,3 +23,25 @@ export enum RouteChildEnum {
   GROUP_INFO = '/team/groupInfo',
   SEARCH_SCENARIO = '/datasets/searchScenario',
 }
+
+export enum RouteNameEnum {
+  DATASET = 'Dataset',
+  DATASET_LIST = 'DatasetList',
+  DATASET_DATA = 'DatasetData',
+  DATASET_DETAIL = 'DatasetDetail',
+  DATASET_OVERVIEW = 'DatasetsOverview',
+  DATASET_CLASS = 'DatasetClass',
+  DATASET_CLASSIFICATION = 'DatasetsClassification',
+  MODEL = 'Model',
+  MODEL_LIST = 'ModelList',
+  MODEL_DETAIL = 'ModelDetail',
+  TEAM = 'Team',
+  TEAM_PAGE = 'TeamPage',
+  TEAM_GROUP_INFO = 'TeamGroupInfo',
+  TASK = 'Task',
+  TASK_LIST = 'TaskList',
+  TASK_CREATE = 'TaskCreate',
+  TASK_DETAIL = 'TaskDetail',
+  TASK_COUNTDOWN = 'TaskCountdown',
+  TASK_PERFORMANCE = 'TaskPerformance',
+}

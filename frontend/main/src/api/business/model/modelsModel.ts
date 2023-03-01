@@ -80,3 +80,9 @@ export interface runModelRunParams {
   resultFilterParam: Nullable<PreModelParam>;
 }
 /** Runs End */
+
+export interface modelQuotaResponse {
+  totalQuota: string;
+  usedQuota: string;
+  expireDate: string;
+}

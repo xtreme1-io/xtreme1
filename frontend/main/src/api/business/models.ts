@@ -14,6 +14,8 @@ import {
 enum Api {
   Model = '/model',
   ModelRun = '/dataset/modelRun',
+  ModelQuota = '/dataset/modelQuota',
+  DATASET = '/dataset/dataset',
 }
 
 /** get all Models */
@@ -116,6 +118,28 @@ export const modelRunRecordListApi = () =>
 export const getReportByDataset = (params: { id: string }) =>
   defHttp.get<ModelListItem[]>({
     url: `${Api.ModelRun}/findModelRunRecordByDatasetId/${params.id}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** 查询模型配额 */
+export const getModelQuotaApi = () =>
+  // TODO TS类型
+  defHttp.get<any>({
+    url: `${Api.ModelQuota}/queryModelQuota`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** 获取 team 下所有数据集 */
+export const getAllDataset = (params: { datasetTypes: string }) =>
+  defHttp.get<Array<{ id: string; name: string }>>({
+    url: `${Api.DATASET}/findByType`,
+    params,
     headers: {
       // @ts-ignore
       ignoreCancelToken: true,

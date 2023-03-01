@@ -20,6 +20,8 @@ export default {
     createTime: 'Create Time',
     overview: 'Overview',
     runs: 'Runs',
+    settings: 'Settings',
+    usage: 'Usage',
   },
   overviewPage: {
     description: 'Description',
