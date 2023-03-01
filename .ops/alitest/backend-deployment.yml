@@ -85,7 +85,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: x1-community.alitest.beisai.com
+    - host: xtreme1.alitest.beisai.com
       http:
         paths:
           - backend:
@@ -97,7 +97,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - x1-community.alitest.beisai.com
+        - xtreme1.alitest.beisai.com
       secretName: alitest.beisai.com
 ---
 apiVersion: v1
@@ -120,7 +120,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: x1-community.alitest.beisai.com
+    - host: xtreme1.alitest.beisai.com
       http:
         paths:
           - backend:
@@ -132,5 +132,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - x1-community.alitest.beisai.com
+        - xtreme1.alitest.beisai.com
       secretName: alitest.beisai.com

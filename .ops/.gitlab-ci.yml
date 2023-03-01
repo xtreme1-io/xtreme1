@@ -5,13 +5,13 @@ stages:
 
 variables:
   APP_NAME: "xtreme1"
-  APP_VERSION: "0.5.5"
+  APP_VERSION: "0.5.6"
 
   FRONTEND_PACKAGE_DIR: "dist"
   BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
 
-  FRONTEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/x1-community/frontend"
-  BACKEND_IMAGE_NAME: "registry.talos.basic.ai/basicai/x1-community/backend"
+  FRONTEND_IMAGE_NAME: "$CI_REGISTRY_IMAGE/frontend"
+  BACKEND_IMAGE_NAME: "$CI_REGISTRY_IMAGE/backend"
 
   DOCKER_HUB_FRONTEND_IMAGE_NAME: "basicai/${APP_NAME}-frontend"
   DOCKER_HUB_BACKEND_IMAGE_NAME: "basicai/${APP_NAME}-backend"
@@ -108,8 +108,8 @@ build-release-package:
     - docker:20-dind
   before_script:
     - until docker info; do sleep 1; done
-    - echo "$BASICAI_REGISTRY_PASS" | docker login $BASICAI_REGISTRY --username $BASICAI_REGISTRY_USER --password-stdin
-    - echo "$DOCKER_HUB_REGISTRY_PASS" | docker login --username $DOCKER_HUB_REGISTRY_USER --password-stdin
+    - docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
+    - docker login -u $DOCKER_HUB_REGISTRY_USER -p $DOCKER_HUB_REGISTRY_PASS
   after_script:
     - cd $WORKING_DIR
     - docker pull $IMAGE_NAME:latest || true
