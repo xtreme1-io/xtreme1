@@ -2,6 +2,7 @@ package ai.basic.x1.adapter.port.dao.mybatis.model;
 
 import ai.basic.x1.entity.enums.InputTypeEnum;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,7 @@ public class Classification {
      * setting
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private JSONArray options;
+    private JSONObject attribute;
 
     /**
      * create time

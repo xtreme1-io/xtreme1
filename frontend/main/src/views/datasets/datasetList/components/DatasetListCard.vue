@@ -13,19 +13,19 @@
       <template v-if="data.datas === null">
         <div style="width: 100%">
           <img
-            style="width: 100%; height: 144px"
+            style="width: 100%;"
             v-if="data.type === datasetTypeEnum.IMAGE"
             :src="imageEmpty"
             alt=""
           />
           <img
-            style="width: 100%; height: 144px"
+            style="width: 100%;"
             v-if="data.type === datasetTypeEnum.LIDAR_FUSION"
             :src="fusionEmpty"
             alt=""
           />
           <img
-            style="width: 100%; height: 144px"
+            style="width: 100%; "
             v-if="data.type === datasetTypeEnum.LIDAR_BASIC"
             :src="basicEmpty"
             alt=""
@@ -34,24 +34,29 @@
       </template>
       <template v-else>
         <div class="img-content" v-if="data.type === datasetTypeEnum.IMAGE">
-          <div class="img" v-for="(item, index) in new Array(6)" :key="item">
-            <img v-lazy="getImgUrl(index)" alt="" />
+          <div class="img image-loading" v-for="(item, index) in new Array(6)" :key="item">
+            <img v-lazyload="getImgUrl(index)" alt="" />
           </div>
         </div>
         <div class="img-content" v-else-if="data.type === datasetTypeEnum.LIDAR_FUSION">
           <div class="wrapper">
-            <div class="banner-img">
-              <img class="pcRender" v-lazy="getPcImgUrl()" alt="" />
+            <div class="banner-img image-loading">
+              <img class="pcRender" v-lazyload="getPcImgUrl()" alt="" />
             </div>
-            <div class="img-fusion-camera">
-              <img v-for="item in new Array(3)" :key="item" v-lazy="getLidarImgUrl()" alt="" />
+            <div class="img-fusion-camera image-loading">
+              <img
+                v-for="(item, index) in new Array(3)"
+                :key="item"
+                v-lazyload="getLidarImgUrl(index)"
+                alt=""
+              />
             </div>
           </div>
         </div>
         <div class="img-content" v-else>
           <div class="wrapper">
-            <div class="banner-img-full">
-              <img class="pcRender" v-lazy="getPcImgUrl()" alt="" />
+            <div class="banner-img-full image-loading">
+              <img class="pcRender" v-lazyload="getPcImgUrl()" alt="" />
             </div>
           </div>
         </div>
@@ -142,10 +147,11 @@
     data: DatasetListItem;
   };
 
-  const getLidarImgUrl = () => {
+  const getLidarImgUrl = (index: number) => {
     const content = props.data.datas && props.data.datas[0]?.content;
     if (content && content[0] && content[0].files) {
-      const files = content.filter((record) => record.directoryType?.includes('image'))[0]?.files;
+      const files = content.filter((record) => record.directoryType?.includes('image'))[index]
+        ?.files;
       if (files && files[0].file) {
         const file = files[0].file;
         return file.mediumThumbnail?.url || file.url || placeImgSm;
@@ -167,12 +173,9 @@
   };
 
   const getImgUrl = (index) => {
-    return (
-      (props.data.datas &&
-        props.data.datas[index]?.content &&
-        props.data.datas[index]?.content[0]?.file?.url) ||
-      placeImg
-    );
+    const files = props.data.datas || [];
+    const file = files[index]?.content[0]?.file;
+    return file?.mediumThumbnail?.url || file?.url || placeImg;
   };
 
   const getPcImgUrl = () => {
@@ -253,21 +256,22 @@
     }
 
     .card-content{
-      // padding: 10px;
+      width: 100%;
+        height: 100%;
       background: #fff;
       border: 1px solid #CCCCCC;
-      height: 253px;
       border-radius: 12px;
       position: relative;
       margin: 0 10px;
       overflow:hidden;
+      transform: translateZ(0);
 
       &:hover{
         box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
       }
-
       .img-content{
         width: 100%;
+        height: calc(100% - 105px);
         display: flex;
         flex-wrap: wrap;
         border-radius: 12px 12px 0 0;
@@ -276,11 +280,9 @@
         .wrapper{
           width: 100%;
           display: flex;
-          height: 144px;
-
+          // height: 144px;
           .banner-img{
             flex: 1;
-
             .pcRender{
               width: 100%;
               height: 100%;
@@ -294,13 +296,14 @@
         }
 
         .img-fusion-camera{
+          width: 33.3%;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
           // flex: 1;
 
           img{
-            width: 82px;
+            width: 100%;
             flex: 1;
           }
         }
@@ -308,7 +311,10 @@
         .img{
           flex-shrink: 0;
           width: 33.3%;
-          height: 72px;
+          img{
+            width: 100%;
+            height: 100%;
+          }
         }
 
         img{

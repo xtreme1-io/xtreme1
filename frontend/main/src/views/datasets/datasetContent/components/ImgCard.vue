@@ -114,13 +114,7 @@
       </div>
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
         <div class="place relation-container image-loading">
-          <img
-            class="pointCloudImg h-83px"
-            @error="onHandleImgLoad"
-            @load="onHandleImgLoad"
-            v-lazy="getPlaceImg()"
-            alt=""
-          />
+          <img class="pointCloudImg h-83px" v-lazyload="getPlaceImg()" alt="" />
           <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
             <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
           </svg>
@@ -132,13 +126,7 @@
             :ref="(e) => setRef(e, index)"
             :key="item"
           >
-            <img
-              :key="item"
-              @error="onHandleImgLoad"
-              @load="onHandleImgLoad"
-              v-lazy="getPcImage(iState.pcImageObject[item])"
-              alt=""
-            />
+            <img :key="item" v-lazyload="getPcImage(iState.pcImageObject[item])" alt="" />
             <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
               <template v-for="_item in iState.pcImageObject[item]?.object || []">
                 <polygon v-if="_item.type === '2D_RECT'" :key="_item.id" :points="_item.points" />
@@ -154,17 +142,11 @@
         <div class="name"> {{ data.name }} </div>
       </template>
       <div
-        class="mb-4 place relation-container"
+        class="place relation-container"
         v-else-if="info?.type === datasetTypeEnum.LIDAR_BASIC"
         style="width: 100%; height: 100%"
       >
-        <img
-          class="object-cover pointCloudImg image-loading"
-          @error="onHandleImgLoad"
-          @load="onHandleImgLoad"
-          :src="getPlaceImg()"
-          alt=""
-        />
+        <img class="object-cover pointCloudImg image-loading" v-lazyload="getPlaceImg()" alt="" />
         <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
           <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
         </svg>
@@ -178,9 +160,9 @@
         <img
           class="place image-card"
           ref="svg"
-          @load="(e) => onHandleImgLoad(e, data)"
-          @error="onHandleImgLoad"
-          :src="getImageUrl(data) || placeImg"
+          :viewBox="`0 0 ${size.svgWidth} ${size.svgHeight}`"
+          @load="() => onImgLoad(data)"
+          v-lazyload="getImageUrl(data) || placeImg"
           alt=""
         />
         <svg
@@ -290,13 +272,13 @@
     handleTrigger(true);
   };
 
-  const onHandleImgLoad = (event: Event, data?: any) => {
-    const target = event.target as HTMLImageElement;
-    target?.parentElement?.classList.remove('image-loading');
-    if (data) {
-      onImgLoad(data);
-    }
-  };
+  // const onHandleImgLoad = (event: Event, data?: any) => {
+  //   const target = event.target as HTMLImageElement;
+  //   target?.parentElement?.classList.remove('image-loading');
+  //   if (data) {
+  //     onImgLoad(data);
+  //   }
+  // };
 
   const handleLeave = () => {
     handleTrigger(false);
@@ -371,108 +353,76 @@
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-img-card';
-  .@{prefix-cls}{
-    // padding: 0 10px;
-    // margin-bottom: 20px;
-    position: relative;
-    width: 272px;
-    height: 175px;
-    transform: translateZ(0);
-     .image-loading{
-        img{
-          opacity: 0;
-        }
-      background: linear-gradient(45deg,rgba(190,190,190,.2) 25%,rgba(129,129,129,.24) 37%,rgba(190,190,190,.2) 63%);
-      background-size: 400% 100%;
-      animation: animation-loading 1.4s ease infinite;
-     }
 
-     @keyframes animation-loading {
-      0% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0 50%;
-      }
-    }
-    .lockInfo{
+  .@{prefix-cls} {
+    position: relative;
+    transform: translateZ(0);
+
+    .lockInfo {
       position: absolute;
-      right: 20px;
+      padding: 0 10px;
+      width: 100%;
+      text-align: center;
       top: 6px;
       color: white;
       z-index: 1;
-      max-width: 150px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .floder-img {
-        position: relative;
-        display: inline-flex;
-        width: 100%;
-        // height: 100%;
-        justify-content: center;
-        align-items: center;
-        background: #ffffff;
-        border: 1px solid #cccccc;
-        box-sizing: border-box;
-        border-radius: 4px;
-        height: 100%;
-
-        img {
-          width: 80px;
-        }
-
-        .title {
-          position: absolute;
-          bottom: 12px;
-        }
-      }
-
-    .img{
       position: relative;
-      width: 272px;
-      height: 175px;
-      border: 1px solid #CCCCCC;
+      display: inline-flex;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #cccccc;
       box-sizing: border-box;
-      padding: 6px;
       border-radius: 4px;
-      background: #fff;
 
-      .name{
-        width: 100%;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 400;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        &.bottom{
-          position: absolute;
-          bottom: 0;
-          background: white;
-          z-index: 2;
-        }
+      img {
+        width: 80px;
       }
 
-      .checkbox{
+      .title {
+        position: absolute;
+        bottom: 12px;
+      }
+    }
+
+    .img {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #cccccc;
+      box-sizing: border-box;
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+
+      .checkbox {
         position: absolute;
         top: 10px;
         left: 10px;
         z-index: 50;
       }
 
-      .mask{
+      .mask {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         z-index: 40;
-        background-color: rgba(0,0,0,.25);
+        background-color: rgba(0, 0, 0, 0.25);
 
-        .wrapper{
+        .wrapper {
           position: absolute;
           width: 100%;
           bottom: 5px;
@@ -482,45 +432,69 @@
           height: 100%;
         }
 
-        .frameWrapper{
+        .frameWrapper {
           position: absolute;
           width: 100%;
           height: 100%;
           display: grid;
-          grid-template-columns: repeat(2,74px);
+          grid-template-columns: repeat(2, 74px);
           justify-content: center;
           gap: 10px;
           align-content: center;
         }
 
-        .openBtn{
+        .openBtn {
           width: 74px;
           margin-left: 4px;
           margin-right: 4px;
         }
-
       }
-      .relation-container{
+
+      .relation-container {
         position: relative;
         overflow: hidden;
         width: 100%;
+        flex: 1;
       }
-      .place{
+
+      .place {
         // margin-bottom: 6px;
 
-        .pointCloudImg{
-          width: 100%;
-          max-height: 100%;
-          object-fit: cover;
-        }
-
-        &.image-card{
+        .pointCloudImg {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          margin-bottom: 5px
+        }
+
+        &.image-card {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
       }
+
+      .name {
+        width: 100%;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 400;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        position: absolute;
+        height: 38px;
+        bottom: 0;
+        display: flex;
+        z-index: 2;
+        justify-content: center;
+        align-items: center;
+        left: 0;
+        background: white;
+
+        &.bottom {
+        }
+      }
+
       .easy-pc {
         pointer-events: none;
         color: red;
@@ -543,9 +517,10 @@
         transform: translate(-50%, -50%);
         z-index: 1;
       }
-      .camera{
+
+      .camera {
         display: flex;
-        margin-bottom: 5px;
+        margin-bottom: 38px;
         // margin-left: -3px;
         // margin-right: -3px;
 

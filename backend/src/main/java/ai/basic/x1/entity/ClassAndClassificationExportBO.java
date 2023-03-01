@@ -59,6 +59,6 @@ public class ClassAndClassificationExportBO {
         /**
          * setting
          */
-        private JSONArray options;
+        private JSONObject attribute;
     }
 }

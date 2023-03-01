@@ -1,6 +1,6 @@
 import { get, post } from './base';
 import { IModelResult, IDataMeta, IClassType, IFileConfig } from '../type';
-import { traverseClassification2Arr, empty } from '../utils';
+import { traverseClassification2Arr, empty, parseClassesFromBackend } from '../utils';
 
 enum Api {
     API = '/api',
@@ -142,35 +142,7 @@ export async function getDataSetClass(datasetId: string) {
     let data = await get(url);
     data = data.data || [];
 
-    let classTypes = [] as IClassType[];
-    data.forEach((config: any) => {
-        let classType: IClassType = {
-            id: config.id + '',
-            name: config.name || '',
-            label: config.name || '',
-            color: config.color || '#ff0000',
-            attrs: [],
-            toolType: config.toolType,
-        };
-
-        let attributes = config.attributes || [];
-        // attributes = JSON.parse(attributes);
-
-        attributes.forEach((config: any) => {
-            let options = (config.options || []).map((e: any) => {
-                return { value: e.name, label: e.name };
-            });
-            classType.attrs.push({
-                name: config.name,
-                label: config.name,
-                required: config.required,
-                type: config.type,
-                options: options,
-            });
-        });
-
-        classTypes.push(classType);
-    });
+    let classTypes = parseClassesFromBackend(data);
 
     return classTypes;
 }

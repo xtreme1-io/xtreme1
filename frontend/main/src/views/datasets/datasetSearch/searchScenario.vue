@@ -25,8 +25,9 @@
           mode="multiple"
           style="flex: 1"
           @change="handleChange"
+          :filter-option="handleFilter"
         >
-          <Select.Option v-for="item in options" :key="item.id" :value="item.id">
+          <Select.Option v-for="item in options" :key="item.id" :value="item.id" :name="item.name">
             <div
               class="inline-flex items-center"
               :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
@@ -118,7 +119,8 @@
   const { prefixCls } = useDesign('searchScenario');
   // const { t } = useI18n();
   const result = ref();
-  const options = ref<any[]>(['gmail.com', '163.com', 'qq.com']);
+  const options = ref<any[]>([]);
+  const allOptions = ref<any[]>([]);
   const list = ref<any[]>([]);
   const info = ref<any>();
   const classification = ref();
@@ -129,6 +131,7 @@
   const scrollRef = ref<Nullable<ScrollActionType>>(null);
 
   const handleChange = (e) => {
+    pageNo.value = 1;
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];
@@ -175,6 +178,7 @@
   const fetchOption = async () => {
     const list = await getDatasetClass(id);
     options.value = list;
+    allOptions.value = list;
   };
 
   const fetchList = async (flag?) => {
@@ -274,6 +278,11 @@
       return message.error('please select a class first');
     }
     openModal();
+  };
+
+  const handleFilter = (input, option) => {
+    window.console.log(input, option);
+    return (option?.name ?? '').toLowerCase().includes(input.toLowerCase());
   };
 </script>
 <style lang="less" scoped>

@@ -123,9 +123,10 @@ public class MinioService {
             ServerException, XmlParserException {
         createBucket(bucketName);
         List<SnowballObject> objects = new ArrayList<>(fileList.size());
+        int startingPosition = FileUtil.getAbsolutePath(FileUtil.file(tempPath).getAbsolutePath()).length();
         fileList.forEach(file -> objects.add(
                 new SnowballObject(
-                        rootPath + file.getAbsolutePath().replace(tempPath, ""),
+                        rootPath + FileUtil.getAbsolutePath(file.getAbsolutePath()).substring(startingPosition),
                         FileUtil.getInputStream(file),
                         file.length(),
                         null)));
@@ -221,7 +222,6 @@ public class MinioService {
                 .accessUrl(accessUrl)
                 .presignedUrl(preUrl).build();
     }
-
 
 
     private String replaceUrl(String url) {

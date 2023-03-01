@@ -21,8 +21,9 @@
           mode="multiple"
           style="flex: 1"
           @change="handleChange"
+          :filter-option="handleFilter"
         >
-          <Select.Option v-for="item in options" :key="item.id" :value="item.id">
+          <Select.Option v-for="item in options" :key="item.id" :value="item.id" :name="item.name">
             <div
               class="inline-flex items-center"
               :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
@@ -144,6 +145,7 @@
   ];
 
   const handleChange = (e) => {
+    pageNo.value = 1;
     if (e.length === 0) {
       result.value = [];
       filterOptions.value = [];
@@ -288,6 +290,11 @@
       return message.error('please select a class first');
     }
     openModal();
+  };
+
+  const handleFilter = (input, option) => {
+    window.console.log(input, option);
+    return (option?.name ?? '').toLowerCase().includes(input.toLowerCase());
   };
 </script>
 <style lang="less" scoped>

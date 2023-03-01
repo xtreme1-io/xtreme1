@@ -197,6 +197,11 @@ public class DatasetUseCase {
      * @param id Dataset id
      */
     public void delete(Long id) {
+        var task = datasetDAO.getById(id);
+        if(ObjectUtil.isNull(task)){
+            throw new UsecaseException(UsecaseCode.DATASET_NOT_FOUND);
+        }
+
         var datasetLambdaUpdateWrapper = Wrappers.lambdaUpdate(Dataset.class);
         datasetLambdaUpdateWrapper.eq(Dataset::getId, id);
         datasetLambdaUpdateWrapper.set(Dataset::getIsDeleted, true);

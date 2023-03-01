@@ -156,7 +156,7 @@
         formState.inputType = props.detail.inputType;
         formState.isRequired = props.detail.isRequired;
 
-        dataSchema.value = { options: props.detail.options ?? [] };
+        dataSchema.value = { options: props.detail?.attribute?.options ?? [] };
         defaultFormState.value = JSON.parse(JSON.stringify(unref(props.detail)));
       } else {
         modalTitle.value = 'Create New Classification';
@@ -275,7 +275,7 @@
 
     handleAddUuid(dataSchema.value.options);
 
-    const params = getCreateClassificationParams({
+    const params: any = getCreateClassificationParams({
       formState: _.cloneDeep(formState),
       props: _.cloneDeep(props),
       dataSchema: _.cloneDeep(unref(dataSchema)),

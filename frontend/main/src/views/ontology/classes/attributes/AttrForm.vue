@@ -133,6 +133,7 @@
   const isInit = ref<boolean>(true);
   onMounted(() => {
     isInit.value = true;
+    console.log('attr form mounted', currentData.value);
 
     setFieldsValue({ ...currentData.value });
     handleChangeType(currentData.value.type);
@@ -224,12 +225,17 @@
   });
 
   emitter.off('handleSaveForm');
-  emitter.on('handleSaveForm', async () => {
+  emitter.on('handleSaveForm', async (params) => {
     if (isInit.value) return;
+    let attrFormValue = await getFieldsValue();
+    if (params) {
+      attrFormValue = { ...attrFormValue, ...params };
+    }
+    console.log('attrFormValue =>', attrFormValue);
 
     handleSetDataSchema({
       setType: 'update',
-      setValue: getFieldsValue() as any,
+      setValue: attrFormValue,
     });
   });
 </script>

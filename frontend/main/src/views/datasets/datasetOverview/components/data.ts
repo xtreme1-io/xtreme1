@@ -67,6 +67,12 @@ export const defaultScatterOptions = {
   pointStyle: {
     fillOpacity: 1,
   },
+  // interactions: [
+  //   {
+  //     type: 'tooltip',
+  //     cfg: { start: [{ trigger: 'element:click', action: 'tooltip:show' }] },
+  //   },
+  // ],
 };
 
 export const classificationBarOptions = {

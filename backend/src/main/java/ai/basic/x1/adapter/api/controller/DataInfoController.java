@@ -149,7 +149,7 @@ public class DataInfoController extends BaseDatasetController {
 
     @PostMapping("deleteBatch")
     public void deleteBatch(@RequestBody @Validated DataInfoDeleteDTO dto) {
-        dataInfoUsecase.deleteBatch(dto.getIds());
+        dataInfoUsecase.deleteBatch(dto.getDatasetId(),dto.getIds());
     }
 
     @GetMapping("generatePresignedUrl")

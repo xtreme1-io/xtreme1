@@ -2,6 +2,7 @@ package ai.basic.x1.adapter.port.dao.mybatis.model;
 
 import ai.basic.x1.entity.enums.InputTypeEnum;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.AllArgsConstructor;
@@ -33,8 +34,8 @@ public class DatasetClassification{
 
     private InputTypeEnum inputType;
 
-    @TableField(value = "options",typeHandler = JacksonTypeHandler.class)
-    private JSONArray options;
+    @TableField(value = "attribute",typeHandler = JacksonTypeHandler.class)
+    private JSONObject attribute;
 
     /**
      * create time

@@ -1,7 +1,7 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.5.5-green) 
+![](https://img.shields.io/badge/Release-v0.5.6-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/Xtreme1io)
@@ -58,8 +58,8 @@ Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xi
 Download the latest release package and unzip it.
 
 ```bash
-wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.5.5/xtreme1-v0.5.5.zip
-unzip -d xtreme1-v0.5.5 xtreme1-v0.5.5.zip
+wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.5.6/xtreme1-v0.5.6.zip
+unzip -d xtreme1-v0.5.6 xtreme1-v0.5.6.zip
 ```
 
 ## Start all services
@@ -68,7 +68,7 @@ unzip -d xtreme1-v0.5.5 xtreme1-v0.5.5.zip
 docker compose up
 ```
 
-Visit [https://localhost:8190](https://localhost:8190) in the browser (Google Chrome is recommended) to try out Xtreme1!
+Visit [http://localhost:8190](http://localhost:8190) in the browser (Google Chrome is recommended) to try out Xtreme1!
 
 ## ⚠️ Install built-in models
 You need to explicitly specify a model profile to enable model services.

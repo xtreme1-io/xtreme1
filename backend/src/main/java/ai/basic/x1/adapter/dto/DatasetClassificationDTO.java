@@ -4,6 +4,7 @@ import ai.basic.x1.entity.enums.InputTypeEnum;
 import ai.basic.x1.entity.enums.SortByEnum;
 import ai.basic.x1.entity.enums.SortEnum;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,7 @@ public class DatasetClassificationDTO {
     @Length(max = 256, message = "The length of name should be less than 256.")
     private String name;
 
-    private JSONArray options;
+    private JSONObject attribute;
 
     /**
      * input type:'RADIO','MULTI_SELECTION','DROPDOWN','TEXT'
