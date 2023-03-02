@@ -1,8 +1,3 @@
-FROM tjmehta/node-http-server
+FROM nginx:1.22
 
-WORKDIR /app
-COPY $FRONTEND_PACKAGE_DIR ./
-
-EXPOSE 8080
-
-CMD ["http-server", "./"]
+COPY $FRONTEND_PACKAGE_DIR /usr/share/nginx/html
