@@ -11,8 +11,8 @@
       <div class="title"
         >{{ t('business.models.overviewPage.classes') }}
         <SvgIcon
-          style="color: #c4c4c4; cursor: pointer"
-          size="24"
+          style="color: #c4c4c4; cursor: pointer; vertical-align: revert"
+          size="18"
           @click="openModal"
           name="setting"
       /></div>

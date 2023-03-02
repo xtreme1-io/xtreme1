@@ -5,9 +5,24 @@ import { Tooltip, Progress } from 'ant-design-vue';
 import failureSvg from '/@/assets/images/models/failure.svg';
 import { statusEnum, ModelRunItem } from '/@/api/business/model/modelsModel';
 import { getDateTime } from '/@/utils/business/timeFormater';
-
+import Icon, { SvgIcon } from '/@/components/Icon';
 const { t } = useI18n();
-
+const inactiveFilterIcon = (
+  <SvgIcon name={'filter-inactive'} size={14} style={{ transform: 'translateY(-2px)' }} />
+);
+const activeFilterIcon = (
+  <SvgIcon name={'filter-active'} size={14} style={{ transform: 'translateY(-2px)' }} />
+);
+export const stageFilter = [
+  {
+    text: t('business.task.annotate'),
+    value: '111',
+  },
+  {
+    text: t('business.task.review'),
+    value: '22',
+  },
+];
 // status 颜色
 const statusColor = {
   [statusEnum.started]: '#86AFFE',
@@ -32,12 +47,49 @@ export function getBasicColumns(): BasicColumn[] {
   return [
     { title: '', dataIndex: '', width: 20 },
     { title: t('business.models.run.runId'), dataIndex: 'runNo', align: 'left' },
-    { title: t('business.models.run.datasetName'), dataIndex: 'datasetName', align: 'left' },
+    {
+      title: t('business.models.run.datasetName'),
+      dataIndex: 'datasetName',
+      align: 'left',
+      filters: stageFilter,
+      filterIcon: ({ filtered }) => {
+        return filtered ? activeFilterIcon : inactiveFilterIcon;
+      },
+      onFilter: (value: string, record: any) => record.datasetType.indexOf(value) === 0,
+    },
+    {
+      title: t('business.models.run.type'),
+      dataIndex: 'type',
+      align: 'left',
+      filters: stageFilter,
+      filterIcon: ({ filtered }) => {
+        return filtered ? activeFilterIcon : inactiveFilterIcon;
+      },
+      onFilter: (value: string, record: any) => record.datasetType.indexOf(value) === 0,
+    },
+    { title: t('business.models.run.DataCount'), dataIndex: 'DataCount', align: 'left' },
+
+    {
+      title: t('business.models.run.Metrics'),
+      dataIndex: 'Metrics',
+      align: 'left',
+      customRender: ({ record }) => {
+        return (
+          <div class="flex items-center gap-5px">
+            34343
+            <Tooltip title={getErrorReason(record.errorReason)}>more</Tooltip>
+          </div>
+        );
+      },
+    },
     {
       title: t('business.models.run.createdAt'),
       dataIndex: 'createdAt',
       slots: { customRender: 'createdAt' },
       align: 'left',
+      sorter: (a, b) => a.age - b.age,
+      // sorter: true,
+      sortOrder: 'ascend',
       customRender: ({ record }) => {
         return <span>{getDateTime(record.createdAt)}</span>;
       },
@@ -46,6 +98,11 @@ export function getBasicColumns(): BasicColumn[] {
       title: t('business.models.run.status'),
       dataIndex: 'status',
       align: 'left',
+      filters: stageFilter,
+      filterIcon: ({ filtered }) => {
+        return filtered ? activeFilterIcon : inactiveFilterIcon;
+      },
+      onFilter: (value: string, record: any) => record.datasetType.indexOf(value) === 0,
       customRender: ({ record }) => {
         return (
           <div class="flex items-center gap-5px">

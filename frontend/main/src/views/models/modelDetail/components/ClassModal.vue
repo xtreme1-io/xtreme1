@@ -1,7 +1,7 @@
 <template>
   <BasicModal
     v-bind="$attrs"
-    :visible="true"
+    :visible="false"
     :okText="t('common.saveText')"
     @register="registerModal"
     destroyOnClose
@@ -13,6 +13,17 @@
   >
     <template #title> classes Setting </template>
     <div class="inner">
+      <div class="cursor-pointer">
+        <Icon
+          size="18"
+          style="color: #60a9fe; margin-right: 10px"
+          class="info-icon"
+          icon="material-symbols:library-books-rounded"
+        />
+        <span style="color: #8bc1e8"
+          >{{ t('business.models.helpLinkText.overviewClassSetting') }}
+        </span>
+      </div>
       <div class="text">
         <div class="title">
           <span class="code">

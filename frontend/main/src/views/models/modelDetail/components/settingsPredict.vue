@@ -1,0 +1,153 @@
+<template>
+  <div class="title">{{ t('business.models.settingsModel.ModelConfiguration') }} </div>
+  <div class="content">
+    <div>
+      {{ t('business.models.settingsModel.Predict') }}
+      <template v-if="!isEdit">
+        <SvgIcon
+          style="color: #c4c4c4; cursor: pointer"
+          size="24"
+          @click="handleEdit"
+          name="edit"
+        />
+      </template>
+      <template v-else>
+        <Button type="default" @click="handleCancel">{{ t('common.cancelText') }}</Button>
+        <Button type="primary" class="ml-2" @click="handleSave">{{ t('common.saveText') }}</Button>
+      </template>
+    </div>
+    <div class="cursor-pointer link">
+      <Icon
+        size="18"
+        style="color: #60a9fe; margin-right: 10px"
+        class="info-icon"
+        icon="material-symbols:library-books-rounded"
+      />
+      <span style="color: #8bc1e8">{{ t('business.models.helpLinkText.settingsPredict') }} </span>
+    </div>
+
+    <div class="predict">
+      <span class="tab">URL:</span>
+      <div>
+        <Select :disabled="!isEdit" style="width: 120px" v-model:value="urlType">
+          <Select.Option v-for="item in urlTypeList" :key="item" :value="item">
+            {{ item }}
+          </Select.Option>
+        </Select>
+      </div>
+      <Input :disabled="!isEdit" v-model:value="urlVal" />
+      <Button type="default" @click="testConnection">{{
+        t('business.models.settingsModel.TestConnection')
+      }}</Button>
+    </div>
+    <div class="status"> <span class="tab">Status: </span> 200</div>
+    <div class="response"> <span class="tab">Response: </span> 200</div>
+  </div>
+</template>
+<script lang="ts" setup>
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import Icon, { SvgIcon } from '/@/components/Icon';
+  import { Tinymce } from '/@/components/Tinymce';
+  import { computed, ref } from 'vue';
+
+  import { Button, Input, message, Select } from 'ant-design-vue';
+  let urlVal = ref<string>('');
+  let urlTypeList = ref(['POST']);
+  let urlType = ref('POST');
+  const isEdit = ref(false);
+  const { t } = useI18n();
+  const props = withDefaults(defineProps<{ description: string | null }>(), {
+    description: '',
+  });
+  const description = computed(() => props.description);
+  const handleEdit = () => {
+    isEdit.value = true;
+  };
+  const handleCancel = () => {
+    isEdit.value = !isEdit.value;
+  };
+  const handleSave = async () => {
+    // buriedPoint(BuriedPointEnum.TASK_INSTRUCTION_CHANGE, {
+    //   Task_ID: props.info.id,
+    // });
+    // const params = {
+    //   id: props.info.id,
+    //   instructionFiles: fileList.value,
+    //   instruction: instruction.value,
+    // };
+    // await updateInstruction(params);
+    // isEdit.value = false;
+    // message.success('Instruction saved');
+    // handleSuccess();
+  };
+  const testConnection = async () => {
+    const reg = /(http|https):\/\/([\w.]+\/?)\S*/;
+    let val = urlVal.value;
+    if (!reg.test(val) || !val) {
+      message.warning(t('business.models.settingsModel.TestConnectionUrlErrorMsg'));
+    }
+  };
+</script>
+<style lang="less" scoped>
+  .overview {
+    & > div {
+      margin-right: 80px;
+      margin-bottom: 30px;
+      overflow: hidden;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .title {
+        height: 25px;
+        line-height: 25px;
+        font-size: 18px;
+        color: #000;
+        margin-bottom: 20px;
+      }
+      .content {
+        border: 1px solid #aaa;
+        padding: 15px;
+        border-radius: 10px;
+        .link {
+          padding: 10px 0;
+        }
+        .tab {
+          display: inline-block;
+          width: 100px;
+        }
+        .predict {
+          display: flex;
+          align-items: center;
+          margin-bottom: 20px;
+          input {
+            flex: 1;
+            margin: 0 20px;
+            height: 32px;
+          }
+        }
+        .status {
+          margin-bottom: 20px;
+        }
+        .response {
+        }
+      }
+    }
+
+    .des_text {
+      // font-size: 14px;
+      // line-height: 32px;
+      // color: #333;
+      // word-break: break-word;
+
+      // width: 90%;
+      margin-left: 20px;
+      margin-bottom: 10px;
+      padding: 20px;
+      padding-right: 50px;
+      background: #e6f7fd;
+      border-radius: 20px;
+    }
+  }
+</style>

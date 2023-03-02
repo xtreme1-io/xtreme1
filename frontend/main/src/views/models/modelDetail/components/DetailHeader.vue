@@ -23,7 +23,24 @@
               </span>
             </template>
           </div>
-          <div class="title">{{ props.headerData.name || '' }}</div>
+          <div class="title">
+            <template v-if="!isEdit">
+              {{ props.headerData.name || '' }}
+              <SvgIcon
+                style="color: #c4c4c4; cursor: pointer"
+                size="24"
+                @click="handleEdit"
+                name="edit"
+              />
+            </template>
+            <template v-else>
+              <Input style="margin-right: 20px" v-model:value="headerDataName" />
+              <Button type="default" @click="handleCancel">{{ t('common.cancelText') }}</Button>
+              <Button type="primary" class="ml-2" @click="handleSave">{{
+                t('common.saveText')
+              }}</Button>
+            </template>
+          </div>
         </div>
         <div>
           <span>{{ t('business.models.detail.usage') + '：' }}</span>
@@ -51,17 +68,18 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { computed } from 'vue';
+  import { SvgIcon } from '/@/components/Icon';
+  import { computed, ref } from 'vue';
   import { useGo } from '/@/hooks/web/usePage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getDate } from '/@/utils/business/timeFormater';
   import { RouteEnum } from '/@/enums/routeEnum';
   import { IHeader } from './typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { Progress } from 'ant-design-vue';
+  import { Progress, Button, Input } from 'ant-design-vue';
 
   const { t } = useI18n();
-
+  const isEdit = ref(false);
   const props = withDefaults(defineProps<{ headerData: IHeader }>(), {
     headerData: (): IHeader => {
       return {
@@ -82,10 +100,30 @@
   const isImage = computed(() => {
     return props.headerData.type == datasetTypeEnum.IMAGE;
   });
-
+  let headerDataName = computed(() => props.headerData.name);
   const go = useGo();
   const goBack = () => {
     go(`${RouteEnum.MODELS}`);
+  };
+  const handleEdit = () => {
+    isEdit.value = true;
+  };
+  const handleCancel = () => {
+    isEdit.value = !isEdit.value;
+  };
+  const handleSave = async () => {
+    // buriedPoint(BuriedPointEnum.TASK_INSTRUCTION_CHANGE, {
+    //   Task_ID: props.info.id,
+    // });
+    // const params = {
+    //   id: props.info.id,
+    //   instructionFiles: fileList.value,
+    //   instruction: instruction.value,
+    // };
+    // await updateInstruction(params);
+    // isEdit.value = false;
+    // message.success('Instruction saved');
+    // handleSuccess();
   };
 </script>
 <style lang="less" scoped>

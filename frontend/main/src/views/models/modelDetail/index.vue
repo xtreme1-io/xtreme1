@@ -54,6 +54,7 @@
 
   // notify 消息跳转携带的一次性参数
   const { currentRoute } = useRouter();
+  activeKey.value = currentRoute.value.query.tabId;
   let routeParams = currentRoute.value.params;
   if (routeParams && routeParams.tabId) {
     activeKey.value = routeParams.tabId as detailType.runs;

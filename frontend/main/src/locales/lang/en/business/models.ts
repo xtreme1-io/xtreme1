@@ -1,8 +1,12 @@
 export default {
   models: 'Models',
   modelDetails: 'Model Details',
+  modelName: 'modelName',
   modelRuns: 'Models Runs',
   overview: 'Overview',
+  modelType: 'model Type',
+  dataType: 'data Type',
+  description: 'Description',
   runs: 'Runs',
   create: {
     createModels: 'Create My Model',
@@ -14,6 +18,7 @@ export default {
     all: 'All',
     image: 'Image',
     lidar: 'Lidar',
+    create: 'Create Model',
   },
   detail: {
     creator: 'Creator',
@@ -39,6 +44,10 @@ export default {
     reRun: 'Rerun',
     viewDataset: 'View Dataset',
     delete: 'Delete',
+    type: 'Type',
+    DataCount: 'Data Count',
+    Metrics: 'Metrics',
+    CreatedAt: 'Created At',
   },
   runModel: {
     dataset: 'Dataset',
@@ -54,5 +63,21 @@ export default {
     title: 'Warning',
     text: 'You are going to delete a model run, continue？',
     hasDeleted: 'models has been deleted!',
+  },
+  settingsModel: {
+    ModelConfiguration: 'Model Configuration',
+    Predict: 'Predict',
+    TestConnection: 'Test Connection',
+    TestConnectionUrlErrorMsg: 'Please enter the url in the correct format',
+    DangerZone: 'Danger Zone',
+    DangerDes:
+      'Delete this model \nOnce you delete a model, all data about this model will be deleted permanently',
+    DeleteModel: 'Delete this Model',
+    deleteModalText:
+      'Once you delete a model, all data about this model will be deleted permanently, continue?',
+  },
+  helpLinkText: {
+    overviewClassSetting: 'Click to see our documentations for more information',
+    settingsPredict: 'check out our model integration instructions',
   },
 };

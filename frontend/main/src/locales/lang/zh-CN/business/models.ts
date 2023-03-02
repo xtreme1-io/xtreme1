@@ -1,6 +1,10 @@
 export default {
   models: '模型',
+  description: '描述',
+  modelName: '模型名',
   modelDetails: '模型细节',
+  modelType: '模型类型',
+  dataType: '数据类型',
   modelRuns: '模型运行',
   overview: '概述',
   runs: '运行',
@@ -14,6 +18,7 @@ export default {
     all: '全部',
     image: '图像',
     lidar: '雷达',
+    create: '创建模型',
   },
   detail: {
     usage: '使用量',
@@ -39,6 +44,10 @@ export default {
     reRun: '重新运行',
     viewDataset: '查看数据集',
     delete: '删除',
+    type: '类型',
+    DataCount: 'Data Count',
+    Metrics: 'Metrics',
+    CreatedAt: '创建时间',
   },
   runModel: {
     dataset: '数据集',
@@ -54,5 +63,20 @@ export default {
     title: '警告',
     text: '你将要删除一个模型，是否继续？',
     hasDeleted: '模型已被删除！',
+  },
+  settingsModel: {
+    ModelConfiguration: 'Model Configuration',
+    Predict: 'Predict',
+    TestConnection: '测试连接',
+    TestConnectionUrlErrorMsg: '请输入正确格式的url',
+    DangerZone: '危险操作',
+    DangerDes: '删除此模型\n删除模型后，有关此模型的所有数据将被永久删除',
+    DeleteModel: '删除此模型',
+    deleteModalText:
+      'Once you delete a model, all data about this model will be deleted permanently, continue?',
+  },
+  helpLinkText: {
+    overviewClassSetting: 'Click to see our documentations for more information',
+    settingsPredict: 'check out our model integration instructions',
   },
 };

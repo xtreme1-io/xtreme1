@@ -56,6 +56,7 @@
     createModelRunApi,
     rerunModelRunApi,
     getAllDataset,
+    getAllModelRunRecordApi,
   } from '/@/api/business/models';
   import {
     PreModelParam,
@@ -79,7 +80,12 @@
 
   // Table ==>
   const [registerTable, { reload }] = useTable({
-    api: getModelRunApi,
+    afterFetch: (res) => {
+      // debugger;
+      return [{}];
+    },
+    bordered: true,
+    api: () => {},
     columns: getBasicColumns(),
     searchInfo: { modelId: Number(props.modelId) },
     showIndexColumn: false,
