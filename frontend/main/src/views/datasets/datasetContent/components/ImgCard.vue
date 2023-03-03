@@ -142,7 +142,7 @@
         <div class="name"> {{ data.name }} </div>
       </template>
       <div
-        class="mb-4 place relation-container"
+        class="place relation-container"
         v-else-if="info?.type === datasetTypeEnum.LIDAR_BASIC"
         style="width: 100%; height: 100%"
       >
@@ -160,6 +160,7 @@
         <img
           class="place image-card"
           ref="svg"
+          :viewBox="`0 0 ${size.svgWidth} ${size.svgHeight}`"
           @load="() => onImgLoad(data)"
           v-lazyload="getImageUrl(data) || placeImg"
           alt=""
@@ -352,16 +353,16 @@
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-img-card';
-  .@{prefix-cls}{
-    
+
+  .@{prefix-cls} {
     position: relative;
-   
     transform: translateZ(0);
-    .lockInfo{
+
+    .lockInfo {
       position: absolute;
       padding: 0 10px;
-     width: 100%;
-     text-align: center;
+      width: 100%;
+      text-align: center;
       top: 6px;
       color: white;
       z-index: 1;
@@ -371,54 +372,57 @@
     }
 
     .floder-img {
-        position: relative;
-        display: inline-flex;
-        width: 100%;
-        height: 100%;
-        justify-content: center;
-        align-items: center;
-        background: #ffffff;
-        border: 1px solid #cccccc;
-        box-sizing: border-box;
-        border-radius: 4px;
+      position: relative;
+      display: inline-flex;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #cccccc;
+      box-sizing: border-box;
+      border-radius: 4px;
 
-        img {
-          width: 80px;
-        }
-
-        .title {
-          position: absolute;
-          bottom: 12px;
-        }
+      img {
+        width: 80px;
       }
 
-    .img{
+      .title {
+        position: absolute;
+        bottom: 12px;
+      }
+    }
+
+    .img {
       position: relative;
       width: 100%;
       height: 100%;
-      border: 1px solid #CCCCCC;
+      border: 1px solid #cccccc;
       box-sizing: border-box;
       border-radius: 12px;
       background: #fff;
       overflow: hidden;
       cursor: pointer;
-      .checkbox{
+      display: flex;
+      flex-direction: column;
+
+      .checkbox {
         position: absolute;
         top: 10px;
         left: 10px;
         z-index: 50;
       }
 
-      .mask{
+      .mask {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         z-index: 40;
-        background-color: rgba(0,0,0,.25);
+        background-color: rgba(0, 0, 0, 0.25);
 
-        .wrapper{
+        .wrapper {
           position: absolute;
           width: 100%;
           bottom: 5px;
@@ -428,47 +432,48 @@
           height: 100%;
         }
 
-        .frameWrapper{
+        .frameWrapper {
           position: absolute;
           width: 100%;
           height: 100%;
           display: grid;
-          grid-template-columns: repeat(2,74px);
+          grid-template-columns: repeat(2, 74px);
           justify-content: center;
           gap: 10px;
           align-content: center;
         }
 
-        .openBtn{
+        .openBtn {
           width: 74px;
           margin-left: 4px;
           margin-right: 4px;
         }
-
       }
-      .relation-container{
+
+      .relation-container {
         position: relative;
         overflow: hidden;
         width: 100%;
+        flex: 1;
       }
-      .place{
+
+      .place {
         // margin-bottom: 6px;
 
-        .pointCloudImg{
+        .pointCloudImg {
           width: 100%;
-          max-height: 100%;
+          height: 100%;
           object-fit: cover;
         }
 
-        &.image-card{
+        &.image-card {
           width: 100%;
-          height: calc(100% - 40px);
-          object-fit: fill;
-          margin-bottom: 5px
+          height: 100%;
+          object-fit: cover;
         }
       }
 
-      .name{
+      .name {
         width: 100%;
         text-align: center;
         font-size: 14px;
@@ -476,9 +481,20 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
-        &.bottom{
+        position: absolute;
+        height: 38px;
+        bottom: 0;
+        display: flex;
+        z-index: 2;
+        justify-content: center;
+        align-items: center;
+        left: 0;
+        background: white;
+
+        &.bottom {
         }
       }
+
       .easy-pc {
         pointer-events: none;
         color: red;
@@ -501,9 +517,10 @@
         transform: translate(-50%, -50%);
         z-index: 1;
       }
-      .camera{
+
+      .camera {
         display: flex;
-        margin-bottom: 5px;
+        margin-bottom: 38px;
         // margin-left: -3px;
         // margin-right: -3px;
 

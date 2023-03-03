@@ -9,8 +9,5 @@ RUN --mount=type=cache,target=image-tool/node_modules \
 RUN --mount=type=cache,target=pc-tool/node_modules \
     cd pc-tool && npm install && npm run build
 
-FROM tjmehta/node-http-server
-WORKDIR /app
-COPY --from=build /build/dist ./
-EXPOSE 8080
-CMD ["http-server", "./", "-s"]
+FROM nginx:1.22
+COPY --from=build /build/dist /usr/share/nginx/html

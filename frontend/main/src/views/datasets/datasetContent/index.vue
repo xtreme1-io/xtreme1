@@ -79,7 +79,7 @@
         >
           <ScrollContainer ref="scrollRef">
             <ImgCard
-            class="listcard"
+              class="listcard"
               v-for="i in list"
               :key="i.id"
               :object="objectMap[i.id]"
@@ -226,7 +226,7 @@
   import TipModal from './components/TipModal.vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import { getModelAllApi } from '/@/api/business/models';
-import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
+  import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
   //   useModal();
@@ -650,10 +650,9 @@ import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
 
     .listcard {
       // margin: 0 !important;
-      
+
       margin: v-bind(paddingX) !important;
       height: v-bind(cardHeight) !important;
     }
   }
-
 </style>

@@ -46,7 +46,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -58,6 +61,7 @@ import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DataUploadSourceEnum.LOCAL;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
 import static ai.basic.x1.entity.enums.RelationEnum.*;
 import static ai.basic.x1.entity.enums.UploadStatusEnum.*;
 import static ai.basic.x1.usecase.exception.UsecaseCode.*;
@@ -170,7 +174,7 @@ public class DataInfoUseCase {
      */
     private final FileFilter filefilter = file -> {
         //if the file extension is image return true, else false
-        return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath()));
+        return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath())) && Constants.IMAGE.equals(FileUtil.getName(file.getParentFile()));
     };
 
     /**
@@ -201,11 +205,11 @@ public class DataInfoUseCase {
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
-            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId,datasetId);
+            dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId, datasetId);
             dataAnnotationObjectLambdaUpdateWrapper.in(DataAnnotationObject::getDataId, ids);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);
             var dataAnnotationClassificationLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationClassification.class);
-            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId,datasetId);
+            dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId, datasetId);
             dataAnnotationClassificationLambdaUpdateWrapper.in(DataAnnotationClassification::getDataId, ids);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
             datasetSimilarityJobUseCase.submitJob(datasetId);
@@ -497,7 +501,7 @@ public class DataInfoUseCase {
         var datasetType = dataInfoUploadBO.getType();
         var pointCloudList = new ArrayList<File>();
         findPointCloudList(dataInfoUploadBO.getBaseSavePath(), pointCloudList);
-        var rootPath = String.format("%s/%s/", userId, datasetId);
+        var rootPath = String.format("%s/%s", userId, datasetId);
         log.info("Get point_cloud datasetId:{},size:{}", datasetId, pointCloudList.size());
         if (CollectionUtil.isEmpty(pointCloudList)) {
             uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, POINT_CLOUD_COMPRESSED_FILE_ERROR.getMessage());
@@ -589,7 +593,7 @@ public class DataInfoUseCase {
         var file = FileUtil.file(dataInfoUploadBO.getSavePath());
         var imageExtraInfoBO = ImageExtraInfoBO.builder().height(Img.from(file).getImg().getHeight(null))
                 .width(Img.from(file).getImg().getWidth(null)).build();
-        var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var fileUrl = DecompressionFileUtils.removeUrlParameter(URLUtil.decode(dataInfoUploadBO.getFileUrl()));
         var path = fileUrl.replace(minioProp.getEndpoint(), "").replace(minioProp.getBucketName() + "/", "");
         var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(minioProp.getBucketName())
                 .size(file.length()).path(path).type(FileUtil.getMimeType(path)).extraInfo(JSONUtil.parseObj(imageExtraInfoBO)).build();
@@ -599,7 +603,7 @@ public class DataInfoUseCase {
         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file))
                 .content(Collections.singletonList(fileNodeBO)).build();
         dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
-        var rootPath = String.format("%s/%s/", userId, datasetId);
+        var rootPath = String.format("%s/%s", userId, datasetId);
         var newSavePath = tempPath + fileBO.getPath().replace(rootPath, "");
         FileUtil.copy(dataInfoUploadBO.getSavePath(), newSavePath, true);
         createUploadThumbnail(userId, fileBOS, rootPath);
@@ -613,8 +617,8 @@ public class DataInfoUseCase {
     private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 2, filefilter);
-        var rootPath = String.format("%s/%s/", userId, datasetId);
+        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, filefilter);
+        var rootPath = String.format("%s/%s", userId, datasetId);
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
         var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>();
@@ -641,7 +645,7 @@ public class DataInfoUseCase {
                         var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
                         var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
                         var file = FileUtil.file(tempPath + fileBO.getPath().replace(rootPath, ""));
-                        handleDataResult(file.getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
+                        handleDataResult(file.getParentFile().getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                                 .fileId(fileBO.getId()).type(FILE).build();
                         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).tempDataId(tempDataId).build();
@@ -866,7 +870,7 @@ public class DataInfoUseCase {
     private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var path = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var path = DecompressionFileUtils.removeUrlParameter(fileUrl);
         dataInfoUploadBO.setFileName(FileUtil.getPrefix(path));
         var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
         var savePath = baseSavePath + FileUtil.getName(path);
@@ -1128,8 +1132,8 @@ public class DataInfoUseCase {
      */
     public void handleDataResult(File file, String dataName, DataAnnotationObjectBO dataAnnotationObjectBO,
                                  List<DataAnnotationObjectBO> dataAnnotationObjectBOList, StringBuilder errorBuilder) {
-        var resultFile = FileUtil.loopFiles(file).stream()
-                .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && getFileName(fc).equals(dataName)
+        var resultFile = FileUtil.loopFiles(file, 2, null).stream()
+                .filter(fc -> JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fc)) && dataName.equals(FileUtil.getPrefix(fc))
                         && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
         if (resultFile.isPresent()) {
             try {
@@ -1206,7 +1210,7 @@ public class DataInfoUseCase {
                     .type(DIRECTORY)
                     .files(getDirList(node, rootPath, files)).build();
         } else {
-            var path = rootPath + node.getAbsolutePath().replace(tempPath, "");
+            var path = rootPath + FileUtil.getAbsolutePath(node.getAbsolutePath()).replace(FileUtil.getAbsolutePath(FileUtil.file(tempPath).getAbsolutePath()), "");
             var fileId = ByteUtil.bytesToLong(SecureUtil.md5().digest(path));
             files.add(node);
             return DataInfoBO.FileNodeBO.builder()
@@ -1266,8 +1270,9 @@ public class DataInfoUseCase {
 
         var fileBOS = new ArrayList<FileBO>();
         files.forEach(file -> {
-            var zipPath = file.getAbsolutePath().replace(dataInfoUploadBO.getBaseSavePath(), "");
-            var path = String.format("%s%s", rootPath, file.getAbsolutePath().replace(tempPath, ""));
+            var startingPosition = FileUtil.getAbsolutePath(FileUtil.file(dataInfoUploadBO.getBaseSavePath()).getAbsolutePath()).length() + 1;
+            var zipPath = FileUtil.getAbsolutePath(file.getAbsolutePath()).substring(startingPosition);
+            var path = String.format("%s%s", rootPath, FileUtil.getAbsolutePath(file.getAbsolutePath()).replace(FileUtil.getAbsolutePath(FileUtil.file(tempPath).getAbsolutePath()), ""));
             zipPath = zipPath.startsWith(dataInfoUploadBO.getFileName()) ? zipPath : String.format("%s/%s", dataInfoUploadBO.getFileName(), zipPath);
             var mimeType = FileUtil.getMimeType(path);
             var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(bucketName)

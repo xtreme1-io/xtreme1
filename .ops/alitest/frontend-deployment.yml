@@ -32,7 +32,7 @@ spec:
               cpu: 1
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 80
 ---
 apiVersion: v1
 kind: Service
@@ -46,7 +46,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 8080
+      targetPort: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -57,7 +57,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: x1-community.alitest.beisai.com
+    - host: xtreme1.alitest.beisai.com
       http:
         paths:
           - backend:
@@ -69,7 +69,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - x1-community.alitest.beisai.com
+        - xtreme1.alitest.beisai.com
       secretName: alitest.beisai.com
 ---
 apiVersion: networking.k8s.io/v1
@@ -81,7 +81,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: x1-community.alitest.beisai.com
+    - host: xtreme1.alitest.beisai.com
       http:
         paths:
           - backend:
@@ -93,7 +93,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - x1-community.alitest.beisai.com
+        - xtreme1.alitest.beisai.com
       secretName: alitest.beisai.com
 ---
 apiVersion: networking.k8s.io/v1
@@ -105,7 +105,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: x1-community.alitest.beisai.com
+    - host: xtreme1.alitest.beisai.com
       http:
         paths:
           - backend:
@@ -117,5 +117,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - x1-community.alitest.beisai.com
+        - xtreme1.alitest.beisai.com
       secretName: alitest.beisai.com
