@@ -46,7 +46,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -590,7 +593,7 @@ public class DataInfoUseCase {
         var file = FileUtil.file(dataInfoUploadBO.getSavePath());
         var imageExtraInfoBO = ImageExtraInfoBO.builder().height(Img.from(file).getImg().getHeight(null))
                 .width(Img.from(file).getImg().getWidth(null)).build();
-        var fileUrl = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var fileUrl = DecompressionFileUtils.removeUrlParameter(URLUtil.decode(dataInfoUploadBO.getFileUrl()));
         var path = fileUrl.replace(minioProp.getEndpoint(), "").replace(minioProp.getBucketName() + "/", "");
         var fileBO = FileBO.builder().name(file.getName()).originalName(file.getName()).bucketName(minioProp.getBucketName())
                 .size(file.length()).path(path).type(FileUtil.getMimeType(path)).extraInfo(JSONUtil.parseObj(imageExtraInfoBO)).build();
@@ -867,7 +870,7 @@ public class DataInfoUseCase {
     private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var path = DecompressionFileUtils.removeUrlParameter(dataInfoUploadBO.getFileUrl());
+        var path = DecompressionFileUtils.removeUrlParameter(fileUrl);
         dataInfoUploadBO.setFileName(FileUtil.getPrefix(path));
         var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
         var savePath = baseSavePath + FileUtil.getName(path);
