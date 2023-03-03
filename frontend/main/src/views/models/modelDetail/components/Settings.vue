@@ -3,6 +3,9 @@
     <div class="des">
       <settingsPredict />
     </div>
+  </div>
+
+  <div class="overview">
     <div class="scenario">
       <div class="title">{{ t('business.models.settingsModel.DangerZone') }}</div>
       <div class="DangerZone">
@@ -65,12 +68,17 @@
         margin-bottom: 20px;
       }
       .DangerZone {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         white-space: pre-wrap;
-        border: 1px solid red;
+        border: 1px solid #aaa;
         border-radius: 10px;
         padding: 20px 15px;
         button {
-          float: right;
+          color: #f8827b !important;
+          border: 1px solid #f8827b !important;
+          border-radius: 8px;
         }
       }
     }

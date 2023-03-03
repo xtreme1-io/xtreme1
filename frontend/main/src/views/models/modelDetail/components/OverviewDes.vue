@@ -1,14 +1,21 @@
 <template>
   <div class="title"
     >{{ t('business.models.overviewPage.description') }}
-    <template v-if="!isEdit">
-      <SvgIcon style="color: #c4c4c4; cursor: pointer" size="24" @click="handleEdit" name="edit" />
-    </template>
-    <template v-else>
-      <Button type="default" @click="handleCancel">{{ t('common.cancelText') }}</Button>
-      <Button type="primary" class="ml-2" @click="handleSave">{{ t('common.saveText') }}</Button>
-    </template></div
-  >
+    <div style="float: right">
+      <template v-if="!isEdit">
+        <SvgIcon
+          style="color: #c4c4c4; cursor: pointer; border-radius: 6px; border: 2px solid #aaa"
+          size="26"
+          @click="handleEdit"
+          name="edit"
+        />
+      </template>
+      <template v-else>
+        <Button type="default" @click="handleCancel">{{ t('common.cancelText') }}</Button>
+        <Button type="primary" class="ml-2" @click="handleSave">{{ t('common.saveText') }}</Button>
+      </template>
+    </div>
+  </div>
 
   <template v-if="!isEdit">
     <!-- eslint-disable vue/no-v-html -->

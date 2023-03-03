@@ -5,15 +5,15 @@
     :okText="t('common.saveText')"
     @register="registerModal"
     destroyOnClose
-    :width="560"
+    :width="550"
     :closable="false"
     :centered="true"
     wrapClassName="models_class_modal"
     @ok="saveHandle"
   >
-    <template #title> classes Setting </template>
-    <div class="inner">
-      <div class="cursor-pointer">
+    <template #title>
+      classes Setting
+      <a class="cursor-pointer link">
         <Icon
           size="18"
           style="color: #60a9fe; margin-right: 10px"
@@ -23,7 +23,9 @@
         <span style="color: #8bc1e8"
           >{{ t('business.models.helpLinkText.overviewClassSetting') }}
         </span>
-      </div>
+      </a>
+    </template>
+    <div class="inner">
       <div class="text">
         <div class="title">
           <span class="code">
@@ -32,7 +34,8 @@
               <Icon size="15" class="info-icon" icon="uiw:information" /> </Tooltip
           ></span>
           <span class="name">
-            name<Tooltip placement="rightTop" :title="nameText">
+            name
+            <Tooltip placement="rightTop" :title="nameText">
               <Icon size="15" class="info-icon" icon="uiw:information" /> </Tooltip></span
         ></div>
         <div class="classItem" :key="item.key" v-for="item in classConfig">
@@ -46,8 +49,8 @@
             />
           </div>
         </div>
-        <div @click="addClass">
-          <Icon icon="ant-design:plus-outlined" class="mt-1 cursor-pointer" size="29" />
+        <div style="color: #576ff3" class="mt-1 cursor-pointer" @click="addClass">
+          <Icon icon="ant-design:plus-outlined" size="18" /> Add
         </div>
       </div>
       <!-- <div class="btn">
@@ -103,6 +106,16 @@
   );
 </script>
 <style lang="less" scoped>
+  .link {
+    margin-left: 10px;
+    display: inline-block;
+    padding: 3px 4px;
+    background: #edf0ff;
+    border-radius: 4px;
+    span {
+      font-size: 12px;
+    }
+  }
   .inner {
     .text {
       width: 100%;

@@ -1,6 +1,8 @@
 import { FormSchema } from '/@/components/Form/index';
 import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 import { useI18n } from '/@/hooks/web/useI18n';
+import Icon, { SvgIcon } from '/@/components/Icon';
+import { Button, Input, Tooltip } from 'ant-design-vue';
 const { t } = useI18n();
 export const createForm: FormSchema[] = [
   {
@@ -27,7 +29,17 @@ export const createForm: FormSchema[] = [
     componentProps: {
       options: [
         { label: 'Image', value: 'Image' },
-        { label: 'LiDAR', value: 'LiDAR' },
+        {
+          label: (
+            <span>
+              <span> LIDAR </span>
+              <Tooltip placement="rightTop" title={t('business.models.create.lidarTips')}>
+                <Icon size={'15'} icon={'uiw:information'} />{' '}
+              </Tooltip>
+            </span>
+          ),
+          value: 'LIDAR',
+        },
       ],
     },
     required: true,
@@ -35,6 +47,7 @@ export const createForm: FormSchema[] = [
   },
   {
     field: 'modaltype',
+    // renderColContent: () => <div>232</div>,
     label: t('business.models.modelType'),
     component: 'ApiRadioGroup',
     componentProps: {

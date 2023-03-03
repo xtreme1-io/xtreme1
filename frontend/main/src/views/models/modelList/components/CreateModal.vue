@@ -23,7 +23,8 @@
           </template>
           <template #description="{ model, field }">
             <FormItem label="" name="type" :labelCol="{ span: 0 }" :wrapperCol="{ span: 24 }">
-              {{ t('business.models.description') }}
+              <p> {{ t('business.models.description') }} </p>
+
               <Tinymce v-model="description" width="100%" :plugins="plugins" :toolbar="toolbar" />
             </FormItem>
           </template>
@@ -57,7 +58,7 @@
   const FormItem = Form.Item;
   const [registerForm, { validate, resetFields }] = useForm({
     schemas: createForm,
-    labelCol: { span: 6 },
+    labelCol: { span: 4 },
     wrapperCol: { span: 18 },
     labelAlign: 'left',
   });

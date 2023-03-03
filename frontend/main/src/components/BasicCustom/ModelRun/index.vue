@@ -18,17 +18,49 @@
           <slot name="select"></slot>
         </Form.Item>
         <Form.Item>
-          <Checkbox v-model:checked="formState.checked">
-            {{ t('business.models.runModel.predict') }}
+          <Checkbox v-model:checked="formState.checkedData">
+            {{ t('business.models.runModel.FliterData') }}
           </Checkbox>
         </Form.Item>
-        <div v-show="!formState.checked">
-          <Form.Item :label="t('business.models.runModel.confidence')">
+
+        <div style="margin-left: 35px" v-show="formState.checkedData">
+          <Form.Item :label="t('business.models.run.DataCount')">
             <TheSlider
               v-model:start="formState.sliderValue[0]"
               v-model:end="formState.sliderValue[1]"
             />
           </Form.Item>
+          <Form.Item>
+            <Checkbox v-model:checked="formState.checkedData">
+              {{ t('business.models.runModel.excludeData') }}
+            </Checkbox>
+          </Form.Item>
+          <Form.Item
+            :label="t('business.models.runModel.Splite')"
+            :label-col="{ span: 6 }"
+            :wrapper-col="{ span: 20 }"
+          >
+            <RadioGroup v-model:value="formState.splite" button-style="solid">
+              <Radio value="item.value"> 00 </Radio>
+            </RadioGroup>
+          </Form.Item>
+          <Form.Item
+            :label="t('business.models.runModel.AnnotationStatus')"
+            :label-col="{ span: 6 }"
+            :wrapper-col="{ span: 20 }"
+          >
+            <RadioGroup v-model:value="formState.AnnotationStatus" button-style="solid">
+              <Radio value="item.value"> 00 </Radio>
+            </RadioGroup>
+          </Form.Item>
+        </div>
+
+        <Form.Item>
+          <Checkbox v-model:checked="formState.checkedResult">
+            {{ t('business.models.runModel.FliterModel') }}
+          </Checkbox>
+        </Form.Item>
+        <div style="margin-left: 35px" v-show="formState.checkedResult">
           <Form.Item
             :label="t('business.models.runModel.classes')"
             :label-col="{ span: 24 }"
@@ -44,6 +76,12 @@
               </div>
             </div>
           </Form.Item>
+          <Form.Item :label="t('business.models.runModel.confidence')">
+            <TheSlider
+              v-model:start="formState.sliderValue[0]"
+              v-model:end="formState.sliderValue[1]"
+            />
+          </Form.Item>
         </div>
       </Form>
     </div>
@@ -54,7 +92,7 @@
   // 组件
   import { useMessage } from '/@/hooks/web/useMessage';
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { Form, Checkbox } from 'ant-design-vue';
+  import { Form, Checkbox, RadioGroup, Radio } from 'ant-design-vue';
   import TheSlider from './TheSlider.vue';
   import TheTags from './TheTags.vue';
   // 工具
@@ -79,15 +117,17 @@
   }>();
 
   const labelCol = { span: 4 };
-  const wrapperCol = { span: 14 };
+  const wrapperCol = { span: 24 };
 
   interface IFormState {
-    checked?: boolean;
+    checkedResult?: boolean;
+    checkedData?: boolean;
     sliderValue: [number, number];
     tagsList: any[];
   }
   const formState = reactive<IFormState>({
-    checked: true,
+    checkedResult: false,
+    checkedData: false,
     sliderValue: [0.5, 1],
     tagsList: [],
   });
@@ -106,7 +146,7 @@
 
     let preModel: Nullable<PreModelParam> = null;
 
-    if (!formState.checked) {
+    if (!formState.checkedResult) {
       // 勾选状态 -- 传勾选的
       const classes: string[] = [];
       formState.tagsList.forEach((item) => {
@@ -208,7 +248,7 @@
 
   // 重置 formState
   const handleReset = () => {
-    formState.checked = true;
+    formState.checkedResult = false;
     formState.sliderValue = [0.5, 1];
     formState.tagsList = JSON.parse(JSON.stringify(classes));
   };
@@ -250,7 +290,7 @@
   .modelRunModal {
     .scroll-container {
       .scrollbar__view {
-        max-height: 400px;
+        max-height: 650px;
       }
     }
   }

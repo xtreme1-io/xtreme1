@@ -1,12 +1,11 @@
 <template>
-  <div class="title">{{ t('business.models.settingsModel.ModelConfiguration') }} </div>
-  <div class="content">
-    <div>
-      {{ t('business.models.settingsModel.Predict') }}
+  <div class="title">
+    {{ t('business.models.settingsModel.Predict') }}
+    <div style="float: right">
       <template v-if="!isEdit">
         <SvgIcon
-          style="color: #c4c4c4; cursor: pointer"
-          size="24"
+          style="color: #c4c4c4; cursor: pointer; border-radius: 6px; border: 2px solid #aaa"
+          size="26"
           @click="handleEdit"
           name="edit"
         />
@@ -15,8 +14,10 @@
         <Button type="default" @click="handleCancel">{{ t('common.cancelText') }}</Button>
         <Button type="primary" class="ml-2" @click="handleSave">{{ t('common.saveText') }}</Button>
       </template>
-    </div>
-    <div class="cursor-pointer link">
+    </div></div
+  >
+  <div class="content">
+    <a class="cursor-pointer link">
       <Icon
         size="18"
         style="color: #60a9fe; margin-right: 10px"
@@ -24,7 +25,7 @@
         icon="material-symbols:library-books-rounded"
       />
       <span style="color: #8bc1e8">{{ t('business.models.helpLinkText.settingsPredict') }} </span>
-    </div>
+    </a>
 
     <div class="predict">
       <span class="tab">URL:</span>
@@ -36,7 +37,7 @@
         </Select>
       </div>
       <Input :disabled="!isEdit" v-model:value="urlVal" />
-      <Button type="default" @click="testConnection">{{
+      <Button style="border-radius: 8px" type="default" @click="testConnection">{{
         t('business.models.settingsModel.TestConnection')
       }}</Button>
     </div>
@@ -104,14 +105,18 @@
         line-height: 25px;
         font-size: 18px;
         color: #000;
-        margin-bottom: 20px;
       }
       .content {
-        border: 1px solid #aaa;
-        padding: 15px;
         border-radius: 10px;
         .link {
-          padding: 10px 0;
+          margin: 10px 0 20px 0;
+          display: inline-block;
+          padding: 3px 4px;
+          background: #edf0ff;
+          border-radius: 4px;
+          span {
+            font-size: 12px;
+          }
         }
         .tab {
           display: inline-block;

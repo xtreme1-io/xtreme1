@@ -27,7 +27,7 @@
             <template v-if="!isEdit">
               {{ props.headerData.name || '' }}
               <SvgIcon
-                style="color: #c4c4c4; cursor: pointer"
+                style="color: #c4c4c4; cursor: pointer; border-radius: 6px; border: 2px solid #aaa"
                 size="24"
                 @click="handleEdit"
                 name="edit"

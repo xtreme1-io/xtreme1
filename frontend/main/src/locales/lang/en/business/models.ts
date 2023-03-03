@@ -1,17 +1,18 @@
 export default {
   models: 'Models',
   modelDetails: 'Model Details',
-  modelName: 'modelName',
+  modelName: 'Name',
   modelRuns: 'Models Runs',
   overview: 'Overview',
-  modelType: 'model Type',
-  dataType: 'data Type',
+  modelType: 'Model Type',
+  dataType: 'Data Type',
   description: 'Description',
   runs: 'Runs',
   create: {
     createModels: 'Create My Model',
     modelsName: 'Models Name',
     createHolder: 'Input name...',
+    lidarTips: '包括LiDAR Basic 和LiDAR Fusion',
   },
   list: {
     myModels: 'My Models',
@@ -54,6 +55,13 @@ export default {
     confidence: 'Confidence',
     classes: 'Classes',
     predict: 'Predict all in Model',
+
+    FliterModel: 'Filter with model results',
+    FliterData: 'Filter with data',
+    excludeData: 'Exclude the data that already run under this model',
+    Splite: 'Splite',
+    AnnotationStatus: 'Annotation Status',
+
     selectAll: 'Select all',
     unselectAll: 'Unselect all',
     selectDataset: 'Please select the dataset first.',

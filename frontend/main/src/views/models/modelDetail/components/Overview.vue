@@ -10,12 +10,22 @@
     <div v-if="props.overviewData.classes.length > 0" class="classes">
       <div class="title"
         >{{ t('business.models.overviewPage.classes') }}
-        <SvgIcon
-          style="color: #c4c4c4; cursor: pointer; vertical-align: revert"
-          size="18"
-          @click="openModal"
-          name="setting"
-      /></div>
+        <div style="float: right"
+          ><SvgIcon
+            style="
+              color: #c4c4c4;
+              cursor: pointer;
+              vertical-align: revert;
+              border-radius: 6px;
+              border: 2px solid #aaa;
+              padding: 4px;
+            "
+            size="28"
+            @click="openModal"
+            name="setting"
+          />
+        </div>
+      </div>
 
       <OverviewClasses
         :isGroup="props.overviewData.isType"
