@@ -4,6 +4,17 @@
       <div class="header">
         <VirtualTab :list="tabListDataset" />
         <VirtualTab :list="tabListOntology" />
+        <Input
+          style="margin-right: 60px; flex: 1"
+          size="large"
+          autocomplete="off"
+          v-model:value="searchName"
+          :placeholder="t('business.ontology.searchForm.searchItems')"
+        >
+          <template #prefix>
+            <Icon icon="ic:twotone-manage-search" style="color: #aaa" size="16" />
+          </template>
+        </Input>
       </div>
       <div class="btn">
         <HeaderDropdown
@@ -45,6 +56,7 @@
         :isCenter="false"
         :activeTab="activeTab"
         :datasetType="datasetType"
+        :searchName="searchName"
       />
     </div>
     <!-- Modal -->
@@ -65,6 +77,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+  import { Input } from 'ant-design-vue';
   import { ref, unref, provide, onMounted } from 'vue';
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from '/@/views/ontology/classes/components/SearchForm.vue';
@@ -75,7 +88,7 @@
   import HeaderDropdown from './components/HeaderDropdown.vue';
   import CreateClass from '/@/views/ontology/classes/create/CreateClass.vue';
   import CreateClassification from '/@/views/ontology/classes/create/CreateClassification.vue';
-
+  import Icon, { SvgIcon } from '/@/components/Icon/index';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -161,6 +174,7 @@
     },
   ];
 
+  let searchName = ref<string>('');
   /** Clicked Detail */
   const detail = ref<datasetClassItem | datasetClassificationItem>();
   const updateDetail = (newDetail) => {
