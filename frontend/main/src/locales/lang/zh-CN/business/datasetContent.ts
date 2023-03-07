@@ -123,4 +123,7 @@ export default {
   },
 
   urlError: '请输入一个包含压缩包类型的地址',
+  splitModel: {
+    title: 'Split Dataset',
+  },
 };

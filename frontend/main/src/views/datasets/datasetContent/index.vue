@@ -71,6 +71,7 @@
           @handleMultipleFrame="openFrameModal"
           @handleModelRun="handleModelRun"
           @fetchList="fixedFetchList"
+          @handleSplite="handleSplite"
         />
         <div
           class="list"
@@ -227,6 +228,7 @@
   import { Button } from '/@/components/BasicCustom/Button';
   import { getModelAllApi } from '/@/api/business/models';
   import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
+  import { splitDataSelected } from '/@/api/business/dataset';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
   //   useModal();
@@ -433,6 +435,14 @@
     await ungroupFrameSeriesApi({
       datasetId: id as unknown as number,
       dataIds: selectedList.value,
+    });
+    fixedFetchList();
+  };
+
+  const handleSplite = async (type) => {
+    await splitDataSelected({
+      dataIds: selectedList.value,
+      splitType: type,
     });
     fixedFetchList();
   };

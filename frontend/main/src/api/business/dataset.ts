@@ -21,6 +21,7 @@ import {
   ResponsePresignedParams,
   UploadParams,
   ResponseUploadRecord,
+  SelectedDataPa,
 } from './model/datasetModel';
 import { BasicIdParams } from '/@/api/model/baseModel';
 
@@ -385,6 +386,25 @@ export const createByScenario = (params) =>
 export const getClassificationOptions = (params) =>
   defHttp.get<any>({
     url: `${Api.DATA}/classificationOption/findAll`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+export const splitFliter = (params) =>
+  defHttp.post<any>({
+    url: `${Api.DATA}/split/fliter`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const splitDataSelected = (params: SelectedDataPa) =>
+  defHttp.post<any>({
+    url: `${Api.DATA}/split/dataIds`,
     params,
     headers: {
       // @ts-ignore

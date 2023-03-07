@@ -20,6 +20,13 @@
       :filterForm="filterForm"
       @setExportRecord="setExportRecord"
     />
+    <SplitedModal
+      @register="registerSplitedModal"
+      :modelrunOption="modelrunOption"
+      :groundTruthsOption="groundTruthsOption"
+      :filterForm="filterForm"
+      @setExportRecord="setExportRecord"
+    />
     <Modal
       :title="t('business.datasetContent.terminateExport')"
       @register="registerCancelExportModal"
@@ -75,6 +82,7 @@
               >
                 <Authority :value="item.permission ? [item.permission] : undefined">
                   <Menu.Item
+                    v-if="!item.children"
                     @click="
                     () => {
                       emits(item.function as any);
@@ -91,6 +99,38 @@
                       <span style="display: inline-block; margin-left: 5px">{{ item.text }} </span>
                     </div>
                   </Menu.Item>
+
+                  <SubMenu
+                    :disabled="
+                      (selectedList.length === 0 && index > 1) ||
+                      (item.isDisabledFlag && flagReactive[item.isDisabledFlag])
+                    "
+                    v-else
+                  >
+                    <template #icon> <AppstoreOutlined />图标 </template>
+                    <template #title>{{ item.text }}</template>
+                    <template :key="item.text" v-for="(itemC, index) in item.children">
+                      <Menu.Item
+                        @click="() => {
+                     emits(itemC.function as any,itemC.type);
+                   }
+                 "
+                      >
+                        <div class="action-item">
+                          <Icon
+                            v-if="itemC.icon"
+                            style="color: #57ccef"
+                            size="20"
+                            :icon="itemC.icon"
+                          />
+                          <img width="20" height="20" v-if="itemC.img" :src="itemC.img" alt="" />
+                          <span style="display: inline-block; margin-left: 5px"
+                            >{{ itemC.text }}
+                          </span>
+                        </div>
+                      </Menu.Item></template
+                    >
+                  </SubMenu>
                 </Authority>
                 <Divider v-if="item.hasDivider" style="margin: 5px" />
               </template>
@@ -123,6 +163,7 @@
           class="bg-white h-28px w-36px text-center leading-7 rounded cursor-pointer"
           @click="reloadList"
         >
+          <Button @click="handleOpenSplited">spilted</Button>
           <SvgIcon name="reload" />
         </div>
       </div>
@@ -199,7 +240,7 @@
   import { useRoute } from 'vue-router';
   import { RouteChildEnum } from '/@/enums/routeEnum';
 
-  import { Dropdown, Menu, Divider, Progress, Tooltip, Checkbox } from 'ant-design-vue';
+  import { Dropdown, Menu, Divider, Progress, Tooltip, Checkbox, SubMenu } from 'ant-design-vue';
   import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon/index';
   import { Button, ButtonSize } from '/@@/Button';
@@ -210,6 +251,7 @@
   import UploadModal from './upload/UploadModal.vue';
   import ProgressModal from './upload/ProgressModal.vue';
   import ExportModal from './ExportModal.vue';
+  import SplitedModal from './splitedModal.vue';
 
   import { exportDataRecordCallBack } from '/@/api/business/dataset';
   import { actionList, actionListFrame, actionImageList, PageTypeEnum } from './data';
@@ -346,6 +388,7 @@
   /** Export */
   const exportResultList = ref<exportFileRecord[]>([]);
   const [registerExportModal, { openModal: openExportModal }] = useModal();
+  const [registerSplitedModal, { openModal: openSplitedModal }] = useModal();
   const [
     registerCancelExportModal,
     { openModal: openExportCancelModal, closeModal: closeExportCancelModal },
@@ -354,6 +397,10 @@
   const handleOpenExport = async () => {
     openExportModal();
   };
+  const handleOpenSplited = async () => {
+    openSplitedModal();
+  };
+
   // Cancel
   const handleCancelExport = () => {
     if (successExportFilesNum.value != exportList.value.length) {

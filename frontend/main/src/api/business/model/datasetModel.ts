@@ -271,3 +271,14 @@ export interface ResponseUploadRecord {
   parsedDataNum: string;
   status: UploadStatusEnum;
 }
+
+export enum SelectedDataSplitType {
+  TRAINING = 'TRAINING',
+  VALIDATION = 'VALIDATION',
+  TEST = 'TEST',
+  NOT_SPLIT = 'NOT_SPLIT',
+}
+export interface SelectedDataPa {
+  dataIds: string[];
+  splitType: SelectedDataSplitType;
+}

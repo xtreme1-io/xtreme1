@@ -123,4 +123,15 @@ export default {
   },
 
   urlError: 'Please enter a path with a zip type',
+  splitModel: {
+    title: 'Split Dataset',
+    splitInto: 'Split into',
+
+    Training: 'Training',
+    Validation: 'Validation',
+    Test: 'Test',
+    NotSplited: 'Not Splited',
+    Splited: 'Splited',
+    All: 'All',
+  },
 };
