@@ -45,11 +45,22 @@
       <div class="actions">
         <VirtualTab :list="tabList" />
       </div>
-      <div class="view-actions">
-        <Button class="mr-2" type="default" @click="handleGoSearch" :size="ButtonSize.LG">
+      <div style="margin-left: 10px; flex: 1" class="view-actions">
+        <Input
+          style="margin: 0 15px; flex: 1"
+          size="large"
+          autocomplete="off"
+          v-model:value="searchName"
+          :placeholder="t('business.ontology.searchForm.searchItems')"
+        >
+          <template #prefix>
+            <Icon icon="ic:twotone-manage-search" style="color: #aaa" size="16" />
+          </template>
+        </Input>
+        <!-- <Button class="mr-2" type="default" @click="handleGoSearch" :size="ButtonSize.LG">
           <Icon icon="ic:twotone-manage-search" size="20" />
           Scenario Search
-        </Button>
+        </Button> -->
         <Button type="primary" @click="handleOpenUpload" :size="ButtonSize.LG" noBorder>
           {{ t('business.datasetContent.upload') }}
         </Button>
@@ -58,6 +69,19 @@
         </Button>
       </div>
     </div>
+
+    <div class="tabs flex">
+      <Tabs @change="TabChange" v-model:activeKey="activeTab">
+        <Tabs.TabPane key="File">
+          <template #tab> File </template>
+        </Tabs.TabPane>
+        <Tabs.TabPane key="Scenario">
+          <template #tab> Scenario </template>
+        </Tabs.TabPane>
+      </Tabs>
+      <Button type="default" @click="handleOpenSplited">Split</Button>
+    </div>
+
     <div class="wrapper">
       <div class="actions">
         <Dropdown placement="bottomLeft">
@@ -107,8 +131,14 @@
                     "
                     v-else
                   >
-                    <template #icon> <AppstoreOutlined />图标 </template>
-                    <template #title>{{ item.text }}</template>
+                    <template #icon> </template>
+                    <template #title>
+                      <div class="action-item">
+                        <img width="14" height="14" v-if="item.img" :src="item.img" alt="" />
+                      </div>
+
+                      {{ item.text }}</template
+                    >
                     <template :key="item.text" v-for="(itemC, index) in item.children">
                       <Menu.Item
                         @click="() => {
@@ -123,7 +153,7 @@
                             size="20"
                             :icon="itemC.icon"
                           />
-                          <img width="20" height="20" v-if="itemC.img" :src="itemC.img" alt="" />
+                          <!-- <img width="20" height="20" v-if="itemC.img" :src="itemC.img" alt="" /> -->
                           <span style="display: inline-block; margin-left: 5px"
                             >{{ itemC.text }}
                           </span>
@@ -163,7 +193,6 @@
           class="bg-white h-28px w-36px text-center leading-7 rounded cursor-pointer"
           @click="reloadList"
         >
-          <Button @click="handleOpenSplited">spilted</Button>
           <SvgIcon name="reload" />
         </div>
       </div>
@@ -240,7 +269,17 @@
   import { useRoute } from 'vue-router';
   import { RouteChildEnum } from '/@/enums/routeEnum';
 
-  import { Dropdown, Menu, Divider, Progress, Tooltip, Checkbox, SubMenu } from 'ant-design-vue';
+  import {
+    Dropdown,
+    Menu,
+    Divider,
+    Progress,
+    Tooltip,
+    Checkbox,
+    SubMenu,
+    Tabs,
+    Input,
+  } from 'ant-design-vue';
   import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon/index';
   import { Button, ButtonSize } from '/@@/Button';
@@ -286,6 +325,22 @@
   const { id, dataId } = query;
   const { t } = useI18n();
 
+  let activeTab = ref<string>('File');
+
+  const searchName = computed({
+    get() {
+      return props.name;
+    },
+    set(value) {
+      emits('update:name', value);
+    },
+  });
+
+  let TabChange = (val) => {
+    if (val === 'Scenario') {
+      handleGoSearch();
+    }
+  };
   const tabList = [
     {
       name: t('business.dataset.overview'),
@@ -311,6 +366,7 @@
   ];
 
   const props = defineProps<{
+    name: string;
     sliderValue: number;
     setSlider: (val) => void;
     selectedList: string[];
@@ -345,6 +401,7 @@
     'handleMultipleFrame',
     'handleModelRun',
     'update:showAnnotation',
+    'update:name',
   ]);
 
   const reloadList = () => {

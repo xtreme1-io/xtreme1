@@ -3,6 +3,7 @@ import { SortTypeEnum } from '/@/api/model/baseModel';
 import annotate from '/@/assets/images/dataset/annotate.png';
 import unmakeFrameSeries from '/@/assets/images/dataset/unmakeFrameSeries.png';
 import modelRun from '/@/assets/images/dataset/modelRun.png';
+import splite from '/@/assets/icons/splite.svg';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { TeamStatusEnum } from '/@/api/business/model/teamModel';
 import { SelectedDataSplitType } from '/@/api/business/model/datasetModel';
@@ -53,7 +54,7 @@ export const actionList: actionItem[] = [
     text: t('business.datasetContent.splitModel.splitInto'),
     function: '',
     isDisabledFlag: 'annotateAndMoelRun',
-    img: modelRun,
+    img: splite,
     hasDivider: true,
     children: [
       {
@@ -123,7 +124,7 @@ export const actionImageList: actionItem[] = [
     text: t('business.datasetContent.splitModel.splitInto'),
     function: '',
     isDisabledFlag: 'annotateAndMoelRun',
-    img: modelRun,
+    img: splite,
     hasDivider: true,
     children: [
       {
@@ -193,7 +194,7 @@ export const actionListFrame: actionItem[] = [
     text: t('business.datasetContent.splitModel.splitInto'),
     function: '',
     isDisabledFlag: 'annotateAndMoelRun',
-    img: modelRun,
+    img: splite,
     hasDivider: true,
     children: [
       {

@@ -72,6 +72,7 @@
           @handleModelRun="handleModelRun"
           @fetchList="fixedFetchList"
           @handleSplite="handleSplite"
+          v-model:name="name"
         />
         <div
           class="list"
@@ -105,7 +106,21 @@
         </div>
       </div>
       <div class="sider">
-        <Input
+        <div class="header">
+          <div
+            @click="sliderType = 'fliter'"
+            :class="{ notActive: sliderType !== 'fliter', fliter: true }"
+          >
+            Fliter</div
+          >
+          <div
+            @click="sliderType = 'display'"
+            :class="{ notActive: sliderType !== 'display', display: true }"
+          >
+            Display</div
+          >
+        </div>
+        <!-- <Input
           autocomplete="off"
           v-model:value="name"
           :placeholder="t('business.ontology.searchForm.searchItems')"
@@ -113,55 +128,141 @@
           <template #suffix>
             <Icon icon="ant-design:search-outlined" style="color: #aaa" size="16" />
           </template>
-        </Input>
-        <div class="custom-item">
-          <div class="custom-label font-bold">Sort</div>
-          <Select style="flex: 1" size="small" v-model:value="sortField">
-            <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </Select.Option>
-          </Select>
-        </div>
-        <div class="custom-item">
-          <Radio.Group name="sortType" v-model:value="sortType">
-            <Radio v-for="item in SortTypeOption" :key="item.value" :value="item.value">
-              <span class="radioText">{{ item.label }}</span>
-            </Radio>
-          </Radio.Group>
-        </div>
-        <div class="filter">
-          <div class="font-bold mb-2 flex justify-between">
-            <div>Filter</div>
-            <div>
-              <SvgIcon @click="resetFilter" name="reload" />
+        </Input> -->
+        <template v-if="sliderType === 'fliter'">
+          <div class="custom-item font-bold mb-2 flex justify-between">
+            <div class="font-bold">Filter and Sort</div>
+
+            <div class="cursor-pointer"> <SvgIcon @click="resetFilter" name="reload" /> </div
+          ></div>
+          <div>Sort with</div>
+          <Tabs size="small" v-model:activeKey="sortWithLabel">
+            <Tabs.TabPane key="Data">
+              <template #tab> Data </template>
+            </Tabs.TabPane>
+            <Tabs.TabPane key="Result">
+              <template #tab> Result </template>
+            </Tabs.TabPane>
+          </Tabs>
+
+          <template v-if="sortWithLabel === 'Data'">
+            <div class="custom-item">
+              <Select style="flex: 1" size="small" v-model:value="sortField">
+                <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </Select.Option>
+              </Select>
             </div>
-          </div>
-          <CollContainer icon="mdi:calendar-month" title="Uploaded date">
-            <DatePicker v-model:start="start" v-model:end="end" />
-          </CollContainer>
-          <CollContainer icon="mdi:calendar-month" title="Status">
-            <Radio.Group name="status" v-model:value="annotationStatus">
-              <Radio :value="undefined">
-                <SvgIcon name="annotated" />
-                <span class="ml-2">All</span>
-              </Radio>
-              <Radio value="ANNOTATED">
-                <SvgIcon name="annotated" />
-                <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
-              </Radio>
-              <Radio value="NOT_ANNOTATED">
-                <SvgIcon name="notAnnotated" />
-                <span class="ml-2"
-                  >Not Annotated({{ countFormat(statusInfo.notAnnotatedCount) }})</span
-                >
-              </Radio>
-              <Radio value="INVALID">
-                <SvgIcon name="invalid" />
-                <span class="ml-2">Invalid({{ countFormat(statusInfo.invalidCount) }})</span>
+          </template>
+          <template v-else>
+            <div class="custom-item">
+              <Select showSearch style="flex: 1" size="small" v-model:value="sortField">
+                <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </Select.Option>
+              </Select>
+            </div>
+            <div class="custom-item">
+              <Select style="flex: 1" size="small" v-model:value="sortField">
+                <Select.Option value="data confidence"> confidence </Select.Option>
+              </Select>
+            </div>
+          </template>
+
+          <div class="custom-item">
+            <Radio.Group name="sortType" v-model:value="sortType">
+              <Radio v-for="item in SortTypeOption" :key="item.value" :value="item.value">
+                <span class="radioText">{{ item.label }}</span>
               </Radio>
             </Radio.Group>
-          </CollContainer>
-        </div>
+          </div>
+          <div class="filter">
+            <div class="font-bold mb-2 flex justify-between">
+              <div>Filter with data</div>
+            </div>
+            <CollContainer icon="mdi:calendar-month" title="Uploaded at">
+              <DatePicker v-model:start="start" v-model:end="end" />
+            </CollContainer>
+
+            <CollContainer icon="splite|svg" title="Split">
+              <Radio.Group name="status" v-model:value="annotationStatus">
+                <Radio :value="undefined">
+                  <span>All</span>
+                </Radio>
+                <Radio value="ANNOTATED">
+                  <SvgIcon name="annotated" />
+                  <span class="ml-2">Training({{ countFormat(statusInfo.annotatedCount) }})</span>
+                </Radio>
+                <Radio value="NOT_ANNOTATED">
+                  <SvgIcon name="notAnnotated" />
+                  <span class="ml-2"
+                    >Validation({{ countFormat(statusInfo.notAnnotatedCount) }})</span
+                  >
+                </Radio>
+                <Radio value="INVALID">
+                  <SvgIcon name="invalid" />
+                  <span class="ml-2">Not Splited({{ countFormat(statusInfo.invalidCount) }})</span>
+                </Radio>
+                <Radio value="INVALID">
+                  <SvgIcon name="invalid" />
+                  <span class="ml-2">Not Splited({{ countFormat(statusInfo.invalidCount) }})</span>
+                </Radio>
+              </Radio.Group>
+            </CollContainer>
+
+            <CollContainer icon="mdi:calendar-month" title="Status">
+              <Radio.Group name="status" v-model:value="annotationStatus">
+                <Radio :value="undefined">
+                  <SvgIcon name="annotated" />
+                  <span class="ml-2">All</span>
+                </Radio>
+                <Radio value="ANNOTATED">
+                  <SvgIcon name="annotated" />
+                  <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
+                </Radio>
+                <Radio value="NOT_ANNOTATED">
+                  <SvgIcon name="notAnnotated" />
+                  <span class="ml-2"
+                    >Not Annotated({{ countFormat(statusInfo.notAnnotatedCount) }})</span
+                  >
+                </Radio>
+                <Radio value="INVALID">
+                  <SvgIcon name="invalid" />
+                  <span class="ml-2">Invalid({{ countFormat(statusInfo.invalidCount) }})</span>
+                </Radio>
+              </Radio.Group>
+            </CollContainer>
+          </div>
+
+          <div class="filter">
+            <div class="font-bold mb-2 flex justify-between">
+              <div>Filter with result</div>
+            </div>
+            <div class="custom-item">
+              <Select showSearch style="flex: 1" size="small" v-model:value="sortField">
+                <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </Select.Option>
+              </Select>
+            </div>
+
+            <CollContainer icon="data-confidence|svg" title="Data confidence">
+              <Slider style="width: 100%" v-model:value="confidenceSlider" range />
+            </CollContainer>
+          </div>
+        </template>
+        <template v-else
+          ><div>
+            <div class="custom-item">
+              <div class="custom-label font-bold"> If display results</div>
+              <Switch v-model:checked="isDisplayResult" />
+            </div>
+            <div class="custom-item">
+              <div class="custom-label font-bold"> Results</div>
+              XXX多选
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -204,7 +305,7 @@
   // import emitter from 'tiny-emitter/instance';
   import ImgCard from './components/ImgCard.vue';
   import Tools from './components/Tools.vue';
-  import { Select, Radio, Input, Modal } from 'ant-design-vue';
+  import { Select, Radio, Input, Modal, Switch, Tabs, Slider } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { datasetItemDetail } from '/@/api/business/dataset';
   import { dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -251,6 +352,9 @@
   const sortType = ref<SortTypeEnum>(SortTypeEnum.ASC);
   const lockedId = ref<number>(0);
   const lockedNum = ref<number>(0);
+  const sliderType = ref<string>('fliter');
+  const sortWithLabel = ref<string>('Data');
+  const confidenceSlider = ref([0, 10]);
 
   const type = ref<PageTypeEnum>();
   const { id, dataId } = query;
@@ -273,6 +377,7 @@
     },
   ]);
   const objectMap = ref<Record<string, any>>({});
+  const isDisplayResult = ref<boolean>(true);
   onBeforeMount(async () => {
     // fetchList({});
     // max.value = await getMaxCountApi({ datasetId: id as unknown as number });
@@ -648,7 +753,7 @@
     margin: 0 -10px;
     position: relative;
     display: flex;
-    height: calc(100vh - 187px);
+    height: calc(100vh - 226px) !important;
 
     :deep(.scrollbar__view) {
       width: 100%;
@@ -659,8 +764,6 @@
     }
 
     .listcard {
-      // margin: 0 !important;
-
       margin: v-bind(paddingX) !important;
       height: v-bind(cardHeight) !important;
     }
