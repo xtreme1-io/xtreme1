@@ -52,7 +52,7 @@
   };
 
   onMounted(() => {
-    console.log(inputRef.value);
+    // console.log(inputRef.value);
   });
 
   const labelCol = { span: 9 };
@@ -62,7 +62,6 @@
   const handleVisible = () => {
     formState.value = { name: props.name };
     setTimeout(() => {
-      console.log(document.getElementsByClassName('input-element'));
       if (document.getElementsByClassName('input-element').length > 0) {
         document.getElementsByClassName('input-element')['name'].focus();
       }
@@ -74,7 +73,7 @@
   };
   const handleRename = async () => {
     changeOkLoading(true);
-    console.log(123123);
+
     try {
       await unref(form)
         .validateFields()

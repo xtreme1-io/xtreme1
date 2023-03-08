@@ -397,7 +397,6 @@
   });
   let timeout;
   onMounted(async () => {
-    console.log(scrollRef.value);
     fetchStatusNum();
     getLockedData();
     fetchList(filterForm);
@@ -562,7 +561,6 @@
         danger: true,
       },
       onOk() {
-        console.log(id);
         return new Promise(async (resolve) => {
           await deleteBatchDataset({
             ids: selectedList.value,
@@ -622,7 +620,6 @@
     if (index > -1 && !flag) {
       unref(selectedList).splice(index, 1);
     }
-    console.log(unref(selectedList));
   };
 
   const handleSelectAll = () => {
