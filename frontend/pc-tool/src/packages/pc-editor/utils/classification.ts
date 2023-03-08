@@ -5,26 +5,31 @@ export function traverseClassification2Arr(data: any[]) {
     let classifications = [] as IClassification[];
 
     data.forEach((e: any) => {
+        let attribute = e.attribute || e;
         let classificationId = e.id + '';
+
         let classification: IClassification = {
             id: classificationId,
             name: e.name,
             label: e.name,
             attrs: [],
         };
-        let options = e.options || [];
+        let options = attribute.options || [];
+        if (e.inputType) {
+            attribute.type = e.inputType;
+        }
         let classificationAttr: IClassificationAttr = {
-            id: e.id,
-            key: e.name,
+            id: attribute.id,
+            key: attribute.name,
             classificationId,
             parent: '',
             parentValue: '',
             parentAttr: e.name,
-            type: e.inputType,
-            name: e.name,
-            label: e.name,
-            value: e.inputType === AttrType.MULTI_SELECTION ? [] : '',
-            required: e.isRequired,
+            type: attribute.type,
+            name: attribute.name,
+            label: attribute.name,
+            value: attribute.type === AttrType.MULTI_SELECTION ? [] : '',
+            required: attribute.required,
             options: options.map((e: any) => {
                 return { value: e.name, label: e.name };
             }),
@@ -32,7 +37,7 @@ export function traverseClassification2Arr(data: any[]) {
 
         classification.attrs.push(classificationAttr);
         options.forEach((option: any) => {
-            traverseOption(classification, option, classificationAttr.id, e.name);
+            traverseOption(classification, option, classificationAttr.id, attribute.name);
         });
         classifications.push(classification);
     });
@@ -50,7 +55,7 @@ export function traverseClassification2Arr(data: any[]) {
         option.attributes.forEach((attr: any) => {
             let name = attr.name;
             let classificationAttr: IClassificationAttr = {
-                id: attr.id || attr.uuid,
+                id: attr.id,
                 key: `${parent}[${option.name}]-${name}`,
                 classificationId: classification.id,
                 parent,
@@ -72,6 +77,7 @@ export function traverseClassification2Arr(data: any[]) {
         });
     }
 }
+
 export function traverseClass2Arr(data: any) {
     let classTypes = [] as IClassType[];
     data.forEach((config: any) => {

@@ -3,16 +3,16 @@
 <mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.DatasetClassificationMapper">
 
     <insert id="saveOrUpdateBatch">
-        INSERT INTO dataset_classification (dataset_id, name, is_required, input_type,options, created_by, updated_by)
+        INSERT INTO dataset_classification (dataset_id, name, is_required, input_type,attribute, created_by, updated_by)
         VALUES
         <foreach collection="list" item="item"  separator=",">
             (#{item.datasetId},#{item.name},#{item.isRequired},#{item.inputType},
-            #{item.options,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
+            #{item.attribute,jdbcType=OTHER,typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler},
             #{item.createdBy},#{item.updatedBy})
         </foreach>
         ON DUPLICATE KEY UPDATE is_required=VALUES(is_required),
         input_type=VALUES(input_type),
-        options=VALUES(options),
+        attribute=VALUES(attribute),
         updated_by=VALUES(updated_by)
     </insert>
 </mapper>
