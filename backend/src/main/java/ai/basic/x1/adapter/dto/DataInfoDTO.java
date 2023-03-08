@@ -2,6 +2,7 @@ package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
+import ai.basic.x1.entity.enums.SplitTypeEnum;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -55,6 +56,11 @@ public class DataInfoDTO {
      * Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
+
+    /**
+     * Data split type ANNOTATED, NOT_ANNOTATED, INVALID
+     */
+    private SplitTypeEnum splitType;
 
     /**
      * Locked Person's Name

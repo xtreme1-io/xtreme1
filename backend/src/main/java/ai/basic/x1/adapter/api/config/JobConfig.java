@@ -1,9 +1,6 @@
 package ai.basic.x1.adapter.api.config;
 
-import ai.basic.x1.adapter.api.job.ModelJobConsumerListener;
-import ai.basic.x1.adapter.api.job.ModelRunErrorHandler;
-import ai.basic.x1.adapter.api.job.PreLabelModelMessageHandler;
-import ai.basic.x1.adapter.api.job.PredictImageCo80ModelHandler;
+import ai.basic.x1.adapter.api.job.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +64,8 @@ public class JobConfig {
     ) {
 
         try {
-            redisTemplate.opsForStream().createGroup(MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
+            redisTemplate.opsForStream().createGroup(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
+            redisTemplate.opsForStream().createGroup(DATASET_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
         } catch (RedisSystemException redisSystemException) {
             //no do
         }
@@ -87,14 +85,23 @@ public class JobConfig {
                         .build();
         StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainer =
                 StreamMessageListenerContainer.create(redisConnectionFactory, options);
-        StreamMessageListenerContainer.ConsumerStreamReadRequest<String> streamReadRequest = StreamMessageListenerContainer
+        StreamMessageListenerContainer.ConsumerStreamReadRequest<String> dataStreamReadRequest = StreamMessageListenerContainer
                 .StreamReadRequest
-                .builder(StreamOffset.create(MODEL_RUN_STREAM_KEY, ReadOffset.lastConsumed()))
+                .builder(StreamOffset.create(DATA_MODEL_RUN_STREAM_KEY, ReadOffset.lastConsumed()))
                 .consumer(Consumer.from(MODEL_RUN_CONSUMER_GROUP, MODEL_RUN_CONSUMER_NAME))
                 .autoAcknowledge(false)
                 .cancelOnError(throwable -> false)
                 .build();
-        streamMessageListenerContainer.register(streamReadRequest, new ModelJobConsumerListener(MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
+
+        StreamMessageListenerContainer.ConsumerStreamReadRequest<String> datasetStreamReadRequest = StreamMessageListenerContainer
+                .StreamReadRequest
+                .builder(StreamOffset.create(DATASET_MODEL_RUN_STREAM_KEY, ReadOffset.lastConsumed()))
+                .consumer(Consumer.from(MODEL_RUN_CONSUMER_GROUP, MODEL_RUN_CONSUMER_NAME))
+                .autoAcknowledge(false)
+                .cancelOnError(throwable -> false)
+                .build();
+        streamMessageListenerContainer.register(dataStreamReadRequest, new DataModelJobConsumerListener(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
+        streamMessageListenerContainer.register(datasetStreamReadRequest, new DatasetModelJobConsumerListener(DATASET_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
         return streamMessageListenerContainer;
     }
 

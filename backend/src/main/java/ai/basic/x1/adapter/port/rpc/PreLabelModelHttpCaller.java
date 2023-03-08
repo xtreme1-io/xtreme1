@@ -21,16 +21,13 @@ import java.util.List;
 @Slf4j
 public class PreLabelModelHttpCaller {
 
-    @Value("${model.arithmetic.preModel.url}")
-    private String preModelUrl;
 
-
-    public ApiResult<List<PreModelRespDTO>> callPreLabelModel(PreModelReqDTO preModelReqDTO) {
+    public ApiResult<List<PreModelRespDTO>> callPreLabelModel(PreModelReqDTO preModelReqDTO,String url) {
         try {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             String requestBody = JSONUtil.toJsonStr(preModelReqDTO);
-            HttpRequest httpRequest = HttpUtil.createPost(preModelUrl)
+            HttpRequest httpRequest = HttpUtil.createPost(url)
                     .body(requestBody, ContentType.JSON.getValue());
             HttpResponse httpResponse = httpRequest.execute();
             stopWatch.stop();

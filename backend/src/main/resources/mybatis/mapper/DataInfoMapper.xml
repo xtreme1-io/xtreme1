@@ -11,6 +11,7 @@
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="status" property="status"/>
         <result column="annotation_status" property="annotationStatus"/>
+        <result column="split_type" property="splitType"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="created_at" property="createdAt"/>
         <result column="created_by" property="createdBy"/>
@@ -59,5 +60,20 @@
             AND d.is_deleted = 0
         GROUP BY
             dataset_id
+    </select>
+
+    <select id="findModelRunDataIds" resultType="java.lang.Long">
+        SELECT id FROM data ${ew.customSqlSegment}
+        <if test="isExcludeModelData == true">
+            AND id not in (SELECT data_id FROM model_dataset_result WHERE model_id =  #{modelId})
+        </if>
+        limit #{limit}
+    </select>
+
+    <select id="findModelRunDataCount" resultType="java.lang.Long">
+        SELECT count(*) FROM data ${ew.customSqlSegment}
+        <if test="isExcludeModelData == true">
+            AND id not in (SELECT data_id FROM model_dataset_result WHERE model_id =  #{modelId})
+        </if>
     </select>
 </mapper>

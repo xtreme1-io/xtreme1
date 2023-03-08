@@ -14,9 +14,8 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PreLabelModelObjectBO {
-    private Integer code;
-    private String message;
+public class PreLabelModelObjectBO extends ModelTaskInfoBO{
+
     private Long dataId;
     private List<ObjectBO> objects;
 }

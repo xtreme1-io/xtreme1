@@ -24,4 +24,10 @@ public class LockRecordDTO {
      * Locked data number
      */
     private Long lockedNum;
+
+
+    /**
+     * Locked username
+     */
+    private String lockedBy;
 }

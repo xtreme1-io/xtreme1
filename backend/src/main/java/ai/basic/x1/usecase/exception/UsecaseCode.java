@@ -53,8 +53,16 @@ public enum UsecaseCode {
 
     DATASET_DATA_SCENARIO_NOT_FOUND("DATASET_DATA_SCENARIO_NOT_FOUND", "No data has been found"),
 
-    DATASET_DATA_ALL_EMPTY("DATASET_DATA_ALL_EMPTY", "DatasetId and dataIds cannot be empty at the same time");
+    DATASET_DATA_ALL_EMPTY("DATASET_DATA_ALL_EMPTY", "DatasetId and dataIds cannot be empty at the same time"),
 
+    DATASET__NOT_EXIST_DATA("DATASET__NOT_EXIST_DATA", "dataset have not data"),
+
+    DATASET__MODEL_NOT_EXIST("DATASET__MODEL_NOT_EXIT", "model is not exist"),
+
+    DATASET__MODEL_RUN_RECORD_NOT_EXIST("DATASET__MODEL_RUN_RECORD_NOT_EXIST","run record not exist"),
+
+    DATASET__MODEL_RERUN_ERROR("DATASET__MODEL_RERUN_ERROR","model rerun error"),
+    DATASET__NOT_EXIST("DATASET__NOT_EXIST", "dataset not exist");
 
     // Storage
 

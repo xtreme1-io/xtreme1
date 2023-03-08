@@ -38,8 +38,7 @@ public class PreLabelModelMessageHandler extends AbstractModelMessageHandler<Lis
 
     @Autowired
     private PreLabelModelHttpCaller preLabelModelHttpCaller;
-    @Autowired
-    private ModelDataResultDAO modelDataResultDAO;
+
     @Autowired
     private ModelUseCase modelUseCase;
 
@@ -47,40 +46,23 @@ public class PreLabelModelMessageHandler extends AbstractModelMessageHandler<Lis
 
 
     @Override
-    public boolean modelRun(ModelMessageBO modelMessageBO) {
+    public ModelTaskInfoBO modelRun(ModelMessageBO modelMessageBO) {
         ApiResult<List<PreModelRespDTO>> apiResult = getRetryAbleApiResult(modelMessageBO);
         Map<String, ModelClass> modelClassMap = modelUseCase.getModelClassMapByModelId(modelMessageBO.getModelId());
         PreLabelModelObjectBO preLabelModelObjectBO = ModelResultConverter.preModelResultConverter(apiResult,
                 JSONUtil.toBean(modelMessageBO.getResultFilterParam(), PreModelParamBO.class), modelClassMap);
-        if (ObjectUtil.isNotNull(preLabelModelObjectBO)) {
-            try {
-                boolean modelResult = modelDataResultDAO.update(ModelDataResult.builder()
-                                .updatedAt(OffsetDateTime.now())
-                                .updatedBy(modelMessageBO.getCreatedBy())
-                                .modelResult(objectMapper.readValue(JSONUtil.toJsonStr(preLabelModelObjectBO), JsonNode.class))
-                                .build(),
-                        Wrappers.lambdaUpdate(ModelDataResult.class)
-                                .eq(ModelDataResult::getModelSerialNo, modelMessageBO.getModelSerialNo())
-                                .eq(ModelDataResult::getDataId, modelMessageBO.getDataId()));
-                return modelResult;
-            } catch (JsonProcessingException e) {
-                log.error("preLabelModelObjectBO convert jsonNode error. ", e);
-                return false;
-            }
-
-        }
-        return false;
+        return preLabelModelObjectBO;
     }
 
     @Override
     ApiResult<List<PreModelRespDTO>> callRemoteService(ModelMessageBO modelMessageBO) {
-        ApiResult<List<PreModelRespDTO>> listApiResult = preLabelModelHttpCaller.callPreLabelModel(buildRequestParam(modelMessageBO));
+        ApiResult<List<PreModelRespDTO>> listApiResult = preLabelModelHttpCaller.callPreLabelModel(buildRequestParam(modelMessageBO),modelMessageBO.getUrl());
         return listApiResult;
     }
 
     @Override
     public ModelCodeEnum getModelCodeEnum() {
-        return ModelCodeEnum.PRE_LABEL;
+        return ModelCodeEnum.LIDAR_DETECTION;
     }
 
     private PreModelReqDTO buildRequestParam(ModelMessageBO messageBo) {

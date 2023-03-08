@@ -23,13 +23,10 @@ import java.util.List;
 @Component
 public class PredImageCo80ModelHttpCaller {
 
-    @Value("${model.arithmetic.image80.url}")
-    private String url;
-
     @Autowired
     private ObjectMapper objectMapper;
 
-    public ApiResult<List<PredImageRespDTO>> callPredImageModel(PredImageReqDTO requestBody) throws IOException {
+    public ApiResult<List<PredImageRespDTO>> callPredImageModel(PredImageReqDTO requestBody,String url) throws IOException {
         var requestBodyStr = objectMapper.writeValueAsString(requestBody);
         var httpRequest = HttpUtil.createPost(url)
                 .body(requestBodyStr, ContentType.JSON.getValue());

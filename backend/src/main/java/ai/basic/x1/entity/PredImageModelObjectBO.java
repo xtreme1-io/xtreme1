@@ -13,13 +13,11 @@ import java.util.List;
  * @author Zhujh
  */
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PredImageModelObjectBO {
+public class PredImageModelObjectBO extends ModelTaskInfoBO{
 
-    private Integer code;
-    private String message;
     private Long dataId;
     private List<ObjectBO> objects;
 

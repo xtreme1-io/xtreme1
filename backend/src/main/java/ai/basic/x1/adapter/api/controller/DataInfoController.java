@@ -2,13 +2,14 @@ package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
+import ai.basic.x1.adapter.dto.request.DataInfoSplitFilterDTO;
+import ai.basic.x1.adapter.dto.request.DataInfoSplitReqDTO;
 import ai.basic.x1.adapter.exception.ApiException;
-import ai.basic.x1.entity.DataInfoQueryBO;
-import ai.basic.x1.entity.DataInfoUploadBO;
-import ai.basic.x1.entity.DataPreAnnotationBO;
-import ai.basic.x1.entity.ScenarioQueryBO;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
+import ai.basic.x1.entity.enums.SplitTargetDataTypeEnum;
+import ai.basic.x1.entity.enums.SplitTypeEnum;
 import ai.basic.x1.usecase.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
@@ -147,9 +148,35 @@ public class DataInfoController extends BaseDatasetController {
         return DefaultConverter.convert(dataAnnotationRecordBO, DataAnnotationRecordDTO.class);
     }
 
+    @GetMapping("findLockRecordByDatasetId")
+    public List<LockRecordDTO> findLockRecordByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId) {
+        return DefaultConverter.convert(dataAnnotationRecordUseCase.findLockRecordByDatasetId(datasetId), LockRecordDTO.class);
+    }
+
+    @PostMapping("unLockByLockRecordIds")
+    public void unLockByLockRecordIds(@RequestBody @Validated DataBatchUnlockDTO dataBatchUnlockDTO) {
+        dataAnnotationRecordUseCase.unLockByLockRecordIds(dataBatchUnlockDTO.getLockRecordIds());
+    }
+
+    @PostMapping("split/dataIds")
+    public void splitByDataIds(@RequestBody @Validated DataInfoSplitReqDTO dto) {
+        dataInfoUsecase.splitByDataIds(dto.getDataIds(), EnumUtil.fromString(SplitTypeEnum.class, dto.getSplitType()));
+    }
+
+    @PostMapping("split/filter")
+    public void splitByFilter(@RequestBody @Validated DataInfoSplitFilterDTO dto) {
+        dataInfoUsecase.splitByFilter(DefaultConverter.convert(dto, DataInfoSplitFilterBO.class));
+    }
+
+    @GetMapping("split/totalDataCount")
+    public Long getSplitDataTotalCount(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
+                                       @RequestParam(value = "targetDataType", required = false) SplitTargetDataTypeEnum targetDataType) {
+        return dataInfoUsecase.getSplitDataTotalCount(datasetId,targetDataType);
+    }
+
     @PostMapping("deleteBatch")
     public void deleteBatch(@RequestBody @Validated DataInfoDeleteDTO dto) {
-        dataInfoUsecase.deleteBatch(dto.getDatasetId(),dto.getIds());
+        dataInfoUsecase.deleteBatch(dto.getDatasetId(), dto.getIds());
     }
 
     @GetMapping("generatePresignedUrl")

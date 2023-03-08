@@ -24,7 +24,7 @@ public class ModelCocoResponseConverter {
                                                Map<String, ModelClass> systemModelClassMap,
                                               PreModelParamDTO filterCondition) {
         if (CollUtil.isEmpty(response.getPredictItems())) {
-            return PredImageModelObjectBO.builder().code(1)
+            return PredImageModelObjectBO.builder().code(0)
                     .message("success")
                     .dataId(response.getImageId())
                     .objects(List.of()).build();

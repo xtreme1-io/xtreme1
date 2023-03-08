@@ -14,14 +14,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author andy
  */
 @Slf4j
-public class ModelJobConsumerListener implements StreamListener<String, ObjectRecord<String, String>> {
+public class DataModelJobConsumerListener implements StreamListener<String, ObjectRecord<String, String>> {
 
     private String group;
     private String streamKey;
     private RedisTemplate<String, Object> redisTemplate;
     private ConcurrentHashMap<String, AbstractModelMessageHandler> modelMessageHandlerMap = new ConcurrentHashMap<>();
 
-    public ModelJobConsumerListener(String streamKey, String group, RedisTemplate<String, Object> redisTemplate, ApplicationContext applicationContext) {
+    public DataModelJobConsumerListener(String streamKey, String group, RedisTemplate<String, Object> redisTemplate, ApplicationContext applicationContext) {
         this.streamKey = streamKey;
         this.group = group;
         this.redisTemplate = redisTemplate;
@@ -35,7 +35,7 @@ public class ModelJobConsumerListener implements StreamListener<String, ObjectRe
     public void onMessage(ObjectRecord message) {
         String modelMessageBOJSONStr = (String) message.getValue();
         ModelMessageBO modelMessageBO = JSONUtil.toBean(modelMessageBOJSONStr, ModelMessageBO.class);
-        if (modelMessageHandlerMap.get(modelMessageBO.getModelCode().name()).modelRun(modelMessageBO)) {
+        if (modelMessageHandlerMap.get(modelMessageBO.getModelCode().name()).handleDataModelRun(modelMessageBO)) {
             redisTemplate.opsForStream().acknowledge(streamKey, group, message.getId());
         }
     }

@@ -2,6 +2,7 @@ package ai.basic.x1.adapter.port.dao.mybatis.model;
 
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
+import ai.basic.x1.entity.enums.SplitTypeEnum;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.AllArgsConstructor;
@@ -54,6 +55,11 @@ public class DataInfo implements Serializable {
      * Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
+
+    /**
+     * Data split type ANNOTATED, NOT_ANNOTATED, INVALID
+     */
+    private SplitTypeEnum splitType;
 
     /**
      * Is deleted

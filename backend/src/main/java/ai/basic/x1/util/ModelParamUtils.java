@@ -17,8 +17,8 @@ public class ModelParamUtils {
             return;
         }
         switch (modelCode) {
-            case PRE_LABEL:
-            case COCO_80:
+            case LIDAR_DETECTION:
+            case IMAGE_DETECTION:
                 var modelClass = DefaultConverter.convert(resultFilterParam, PreModelParamDTO.class);
                 ValidateUtil.validate(modelClass);
                 break;

@@ -3,6 +3,7 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
+import ai.basic.x1.adapter.port.dao.mybatis.model.Class;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.minio.MinioProp;
@@ -33,7 +34,9 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -176,6 +180,85 @@ public class DataInfoUseCase {
         //if the file extension is image return true, else false
         return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath())) && Constants.IMAGE.equals(FileUtil.getName(file.getParentFile()));
     };
+
+    /**
+     * Data split
+     *
+     * @param dataIds   Data id collection
+     * @param splitType split type
+     */
+    public void splitByDataIds(List<Long> dataIds, SplitTypeEnum splitType) {
+        var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+        dataInfoLambdaUpdateWrapper.in(DataInfo::getId, dataIds);
+        dataInfoLambdaUpdateWrapper.set(DataInfo::getSplitType, splitType);
+        dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+    }
+
+    /**
+     * Data split
+     *
+     * @param splitFilterBO split filter parameter
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void splitByFilter(DataInfoSplitFilterBO splitFilterBO) {
+        var dataInfoLambdaQueryWrapper = getCommonSplitWrapper(splitFilterBO.getDatasetId(), splitFilterBO.getTargetDataType());
+        var dataCount = dataInfoDAO.count(dataInfoLambdaQueryWrapper);
+        var oneHundred = BigDecimal.valueOf(100);
+        var limit = (int) Math.round(BigDecimal.valueOf(dataCount).multiply(BigDecimal.valueOf(splitFilterBO.getTotalSizeRatio())).divide(oneHundred).doubleValue());
+        if (limit == 0) {
+            return;
+        }
+        if (SplittingByEnum.RANDOM.equals(splitFilterBO.getSplittingBy())) {
+            dataInfoLambdaQueryWrapper.last(" ORDER BY RAND()");
+        } else {
+            boolean isAsc = ObjectUtil.isNotNull(splitFilterBO.getAscOrDesc()) || SortEnum.ASC.name().equals(splitFilterBO.getAscOrDesc());
+            dataInfoLambdaQueryWrapper.orderBy(SortByEnum.NAME.equals(splitFilterBO.getSortBy()), isAsc, DataInfo::getName);
+            dataInfoLambdaQueryWrapper.orderBy(SortByEnum.CREATE_TIME.equals(splitFilterBO.getSortBy()), isAsc, DataInfo::getCreatedAt);
+        }
+        dataInfoLambdaQueryWrapper.last(" limit " + limit + "");
+        var dataList = dataInfoDAO.list(dataInfoLambdaQueryWrapper);
+        var dataIdList = dataList.stream().map(DataInfo::getId).collect(Collectors.toList());
+        int indexTraining = (int) Math.round(BigDecimal.valueOf(limit).multiply(BigDecimal.valueOf(splitFilterBO.getTrainingRatio())).divide(oneHundred).doubleValue());
+        int indexValidation = (int) Math.round(BigDecimal.valueOf(limit).multiply(BigDecimal.valueOf(splitFilterBO.getTrainingRatio())).divide(oneHundred).doubleValue()) + indexTraining;
+        var trainingDataIdList = dataIdList.subList(0, indexTraining);
+        var validationDataIdList = dataIdList.subList(indexTraining, indexValidation);
+        var testDataIdList = dataIdList.subList(indexValidation, limit);
+        this.updateBatchByIds(trainingDataIdList, SplitTypeEnum.TRAINING);
+        this.updateBatchByIds(validationDataIdList, SplitTypeEnum.VALIDATION);
+        this.updateBatchByIds(testDataIdList, SplitTypeEnum.TEST);
+    }
+
+    private void updateBatchByIds(List<Long> dataIds, SplitTypeEnum splitType) {
+        if (CollUtil.isNotEmpty(dataIds)) {
+            var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+            dataInfoLambdaUpdateWrapper.in(DataInfo::getId, dataIds);
+            dataInfoLambdaUpdateWrapper.set(DataInfo::getSplitType, splitType);
+            dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+        }
+    }
+
+    /**
+     * Total amount of segmented data obtained
+     *
+     * @param datasetId      Dataset id
+     * @param targetDataType Data type
+     * @return
+     */
+    public Long getSplitDataTotalCount(Long datasetId, SplitTargetDataTypeEnum targetDataType) {
+        var dataInfoLambdaQueryWrapper = getCommonSplitWrapper(datasetId, targetDataType);
+        var dataCount = dataInfoDAO.count(dataInfoLambdaQueryWrapper);
+        return dataCount;
+    }
+
+    private LambdaQueryWrapper<DataInfo> getCommonSplitWrapper(Long datasetId, SplitTargetDataTypeEnum targetDataType) {
+        var dataInfoLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        dataInfoLambdaQueryWrapper.select(DataInfo::getId);
+        dataInfoLambdaQueryWrapper.ne(SplitTargetDataTypeEnum.SPLIT.equals(targetDataType), DataInfo::getSplitType, SplitTargetDataTypeEnum.NOT_SPLIT);
+        dataInfoLambdaQueryWrapper.eq(SplitTargetDataTypeEnum.NOT_SPLIT.equals(targetDataType), DataInfo::getSplitType, targetDataType);
+        return dataInfoLambdaQueryWrapper;
+    }
+
 
     /**
      * Batch delete
@@ -811,6 +894,7 @@ public class DataInfoUseCase {
         modelMessageBO.setModelSerialNo(serialNo);
         modelMessageBO.setModelId(modelBO.getId());
         modelMessageBO.setModelVersion(modelBO.getVersion());
+        modelMessageBO.setUrl(modelBO.getUrl());
         int i = 1;
         var modelDataResultBuilder = ModelDataResult.builder()
                 .modelId(modelBO.getId())
@@ -833,7 +917,7 @@ public class DataInfoUseCase {
             modelMessageBO.setDataId(dataId);
             modelMessageBO.setDataInfo(dataMap.get(dataId));
             modelMessageBO.setDatasetId(dataMap.get(dataId).getDatasetId());
-            modelUseCase.sendModelMessageToMQ(modelMessageBO);
+            modelUseCase.sendDataModelMessageToMQ(modelMessageBO);
         }
     }
 
@@ -859,6 +943,41 @@ public class DataInfoUseCase {
                     .modelDataResults(DefaultConverter.convert(modelDataResultList, ModelDataResultBO.class)).build();
         }
         return new ModelObjectBO();
+    }
+
+    /**
+     * Get Model run data id
+     *
+     * @param modelRunFilterData Model run Filter data parameter
+     * @param datasetId Dataset id
+     * @param modelId Model id
+     * @param limit data id count
+     * @return data id
+     */
+    public List<Long> findModelRunDataIds(ModelRunFilterDataBO modelRunFilterData,Long datasetId,Long modelId,Long limit) {
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData,datasetId,modelId);
+        return dataInfoDAO.getBaseMapper().findModelRunDataIds(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData(),limit);
+    }
+
+    /**
+     * Get Model run data count
+     *
+     * @param modelRunFilterData Model run Filter data parameter
+     * @param datasetId Dataset id
+     * @param modelId Model id
+     * @return data count
+     */
+    public Long findModelRunDataCount(ModelRunFilterDataBO modelRunFilterData,Long datasetId,Long modelId) {
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData,datasetId,modelId);
+        return dataInfoDAO.getBaseMapper().findModelRunDataCount(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData());
+    }
+
+    private Wrapper<DataInfo> getCommonModelRunDataWrapper(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId) {
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        lambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getAnnotationStatus()), DataInfo::getAnnotationStatus, modelRunFilterData.getAnnotationStatus());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getSplitType()), DataInfo::getSplitType, modelRunFilterData.getSplitType());
+        return lambdaQueryWrapper;
     }
 
     /**
@@ -1734,4 +1853,5 @@ public class DataInfoUseCase {
             datasetBOList.forEach(datasetBO -> datasetBO.setDatas(dataMap.get(datasetBO.getId())));
         }
     }
+
 }

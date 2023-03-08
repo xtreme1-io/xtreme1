@@ -2,6 +2,7 @@ package ai.basic.x1.entity;
 
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
+import ai.basic.x1.entity.enums.SplitTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -54,6 +55,11 @@ public class DataInfoBO {
      * Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID
      */
     private DataAnnotationStatusEnum annotationStatus;
+
+    /**
+     * Data split type ANNOTATED, NOT_ANNOTATED, INVALID
+     */
+    private SplitTypeEnum splitType;
 
     /**
      * Is deleted

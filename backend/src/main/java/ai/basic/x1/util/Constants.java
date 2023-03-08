@@ -121,7 +121,9 @@ public interface Constants {
     }};
 
 
-    String MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:modelRun";
+    String DATA_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:data:modelRun";
+
+    String DATASET_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:dataset:modelRun";
     String MODEL_RUN_CONSUMER_GROUP = "default-group";
     String MODEL_RUN_CONSUMER_NAME = "model-consumer";
 
