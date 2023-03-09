@@ -206,7 +206,8 @@ public class ModelUseCase {
                 .runNo(DateUtil.format(OffsetDateTime.now().toLocalDateTime(), DatePattern.PURE_DATETIME_PATTERN))
                 .datasetId(dataset.getId())
                 .status(RunStatusEnum.STARTED)
-                .resultFilterParam(modelRunBO.getResultFilterParam()).build();
+                .resultFilterParam(modelRunBO.getResultFilterParam())
+                .dataCount(totalDataNum).build();
         modelRunRecordDAO.save(modelRunRecord);
         this.sendModelMessageAsync(modelRunRecord, modelBO, totalDataNum, dataIds);
     }
@@ -241,6 +242,7 @@ public class ModelUseCase {
             throw new UsecaseException(PARAM_ERROR, "Please first configure the model URL.");
         }
         boolean updateResult = modelRunRecordDAO.update(ModelRunRecord.builder().build(), Wrappers.lambdaUpdate(ModelRunRecord.class)
+                 .set(ModelRunRecord::getDataCount,totalDataNum)
                 .set(ModelRunRecord::getStatus, RunStatusEnum.STARTED)
                 .eq(ModelRunRecord::getId, modelRunRecordBO.getId())
                 .in(ModelRunRecord::getStatus, RunStatusEnum.FAILURE, RunStatusEnum.SUCCESS_WITH_ERROR)

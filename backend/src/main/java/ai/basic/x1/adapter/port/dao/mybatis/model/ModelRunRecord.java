@@ -58,6 +58,17 @@ public class ModelRunRecord {
     private RunRecordTypeEnum runRecordType;
 
     /**
+     * Data count
+     */
+    private Long dataCount;
+
+    /**
+     * metrics
+     */
+    @TableField(value = "metrics", typeHandler = JacksonTypeHandler.class)
+    private JSONObject  metrics;
+
+    /**
      * Error reason
      */
     private String errorReason;

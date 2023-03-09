@@ -60,6 +60,16 @@ public class ModelRunRecordDTO {
     private RunRecordTypeEnum runRecordType;
 
     /**
+     * Data count
+     */
+    private Long dataCount;
+
+    /**
+     * metrics
+     */
+    private JSONObject  metrics;
+
+    /**
      * Error reason
      */
     private String errorReason;

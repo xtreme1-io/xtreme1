@@ -58,9 +58,19 @@ public class ModelRunRecordBO {
     private RunRecordTypeEnum runRecordType;
 
     /**
+     * Data count
+     */
+    private Long dataCount;
+
+    /**
      * Error reason
      */
     private String errorReason;
+
+    /**
+     * metrics
+     */
+    private JSONObject  metrics;
 
     /**
      * Run parameters

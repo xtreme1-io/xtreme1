@@ -12,6 +12,9 @@
         <result column="status" property="status" />
         <result column="error_reason" property="errorReason" />
         <result column="run_record_type" property="runRecordType" />
+        <result column="data_count" property="dataCount" />
+        <result column="metrics" property="metrics"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="result_filter_param" property="resultFilterParam"
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="data_filter_param" property="dataFilterParam"
