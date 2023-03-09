@@ -955,7 +955,7 @@ public class DataInfoUseCase {
      * @return data id
      */
     public List<Long> findModelRunDataIds(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId, Long limit) {
-        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId, modelId);
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId);
         return dataInfoDAO.getBaseMapper().findModelRunDataIds(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData(), limit);
     }
 
@@ -968,11 +968,11 @@ public class DataInfoUseCase {
      * @return data count
      */
     public Long findModelRunDataCount(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId) {
-        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId, modelId);
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId);
         return dataInfoDAO.getBaseMapper().findModelRunDataCount(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData());
     }
 
-    private Wrapper<DataInfo> getCommonModelRunDataWrapper(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId) {
+    private Wrapper<DataInfo> getCommonModelRunDataWrapper(ModelRunFilterDataBO modelRunFilterData, Long datasetId) {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
         lambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getAnnotationStatus()), DataInfo::getAnnotationStatus, modelRunFilterData.getAnnotationStatus());

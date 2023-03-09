@@ -22,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import static ai.basic.x1.usecase.exception.UsecaseCode.PARAM_ERROR;
  */
 @RestController
 @RequestMapping("/model")
+@Validated
 public class ModelController {
 
     @Autowired
@@ -59,11 +61,6 @@ public class ModelController {
     @PostMapping("/configurationModelClass")
     public void configurationModelClass(@RequestBody @Validated ModelClassReqDTO modelClassReqDTO) {
         modelUseCase.configurationModelClass(modelClassReqDTO.getModelId(), DefaultConverter.convert(modelClassReqDTO.getModelClassList(), ModelClassBO.class));
-    }
-
-    @PostMapping("/checkModelUrlConnection")
-    public void checkModelUrlConnection(@NotEmpty(message = "url cannot be null") String url) {
-
     }
 
     @GetMapping("/list")
@@ -105,9 +102,15 @@ public class ModelController {
                 DefaultConverter.convert(modelRunRecordDTO, ModelRunRecordBO.class));
     }
 
+    @GetMapping("modelRun/dataCount")
+    public Long findModelRunDataCount(@Validated ModelRunFilterDataDTO modelRunDTO, @NotNull(message = "datasetId cannot be null") Long datasetId,
+                                      @NotNull(message = "modelId cannot be null") Long modelId) {
+        return dataInfoUseCase.findModelRunDataCount(DefaultConverter.convert(modelRunDTO, ModelRunFilterDataBO.class), datasetId, modelId);
+    }
+
     @PostMapping("testModelUrlConnection")
     public ModelResponseDTO testModelUrlConnection(@Validated @RequestBody ModelUrlConnectionReqDTO modelUrlConnectionReqDTO) {
-       return DefaultConverter.convert(modelUseCase.testModelUrlConnection(modelUrlConnectionReqDTO.getModelId(), modelUrlConnectionReqDTO.getUrl()),ModelResponseDTO.class);
+        return DefaultConverter.convert(modelUseCase.testModelUrlConnection(modelUrlConnectionReqDTO.getModelId(), modelUrlConnectionReqDTO.getUrl()), ModelResponseDTO.class);
     }
 
     @PostMapping("/image/recognition")
