@@ -35,6 +35,7 @@ public enum UsecaseCode {
 
     DATASET_NOT_FOUND("DATASET_NOT_FOUND", "Dataset not found"),
 
+    DEFAULT_DATASET_NOT_FOUND("DEFAULT_DATASET_NOT_FOUND", "Default dataset not found"),
     DATA_NOT_FOUND("DATA_NOT_FOUND", "Data not found"),
 
     DATASET__DATA__DATA_HAS_BEEN_UNLOCKED("DATASET__DATA_DATA_HAS_BEEN_UNLOCKED", "The data has been unlocked"),

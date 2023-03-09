@@ -106,12 +106,12 @@ public class JobConfig {
     }
 
     @Bean
-    public PreLabelModelMessageHandler preLabelModelMessageHandler() {
-        return new PreLabelModelMessageHandler();
+    public PointCloudDetectionModelMessageHandler pointCloudDetectionModelMessageHandler() {
+        return new PointCloudDetectionModelMessageHandler();
     }
 
     @Bean
-    public PredictImageCo80ModelHandler predictImageCo80ModelHandler() {
-        return new PredictImageCo80ModelHandler();
+    public ImageDetectionModelHandler imageDetectionModelHandler() {
+        return new ImageDetectionModelHandler();
     }
 }

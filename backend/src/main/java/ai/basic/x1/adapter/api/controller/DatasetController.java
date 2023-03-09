@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,16 +33,13 @@ import java.util.stream.Collectors;
 public class DatasetController extends BaseDatasetController {
 
     @Autowired
-    private DatasetUseCase datasetUsecase;
+    private DatasetUseCase datasetUseCase;
 
     @Autowired
     protected DataInfoUseCase dataInfoUsecase;
 
     @Autowired
     private DatasetClassUseCase datasetClassUseCase;
-
-    @Autowired
-    private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
 
     @Autowired
     private DataClassificationOptionUseCase dataClassificationOptionUseCase;
@@ -52,18 +50,23 @@ public class DatasetController extends BaseDatasetController {
 
     @PostMapping("create")
     public DatasetDTO create(@RequestBody @Validated({DatasetRequestDTO.GroupInsert.class}) DatasetRequestDTO dto) {
-        var datasetBO = datasetUsecase.create(DefaultConverter.convert(dto, DatasetBO.class));
+        var datasetBO = datasetUseCase.create(DefaultConverter.convert(dto, DatasetBO.class));
         return DefaultConverter.convert(datasetBO, DatasetDTO.class);
     }
 
     @PostMapping("update/{id}")
     public void update(@PathVariable Long id, @RequestBody @Validated DatasetRequestDTO dto) {
-        datasetUsecase.update(id, DefaultConverter.convert(dto, DatasetBO.class));
+        datasetUseCase.update(id, DefaultConverter.convert(dto, DatasetBO.class));
     }
 
     @PostMapping("delete/{id}")
     public void delete(@PathVariable Long id) {
-        datasetUsecase.delete(id);
+        datasetUseCase.delete(id);
+    }
+
+    @GetMapping("findByType")
+    public List<DatasetDTO> findByType(@NotEmpty(message = "datasetTypes cannot be null") @RequestParam(required = false) List<DatasetTypeEnum> datasetTypes) {
+        return DefaultConverter.convert(datasetUseCase.findByType(datasetTypes), DatasetDTO.class);
     }
 
     @GetMapping("findByPage")
@@ -71,7 +74,7 @@ public class DatasetController extends BaseDatasetController {
                                        @RequestParam(defaultValue = "10") Integer pageSize,
                                        @Validated DatasetQueryDTO dto) {
         var queryBO = DefaultConverter.convert(dto, DatasetQueryBO.class);
-        var datasetBOPage = datasetUsecase.findByPage(pageNo, pageSize, queryBO);
+        var datasetBOPage = datasetUseCase.findByPage(pageNo, pageSize, queryBO);
         var datasetBOList = datasetBOPage.getList();
         if (CollectionUtil.isEmpty(datasetBOList)) {
             return DefaultConverter.convert(datasetBOPage, DatasetDTO.class);
@@ -101,7 +104,7 @@ public class DatasetController extends BaseDatasetController {
 
     @GetMapping("info/{id}")
     public DatasetDTO info(@PathVariable Long id) {
-        var datasetBO = datasetUsecase.findById(id);
+        var datasetBO = datasetUseCase.findById(id);
         if (ObjectUtil.isEmpty(datasetBO)) {
             throw new ApiException(UsecaseCode.NOT_FOUND);
         }
@@ -110,13 +113,13 @@ public class DatasetController extends BaseDatasetController {
 
     @GetMapping("findOntologyIsExistByDatasetId")
     public Boolean findOntologyIsExistByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId) {
-        return datasetUsecase.findOntologyIsExistByDatasetId(datasetId);
+        return datasetUseCase.findOntologyIsExistByDatasetId(datasetId);
     }
 
     @GetMapping("{datasetId}/statistics/dataStatus")
     public DatasetStatisticsDTO statisticsDataStatus(@PathVariable("datasetId") Long datasetId) {
         var datasetStatisticsMap = dataInfoUsecase.getDatasetStatisticsByDatasetIds(List.of(datasetId));
-        var objectCount = datasetUsecase.countObject(datasetId);
+        var objectCount = datasetUseCase.countObject(datasetId);
         var statisticsInfo = datasetStatisticsMap.getOrDefault(datasetId,
                 DatasetStatisticsBO.createEmpty(datasetId));
 
@@ -156,7 +159,7 @@ public class DatasetController extends BaseDatasetController {
             datasetScenarioBO.setClassIds(Collections.singletonList(dto.getClassId()));
         }
         datasetScenarioBO.setOntologyClassId(dto.getClassId());
-        datasetUsecase.createByScenario(datasetScenarioBO);
+        datasetUseCase.createByScenario(datasetScenarioBO);
     }
 
 }

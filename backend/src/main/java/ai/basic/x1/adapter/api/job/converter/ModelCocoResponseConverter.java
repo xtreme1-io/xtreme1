@@ -1,9 +1,13 @@
 package ai.basic.x1.adapter.api.job.converter;
 
+import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.dto.PreModelParamDTO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
+import ai.basic.x1.adapter.port.rpc.dto.PreModelRespDTO;
 import ai.basic.x1.adapter.port.rpc.dto.PredImageRespDTO;
+import ai.basic.x1.entity.PreLabelModelObjectBO;
 import ai.basic.x1.entity.PredImageModelObjectBO;
+import ai.basic.x1.usecase.exception.UsecaseCode;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -20,29 +24,38 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelCocoResponseConverter {
 
-    public static PredImageModelObjectBO convert(PredImageRespDTO response,
-                                               Map<String, ModelClass> systemModelClassMap,
-                                              PreModelParamDTO filterCondition) {
-        if (CollUtil.isEmpty(response.getPredictItems())) {
-            return PredImageModelObjectBO.builder().code(0)
-                    .message("success")
-                    .dataId(response.getImageId())
-                    .objects(List.of()).build();
-        } else {
-            log.info("start filter predItem. filter condition: " + JSONUtil.toJsonStr(filterCondition));
-            var predObjects = response.getPredictItems()
-                    .stream()
-                    .filter(item -> matchSystemModelClass(item.getClsid(), systemModelClassMap)
-                            && matchSelectedClassAndConfidence(item, filterCondition)
-                    )
-                    .map(item -> buildObject(item, systemModelClassMap.get(String.valueOf(item.getClsid()))))
-                    .collect(Collectors.toList());
+    public static PredImageModelObjectBO convert(ApiResult<PredImageRespDTO> predImageRespDTOApiResult,
+                                                 Map<String, ModelClass> systemModelClassMap,
+                                                 PreModelParamDTO filterCondition) {
+        PredImageModelObjectBO.PredImageModelObjectBOBuilder<?, ?> builder = PredImageModelObjectBO.builder();
+        var response = predImageRespDTOApiResult.getData();
+        if (predImageRespDTOApiResult.getCode() == UsecaseCode.OK) {
+            if (CollUtil.isEmpty(response.getPredictItems())) {
+                builder.code(0)
+                        .message("success")
+                        .dataId(response.getImageId())
+                        .objects(List.of());
+            } else {
+                log.info("start filter predItem. filter condition: " + JSONUtil.toJsonStr(filterCondition));
+                var predObjects = response.getPredictItems()
+                        .stream()
+                        .filter(item -> matchSystemModelClass(item.getClsid(), systemModelClassMap)
+                                && matchSelectedClassAndConfidence(item, filterCondition)
+                        )
+                        .map(item -> buildObject(item, systemModelClassMap.get(String.valueOf(item.getClsid()))))
+                        .collect(Collectors.toList());
 
-            return PredImageModelObjectBO.builder().code(0)
-                    .message("success")
-                    .dataId(response.getImageId())
-                    .objects(predObjects).build();
+                builder.code(0)
+                        .message("success")
+                        .dataId(response.getImageId())
+                        .objects(predObjects);
+            }
+        } else {
+            builder.code(-1)
+                    .message(predImageRespDTOApiResult.getMessage())
+                    .objects(null).build();
         }
+        return builder.build();
     }
 
     private static PredImageModelObjectBO.ObjectBO buildObject(PredImageRespDTO.PredictItem predictItem,

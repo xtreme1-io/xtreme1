@@ -6,6 +6,14 @@ package ai.basic.x1.entity.enums;
  */
 public enum ModelDatasetTypeEnum {
     /**
+     * LIDAR_FUSION
+     */
+    LIDAR_FUSION,
+    /**
+     * LIDAR_BASIC
+     */
+    LIDAR_BASIC,
+    /**
      * IMAGE
      */
     IMAGE,

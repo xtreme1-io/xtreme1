@@ -1,12 +1,10 @@
 package ai.basic.x1.adapter.api.controller;
 
-import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.*;
-import ai.basic.x1.adapter.dto.request.ModelAddDTO;
-import ai.basic.x1.adapter.dto.request.ModelClassReqDTO;
-import ai.basic.x1.adapter.dto.request.ModelRecognitionRequestDTO;
-import ai.basic.x1.adapter.dto.request.ModelUpdateDTO;
+import ai.basic.x1.adapter.dto.request.*;
+import ai.basic.x1.adapter.dto.response.ModelResponseDTO;
+import ai.basic.x1.adapter.exception.ApiException;
 import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ModelDatasetTypeEnum;
@@ -17,6 +15,7 @@ import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static ai.basic.x1.usecase.exception.UsecaseCode.PARAM_ERROR;
 
 /**
  * @author chenchao
@@ -47,28 +48,33 @@ public class ModelController {
 
     @PostMapping("/add")
     public void add(@RequestBody @Validated ModelAddDTO modelAddDTO) {
-        modelUseCase.add(DefaultConverter.convert(modelAddDTO,ModelBO.class));
+        modelUseCase.add(DefaultConverter.convert(modelAddDTO, ModelBO.class));
     }
 
     @PostMapping("/update")
     public void update(@RequestBody @Validated ModelUpdateDTO modelUpdateDTO) {
-        modelUseCase.update(DefaultConverter.convert(modelUpdateDTO,ModelBO.class));
+        modelUseCase.update(DefaultConverter.convert(modelUpdateDTO, ModelBO.class));
     }
 
     @PostMapping("/configurationModelClass")
     public void configurationModelClass(@RequestBody @Validated ModelClassReqDTO modelClassReqDTO) {
-        modelUseCase.configurationModelClass(modelClassReqDTO.getModelId(),DefaultConverter.convert(modelClassReqDTO.getModelClassList(),ModelClassBO.class));
+        modelUseCase.configurationModelClass(modelClassReqDTO.getModelId(), DefaultConverter.convert(modelClassReqDTO.getModelClassList(), ModelClassBO.class));
     }
 
     @PostMapping("/checkModelUrlConnection")
-    public void checkModelUrlConnection(@NotEmpty(message ="url cannot be null") String url) {
+    public void checkModelUrlConnection(@NotEmpty(message = "url cannot be null") String url) {
 
+    }
+
+    @GetMapping("/list")
+    public List<ModelDTO> list(ModelDTO modelDTO) {
+        return DefaultConverter.convert(modelUseCase.list(DefaultConverter.convert(modelDTO, ModelBO.class)), ModelDTO.class);
     }
 
     @GetMapping("/page")
     public Page<ModelDTO> findByPage(@RequestParam(defaultValue = "1") Integer pageNo,
                                      @RequestParam(defaultValue = "10") Integer pageSize, ModelDatasetTypeEnum datasetType) {
-        return DefaultConverter.convert(modelUseCase.findByPage(pageNo,pageSize,datasetType),ModelDTO.class);
+        return DefaultConverter.convert(modelUseCase.findByPage(pageNo, pageSize, datasetType), ModelDTO.class);
     }
 
     @GetMapping("info/{id}")
@@ -82,8 +88,11 @@ public class ModelController {
     }
 
     @PostMapping("modelRun")
-    public void modelRun(@RequestBody ModelRunDTO modelRunDTO) {
+    public void modelRun(@Validated @RequestBody ModelRunDTO modelRunDTO) {
         ModelBO model = modelUseCase.getModelById(modelRunDTO.getModelId());
+        if (StrUtil.isEmpty(model.getUrl())) {
+            throw new ApiException(PARAM_ERROR, "Please first configure the model URL.");
+        }
         ModelParamUtils.valid(modelRunDTO.getResultFilterParam(), model.getModelCode());
         modelUseCase.modelRun(
                 DefaultConverter.convert(modelRunDTO, ModelRunBO.class)
@@ -91,12 +100,14 @@ public class ModelController {
     }
 
     @PostMapping("reRun")
-    public void reRun(@RequestBody ModelRunRecordDTO modelRunRecordDTO,
-                      @LoggedUser LoggedUserDTO loggedUserDTO) {
+    public void reRun(@Validated @RequestBody ModelRunRecordDTO modelRunRecordDTO) {
         modelUseCase.reRun(
-                DefaultConverter.convert(modelRunRecordDTO, ModelRunRecordBO.class),
-                DefaultConverter.convert(loggedUserDTO, LoggedUserBO.class)
-        );
+                DefaultConverter.convert(modelRunRecordDTO, ModelRunRecordBO.class));
+    }
+
+    @PostMapping("testModelUrlConnection")
+    public ModelResponseDTO testModelUrlConnection(@Validated @RequestBody ModelUrlConnectionReqDTO modelUrlConnectionReqDTO) {
+       return DefaultConverter.convert(modelUseCase.testModelUrlConnection(modelUrlConnectionReqDTO.getModelId(), modelUrlConnectionReqDTO.getUrl()),ModelResponseDTO.class);
     }
 
     @PostMapping("/image/recognition")

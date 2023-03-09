@@ -1,9 +1,9 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
-import ai.basic.x1.adapter.port.dao.mybatis.model.Class;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.minio.MinioProp;
@@ -36,7 +36,6 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
@@ -50,10 +49,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -64,9 +60,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DataUploadSourceEnum.LOCAL;
-import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
 import static ai.basic.x1.entity.enums.RelationEnum.*;
+import static ai.basic.x1.entity.enums.SplitTypeEnum.NOT_SPLIT;
 import static ai.basic.x1.entity.enums.UploadStatusEnum.*;
 import static ai.basic.x1.usecase.exception.UsecaseCode.*;
 import static ai.basic.x1.util.Constants.*;
@@ -137,6 +134,9 @@ public class DataInfoUseCase {
 
     @Autowired
     private DatasetClassUseCase datasetClassUseCase;
+
+    @Autowired
+    private DatasetUseCase datasetUseCase;
 
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
@@ -637,7 +637,7 @@ public class DataInfoUseCase {
                             handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                             var fileNodeList = assembleContent(dataFiles, rootPath, dataInfoUploadBO);
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
-                            var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
+                            var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
                         }
                     });
@@ -684,7 +684,7 @@ public class DataInfoUseCase {
         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(FILE).build();
         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file))
-                .content(Collections.singletonList(fileNodeBO)).build();
+                .content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).build();
         dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
         var rootPath = String.format("%s/%s", userId, datasetId);
         var newSavePath = tempPath + fileBO.getPath().replace(rootPath, "");
@@ -697,7 +697,7 @@ public class DataInfoUseCase {
         datasetSimilarityJobUseCase.submitJob(datasetId);
     }
 
-    private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+    public void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
         var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, filefilter);
@@ -731,7 +731,7 @@ public class DataInfoUseCase {
                         handleDataResult(file.getParentFile().getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                                 .fileId(fileBO.getId()).type(FILE).build();
-                        var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).tempDataId(tempDataId).build();
+                        var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
                         dataInfoBOList.add(dataInfoBO);
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
@@ -949,26 +949,26 @@ public class DataInfoUseCase {
      * Get Model run data id
      *
      * @param modelRunFilterData Model run Filter data parameter
-     * @param datasetId Dataset id
-     * @param modelId Model id
-     * @param limit data id count
+     * @param datasetId          Dataset id
+     * @param modelId            Model id
+     * @param limit              data id count
      * @return data id
      */
-    public List<Long> findModelRunDataIds(ModelRunFilterDataBO modelRunFilterData,Long datasetId,Long modelId,Long limit) {
-        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData,datasetId,modelId);
-        return dataInfoDAO.getBaseMapper().findModelRunDataIds(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData(),limit);
+    public List<Long> findModelRunDataIds(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId, Long limit) {
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId, modelId);
+        return dataInfoDAO.getBaseMapper().findModelRunDataIds(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData(), limit);
     }
 
     /**
      * Get Model run data count
      *
      * @param modelRunFilterData Model run Filter data parameter
-     * @param datasetId Dataset id
-     * @param modelId Model id
+     * @param datasetId          Dataset id
+     * @param modelId            Model id
      * @return data count
      */
-    public Long findModelRunDataCount(ModelRunFilterDataBO modelRunFilterData,Long datasetId,Long modelId) {
-        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData,datasetId,modelId);
+    public Long findModelRunDataCount(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId) {
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId, modelId);
         return dataInfoDAO.getBaseMapper().findModelRunDataCount(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData());
     }
 
@@ -1852,6 +1852,19 @@ public class DataInfoUseCase {
             var dataMap = dataInfoBOList.stream().collect(Collectors.groupingBy(DataInfoBO::getDatasetId));
             datasetBOList.forEach(datasetBO -> datasetBO.setDatas(dataMap.get(datasetBO.getId())));
         }
+    }
+
+    public DataInfoBO getInitDataInfoBO(DatasetInitialInfo datasetInitialInfo) {
+        var dataset = datasetUseCase.getInitDataset(datasetInitialInfo);
+        if (ObjectUtil.isNull(dataset)) {
+            throw new UsecaseException(DEFAULT_DATASET_NOT_FOUND);
+        }
+        var dataInfoLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getDatasetId, dataset.getId());
+        dataInfoLambdaQueryWrapper.last("limit 1");
+        var dataInfoBO = DefaultConverter.convert(dataInfoDAO.getOne(dataInfoLambdaQueryWrapper), DataInfoBO.class);
+        setDataInfoBOListFile(List.of(dataInfoBO));
+        return dataInfoBO;
     }
 
 }

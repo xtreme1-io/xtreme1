@@ -14,9 +14,11 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ModelRunDTO {
-    @NotNull
+
+    @NotNull(message = "datasetId cannot be null")
     private Long datasetId;
-    @NotNull
+
+    @NotNull(message = "modelId cannot be null")
     private Long modelId;
 
     private JSONObject resultFilterParam;

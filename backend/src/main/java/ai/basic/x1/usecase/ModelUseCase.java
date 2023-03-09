@@ -1,9 +1,15 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.api.config.ImageDatasetInitialInfo;
+import ai.basic.x1.adapter.api.config.PointCloudDatasetInitialInfo;
+import ai.basic.x1.adapter.api.job.converter.ModelCocoRequestConverter;
+import ai.basic.x1.adapter.api.job.converter.PointCloudDetectionModelReqConverter;
+import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoCountDAO;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoIncrDAO;
+import ai.basic.x1.adapter.port.rpc.dto.PreModelRespDTO;
 import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
@@ -17,14 +23,20 @@ import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.StopWatch;
+import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.*;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +58,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ai.basic.x1.entity.enums.ModelDatasetTypeEnum.LIDAR;
+import static ai.basic.x1.entity.enums.ModelDatasetTypeEnum.*;
+import static ai.basic.x1.usecase.exception.UsecaseCode.PARAM_ERROR;
 
 /**
  * @author chenchao
@@ -77,6 +90,13 @@ public class ModelUseCase {
 
     @Autowired
     private DataInfoUseCase dataInfoUseCase;
+
+    @Autowired
+    private PointCloudDatasetInitialInfo pointCloudDatasetInitialInfo;
+
+    @Autowired
+    private ImageDatasetInitialInfo imageDatasetInitialInfo;
+
     @Autowired
     private RedisTemplate<String, Object> streamRedisTemplate;
 
@@ -84,6 +104,7 @@ public class ModelUseCase {
 
 
     public void add(ModelBO modelBO) {
+        modelBO.setModelCode(EnumUtil.fromString(ModelCodeEnum.class, String.format("%s_%s", modelBO.getDatasetType().name(), modelBO.getModelType().name())));
         modelDAO.save(DefaultConverter.convert(modelBO, Model.class));
     }
 
@@ -99,6 +120,20 @@ public class ModelUseCase {
         modelClassDAO.saveBatch(DefaultConverter.convert(modelClassBOList, ModelClass.class));
     }
 
+    public List<ModelBO> list(ModelBO modelBO) {
+        ModelDatasetTypeEnum datasetType = modelBO.getDatasetType();
+        LambdaQueryWrapper<Model> modelLambdaQueryWrapper = Wrappers.lambdaQuery();
+        modelLambdaQueryWrapper.orderBy(true, true, Model::getName);
+        if(ObjectUtil.isNotNull(datasetType)){
+            if(LIDAR_BASIC.equals(datasetType)||LIDAR_FUSION.equals(datasetType)){
+                modelLambdaQueryWrapper.in(Model::getDatasetType, Lists.newArrayList(datasetType.name(),"LIDAR"));
+            }else {
+                modelLambdaQueryWrapper.eq(Model::getDatasetType, datasetType);
+            }
+        }
+        var modelList = modelDAO.list(modelLambdaQueryWrapper);
+        return DefaultConverter.convert(modelList, ModelBO.class);
+    }
 
     public Page<ModelBO> findByPage(Integer pageNo, Integer pageSize, ModelDatasetTypeEnum datasetType) {
         LambdaQueryWrapper<Model> modelLambdaQueryWrapper = Wrappers.lambdaQuery();
@@ -187,7 +222,7 @@ public class ModelUseCase {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public void reRun(ModelRunRecordBO modelRunRecordBO, LoggedUserBO loggedUserBO) {
+    public void reRun(ModelRunRecordBO modelRunRecordBO) {
         ModelRunRecord modelRunRecord = modelRunRecordDAO.getById(modelRunRecordBO.getId());
         if (ObjectUtil.isNull(modelRunRecord)) {
             throw new UsecaseException(UsecaseCode.DATASET__MODEL_RUN_RECORD_NOT_EXIST);
@@ -201,6 +236,9 @@ public class ModelUseCase {
         ModelBO modelBO = getModelById(modelRunRecord.getModelId());
         if (ObjectUtil.isNull(modelBO)) {
             throw new UsecaseException(UsecaseCode.DATASET__MODEL_NOT_EXIST);
+        }
+        if (StrUtil.isEmpty(modelBO.getUrl())) {
+            throw new UsecaseException(PARAM_ERROR, "Please first configure the model URL.");
         }
         boolean updateResult = modelRunRecordDAO.update(ModelRunRecord.builder().build(), Wrappers.lambdaUpdate(ModelRunRecord.class)
                 .set(ModelRunRecord::getStatus, RunStatusEnum.STARTED)
@@ -218,6 +256,32 @@ public class ModelUseCase {
             throw new UsecaseException(UsecaseCode.DATASET__MODEL_RERUN_ERROR);
         }
     }
+
+    public ModelResponseBO testModelUrlConnection(Long modelId, String url) {
+        ModelBO modelBO = getModelById(modelId);
+        if (ObjectUtil.isNull(modelBO)) {
+            throw new UsecaseException(UsecaseCode.DATASET__MODEL_NOT_EXIST);
+        }
+        String requestBody = null;
+        DataInfoBO dataInfoBO;
+        switch (modelBO.getModelCode()) {
+            case IMAGE_DETECTION:
+                dataInfoBO = dataInfoUseCase.getInitDataInfoBO(imageDatasetInitialInfo);
+                var predImageReqDTO = ModelCocoRequestConverter.convert(ModelMessageBO.builder().dataInfo(dataInfoBO).build());
+                requestBody = JSONUtil.toJsonStr(predImageReqDTO);
+                break;
+            case LIDAR_DETECTION:
+                dataInfoBO = dataInfoUseCase.getInitDataInfoBO(pointCloudDatasetInitialInfo);
+                var preModelReqDTO = PointCloudDetectionModelReqConverter.buildRequestParam(ModelMessageBO.builder().dataInfo(dataInfoBO).build());
+                requestBody = JSONUtil.toJsonStr(preModelReqDTO);
+                break;
+            default:
+        }
+        var modelResponseBO = reqModel(requestBody, url);
+        validateModelResponse(modelResponseBO, modelBO.getModelCode());
+        return modelResponseBO;
+    }
+
 
     public ModelBO getModelById(Long modelId) {
         LambdaQueryWrapper<Model> modelLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -371,5 +435,37 @@ public class ModelUseCase {
             sendNum.getAndIncrement();
         });
         return sendNum.get();
+    }
+
+    private ModelResponseBO reqModel(String requestBody, String url) {
+        try {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            HttpRequest httpRequest = HttpUtil.createPost(url)
+                    .body(requestBody, ContentType.JSON.getValue());
+            HttpResponse httpResponse = httpRequest.execute();
+            stopWatch.stop();
+            log.info(String.format("call preLabelModelService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
+
+            return ModelResponseBO.builder().status(httpResponse.getStatus()).content(JSONUtil.parseObj(httpResponse.body())).build();
+        } catch (Throwable throwable) {
+            log.error("call pre-model service error.", throwable);
+            throw new UsecaseException("preLabelModel run error!");
+        }
+    }
+
+    private void validateModelResponse(ModelResponseBO modelResponseBO, ModelCodeEnum modelCode) {
+        switch (modelCode) {
+            case IMAGE_DETECTION:
+                break;
+            case LIDAR_DETECTION:
+                ApiResult<List<PreModelRespDTO>> apiResult = JSONUtil.toBean(modelResponseBO.getContent(), new TypeReference<>() {
+                }, false);
+                if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {}
+                break;
+            default:
+                break;
+        }
+
     }
 }
