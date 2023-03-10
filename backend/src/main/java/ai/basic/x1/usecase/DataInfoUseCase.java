@@ -4,6 +4,7 @@ import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
+import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendLambdaQueryWrapper;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.dao.mybatis.query.DataInfoQuery;
@@ -307,7 +308,7 @@ public class DataInfoUseCase {
      * @return DataInfo page
      */
     public Page<DataInfoBO> findByPage(DataInfoQueryBO queryBO) {
-        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        var lambdaQueryWrapper = new ExtendLambdaQueryWrapper<DataInfo>();
         lambdaQueryWrapper.eq(DataInfo::getDatasetId, queryBO.getDatasetId());
         lambdaQueryWrapper.eq(DataInfo::getIsDeleted, false);
         lambdaQueryWrapper.like(StrUtil.isNotEmpty(queryBO.getName()), DataInfo::getName, queryBO.getName());

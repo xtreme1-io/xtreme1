@@ -79,18 +79,18 @@
 
     <select id="selectDataPage" resultMap="BaseResultMap">
         SELECT distinct d.* FROM data d
-        LEFT JOIN model_dataset_result mdr ON d.id=mdr.data_id
+            LEFT JOIN model_dataset_result mdr ON d.id=mdr.data_id
         ${ew.customSqlSegment("d")}
         <if test="dataInfoQuery.runRecordId != null">
-            mdr.run_record_id =  #{runRecordId}
+          AND  mdr.run_record_id = #{dataInfoQuery.runRecordId}
         </if>
 
         <if test="dataInfoQuery.minDataConfidence != null">
-            mdr.data_confidence <![CDATA[ >= ]]>  #{minDataConfidence}
+            AND  mdr.data_confidence <![CDATA[ >= ]]>  #{dataInfoQuery.minDataConfidence}
         </if>
 
         <if test="dataInfoQuery.maxDataConfidence != null">
-            mdr.data_confidence <![CDATA[ <= ]]>   #{maxDataConfidence}
+            AND  mdr.data_confidence <![CDATA[ <= ]]>   #{dataInfoQuery.maxDataConfidence}
         </if>
         <include refid="selectDataByPageOrder"/>
     </select>
