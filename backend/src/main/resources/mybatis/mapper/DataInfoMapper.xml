@@ -100,7 +100,6 @@
         <choose>
             <when test="dataInfoQuery.sortField != null and dataInfoQuery.sortField != ''
         and dataInfoQuery.ascOrDesc != null and dataInfoQuery.ascOrDesc != ''">
-                d.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
                 <if test="dataInfoQuery.sortField == 'DATA_CONFIDENCE'">
                     mdr.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
                 </if>
