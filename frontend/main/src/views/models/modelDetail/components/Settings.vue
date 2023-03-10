@@ -1,7 +1,7 @@
 <template>
   <div class="overview">
     <div class="des">
-      <settingsPredict />
+      <settingsPredict v-bind="$attrs" />
     </div>
   </div>
 
@@ -18,6 +18,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+  import { deleteModelApi } from '/@/api/business/models';
   import { useModal } from '/@/components/Modal';
   import { Button } from 'ant-design-vue';
   import ClassModal from './ClassModal.vue';
@@ -30,10 +31,17 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { h } from 'vue';
+  import { useRoute } from 'vue-router';
+  import { useGo } from '/@/hooks/web/usePage';
+  import { RouteEnum } from '/@/enums/routeEnum';
   const [register, { openModal }] = useModal();
   const { t } = useI18n();
-
+  const route = useRoute();
+  const modelId = Number(route?.query?.id);
   const { createConfirm } = useMessage();
+  const go = useGo();
+
+  const { createMessage } = useMessage();
   let deleteModal = () => {
     createConfirm({
       iconType: 'warning',
@@ -41,7 +49,9 @@
       content: () => h('span', t('business.models.settingsModel.deleteModalText')),
       okText: t('business.models.run.delete'),
       onOk: async () => {
-        // await this.logout(true);
+        await deleteModelApi(modelId);
+        createMessage.success(t('action.deleteSuccess'));
+        go(`${RouteEnum.MODELS}`);
       },
       okButtonProps: {
         style: { background: '#d27575', 'border-radius': '6px', padding: '10px 16px' },

@@ -9,13 +9,16 @@ import {
   GetModelRunParams,
   ResponseModelRunParams,
   runModelRunParams,
+  editParams,
+  setClassParams,
+  ModelDataCountParams,
 } from './model/modelsModel';
 
 enum Api {
   Model = '/model',
-  ModelRun = '/dataset/modelRun',
+  ModelRun = '/modelRun',
   ModelQuota = '/dataset/modelQuota',
-  DATASET = '/dataset/dataset',
+  DATASET = '/dataset',
 }
 
 /** get all Models */
@@ -29,10 +32,74 @@ export const getModelAllApi = (params: GetModelParams) =>
     },
   });
 
+/** edit  Models  */
+export const setClassModelApi = (params: setClassParams) =>
+  defHttp.post<ResponseModelParams>({
+    url: `${Api.Model}/configurationModelClass`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+/** add  Models  */
+// TODO
+export const addModelApi = (params: GetModelParams) =>
+  defHttp.post<ResponseModelParams>({
+    url: `${Api.Model}/add`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** delete  Models  */
+
+export const deleteModelApi = (id: number) =>
+  defHttp.post<ResponseModelParams>({
+    url: `${Api.Model}/delete/${id}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+/** edit  Models  */
+export const editModelApi = (params: editParams) =>
+  defHttp.post<ResponseModelParams>({
+    url: `${Api.Model}/update`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+/** get  Models  list*/
+export const getModelPageApi = (params: GetModelParams) =>
+  defHttp.get<ResponseModelParams>({
+    url: `${Api.Model}/page`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 /** get model by id */
 export const getModelByIdApi = (params: BasicIdParams) =>
   defHttp.get<ModelListItem>({
     url: `${Api.Model}/info/${params.id}`,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** get model by id */
+export const getModelDataCountApi = (params: ModelDataCountParams) =>
+  defHttp.get<ModelListItem>({
+    url: `${Api.Model}/modelRun/dataCount`,
+    params,
     headers: {
       // @ts-ignore
       ignoreCancelToken: true,
@@ -56,6 +123,17 @@ export const createEditModelApi = (params: SaveModelParams) =>
 export const getModelRunApi = (params: GetModelRunParams) =>
   defHttp.get<ResponseModelRunParams>({
     url: `${Api.ModelRun}/findModelRunRecordByPage`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+/** get model run by team*/
+export const findModelRunFilterDatasetNameApi = (params: { datasetName: string }) =>
+  defHttp.get<ResponseModelRunParams>({
+    url: `${Api.ModelRun}/findModelRunFilterDatasetName`,
     params,
     headers: {
       // @ts-ignore

@@ -1,11 +1,12 @@
 import { useI18n } from '/@/hooks/web/useI18n';
 import { BasicColumn } from '/@/components/Table';
-import { Button } from '/@@/Button';
-import { Tooltip, Progress } from 'ant-design-vue';
+import { Tooltip, Progress, Input, Button, Select } from 'ant-design-vue';
 import failureSvg from '/@/assets/images/models/failure.svg';
 import { statusEnum, ModelRunItem } from '/@/api/business/model/modelsModel';
 import { getDateTime } from '/@/utils/business/timeFormater';
 import Icon, { SvgIcon } from '/@/components/Icon';
+import { defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
+import { findModelRunFilterDatasetNameApi } from '/@/api/business/models';
 const { t } = useI18n();
 const inactiveFilterIcon = (
   <SvgIcon name={'filter-inactive'} size={14} style={{ transform: 'translateY(-2px)' }} />
@@ -13,16 +14,6 @@ const inactiveFilterIcon = (
 const activeFilterIcon = (
   <SvgIcon name={'filter-active'} size={14} style={{ transform: 'translateY(-2px)' }} />
 );
-export const stageFilter = [
-  {
-    text: t('business.task.annotate'),
-    value: '111',
-  },
-  {
-    text: t('business.task.review'),
-    value: '22',
-  },
-];
 // status 颜色
 const statusColor = {
   [statusEnum.started]: '#86AFFE',
@@ -43,53 +34,198 @@ const formatStatusText = (status: statusEnum) => {
 };
 
 /** 表格头 */
+const filterSelect = defineComponent({
+  props: {
+    setSelectedKeys: Function,
+    selectedKeys: String,
+    confirm: Function,
+    clearFilters: Function,
+    column: Array,
+  },
+  setup(props) {
+    const { setSelectedKeys, selectedKeys, confirm, clearFilters, column } = toRefs(props);
+    const data = ref<Array<any>>([]);
+    const selectValue = ref([]);
+    const fetching = ref(true);
+
+    const findModelRunFilterDatasetName = async (name) => {
+      const res = await findModelRunFilterDatasetNameApi({ datasetName: name });
+      if (res && Array.isArray(res)) data.value = res.map((i) => ({ value: i.id, label: i.name }));
+    };
+    // watch(
+    //   () => selectValue.value,
+    //   () => {
+    //     data.value = [];
+    //     fetching.value = false;
+    //   },
+    // );
+    onMounted(() => {
+      // reset();
+      // getCount();
+    });
+    return () => (
+      <>
+        {
+          <div style="padding:20px">
+            <div style="padding-bottom:20px" class="flex; ">
+              {' '}
+              <a
+                onClick={() => {
+                  props.setSelectedKeys(selectValue.value);
+                  props.confirm();
+                }}
+                size={'small'}
+                style=""
+              >
+                Ok
+              </a>
+              <a
+                style="float:right"
+                size="small"
+                onClick={() => {
+                  selectValue.value = [];
+                  clearFilters.value({ confirm: true });
+                }}
+              >
+                Reset
+              </a>{' '}
+            </div>
+            <Select
+              value={selectValue.value}
+              onChange={(e) => {
+                selectValue.value = e;
+              }}
+              mode="multiple"
+              label-in-value
+              placeholder="write datasetName"
+              style="min-width:120px; height:40px;  display: block"
+              filterOption={false}
+              notFoundContent={fetching.value ? undefined : null}
+              options={data.value}
+              onSearch={(name) => {
+                findModelRunFilterDatasetName(name);
+              }}
+            ></Select>
+          </div>
+        }
+      </>
+    );
+  },
+});
+
 export function getBasicColumns(): BasicColumn[] {
   return [
-    { title: '', dataIndex: '', width: 20 },
-    { title: t('business.models.run.runId'), dataIndex: 'runNo', align: 'left' },
+    // { title: '', dataIndex: '', width: 20 },
+    {
+      title: t('business.models.run.runId'),
+      dataIndex: 'runNo',
+
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, column }) => {
+        const handleSearch = (selectedKeys, confirm, dataIndex) => {
+          confirm();
+          // state.searchText = selectedKeys[0];
+          // state.searchedColumn = dataIndex;
+        };
+
+        const handleReset = (clearFilters) => {
+          clearFilters({ confirm: true });
+          // state.searchText = '';
+        };
+        return (
+          <div style=" padding:10px">
+            {' '}
+            <Input
+              style="width: 100px; display: block"
+              value={selectedKeys}
+              onChange={(e) => setSelectedKeys(e.target.value ? e.target.value : '')}
+              onPressEnter={(A) => {}}
+            />
+            <div style={'margin-top:10px'}>
+              {' '}
+              <a
+                onClick={() => handleSearch(selectedKeys, confirm, column.dataIndex)}
+                type="primary"
+                size={'small'}
+              >
+                ok
+              </a>
+              <a size="small" style="float:right" onClick={() => handleReset(clearFilters)}>
+                Reset
+              </a>{' '}
+            </div>
+          </div>
+        );
+      },
+      align: 'left',
+    },
     {
       title: t('business.models.run.datasetName'),
       dataIndex: 'datasetName',
       align: 'left',
-      filters: stageFilter,
-      filterIcon: ({ filtered }) => {
-        return filtered ? activeFilterIcon : inactiveFilterIcon;
-      },
-      onFilter: (value: string, record: any) => record.datasetType.indexOf(value) === 0,
-    },
-    {
-      title: t('business.models.run.type'),
-      dataIndex: 'type',
-      align: 'left',
-      filters: stageFilter,
-      filterIcon: ({ filtered }) => {
-        return filtered ? activeFilterIcon : inactiveFilterIcon;
-      },
-      onFilter: (value: string, record: any) => record.datasetType.indexOf(value) === 0,
-    },
-    { title: t('business.models.run.DataCount'), dataIndex: 'DataCount', align: 'left' },
-
-    {
-      title: t('business.models.run.Metrics'),
-      dataIndex: 'Metrics',
-      align: 'left',
-      customRender: ({ record }) => {
+      filterDropdown: (config) => {
         return (
-          <div class="flex items-center gap-5px">
-            34343
-            <Tooltip title={getErrorReason(record.errorReason)}>more</Tooltip>
+          <div>
+            <filterSelect {...config}></filterSelect>
           </div>
         );
       },
+
+      filterIcon: ({ filtered }) => {
+        return filtered ? activeFilterIcon : inactiveFilterIcon;
+      },
+      // onFilter: (value: string, record: any) => {
+      //   // record.id=
+      //   console.log(value, record);
+      //   return record;
+      // },
+    },
+    {
+      title: t('business.models.run.type'),
+      dataIndex: 'runRecordType',
+      align: 'left',
+      filterMultiple: false,
+      filters: [
+        {
+          text: 'Runs',
+          value: 'RUNS',
+        },
+        {
+          text: 'Imported',
+          value: 'IMPORTED',
+        },
+      ],
+      filterIcon: ({ filtered }) => {
+        return filtered ? activeFilterIcon : inactiveFilterIcon;
+      },
+      onFilter: (value: string, record: any) => record.runRecordType,
+      // format: (v: any) => {
+      //   return formatTaskType(v);
+      // },
+    },
+    { title: t('business.models.run.DataCount'), dataIndex: 'dataCount', align: 'left' },
+
+    {
+      title: t('business.models.run.Metrics'),
+      dataIndex: 'metrics',
+      align: 'left',
+      // customRender: ({ record }) => {
+      //   return (
+      //     <div class="flex items-center gap-5px">
+      //       <Tooltip title={getErrorReason(record.errorReason)}>more</Tooltip>
+      //     </div>
+      //   );
+      // },
     },
     {
       title: t('business.models.run.createdAt'),
       dataIndex: 'createdAt',
       slots: { customRender: 'createdAt' },
       align: 'left',
-      sorter: (a, b) => a.age - b.age,
-      // sorter: true,
-      sortOrder: 'ascend',
+      sorter: true,
+      // sortDirections: ['ASC', 'DESC'],
+
+      sortDirections: ['descend', 'ascend'],
+      // sortOrder: 'ascend',
       customRender: ({ record }) => {
         return <span>{getDateTime(record.createdAt)}</span>;
       },
@@ -97,12 +233,35 @@ export function getBasicColumns(): BasicColumn[] {
     {
       title: t('business.models.run.status'),
       dataIndex: 'status',
+      filterMultiple: false,
       align: 'left',
-      filters: stageFilter,
+      filters: [
+        {
+          text: 'STARTED',
+          value: 'STARTED',
+        },
+        {
+          text: 'RUNNING',
+          value: 'RUNNING',
+        },
+
+        {
+          text: 'SUCCESS',
+          value: 'SUCCESS',
+        },
+        {
+          text: 'SUCCESS_WITH_ERROR',
+          value: 'SUCCESS_WITH_ERROR',
+        },
+        {
+          text: 'FAILURE',
+          value: 'FAILURE',
+        },
+      ],
       filterIcon: ({ filtered }) => {
         return filtered ? activeFilterIcon : inactiveFilterIcon;
       },
-      onFilter: (value: string, record: any) => record.datasetType.indexOf(value) === 0,
+      // onFilter: (value: string, record: any) => record.datasetType.indexOf(value) === 0,
       customRender: ({ record }) => {
         return (
           <div class="flex items-center gap-5px">
@@ -121,23 +280,6 @@ export function getBasicColumns(): BasicColumn[] {
               </Tooltip>
             </span>
           </div>
-        );
-      },
-    },
-    {
-      title: t('business.models.run.progress'),
-      dataIndex: 'completionRate',
-      align: 'left',
-      customRender: ({ record }) => {
-        return (
-          <Progress
-            style="width: 135px"
-            percent={record.completionRate * 100}
-            strokeWidth={12}
-            trailColor={'#aaa'}
-            strokeColor={'#57CCEF'}
-            format={(percent) => `${percent.toFixed(0)}%`}
-          />
         );
       },
     },

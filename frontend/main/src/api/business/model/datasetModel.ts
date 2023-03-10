@@ -1,5 +1,5 @@
 import { BasicPageParams, BasicFetchResult, SortType } from '/@/api/model/baseModel';
-import { PreModelParam } from '/@/api/business/model/modelsModel';
+import { resultFilterParam } from '/@/api/business/model/modelsModel';
 
 export enum listTypeEnum {
   list = 'LIST',
@@ -205,7 +205,7 @@ export interface takeRecordParams {
   modelId?: Nullable<number>;
   modelCode?: modelCode;
   isFilterData?: boolean;
-  resultFilterParam?: Nullable<PreModelParam>;
+  resultFilterParam?: Nullable<resultFilterParam>;
 }
 
 export interface exportFileRecord {

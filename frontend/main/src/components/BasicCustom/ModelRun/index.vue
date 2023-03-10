@@ -17,44 +17,61 @@
           <!-- 名称和值 由 props 接收传入 -->
           <slot name="select"></slot>
         </Form.Item>
-        <Form.Item>
-          <Checkbox v-model:checked="formState.checkedData">
-            {{ t('business.models.runModel.FliterData') }}
-          </Checkbox>
-        </Form.Item>
 
-        <div style="margin-left: 35px" v-show="formState.checkedData">
-          <Form.Item :label="t('business.models.run.DataCount')">
-            <TheSlider
-              v-model:start="formState.sliderValue[0]"
-              v-model:end="formState.sliderValue[1]"
-            />
-          </Form.Item>
+        <template v-if="props.modelType !== 'model'">
           <Form.Item>
             <Checkbox v-model:checked="formState.checkedData">
-              {{ t('business.models.runModel.excludeData') }}
+              {{ t('business.models.runModel.FliterData') }}
             </Checkbox>
           </Form.Item>
-          <Form.Item
-            :label="t('business.models.runModel.Splite')"
-            :label-col="{ span: 6 }"
-            :wrapper-col="{ span: 20 }"
-          >
-            <RadioGroup v-model:value="formState.splite" button-style="solid">
-              <Radio value="item.value"> 00 </Radio>
-            </RadioGroup>
-          </Form.Item>
-          <Form.Item
-            :label="t('business.models.runModel.AnnotationStatus')"
-            :label-col="{ span: 6 }"
-            :wrapper-col="{ span: 20 }"
-          >
-            <RadioGroup v-model:value="formState.AnnotationStatus" button-style="solid">
-              <Radio value="item.value"> 00 </Radio>
-            </RadioGroup>
-          </Form.Item>
-        </div>
 
+          <div style="margin-left: 35px" v-show="formState.checkedData">
+            <Form.Item :label="t('business.models.run.DataCount')">
+              <div class="flex mr-20 ml-20">
+                {{ getDataCount }}
+                <Slider
+                  style="flex: 1"
+                  :tip-formatter="(value: number) =>  `${value}%`"
+                  v-model:value="formState.dataCountRatio"
+                  :min="0"
+                  :max="100"
+                  :step="1"
+                />
+                {{ formState.dataCountRatio }}%
+              </div>
+            </Form.Item>
+            <Form.Item>
+              <Checkbox v-model:checked="formState.isExcludeModelData">
+                {{ t('business.models.runModel.excludeData') }}
+              </Checkbox>
+            </Form.Item>
+            <Form.Item
+              :label="t('business.models.runModel.Splite')"
+              :label-col="{ span: 6 }"
+              :wrapper-col="{ span: 20 }"
+            >
+              <RadioGroup v-model:value="formState.splitType" button-style="solid">
+                <Radio value=""> {{ SplitedTypeEnum.All }} </Radio>
+                <Radio value="TRAINING"> {{ SplitedTypeEnum.Training }}</Radio>
+                <Radio value="VALIDATION"> {{ SplitedTypeEnum.Validation }} </Radio>
+                <Radio value="TEST">{{ SplitedTypeEnum.Test }}</Radio>
+                <Radio value="NOT_SPLIT"> {{ SplitedTypeEnum.NotSplited }}</Radio>
+              </RadioGroup>
+            </Form.Item>
+            <Form.Item
+              :label="t('business.models.runModel.AnnotationStatus')"
+              :label-col="{ span: 6 }"
+              :wrapper-col="{ span: 20 }"
+            >
+              <RadioGroup v-model:value="formState.annotationStatus" button-style="solid">
+                <Radio value=""> All </Radio>
+                <Radio value="ANNOTATED"> Annotated </Radio>
+                <Radio value="NOT_ANNOTATED">Not Annotated </Radio>
+                <Radio value="INVALID"> Invalid </Radio>
+              </RadioGroup>
+            </Form.Item>
+          </div>
+        </template>
         <Form.Item>
           <Checkbox v-model:checked="formState.checkedResult">
             {{ t('business.models.runModel.FliterModel') }}
@@ -88,19 +105,25 @@
   </BasicModal>
 </template>
 <script lang="ts" setup>
-  import { ref, reactive, computed, watch } from 'vue';
+  import { ref, reactive, computed, watch, watchEffect } from 'vue';
+
   // 组件
   import { useMessage } from '/@/hooks/web/useMessage';
   import { BasicModal, useModalInner } from '/@/components/Modal';
-  import { Form, Checkbox, RadioGroup, Radio } from 'ant-design-vue';
+  import { Form, Checkbox, RadioGroup, Radio, Slider } from 'ant-design-vue';
   import TheSlider from './TheSlider.vue';
   import TheTags from './TheTags.vue';
   // 工具
   import { useI18n } from '/@/hooks/web/useI18n';
   // 接口
-  import { PreModelParam } from '/@/api/business/model/modelsModel';
-  import { getModelByIdApi } from '/@/api/business/models';
+  import {
+    ResultsModelParam,
+    DataModelParam,
+    ModelDataCountParams,
+  } from '/@/api/business/model/modelsModel';
+  import { getModelByIdApi, getModelDataCountApi } from '/@/api/business/models';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { SplitedTypeEnum } from '/@/views/datasets/datasetContent/components/data';
 
   const { t } = useI18n();
   const { createMessage } = useMessage();
@@ -111,9 +134,11 @@
 
   const emits = defineEmits(['run']);
   const props = defineProps<{
+    modelType?: string;
     selectName: string; // 下拉框的label
     title: string; // 弹窗 title
     modelId: string | number; // 需要传入 modelId 以获取 classes
+    datasetId?: string | number;
   }>();
 
   const labelCol = { span: 4 };
@@ -124,12 +149,20 @@
     checkedData?: boolean;
     sliderValue: [number, number];
     tagsList: any[];
+    dataCountRatio: number;
+    isExcludeModelData: boolean;
+    splitType: string;
+    annotationStatus: string;
   }
   const formState = reactive<IFormState>({
     checkedResult: false,
     checkedData: false,
     sliderValue: [0.5, 1],
     tagsList: [],
+    dataCountRatio: 100,
+    isExcludeModelData: false,
+    splitType: '',
+    annotationStatus: '',
   });
   const defaultFormState = reactive<IFormState>({
     sliderValue: [0.5, 1],
@@ -142,12 +175,13 @@
 
   // 执行
   const handleRun = () => {
-    changeOkLoading(true);
+    // changeOkLoading(true);
 
-    let preModel: Nullable<PreModelParam> = null;
+    console.log(formState.sliderValue);
+    let preModelResults: Nullable<ResultsModelParam> = null;
+    let preModelData: Nullable<DataModelParam> = null;
 
-    if (!formState.checkedResult) {
-      // 勾选状态 -- 传勾选的
+    if (formState.checkedResult) {
       const classes: string[] = [];
       formState.tagsList.forEach((item) => {
         if (item.subClasses) {
@@ -158,7 +192,7 @@
           item.checked && classes.push(item.code);
         }
       });
-      preModel = {
+      preModelResults = {
         minConfidence: formState.sliderValue[0],
         maxConfidence: formState.sliderValue[1],
         classes: JSON.parse(JSON.stringify(classes)),
@@ -175,24 +209,48 @@
           classes.push(item.code);
         }
       });
-      preModel = {
+      preModelResults = {
         minConfidence: defaultFormState.sliderValue[0],
         maxConfidence: defaultFormState.sliderValue[1],
         classes: JSON.parse(JSON.stringify(classes)),
       };
     }
+
+    if (formState.checkedData) {
+      preModelData = {
+        dataCountRatio: formState.dataCountRatio,
+        isExcludeModelData: formState.isExcludeModelData,
+        splitType: formState.splitType,
+        annotationStatus: formState.annotationStatus,
+      };
+    } else {
+      // 未勾选状态 -- 全部传
+      preModelData = {
+        dataCountRatio: 100,
+        isExcludeModelData: false,
+      };
+    }
     // console.log(preModel);
     // return;
     // 判断 classes
-    if (preModel.classes.length == 0) {
+    if (preModelResults.classes.length == 0) {
       createMessage.error(t('business.models.runModel.selectClass'));
       setTimeout(() => {
         changeOkLoading(false);
       }, 500);
       return;
     }
+    // 判断data
+    if (props.modelType !== 'model' && getDataCount.value == 0) {
+      createMessage.error(t('business.models.runModel.noData'));
+      setTimeout(() => {
+        changeOkLoading(false);
+      }, 500);
+      return;
+    }
+
     // 抛出数据
-    emits('run', preModel);
+    emits('run', preModelResults, preModelData);
   };
 
   // 类型
@@ -246,6 +304,36 @@
     });
   };
 
+  let dataCount = ref<number>(0);
+  watchEffect(async () => {
+    let pa: ModelDataCountParams = {
+      datasetId: props.datasetId as number,
+      modelId: props.modelId as number,
+      dataCountRatio: 100,
+      isExcludeModelData: formState.isExcludeModelData,
+      splitType: formState.splitType,
+      annotationStatus: formState.annotationStatus,
+    };
+    for (const key in pa) {
+      if (Object.prototype.hasOwnProperty.call(pa, key)) {
+        const element = pa[key];
+        if (element === '') {
+          delete pa[key];
+        }
+      }
+    }
+
+    if (!props.datasetId) {
+      return;
+    }
+    let res = await getModelDataCountApi(pa);
+    dataCount.value = res;
+  });
+
+  let getDataCount = computed(() => {
+    return ((dataCount.value * formState.dataCountRatio) / 100).toFixed(0);
+  });
+
   // 重置 formState
   const handleReset = () => {
     formState.checkedResult = false;
@@ -257,8 +345,7 @@
   .run__body {
     display: flex;
     flex-direction: column;
-    margin: 20px 60px 0;
-    margin-left: 86px;
+    margin: 20px 30px 0;
 
     & > div {
       margin-bottom: 20px;

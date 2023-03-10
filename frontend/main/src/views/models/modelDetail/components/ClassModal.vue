@@ -1,7 +1,6 @@
 <template>
   <BasicModal
     v-bind="$attrs"
-    :visible="false"
     :okText="t('common.saveText')"
     @register="registerModal"
     destroyOnClose
@@ -62,18 +61,42 @@
 </template>
 
 <script lang="tsx" setup>
+  import { setClassModelApi } from '/@/api/business/models';
+
   import Icon, { SvgIcon } from '/@/components/Icon';
-  import { Button, Input, Tooltip } from 'ant-design-vue';
+  import { Button, Input, message, Tooltip } from 'ant-design-vue';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { useI18n } from '/@/hooks/web/useI18n';
   import warningSvg from '/@/assets/images/models/warning.svg';
-  import { ref } from 'vue';
+  import { inject, ref, watch } from 'vue';
+  import { useRoute } from 'vue-router';
+  import { modelClassList } from '/@/api/business/model/modelsModel';
+  import { string } from 'vue-types';
 
+  let props = defineProps<{ classes: Array<any> }>();
   const { t } = useI18n();
   const [registerModal, { closeModal }] = useModalInner();
-  const handleSave = () => {};
 
-  let classConfig = ref<Array<any>>([]);
+  interface ClassParams extends modelClassList {
+    key: string | number;
+  }
+
+  let classConfig = ref<Array<ClassParams>>([]);
+
+  watch(
+    () => props.classes,
+    (val) => {
+      if (val) {
+        let copydata = JSON.parse(JSON.stringify(val));
+        classConfig.value = copydata.map((item) => {
+          return { ...item, key: Math.random() };
+        });
+      }
+    },
+    {
+      immediate: true,
+    },
+  );
 
   const deleteClass = (item) => {
     classConfig.value = classConfig.value.filter((i) => i.key !== item.key);
@@ -81,27 +104,41 @@
   const addClass = () => {
     classConfig.value.push({ key: Math.random(), code: '', name: '' });
   };
-  const saveHandle = () => {
-    // debugger;
+  const route = useRoute();
+  const modelId = String(route?.query?.id);
+
+  const refreshListFn: Function | undefined = inject('refreshList');
+  const saveHandle = async () => {
+    const params: any = {
+      modelId: Number(modelId),
+    };
+    params.modelClassList = classConfig.value.map((item) => ({
+      code: item.code,
+      name: item.name,
+    }));
+    await setClassModelApi(params);
+    message.success('Successed');
+    closeModal();
+    refreshListFn && refreshListFn();
   };
   const codeText = (
     <div style="width:300px;font-size: 12px">
-      <div>Password must contain:</div>
+      {/* <div>Password must contain:</div>
       <ul style="padding-left: 15px;list-style: disc;">
         <li>8 and 64 characters</li>
         <li>Number</li>
         <li>Letter</li>
-      </ul>
+      </ul> */}
     </div>
   );
   const nameText = (
     <div style="width:300px;font-size: 12px">
-      <div>Password must contain:</div>
+      {/* <div>Password must contain:</div>
       <ul style="padding-left: 15px;list-style: disc;">
         <li>8 and 64 characters</li>
         <li>Number</li>
         <li>Letter</li>
-      </ul>
+      </ul> */}
     </div>
   );
 </script>

@@ -49,6 +49,9 @@ export default {
     DataCount: 'Data Count',
     Metrics: 'Metrics',
     CreatedAt: '创建时间',
+    runModelWarning: 'The following prerequisites must be met in order to run a mode',
+    runModelWarningClass: 'have at least one class in overview',
+    runModelWarningConfig: 'Have your model configuration set up',
   },
   runModel: {
     dataset: '数据集',
@@ -59,6 +62,7 @@ export default {
     unselectAll: '取消选择',
     selectDataset: '请先选择数据集',
     selectClass: '请至少选择一个类型',
+    noData: '数据为0，不能提交',
   },
   deleteModel: {
     title: '警告',

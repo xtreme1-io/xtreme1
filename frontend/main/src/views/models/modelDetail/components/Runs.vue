@@ -16,6 +16,7 @@
       <BasicTable @register="registerTable" />
     </div>
     <ModelRun
+      :datasetId="selectId"
       @register="registerRunModel"
       :selectName="selectName"
       :title="title"
@@ -33,10 +34,10 @@
     <RunsDeleteModal @register="registerDeleteModel" :id="deleteId" @delete="reload" />
   </div>
 </template>
-<script lang="ts" setup>
-  import { onBeforeMount, ref, watch } from 'vue';
+<script lang="tsx" setup>
+  import { h, inject, onBeforeMount, ref, watch } from 'vue';
   import { useI18n } from '/@/hooks/web/useI18n';
-  import { RouteEnum } from '/@/enums/routeEnum';
+  import { RouteEnum, RouteNameEnum } from '/@/enums/routeEnum';
   import { useGo } from '/@/hooks/web/usePage';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { parseParam } from '/@/utils/business/parseParams';
@@ -45,7 +46,7 @@
   import { Button } from '/@@/Button';
   import { ModelRun } from '/@@/ModelRun';
   import { useModal } from '/@/components/Modal';
-  import Icon from '/@/components/Icon/index';
+  import Icon, { SvgIcon } from '/@/components/Icon/index';
   // import { ApiSelect } from '/@/components/Form/index';
   import { BasicTable, useTable } from '/@/components/Table';
   import RunsDeleteModal from './RunsDeleteModal.vue';
@@ -56,36 +57,71 @@
     createModelRunApi,
     rerunModelRunApi,
     getAllDataset,
-    getAllModelRunRecordApi,
   } from '/@/api/business/models';
   import {
-    PreModelParam,
+    ResultsModelParam,
+    DataModelParam,
     runModelRunParams,
     ModelRunItem,
   } from '/@/api/business/model/modelsModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { useRouter } from 'vue-router';
+  import { detailType } from './typing';
   // import { Authority } from '/@/components/Authority';
   // import { PermissionCodeEnum } from '/@/enums/permissionCodeEnum';
 
   const { t } = useI18n();
   const go = useGo();
-  const { createMessage } = useMessage();
+  const { createMessage, createConfirm } = useMessage();
 
   const props = defineProps<{
     modelId: string;
     datasetType: datasetTypeEnum;
     isLimit: boolean;
   }>();
-  const emits = defineEmits(['reload']);
+  const emits = defineEmits(['reload', 'setActiveKey']);
 
   // Table ==>
   const [registerTable, { reload }] = useTable({
     afterFetch: (res) => {
       // debugger;
-      return [{}];
+      return res;
+    },
+    filterFn: (data) => {
+      data.status && (data.status = data.status?.toString());
+      data.runRecordType && (data.runRecordType = data.runRecordType?.toString());
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          const element = data[key];
+          if (!element) {
+            delete data[key];
+          }
+        }
+      }
+      return data;
+    },
+    beforeFetch: (res) => {
+      if (res?.datasetName) {
+        let pa = res?.datasetName.map((i) => i.value);
+        delete res.datasetName;
+        res.datasetIds = pa.toString();
+      }
+      return res;
+    },
+    // defSort: {
+    //   field: 'ascOrDesc',
+    //   order: 'ascend',
+    // },
+    sortFn: (sortInfo) => {
+      if (!sortInfo?.order) {
+        return;
+      }
+
+      let trans = sortInfo.order.split('end')[0].toUpperCase();
+      return { ascOrDesc: trans };
     },
     bordered: true,
-    api: () => {},
+    api: getModelRunApi,
     columns: getBasicColumns(),
     searchInfo: { modelId: Number(props.modelId) },
     showIndexColumn: false,
@@ -111,11 +147,70 @@
     { openModal: openRunModal, closeModal: closeRunModal, setModalProps: setRunModalProps },
   ] = useModal();
   // 打开 ModelRun 弹窗
+
+  let overviewData: any = inject('overviewData');
+
+  let IconStatus = ({ success }) => {
+    if (!!success) {
+      return <SvgIcon name="sucess"></SvgIcon>;
+    } else {
+      return <SvgIcon name="error"></SvgIcon>;
+    }
+  };
+  let warningContent = ({ hasClass, hasUrl }) => (
+    <div>
+      {' '}
+      {t('business.models.run.runModelWarning')}
+      <div>
+        <IconStatus style="display: inline;" success={hasClass} />{' '}
+        {t('business.models.run.runModelWarningClass')}{' '}
+      </div>
+      <div>
+        <IconStatus style="display: inline;" success={hasUrl} />{' '}
+        {t('business.models.run.runModelWarningConfig')}{' '}
+      </div>
+    </div>
+  );
+  const router = useRouter();
   const handleOpenRunModel = () => {
-    openRunModal(true, {});
+    if (overviewData.classes.length < 1 || !overviewData.url) {
+      let warningConfig = {
+        hasClass: overviewData.classes.length >= 1,
+        hasUrl: !!overviewData.url,
+      };
+      createConfirm({
+        iconType: 'warning',
+        title: () => h('span', t('business.models.deleteModel.title')),
+        content: () => <warningContent {...warningConfig}></warningContent>,
+        okText: 'Set up',
+        onOk: async () => {
+          let tabId = detailType.overview;
+          if (warningConfig.hasClass && !warningConfig.hasUrl) {
+            tabId = detailType.settings;
+          }
+          // 跳转后 切换tab window.history.pushState 路由不更新 导致仍然认为在当前页，无法切回来
+          // let query = { id: router.currentRoute.value.query.id, tabId };
+          // const params = { tabId: 'RUNS' };
+          // router.push({
+          //   name: RouteNameEnum.MODEL_DETAIL,
+          //   query,
+          //   // params,
+          // });
+
+          emits('setActiveKey', tabId);
+        },
+        okButtonProps: {
+          style: { background: '#d27575', 'border-radius': '6px', padding: '10px 16px' },
+        } as any,
+      });
+    } else {
+      openRunModal(true, {});
+    }
+
+    // openRunModal(true, {});
   };
   // 执行 RunModel
-  const handleRun = async (params: Nullable<PreModelParam>) => {
+  const handleRun = async (result: Nullable<ResultsModelParam>, data: Nullable<DataModelParam>) => {
     if (props.isLimit) {
       createMessage.error(
         'model runs has reached maximum limit, please contact us for more model usage',
@@ -131,7 +226,8 @@
       const runParams: runModelRunParams = {
         modelId: modelId,
         datasetId: datasetId,
-        resultFilterParam: params,
+        resultFilterParam: result,
+        dataFilterParam: data,
       };
       console.log(runParams);
       // return;

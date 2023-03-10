@@ -1,5 +1,6 @@
 <template>
   <div class="title">
+    <SvgIcon :name="overviewData.url ? 'sucess' : 'error'" />
     {{ t('business.models.settingsModel.Predict') }}
     <div style="float: right">
       <template v-if="!isEdit">
@@ -49,36 +50,58 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { Tinymce } from '/@/components/Tinymce';
-  import { computed, ref } from 'vue';
-
+  import { computed, inject, ref, watch } from 'vue';
+  import { editModelApi } from '/@/api/business/models';
   import { Button, Input, message, Select } from 'ant-design-vue';
-  let urlVal = ref<string>('');
-  let urlTypeList = ref(['POST']);
-  let urlType = ref('POST');
+  import { useRoute } from 'vue-router';
+
   const isEdit = ref(false);
   const { t } = useI18n();
-  const props = withDefaults(defineProps<{ description: string | null }>(), {
-    description: '',
-  });
-  const description = computed(() => props.description);
+
   const handleEdit = () => {
     isEdit.value = true;
   };
   const handleCancel = () => {
+    urlVal.value = overviewData.url;
     isEdit.value = !isEdit.value;
   };
+
+  let urlVal = ref<string>('');
+
+  let urlTypeList = ref(['POST']);
+  let urlType = ref('POST');
+  const refreshListFn: Function | undefined = inject('refreshList');
+  let overviewData: any = inject('overviewData');
+
+  watch(
+    () => overviewData,
+    (val) => {
+      urlVal.value = val.url;
+    },
+    {
+      immediate: true,
+      deep: true,
+    },
+  );
+
+  const route = useRoute();
+  const modelId = String(route?.query?.id);
   const handleSave = async () => {
-    // buriedPoint(BuriedPointEnum.TASK_INSTRUCTION_CHANGE, {
-    //   Task_ID: props.info.id,
-    // });
-    // const params = {
-    //   id: props.info.id,
-    //   instructionFiles: fileList.value,
-    //   instruction: instruction.value,
-    // };
-    // await updateInstruction(params);
-    // isEdit.value = false;
-    // message.success('Instruction saved');
+    const reg = /(http|https):\/\/([\w.]+\/?)\S*/;
+    let val = urlVal.value;
+    if (!reg.test(val) || !val) {
+      message.warning(t('business.models.settingsModel.TestConnectionUrlErrorMsg'));
+      return;
+    }
+    const params = {
+      id: Number(modelId),
+      url: urlVal.value,
+    };
+    await editModelApi(params);
+    refreshListFn && refreshListFn();
+    isEdit.value = false;
+
+    message.success('Successed');
     // handleSuccess();
   };
   const testConnection = async () => {

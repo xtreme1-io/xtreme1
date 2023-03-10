@@ -30,7 +30,7 @@
   import ModelsCard from './components/ModelsCard.vue';
   import CreateModal from './components/CreateModal.vue';
   // 接口
-  import { getModelAllApi } from '/@/api/business/models';
+  import { getModelPageApi } from '/@/api/business/models';
   import { ResponseModelParams, ModelListItem } from '/@/api/business/model/modelsModel';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   // 图片
@@ -94,7 +94,7 @@
     }
     try {
       const params = { datasetType: currentType.value };
-      const res: ResponseModelParams = await getModelAllApi({
+      const res: ResponseModelParams = await getModelPageApi({
         pageNo: pageNo.value,
         pageSize: 12,
         ...params,

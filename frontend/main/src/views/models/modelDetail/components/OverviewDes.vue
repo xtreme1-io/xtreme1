@@ -19,7 +19,7 @@
 
   <template v-if="!isEdit">
     <!-- eslint-disable vue/no-v-html -->
-    <div class="des_text" v-html="props.description"></div>
+    <div class="des_text" v-html="showDescription"></div>
   </template>
   <template v-else>
     <div class="mt-20px">
@@ -31,8 +31,11 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { SvgIcon } from '/@/components/Icon';
   import { Tinymce } from '/@/components/Tinymce';
-  import { computed, ref } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import { Button } from '/@@/Button';
+  import { editModelApi } from '/@/api/business/models';
+  import { useRoute } from 'vue-router';
+  import { message } from 'ant-design-vue';
   const plugins = [
     'advlist anchor autolink autosave code codesample  directionality  fullscreen hr insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus  template  textpattern visualblocks visualchars wordcount',
   ];
@@ -44,25 +47,34 @@
   const props = withDefaults(defineProps<{ description: string | null }>(), {
     description: '',
   });
-  const description = computed(() => props.description);
+
+  let description = ref<string | null>('');
+  let showDescription = ref<string | null>('');
+  watch(
+    () => props.description,
+    (val) => {
+      description.value = val;
+      showDescription.value = val;
+    },
+  );
+
   const handleEdit = () => {
     isEdit.value = true;
   };
   const handleCancel = () => {
     isEdit.value = !isEdit.value;
   };
+  const route = useRoute();
+  const modelId = String(route?.query?.id);
   const handleSave = async () => {
-    // buriedPoint(BuriedPointEnum.TASK_INSTRUCTION_CHANGE, {
-    //   Task_ID: props.info.id,
-    // });
-    // const params = {
-    //   id: props.info.id,
-    //   instructionFiles: fileList.value,
-    //   instruction: instruction.value,
-    // };
-    // await updateInstruction(params);
-    // isEdit.value = false;
-    // message.success('Instruction saved');
+    const params = {
+      id: Number(modelId),
+      description: description.value as string,
+    };
+    await editModelApi(params);
+    isEdit.value = false;
+    showDescription.value = description.value;
+    message.success('Successed');
     // handleSuccess();
   };
 </script>

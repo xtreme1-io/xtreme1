@@ -67,7 +67,13 @@ export interface GetModelRunParams extends BasicPageParams {
 export type ResponseModelRunParams = BasicFetchResult<ModelRunItem>;
 
 /** PreModel params */
-export interface PreModelParam {
+export interface DataModelParam {
+  dataCountRatio: number;
+  isExcludeModelData: boolean;
+  splitType?: string;
+  annotationStatus?: string;
+}
+export interface ResultsModelParam {
   minConfidence: number;
   maxConfidence: number;
   classes: string[];
@@ -77,7 +83,8 @@ export interface PreModelParam {
 export interface runModelRunParams {
   datasetId: number;
   modelId: number;
-  resultFilterParam: Nullable<PreModelParam>;
+  resultFilterParam: Nullable<ResultsModelParam>;
+  dataFilterParam: Nullable<DataModelParam>;
 }
 /** Runs End */
 
@@ -85,4 +92,30 @@ export interface modelQuotaResponse {
   totalQuota: string;
   usedQuota: string;
   expireDate: string;
+}
+
+export interface editParams {
+  id: number;
+  name?: string;
+  description?: string;
+  url?: string;
+}
+
+export interface modelClassList {
+  name: string;
+  code: string;
+}
+
+export interface setClassParams {
+  modelId: number;
+  modelClassList: Array<modelClassList>;
+}
+
+export interface ModelDataCountParams {
+  datasetId: number;
+  modelId: number;
+  dataCountRatio?: number;
+  isExcludeModelData: boolean;
+  splitType?: string;
+  annotationStatus?: string;
 }

@@ -72,7 +72,7 @@
           <div class="whitespace-nowrap" style="color: #333">Order By</div>
           <RadioGroup v-model:value="formData.sortBy" button-style="solid">
             <Radio value="CREATE_TIME"> Upload time </Radio>
-            <Radio value="NAMe"> File name </Radio>
+            <Radio value="NAME"> File name </Radio>
           </RadioGroup>
         </div>
         <div class="flex items-center gap-100px">

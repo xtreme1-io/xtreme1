@@ -7,7 +7,7 @@
       <div class="title">{{ t('business.models.overviewPage.scenarios') }}</div>
       <OverviewTags :tagList="props.overviewData.scenario" />
     </div>
-    <div v-if="props.overviewData.classes.length > 0" class="classes">
+    <div class="classes">
       <div class="title"
         >{{ t('business.models.overviewPage.classes') }}
         <div style="float: right"
@@ -28,15 +28,20 @@
       </div>
 
       <OverviewClasses
+        v-if="props.overviewData.classes.length > 0"
         :isGroup="props.overviewData.isType"
         :classes="props.overviewData.classes"
         :datasetType="props.datasetType"
       />
+
+      <Empty v-else />
     </div>
   </div>
-  <ClassModal @register="register" />
+  <ClassModal :classes="props.overviewData.classes" @register="register" />
 </template>
 <script lang="ts" setup>
+  import { useRoute } from 'vue-router';
+  import { Empty } from 'ant-design-vue';
   import { useModal } from '/@/components/Modal';
   import ClassModal from './ClassModal.vue';
   import { SvgIcon } from '/@/components/Icon';

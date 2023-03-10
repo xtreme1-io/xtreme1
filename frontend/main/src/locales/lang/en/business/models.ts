@@ -49,6 +49,9 @@ export default {
     DataCount: 'Data Count',
     Metrics: 'Metrics',
     CreatedAt: 'Created At',
+    runModelWarning: 'The following prerequisites must be met in order to run a mode',
+    runModelWarningClass: 'have at least one class in overview',
+    runModelWarningConfig: 'Have your model configuration set up',
   },
   runModel: {
     dataset: 'Dataset',
@@ -65,6 +68,7 @@ export default {
     selectAll: 'Select all',
     unselectAll: 'Unselect all',
     selectDataset: 'Please select the dataset first.',
+    noData: 'No data has been found',
     selectClass: 'Please select at least one classes.',
   },
   deleteModel: {

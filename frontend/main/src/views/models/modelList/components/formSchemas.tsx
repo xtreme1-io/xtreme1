@@ -23,12 +23,12 @@ export const createForm: FormSchema[] = [
     ],
   },
   {
-    field: 'datatype',
+    field: 'datasetType',
     label: t('business.models.dataType'),
     component: 'ApiRadioGroup',
     componentProps: {
       options: [
-        { label: 'Image', value: 'Image' },
+        { label: 'Image', value: 'IMAGE' },
         {
           label: (
             <span>
@@ -43,20 +43,20 @@ export const createForm: FormSchema[] = [
       ],
     },
     required: true,
-    defaultValue: 'Image',
+    defaultValue: 'IMAGE',
   },
   {
-    field: 'modaltype',
+    field: 'modelType',
     // renderColContent: () => <div>232</div>,
     label: t('business.models.modelType'),
     component: 'ApiRadioGroup',
     componentProps: {
-      options: [{ label: 'Detection', value: 'Detection' }],
+      options: [{ label: 'Detection', value: 'DETECTION' }],
     },
-    defaultValue: 'Detection',
+    defaultValue: 'DETECTION',
   },
   {
-    field: 'Description',
+    field: 'description',
     label: ' ',
     component: 'Input',
     colSlot: 'description',

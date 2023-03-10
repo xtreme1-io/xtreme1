@@ -11,6 +11,7 @@ export interface IOverview {
   scenario: Nullable<string>;
   isType: boolean;
   classes: IClasses[];
+  url?: string;
 }
 
 /** detailHeader 接收数据类型 */

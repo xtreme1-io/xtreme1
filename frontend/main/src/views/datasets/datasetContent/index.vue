@@ -21,6 +21,7 @@
       </div>
       <TipModal @register="tipRegister" />
       <ModelRun
+        modelType="model"
         @register="registerRunModel"
         :selectName="selectName"
         :title="title"
@@ -321,7 +322,7 @@
   import datasetEmpty from '/@/assets/images/dataset/data_empty.png';
   // import WarningModalVue from './components/WarningModal.vue';
   import { ModelRun } from '/@@/ModelRun';
-  import { PreModelParam } from '/@/api/business/model/modelsModel';
+  import { ResultsModelParam, DataModelParam } from '/@/api/business/model/modelsModel';
   import { countFormat, goToTool, setDatasetBreadcrumb } from '/@/utils/business';
   import { useLoading } from '/@/components/Loading';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
@@ -701,7 +702,10 @@
     openRunModal(true, {});
   };
 
-  const handleRun = async (params: Nullable<PreModelParam>) => {
+  const handleRun = async (
+    resultModel: Nullable<ResultsModelParam>,
+    dataModel: Nullable<DataModelParam>,
+  ) => {
     let templist: DatasetItem[] = [];
     let type = dataTypeEnum.SINGLE_DATA;
     const data = unref(list).filter((item) => {
@@ -713,14 +717,15 @@
       type = dataTypeEnum.FRAME_SERIES;
       templist = selectedList.value;
     }
-
+    // debugger
     const res = await takeRecordByDataModel({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
       dataType: type,
       modelId: modelId.value as number,
       modelCode: selectOptions.value.filter((item) => item.id === modelId.value)[0].modelCode,
-      resultFilterParam: params,
+      resultFilterParam: resultModel,
+      // dataFilterParam: dataModel,
     });
     goToTool({ recordId: res, type: 'modelRun' }, info.value?.type);
     // window.location.reload();

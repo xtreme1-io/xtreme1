@@ -1,6 +1,6 @@
 <template>
   <BasicModal
-    :visible="true"
+    :visible="false"
     :okText="t('common.saveText')"
     v-bind="$attrs"
     @register="registerModal"
@@ -15,17 +15,21 @@
     <div class="inner">
       <div class="text">
         <BasicForm @register="registerForm" :showActionButtonGroup="false" :hideRequiredMark="true">
-          <template #editor="{ model, field }">
-            <div class="datasetForm">
-              <!-- <FormItem :label="t('business.dataset.datasetTyp')" labelAlign="left"> </FormItem>
-              <FormItem label="s88" name="type" :wrapperCol="{ span: 24 }"> </FormItem> -->
-            </div>
-          </template>
           <template #description="{ model, field }">
-            <FormItem label="" name="type" :labelCol="{ span: 0 }" :wrapperCol="{ span: 24 }">
+            <FormItem
+              label=""
+              name="description"
+              :labelCol="{ span: 0 }"
+              :wrapperCol="{ span: 24 }"
+            >
               <p> {{ t('business.models.description') }} </p>
 
-              <Tinymce v-model="description" width="100%" :plugins="plugins" :toolbar="toolbar" />
+              <Tinymce
+                v-model="model.description"
+                width="100%"
+                :plugins="plugins"
+                :toolbar="toolbar"
+              />
             </FormItem>
           </template>
         </BasicForm>
@@ -48,6 +52,7 @@
   import { createForm } from './formSchemas';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { ref } from 'vue';
+  import { addModelApi } from '/@/api/business/models';
   //表单
   const plugins = [
     'advlist anchor autolink autosave code codesample  directionality  fullscreen hr insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus  template  textpattern visualblocks visualchars wordcount',
@@ -62,26 +67,20 @@
     wrapperCol: { span: 18 },
     labelAlign: 'left',
   });
-
-  let description = ref<string>('');
-  //表单提交
-  async function handleSubmit() {
-    const data = await validate();
-    await fetch(data);
-  }
+  const emit = defineEmits(['success']);
   const { t } = useI18n();
   const [registerModal, { closeModal: closeCreateModal, changeOkLoading }] = useModalInner();
   const handleOk = async () => {
     changeOkLoading(true);
     try {
       const data = await validate();
-      // const res = await createDatasetApi(data);
-      if (res) {
-        closeCreateModal();
-        resetFields();
-        changeOkLoading(false);
-        createMessage.success(t('action.createSuccess'));
-      }
+
+      await addModelApi(data);
+      emit('success');
+      closeCreateModal();
+      resetFields();
+      changeOkLoading(false);
+      createMessage.success(t('action.createSuccess'));
     } catch (e) {
       changeOkLoading(false);
     }
@@ -118,8 +117,11 @@
 
 <style lang="less">
   .models__modal {
+    .scrollbar__view > div {
+      overflow: auto;
+    }
     .scrollbar__wrap {
-      overflow: hidden;
+      // overflow: auto;
     }
 
     .scrollbar__bar {
@@ -128,6 +130,7 @@
 
     .ant-modal-body {
       // height: 150px;
+      // overflow: auto;
     }
   }
 </style>

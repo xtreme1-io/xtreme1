@@ -11,6 +11,7 @@
             :datasetType="datasetType"
           />
           <Runs
+            @setActiveKey="setActiveKey"
             v-if="item.key == detailType.runs"
             :modelId="modelId"
             :datasetType="datasetType"
@@ -18,10 +19,10 @@
             @reload="handleRefreshQuota"
           />
           <Settings
+            :datasetType="datasetType"
+            :overviewData="overviewData"
             v-if="item.key == detailType.settings"
             :modelId="modelId"
-            :datasetType="datasetType"
-            :isLimit="isLimit"
             @reload="handleRefreshQuota"
           />
         </Tabs.TabPane>
@@ -30,7 +31,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, reactive, computed, onBeforeMount, onMounted } from 'vue';
+  import { ref, reactive, computed, onBeforeMount, onMounted, provide, watch } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useRoute, useRouter } from 'vue-router';
@@ -44,6 +45,7 @@
   import { getModelByIdApi, getModelQuotaApi } from '/@/api/business/models';
   import { detailType, IOverview, IHeader } from './components/typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
+  import { RouteNameEnum } from '/@/enums/routeEnum';
 
   const { prefixCls } = useDesign('modelsDetail');
   const { t } = useI18n();
@@ -52,32 +54,56 @@
   const isInteractive = ref<boolean>(true);
   const activeKey = ref<detailType>(detailType.overview);
 
+  watch(
+    () => activeKey.value,
+    (tabId) => {
+      let query = { tabId, id: modelId };
+      // router.push({
+      //   name: RouteNameEnum.MODEL_DETAIL,
+      //   query,
+      //   // params,
+      // });
+      // 不刷新页面
+      window.history.pushState('', '', `/#/models/detail?id=${query.id}&tabId=${query.tabId}`);
+    },
+  );
+
+  let setActiveKey = (val) => {
+    activeKey.value = val;
+  };
   // notify 消息跳转携带的一次性参数
+  const router = useRouter();
   const { currentRoute } = useRouter();
-  activeKey.value = currentRoute.value.query.tabId;
+  activeKey.value = currentRoute.value.query.tabId as any;
   let routeParams = currentRoute.value.params;
   if (routeParams && routeParams.tabId) {
     activeKey.value = routeParams.tabId as detailType.runs;
   }
 
   const tabPane = computed(() => {
-    const arr = [{ key: detailType.overview, tab: t('business.models.detail.overview') }];
+    const arr = [
+      { key: detailType.overview, tab: t('business.models.detail.overview') },
+      // { key: detailType.runs, tab: t('business.models.detail.runs') },
+      // { key: detailType.settings, tab: t('business.models.detail.settings') }
+    ];
 
-    if (!isInteractive.value)
-      arr.push({ key: detailType.runs, tab: t('business.models.detail.runs') });
+    // if (!isInteractive?.value){
+
+    // }
+    arr.push({ key: detailType.runs, tab: t('business.models.detail.runs') });
     arr.push({ key: detailType.settings, tab: t('business.models.detail.settings') });
-
     return arr;
   });
 
   const route = useRoute();
   const modelId = String(route?.query?.id);
 
-  const overviewData: IOverview = reactive({
+  let overviewData: IOverview = reactive({
     isType: false,
     description: '',
     scenario: '',
     classes: [],
+    url: '',
   });
   const headerData: IHeader = reactive({
     type: '',
@@ -100,6 +126,7 @@
     overviewData.description = res.description;
     overviewData.scenario = res.scenario;
     overviewData.classes = res.classes ?? [];
+    overviewData.url = res.url ?? '';
 
     headerData.type = res?.datasetType;
     headerData.name = res.name;
@@ -120,6 +147,13 @@
   const handleRefreshQuota = () => {
     // getModelQuota();
   };
+
+  provide('refreshList', getModel);
+  provide('overviewData', overviewData);
+  // setInterval(() => {
+  //   console.log(overviewData);
+  //   overviewData.url = Math.random();
+  // }, 1000);
 
   onBeforeMount(() => {
     getModel();

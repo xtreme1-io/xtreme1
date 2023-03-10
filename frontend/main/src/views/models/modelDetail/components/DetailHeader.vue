@@ -25,7 +25,7 @@
           </div>
           <div class="title">
             <template v-if="!isEdit">
-              {{ props.headerData.name || '' }}
+              {{ showHeaderDataName || '' }}
               <SvgIcon
                 style="color: #c4c4c4; cursor: pointer; border-radius: 6px; border: 2px solid #aaa"
                 size="24"
@@ -69,14 +69,17 @@
 </template>
 <script lang="ts" setup>
   import { SvgIcon } from '/@/components/Icon';
-  import { computed, ref } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import { useGo } from '/@/hooks/web/usePage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getDate } from '/@/utils/business/timeFormater';
   import { RouteEnum } from '/@/enums/routeEnum';
   import { IHeader } from './typing';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
-  import { Progress, Button, Input } from 'ant-design-vue';
+  import { Progress, Button, Input, message } from 'ant-design-vue';
+  import { editModelApi } from '/@/api/business/models';
+  import { useRoute } from 'vue-router';
+  import { number } from 'vue-types';
 
   const { t } = useI18n();
   const isEdit = ref(false);
@@ -100,7 +103,26 @@
   const isImage = computed(() => {
     return props.headerData.type == datasetTypeEnum.IMAGE;
   });
-  let headerDataName = computed(() => props.headerData.name);
+
+  let headerDataName = ref<string>('');
+  let showHeaderDataName = ref<string>('');
+  watch(
+    () => props.headerData.name,
+    (val) => {
+      headerDataName.value = val;
+      showHeaderDataName.value = val;
+    },
+  );
+
+  // let headerDataName = computed({
+  //   get() {
+  //     return props.headerData.name;
+  //   },
+  //   set(value) {
+  //     console.log(value);
+  //     // emits('update:name', value);
+  //   },
+  // });
   const go = useGo();
   const goBack = () => {
     go(`${RouteEnum.MODELS}`);
@@ -111,18 +133,17 @@
   const handleCancel = () => {
     isEdit.value = !isEdit.value;
   };
+  const route = useRoute();
+  const modelId = String(route?.query?.id);
   const handleSave = async () => {
-    // buriedPoint(BuriedPointEnum.TASK_INSTRUCTION_CHANGE, {
-    //   Task_ID: props.info.id,
-    // });
-    // const params = {
-    //   id: props.info.id,
-    //   instructionFiles: fileList.value,
-    //   instruction: instruction.value,
-    // };
-    // await updateInstruction(params);
-    // isEdit.value = false;
-    // message.success('Instruction saved');
+    const params = {
+      id: Number(modelId),
+      name: headerDataName.value,
+    };
+    await editModelApi(params);
+    isEdit.value = false;
+    showHeaderDataName.value = headerDataName.value;
+    message.success('Successed');
     // handleSuccess();
   };
 </script>
