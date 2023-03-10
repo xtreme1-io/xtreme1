@@ -1,12 +1,15 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.port.dao.ModelDAO;
 import ai.basic.x1.adapter.port.dao.ModelDatasetResultDAO;
 import ai.basic.x1.adapter.port.dao.ModelRunRecordDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendLambdaQueryWrapper;
+import ai.basic.x1.adapter.port.dao.mybatis.model.Model;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDatasetResult;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoCountDAO;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoIncrDAO;
+import ai.basic.x1.entity.DatasetModelResultBO;
 import ai.basic.x1.entity.DatasetBO;
 import ai.basic.x1.entity.ModelRunRecordBO;
 import ai.basic.x1.entity.enums.RunRecordQueryBO;
@@ -24,8 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static ai.basic.x1.entity.enums.RunStatusEnum.SUCCESS;
+import static ai.basic.x1.entity.enums.RunStatusEnum.SUCCESS_WITH_ERROR;
 
 
 /**
@@ -46,6 +55,9 @@ public class ModelRunRecordUseCase {
 
     @Autowired
     private ModelSerialNoIncrDAO modelSerialNoIncrDAO;
+
+    @Autowired
+    private ModelDAO modelDAO;
 
     public List<ModelRunRecordBO> findAllModelRunRecord(ModelRunRecordBO bo) {
         LambdaQueryWrapper<ModelRunRecord> modelRunRecordLambdaQueryWrapper = Wrappers.lambdaQuery();
@@ -126,5 +138,29 @@ public class ModelRunRecordUseCase {
     @Transactional(readOnly = true)
     public List<ModelRunRecord> findByIds(List<Long> ids) {
         return modelRunRecordDAO.listByIds(ids);
+    }
+
+    public List<DatasetModelResultBO> getDatasetModelRunResult(Long datasetId) {
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(ModelRunRecord.class);
+        lambdaQueryWrapper.select(ModelRunRecord::getId, ModelRunRecord::getModelId, ModelRunRecord::getRunNo);
+        lambdaQueryWrapper.eq(ModelRunRecord::getDatasetId, datasetId);
+        lambdaQueryWrapper.in(ModelRunRecord::getStatus, List.of(SUCCESS, SUCCESS_WITH_ERROR));
+        var modelRunRecordList = modelRunRecordDAO.list(lambdaQueryWrapper);
+        if (CollUtil.isEmpty(modelRunRecordList)) {
+            return List.of();
+        }
+        var modelResultBOList = new ArrayList<DatasetModelResultBO>();
+        var modelIds = modelRunRecordList.stream().map(ModelRunRecord::getModelId).collect(Collectors.toSet());
+        var modelList = modelDAO.listByIds(modelIds);
+        var modelMap = modelList.stream().collect(Collectors.toMap(Model::getId, Model::getName));
+        var modelRunMap = modelRunRecordList.stream().collect(Collectors.groupingBy(ModelRunRecord::getModelId));
+        modelRunMap.forEach((modelId, runRecordList) -> {
+            var runRecordBOList = runRecordList.stream().map(runRecord -> DefaultConverter.convert(runRecord, DatasetModelResultBO.RunRecordBO.class)).collect(Collectors.toList());
+            var datasetModelResultBO = DatasetModelResultBO.builder().modelId(modelId)
+                    .modelName(modelMap.get(modelId)).runRecords(runRecordBOList).build();
+            modelResultBOList.add(datasetModelResultBO);
+
+        });
+        return modelResultBOList;
     }
 }

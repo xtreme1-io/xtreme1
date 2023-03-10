@@ -53,7 +53,7 @@ public class DataInfoQueryDTO {
     /**
      * Sort field
      */
-    @ValidStringEnum(message = "sort field must be one of NAME,CREATED_AT", enumClass = DataInfoSortFieldEnum.class)
+    @ValidStringEnum(message = "sort field must be one of NAME,CREATED_AT,DATA_CONFIDENCE", enumClass = DataInfoSortFieldEnum.class)
     private String sortField;
 
     /**
