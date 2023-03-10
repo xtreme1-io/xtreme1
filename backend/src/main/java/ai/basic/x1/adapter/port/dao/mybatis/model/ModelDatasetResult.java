@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 /**
@@ -67,6 +68,11 @@ public class ModelDatasetResult {
      */
     @TableField(value = "model_result", typeHandler = JacksonTypeHandler.class)
     private JSONObject modelResult;
+
+    /**
+     * Data confidence
+     */
+    private BigDecimal dataConfidence;
 
     /**
      * Model serial no

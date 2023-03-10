@@ -76,4 +76,42 @@
             AND id not in (SELECT data_id FROM model_dataset_result WHERE model_id =  #{modelId})
         </if>
     </select>
+
+    <select id="selectDataPage" resultMap="BaseResultMap">
+        SELECT distinct d.* FROM data d
+        LEFT JOIN model_dataset_result mdr ON d.id=mdr.data_id
+        ${ew.customSqlSegment("d")}
+        <if test="dataInfoQuery.runRecordId != null">
+            mdr.run_record_id =  #{runRecordId}
+        </if>
+
+        <if test="dataInfoQuery.minDataConfidence != null">
+            mdr.data_confidence <![CDATA[ >= ]]>  #{minDataConfidence}
+        </if>
+
+        <if test="dataInfoQuery.maxDataConfidence != null">
+            mdr.data_confidence <![CDATA[ <= ]]>   #{maxDataConfidence}
+        </if>
+        <include refid="selectDataByPageOrder"/>
+    </select>
+
+    <sql id="selectDataByPageOrder">
+        ORDER BY
+        <choose>
+            <when test="dataInfoQuery.sortField != null and dataInfoQuery.sortField != ''
+        and dataInfoQuery.ascOrDesc != null and dataInfoQuery.ascOrDesc != ''">
+                d.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
+                <if test="dataInfoQuery.sortField == 'DATA_CONFIDENCE'">
+                    mdr.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
+                </if>
+                <if test="dataInfoQuery.sortField != 'DATA_CONFIDENCE'">
+                    d.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
+                </if>
+            </when>
+            <otherwise>
+                d.name ASC
+            </otherwise>
+        </choose>
+        ,d.id ASC
+    </sql>
 </mapper>

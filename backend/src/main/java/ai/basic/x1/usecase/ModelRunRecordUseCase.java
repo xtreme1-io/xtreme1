@@ -61,12 +61,13 @@ public class ModelRunRecordUseCase {
     public Page<ModelRunRecordBO> findModelRunRecordByPage(RunRecordQueryBO bo, Integer pageNo, Integer pageSize) {
         var lambdaQueryWrapper = new ExtendLambdaQueryWrapper<ModelRunRecord>();
         lambdaQueryWrapper.eq(ModelRunRecord::getModelId, bo.getModelId());
-        lambdaQueryWrapper.in(CollUtil.isNotEmpty(bo.getDatasetIds()),ModelRunRecord::getDatasetId, bo.getDatasetIds());
-        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(bo.getRunRecordType()),ModelRunRecord::getRunRecordType, bo.getRunRecordType());
-        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(bo.getStatus()),ModelRunRecord::getStatus, bo.getStatus());
+        lambdaQueryWrapper.in(CollUtil.isNotEmpty(bo.getDatasetIds()), ModelRunRecord::getDatasetId, bo.getDatasetIds());
+        lambdaQueryWrapper.like(ObjectUtil.isNotNull(bo.getRunNo()), ModelRunRecord::getRunNo, bo.getRunNo());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(bo.getRunRecordType()), ModelRunRecord::getRunRecordType, bo.getRunRecordType());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(bo.getStatus()), ModelRunRecord::getStatus, bo.getStatus());
         lambdaQueryWrapper.orderBy(true, SortEnum.ASC.equals(bo.getAscOrDesc()), ModelRunRecord::getCreatedAt);
         var modelRunRecordPage = modelRunRecordDAO.getBaseMapper().
-                selectListWithDatasetNotDeleted(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize),lambdaQueryWrapper);
+                selectListWithDatasetNotDeleted(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(pageNo, pageSize), lambdaQueryWrapper);
         var recordBOPage = DefaultConverter.convert(modelRunRecordPage, ModelRunRecordBO.class);
         this.setProgressBar(recordBOPage.getList());
         return recordBOPage;

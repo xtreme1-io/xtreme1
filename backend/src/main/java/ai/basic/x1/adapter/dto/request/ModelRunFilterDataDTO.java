@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 
 @Data
 @Builder
@@ -16,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class ModelRunFilterDataDTO {
 
-    @NotNull(message = "not allow null")
+    @NotNull(message = "not allow null", groups = {ModelRunGroup.class})
     private Integer dataCountRatio;
 
     @NotNull(message = "not allow null")
@@ -27,4 +28,7 @@ public class ModelRunFilterDataDTO {
 
     @ValidStringEnum(message = "annotationStatus must be one of ANNOTATED, NOT_ANNOTATED, INVALID", enumClass = DataAnnotationStatusEnum.class)
     private String annotationStatus;
+
+    public interface ModelRunGroup extends Default {
+    }
 }

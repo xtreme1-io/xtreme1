@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 /**
@@ -60,6 +61,11 @@ public class ModelDatasetResultBO {
      * Model result
      */
     private String modelResult;
+
+    /**
+     * Data confidence
+     */
+    private BigDecimal dataConfidence;
 
     /**
      * Whether it is successful.

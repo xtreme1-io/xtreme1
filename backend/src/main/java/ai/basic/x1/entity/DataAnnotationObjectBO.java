@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import ai.basic.x1.entity.enums.DataAnnotationObjectSourceTypeEnum;
 import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,6 +35,10 @@ public class DataAnnotationObjectBO {
     private Integer objectCount;
 
     private String frontId;
+
+    private Long sourceId;
+
+    private DataAnnotationObjectSourceTypeEnum sourceType;
 
     /**
      * Locked Person's Name

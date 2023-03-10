@@ -23,6 +23,8 @@ public class RunRecordQueryDTO {
 
     private List<Long> datasetIds;
 
+    private String runNo;
+
     @ValidStringEnum(message = "runRecordType must be one of IMPORTED,RUNS", enumClass = RunRecordTypeEnum.class)
     private String runRecordType;
 

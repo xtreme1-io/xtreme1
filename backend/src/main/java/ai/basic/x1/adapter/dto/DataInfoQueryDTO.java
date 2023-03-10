@@ -4,12 +4,14 @@ import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataInfoSortFieldEnum;
 import ai.basic.x1.entity.enums.SortEnum;
+import ai.basic.x1.entity.enums.SplitTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -65,5 +67,26 @@ public class DataInfoQueryDTO {
      */
     @ValidStringEnum(message = "annotationStatus must be one of ANNOTATED, NOT_ANNOTATED, INVALID", enumClass = DataAnnotationStatusEnum.class)
     private String annotationStatus;
+
+    /**
+     * Data split type TRAINING,VALIDATION,TEST,NOT_SPLIT
+     */
+    @ValidStringEnum(message = "splitType must be one of TRAINING,VALIDATION,TEST,NOT_SPLIT", enumClass = SplitTypeEnum.class)
+    private String splitType;
+
+    /**
+     * Model run record id
+     */
+    private Long runRecordId;
+
+    /**
+     * Min data confidence
+     */
+    private BigDecimal minDataConfidence;
+
+    /**
+     * Max data confidence
+     */
+    private BigDecimal maxDataConfidence;
 
 }

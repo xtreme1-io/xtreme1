@@ -9,6 +9,9 @@
         <result column="class_id" property="classId" />
         <result column="class_attributes" property="classAttributes"
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+
+        <result column="source_id" property="sourceId" />
+        <result column="source_type" property="sourceType"/>
         <result column="created_at" property="createdAt" />
         <result column="created_by" property="createdBy" />
         <result column="updated_at" property="updatedAt" />
@@ -17,7 +20,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, dataset_id, data_id, class_id, class_attributes, created_at, created_by, updated_at, updated_by
+        id, dataset_id, data_id, class_id, class_attributes,source_id,source_type, created_at, created_by, updated_at, updated_by
     </sql>
 
     <select id="listByScenario" resultMap="BaseResultMap">

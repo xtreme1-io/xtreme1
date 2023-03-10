@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -23,7 +24,7 @@ public class ModelRunDTO {
 
     private JSONObject resultFilterParam;
 
+    @Valid
     private ModelRunFilterDataDTO dataFilterParam;
-
 
 }

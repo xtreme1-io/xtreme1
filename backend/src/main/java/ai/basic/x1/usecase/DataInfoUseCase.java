@@ -6,6 +6,7 @@ import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
+import ai.basic.x1.adapter.port.dao.mybatis.query.DataInfoQuery;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
 import ai.basic.x1.adapter.port.rpc.PointCloudConvertRenderHttpCaller;
@@ -309,24 +310,14 @@ public class DataInfoUseCase {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
         lambdaQueryWrapper.eq(DataInfo::getDatasetId, queryBO.getDatasetId());
         lambdaQueryWrapper.eq(DataInfo::getIsDeleted, false);
-        if (StrUtil.isNotBlank(queryBO.getName())) {
-            lambdaQueryWrapper.like(DataInfo::getName, queryBO.getName());
-        }
-        if (ObjectUtil.isNotNull(queryBO.getAnnotationStatus())) {
-            lambdaQueryWrapper.eq(DataInfo::getAnnotationStatus, queryBO.getAnnotationStatus());
-        }
-        if (ObjectUtil.isNotEmpty(queryBO.getCreateStartTime()) && ObjectUtil.isNotEmpty(queryBO.getCreateEndTime())) {
-            lambdaQueryWrapper.ge(DataInfo::getCreatedAt, queryBO.getCreateStartTime()).le(DataInfo::getCreatedAt, queryBO.getCreateEndTime());
-        }
-
-        if (CollectionUtil.isNotEmpty(queryBO.getIds())) {
-            lambdaQueryWrapper.in(DataInfo::getId, queryBO.getIds());
-        }
-        if (StrUtil.isNotBlank(queryBO.getSortField())) {
-            lambdaQueryWrapper.last(" order by " + queryBO.getSortField().toLowerCase() + " " + queryBO.getAscOrDesc());
-        }
-
-        var dataInfoPage = dataInfoDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()), lambdaQueryWrapper);
+        lambdaQueryWrapper.like(StrUtil.isNotEmpty(queryBO.getName()), DataInfo::getName, queryBO.getName());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(queryBO.getAnnotationStatus()), DataInfo::getAnnotationStatus, queryBO.getAnnotationStatus());
+        lambdaQueryWrapper.ge(ObjectUtil.isNotEmpty(queryBO.getCreateStartTime()), DataInfo::getCreatedAt, queryBO.getCreateStartTime());
+        lambdaQueryWrapper.le(ObjectUtil.isNotEmpty(queryBO.getCreateEndTime()), DataInfo::getCreatedAt, queryBO.getCreateEndTime());
+        lambdaQueryWrapper.in(CollUtil.isNotEmpty(queryBO.getIds()), DataInfo::getId, queryBO.getIds());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(queryBO.getSplitType()), DataInfo::getSplitType, queryBO.getSplitType());
+        var dataInfoPage = dataInfoDAO.getBaseMapper().selectDataPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()),
+                lambdaQueryWrapper,DefaultConverter.convert(queryBO, DataInfoQuery.class));
         var dataInfoBOPage = DefaultConverter.convert(dataInfoPage, DataInfoBO.class);
         var dataInfoBOList = dataInfoBOPage.getList();
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {

@@ -116,18 +116,20 @@ public class ModelUseCase {
         var modelClassLambdaQueryWrapper = Wrappers.lambdaQuery(ModelClass.class);
         modelClassLambdaQueryWrapper.eq(ModelClass::getModelId, modelId);
         modelClassDAO.remove(modelClassLambdaQueryWrapper);
-        modelClassBOList.forEach(modelClassBO -> modelClassBO.setModelId(modelId));
-        modelClassDAO.saveBatch(DefaultConverter.convert(modelClassBOList, ModelClass.class));
+        if (CollUtil.isNotEmpty(modelClassBOList)) {
+            modelClassBOList.forEach(modelClassBO -> modelClassBO.setModelId(modelId));
+            modelClassDAO.saveBatch(DefaultConverter.convert(modelClassBOList, ModelClass.class));
+        }
     }
 
     public List<ModelBO> list(ModelBO modelBO) {
         ModelDatasetTypeEnum datasetType = modelBO.getDatasetType();
         LambdaQueryWrapper<Model> modelLambdaQueryWrapper = Wrappers.lambdaQuery();
         modelLambdaQueryWrapper.orderBy(true, true, Model::getName);
-        if(ObjectUtil.isNotNull(datasetType)){
-            if(LIDAR_BASIC.equals(datasetType)||LIDAR_FUSION.equals(datasetType)){
-                modelLambdaQueryWrapper.in(Model::getDatasetType, Lists.newArrayList(datasetType.name(),"LIDAR"));
-            }else {
+        if (ObjectUtil.isNotNull(datasetType)) {
+            if (LIDAR_BASIC.equals(datasetType) || LIDAR_FUSION.equals(datasetType)) {
+                modelLambdaQueryWrapper.in(Model::getDatasetType, Lists.newArrayList(datasetType.name(), "LIDAR"));
+            } else {
                 modelLambdaQueryWrapper.eq(Model::getDatasetType, datasetType);
             }
         }
@@ -242,7 +244,7 @@ public class ModelUseCase {
             throw new UsecaseException(PARAM_ERROR, "Please first configure the model URL.");
         }
         boolean updateResult = modelRunRecordDAO.update(ModelRunRecord.builder().build(), Wrappers.lambdaUpdate(ModelRunRecord.class)
-                 .set(ModelRunRecord::getDataCount,totalDataNum)
+                .set(ModelRunRecord::getDataCount, totalDataNum)
                 .set(ModelRunRecord::getStatus, RunStatusEnum.STARTED)
                 .eq(ModelRunRecord::getId, modelRunRecordBO.getId())
                 .in(ModelRunRecord::getStatus, RunStatusEnum.FAILURE, RunStatusEnum.SUCCESS_WITH_ERROR)
@@ -463,7 +465,8 @@ public class ModelUseCase {
             case LIDAR_DETECTION:
                 ApiResult<List<PreModelRespDTO>> apiResult = JSONUtil.toBean(modelResponseBO.getContent(), new TypeReference<>() {
                 }, false);
-                if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {}
+                if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
+                }
                 break;
             default:
                 break;

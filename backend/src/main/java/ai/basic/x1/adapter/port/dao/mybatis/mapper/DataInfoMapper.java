@@ -6,8 +6,10 @@ import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Dataset;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetSixData;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DatasetStatistics;
+import ai.basic.x1.adapter.port.dao.mybatis.query.DataInfoQuery;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -65,5 +67,14 @@ public interface DataInfoMapper extends ExtendBaseMapper<DataInfo> {
      */
     Long findModelRunDataCount(@Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper,@Param("modelId") Long modelId,
                                    @Param("isExcludeModelData") Boolean isExcludeModelData);
+
+
+    /**
+     * Select data
+     * @param page page
+     * @param queryWrapper parameter
+     * @return data page
+     */
+    Page<DataInfo> selectDataPage(Page<DataInfo> page, @Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper,@Param("dataInfoQuery") DataInfoQuery dataInfoQuery);
 
 }

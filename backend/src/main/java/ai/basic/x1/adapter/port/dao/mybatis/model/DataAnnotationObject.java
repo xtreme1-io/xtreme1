@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
+import ai.basic.x1.entity.enums.DataAnnotationObjectSourceTypeEnum;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
@@ -32,6 +33,10 @@ public class DataAnnotationObject {
 
     @TableField(value = "class_attributes", typeHandler = JacksonTypeHandler.class)
     private JSONObject classAttributes;
+
+    private Long sourceId;
+
+    private DataAnnotationObjectSourceTypeEnum sourceType;
 
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;

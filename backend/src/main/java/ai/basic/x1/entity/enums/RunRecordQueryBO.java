@@ -16,6 +16,8 @@ public class RunRecordQueryBO {
 
     private Long modelId;
 
+    private String runNo;
+
     private List<Long> datasetIds;
 
     private RunRecordTypeEnum runRecordType;

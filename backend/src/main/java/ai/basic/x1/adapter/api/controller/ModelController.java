@@ -1,7 +1,10 @@
 package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
-import ai.basic.x1.adapter.dto.*;
+import ai.basic.x1.adapter.dto.ModelDTO;
+import ai.basic.x1.adapter.dto.ModelObjectDTO;
+import ai.basic.x1.adapter.dto.ModelRunDTO;
+import ai.basic.x1.adapter.dto.ModelRunRecordDTO;
 import ai.basic.x1.adapter.dto.request.*;
 import ai.basic.x1.adapter.dto.response.ModelResponseDTO;
 import ai.basic.x1.adapter.exception.ApiException;
@@ -21,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +87,7 @@ public class ModelController {
     }
 
     @PostMapping("modelRun")
-    public void modelRun(@Validated @RequestBody ModelRunDTO modelRunDTO) {
+    public void modelRun(@Validated(ModelRunFilterDataDTO.ModelRunGroup.class) @RequestBody ModelRunDTO modelRunDTO) {
         ModelBO model = modelUseCase.getModelById(modelRunDTO.getModelId());
         if (StrUtil.isEmpty(model.getUrl())) {
             throw new ApiException(PARAM_ERROR, "Please first configure the model URL.");

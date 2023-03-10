@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 @Data
@@ -21,6 +20,5 @@ public class ModelClassReqDTO {
     @NotNull(message = "Model id cannot be null")
     private Long modelId;
 
-    @NotEmpty(message = "Model class cannot be null")
     private List<ModelClassDTO> modelClassList;
 }

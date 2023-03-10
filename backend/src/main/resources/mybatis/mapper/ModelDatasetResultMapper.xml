@@ -13,6 +13,7 @@
         <result column="data_id" property="dataId"/>
         <result column="result_filter_param" property="resultFilterParam" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="model_result" property="modelResult" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="data_confidence" property="dataConfidence"/>
         <result column="is_success" property="isSuccess"/>
         <result column="error_message" property="errorMessage"/>
         <result column="created_at" property="createdAt"/>
