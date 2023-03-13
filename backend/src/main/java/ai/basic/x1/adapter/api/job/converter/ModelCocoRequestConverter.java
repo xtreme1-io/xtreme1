@@ -27,7 +27,7 @@ public class ModelCocoRequestConverter {
             throw new IllegalArgumentException("file url is empty");
         }
         return PredImageReqDTO.builder().datas(List.of(PredImageReqDTO.ImageData.builder()
-                .imageId(String.valueOf(dataInfo.getId())).imgUrl(url).build())).params("").build();
+                .id(dataInfo.getId()).url(url).build())).build();
     }
 
 }

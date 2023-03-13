@@ -128,7 +128,7 @@ public class ModelUseCase {
         modelLambdaQueryWrapper.orderBy(true, true, Model::getName);
         if (ObjectUtil.isNotNull(datasetType)) {
             if (LIDAR_BASIC.equals(datasetType) || LIDAR_FUSION.equals(datasetType)) {
-                modelLambdaQueryWrapper.in(Model::getDatasetType, Lists.newArrayList(datasetType.name(), "LIDAR"));
+                modelLambdaQueryWrapper.in(Model::getDatasetType, Lists.newArrayList(datasetType.name(), LIDAR.name()));
             } else {
                 modelLambdaQueryWrapper.eq(Model::getDatasetType, datasetType);
             }

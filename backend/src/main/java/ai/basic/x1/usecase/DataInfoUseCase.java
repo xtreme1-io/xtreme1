@@ -3,6 +3,7 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.ApiResult;
+import ai.basic.x1.adapter.dto.DatasetClassDTO;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendLambdaQueryWrapper;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
@@ -140,6 +141,10 @@ public class DataInfoUseCase {
     @Autowired
     private DatasetUseCase datasetUseCase;
 
+    @Autowired
+    private ModelRunRecordUseCase modelRunRecordUseCase;
+
+
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
@@ -221,7 +226,7 @@ public class DataInfoUseCase {
         var dataList = dataInfoDAO.list(dataInfoLambdaQueryWrapper);
         var dataIdList = dataList.stream().map(DataInfo::getId).collect(Collectors.toList());
         int indexTraining = (int) Math.round(BigDecimal.valueOf(limit).multiply(BigDecimal.valueOf(splitFilterBO.getTrainingRatio())).divide(oneHundred).doubleValue());
-        int indexValidation = (int) Math.round(BigDecimal.valueOf(limit).multiply(BigDecimal.valueOf(splitFilterBO.getTrainingRatio())).divide(oneHundred).doubleValue()) + indexTraining;
+        int indexValidation = (int) Math.round(BigDecimal.valueOf(limit).multiply(BigDecimal.valueOf(splitFilterBO.getValidationRatio())).divide(oneHundred).doubleValue()) + indexTraining;
         var trainingDataIdList = dataIdList.subList(0, indexTraining);
         var validationDataIdList = dataIdList.subList(indexTraining, indexValidation);
         var testDataIdList = dataIdList.subList(indexValidation, limit);
@@ -318,7 +323,7 @@ public class DataInfoUseCase {
         lambdaQueryWrapper.in(CollUtil.isNotEmpty(queryBO.getIds()), DataInfo::getId, queryBO.getIds());
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(queryBO.getSplitType()), DataInfo::getSplitType, queryBO.getSplitType());
         var dataInfoPage = dataInfoDAO.getBaseMapper().selectDataPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()),
-                lambdaQueryWrapper,DefaultConverter.convert(queryBO, DataInfoQuery.class));
+                lambdaQueryWrapper, DefaultConverter.convert(queryBO, DataInfoQuery.class));
         var dataInfoBOPage = DefaultConverter.convert(dataInfoPage, DataInfoBO.class);
         var dataInfoBOList = dataInfoBOPage.getList();
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
@@ -595,6 +600,13 @@ public class DataInfoUseCase {
             uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, COMPRESSED_PACKAGE_EMPTY.getMessage());
             throw new UsecaseException(COMPRESSED_PACKAGE_EMPTY);
         }
+        Long sourceId = null;
+        if (ObjectUtil.isNotNull(dataInfoUploadBO.getResultType())) {
+            sourceId = -1L;
+            if (ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+                sourceId = modelRunRecordUseCase.save(dataInfoUploadBO.getModelId(), datasetId, totalDataNum);
+            }
+        }
         pointCloudList.forEach(pointCloudFile -> {
             var isError = this.validDirectoryFormat(pointCloudFile.getParentFile(), datasetType);
             if (isError) {
@@ -654,6 +666,9 @@ public class DataInfoUseCase {
         });
         var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+        if (ObjectUtil.isNotNull(sourceId) && ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+            modelRunRecordUseCase.updateById(sourceId, RunStatusEnum.SUCCESS);
+        }
     }
 
     private void parseImageUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -709,6 +724,14 @@ public class DataInfoUseCase {
         var uploadRecordBOBuilder = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
         if (CollectionUtil.isNotEmpty(files)) {
+            Long sourceId = null;
+            if (ObjectUtil.isNotNull(dataInfoUploadBO.getResultType())) {
+                sourceId = -1L;
+                if (ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+                    sourceId = modelRunRecordUseCase.save(dataInfoUploadBO.getModelId(), datasetId, totalDataNum);
+                }
+            }
+            dataAnnotationObjectBOBuilder.sourceId(sourceId).sourceType(DataAnnotationObjectSourceTypeEnum.IMPORTED);
             var list = ListUtil.split(files, 10);
             CountDownLatch countDownLatch = new CountDownLatch(list.size());
             list.forEach(fl -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
@@ -747,6 +770,9 @@ public class DataInfoUseCase {
             }
             var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+            if (ObjectUtil.isNotNull(sourceId) && ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+                modelRunRecordUseCase.updateById(sourceId, RunStatusEnum.SUCCESS);
+            }
             datasetSimilarityJobUseCase.submitJob(datasetId);
         } else {
             var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
@@ -1243,29 +1269,72 @@ public class DataInfoUseCase {
      */
     public void handleDataResult(File file, String dataName, DataAnnotationObjectBO dataAnnotationObjectBO,
                                  List<DataAnnotationObjectBO> dataAnnotationObjectBOList, StringBuilder errorBuilder) {
-        var resultFile = FileUtil.loopFiles(file, 2, null).stream()
-                .filter(fc -> JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fc)) && dataName.equals(FileUtil.getPrefix(fc))
-                        && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
-        if (resultFile.isPresent()) {
-            try {
-                var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
-                var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
-                if (CollectionUtil.isEmpty(result.getObjects())) {
-                    log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
-                    errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
-                    return;
-                }
-                result.getObjects().forEach(object -> {
-                    var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
-                    object.setId(IdUtil.randomUUID());
-                    object.setVersion(0);
-                    Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
-                    if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
-                        dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
+
+        // Indicates that no result data was imported
+        if (ObjectUtil.isNotNull(dataAnnotationObjectBO.getSourceId())) {
+            var resultFile = FileUtil.loopFiles(file, 2, null).stream()
+                    .filter(fc -> JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fc)) && dataName.equals(FileUtil.getPrefix(fc))
+                            && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
+            if (resultFile.isPresent()) {
+                try {
+                    var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
+                    var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
+                    if (CollectionUtil.isEmpty(result.getObjects())) {
+                        log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
+                        errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
+                        return;
                     }
-                });
-            } catch (Exception e) {
-                log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
+
+                    var classMap = getClassMap(result.getObjects());
+                    result.getObjects().forEach(object -> {
+                        var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
+                        object.setId(IdUtil.randomUUID());
+                        object.setVersion(0);
+                        Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
+                        if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
+                            dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
+                        }
+                        processClassAttributes(classMap, object);
+                    });
+                } catch (Exception e) {
+                    log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
+                }
+            }
+        }
+    }
+
+    private Map<Long, DatasetClassBO> getClassMap(List<DataAnnotationResultObjectBO> objects) {
+        if (CollUtil.isEmpty(objects)) {
+            return new HashMap<>();
+        }
+        var classIds = objects.stream().map(DataAnnotationResultObjectBO::getClassId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (CollUtil.isEmpty(classIds)) {
+            return new HashMap<>();
+        }
+        var datasetClassBOList = datasetClassUseCase.findByIds(new ArrayList<>(classIds));
+        if (CollUtil.isNotEmpty(datasetClassBOList)) {
+            return datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId,
+                    t -> t));
+        }
+        return Map.of();
+    }
+
+    private void processClassAttributes(Map<Long, DatasetClassBO> classMap,
+                                        DataAnnotationResultObjectBO object) {
+        if (object == null) {
+            return;
+        }
+        var classId = object.getClassId();
+        if (classMap.containsKey(classId)) {
+            object.setClassName(classMap.get(classId).getName());
+        } else {
+            object.setClassId(null);
+            object.setClassValues(null);
+            if (StrUtil.isNotEmpty(object.getClassName())) {
+                object.setModelClass(object.getClassName());
+                object.setClassName(null);
             }
         }
     }
