@@ -29,7 +29,6 @@ public class PointCloudDetectionModelReqConverter {
         DataInfo dataInfo = buildDataInfo(messageBo.getDataInfo());
         return PreModelReqDTO.builder()
                 .datas(Arrays.asList(dataInfo))
-                .params(PreModelParam.builder().confidence(DEFAULT_CONFIDENCE).build())
                 .build();
     }
 
@@ -54,27 +53,21 @@ public class PointCloudDetectionModelReqConverter {
             String prePath = subPaths[subPaths.length - 2];
             //images
             if (prePath.startsWith(POINT_CLOUD_IMG)) {
-                if (CollUtil.isEmpty(dataInfo.getImages())) {
-                    List<ImageInfo> imageInfoList = new ArrayList<>();
-                    imageInfoList.add(ImageInfo.builder()
-                            .name(fileNodeBO.getFile().getName())
-                            .url(fileNodeBO.getFile().getInternalUrl())
-                            .build());
-                    dataInfo.setImages(imageInfoList);
+                if (CollUtil.isEmpty(dataInfo.getImageUrls())) {
+                    List<String> imageUrlList = new ArrayList<>();
+                    imageUrlList.add(fileNodeBO.getFile().getInternalUrl());
+                    dataInfo.setImageUrls(imageUrlList);
                 } else {
-                    dataInfo.getImages().add(ImageInfo.builder()
-                            .name(fileNodeBO.getFile().getName())
-                            .url(fileNodeBO.getFile().getInternalUrl())
-                            .build());
+                    dataInfo.getImageUrls().add(fileNodeBO.getFile().getInternalUrl());
                 }
             }
             //pcd
             if (prePath.startsWith(POINT_CLOUD)) {
-                dataInfo.setPointCloudFile(getFileBO(fileNodeBO.getFile()).getInternalUrl());
+                dataInfo.setPointCloudUrl(getFileBO(fileNodeBO.getFile()).getInternalUrl());
             }
             //cameraConfig
             if (prePath.startsWith(CAMERA_CONFIG)) {
-                dataInfo.setCameraConfig(fileNodeBO.getFile().getInternalUrl());
+                dataInfo.setCameraConfigUrl(fileNodeBO.getFile().getInternalUrl());
             }
         }
         if (DIRECTORY.equals(fileNodeBO.getType()) && CollUtil.isNotEmpty(fileNodeBO.getFiles())) {

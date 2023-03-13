@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PreModelReqDTO {
+
     private List<DataInfo> datas;
-    private PreModelParam params;
+
 }

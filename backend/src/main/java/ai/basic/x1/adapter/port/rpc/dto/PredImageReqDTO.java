@@ -19,19 +19,15 @@ public class PredImageReqDTO {
 
     private List<ImageData> datas;
 
-    private String params;
-
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class ImageData {
 
-        @JsonProperty(value = "img_url", access = JsonProperty.Access.READ_ONLY)
-        private String imgUrl;
+        private String url;
 
-        @JsonProperty(value = "image_id", access = JsonProperty.Access.READ_ONLY)
-        private String imageId;
+        private Long id;
 
     }
 

@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DataInfo {
     private Long id;
-    private List<ImageInfo> images;
-    private String pointCloudFile;
-    private String cameraConfig;
+    private List<String> imageUrls;
+    private String pointCloudUrl;
+    private String cameraConfigUrl;
 }
