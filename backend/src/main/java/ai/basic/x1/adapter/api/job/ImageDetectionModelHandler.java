@@ -7,9 +7,7 @@ import ai.basic.x1.adapter.dto.PreModelParamDTO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
 import ai.basic.x1.adapter.port.rpc.PredImageCo80ModelHttpCaller;
 import ai.basic.x1.adapter.port.rpc.dto.PredImageRespDTO;
-import ai.basic.x1.entity.ModelMessageBO;
-import ai.basic.x1.entity.ModelTaskInfoBO;
-import ai.basic.x1.entity.PredImageModelObjectBO;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.usecase.ModelUseCase;
 import ai.basic.x1.usecase.exception.UsecaseCode;
@@ -18,6 +16,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
 
 /**
  * @author Zhujh
@@ -55,6 +55,20 @@ public class ImageDetectionModelHandler extends AbstractModelMessageHandler<Pred
             return new ApiResult<>(apiResult.getCode(), apiResult.getMessage());
         } catch (Exception e) {
             throw new UsecaseException(UsecaseCode.UNKNOWN, e.getMessage());
+        }
+    }
+
+    @Override
+    public void syncModelAnnotationResult(ModelTaskInfoBO modelTaskInfo, ModelMessageBO modelMessage) {
+        var modelResult = (PredImageModelObjectBO) modelTaskInfo;
+        if (CollUtil.isNotEmpty(modelResult.getObjects())) {
+            var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>(modelResult.getObjects().size());
+            modelResult.getObjects().forEach(o -> {
+                var dataAnnotationObjectBO = DataAnnotationObjectBO.builder()
+                        .datasetId(modelMessage.getDatasetId()).dataId(modelResult.getDataId()).classAttributes(JSONUtil.parseObj(o)).build();
+                dataAnnotationObjectBOList.add(dataAnnotationObjectBO);
+            });
+
         }
     }
 

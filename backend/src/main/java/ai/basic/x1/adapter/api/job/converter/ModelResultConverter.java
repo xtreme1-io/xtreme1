@@ -14,9 +14,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author andy
@@ -31,14 +34,20 @@ public class ModelResultConverter {
             for (PreModelRespDTO preModelRespDTO : preModelRespDTOApiResult.getData()) {
                 builder.message(preModelRespDTO.getMessage())
                         .code(preModelRespDTO.getCode());
-                if (preModelRespDTO.getCode() == 0) {
-                    builder.objects(toObjectBOs(preModelRespDTO.getClasses(), preModelParamBO, modelClassMap));
+                if (UsecaseCode.OK.getCode().equals(preModelRespDTO.getCode())) {
+                    var objects = toObjectBOs(preModelRespDTO.getObjects(), preModelParamBO, modelClassMap);
+                    builder.objects(objects);
+                    builder.confidence(preModelRespDTO.getConfidence());
+                    if(CollUtil.isNotEmpty(objects) && ObjectUtil.isNull(preModelRespDTO.getConfidence())){
+                        var dataConfidence =objects.stream().mapToDouble(object->object.getConfidence().doubleValue()).summaryStatistics();
+                        builder.confidence(BigDecimal.valueOf(dataConfidence.getAverage()));
+                    }
                 } else {
                     builder.code(preModelRespDTO.getCode()).message(preModelRespDTO.getMessage());
                 }
             }
         } else {
-            builder.code(-1).message(preModelRespDTOApiResult.getMessage());
+            builder.code(UsecaseCode.ERROR.getCode()).message(preModelRespDTOApiResult.getMessage());
         }
 
         return builder.build();
@@ -72,9 +81,12 @@ public class ModelResultConverter {
     }
 
     private static boolean matchResult(LabelInfo labelInfo, PreModelParamBO preModelParamBO) {
-        boolean matchClassResult = ((CollUtil.isNotEmpty(preModelParamBO.getClasses())
-                && preModelParamBO.getClasses().contains(labelInfo.getLabel().toUpperCase()))
-                || CollUtil.isEmpty(preModelParamBO.getClasses()));
+        var selectedClasses = new HashSet<>(preModelParamBO.getClasses());
+        var selectedUpperClasses = selectedClasses.stream().map(c -> c.toUpperCase()).collect(Collectors.toList());
+
+        boolean matchClassResult = ((CollUtil.isNotEmpty(selectedUpperClasses)
+                && selectedUpperClasses.contains(labelInfo.getLabel().toUpperCase()))
+                || CollUtil.isEmpty(selectedUpperClasses));
 
         boolean matchMinConfidence = ((ObjectUtil.isNotNull(preModelParamBO.getMinConfidence())
                 && preModelParamBO.getMinConfidence().compareTo(labelInfo.getConfidence()) <= 0)

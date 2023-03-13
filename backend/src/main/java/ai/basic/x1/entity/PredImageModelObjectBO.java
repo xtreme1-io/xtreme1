@@ -27,7 +27,6 @@ public class PredImageModelObjectBO extends ModelTaskInfoBO{
     @AllArgsConstructor
     public static class ObjectBO {
         private String modelClass;
-        private Integer modelClassId;
         private BigDecimal confidence;
         private String objType;
         List<Point> points;

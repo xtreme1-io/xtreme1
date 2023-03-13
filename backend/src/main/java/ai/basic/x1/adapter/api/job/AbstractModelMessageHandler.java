@@ -86,18 +86,7 @@ public abstract class AbstractModelMessageHandler<T> {
      */
     abstract ApiResult<T> callRemoteService(ModelMessageBO modelMessageBO);
 
-    public void syncModelAnnotationResult(ModelTaskInfoBO modelTaskInfo, ModelMessageBO modelMessage) {
-        var modelResult = (PreLabelModelObjectBO) modelTaskInfo;
-        if (CollUtil.isNotEmpty(modelResult.getObjects())) {
-            var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>(modelResult.getObjects().size());
-            modelResult.getObjects().forEach(o -> {
-                var dataAnnotationObjectBO = DataAnnotationObjectBO.builder()
-                        .datasetId(modelMessage.getDatasetId()).dataId(modelResult.getDataId()).classAttributes(JSONUtil.parseObj(o)).build();
-                dataAnnotationObjectBOList.add(dataAnnotationObjectBO);
-            });
-
-        }
-    }
+    abstract void syncModelAnnotationResult(ModelTaskInfoBO modelTaskInfo, ModelMessageBO modelMessage);
 
     /**
      * model code implement by subClass
@@ -145,7 +134,7 @@ public abstract class AbstractModelMessageHandler<T> {
                 return true;
             }
             var modelResult = modelRun(modelMessageBO);
-            if (modelResult.getCode() == 0) {
+            if (UsecaseCode.OK.getCode().equals(modelResult.getCode())) {
                 syncModelAnnotationResult(modelResult, modelMessageBO);
             }
             if (saveToModelDatasetResult(modelMessageBO, modelResult)) {
@@ -182,10 +171,11 @@ public abstract class AbstractModelMessageHandler<T> {
     public boolean saveToModelDatasetResult(ModelMessageBO modelMessage, ModelTaskInfoBO modelTaskInfo) {
         return modelDatasetResultDAO.update(Wrappers.lambdaUpdate(ModelDatasetResult.class)
                 .set(ModelDatasetResult::getModelResult, JSONUtil.toJsonStr(modelTaskInfo))
-                .set(ModelDatasetResult::getIsSuccess, modelTaskInfo.getCode() == 0)
-                .set(ModelDatasetResult::getErrorMessage, modelTaskInfo.getCode() == 0 ? null : modelTaskInfo.getMessage())
+                .set(ModelDatasetResult::getIsSuccess, UsecaseCode.OK.getCode().equals(modelTaskInfo.getCode()))
+                .set(ModelDatasetResult::getErrorMessage, UsecaseCode.OK.getCode().equals(modelTaskInfo.getCode()) ? null : modelTaskInfo.getMessage())
                 .set(ModelDatasetResult::getUpdatedBy, modelMessage.getCreatedBy())
                 .set(ModelDatasetResult::getUpdatedAt, OffsetDateTime.now())
+                .set(ModelDatasetResult::getDataConfidence, modelTaskInfo.getConfidence())
                 .eq(ModelDatasetResult::getModelSerialNo, modelMessage.getModelSerialNo())
                 .eq(ModelDatasetResult::getDataId, modelMessage.getDataId())
                 .isNull(ModelDatasetResult::getModelResult)

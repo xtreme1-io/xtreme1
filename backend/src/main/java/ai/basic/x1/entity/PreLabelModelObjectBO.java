@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -18,4 +19,5 @@ public class PreLabelModelObjectBO extends ModelTaskInfoBO{
 
     private Long dataId;
     private List<ObjectBO> objects;
+
 }

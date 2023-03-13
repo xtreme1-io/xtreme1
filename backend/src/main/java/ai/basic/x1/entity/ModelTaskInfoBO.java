@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+
 @Data
 @SuperBuilder
 @NoArgsConstructor
@@ -13,6 +15,8 @@ public class ModelTaskInfoBO {
     /**
      * successful returns 0; failure returns -1.
      */
-    private Integer code;
+    private String code;
     private String message;
+
+    private BigDecimal confidence;
 }

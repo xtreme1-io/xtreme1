@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -16,7 +17,9 @@ import java.util.List;
 @AllArgsConstructor
 public class PreModelRespDTO {
     private Long id;
-    private Integer code;
+    private String code;
     private String message;
-    private List<LabelInfo> classes;
+    private List<LabelInfo> objects;
+
+    private BigDecimal confidence;
 }

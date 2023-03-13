@@ -18,11 +18,14 @@ import java.util.List;
 @AllArgsConstructor
 public class PredImageRespDTO {
 
-    @JsonAlias(value = "image_id")
-    private Long imageId;
-
-    @JsonAlias(value = "det_res")
-    private List<PredictItem> predictItems;
+    private Long id;
+    private String code;
+    private String message;
+    private List<PredictItem> objects;
+    /**
+     * Confidence level
+     */
+    private BigDecimal confidence;
 
     @Data
     @NoArgsConstructor
@@ -31,26 +34,14 @@ public class PredImageRespDTO {
     public static class PredictItem {
 
         /**
-         * Target category id
-         */
-        private Integer clsid;
-
-        /**
          * Target class
          */
-        @JsonAlias(value = "class")
-        private String className;
-
-        /**
-         * Target parent class
-         */
-        @JsonAlias(value = "super_class")
-        private String superClass;
+        private String label;
 
         /**
          * Confidence level
          */
-        private BigDecimal score;
+        private BigDecimal confidence;
 
         /**
          * The upper left abscissa of the detection box
