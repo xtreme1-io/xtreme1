@@ -67,8 +67,8 @@ export default function useCardObject() {
   const getImageUrl = (item: any) => {
     const info = item.content && item.content[0]?.file?.extraInfo;
     const url = item.content && item.content[0]?.file?.url;
-    const mediumUrl = item.content && item.content[0]?.file?.mediumThumbnail?.url;
-    return info ? mediumUrl || url : url;
+    const largeThumbnail = item.content && item.content[0]?.file?.largeThumbnail?.url;
+    return info ? largeThumbnail || url : url;
   };
   const canPreview = (data: any, info: any) => {
     const isPc =

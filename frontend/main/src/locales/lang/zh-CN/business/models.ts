@@ -84,4 +84,8 @@ export default {
     overviewClassSetting: 'Click to see our documentations for more information',
     settingsPredict: 'check out our model integration instructions',
   },
+  overView: {
+    codeText: "The code of your classes correspond to the 'label' values by your model runs",
+    nameText: 'The name response to how you display your classes in Xtreme1',
+  },
 };

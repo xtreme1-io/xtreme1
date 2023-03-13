@@ -183,7 +183,21 @@
           </div>
         </div>
       </div> -->
-      <div class="flex items-center">
+      <div class="wrapper-right flex items-center">
+        <div class="sliderContent">
+          <div class="slider">
+            <Slider
+              v-model:value="cardSliderValue"
+              :min="200"
+              :max="cardMaxSliderWidth || 900"
+              step="4"
+            />
+          </div>
+          <SvgIcon @click="cardResetWidth" class="cursor-pointer" name="screen" />
+        </div>
+
+        <UnLock @fetchList="reloadList" />
+
         <div class="view-tag mr-2" v-if="dataId">
           <Icon icon="mdi:filter-minus" />
           Filtering by selected data
@@ -264,7 +278,7 @@
   import { ref, unref, defineProps, computed, watch, defineEmits, reactive } from 'vue';
   // import emitter from 'tiny-emitter/instance';
   // import { LoadingOutlined } from '@ant-design/icons-vue';
-
+  import UnLock from './UnLock.vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useRoute } from 'vue-router';
   import { RouteChildEnum } from '/@/enums/routeEnum';
@@ -278,6 +292,7 @@
     SubMenu,
     Tabs,
     Input,
+    Slider,
   } from 'ant-design-vue';
   import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon/index';
@@ -376,6 +391,9 @@
     filterForm: any;
     showAnnotation: boolean;
     datasetType: datasetTypeEnum | undefined;
+    cardMaxSliderWidth: number;
+    cardResetWidth: (val) => void;
+    cardSliderWidthValue: number;
   }>();
 
   watch(props, (curr) => {
@@ -401,6 +419,7 @@
     'handleModelRun',
     'update:showAnnotation',
     'update:name',
+    'update:cardSliderWidthValue',
   ]);
 
   const reloadList = () => {
@@ -528,6 +547,15 @@
       { serialNumber: res, status: ExportStatus.GENERATING, fileName: 'pending...' },
     ]);
   };
+
+  const cardSliderValue = computed({
+    get() {
+      return props.cardSliderWidthValue;
+    },
+    set(value) {
+      emits('update:cardSliderWidthValue', value);
+    },
+  });
 
   const exportList = ref<any>([]);
   watch(

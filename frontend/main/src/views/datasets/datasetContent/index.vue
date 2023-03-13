@@ -52,6 +52,9 @@
           @fetchList="fixedFetchList"
         />
         <Tools
+          :cardMaxSliderWidth="maxSliderWidth"
+          v-model:cardSliderWidthValue="sliderWidthValue"
+          :cardResetWidth="resetWidth"
           :sliderValue="sliderValue"
           :setSlider="setSlider"
           :selectedList="selectedList"
@@ -278,6 +281,7 @@
     watch,
     onMounted,
     onUnmounted,
+    watchEffect,
   } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
   import {
@@ -737,17 +741,23 @@
     pageNo.value = 1;
     selectedList.value = [];
   };
-  let { cardHeight, cardWidth, paddingX } = useFlowLayout('list', 30);
 
-  // watch(sliderWidthValue, (count) => {
-  //   changeWidth(count);
-  // });
-  // watch(cardWidth, (count) => {
-  //   sliderWidthValue.value = parseInt(count);
-  // });
-  // watchEffect(() => {
-  //   cardHeight, paddingX;
-  // });
+  let sliderWidthValue = ref<number>(200);
+  let { cardHeight, cardWidth, paddingX, changeWidth, resetWidth, maxSliderWidth } = useFlowLayout(
+    'list',
+    30,
+  );
+
+  watch(sliderWidthValue, (count) => {
+    changeWidth(count);
+  });
+  watch(cardWidth, (count) => {
+    sliderWidthValue.value = parseInt(count);
+  });
+  watchEffect(() => {
+    // @ts-ignore
+    cardHeight, paddingX;
+  });
 </script>
 <style lang="less" scoped>
   @import url(./index.less);

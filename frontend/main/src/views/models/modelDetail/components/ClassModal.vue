@@ -29,12 +29,12 @@
         <div class="title">
           <span class="code">
             code
-            <Tooltip placement="rightTop" :title="codeText">
+            <Tooltip placement="rightTop" :title="t('business.models.overView.codeText')">
               <Icon size="15" class="info-icon" icon="uiw:information" /> </Tooltip
           ></span>
           <span class="name">
             name
-            <Tooltip placement="rightTop" :title="nameText">
+            <Tooltip placement="rightTop" :title="t('business.models.overView.nameText')">
               <Icon size="15" class="info-icon" icon="uiw:information" /> </Tooltip></span
         ></div>
         <div class="classItem" :key="item.key" v-for="item in classConfig">
@@ -121,26 +121,11 @@
     closeModal();
     refreshListFn && refreshListFn();
   };
-  const codeText = (
-    <div style="width:300px;font-size: 12px">
-      {/* <div>Password must contain:</div>
-      <ul style="padding-left: 15px;list-style: disc;">
-        <li>8 and 64 characters</li>
-        <li>Number</li>
-        <li>Letter</li>
-      </ul> */}
-    </div>
-  );
-  const nameText = (
-    <div style="width:300px;font-size: 12px">
-      {/* <div>Password must contain:</div>
-      <ul style="padding-left: 15px;list-style: disc;">
-        <li>8 and 64 characters</li>
-        <li>Number</li>
-        <li>Letter</li>
-      </ul> */}
-    </div>
-  );
+  // const codeText = (
+  //   <div style="width:300px;font-size: 12px">
+  //     <div>the code of your classes correspond to the 'label' values by your model runs</div>
+  //   </div>
+  // );
 </script>
 <style lang="less" scoped>
   .link {

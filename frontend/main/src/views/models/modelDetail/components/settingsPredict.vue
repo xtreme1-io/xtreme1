@@ -13,7 +13,14 @@
       </template>
       <template v-else>
         <Button type="default" @click="handleCancel">{{ t('common.cancelText') }}</Button>
-        <Button type="primary" class="ml-2" @click="handleSave">{{ t('common.saveText') }}</Button>
+        <Button
+          :title="!hasConnection ? 'Please test connection first' : ''"
+          :disabled="!hasConnection"
+          type="primary"
+          class="ml-2"
+          @click="handleSave"
+          >{{ t('common.saveText') }}</Button
+        >
       </template>
     </div></div
   >
@@ -60,6 +67,7 @@
 
   const handleEdit = () => {
     isEdit.value = true;
+    hasConnection.value = false;
   };
   const handleCancel = () => {
     urlVal.value = overviewData.url;
@@ -104,7 +112,9 @@
     message.success('Successed');
     // handleSuccess();
   };
+  let hasConnection = ref<boolean>(false);
   const testConnection = async () => {
+    hasConnection.value = true;
     const reg = /(http|https):\/\/([\w.]+\/?)\S*/;
     let val = urlVal.value;
     if (!reg.test(val) || !val) {

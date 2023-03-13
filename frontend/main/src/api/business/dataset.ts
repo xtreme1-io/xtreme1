@@ -411,3 +411,23 @@ export const splitDataSelected = (params: SelectedDataPa) =>
       ignoreCancelToken: true,
     },
   });
+
+export const getLockedRecordByDataset = (params: any) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/findLockRecordByDatasetId`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const unLockApi = (params: any) =>
+  defHttp.post<null>({
+    url: `${Api.DATA}/unLockByLockRecordIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
