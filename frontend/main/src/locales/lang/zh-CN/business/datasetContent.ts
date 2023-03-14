@@ -123,4 +123,14 @@ export default {
   },
 
   urlError: '请输入一个包含压缩包类型的地址',
+  splitModel: {
+    title: 'Split Dataset',
+  },
+  unLock: {
+    tips: '一旦你强制解锁选中的占用者，他们将无法更改这些数据，除非他们重新认领。所有未保存的更改将被丢弃。',
+    totalSelect: '已选占用数据总数',
+    searchPlaceholder: '按占用者姓名搜索',
+    // TODO:
+    forceUnlock: '强制解锁',
+  },
 };

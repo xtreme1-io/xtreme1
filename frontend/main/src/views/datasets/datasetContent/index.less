@@ -1,11 +1,11 @@
 @prefix-cls: ~'@{namespace}-datasetContent';
 .@{prefix-cls} {
   display: flex;
-  .view-tag{
+  .view-tag {
     padding-left: 8px;
     display: inline-flex;
-    background-color:#60A9FE;
-    color:white;
+    background-color: #60a9fe;
+    color: white;
     align-items: center;
     background: url('../../../assets/images/dataset/filter-bg.png');
     background-size: cover;
@@ -33,10 +33,34 @@
   }
   .sider {
     width: 220px;
-    padding: 10px;
+    padding: 0 10px;
     background: #fff;
     height: calc(100vh - @header-height);
     overflow-y: scroll;
+    position: relative;
+    padding-top: 35px;
+    .header {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      .fliter,
+      .display {
+        height: 100%;
+        width: 50%;
+        color: @primary-color;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      .fliter {
+        padding-left: -10px;
+      }
+      .notActive {
+        background: #eee;
+        color: #111;
+      }
+    }
     .custom-item {
       display: flex;
       align-items: center;
@@ -91,6 +115,9 @@
     }
     .tools {
       position: relative;
+      .tabs {
+        justify-content: space-between;
+      }
       .actionSelect {
         position: relative;
         padding: 6px 16px;
@@ -126,6 +153,26 @@
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
+        .wrapper-right {
+          display: flex;
+          .sliderContent {
+            padding: 0px 10px;
+            margin-right: 10px;
+            border: 2px solid #dedede;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            width: 15vw;
+            max-width: 250px;
+            min-width: 100px;
+            height: 28px;
+            background-color: #fff;
+            .slider {
+              width: 100%;
+              margin-right: 10px;
+            }
+          }
+        }
       }
       .upload-list {
         position: fixed;

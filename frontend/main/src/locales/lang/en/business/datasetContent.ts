@@ -123,4 +123,21 @@ export default {
   },
 
   urlError: 'Please enter a path with a zip type',
+  splitModel: {
+    title: 'Split Dataset',
+    splitInto: 'Split into',
+
+    Training: 'Training',
+    Validation: 'Validation',
+    Test: 'Test',
+    NotSplited: 'Not Splited',
+    Splited: 'Splited',
+    All: 'All',
+  },
+  unLock: {
+    tips: 'Once you force unlock selected occupants, they are not able to change those data until you claim them again. Any unsaved changes will be discarded',
+    totalSelect: 'Total selected occupied data',
+    searchPlaceholder: 'Search by occupants’ name',
+    forceUnlock: 'Force Unlock',
+  },
 };

@@ -4,6 +4,17 @@
       <div class="header">
         <VirtualTab :list="tabListOntology" />
         <VirtualTab :list="tabListClasses" />
+        <Input
+          style="margin-right: 60px; flex: 1"
+          size="large"
+          autocomplete="off"
+          v-model:value="searchName"
+          :placeholder="t('business.ontology.searchForm.searchItems')"
+        >
+          <template #prefix>
+            <Icon icon="ic:twotone-manage-search" style="color: #aaa" size="16" />
+          </template>
+        </Input>
       </div>
       <div class="btn">
         <HeaderDropdown :activeTab="activeTab" :datasetType="datasetType" />
@@ -20,7 +31,12 @@
       </div>
     </div>
     <div class="classes__right">
-      <SearchForm @search="handleSearch" :activeTab="activeTab" :datasetType="datasetType" />
+      <SearchForm
+        @search="handleSearch"
+        :searchName="searchName"
+        :activeTab="activeTab"
+        :datasetType="datasetType"
+      />
     </div>
     <!-- Modal -->
     <CreateClass
@@ -43,6 +59,8 @@
 </template>
 <script lang="ts" setup>
   // vue
+  import Icon, { SvgIcon } from '/@/components/Icon/index';
+  import { Input } from 'ant-design-vue';
   import { ref, unref, onMounted, provide } from 'vue';
   // components
   import { VirtualTab } from '/@@/VirtualTab';
@@ -93,7 +111,7 @@
   const pageType = pathArr[pathArr.length - 1].toLocaleUpperCase();
   const ontologyId = Number(route.query.id);
   const datasetType = ref<datasetTypeEnum>(datasetTypeEnum.LIDAR_BASIC);
-
+  let searchName = ref<string>('');
   /** Virtual Tab */
   const tabListOntology = [
     {

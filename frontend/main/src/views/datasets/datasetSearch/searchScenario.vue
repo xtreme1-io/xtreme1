@@ -6,39 +6,57 @@
       :classId="result"
       :classification="classification"
     />
+
     <div class="content">
-      <div class="flex p-25px">
-        <div class="mr-24px cursor-pointer" @click="handleBack">
-          <Icon icon="material-symbols:arrow-back" />
-          Back
+      <div class="actions flex">
+        <VirtualTab :list="tabList" />
+        <div style="flex: 1" class="flex pl-25px pr-25px custom-search-scenario">
+          <Select
+            showArrow
+            size="large"
+            dropdownClassName="custom-search-scenario"
+            v-model:value="result"
+            style="flex: 1"
+            showSearch
+            mode="multiple"
+            @change="handleChange"
+            :filter-option="handleFilter"
+          >
+            <Select.Option
+              v-for="item in options"
+              :key="item.id"
+              :value="item.id"
+              :name="item.name"
+            >
+              <div
+                class="inline-flex items-center"
+                :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
+              >
+                <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
+                {{ item.name }}
+              </div>
+            </Select.Option>
+          </Select>
+          <Button :size="ButtonSize.LG" class="ml-20px" type="default" @click="handleExport">{{
+            t('common.exportText')
+          }}</Button>
         </div>
-        <div>
+      </div>
+      <div class="Tabs flex">
+        <Tabs @change="TabChange" v-model:activeKey="activeTab">
+          <Tabs.TabPane key="File">
+            <template #tab> File </template>
+          </Tabs.TabPane>
+          <Tabs.TabPane key="Scenario">
+            <template #tab> Scenario </template>
+          </Tabs.TabPane>
+        </Tabs>
+        <div class="tips">
           <Icon icon="material-symbols:info-rounded" color="#57CCEF" />
           This page allows you to search your data in this dataset by search ontologies
         </div>
       </div>
-      <div class="flex pl-25px pr-25px custom-search-scenario">
-        <Select
-          dropdownClassName="custom-search-scenario"
-          v-model:value="result"
-          showSearch
-          mode="multiple"
-          style="flex: 1"
-          @change="handleChange"
-          :filter-option="handleFilter"
-        >
-          <Select.Option v-for="item in options" :key="item.id" :value="item.id" :name="item.name">
-            <div
-              class="inline-flex items-center"
-              :style="`background:${item.color};border-radius:300px;padding: 4px 10px;`"
-            >
-              <img class="mr-1" width="14" height="14" :src="toolTypeImg[item.toolType]" alt="" />
-              {{ item.name }}
-            </div>
-          </Select.Option>
-        </Select>
-        <Button class="ml-20px" type="default" @click="handleExport">Export Result</Button>
-      </div>
+
       <div class="list" v-show="list.length > 0">
         <ScrollContainer ref="scrollRef">
           <template v-for="item in list">
@@ -87,8 +105,10 @@
 </template>
 <script lang="ts" setup>
   // import { useI18n } from '/@/hooks/web/useI18n';
+  import { ButtonSize } from '/@@/Button/typing';
+  import { VirtualTab } from '/@@/VirtualTab';
   import { useDesign } from '/@/hooks/web/useDesign';
-  import { Select, Checkbox, message } from 'ant-design-vue';
+  import { Select, Checkbox, message, Tabs } from 'ant-design-vue';
   import { Button } from '/@/components/BasicCustom/Button';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import datasetEmpty from '/@/assets/images/dataset/dataset_empty.png';
@@ -105,6 +125,7 @@
   } from '/@/api/business/dataset';
   import SearchCard from './searchCard.vue';
   import { useRoute } from 'vue-router';
+  import { useGo } from '/@/hooks/web/usePage';
   import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
   import exportModalVue from './exportModal.vue';
   import { useModal } from '/@/components/Modal';
@@ -113,6 +134,14 @@
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { handleScroll } from '/@/utils/business/scrollListener';
   import { ResultEnum } from '/@/enums/httpEnum';
+  import { RouteChildEnum } from '/@/enums/routeEnum';
+  import Scenario from '/@/assets/svg/tags/scenario.svg';
+  import ScenarioActive from '/@/assets/svg/tags/scenarioActive.svg';
+  import Data from '/@/assets/svg/tags/data.svg';
+  import DataActive from '/@/assets/svg/tags/dataActive.svg';
+  import Ontology from '/@/assets/svg/tags/ontology.svg';
+  import OntologyActive from '/@/assets/svg/tags/ontologyActive.svg';
+  import { useI18n } from 'vue-i18n';
   const [register, { openModal }] = useModal();
   const { query } = useRoute();
   const { id } = query;
@@ -129,7 +158,38 @@
   const pageNo = ref<number>(1);
   const total = ref<number>(0);
   const scrollRef = ref<Nullable<ScrollActionType>>(null);
-
+  const go = useGo();
+  const { t } = useI18n();
+  let activeTab = ref<any>('File');
+  activeTab.value = 'Scenario';
+  let TabChange = (val) => {
+    if (val === 'File') {
+      go(RouteChildEnum.DATASETS_DATA + `?id=${id}`);
+    }
+  };
+  const tabList = [
+    {
+      name: t('business.dataset.overview'),
+      url: RouteChildEnum.DATASETS_OVERVIEW,
+      params: { id: id },
+      icon: Scenario,
+      activeIcon: ScenarioActive,
+    },
+    {
+      name: t('business.datasetContent.data'),
+      url: RouteChildEnum.DATASETS_DATA,
+      active: true,
+      icon: Data,
+      activeIcon: DataActive,
+    },
+    {
+      name: t('business.ontology.ontology'),
+      url: RouteChildEnum.DATASETS_CLASS,
+      params: { id: id },
+      icon: Ontology,
+      activeIcon: OntologyActive,
+    },
+  ];
   const handleChange = (e) => {
     pageNo.value = 1;
     if (e.length === 0) {
@@ -248,6 +308,7 @@
         list.value = res.list || [];
       }
     }
+
     total.value = res.total;
   };
 
@@ -284,6 +345,9 @@
     window.console.log(input, option);
     return (option?.name ?? '').toLowerCase().includes(input.toLowerCase());
   };
+  // setTimeout(() => {
+  //   list.value = [{}];
+  // }, 3000);
 </script>
 <style lang="less" scoped>
   @prefix-cls: ~'@{namespace}-searchScenario';
@@ -295,7 +359,21 @@
       background: red;
     }
     .content {
+      padding: 10px 20px;
       flex: 1;
+      .actions {
+        justify-content: space-between;
+        align-items: center;
+      }
+      .Tabs {
+        margin-top: 10px;
+        justify-content: flex-start;
+        align-items: center;
+        .tips {
+          margin-left: 20px;
+          padding-bottom: 10px;
+        }
+      }
     }
     .list {
       background: white;
@@ -318,7 +396,7 @@
     }
     .empty {
       width: 100%;
-      height: calc(100vh - 180px);
+      height: calc(100vh - 190px);
       display: flex;
       align-items: center;
       justify-content: center;

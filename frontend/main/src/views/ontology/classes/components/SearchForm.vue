@@ -8,7 +8,7 @@
       hideRequiredMark
       labelAlign="left"
     >
-      <Form.Item>
+      <!-- <Form.Item>
         <Input
           autocomplete="off"
           v-model:value="formState.name"
@@ -18,7 +18,7 @@
             <Icon icon="ant-design:search-outlined" style="color: #aaa" size="16" />
           </template>
         </Input>
-      </Form.Item>
+      </Form.Item> -->
       <Form.Item
         :label="t('business.ontology.searchForm.sort')"
         name="Sort"
@@ -121,11 +121,13 @@
       isCenter?: boolean;
       activeTab: ClassTypeEnum;
       datasetType: datasetTypeEnum;
+      searchName?: string;
     }>(),
     {
       isCenter: true,
     },
   );
+
   const emits = defineEmits(['search']);
 
   let formState: SearchItem = reactive({
@@ -159,7 +161,13 @@
       emits('search', formValue);
     }, 400);
   });
-
+  watch(
+    () => props.searchName,
+    (val) => {
+      // debugger
+      formState.name = val;
+    },
+  );
   /**  ToolType Selection List */
   const toolTypeOption = computed(() => {
     if (props.datasetType != datasetTypeEnum.IMAGE) {

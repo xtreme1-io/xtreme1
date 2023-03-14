@@ -63,8 +63,6 @@ function createConfirm(options: ModalOptionsEx): ConfirmOptions {
   const opt: ModalFuncProps = {
     centered: true,
     icon: getIcon(iconType),
-    ...options,
-    content: renderContent(options),
     okButtonProps: {
       style: { 'border-radius': '6px', padding: '10px 16px' },
     } as any,
@@ -72,6 +70,8 @@ function createConfirm(options: ModalOptionsEx): ConfirmOptions {
       type: 'default',
       style: { 'border-radius': '6px', padding: '10px 16px' },
     } as any,
+    ...options,
+    content: renderContent(options),
   };
   return Modal.confirm(opt) as unknown as ConfirmOptions;
 }

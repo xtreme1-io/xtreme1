@@ -1,5 +1,5 @@
 import { BasicPageParams, BasicFetchResult, SortType } from '/@/api/model/baseModel';
-import { PreModelParam } from '/@/api/business/model/modelsModel';
+import { resultFilterParam } from '/@/api/business/model/modelsModel';
 
 export enum listTypeEnum {
   list = 'LIST',
@@ -149,6 +149,7 @@ export interface DatasetItem {
   name: string;
   lockedBy: Nullable<string>;
   datasetName?: string;
+  splitType: string;
 }
 
 export interface DatasetListItem {
@@ -205,7 +206,7 @@ export interface takeRecordParams {
   modelId?: Nullable<number>;
   modelCode?: modelCode;
   isFilterData?: boolean;
-  resultFilterParam?: Nullable<PreModelParam>;
+  resultFilterParam?: Nullable<resultFilterParam>;
 }
 
 export interface exportFileRecord {
@@ -270,4 +271,31 @@ export interface ResponseUploadRecord {
   totalDataNum: string;
   parsedDataNum: string;
   status: UploadStatusEnum;
+}
+
+export enum SelectedDataSplitType {
+  TRAINING = 'TRAINING',
+  VALIDATION = 'VALIDATION',
+  TEST = 'TEST',
+  NOT_SPLIT = 'NOT_SPLIT',
+}
+export interface SelectedDataPa {
+  dataIds: string[];
+  splitType: SelectedDataSplitType;
+}
+export interface splitFliterParams {
+  datasetId: Number;
+  targetDataType?: string;
+  totalSizeRatio: number;
+  trainingRatio: number;
+  validationRatio: number;
+  testRatio: number;
+  splittingBy: String;
+  sortBy?: string;
+  ascOrDesc?: string;
+}
+
+export interface TotalDataCountPa {
+  datasetId: Number;
+  targetDataType?: string;
 }

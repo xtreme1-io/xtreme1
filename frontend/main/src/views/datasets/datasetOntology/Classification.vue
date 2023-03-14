@@ -4,6 +4,17 @@
       <div class="header">
         <VirtualTab :list="tabListDataset" />
         <VirtualTab :list="tabListOntology" />
+        <Input
+          style="margin-right: 60px; flex: 1"
+          size="large"
+          autocomplete="off"
+          v-model:value="searchName"
+          :placeholder="t('business.ontology.searchForm.searchItems')"
+        >
+          <template #prefix>
+            <Icon icon="ic:twotone-manage-search" style="color: #aaa" size="16" />
+          </template>
+        </Input>
       </div>
       <div class="btn">
         <HeaderDropdown
@@ -45,6 +56,7 @@
         :isCenter="false"
         :activeTab="activeTab"
         :datasetType="datasetType"
+        :searchName="searchName"
       />
     </div>
     <!-- Modal -->
@@ -65,6 +77,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+  import Icon, { SvgIcon } from '/@/components/Icon/index';
+  import { Input } from 'ant-design-vue';
   import { ref, unref, provide, onMounted } from 'vue';
   import { VirtualTab } from '/@@/VirtualTab';
   import SearchForm from '/@/views/ontology/classes/components/SearchForm.vue';
@@ -115,7 +129,7 @@
   const pathArr = route.path.split('/');
   // The page path should be consistent with ClassTypeEnum
   const pageType = pathArr[pathArr.length - 1].toLocaleUpperCase();
-
+  let searchName = ref<string>('');
   const datasetId = Number(route.query.id);
 
   /** Tab */

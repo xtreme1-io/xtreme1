@@ -66,6 +66,7 @@ export default {
     enterNewName: '请输入新名称。',
     datasetType: {
       image: '图像',
+      lidar: '点云',
       lidarBasic: '激光雷达基础',
       lidarFusion: '激光雷达融合',
     },

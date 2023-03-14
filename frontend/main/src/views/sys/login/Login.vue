@@ -1,10 +1,16 @@
 <template>
   <div :class="prefixCls">
     <div class="content">
-      <img class="logo-img" :src="logoImg" alt="" />
+      <div class="logo">
+        <img class="logo-img" :src="logoImg" alt="" />
+        <div class="split"> </div>
+        <img class="logo-qlf" :src="logoQlf" alt="" />
+      </div>
+
       <div class="info">
-        <span class="link cursor-pointer" @click="handleGoPortal">Xtreme1</span> is an open-source
-        platform optimizing your data labeling and accelerating AI and machine learning with MLOps
+        <span class="link cursor-pointer" @click="handleGoPortal">BasicAI </span> x1 Community
+        Edition is an open-source platform optimizing your data labeling and accelerating AI and
+        machine learning with MLOps
       </div>
       <img class="rect-mask" :src="rectMask" alt="" />
       <img class="bg-tip" :src="bgTip" alt="" />
@@ -54,6 +60,7 @@
   import bgTip from '/@/assets/images/bg-tip.png';
   // import showImg from '/@/assets/images/show-img.png';
   import logoImg from '/@/assets/images/logo-img.png';
+  import logoQlf from '/@/assets/images/logo-qlf.png';
   import rectMask from '/@/assets/images/rect-mask.png';
   import { handleGoPortal } from '/@/utils/business';
   import lottie from 'lottie-web';

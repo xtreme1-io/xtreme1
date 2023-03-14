@@ -20,6 +20,7 @@
       :filterForm="filterForm"
       @setExportRecord="setExportRecord"
     />
+    <SplitedModal @register="registerSplitedModal" @fetchList="reloadList" />
     <Modal
       :title="t('business.datasetContent.terminateExport')"
       @register="registerCancelExportModal"
@@ -38,11 +39,22 @@
       <div class="actions">
         <VirtualTab :list="tabList" />
       </div>
-      <div class="view-actions">
-        <Button class="mr-2" type="default" @click="handleGoSearch" :size="ButtonSize.LG">
+      <div style="margin-left: 10px; flex: 1" class="view-actions">
+        <Input
+          style="margin: 0 15px; flex: 1"
+          size="large"
+          autocomplete="off"
+          v-model:value="searchName"
+          :placeholder="t('business.ontology.searchForm.searchItems')"
+        >
+          <template #prefix>
+            <Icon icon="ic:twotone-manage-search" style="color: #aaa" size="16" />
+          </template>
+        </Input>
+        <!-- <Button class="mr-2" type="default" @click="handleGoSearch" :size="ButtonSize.LG">
           <Icon icon="ic:twotone-manage-search" size="20" />
           Scenario Search
-        </Button>
+        </Button> -->
         <Button type="primary" @click="handleOpenUpload" :size="ButtonSize.LG" noBorder>
           {{ t('business.datasetContent.upload') }}
         </Button>
@@ -51,6 +63,19 @@
         </Button>
       </div>
     </div>
+
+    <div class="tabs flex">
+      <Tabs @change="TabChange" v-model:activeKey="activeTab">
+        <Tabs.TabPane key="File">
+          <template #tab> File </template>
+        </Tabs.TabPane>
+        <Tabs.TabPane key="Scenario">
+          <template #tab> Scenario </template>
+        </Tabs.TabPane>
+      </Tabs>
+      <Button type="default" @click="handleOpenSplited">Split</Button>
+    </div>
+
     <div class="wrapper">
       <div class="actions">
         <Dropdown placement="bottomLeft">
@@ -75,6 +100,7 @@
               >
                 <Authority :value="item.permission ? [item.permission] : undefined">
                   <Menu.Item
+                    v-if="!item.children"
                     @click="
                     () => {
                       emits(item.function as any);
@@ -91,6 +117,44 @@
                       <span style="display: inline-block; margin-left: 5px">{{ item.text }} </span>
                     </div>
                   </Menu.Item>
+
+                  <SubMenu
+                    :disabled="
+                      (selectedList.length === 0 && index > 1) ||
+                      (item.isDisabledFlag && flagReactive[item.isDisabledFlag])
+                    "
+                    v-else
+                  >
+                    <template #icon> </template>
+                    <template #title>
+                      <div class="action-item">
+                        <img width="14" height="14" v-if="item.img" :src="item.img" alt="" />
+                      </div>
+
+                      {{ item.text }}</template
+                    >
+                    <template :key="item.text" v-for="(itemC, index) in item.children">
+                      <Menu.Item
+                        @click="() => {
+                     emits(itemC.function as any,itemC.type);
+                   }
+                 "
+                      >
+                        <div class="action-item">
+                          <Icon
+                            v-if="itemC.icon"
+                            style="color: #57ccef"
+                            size="20"
+                            :icon="itemC.icon"
+                          />
+                          <!-- <img width="20" height="20" v-if="itemC.img" :src="itemC.img" alt="" /> -->
+                          <span style="display: inline-block; margin-left: 5px"
+                            >{{ itemC.text }}
+                          </span>
+                        </div>
+                      </Menu.Item></template
+                    >
+                  </SubMenu>
                 </Authority>
                 <Divider v-if="item.hasDivider" style="margin: 5px" />
               </template>
@@ -113,7 +177,21 @@
           </div>
         </div>
       </div> -->
-      <div class="flex items-center">
+      <div class="wrapper-right flex items-center">
+        <div class="sliderContent">
+          <div class="slider">
+            <Slider
+              v-model:value="cardSliderValue"
+              :min="200"
+              :max="cardMaxSliderWidth || 900"
+              step="4"
+            />
+          </div>
+          <SvgIcon @click="cardResetWidth" class="cursor-pointer" name="screen" />
+        </div>
+
+        <UnLock @fetchList="reloadList" />
+
         <div class="view-tag mr-2" v-if="dataId">
           <Icon icon="mdi:filter-minus" />
           Filtering by selected data
@@ -194,12 +272,22 @@
   import { ref, unref, defineProps, computed, watch, defineEmits, reactive } from 'vue';
   // import emitter from 'tiny-emitter/instance';
   // import { LoadingOutlined } from '@ant-design/icons-vue';
-
+  import UnLock from './UnLock.vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useRoute } from 'vue-router';
   import { RouteChildEnum } from '/@/enums/routeEnum';
-
-  import { Dropdown, Menu, Divider, Progress, Tooltip, Checkbox } from 'ant-design-vue';
+  import {
+    Dropdown,
+    Menu,
+    Divider,
+    Progress,
+    Tooltip,
+    Checkbox,
+    SubMenu,
+    Tabs,
+    Input,
+    Slider,
+  } from 'ant-design-vue';
   import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon/index';
   import { Button, ButtonSize } from '/@@/Button';
@@ -210,6 +298,7 @@
   import UploadModal from './upload/UploadModal.vue';
   import ProgressModal from './upload/ProgressModal.vue';
   import ExportModal from './ExportModal.vue';
+  import SplitedModal from './splitedModal.vue';
 
   import { exportDataRecordCallBack } from '/@/api/business/dataset';
   import { actionList, actionListFrame, actionImageList, PageTypeEnum } from './data';
@@ -244,6 +333,22 @@
   const { id, dataId } = query;
   const { t } = useI18n();
 
+  let activeTab = ref<string>('File');
+
+  const searchName = computed({
+    get() {
+      return props.name;
+    },
+    set(value) {
+      emits('update:name', value);
+    },
+  });
+
+  let TabChange = (val) => {
+    if (val === 'Scenario') {
+      handleGoSearch();
+    }
+  };
   const tabList = [
     {
       name: t('business.dataset.overview'),
@@ -269,6 +374,7 @@
   ];
 
   const props = defineProps<{
+    name: string;
     sliderValue: number;
     setSlider: (val) => void;
     selectedList: string[];
@@ -279,6 +385,9 @@
     filterForm: any;
     showAnnotation: boolean;
     datasetType: datasetTypeEnum | undefined;
+    cardMaxSliderWidth: number;
+    cardResetWidth: (val) => void;
+    cardSliderWidthValue: number;
   }>();
 
   watch(props, (curr) => {
@@ -303,6 +412,8 @@
     'handleMultipleFrame',
     'handleModelRun',
     'update:showAnnotation',
+    'update:name',
+    'update:cardSliderWidthValue',
   ]);
 
   const reloadList = () => {
@@ -346,6 +457,7 @@
   /** Export */
   const exportResultList = ref<exportFileRecord[]>([]);
   const [registerExportModal, { openModal: openExportModal }] = useModal();
+  const [registerSplitedModal, { openModal: openSplitedModal }] = useModal();
   const [
     registerCancelExportModal,
     { openModal: openExportCancelModal, closeModal: closeExportCancelModal },
@@ -354,6 +466,10 @@
   const handleOpenExport = async () => {
     openExportModal();
   };
+  const handleOpenSplited = async () => {
+    openSplitedModal();
+  };
+
   // Cancel
   const handleCancelExport = () => {
     if (successExportFilesNum.value != exportList.value.length) {
@@ -425,6 +541,15 @@
       { serialNumber: res, status: ExportStatus.GENERATING, fileName: 'pending...' },
     ]);
   };
+
+  const cardSliderValue = computed({
+    get() {
+      return props.cardSliderWidthValue;
+    },
+    set(value) {
+      emits('update:cardSliderWidthValue', value);
+    },
+  });
 
   const exportList = ref<any>([]);
   watch(

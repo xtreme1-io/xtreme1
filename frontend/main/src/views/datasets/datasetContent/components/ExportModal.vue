@@ -13,6 +13,30 @@
       }"
     >
       <div class="content">
+        <div class="flex items-center gap-10px">
+          <div class="whitespace-nowrap" style="color: #333; width: 100px">Data</div>
+          <Select v-model:value="selectValue" style="width: 240px" allowClear>
+            <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </Select.Option>
+          </Select>
+        </div>
+        <div class="flex items-center gap-10px">
+          <div class="whitespace-nowrap" style="color: #333; width: 100px">Results</div>
+          <Select v-model:value="selectValue" style="width: 240px" allowClear>
+            <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </Select.Option>
+          </Select>
+        </div>
+        <div class="flex items-center gap-10px">
+          <div class="whitespace-nowrap" style="color: #333; width: 100px">Export Format</div>
+          <Select v-model:value="selectValue" style="width: 240px" allowClear>
+            <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </Select.Option>
+          </Select>
+        </div>
         <div class="flex items-center gap-8px">
           <Icon icon="eva:info-fill" size="20" color="#57CCEF" />
           <span style="color: #666"
@@ -20,14 +44,6 @@
             <a href="https://docs.xtreme1.io/xtreme1-docs/export-data" target="_blank">here</a> to
             check out our data format explanation</span
           >
-        </div>
-        <div class="flex items-center gap-10px">
-          <div class="whitespace-nowrap" style="color: #333">Export Format</div>
-          <Select v-model:value="selectValue" style="width: 240px" allowClear>
-            <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </Select.Option>
-          </Select>
         </div>
       </div>
     </BasicModal>
@@ -39,7 +55,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
-
+  import { message } from 'ant-design-vue';
   import { Select } from 'ant-design-vue';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Icon } from '/@/components/Icon';
@@ -95,6 +111,10 @@
     try {
       isLoading.value = true;
       const res = await exportData(data);
+      message.success({
+        content: 'successed',
+        duration: 5,
+      });
       emit('setExportRecord', res);
       closeModal();
     } catch (e) {}
