@@ -5,8 +5,11 @@
     @mouseleave="handleLeave"
     :style="info?.type !== datasetTypeEnum.LIDAR_FUSION ? 'margin-bottom: 20px' : ''"
   >
-    <div class="lockInfo" v-if="data.lockedBy">
-      <Icon icon="bx:bxs-lock" /> Editing by {{ data.lockedBy }}
+    <div class="lockInfo">
+      <div v-if="data?.splitType && data.splitType !== 'NOT_SPLIT'" class="splitType"
+        ><span :style="getSplitColor(data.splitType)">{{ data.splitType }} </span></div
+      >
+      <div v-if="data.lockedBy"> <Icon icon="bx:bxs-lock" /> Editing by {{ data.lockedBy }} </div>
     </div>
     <div class="img">
       <div :class="getCheckboxClass" v-if="!data.lockedBy">
@@ -309,9 +312,10 @@
     return props.data.type && props.data?.type === dataTypeEnum.FRAME_SERIES;
   };
 
-  // const handleGo = () => {
-  //   go(`${RouteEnum.DATASETS}/detail?id=${dataId}`);
-  // };
+  const getSplitColor = (type) => {
+    let color = type === 'TRAINING' ? '#32D583' : type === 'TEST' ? '#FDB022' : '#3E8BE9';
+    return `background:${color}`;
+  };
 
   const handleAnnotate = (id) => {
     emits('handleSingleAnnotate', id);
@@ -362,13 +366,25 @@
       position: absolute;
       padding: 0 10px;
       width: 100%;
-      text-align: center;
+      text-align: right;
       top: 6px;
       color: white;
       z-index: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      .splitType {
+        span {
+          display: inline-block;
+          height: 20px;
+          width: 85px;
+          line-height: 20px;
+          text-align: center;
+          font-size: 12px;
+          background: #fdb022;
+          border-radius: 15px;
+        }
+      }
     }
 
     .floder-img {

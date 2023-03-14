@@ -22,6 +22,8 @@ import {
   UploadParams,
   ResponseUploadRecord,
   SelectedDataPa,
+  splitFliterParams,
+  TotalDataCountPa,
 } from './model/datasetModel';
 import { BasicIdParams } from '/@/api/model/baseModel';
 
@@ -29,6 +31,7 @@ enum Api {
   DATASET = '/dataset',
   DATA = '/data',
   DATASET_CLASS = '/datasetClass',
+  MODEL_RUN = 'modelRun',
 }
 
 /**
@@ -392,9 +395,19 @@ export const getClassificationOptions = (params) =>
       ignoreCancelToken: true,
     },
   });
-export const splitFliter = (params) =>
-  defHttp.post<any>({
-    url: `${Api.DATA}/split/fliter`,
+export const splitFliter = (params: splitFliterParams) =>
+  defHttp.post<null>({
+    url: `${Api.DATA}/split/filter`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getTotalDataCount = (params: TotalDataCountPa) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/split/totalDataCount`,
     params,
     headers: {
       // @ts-ignore
@@ -406,6 +419,16 @@ export const splitDataSelected = (params: SelectedDataPa) =>
   defHttp.post<any>({
     url: `${Api.DATA}/split/dataIds`,
     params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getMoelResultApi = (datasetId: number) =>
+  defHttp.get<any>({
+    url: `${Api.MODEL_RUN}/getDatasetModelRunResult/${datasetId}`,
+
     headers: {
       // @ts-ignore
       ignoreCancelToken: true,

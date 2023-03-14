@@ -149,6 +149,7 @@ export interface DatasetItem {
   name: string;
   lockedBy: Nullable<string>;
   datasetName?: string;
+  splitType: string;
 }
 
 export interface DatasetListItem {
@@ -281,4 +282,20 @@ export enum SelectedDataSplitType {
 export interface SelectedDataPa {
   dataIds: string[];
   splitType: SelectedDataSplitType;
+}
+export interface splitFliterParams {
+  datasetId: Number;
+  targetDataType?: string;
+  totalSizeRatio: number;
+  trainingRatio: number;
+  validationRatio: number;
+  testRatio: number;
+  splittingBy: String;
+  sortBy?: string;
+  ascOrDesc?: string;
+}
+
+export interface TotalDataCountPa {
+  datasetId: Number;
+  targetDataType?: string;
 }

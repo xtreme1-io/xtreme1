@@ -20,13 +20,7 @@
       :filterForm="filterForm"
       @setExportRecord="setExportRecord"
     />
-    <SplitedModal
-      @register="registerSplitedModal"
-      :modelrunOption="modelrunOption"
-      :groundTruthsOption="groundTruthsOption"
-      :filterForm="filterForm"
-      @setExportRecord="setExportRecord"
-    />
+    <SplitedModal @register="registerSplitedModal" @fetchList="reloadList" />
     <Modal
       :title="t('business.datasetContent.terminateExport')"
       @register="registerCancelExportModal"

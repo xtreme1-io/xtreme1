@@ -160,15 +160,16 @@
           </template>
           <template v-else>
             <div class="custom-item">
-              <Select showSearch style="flex: 1" size="small" v-model:value="sortField">
-                <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
-                  {{ item.label }}
-                </Select.Option>
-              </Select>
+              <Cascader
+                showSearch
+                v-model:value="runRecordId"
+                :options="modelRunResultList"
+                placeholder="Please select"
+              />
             </div>
             <div class="custom-item">
-              <Select style="flex: 1" size="small" v-model:value="sortField">
-                <Select.Option value="data confidence"> confidence </Select.Option>
+              <Select style="flex: 1" size="small" v-model:value="DataConfidence">
+                <Select.Option value="DataConfidence"> Data Confidence </Select.Option>
               </Select>
             </div>
           </template>
@@ -189,27 +190,25 @@
             </CollContainer>
 
             <CollContainer icon="splite|svg" title="Split">
-              <Radio.Group name="status" v-model:value="annotationStatus">
-                <Radio :value="undefined">
-                  <span>All</span>
+              <Radio.Group name="status" v-model:value="splitType">
+                <Radio style="display: block" :value="undefined">
+                  <span>All </span>
                 </Radio>
-                <Radio value="ANNOTATED">
+                <Radio :value="SelectedDataSplitType.TRAINING">
                   <SvgIcon name="annotated" />
-                  <span class="ml-2">Training({{ countFormat(statusInfo.annotatedCount) }})</span>
+                  <span class="ml-2">Training</span>
                 </Radio>
-                <Radio value="NOT_ANNOTATED">
+                <Radio :value="SelectedDataSplitType.VALIDATION">
                   <SvgIcon name="notAnnotated" />
-                  <span class="ml-2"
-                    >Validation({{ countFormat(statusInfo.notAnnotatedCount) }})</span
-                  >
+                  <span class="ml-2">Validation</span>
                 </Radio>
-                <Radio value="INVALID">
+                <Radio :value="SelectedDataSplitType.TEST">
                   <SvgIcon name="invalid" />
-                  <span class="ml-2">Not Splited({{ countFormat(statusInfo.invalidCount) }})</span>
+                  <span class="ml-2">Test</span>
                 </Radio>
-                <Radio value="INVALID">
+                <Radio :value="SelectedDataSplitType.NOT_SPLIT">
                   <SvgIcon name="invalid" />
-                  <span class="ml-2">Not Splited({{ countFormat(statusInfo.invalidCount) }})</span>
+                  <span class="ml-2">Not Splited</span>
                 </Radio>
               </Radio.Group>
             </CollContainer>
@@ -238,19 +237,24 @@
             </CollContainer>
           </div>
 
-          <div class="filter">
+          <div class="filter" v-if="sortWithLabel !== 'Data'">
             <div class="font-bold mb-2 flex justify-between">
               <div>Filter with result</div>
             </div>
             <div class="custom-item">
-              <Select showSearch style="flex: 1" size="small" v-model:value="sortField">
-                <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
-                  {{ item.label }}
-                </Select.Option>
-              </Select>
+              <Cascader
+                disabled
+                v-model:value="runRecordId"
+                :options="modelRunResultList"
+                placeholder="Please select"
+              />
             </div>
 
-            <CollContainer icon="data-confidence|svg" title="Data confidence">
+            <CollContainer
+              v-if="runRecordId?.length > 0"
+              icon="data-confidence|svg"
+              title="Data confidence"
+            >
               <Slider style="width: 100%" v-model:value="confidenceSlider" range />
             </CollContainer>
           </div>
@@ -259,11 +263,19 @@
           ><div>
             <div class="custom-item">
               <div class="custom-label font-bold"> If display results</div>
-              <Switch v-model:checked="isDisplayResult" />
+              <Switch v-model:checked="showAnnotation" />
             </div>
             <div class="custom-item">
               <div class="custom-label font-bold"> Results</div>
-              XXX多选
+              版本低 多选不支持级联
+              <!-- <Cascader
+                style="width: 100%"
+                multiple
+                max-tag-count="responsive"
+                v-model:value="runRecordIdDisplay"
+                :options="modelRunResultList"
+                placeholder="Please select"
+              /> -->
             </div>
           </div>
         </template>
@@ -289,6 +301,7 @@
     datasetObjectApi,
     deleteBatchDataset,
     getLockedByDataset,
+    getMoelResultApi,
     getStatusNum,
     hasOntologyApi,
     makeFrameSeriesApi,
@@ -297,6 +310,7 @@
     ungroupFrameSeriesApi,
     unLock,
   } from '/@/api/business/dataset';
+  import { SelectedDataSplitType } from '/@/api/business/model/datasetModel';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { useRoute } from 'vue-router';
   import {
@@ -310,7 +324,17 @@
   // import emitter from 'tiny-emitter/instance';
   import ImgCard from './components/ImgCard.vue';
   import Tools from './components/Tools.vue';
-  import { Select, Radio, Input, Modal, Switch, Tabs, Slider } from 'ant-design-vue';
+  import {
+    Select,
+    Radio,
+    Input,
+    Modal,
+    Switch,
+    Tabs,
+    Slider,
+    message,
+    Cascader,
+  } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { datasetItemDetail } from '/@/api/business/dataset';
   import { dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -359,8 +383,8 @@
   const lockedNum = ref<number>(0);
   const sliderType = ref<string>('fliter');
   const sortWithLabel = ref<string>('Data');
-  const confidenceSlider = ref([0, 10]);
-
+  const confidenceSlider = ref([0, 100]);
+  const runRecordId = ref<any>();
   const type = ref<PageTypeEnum>();
   const { id, dataId } = query;
   const [register, { openModal }] = useModal();
@@ -370,6 +394,10 @@
   const pageNo = ref<number>(1);
   const modelrunOption = ref<any>();
   const annotationStatus = ref<any>();
+  let modelRunResultList = ref<any>([]);
+  let runRecordIdDisplay = ref();
+  const splitType = ref<any>();
+  const DataConfidence = ref<string>('DataConfidence');
   const selectName = t('business.models.models');
   const title = t('business.models.run.runModel');
   const modelId = ref<number>();
@@ -399,9 +427,66 @@
     ascOrDesc: sortType,
     createEndTime: end,
     annotationStatus: annotationStatus,
+    splitType: splitType,
+    confidenceSlider: confidenceSlider,
+    runRecordId: runRecordId,
   });
   let timeout;
+
+  let getMoelResult = async () => {
+    let res = await getMoelResultApi(id);
+
+    modelRunResultList.value = res.map((item) => {
+      let result = {
+        label: item.modelName,
+        value: item.modelId,
+        children: item.runRecords.map((i) => ({
+          label: i.runNo,
+          value: i.id,
+        })),
+      };
+
+      return result;
+    });
+
+    // modelRunResultList.values = [
+    //   {
+    //     value: 'zhejiang',
+    //     label: 'Zhejiang',
+    //     children: [
+    //       {
+    //         value: 'hangzhou',
+    //         label: 'Hangzhou',
+    //         children: [
+    //           {
+    //             value: 'xihu',
+    //             label: 'West Lake',
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     value: 'jiangsu',
+    //     label: 'Jiangsu',
+    //     children: [
+    //       {
+    //         value: 'nanjing',
+    //         label: 'Nanjing',
+    //         children: [
+    //           {
+    //             value: 'zhonghuamen',
+    //             label: 'Zhong Hua Men',
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   },
+    // ];
+    console.log(modelRunResultList.values);
+  };
   onMounted(async () => {
+    getMoelResult();
     fetchStatusNum();
     getLockedData();
     fetchList(filterForm);
@@ -459,6 +544,9 @@
     filterForm.ascOrDesc = SortTypeEnum.ASC;
     filterForm.createEndTime = null;
     filterForm.annotationStatus = undefined;
+    filterForm.splitType = undefined;
+    filterForm.runRecordId = undefined;
+    filterForm.confidenceSlider = [0, 100];
   };
 
   const getSelectOptions = async () => {
@@ -488,7 +576,13 @@
         filter.createEndTime && filter.createStartTime
           ? setEndTime(filter.createEndTime)
           : undefined,
+      // TODO
+      // minDataConfidence: filter.confidenceSlider[0]/100,
+      // maxDataConfidence: filter.confidenceSlider[1]/100,
     };
+    delete params.confidenceSlider;
+    params.runRecordId && (params.runRecordId = params.runRecordId[1]);
+    // console.log(params.runRecordId)
     if (dataId) {
       params.ids = [dataId].toString();
     }
@@ -552,6 +646,10 @@
     await splitDataSelected({
       dataIds: selectedList.value,
       splitType: type,
+    });
+    message.success({
+      content: 'successed',
+      duration: 5,
     });
     fixedFetchList();
   };
