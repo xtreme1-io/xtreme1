@@ -87,20 +87,30 @@
       // debugger;
       return res;
     },
-    filterFn: (data) => {
-      data.status && (data.status = data.status?.toString());
-      data.runRecordType && (data.runRecordType = data.runRecordType?.toString());
-      for (const key in data) {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
-          const element = data[key];
+    // filterFn: (data) => {
+    //   data?.status && (data.status = data.status?.toString());
+    //   data?.runRecordType && (data.runRecordType = data.runRecordType?.toString());
+    //   for (const key in data) {
+    //     if (Object.prototype.hasOwnProperty.call(data, key)) {
+    //       const element = data[key];
+    //       if (!element) {
+    //         delete data[key];
+    //       }
+    //     }
+    //   }
+    //   return data;
+    // },
+    beforeFetch: (res) => {
+      res?.status && (res.status = res.status?.toString());
+      res?.runRecordType && (res.runRecordType = res.runRecordType?.toString());
+      for (const key in res) {
+        if (Object.prototype.hasOwnProperty.call(res, key)) {
+          const element = res[key];
           if (!element) {
-            delete data[key];
+            delete res[key];
           }
         }
       }
-      return data;
-    },
-    beforeFetch: (res) => {
       if (res?.datasetName) {
         let pa = res?.datasetName.map((i) => i.value);
         delete res.datasetName;
@@ -116,7 +126,6 @@
       if (!sortInfo?.order) {
         return;
       }
-
       let trans = sortInfo.order.split('end')[0].toUpperCase();
       return { ascOrDesc: trans };
     },

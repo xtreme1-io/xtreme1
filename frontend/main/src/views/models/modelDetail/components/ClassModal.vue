@@ -37,18 +37,31 @@
             <Tooltip placement="rightTop" :title="t('business.models.overView.nameText')">
               <Icon size="15" class="info-icon" icon="uiw:information" /> </Tooltip></span
         ></div>
-        <div class="classItem" :key="item.key" v-for="item in classConfig">
-          <Input v-model:value="item.code" /> <Input v-model:value="item.name" />
-          <div>
-            <SvgIcon
-              style="color: #c4c4c4; cursor: pointer"
-              size="24"
-              name="delete"
-              @click="deleteClass(item)"
-            />
+        <div class="items">
+          <div class="classItem" :key="item.key" v-for="item in classConfig">
+            <div>
+              <Input v-model:value="item.code" /><div v-show="!item.code" class="errortip">
+                {{ t('business.models.overView.codeErrorMsg') }}
+              </div>
+            </div>
+            <div>
+              <Input v-model:value="item.name" /><div v-show="!item.name" class="errortip">
+                {{ t('business.models.overView.nameErrorMsg') }}</div
+              >
+            </div>
+
+            <div>
+              <SvgIcon
+                style="color: #c4c4c4; cursor: pointer"
+                size="24"
+                name="delete"
+                @click="deleteClass(item)"
+              />
+            </div>
           </div>
         </div>
-        <div style="color: #576ff3" class="mt-1 cursor-pointer" @click="addClass">
+
+        <div style="width: 80px; color: #576ff3" class="mt-1 cursor-pointer" @click="addClass">
           <Icon icon="ant-design:plus-outlined" size="18" /> Add
         </div>
       </div>
@@ -112,10 +125,19 @@
     const params: any = {
       modelId: Number(modelId),
     };
-    params.modelClassList = classConfig.value.map((item) => ({
-      code: item.code,
-      name: item.name,
-    }));
+    let validate = false;
+    params.modelClassList = classConfig.value.map((item) => {
+      if (!item.code || !item.name) {
+        validate = true;
+      }
+      return {
+        code: item.code,
+        name: item.name,
+      };
+    });
+    if (validate) {
+      return;
+    }
     await setClassModelApi(params);
     message.success('Successed');
     closeModal();
@@ -141,11 +163,12 @@
   .inner {
     .text {
       width: 100%;
-      padding: 40px;
+      padding: 20px;
       font-weight: 500; //font-weight: 600;
       font-size: 16px;
       color: #333;
       .title {
+        margin-bottom: 10px;
         .code {
           display: inline-block;
           width: 200px;
@@ -156,14 +179,22 @@
           width: 200px;
         }
       }
-      .classItem {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        margin-bottom: 10px;
-        :deep(.ant-input) {
-          width: 200px;
-          margin-right: 20px;
+      .items {
+        max-height: 310px;
+        overflow: auto;
+        .classItem {
+          display: flex;
+          justify-content: flex-start;
+
+          margin-bottom: 10px;
+          :deep(.ant-input) {
+            width: 200px;
+            margin-right: 20px;
+          }
+          .errortip {
+            font-size: 12px;
+            color: red;
+          }
         }
       }
     }

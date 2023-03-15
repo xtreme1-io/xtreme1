@@ -400,7 +400,7 @@ export function useImgCard(props: {
       ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
       : { files: null };
     const file = pc.files && pc.files[0].file;
-    const thumbnailUrl = file?.mediumThumbnail?.url;
+    const thumbnailUrl = file?.largeThumbnail?.url;
     const url = file?.renderImage?.url;
     return thumbnailUrl || url || placeImgType;
   };
@@ -441,7 +441,7 @@ export function useSearchCard(props: {
       ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
       : { files: null };
     const file = pc.files && pc.files[0].file;
-    const thumbnailUrl = file?.mediumThumbnail?.url;
+    const thumbnailUrl = file?.largeThumbnail?.url;
     const url = file?.renderImage?.url;
     return thumbnailUrl || url || placeImgType;
   };

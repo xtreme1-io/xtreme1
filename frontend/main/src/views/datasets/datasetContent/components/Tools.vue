@@ -161,10 +161,10 @@
             </Menu>
           </template>
         </Dropdown>
-        <div class="check">
+        <!-- <div class="check">
           <Checkbox class="small" :checked="showAnnotation" @change="onShowAnnotation" />
           <span class="inline-block ml-2">Preview annotation objects</span>
-        </div>
+        </div> -->
       </div>
       <!-- <div class="view-actions" v-if="false">
         <div class="num-wrapper">

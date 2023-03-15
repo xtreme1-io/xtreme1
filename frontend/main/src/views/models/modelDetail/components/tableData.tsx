@@ -66,7 +66,7 @@ const filterSelect = defineComponent({
     return () => (
       <>
         {
-          <div style="padding:20px">
+          <div style="padding:20px;max-width:220px">
             <div style="padding-bottom:20px" class="flex; ">
               {' '}
               <a
@@ -197,7 +197,7 @@ export function getBasicColumns(): BasicColumn[] {
       filterIcon: ({ filtered }) => {
         return filtered ? activeFilterIcon : inactiveFilterIcon;
       },
-      onFilter: (value: string, record: any) => record.runRecordType,
+      // onFilter: (value: string, record: any) => record.runRecordType,
       // format: (v: any) => {
       //   return formatTaskType(v);
       // },
