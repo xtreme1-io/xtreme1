@@ -19,7 +19,8 @@
 
   <template v-if="!isEdit">
     <!-- eslint-disable vue/no-v-html -->
-    <div class="des_text" v-html="showDescription"></div>
+    <div v-if="showDescription" class="des_text" v-html="showDescription"></div>
+    <Empty v-else />
   </template>
   <template v-else>
     <div class="mt-20px">
@@ -28,6 +29,7 @@
   </template>
 </template>
 <script lang="ts" setup>
+  import { Empty } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { SvgIcon } from '/@/components/Icon';
   import { Tinymce } from '/@/components/Tinymce';

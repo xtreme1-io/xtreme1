@@ -87,5 +87,7 @@ export default {
   overView: {
     codeText: "The code of your classes correspond to the 'label' values by your model runs",
     nameText: 'The name response to how you display your classes in Xtreme1',
+    codeErrorMsg: 'The code cannot be empty',
+    nameErrorMsg: 'The name cannot be empty',
   },
 };

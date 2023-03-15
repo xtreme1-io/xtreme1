@@ -1,42 +1,42 @@
 <template>
-  <div class="overview">
-    <div class="des">
-      <OverviewDes :description="props.overviewData.description" />
-    </div>
-    <div class="scenario">
+  <div class="overview des">
+    <OverviewDes :description="props.overviewData.description" />
+  </div>
+  <!-- <div class="scenario">
       <div class="title">{{ t('business.models.overviewPage.scenarios') }}</div>
       <OverviewTags :tagList="props.overviewData.scenario" />
-    </div>
-    <div class="classes">
-      <div class="title"
-        >{{ t('business.models.overviewPage.classes') }}
-        <div style="float: right"
-          ><SvgIcon
-            style="
-              color: #c4c4c4;
-              cursor: pointer;
-              vertical-align: revert;
-              border-radius: 6px;
-              border: 2px solid #aaa;
-              padding: 4px;
-            "
-            size="28"
-            @click="openModal"
-            name="setting"
-          />
-        </div>
+    </div> -->
+
+  <div class="classes overview">
+    <div class="title"
+      >{{ t('business.models.overviewPage.classes') }}
+      <div style="float: right"
+        ><SvgIcon
+          style="
+            color: #c4c4c4;
+            cursor: pointer;
+            vertical-align: revert;
+            border-radius: 6px;
+            border: 2px solid #aaa;
+            padding: 4px;
+          "
+          size="28"
+          @click="openModal"
+          name="setting"
+        />
       </div>
-
-      <OverviewClasses
-        v-if="props.overviewData.classes.length > 0"
-        :isGroup="props.overviewData.isType"
-        :classes="props.overviewData.classes"
-        :datasetType="props.datasetType"
-      />
-
-      <Empty v-else />
     </div>
+
+    <OverviewClasses
+      v-if="props.overviewData.classes.length > 0"
+      :isGroup="props.overviewData.isType"
+      :classes="props.overviewData.classes"
+      :datasetType="props.datasetType"
+    />
+
+    <Empty v-else />
   </div>
+
   <ClassModal :classes="props.overviewData.classes" @register="register" />
 </template>
 <script lang="ts" setup>

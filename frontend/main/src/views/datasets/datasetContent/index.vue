@@ -265,17 +265,23 @@
               <div class="custom-label font-bold"> If display results</div>
               <Switch v-model:checked="showAnnotation" />
             </div>
-            <div class="custom-item">
+            <div>
               <div class="custom-label font-bold"> Results</div>
-              版本低 多选不支持级联
-              <!-- <Cascader
+
+              <TreeSelect
+                :dropdownStyle="{ width: '200px' }"
+                size="small"
                 style="width: 100%"
-                multiple
-                max-tag-count="responsive"
                 v-model:value="runRecordIdDisplay"
-                :options="modelRunResultList"
+                :tree-data="modelRunResultListForDisplay"
+                tree-checkable
+                allow-clear
                 placeholder="Please select"
-              /> -->
+                showSearch
+                treeDefaultExpandAll
+              />
+
+              <!-- fieldNames -->
             </div>
           </div>
         </template>
@@ -294,6 +300,7 @@
     onMounted,
     onUnmounted,
     watchEffect,
+    computed,
   } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
   import {
@@ -334,6 +341,7 @@
     Slider,
     message,
     Cascader,
+    TreeSelect,
   } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { datasetItemDetail } from '/@/api/business/dataset';
@@ -377,7 +385,7 @@
   const end = ref<Nullable<Dayjs>>(null);
   const showAnnotation = ref<boolean>(false);
   const name = ref<string>('');
-  const sortField = ref<SortFieldEnum>(SortFieldEnum.NAME);
+  const sortField = ref<SortFieldEnum | undefined>(SortFieldEnum.NAME);
   const sortType = ref<SortTypeEnum>(SortTypeEnum.ASC);
   const lockedId = ref<number>(0);
   const lockedNum = ref<number>(0);
@@ -395,6 +403,11 @@
   const modelrunOption = ref<any>();
   const annotationStatus = ref<any>();
   let modelRunResultList = ref<any>([]);
+  const modelRunResultListForDisplay = computed(() => {
+    let result: Array<any> = [{ label: 'Ground Truths', value: -1 }, ...modelRunResultList.value];
+
+    return result;
+  });
   let runRecordIdDisplay = ref();
   const splitType = ref<any>();
   const DataConfidence = ref<string>('DataConfidence');
@@ -410,7 +423,7 @@
     },
   ]);
   const objectMap = ref<Record<string, any>>({});
-  const isDisplayResult = ref<boolean>(true);
+
   onBeforeMount(async () => {
     // fetchList({});
     // max.value = await getMaxCountApi({ datasetId: id as unknown as number });
@@ -448,42 +461,6 @@
 
       return result;
     });
-
-    // modelRunResultList.values = [
-    //   {
-    //     value: 'zhejiang',
-    //     label: 'Zhejiang',
-    //     children: [
-    //       {
-    //         value: 'hangzhou',
-    //         label: 'Hangzhou',
-    //         children: [
-    //           {
-    //             value: 'xihu',
-    //             label: 'West Lake',
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     value: 'jiangsu',
-    //     label: 'Jiangsu',
-    //     children: [
-    //       {
-    //         value: 'nanjing',
-    //         label: 'Nanjing',
-    //         children: [
-    //           {
-    //             value: 'zhonghuamen',
-    //             label: 'Zhong Hua Men',
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    // ];
-    console.log(modelRunResultList.values);
   };
   onMounted(async () => {
     getMoelResult();
@@ -537,10 +514,10 @@
     fetchList(filter, false);
   };
 
-  const resetFilter = () => {
+  const resetFilter = (type) => {
     filterForm.name = '';
     filterForm.createStartTime = null;
-    filterForm.sortField = SortFieldEnum.NAME;
+    filterForm.sortField = type === 'Result' ? undefined : SortFieldEnum.NAME;
     filterForm.ascOrDesc = SortTypeEnum.ASC;
     filterForm.createEndTime = null;
     filterForm.annotationStatus = undefined;
@@ -576,12 +553,13 @@
         filter.createEndTime && filter.createStartTime
           ? setEndTime(filter.createEndTime)
           : undefined,
-      // TODO
-      // minDataConfidence: filter.confidenceSlider[0]/100,
-      // maxDataConfidence: filter.confidenceSlider[1]/100,
     };
     delete params.confidenceSlider;
-    params.runRecordId && (params.runRecordId = params.runRecordId[1]);
+    if (params.runRecordId) {
+      params.runRecordId = params.runRecordId[1];
+      params.minDataConfidence = filter.confidenceSlider[0] / 100;
+      params.maxDataConfidence = filter.confidenceSlider[1] / 100;
+    }
     // console.log(params.runRecordId)
     if (dataId) {
       params.ids = [dataId].toString();
@@ -846,6 +824,14 @@
     30,
   );
 
+  watch(runRecordIdDisplay, (id) => {
+    console.log(id);
+    // TODO;
+  });
+
+  watch(sortWithLabel, (type) => {
+    resetFilter(type);
+  });
   watch(sliderWidthValue, (count) => {
     changeWidth(count);
   });
