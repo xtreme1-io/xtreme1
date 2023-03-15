@@ -63,7 +63,12 @@ public enum UsecaseCode {
     DATASET__MODEL_RUN_RECORD_NOT_EXIST("DATASET__MODEL_RUN_RECORD_NOT_EXIST","run record not exist"),
 
     DATASET__MODEL_RERUN_ERROR("DATASET__MODEL_RERUN_ERROR","model rerun error"),
-    DATASET__NOT_EXIST("DATASET__NOT_EXIST", "dataset not exist");
+    DATASET__NOT_EXIST("DATASET__NOT_EXIST", "dataset not exist"),
+
+    MODEL__MISS_FILED("MODEL__MISS_FILED", "We were unable to locate the %s key(s) in your response JSON. As a result, Xtreme1 cannot process your response successfully. Please verify your API.");
+
+
+
 
     // Storage
 

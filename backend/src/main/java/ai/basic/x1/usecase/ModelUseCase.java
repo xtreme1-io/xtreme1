@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.api.config.PointCloudDatasetInitialInfo;
 import ai.basic.x1.adapter.api.job.converter.ModelCocoRequestConverter;
 import ai.basic.x1.adapter.api.job.converter.PointCloudDetectionModelReqConverter;
 import ai.basic.x1.adapter.dto.ApiResult;
+import ai.basic.x1.adapter.dto.response.ModelResponseDTO;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoCountDAO;
@@ -281,9 +282,13 @@ public class ModelUseCase {
                 break;
             default:
         }
-        var modelResponseBO = reqModel(requestBody, url);
-        validateModelResponse(modelResponseBO, modelBO.getModelCode());
-        return modelResponseBO;
+        try {
+            var modelResponseBO = reqModel(requestBody, url);
+            validateModelResponse(modelResponseBO, modelBO.getModelCode());
+            return modelResponseBO;
+        } catch (Exception e) {
+            return ModelResponseBO.builder().errorMessage(e.getMessage()).code(UsecaseCode.ERROR).build();
+        }
     }
 
 
@@ -451,22 +456,61 @@ public class ModelUseCase {
             stopWatch.stop();
             log.info(String.format("call preLabelModelService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
 
-            return ModelResponseBO.builder().status(httpResponse.getStatus()).content(JSONUtil.parseObj(httpResponse.body())).build();
-        } catch (Throwable throwable) {
-            log.error("call pre-model service error.", throwable);
-            throw new UsecaseException("preLabelModel run error!");
+            return ModelResponseBO.builder().status(httpResponse.getStatus()).code(UsecaseCode.ERROR).content(JSONUtil.parseObj(httpResponse.body())).build();
+        } catch (Exception e) {
+            log.error("call pre-model service error.", e);
+            throw new UsecaseException("Model service connection timed out");
         }
     }
 
     private void validateModelResponse(ModelResponseBO modelResponseBO, ModelCodeEnum modelCode) {
         switch (modelCode) {
             case IMAGE_DETECTION:
-                break;
             case LIDAR_DETECTION:
-                ApiResult<List<PointCloudDetectionRespDTO>> apiResult = JSONUtil.toBean(modelResponseBO.getContent(), new TypeReference<>() {
-                }, false);
-                if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
+                var missFiled = new ArrayList<>();
+                var content = modelResponseBO.getContent();
+                if (!content.containsKey(Constants.MODEL_RUN_RESULT_CODE)) {
+                    missFiled.add(Constants.MODEL_RUN_RESULT_CODE);
                 }
+                if (!UsecaseCode.OK.getCode().equals(content.get(Constants.MODEL_RUN_RESULT_CODE))) {
+                    modelResponseBO.setErrorMessage(content.getStr(Constants.MODEL_RUN_RESULT_MESSAGE));
+                    return;
+                }
+                if (!content.containsKey(Constants.MODEL_RUN_RESULT_DATA)) {
+                    missFiled.add(Constants.MODEL_RUN_RESULT_DATA);
+                }
+                try {
+                    var data = content.getJSONArray(Constants.MODEL_RUN_RESULT_DATA);
+                    if (CollUtil.isNotEmpty(data)) {
+                        var d = JSONUtil.parseObj(CollUtil.getFirst(data));
+                        if (!d.containsKey(Constants.MODEL_RUN_RESULT_CODE)) {
+                            missFiled.add(Constants.MODEL_RUN_RESULT_DATA_CODE);
+                        }
+                        if (!UsecaseCode.OK.getCode().equals(d.get(Constants.MODEL_RUN_RESULT_CODE))) {
+                            modelResponseBO.setErrorMessage(d.getStr(Constants.MODEL_RUN_RESULT_MESSAGE));
+                            return;
+                        }
+                        if (!d.containsKey(Constants.MODEL_RUN_RESULT_OBJECTS)) {
+                            missFiled.add(Constants.MODEL_RUN_RESULT_OBJECTS);
+                        }
+                        if (CollUtil.isNotEmpty(missFiled)) {
+                            var lastMissFiled = CollUtil.getLast(missFiled);
+                            missFiled.remove(lastMissFiled);
+                            var missFiledErrorStr = CollUtil.isEmpty(missFiled) ? lastMissFiled : String.format("%s and %s", CollUtil.join(missFiled, ","), lastMissFiled);
+                            modelResponseBO.setErrorMessage(String.format(UsecaseCode.MODEL__MISS_FILED.getMessage(), missFiledErrorStr));
+                            return;
+                        }
+                        modelResponseBO.setCode(UsecaseCode.OK);
+
+                    } else {
+                        modelResponseBO.setErrorMessage("Data is not allowed to be empty");
+                    }
+
+                } catch (Exception e) {
+                    log.info("data parse error", e);
+                    modelResponseBO.setErrorMessage("The format of data is wrong, it must be a json array");
+                }
+
                 break;
             default:
                 break;

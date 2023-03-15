@@ -129,4 +129,14 @@ public interface Constants {
 
     String SIMILARITY_RESULT_PATH_FORMAT="datasetSimilarity/result/%s";
     String SIMILARITY_SUBMIT_FILE_PATH_FORMAT="datasetSimilarity/commit/%s";
+
+    String MODEL_RUN_RESULT_CODE="code";
+
+    String MODEL_RUN_RESULT_MESSAGE="message";
+
+    String MODEL_RUN_RESULT_DATA="data";
+
+    String MODEL_RUN_RESULT_DATA_CODE="data.code";
+
+    String MODEL_RUN_RESULT_OBJECTS="objects";
 }
