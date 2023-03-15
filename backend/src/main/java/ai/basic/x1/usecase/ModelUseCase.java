@@ -104,9 +104,11 @@ public class ModelUseCase {
     private static final ExecutorService executorService = ThreadUtil.newExecutor(5);
 
 
-    public void add(ModelBO modelBO) {
+    public ModelBO add(ModelBO modelBO) {
         modelBO.setModelCode(EnumUtil.fromString(ModelCodeEnum.class, String.format("%s_%s", modelBO.getDatasetType().name(), modelBO.getModelType().name())));
-        modelDAO.save(DefaultConverter.convert(modelBO, Model.class));
+        var model = DefaultConverter.convert(modelBO, Model.class);
+        modelDAO.save(model);
+        return DefaultConverter.convert(model,ModelBO.class);
     }
 
     public void update(ModelBO modelBO) {
