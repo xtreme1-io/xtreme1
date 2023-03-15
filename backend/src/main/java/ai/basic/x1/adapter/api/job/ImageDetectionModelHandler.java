@@ -6,6 +6,7 @@ import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.dto.PreModelParamDTO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDatasetResult;
+import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord;
 import ai.basic.x1.adapter.port.rpc.ImageDetectionModelHttpCaller;
 import ai.basic.x1.adapter.port.rpc.dto.ImageDetectionMetricsReqDTO;
 import ai.basic.x1.adapter.port.rpc.dto.ImageDetectionObject;
@@ -21,6 +22,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,11 +77,15 @@ public class ImageDetectionModelHandler extends AbstractModelMessageHandler<Imag
     public void syncModelAnnotationResult(ModelTaskInfoBO modelTaskInfo, ModelMessageBO modelMessage) {
         var modelResult = (ImageDetectionObjectBO) modelTaskInfo;
         if (CollUtil.isNotEmpty(modelResult.getObjects())) {
+            var lambdaQueryWrapper = Wrappers.lambdaQuery(ModelRunRecord.class);
+            lambdaQueryWrapper.eq(ModelRunRecord::getModelSerialNo,modelMessage.getModelSerialNo());
+            lambdaQueryWrapper.last("limit 1");
+            var modelRunRecord = modelRunRecordDAO.getOne(lambdaQueryWrapper);
             var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>(modelResult.getObjects().size());
             modelResult.getObjects().forEach(o -> {
                 var dataAnnotationObjectBO = DataAnnotationObjectBO.builder()
                         .datasetId(modelMessage.getDatasetId()).dataId(modelResult.getDataId()).classAttributes(JSONUtil.parseObj(o))
-                        .sourceType(DataAnnotationObjectSourceTypeEnum.MODEL).sourceId(-1L).build();
+                        .sourceType(DataAnnotationObjectSourceTypeEnum.MODEL).sourceId(modelRunRecord.getId()).build();
                 dataAnnotationObjectBOList.add(dataAnnotationObjectBO);
             });
 
@@ -111,7 +117,7 @@ public class ImageDetectionModelHandler extends AbstractModelMessageHandler<Imag
             }
             dataAnnotationObjects.forEach(dataAnnotationObject -> {
                 var imageDetectionObject = new ImageDetectionObject();
-                var objectBO = DefaultConverter.convert(dataAnnotationObject.getClassAttributes(), ImageDetectionObjectBO.ObjectBO.class);
+                var objectBO = DefaultConverter.convert(dataAnnotationObject.getClassAttributes().get("contour"), ImageDetectionObjectBO.ObjectBO.class);
                 assembleObject(objectBO, imageDetectionObject);
                 groundTruthObjects.add(imageDetectionObject);
             });

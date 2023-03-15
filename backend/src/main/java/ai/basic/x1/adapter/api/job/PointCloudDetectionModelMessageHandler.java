@@ -6,6 +6,7 @@ import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDatasetResult;
+import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord;
 import ai.basic.x1.adapter.port.rpc.PointCloudDetectionModelHttpCaller;
 import ai.basic.x1.adapter.port.rpc.dto.PointCloudDetectionMetricsReqDTO;
 import ai.basic.x1.adapter.port.rpc.dto.PointCloudDetectionObject;
@@ -19,6 +20,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,11 +66,15 @@ public class PointCloudDetectionModelMessageHandler extends AbstractModelMessage
     public void syncModelAnnotationResult(ModelTaskInfoBO modelTaskInfo, ModelMessageBO modelMessage) {
         var modelResult = (PointCloudDetectionObjectBO) modelTaskInfo;
         if (CollUtil.isNotEmpty(modelResult.getObjects())) {
+            var lambdaQueryWrapper = Wrappers.lambdaQuery(ModelRunRecord.class);
+            lambdaQueryWrapper.eq(ModelRunRecord::getModelSerialNo,modelMessage.getModelSerialNo());
+            lambdaQueryWrapper.last("limit 1");
+            var modelRunRecord = modelRunRecordDAO.getOne(lambdaQueryWrapper);
             var dataAnnotationObjectBOList = new ArrayList<DataAnnotationObjectBO>(modelResult.getObjects().size());
             modelResult.getObjects().forEach(o -> {
                 var dataAnnotationObjectBO = DataAnnotationObjectBO.builder()
                         .datasetId(modelMessage.getDatasetId()).dataId(modelResult.getDataId()).classAttributes(JSONUtil.parseObj(o))
-                        .sourceType(DataAnnotationObjectSourceTypeEnum.MODEL).sourceId(-1L).build();
+                        .sourceType(DataAnnotationObjectSourceTypeEnum.MODEL).sourceId(modelRunRecord.getId()).build();
                 dataAnnotationObjectBOList.add(dataAnnotationObjectBO);
             });
             dataAnnotationObjectDAO.saveBatch(DefaultConverter.convert(dataAnnotationObjectBOList, DataAnnotationObject.class));
@@ -96,7 +103,7 @@ public class PointCloudDetectionModelMessageHandler extends AbstractModelMessage
             }
             dataAnnotationObjects.forEach(dataAnnotationObject -> {
                 var pointCloudDetectionObject = new PointCloudDetectionObject();
-                var objectBO = DefaultConverter.convert(dataAnnotationObject.getClassAttributes(), ObjectBO.class);
+                var objectBO = DefaultConverter.convert(dataAnnotationObject.getClassAttributes().get("contour"), ObjectBO.class);
                 assembleObject(objectBO, pointCloudDetectionObject);
                 groundTruthObjects.add(pointCloudDetectionObject);
             });
