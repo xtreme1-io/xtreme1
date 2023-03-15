@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PreModelParamBO {
+public class PointCloudDetectionParamBO {
 
     private BigDecimal minConfidence;
 

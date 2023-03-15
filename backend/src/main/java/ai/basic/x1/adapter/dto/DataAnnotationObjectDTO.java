@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.entity.enums.DataAnnotationObjectSourceTypeEnum;
 import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,10 @@ public class DataAnnotationObjectDTO {
     private Long classId;
 
     private JSONObject classAttributes;
+
+    private Long sourceId;
+
+    private DataAnnotationObjectSourceTypeEnum sourceType;
 
     private Integer objectCount;
 

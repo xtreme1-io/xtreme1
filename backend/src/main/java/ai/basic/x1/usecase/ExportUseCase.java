@@ -20,6 +20,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import kotlin.jvm.functions.Function3;
+import kotlin.jvm.functions.Function4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,18 +59,6 @@ public class ExportUseCase {
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
-    @FunctionalInterface
-    public interface Function2<A, B, R> {
-        /**
-         * Applies this function to the given argument.
-         *
-         * @param a the function argument
-         * @param b the function argument
-         * @return the function result
-         */
-        R apply(A a, B b);
-    }
-
     /**
      * Create export record
      *
@@ -86,19 +75,19 @@ public class ExportUseCase {
     }
 
 
-    public <T, Q extends BaseQueryBO> Long asyncExportDataZip(String fileName, Long serialNumber, Map<Long,String> classMap,
-                Q query, Function<Q, Page<T>> fun, Function3<List<T>, Q,Map<Long,String>, List<DataExportBO>> processData) {
+    public <T, Q extends BaseQueryBO> Long asyncExportDataZip(String fileName, Long serialNumber, Map<Long,String> classMap,Map<Long,String> resultMap,
+                Q query, Function<Q, Page<T>> fun, Function4<List<T>, Q,Map<Long,String>,Map<Long,String>, List<DataExportBO>> processData) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<ExportRecord>();
         lambdaQueryWrapper.in(ExportRecord::getSerialNumber, serialNumber);
         var exportRecord = exportRecordDAO.getOne(lambdaQueryWrapper);
         var srcPath = String.format("%s%s", tempPath, FileUtil.getPrefix(fileName));
         FileUtil.mkdir(srcPath);
-        getDataAndUpload(exportRecord, srcPath,classMap, query,fun,processData);
+        getDataAndUpload(exportRecord, srcPath,classMap,resultMap, query,fun,processData);
         return serialNumber;
     }
 
-    private <T, Q extends BaseQueryBO> void getDataAndUpload(ExportRecord record, String srcPath,Map<Long,String> classMap, Q query,
-                                                             Function<Q, Page<T>> fun, Function3<List<T>, Q,Map<Long,String>, List<DataExportBO>> processData) {
+    private <T, Q extends BaseQueryBO> void getDataAndUpload(ExportRecord record, String srcPath,Map<Long,String> classMap,Map<Long,String> resultMap, Q query,
+                                                             Function<Q, Page<T>> fun, Function4<List<T>, Q,Map<Long,String>,Map<Long,String>, List<DataExportBO>> processData) {
         var rootPath = String.format("%s/%s", record.getCreatedBy(),
                 TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN));
         var exportRecordBOBuilder = ExportRecordBO.builder()
@@ -112,7 +101,7 @@ public class ExportUseCase {
             if (CollectionUtil.isEmpty(page.getList())) {
                 break;
             }
-            writeFile(page.getList(), srcPath,classMap, query,processData);
+            writeFile(page.getList(), srcPath,classMap,resultMap, query,processData);
             var listSize = page.getList().size();
             var exportRecordBO = exportRecordBOBuilder
                     .generatedNum((page.getPageNo() - 1) * page.getPageSize() + listSize)
@@ -147,8 +136,8 @@ public class ExportUseCase {
 
     }
 
-    private <T, Q extends BaseQueryBO>  void writeFile(List<T> list, String zipPath,Map<Long,String> classMap, Q query,Function3<List<T>, Q,Map<Long,String>, List<DataExportBO>> processData) {
-        var dataExportBOList = processData.invoke(list,query,classMap);
+    private <T, Q extends BaseQueryBO>  void writeFile(List<T> list, String zipPath, Map<Long,String> classMap, Map<Long,String> resultMap, Q query, Function4<List<T>, Q,Map<Long,String>,Map<Long,String>, List<DataExportBO>> processData) {
+        var dataExportBOList = processData.invoke(list,query,classMap,resultMap);
         var jsonConfig = JSONConfig.create().setIgnoreNullValue(false);
         dataExportBOList.forEach(dataExportBO -> {
             var dataExportBaseBO = dataExportBO.getData();

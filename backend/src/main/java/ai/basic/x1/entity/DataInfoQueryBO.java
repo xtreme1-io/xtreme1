@@ -90,4 +90,11 @@ public class DataInfoQueryBO extends BaseQueryBO {
      */
     private BigDecimal maxDataConfidence;
 
+    /**
+     * Select which models run out of data to export
+     */
+    private List<Long> selectModelRunIds;
+
+    private Boolean isAllResult;
+
 }

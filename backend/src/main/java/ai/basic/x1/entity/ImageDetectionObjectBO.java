@@ -1,7 +1,6 @@
 package ai.basic.x1.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -16,7 +15,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PredImageModelObjectBO extends ModelTaskInfoBO{
+public class ImageDetectionObjectBO extends ModelTaskInfoBO{
 
     private Long dataId;
     private List<ObjectBO> objects;
@@ -28,7 +27,7 @@ public class PredImageModelObjectBO extends ModelTaskInfoBO{
     public static class ObjectBO {
         private String modelClass;
         private BigDecimal confidence;
-        private String objType;
+        private String type;
         List<Point> points;
     }
 

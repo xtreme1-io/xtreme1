@@ -5,15 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
-/**
- * @author andy
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PreModelParam {
-    private BigDecimal confidence;
+public class ModelResultEvaluateReqDTO {
+
+    private String groundTruthResultFileUrl;
+
+    private String modelRunResultFileUrl;
 }

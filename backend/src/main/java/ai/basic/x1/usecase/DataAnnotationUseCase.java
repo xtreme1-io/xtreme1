@@ -48,7 +48,7 @@ public class DataAnnotationUseCase {
 
     public List<DataAnnotationResultBO> findByDataIds(List<Long> dataIds) {
         List<DataAnnotationClassificationBO> dataAnnotationClassificationBOs = dataAnnotationClassificationUseCase.findByDataIds(dataIds);
-        List<DataAnnotationObjectBO> dataAnnotationObjectBOs = dataAnnotationObjectUseCase.findByDataIds(dataIds);
+        List<DataAnnotationObjectBO> dataAnnotationObjectBOs = dataAnnotationObjectUseCase.findByDataIds(dataIds,true,List.of());
         List<DataAnnotationResultBO> results = new ArrayList<>();
         for (Long dataId : dataIds) {
             List<DataAnnotationClassificationBO> classificationValues = dataAnnotationClassificationBOs.stream().filter(bo -> dataId.equals(bo.getDataId())).collect(toList());

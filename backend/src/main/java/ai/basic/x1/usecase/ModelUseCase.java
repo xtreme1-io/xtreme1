@@ -9,7 +9,7 @@ import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoCountDAO;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoIncrDAO;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelRespDTO;
+import ai.basic.x1.adapter.port.rpc.dto.PointCloudDetectionRespDTO;
 import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
@@ -463,7 +463,7 @@ public class ModelUseCase {
             case IMAGE_DETECTION:
                 break;
             case LIDAR_DETECTION:
-                ApiResult<List<PreModelRespDTO>> apiResult = JSONUtil.toBean(modelResponseBO.getContent(), new TypeReference<>() {
+                ApiResult<List<PointCloudDetectionRespDTO>> apiResult = JSONUtil.toBean(modelResponseBO.getContent(), new TypeReference<>() {
                 }, false);
                 if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
                 }

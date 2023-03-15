@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LabelInfo {
+public class PointCloudDetectionObject {
 
     private String label;
     private BigDecimal confidence;
