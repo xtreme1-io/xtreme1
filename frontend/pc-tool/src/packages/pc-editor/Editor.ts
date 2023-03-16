@@ -216,16 +216,16 @@ export default class Editor extends THREE.EventDispatcher {
         this.frameMap.clear();
         this.state.frames = frames;
         frames.forEach((e, index) => {
-            this.frameMap.set(e.id, e);
-            this.frameIndexMap.set(e.id, index);
+            this.frameMap.set(e.id + '', e);
+            this.frameIndexMap.set(e.id + '', index);
         });
     }
 
     getFrameIndex(frameId: string) {
-        return this.frameIndexMap.get(frameId) as number;
+        return this.frameIndexMap.get(frameId + '') as number;
     }
     getFrame(frameId: string) {
-        return this.frameMap.get(frameId) as IFrame;
+        return this.frameMap.get(frameId + '') as IFrame;
     }
 
     getObjectUserData(object: AnnotateObject, frame?: IFrame) {
@@ -249,8 +249,7 @@ export default class Editor extends THREE.EventDispatcher {
             if (frame) frame.needSave = true;
 
             let userData = this.getObjectUserData(obj);
-            let classType = userData.classType || '';
-            let classConfig = this.getClassType(classType);
+            let classConfig = this.getClassType(userData);
 
             if (obj instanceof Box) {
                 // obj.editConfig.resize = !userData.isStandard && userData.resultType !== Const.Fixed;
@@ -269,13 +268,19 @@ export default class Editor extends THREE.EventDispatcher {
         this.classMap.clear();
         this.state.classTypes = classTypes;
         classTypes.forEach((e) => {
-            this.classMap.set(e.name, e);
-            this.classMap.set(e.id, e);
+            this.classMap.set(e.name + '', e);
+            this.classMap.set(e.id + '', e);
         });
     }
 
-    getClassType(name: string) {
-        return this.classMap.get(name) as IClassType;
+    getClassType(name: string | IUserData) {
+        if (name instanceof Object) {
+            let { classId, classType } = name;
+            let key = classId || classType;
+            return this.classMap.get(key + '') as IClassType;
+        } else {
+            return this.classMap.get(name + '') as IClassType;
+        }
     }
 
     setMode(modeConfig: IModeConfig) {

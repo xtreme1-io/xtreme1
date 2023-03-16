@@ -164,6 +164,7 @@ export function addModelTrackData(editor: Editor, objectsMap: Record<string, IOb
                 e.trackId = userData.trackId;
                 e.trackName = userData.trackName;
                 e.classType = userData.classType;
+                e.classId = userData.classId;
                 // e.resultType = userData.resultType;
                 // e.isStandard = userData.isStandard;
                 // e.resultStatus = Const.Predicted;

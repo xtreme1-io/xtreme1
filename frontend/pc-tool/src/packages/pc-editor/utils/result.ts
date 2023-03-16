@@ -9,6 +9,7 @@ import {
     IObjectV2,
     AttrType,
     IAttr,
+    SourceType,
 } from '../type';
 import Editor from '../Editor';
 import * as createUtils from './create';
@@ -79,6 +80,7 @@ export function translateToObjectV2(object: IObject, baseClassType: IClassType) 
         trackName: object.trackName,
         classId: object.classId,
         className: object.classType,
+        sourceId: object.sourceId,
         // classValues: object.attrs,
         classValues: objToArray(object.attrs, baseClassType),
         modelConfidence: object.confidence,
@@ -134,11 +136,10 @@ function bindInfo(target: any, info: IObject) {
 }
 export function convertObject2Annotate(objects: IObject[], editor: Editor) {
     let annotates = [] as AnnotateObject[];
-    let classMap = {} as Record<string, IClassType>;
-    editor.state.classTypes.forEach((e) => {
-        classMap[e.name] = e;
-    });
-
+    // let classMap = {} as Record<string, IClassType>;
+    // editor.state.classTypes.forEach((e) => {
+    //     classMap[e.name] = e;
+    // });
     objects.forEach((obj) => {
         let userData = {} as IUserData;
 
@@ -161,6 +162,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         userData.modelClass = obj.modelClass || '';
         userData.modelRun = obj.modelRun || '';
         userData.modelRunLabel = obj.modelRunLabel || '';
+        userData.sourceId = obj.sourceId;
+        userData.sourceType = obj.sourceType;
         userData.attrs = obj.attrs || {};
         userData.pointN = obj.pointN || 0;
         if (obj.objType === ObjectType.TYPE_3D_BOX || obj.objType === ObjectType.TYPE_3D) {
@@ -248,7 +251,7 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
     annotates.forEach((obj) => {
         let userData = editor.getObjectUserData(obj) as Required<IUserData>;
         let points = obj instanceof Box ? [] : get2DPoints(obj as any);
-        let classConfig = editor.getClassType(userData.classType);
+        let classConfig = editor.getClassType(userData);
         updateObjectVersion(obj as any);
         let bsObj = obj as any;
         let info: IObject = {
@@ -273,6 +276,8 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
             modelRun: userData.modelRun || '',
             modelClass: userData.modelClass || '',
             modelRunLabel: userData.modelRunLabel || '',
+            sourceId: userData.sourceId || editor.state.config.withoutTaskId,
+            sourceType: userData.sourceType || SourceType.DATA_FLOW,
             points: points,
             pointN: userData.pointN || 0,
             viewIndex: 0,

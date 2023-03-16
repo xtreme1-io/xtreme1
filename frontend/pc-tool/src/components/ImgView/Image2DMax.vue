@@ -200,7 +200,7 @@
             let userData = e.userData;
             let trackName = userData.trackName || '';
             let classType = userData.classType || '';
-            let classConfig = classTypeMap.value[classType];
+            let classConfig = editor.getClassType(userData.classId || classType);
             let className = classConfig ? classConfig.label || classConfig.name || '' : classType;
 
             pos.copy(e.position);
@@ -232,7 +232,7 @@
                 let classType = userData.classType || '';
                 // let subId = (userData.id + '').slice(-4);
                 let trackName = userData.trackName || '';
-                let classConfig = classTypeMap.value[classType];
+                let classConfig = editor.getClassType(userData);
                 let className = classConfig
                     ? classConfig.label || classConfig.name || ''
                     : classType;

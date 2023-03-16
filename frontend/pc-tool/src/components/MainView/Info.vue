@@ -108,7 +108,7 @@
         state.hMax = state.lMax;
 
         if (userData.classType) {
-            let config = classTypes.find((item) => item.name === userData.classType);
+            let config = editor.getClassType(userData);
             if (config) classType = config.label || config.name;
             if (config?.type === 'constraint') {
                 let sizeMin = config.sizeMin as THREE.Vector3;

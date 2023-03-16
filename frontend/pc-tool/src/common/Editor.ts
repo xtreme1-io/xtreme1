@@ -33,10 +33,6 @@ export default class Editor extends BaseEditor {
 
         if (!force && !this.needSave(frames)) return;
 
-        let classMap = {};
-        classTypes.forEach((e) => {
-            classMap[e.name] = e;
-        });
         let dataInfos = [] as any[];
         let queryTime = frames[0].queryTime;
         frames.forEach((dataMeta) => {
@@ -51,12 +47,15 @@ export default class Editor extends BaseEditor {
             let infos = [] as any[];
             let dataAnnotations = [] as any[];
             data.forEach((e) => {
-                let objectV2 = utils.translateToObjectV2(e, classMap[e.classType || '']);
+                console.log(e);
+                let classConfig = this.getClassType(e.classId || e.classType || '');
+                let objectV2 = utils.translateToObjectV2(e, classConfig);
                 infos.push({
                     id: e.backId || undefined,
                     frontId: e.frontId,
-                    classId: e.classType ? classMap[e.classType]?.id : '',
+                    classId: classConfig?.id,
                     source: e.modelRun ? 'MODEL' : 'ARTIFICIAL',
+                    sourceId: e.sourceId,
                     classAttributes: objectV2,
                 });
             });

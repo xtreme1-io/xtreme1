@@ -43,7 +43,7 @@ export function execute(): IPageHandler {
                 // load model
                 loadModels(),
             ]);
-
+            await editor.businessManager.getResultSources();
             // load first data
             await editor.loadFrame(0, false);
             focusObject();

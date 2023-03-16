@@ -63,7 +63,7 @@ export default class DataManager extends BaseDataManager {
                             let modelResult = info.modelResult;
                             let objects = (modelResult.objects || []) as IObject[];
 
-                            if (modelResult.code !== 0) {
+                            if (modelResult.code !== "OK") {
                                 dataMeta.model = undefined;
                                 if (dataMeta.id === curData.id)
                                     editor.showMsg('error', editor.lang('model-run-error'));
