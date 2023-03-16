@@ -69,6 +69,7 @@ public class ImageDetectionModelHandler extends AbstractModelMessageHandler<Imag
             }
             return new ApiResult<>(apiResult.getCode(), apiResult.getMessage());
         } catch (Exception e) {
+            log.error("call image error",e);
             throw new UsecaseException(UsecaseCode.UNKNOWN, e.getMessage());
         }
     }

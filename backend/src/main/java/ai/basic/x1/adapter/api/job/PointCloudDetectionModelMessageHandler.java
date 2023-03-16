@@ -43,7 +43,7 @@ public class PointCloudDetectionModelMessageHandler extends AbstractModelMessage
     @Autowired
     private ModelUseCase modelUseCase;
 
-    @Value("${image.resultEvaluate.url}")
+    @Value("${pointCloud.resultEvaluate.url}")
     private String resultEvaluateUrl;
 
 

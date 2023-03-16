@@ -84,6 +84,8 @@ public abstract class AbstractModelMessageHandler<T> {
     @Value("${file.tempPath:/tmp/xtreme1/}")
     protected String tempPath;
 
+    private static final String TYPE_HANDLER = "typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler";
+
 
     @PostConstruct
     public void init() {
@@ -239,7 +241,7 @@ public abstract class AbstractModelMessageHandler<T> {
         boolean isUpdateErrorMsg = runStatus == RunStatusEnum.FAILURE || runStatus == RunStatusEnum.SUCCESS_WITH_ERROR;
         LambdaUpdateWrapper<ModelRunRecord> wrapper = Wrappers.lambdaUpdate(ModelRunRecord.class)
                 .set(ModelRunRecord::getStatus, runStatus)
-                .set(ObjectUtil.isNotNull(modelResultEvaluateRespDTO), ModelRunRecord::getMetrics, JSONUtil.parseObj(modelResultEvaluateRespDTO))
+                .set(ObjectUtil.isNotNull(modelResultEvaluateRespDTO), ModelRunRecord::getMetrics, JSONUtil.parseObj(modelResultEvaluateRespDTO),TYPE_HANDLER)
                 .set(ModelRunRecord::getUpdatedAt, OffsetDateTime.now())
                 .set(ModelRunRecord::getUpdatedBy, modelMessage.getCreatedBy())
                 .eq(ModelRunRecord::getModelSerialNo, modelMessage.getModelSerialNo());
@@ -250,8 +252,7 @@ public abstract class AbstractModelMessageHandler<T> {
     }
 
     private void modelRunRecordSuccess(ModelMessageBO modelMessage) {
-        ModelResultEvaluateRespDTO modelResultEvaluateRespDTO = null;
-        //var modelResultEvaluateRespDTO = calculateMetrics(modelMessage);
+        var modelResultEvaluateRespDTO = calculateMetrics(modelMessage);
         updateModelRunRecordStatus(modelMessage, RunStatusEnum.SUCCESS, null, modelResultEvaluateRespDTO);
     }
 
@@ -285,7 +286,7 @@ public abstract class AbstractModelMessageHandler<T> {
             minioService.uploadFileList(minioProp.getBucketName(), rootPath, tempPath, fileList);
 
             var groundTruthObjectName = String.format("%s/%s", rootPath, groundTruthFilePath.replace(tempPath, ""));
-            var modelRunObjectName = String.format("%s/%s", rootPath, groundTruthFilePath.replace(tempPath, ""));
+            var modelRunObjectName = String.format("%s/%s", rootPath, modelRunFilePath.replace(tempPath, ""));
             modelResultEvaluateReqDTO = ModelResultEvaluateReqDTO.builder().groundTruthResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), groundTruthObjectName))
                     .modelRunResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), modelRunObjectName)).build();
         } catch (Exception e) {
@@ -339,6 +340,7 @@ public abstract class AbstractModelMessageHandler<T> {
                 }, false);
                 return apiResult;
             } else {
+                log.error("resultEvaluate run error!,{}", httpResponse.body());
                 throw new UsecaseException("resultEvaluate run error!");
             }
         } catch (Throwable throwable) {

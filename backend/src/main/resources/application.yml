@@ -130,11 +130,11 @@ dataset-initial:
 
 image:
   resultEvaluate:
-    url:
+    url: http://image-object-detection:5000/image/resultEvaluate
 
 pointCloud:
   resultEvaluate:
-    url:
+    url: http://pcd-tools:5000/pointCloud/resultEvaluate
   convertRender:
     url: http://pcd-tools:5000/pointcloud/convert_render
 
