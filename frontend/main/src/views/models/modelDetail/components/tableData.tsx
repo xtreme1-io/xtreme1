@@ -7,7 +7,7 @@ import { getDateTime } from '/@/utils/business/timeFormater';
 import Icon, { SvgIcon } from '/@/components/Icon';
 import { defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
 import { findModelRunFilterDatasetNameApi } from '/@/api/business/models';
-import RunsCustomMetrics from './RunsCustomMetrics.vue';
+import RunsCustomMetric from './RunsCustomMetric.vue';
 const { t } = useI18n();
 const inactiveFilterIcon = (
   <SvgIcon name={'filter-inactive'} size={14} style={{ transform: 'translateY(-2px)' }} />
@@ -226,7 +226,7 @@ export function getBasicColumns(): BasicColumn[] {
             {record?.metrics?.metrics.length > 1 ? (
               <div>
                 {' '}
-                <RunsCustomMetrics metrics={record?.metrics?.metrics} />
+                <RunsCustomMetric metrics={record?.metrics?.metrics} />
               </div>
             ) : (
               ''

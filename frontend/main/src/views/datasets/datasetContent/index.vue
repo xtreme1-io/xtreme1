@@ -52,6 +52,7 @@
           @fetchList="fixedFetchList"
         />
         <Tools
+          :modelRunResultList="modelRunResultListForDisplay"
           :cardMaxSliderWidth="maxSliderWidth"
           v-model:cardSliderWidthValue="sliderWidthValue"
           :cardResetWidth="resetWidth"

@@ -140,7 +140,7 @@
     title: string; // 弹窗 title
     modelId: string | number; // 需要传入 modelId 以获取 classes
     datasetId?: string | number;
-    classes: Array<any>;
+    classes?: Array<any>;
   }>();
 
   const labelCol = { span: 4 };
