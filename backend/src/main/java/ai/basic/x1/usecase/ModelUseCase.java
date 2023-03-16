@@ -51,10 +51,7 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -147,7 +144,21 @@ public class ModelUseCase {
             }
         }
         var modelList = modelDAO.list(modelLambdaQueryWrapper);
-        return DefaultConverter.convert(modelList, ModelBO.class);
+        var modelBOList = DefaultConverter.convert(modelList, ModelBO.class);
+
+        if (CollUtil.isNotEmpty(modelBOList)) {
+            var modelIds = modelList.stream().map(Model::getId).collect(Collectors.toList());
+            var lambdaQueryWrapper = Wrappers.lambdaQuery(ModelClass.class);
+            lambdaQueryWrapper.in(ModelClass::getModelId, modelIds);
+            var modelClassList = modelClassDAO.list(lambdaQueryWrapper);
+            var modelClassBOList = DefaultConverter.convert(modelClassList, ModelClassBO.class);
+            var modelClassMap = new HashMap<Long, List<ModelClassBO>>();
+            if (CollUtil.isNotEmpty(modelClassBOList)) {
+                modelClassMap.putAll(modelClassBOList.stream().collect(Collectors.groupingBy(ModelClassBO::getModelId)));
+            }
+            modelBOList.forEach(m -> m.setClasses(modelClassMap.get(m.getId())));
+        }
+        return List.of();
     }
 
     public Page<ModelBO> findByPage(Integer pageNo, Integer pageSize, ModelDatasetTypeEnum datasetType) {
