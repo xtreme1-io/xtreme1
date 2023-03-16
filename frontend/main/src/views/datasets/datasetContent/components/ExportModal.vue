@@ -108,6 +108,12 @@
       data.type = undefined;
     }
 
+    if (data.runRecordId) {
+      data.runRecordId = data.runRecordId[1];
+      data.minDataConfidence = data.confidenceSlider[0] / 100;
+      data.maxDataConfidence = data.confidenceSlider[1] / 100;
+    }
+    delete data.confidenceSlider;
     try {
       isLoading.value = true;
       const res = await exportData(data);

@@ -17,6 +17,7 @@
             :datasetType="datasetType"
             :isLimit="isLimit"
             @reload="handleRefreshQuota"
+            :overviewData="overviewData"
           />
           <Settings
             :datasetType="datasetType"

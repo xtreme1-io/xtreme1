@@ -12,6 +12,7 @@ import {
   editParams,
   setClassParams,
   ModelDataCountParams,
+  testModelUrlConnectioParams,
 } from './model/modelsModel';
 
 enum Api {
@@ -32,9 +33,9 @@ export const getModelAllApi = (params: GetModelParams) =>
     },
   });
 
-/** edit  Models  */
+/** SET  Models  */
 export const setClassModelApi = (params: setClassParams) =>
-  defHttp.post<ResponseModelParams>({
+  defHttp.post<null>({
     url: `${Api.Model}/configurationModelClass`,
     params,
     headers: {
@@ -45,7 +46,7 @@ export const setClassModelApi = (params: setClassParams) =>
 /** add  Models  */
 // TODO
 export const addModelApi = (params: GetModelParams) =>
-  defHttp.post<ResponseModelParams>({
+  defHttp.post<null>({
     url: `${Api.Model}/add`,
     params,
     headers: {
@@ -57,7 +58,7 @@ export const addModelApi = (params: GetModelParams) =>
 /** delete  Models  */
 
 export const deleteModelApi = (id: number) =>
-  defHttp.post<ResponseModelParams>({
+  defHttp.post<null>({
     url: `${Api.Model}/delete/${id}`,
     headers: {
       // @ts-ignore
@@ -74,6 +75,18 @@ export const editModelApi = (params: editParams) =>
       ignoreCancelToken: true,
     },
   });
+
+/** add  Models  */
+export const testModelUrlConnectionApi = (params: testModelUrlConnectioParams) =>
+  defHttp.post<null>({
+    url: `${Api.Model}/testModelUrlConnection`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
 /** get  Models  list*/
 export const getModelPageApi = (params: GetModelParams) =>
   defHttp.get<ResponseModelParams>({

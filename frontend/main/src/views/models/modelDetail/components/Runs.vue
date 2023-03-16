@@ -1,6 +1,7 @@
 <template>
   <div class="runs">
     <!-- 按钮 -->
+
     <div class="runs__btn">
       <div class="refresh-btn" @click="handleRefreshTable">
         <Icon icon="charm:refresh" size="18" style="color: #aaa; transform: rotate(-70deg)" />
@@ -16,6 +17,7 @@
       <BasicTable @register="registerTable" />
     </div>
     <ModelRun
+      :classes="props.overviewData?.classes"
       :datasetId="selectId"
       @register="registerRunModel"
       :selectName="selectName"
@@ -42,6 +44,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { parseParam } from '/@/utils/business/parseParams';
   // 组件
+  import { IOverview } from './typing';
   import { Select } from 'ant-design-vue';
   import { Button } from '/@@/Button';
   import { ModelRun } from '/@@/ModelRun';
@@ -78,6 +81,7 @@
     modelId: string;
     datasetType: datasetTypeEnum;
     isLimit: boolean;
+    overviewData: IOverview;
   }>();
   const emits = defineEmits(['reload', 'setActiveKey']);
 

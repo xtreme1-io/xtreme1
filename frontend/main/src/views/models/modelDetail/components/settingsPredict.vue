@@ -49,17 +49,26 @@
         t('business.models.settingsModel.TestConnection')
       }}</Button>
     </div>
-    <div class="status"> <span class="tab">Status: </span> 200</div>
-    <div class="response"> <span class="tab">Response: </span> 200</div>
+    <div class="status"> <span class="tab">Status: </span> {{ connectionRes.status }}</div>
+    <div class="response flex">
+      <div class="tab mr-32px">Response: </div
+      ><div style="width: 90%"
+        ><div v-if="connectionRes.errorMessage" class="errorMessage">
+          <Alert :message="connectionRes.errorMessage" type="error" closable /> </div
+        ><div v-if="connectionRes.content" class="content">
+          <Alert :message="connectionRes.content" type="success" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
   import { useI18n } from '/@/hooks/web/useI18n';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { Tinymce } from '/@/components/Tinymce';
-  import { computed, inject, ref, watch } from 'vue';
-  import { editModelApi } from '/@/api/business/models';
-  import { Button, Input, message, Select } from 'ant-design-vue';
+  import { computed, inject, reactive, ref, watch } from 'vue';
+  import { editModelApi, testModelUrlConnectionApi } from '/@/api/business/models';
+  import { Button, Input, message, Select, Alert } from 'ant-design-vue';
   import { useRoute } from 'vue-router';
 
   const isEdit = ref(false);
@@ -112,14 +121,23 @@
     message.success('Successed');
     // handleSuccess();
   };
+  let connectionRes = reactive({ status: null, errorMessage: '', content: '' });
   let hasConnection = ref<boolean>(false);
   const testConnection = async () => {
-    hasConnection.value = true;
     const reg = /(http|https):\/\/([\w.]+\/?)\S*/;
     let val = urlVal.value;
     if (!reg.test(val) || !val) {
       message.warning(t('business.models.settingsModel.TestConnectionUrlErrorMsg'));
     }
+    let res: any = await testModelUrlConnectionApi({ modelId: Number(modelId), url: urlVal.value });
+    let { code, content, errorMessage, status } = res;
+
+    if (code === 'OK') {
+      hasConnection.value = true;
+    }
+    connectionRes.status = status;
+    connectionRes.errorMessage = errorMessage;
+    connectionRes.content = JSON.stringify(content);
   };
 </script>
 <style lang="less" scoped>

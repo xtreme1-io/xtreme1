@@ -3,7 +3,7 @@
     v-bind="$attrs"
     :title="t('business.datasetContent.uploadData')"
     :width="600"
-    :height="450"
+    :height="650"
     :showOkBtn="false"
     :cancelButtonProps="{ type: 'default' }"
     destroyOnClose
