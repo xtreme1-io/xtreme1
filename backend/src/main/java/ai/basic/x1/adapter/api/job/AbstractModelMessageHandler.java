@@ -298,6 +298,8 @@ public abstract class AbstractModelMessageHandler<T> {
                 return apiResult.getData();
             }
         }
+        FileUtil.clean(groundTruthFilePath);
+        FileUtil.clean(modelRunFilePath);
         return null;
     }
 

@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.dto;
 
+import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,5 +24,5 @@ public class ModelDataResultDTO {
     /**
      * Data model result
      */
-    private JsonNode modelResult;
+    private JSONObject modelResult;
 }
