@@ -41,6 +41,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.connection.stream.StreamRecords;
@@ -105,14 +106,23 @@ public class ModelUseCase {
 
 
     public ModelBO add(ModelBO modelBO) {
+
         modelBO.setModelCode(EnumUtil.fromString(ModelCodeEnum.class, String.format("%s_%s", modelBO.getDatasetType().name(), modelBO.getModelType().name())));
         var model = DefaultConverter.convert(modelBO, Model.class);
-        modelDAO.save(model);
-        return DefaultConverter.convert(model,ModelBO.class);
+        try {
+            modelDAO.save(model);
+        } catch (DuplicateKeyException e) {
+            throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
+        }
+        return DefaultConverter.convert(model, ModelBO.class);
     }
 
     public void update(ModelBO modelBO) {
-        modelDAO.updateById(DefaultConverter.convert(modelBO, Model.class));
+        try {
+            modelDAO.updateById(DefaultConverter.convert(modelBO, Model.class));
+        } catch (DuplicateKeyException e) {
+            throw new UsecaseException(UsecaseCode.NAME_DUPLICATED);
+        }
     }
 
     public void configurationModelClass(Long modelId, List<ModelClassBO> modelClassBOList) {
