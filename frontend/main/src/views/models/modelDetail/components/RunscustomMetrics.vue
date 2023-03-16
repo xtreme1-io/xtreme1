@@ -12,7 +12,7 @@
   </Popover>
 </template>
 <script lang="ts" setup>
-  import { computed, toRefs } from 'vue';
+  // import { computed, toRefs } from 'vue';
   import { Popover } from 'ant-design-vue';
 
   const props = defineProps<{ metrics: any }>();
