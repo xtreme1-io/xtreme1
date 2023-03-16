@@ -39,6 +39,7 @@ public class DatasetModelJobConsumerListener implements StreamListener<String, O
     @Override
     public void onMessage(ObjectRecord message) {
         String modelMessageBOJSONStr = (String) message.getValue();
+        log.info("receive message:{}",modelMessageBOJSONStr);
         ModelMessageBO modelMessageBO = JSONUtil.toBean(modelMessageBOJSONStr, ModelMessageBO.class);
         buildRequestContext(modelMessageBO.getCreatedBy());
         if (modelMessageHandlerMap.get(modelMessageBO.getModelCode().name()).handleDatasetModelRun(modelMessageBO)) {
