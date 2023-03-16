@@ -1,6 +1,7 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
 import cn.hutool.json.JSON;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,7 +50,7 @@ public class ModelDataResult {
      * The result returned by running the model
      */
     @TableField(value = "model_result", typeHandler = JacksonTypeHandler.class)
-    private JSON modelResult;
+    private JSONObject modelResult;
     /**
      * Model serial number
      */

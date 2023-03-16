@@ -97,6 +97,7 @@ export enum datasetTypeEnum {
   LIDAR_FUSION = 'LIDAR_FUSION',
   LIDAR_BASIC = 'LIDAR_BASIC',
   IMAGE = 'IMAGE',
+  LIDAR = 'LIDAR',
 }
 
 export interface fileItem {
@@ -252,6 +253,8 @@ export interface UploadParams {
   fileUrl: string;
   datasetId: string;
   source: UploadSourceEnum;
+  resultType: string;
+  modelId: number;
 }
 
 export enum UploadStatusEnum {

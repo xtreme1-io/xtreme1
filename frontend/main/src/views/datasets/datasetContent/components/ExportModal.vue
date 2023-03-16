@@ -15,23 +15,30 @@
       <div class="content">
         <div class="flex items-center gap-10px">
           <div class="whitespace-nowrap" style="color: #333; width: 100px">Data</div>
-          <Select v-model:value="selectValue" style="width: 240px" allowClear>
-            <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
+          <Select v-model:value="dataType" style="width: 300px" allowClear>
+            <Select.Option v-for="item in dataOption" :key="item.value" :value="item.value">
               {{ item.label }}
             </Select.Option>
           </Select>
         </div>
         <div class="flex items-center gap-10px">
           <div class="whitespace-nowrap" style="color: #333; width: 100px">Results</div>
-          <Select v-model:value="selectValue" style="width: 240px" allowClear>
-            <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </Select.Option>
-          </Select>
+
+          <TreeSelect
+            :dropdownStyle="{ width: '200px' }"
+            style="width: 300px"
+            v-model:value="selectModelRunIds"
+            :tree-data="props.modelRunResultList"
+            tree-checkable
+            allow-clear
+            placeholder="Please select"
+            showSearch
+            treeDefaultExpandAll
+          />
         </div>
         <div class="flex items-center gap-10px">
           <div class="whitespace-nowrap" style="color: #333; width: 100px">Export Format</div>
-          <Select v-model:value="selectValue" style="width: 240px" allowClear>
+          <Select v-model:value="selectValue" style="width: 300px" allowClear>
             <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
               {{ item.label }}
             </Select.Option>
@@ -55,8 +62,8 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
-  import { message } from 'ant-design-vue';
-  import { Select } from 'ant-design-vue';
+
+  import { message, Select, TreeSelect } from 'ant-design-vue';
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { Icon } from '/@/components/Icon';
 
@@ -64,12 +71,16 @@
   import { dataTypeEnum } from '/@/api/business/model/datasetModel';
 
   const { query } = useRoute();
-  const { id } = query;
+  const { id, dataId } = query;
   const { prefixCls } = useDesign('exportModal');
   const { t } = useI18n();
   const [register, { closeModal }] = useModalInner();
 
-  const props = defineProps<{ filterForm: any }>();
+  const props = defineProps<{
+    filterForm: any;
+    modelRunResultList?: any;
+    selectedList: string[];
+  }>();
   const emit = defineEmits(['setExportRecord']);
 
   const selectValue = ref<string>('');
@@ -78,7 +89,34 @@
       value: 'Xtreme1 v0.5.5',
       label: 'Xtreme1 v0.5.5',
     },
+    {
+      value: 'CO CO v0.5.5',
+      label: 'CO CO v0.5.5',
+    },
   ];
+
+  enum dataOptionEmu {
+    ALL = '',
+    SELECTED = 'SELECTED',
+    WITH_CURRENT_FLITER = 'WITH_CURRENT_FLITER',
+  }
+  const dataOption = [
+    {
+      value: dataOptionEmu.ALL,
+      label: 'All',
+    },
+    {
+      value: dataOptionEmu.SELECTED,
+      label: 'Selected',
+    },
+    {
+      value: dataOptionEmu.WITH_CURRENT_FLITER,
+      label: 'With current filter',
+    },
+  ];
+
+  let selectModelRunIds = ref<any>([]);
+  let dataType = ref<string>('');
 
   const isLoading = ref<boolean>(false);
   const handleSubmit = async () => {
@@ -107,10 +145,17 @@
     if (data.type === dataTypeEnum.ALL) {
       data.type = undefined;
     }
+  
 
+    if (data.runRecordId && data.runRecordId.length) {
+      data.runRecordId = data.runRecordId[1];
+      data.minDataConfidence = data.confidenceSlider[0] / 100;
+      data.maxDataConfidence = data.confidenceSlider[1] / 100;
+    }
+    delete data.confidenceSlider;
     try {
       isLoading.value = true;
-      const res = await exportData(data);
+      const res = await exportData(fliterPa(data));
       message.success({
         content: 'successed',
         duration: 5,
@@ -122,6 +167,23 @@
     setTimeout(() => {
       isLoading.value = false;
     }, 300);
+  };
+
+  let fliterPa = (data) => {
+    let res: any = {};
+    if (dataType.value === dataOptionEmu.ALL) {
+      res.datasetId = data.datasetId;
+    } else if (dataType.value === dataOptionEmu.SELECTED) {
+      res.ids = props.selectedList.toString();
+      res.datasetId = data.datasetId;
+    } else if (dataType.value === dataOptionEmu.WITH_CURRENT_FLITER) {
+      res = data;
+      if (dataId) {
+        res.ids = [dataId].toString();
+      }
+    }
+    res.selectModelRunIds = selectModelRunIds.value.toString();
+    return res;
   };
 </script>
 <style lang="less" scoped>

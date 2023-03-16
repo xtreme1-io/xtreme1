@@ -52,6 +52,7 @@
           @fetchList="fixedFetchList"
         />
         <Tools
+          :modelRunResultList="modelRunResultListForDisplay"
           :cardMaxSliderWidth="maxSliderWidth"
           v-model:cardSliderWidthValue="sliderWidthValue"
           :cardResetWidth="resetWidth"
@@ -555,12 +556,13 @@
           : undefined,
     };
     delete params.confidenceSlider;
-    if (params.runRecordId) {
+
+    if (params.runRecordId && params.runRecordId.length) {
       params.runRecordId = params.runRecordId[1];
       params.minDataConfidence = filter.confidenceSlider[0] / 100;
       params.maxDataConfidence = filter.confidenceSlider[1] / 100;
     }
-    // console.log(params.runRecordId)
+
     if (dataId) {
       params.ids = [dataId].toString();
     }

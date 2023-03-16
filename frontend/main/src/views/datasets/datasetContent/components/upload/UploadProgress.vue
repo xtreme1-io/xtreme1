@@ -68,6 +68,8 @@
     file: any[];
     source: UploadSourceEnum;
     uploadUrl: string;
+    modelId?: number;
+    resultType?: string;
   }>();
   const emits = defineEmits(['fetchList']);
 
@@ -209,8 +211,10 @@
                 fileUrl: result.accessUrl,
                 datasetId: props.id as string,
                 source: props.source,
+                resultType: props.resultType as string,
+                modelId: props.modelId as number,
               };
-              // get serialNumbers
+
               const serialNumbers = await uploadDatasetApi(
                 uploadParams,
                 fileItem.controller.signal,

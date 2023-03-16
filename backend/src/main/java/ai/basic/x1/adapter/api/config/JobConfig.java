@@ -65,7 +65,7 @@ public class JobConfig {
 
         try {
             redisTemplate.opsForStream().createGroup(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
-            redisTemplate.opsForStream().createGroup(DATASET_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
+            redisTemplate.opsForStream().createGroup(DATASET_MODEL_RUN_STREAM_KEY, DATASET_MODEL_RUN_CONSUMER_GROUP);
         } catch (RedisSystemException redisSystemException) {
             //no do
         }
@@ -96,12 +96,12 @@ public class JobConfig {
         StreamMessageListenerContainer.ConsumerStreamReadRequest<String> datasetStreamReadRequest = StreamMessageListenerContainer
                 .StreamReadRequest
                 .builder(StreamOffset.create(DATASET_MODEL_RUN_STREAM_KEY, ReadOffset.lastConsumed()))
-                .consumer(Consumer.from(MODEL_RUN_CONSUMER_GROUP, MODEL_RUN_CONSUMER_NAME))
+                .consumer(Consumer.from(DATASET_MODEL_RUN_CONSUMER_GROUP, DATASET_MODEL_RUN_CONSUMER_NAME))
                 .autoAcknowledge(false)
                 .cancelOnError(throwable -> false)
                 .build();
         streamMessageListenerContainer.register(dataStreamReadRequest, new DataModelJobConsumerListener(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
-        streamMessageListenerContainer.register(datasetStreamReadRequest, new DatasetModelJobConsumerListener(DATASET_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
+        streamMessageListenerContainer.register(datasetStreamReadRequest, new DatasetModelJobConsumerListener(DATASET_MODEL_RUN_STREAM_KEY, DATASET_MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
         return streamMessageListenerContainer;
     }
 

@@ -1,5 +1,42 @@
 <template>
   <div class="upload__content">
+    <div class="flex items-center gap-10px mb-15px">
+      <div class="whitespace-nowrap" style="color: #333; width: 100px">Data Format</div>
+      <Select v-model:value="dataFormat" style="width: 240px" allowClear>
+        <Select.Option v-for="item in dataFormatOption" :key="item.value" :value="item.value">
+          {{ item.label }}
+        </Select.Option>
+      </Select>
+    </div>
+    <div class="custom-item mb-15px">
+      <Checkbox v-model:checked="containsAnnotationResult">Contains annotation result</Checkbox>
+    </div>
+    <div v-if="containsAnnotationResult" class="flex items-center gap-10px mb-15px">
+      <div class="whitespace-nowrap" style="color: #333; width: 100px">Result Type</div>
+      <Select
+        placeholder="please select"
+        v-model:value="resultType"
+        style="width: 240px"
+        allowClear
+      >
+        <Select.Option v-for="item in resultTypeOption" :key="item.value" :value="item.value">
+          {{ item.label }}
+        </Select.Option>
+      </Select>
+    </div>
+    <div
+      v-if="!!containsAnnotationResult && resultType === 'MODEL_RUN'"
+      class="flex items-center gap-10px mb-15px"
+    >
+      <div class="whitespace-nowrap" style="color: #333; width: 100px">Model Name</div>
+      <Select placeholder="please select" style="width: 240px" size="small" v-model:value="modelId">
+        <Select.Option v-for="item in modelRunsList" :key="item.value" :value="item.value">
+          {{ item.label }}
+        </Select.Option>
+      </Select>
+      <a @click="CreatModel"> Create a model </a>
+    </div>
+
     <div class="upload__content--dragger">
       <div class="dragger-tips">
         <Icon class="icon" icon="eva:info-fill" size="24" />
@@ -51,14 +88,76 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, reactive } from 'vue';
-  import { Form, Input, Upload, Divider } from 'ant-design-vue';
+  import { ref, reactive, onMounted } from 'vue';
+  import { Form, Input, Upload, Divider, Select, Checkbox } from 'ant-design-vue';
   import { Icon, SvgIcon } from '/@/components/Icon';
   import { Button } from '/@@/Button';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { datasetTypeEnum, UploadSourceEnum } from '/@/api/business/model/datasetModel';
   import { validateUrl } from './formSchemas';
+  import { useRouter } from 'vue-router';
+  import { RouteNameEnum } from '/@/enums/routeEnum';
+  import { getModelPageApi } from '/@/api/business/models';
+
+  const router = useRouter();
+  const dataFormatOption = [
+    {
+      value: 'Xtreme1 v0.5.5',
+      label: 'Xtreme1 v0.5.5',
+    },
+    {
+      value: 'CO CO v0.5.5',
+      label: 'CO CO v0.5.5',
+    },
+  ];
+  const resultTypeOption = [
+    {
+      value: 'GROUND_TRUTH',
+      label: 'Ground Truth',
+    },
+    {
+      value: 'MODEL_RUN',
+      label: 'Model Runs',
+    },
+  ];
+  let modelRunsList = ref<any>([]);
+
+  const getmodelRunsList = async () => {
+    // LIDAR_FUSION
+    let datasetType = props.datasetType?.includes('LIDAR')
+      ? datasetTypeEnum.LIDAR
+      : datasetTypeEnum.IMAGE;
+    const params = { datasetType: datasetType };
+    const res: any = await getModelPageApi({
+      pageNo: 1,
+      pageSize: 9999,
+      ...params,
+    });
+    modelRunsList.value = res.list.map((item) => ({ label: item.name, value: item.id }));
+
+    return { code: 200 };
+  };
+  let dataFormat = ref<string>('Xtreme1 v0.5.5');
+  let resultType = ref<string | undefined>(undefined);
+  let modelId = ref<number | undefined>(undefined);
+  let containsAnnotationResult = ref<boolean>(false);
+  const resSetModelList = async (res) => {
+    let result = await getmodelRunsList();
+    if (result.code === 200) {
+      // TODO
+      modelId = res?.id;
+    }
+  };
+  const CreatModel = () => {
+    (window as any).reConnect = { datasetType: props.datasetType, resSetModelList };
+    let url = router.resolve({
+      name: RouteNameEnum.MODEL_LIST,
+      // query,
+      // params,
+    });
+    window.open(url.href);
+  };
 
   const UploadDragger = Upload.Dragger;
   const { t } = useI18n();
@@ -98,8 +197,12 @@
     // if (!isLimit) {
     //   return createMessage.error('file must smaller than 500MB!');
     // }
-    emits('closeUpload', fileList, UploadSourceEnum.LOCAL);
-
+    emits('closeUpload', fileList, {
+      source: UploadSourceEnum.LOCAL,
+      resultType: resultType.value,
+      modelId: modelId.value,
+    });
+    // console.log(modelId.value)
     return false;
   };
 
@@ -125,6 +228,11 @@
       }, 1000);
     } catch {}
   };
+
+  // 页面加载
+  onMounted(() => {
+    getmodelRunsList();
+  });
 </script>
 <style lang="less" scoped>
   .upload__content {

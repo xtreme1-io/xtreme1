@@ -13,6 +13,7 @@
     <div class="flex justify-center">
       <UploadProgress
         ref="progressRef"
+        v-bind="$attrs"
         :datasetType="props.datasetType"
         :id="props.id"
         :file="fileList"
@@ -34,6 +35,7 @@
 
   const { t } = useI18n();
   const props = defineProps<{
+    
     datasetType: datasetTypeEnum | undefined;
     id: number;
   }>();

@@ -13,7 +13,7 @@
     </ScrollContainer>
 
     <!-- 弹窗 -->
-    <CreateModal @register="register" @success="handleRefresh" />
+    <CreateModal ref="CreateModalRef" @register="register" @success="handleRefresh" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -60,8 +60,8 @@
       },
       {
         name: t('business.models.list.lidar'),
-        active: currentType.value == datasetTypeEnum.LIDAR_FUSION,
-        params: { datasetType: datasetTypeEnum.LIDAR_FUSION },
+        active: currentType.value == datasetTypeEnum.LIDAR,
+        params: { datasetType: datasetTypeEnum.LIDAR },
         icon: Lidar,
         activeIcon: LidarActive,
       },
@@ -114,6 +114,7 @@
     loadingRef.value = false;
   };
   // 页面加载
+  let CreateModalRef = ref();
   onMounted(() => {
     handleScroll(scrollRef, () => {
       if (total.value > list.value.length) {
@@ -122,8 +123,18 @@
       }
     });
     getList();
-    // buriedPoint(BuriedPointEnum.ENTER_MODELS);
-    // TODO
+
+    setTimeout(() => {
+      if (window.opener && window.opener.reConnect) {
+        let { datasetType } = window.opener?.reConnect;
+        handleCreate();
+        datasetType = datasetType.includes('LIDAR') ? datasetTypeEnum.LIDAR : datasetTypeEnum.IMAGE;
+        setTimeout(() => {
+          CreateModalRef.value.setFieldsValue({ datasetType: datasetType });
+          // window.opener = null;
+        });
+      }
+    }, 500);
   });
   // 新增事件
   const [register, { openModal }] = useModal();

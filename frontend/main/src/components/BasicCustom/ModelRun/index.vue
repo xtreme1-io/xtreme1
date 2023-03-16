@@ -12,6 +12,7 @@
   >
     <!-- 内容 -->
     <div class="run__body">
+      {{ props }}
       <Form :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol" labelAlign="left">
         <Form.Item :label="props.selectName">
           <!-- 名称和值 由 props 接收传入 -->
@@ -139,6 +140,7 @@
     title: string; // 弹窗 title
     modelId: string | number; // 需要传入 modelId 以获取 classes
     datasetId?: string | number;
+    classes?: Array<any>;
   }>();
 
   const labelCol = { span: 4 };
@@ -277,6 +279,7 @@
           return item;
         });
       }
+      console.log(classes);
     }
     // 表单值
     formState.tagsList = JSON.parse(JSON.stringify(classes));
@@ -286,6 +289,13 @@
   // 监听 modelId 变化，获取 classes
   watch(
     () => props.modelId,
+    () => {
+      getClasses();
+    },
+    { immediate: true },
+  );
+  watch(
+    () => props.classes,
     () => {
       getClasses();
     },
