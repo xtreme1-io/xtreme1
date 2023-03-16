@@ -64,7 +64,45 @@ public class JobConfig {
     ) {
 
         try {
-            //redisTemplate.opsForStream().createGroup(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
+            redisTemplate.opsForStream().createGroup(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP);
+        } catch (RedisSystemException redisSystemException) {
+            //no do
+        }
+        StreamMessageListenerContainer.StreamMessageListenerContainerOptions<String, ObjectRecord<String, String>> options =
+                StreamMessageListenerContainer.StreamMessageListenerContainerOptions
+                        .builder()
+                        .batchSize(10)
+                        .executor(redisStreamExecutor)
+                        .keySerializer(RedisSerializer.string())
+                        .hashKeySerializer(RedisSerializer.string())
+                        .hashValueSerializer(RedisSerializer.string())
+                        // less than `spring.redis.timeout`
+                        .pollTimeout(Duration.ofSeconds(1))
+                        .objectMapper(new ObjectHashMapper())
+                        .errorHandler(new ModelRunErrorHandler())
+                        .targetType(String.class)
+                        .build();
+        StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainer =
+                StreamMessageListenerContainer.create(redisConnectionFactory, options);
+        StreamMessageListenerContainer.ConsumerStreamReadRequest<String> dataStreamReadRequest = StreamMessageListenerContainer
+                .StreamReadRequest
+                .builder(StreamOffset.create(DATA_MODEL_RUN_STREAM_KEY, ReadOffset.lastConsumed()))
+                .consumer(Consumer.from(MODEL_RUN_CONSUMER_GROUP, MODEL_RUN_CONSUMER_NAME))
+                .autoAcknowledge(false)
+                .cancelOnError(throwable -> false)
+                .build();
+        streamMessageListenerContainer.register(dataStreamReadRequest, new DataModelJobConsumerListener(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
+        return streamMessageListenerContainer;
+    }
+
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainerDataset(Executor redisStreamExecutor,
+                                                                                                               RedisConnectionFactory redisConnectionFactory,
+                                                                                                               RedisTemplate redisTemplate,
+                                                                                                               ApplicationContext applicationContext
+    ) {
+
+        try {
             redisTemplate.opsForStream().createGroup(DATASET_MODEL_RUN_STREAM_KEY, DATASET_MODEL_RUN_CONSUMER_GROUP);
         } catch (RedisSystemException redisSystemException) {
             //no do
@@ -85,13 +123,6 @@ public class JobConfig {
                         .build();
         StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainer =
                 StreamMessageListenerContainer.create(redisConnectionFactory, options);
-        /*StreamMessageListenerContainer.ConsumerStreamReadRequest<String> dataStreamReadRequest = StreamMessageListenerContainer
-                .StreamReadRequest
-                .builder(StreamOffset.create(DATA_MODEL_RUN_STREAM_KEY, ReadOffset.lastConsumed()))
-                .consumer(Consumer.from(MODEL_RUN_CONSUMER_GROUP, MODEL_RUN_CONSUMER_NAME))
-                .autoAcknowledge(false)
-                .cancelOnError(throwable -> false)
-                .build();*/
 
         StreamMessageListenerContainer.ConsumerStreamReadRequest<String> datasetStreamReadRequest = StreamMessageListenerContainer
                 .StreamReadRequest
@@ -100,7 +131,6 @@ public class JobConfig {
                 .autoAcknowledge(false)
                 .cancelOnError(throwable -> false)
                 .build();
-        //streamMessageListenerContainer.register(dataStreamReadRequest, new DataModelJobConsumerListener(DATA_MODEL_RUN_STREAM_KEY, MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
         streamMessageListenerContainer.register(datasetStreamReadRequest, new DatasetModelJobConsumerListener(DATASET_MODEL_RUN_STREAM_KEY, DATASET_MODEL_RUN_CONSUMER_GROUP, redisTemplate, applicationContext));
         return streamMessageListenerContainer;
     }
