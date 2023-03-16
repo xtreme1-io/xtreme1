@@ -1,5 +1,5 @@
 <template>
-  <Popover trigger="click" overlayClassName="taskAdminPopover" :destroyTooltipOnHide="true">
+  <Popover trigger="click" overlayClassName="metricsPopover" :destroyTooltipOnHide="true">
     <template #content>
       <div class="content">
         <div class="item" :key="index + item.name" v-for="(item, index) in props?.metrics"
@@ -35,7 +35,7 @@
   }
 </style>
 <style lang="less">
-  .taskAdminPopover {
+  .metricsPopover {
     .ant-popover-content {
       border-radius: 8px;
 
