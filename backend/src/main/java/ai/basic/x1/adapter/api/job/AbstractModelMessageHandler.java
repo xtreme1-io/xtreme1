@@ -241,7 +241,7 @@ public abstract class AbstractModelMessageHandler<T> {
         boolean isUpdateErrorMsg = runStatus == RunStatusEnum.FAILURE || runStatus == RunStatusEnum.SUCCESS_WITH_ERROR;
         LambdaUpdateWrapper<ModelRunRecord> wrapper = Wrappers.lambdaUpdate(ModelRunRecord.class)
                 .set(ModelRunRecord::getStatus, runStatus)
-                .set(ObjectUtil.isNotNull(modelResultEvaluateRespDTO), ModelRunRecord::getMetrics, JSONUtil.parseObj(modelResultEvaluateRespDTO),TYPE_HANDLER)
+                .set(ObjectUtil.isNotNull(modelResultEvaluateRespDTO), ModelRunRecord::getMetrics, JSONUtil.parseObj(modelResultEvaluateRespDTO), TYPE_HANDLER)
                 .set(ModelRunRecord::getUpdatedAt, OffsetDateTime.now())
                 .set(ModelRunRecord::getUpdatedBy, modelMessage.getCreatedBy())
                 .eq(ModelRunRecord::getModelSerialNo, modelMessage.getModelSerialNo());
@@ -280,26 +280,28 @@ public abstract class AbstractModelMessageHandler<T> {
         var rootPath = String.format("model_%s", modelMessage.getModelId());
         var groundTruthFile = FileUtil.file(groundTruthFilePath);
         var modelRunFile = FileUtil.file(modelRunFilePath);
-        var fileList = List.of(groundTruthFile, modelRunFile);
-        ModelResultEvaluateReqDTO modelResultEvaluateReqDTO = null;
-        try {
-            minioService.uploadFileList(minioProp.getBucketName(), rootPath, tempPath, fileList);
+        if (!FileUtil.isEmpty(groundTruthFile)) {
+            var fileList = List.of(groundTruthFile, modelRunFile);
+            ModelResultEvaluateReqDTO modelResultEvaluateReqDTO = null;
+            try {
+                minioService.uploadFileList(minioProp.getBucketName(), rootPath, tempPath, fileList);
 
-            var groundTruthObjectName = String.format("%s/%s", rootPath, groundTruthFilePath.replace(tempPath, ""));
-            var modelRunObjectName = String.format("%s/%s", rootPath, modelRunFilePath.replace(tempPath, ""));
-            modelResultEvaluateReqDTO = ModelResultEvaluateReqDTO.builder().groundTruthResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), groundTruthObjectName))
-                    .modelRunResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), modelRunObjectName)).build();
-        } catch (Exception e) {
-            log.error("Batch upload file error,filesPath:{}", JSONUtil.parseArray(fileList.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
-        }
-        if (ObjectUtil.isNotNull(modelResultEvaluateReqDTO)) {
-            var apiResult = getRetryModelResultEvaluate(modelResultEvaluateReqDTO);
-            if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
-                return apiResult.getData();
+                var groundTruthObjectName = String.format("%s/%s", rootPath, groundTruthFilePath.replace(tempPath, ""));
+                var modelRunObjectName = String.format("%s/%s", rootPath, modelRunFilePath.replace(tempPath, ""));
+                modelResultEvaluateReqDTO = ModelResultEvaluateReqDTO.builder().groundTruthResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), groundTruthObjectName))
+                        .modelRunResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), modelRunObjectName)).build();
+            } catch (Exception e) {
+                log.error("Batch upload file error,filesPath:{}", JSONUtil.parseArray(fileList.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
             }
+            if (ObjectUtil.isNotNull(modelResultEvaluateReqDTO)) {
+                var apiResult = getRetryModelResultEvaluate(modelResultEvaluateReqDTO);
+                if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
+                    return apiResult.getData();
+                }
+            }
+            FileUtil.clean(groundTruthFilePath);
+            FileUtil.clean(modelRunFilePath);
         }
-        FileUtil.clean(groundTruthFilePath);
-        FileUtil.clean(modelRunFilePath);
         return null;
     }
 
