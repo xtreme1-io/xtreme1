@@ -180,6 +180,10 @@ public class DataInfoUseCase {
     private static final Integer PC_RENDER_IMAGE_WIDTH = 2000;
     private static final Integer PC_RENDER_IMAGE_HEIGHT = 2000;
     private static final Integer RETRY_COUNT = 3;
+
+    private static final Long GROUND_TRUTH = -1L;
+
+    private static final String GROUND_TRUTH_NAME = "Ground Truth";
     /**
      * Filter out files whose file suffix is not image, and discard the file when it returns false
      */
@@ -567,8 +571,19 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
+        var resultMap = new HashMap<Long, String>();
+        if (CollectionUtil.isNotEmpty(dataInfoQueryBO.getSelectModelRunIds())) {
+            var modelRunRecordBOList = modelRunRecordUseCase.findByIds(dataInfoQueryBO.getSelectModelRunIds());
+            if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
+                resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
+            }
+            if (dataInfoQueryBO.getSelectModelRunIds().contains(GROUND_TRUTH)) {
+                resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
+            }
+        }
+        dataInfoQueryBO.setIsAllResult(false);
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
-                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, dataInfoQueryBO,
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, resultMap, dataInfoQueryBO,
                         this::findByPage,
                         this::processData))));
         return serialNumber;
@@ -995,6 +1010,7 @@ public class DataInfoUseCase {
         lambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getAnnotationStatus()), DataInfo::getAnnotationStatus, modelRunFilterData.getAnnotationStatus());
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getSplitType()), DataInfo::getSplitType, modelRunFilterData.getSplitType());
+        lambdaQueryWrapper.eq(DataInfo::getIsDeleted,false);
         return lambdaQueryWrapper;
     }
 
@@ -1509,9 +1525,10 @@ public class DataInfoUseCase {
      * @param dataList Data list
      * @param queryBO  Data query parameters
      * @param classMap Class id and class name associated map
+     * @param classMap Result id and result name associated map
      * @return Data export collection
      */
-    public List<DataExportBO> processData(List<DataInfoBO> dataList, DataInfoQueryBO queryBO, Map<Long, String> classMap) {
+    public List<DataExportBO> processData(List<DataInfoBO> dataList, DataInfoQueryBO queryBO, Map<Long, String> classMap, Map<Long, String> resultMap) {
         if (CollectionUtil.isEmpty(dataList)) {
             return List.of();
         }
@@ -1520,7 +1537,7 @@ public class DataInfoUseCase {
         var dataAnnotationList = dataAnnotationClassificationUseCase.findByDataIds(dataIds);
         Map<Long, List<DataAnnotationClassificationBO>> dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
                 Collectors.groupingBy(DataAnnotationClassificationBO::getDataId)) : Map.of();
-        var dataAnnotationObjectList = dataAnnotationObjectUseCase.findByDataIds(dataIds);
+        var dataAnnotationObjectList = dataAnnotationObjectUseCase.findByDataIds(dataIds, queryBO.getIsAllResult(), queryBO.getSelectModelRunIds());
         Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
                 dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
                 : Map.of();
@@ -1529,23 +1546,33 @@ public class DataInfoUseCase {
             var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());
             var annotationList = dataAnnotationMap.get(dataId);
             var objectList = dataAnnotationObjectMap.get(dataId);
-            var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
-            if (CollectionUtil.isNotEmpty(annotationList)) {
-                var classificationAttributes = annotationList.stream().map(dataAnnotationBO -> dataAnnotationBO.getClassificationAttributes()).collect(Collectors.toList());
-                dataResultExportBO.setClassificationValues(JSONUtil.parseArray(classificationAttributes));
-            }
+            var dataResultExportBOList = new ArrayList<DataResultExportBO>();
             if (CollectionUtil.isNotEmpty(objectList)) {
-                var objects = new ArrayList<DataResultObjectExportBO>();
-                objectList.forEach(o -> {
-                    var dataResultObjectExportBO = DefaultConverter.convert(o.getClassAttributes(), DataResultObjectExportBO.class);
-                    dataResultObjectExportBO.setClassName(classMap.get(o.getClassId()));
-                    objects.add(dataResultObjectExportBO);
+                var objectSourceMap = objectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getSourceId));
+                objectSourceMap.forEach((sourceId, objectSourceList) -> {
+                    var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
+                    var objects = new ArrayList<DataResultObjectExportBO>();
+                    objectSourceList.forEach(o -> {
+                        var dataResultObjectExportBO = DefaultConverter.convert(o.getClassAttributes(), DataResultObjectExportBO.class);
+                        dataResultObjectExportBO.setClassName(classMap.get(o.getClassId()));
+                        objects.add(dataResultObjectExportBO);
+                    });
+                    dataResultExportBO.setObjects(objects);
+                    dataResultExportBO.setSourceName(resultMap.get(sourceId));
+
+                    if (GROUND_TRUTH.equals(sourceId)) {
+                        if (CollectionUtil.isNotEmpty(annotationList)) {
+                            var classificationAttributes = annotationList.stream().map(dataAnnotationBO -> dataAnnotationBO.getClassificationAttributes()).collect(Collectors.toList());
+                            dataResultExportBO.setClassificationValues(JSONUtil.parseArray(classificationAttributes));
+                        }
+                    }
+                    dataResultExportBOList.add(dataResultExportBO);
                 });
-                dataResultExportBO.setObjects(objects);
+
             }
             var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
             if (CollectionUtil.isNotEmpty(annotationList) || CollectionUtil.isNotEmpty(objectList)) {
-                dataInfoExportBO.setResult(dataResultExportBO);
+                dataInfoExportBO.setResult(dataResultExportBOList);
             }
             dataInfoExportBOList.add(dataInfoExportBO);
         });
@@ -1744,15 +1771,16 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
+        var resultMap = this.getResultMap(scenarioQueryBO.getDatasetId());
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
-                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, scenarioQueryBO,
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, resultMap, scenarioQueryBO,
                         dataAnnotationObjectUseCase::findDataIdByScenarioPage,
                         this::processScenarioData))));
         return serialNumber;
     }
 
 
-    public List<DataExportBO> processScenarioData(List<DataAnnotationObjectBO> dataAnnotationObjectBOList, ScenarioQueryBO queryBO, Map<Long, String> classMap) {
+    public List<DataExportBO> processScenarioData(List<DataAnnotationObjectBO> dataAnnotationObjectBOList, ScenarioQueryBO queryBO, Map<Long, String> classMap, Map<Long, String> resultMap) {
         if (CollectionUtil.isEmpty(dataAnnotationObjectBOList)) {
             return List.of();
         }
@@ -1780,7 +1808,7 @@ public class DataInfoUseCase {
             }
             var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
             if (CollectionUtil.isNotEmpty(objectList)) {
-                dataInfoExportBO.setResult(dataResultExportBO);
+                dataInfoExportBO.setResult(List.of(dataResultExportBO));
             }
             dataInfoExportBOList.add(dataInfoExportBO);
         });
@@ -1869,7 +1897,10 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
-        var dataExportBOList = processData(dataInfoBOList, dataInfoQueryBO, classMap);
+
+        var resultMap = this.getResultMap(datasetId);
+        dataInfoQueryBO.setIsAllResult(true);
+        var dataExportBOList = processData(dataInfoBOList, dataInfoQueryBO, classMap, resultMap);
         var exportTime = TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN);
         var data = new ArrayList<DataExportBaseBO>();
         var results = new ArrayList<DataResultExportBO>();
@@ -1877,12 +1908,22 @@ public class DataInfoUseCase {
             if (ObjectUtil.isNotNull(dataExportBO.getData())) {
                 data.add(dataExportBO.getData());
             }
-            if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
-                results.add(dataExportBO.getResult());
+            if (CollUtil.isNotEmpty(dataExportBO.getResult())) {
+                results.addAll(dataExportBO.getResult());
             }
         });
         return DataResultBO.builder().version(version).datasetId(dataset.getId())
                 .datasetName(dataset.getName()).exportTime(exportTime).data(data).results(results).build();
+    }
+
+    private Map<Long, String> getResultMap(Long datasetId) {
+        var resultMap = new HashMap<Long, String>();
+        var modelRunRecordBOList = modelRunRecordUseCase.findByDatasetId(datasetId);
+        if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
+            resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
+        }
+        resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
+        return resultMap;
     }
 
     public void setDatasetSixData(List<DatasetBO> datasetBOList) {

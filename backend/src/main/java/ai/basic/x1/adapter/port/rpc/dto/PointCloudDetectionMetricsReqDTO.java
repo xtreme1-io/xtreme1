@@ -5,21 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * @author andy
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PreModelRespDTO {
-    private Long id;
-    private String code;
-    private String message;
-    private List<LabelInfo> objects;
+public class PointCloudDetectionMetricsReqDTO {
 
-    private BigDecimal confidence;
+    private Long id;
+
+    private List<PointCloudDetectionObject> objects;
 }

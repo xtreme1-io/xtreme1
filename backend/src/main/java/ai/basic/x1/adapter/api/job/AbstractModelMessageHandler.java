@@ -1,25 +1,34 @@
 package ai.basic.x1.adapter.api.job;
 
 import ai.basic.x1.adapter.dto.ApiResult;
+import ai.basic.x1.adapter.port.dao.DataAnnotationObjectDAO;
 import ai.basic.x1.adapter.port.dao.ModelDataResultDAO;
 import ai.basic.x1.adapter.port.dao.ModelDatasetResultDAO;
 import ai.basic.x1.adapter.port.dao.ModelRunRecordDAO;
+import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDataResult;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDatasetResult;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoCountDAO;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoIncrDAO;
-import ai.basic.x1.entity.DataAnnotationObjectBO;
-import ai.basic.x1.entity.ModelMessageBO;
-import ai.basic.x1.entity.ModelTaskInfoBO;
-import ai.basic.x1.entity.PreLabelModelObjectBO;
+import ai.basic.x1.adapter.port.minio.MinioProp;
+import ai.basic.x1.adapter.port.minio.MinioService;
+import ai.basic.x1.adapter.port.rpc.dto.*;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.RunStatusEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
+import ai.basic.x1.usecase.exception.UsecaseException;
+import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.StopWatch;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.TypeReference;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.*;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -28,9 +37,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +72,20 @@ public abstract class AbstractModelMessageHandler<T> {
     private ModelSerialNoIncrDAO modelSerialNoIncrDAO;
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected DataAnnotationObjectDAO dataAnnotationObjectDAO;
+
+    @Autowired
+    protected MinioService minioService;
+
+    @Autowired
+    protected MinioProp minioProp;
+
+    @Value("${file.tempPath:/tmp/xtreme1/}")
+    protected String tempPath;
+
+    private static final String TYPE_HANDLER = "typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler";
+
 
     @PostConstruct
     public void init() {
@@ -87,6 +113,11 @@ public abstract class AbstractModelMessageHandler<T> {
     abstract ApiResult<T> callRemoteService(ModelMessageBO modelMessageBO);
 
     abstract void syncModelAnnotationResult(ModelTaskInfoBO modelTaskInfo, ModelMessageBO modelMessage);
+
+    abstract void assembleCalculateMetricsData(List<ModelDatasetResult> modelDatasetResults, List<DataAnnotationObject> dataAnnotationObjectList,
+                                               String groundTruthFilePath, String modelRunFilePath);
+
+    abstract String getResultEvaluateUrl();
 
     /**
      * model code implement by subClass
@@ -202,14 +233,15 @@ public abstract class AbstractModelMessageHandler<T> {
     }
 
     private void modelRunRecordStart(ModelMessageBO modelMessage) {
-        updateModelRunRecordStatus(modelMessage, RunStatusEnum.RUNNING, null);
+        updateModelRunRecordStatus(modelMessage, RunStatusEnum.RUNNING, null, null);
     }
 
     private void updateModelRunRecordStatus(ModelMessageBO modelMessage, RunStatusEnum runStatus,
-                                            String errorMsg) {
+                                            String errorMsg, ModelResultEvaluateRespDTO modelResultEvaluateRespDTO) {
         boolean isUpdateErrorMsg = runStatus == RunStatusEnum.FAILURE || runStatus == RunStatusEnum.SUCCESS_WITH_ERROR;
         LambdaUpdateWrapper<ModelRunRecord> wrapper = Wrappers.lambdaUpdate(ModelRunRecord.class)
                 .set(ModelRunRecord::getStatus, runStatus)
+                .set(ObjectUtil.isNotNull(modelResultEvaluateRespDTO), ModelRunRecord::getMetrics, JSONUtil.parseObj(modelResultEvaluateRespDTO),TYPE_HANDLER)
                 .set(ModelRunRecord::getUpdatedAt, OffsetDateTime.now())
                 .set(ModelRunRecord::getUpdatedBy, modelMessage.getCreatedBy())
                 .eq(ModelRunRecord::getModelSerialNo, modelMessage.getModelSerialNo());
@@ -220,8 +252,103 @@ public abstract class AbstractModelMessageHandler<T> {
     }
 
     private void modelRunRecordSuccess(ModelMessageBO modelMessage) {
-        updateModelRunRecordStatus(modelMessage, RunStatusEnum.SUCCESS, null);
+        var modelResultEvaluateRespDTO = calculateMetrics(modelMessage);
+        updateModelRunRecordStatus(modelMessage, RunStatusEnum.SUCCESS, null, modelResultEvaluateRespDTO);
     }
+
+    private ModelResultEvaluateRespDTO calculateMetrics(ModelMessageBO modelMessage) {
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(ModelDatasetResult.class);
+        lambdaQueryWrapper.select(ModelDatasetResult::getId, ModelDatasetResult::getDataId);
+        lambdaQueryWrapper.eq(ModelDatasetResult::getModelSerialNo, modelMessage.getModelSerialNo());
+        var modelDatasetResultList = modelDatasetResultDAO.list(lambdaQueryWrapper);
+        var uuid = IdUtil.fastSimpleUUID();
+        var groundTruthFilePath = String.format("%s%s/groundTruth.json", tempPath, uuid);
+        var modelRunFilePath = String.format("%s%s/modelRun.json", tempPath, uuid);
+        if (CollUtil.isNotEmpty(modelDatasetResultList)) {
+            var modelDatasetResultSplitList = ListUtil.split(modelDatasetResultList, 100);
+            modelDatasetResultSplitList.forEach(subModelDatasetResultList -> {
+                var dataIds = subModelDatasetResultList.stream().map(ModelDatasetResult::getDataId).collect(Collectors.toList());
+                var ids = subModelDatasetResultList.stream().map(ModelDatasetResult::getId).collect(Collectors.toList());
+                var modelDatasetResults = modelDatasetResultDAO.listByIds(ids);
+                var annotationObjectLambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationObject.class);
+                annotationObjectLambdaQueryWrapper.in(DataAnnotationObject::getDataId, dataIds);
+                annotationObjectLambdaQueryWrapper.eq(DataAnnotationObject::getSourceId, -1L);
+                var dataAnnotationObjectList = dataAnnotationObjectDAO.list(annotationObjectLambdaQueryWrapper);
+                assembleCalculateMetricsData(modelDatasetResults, dataAnnotationObjectList, groundTruthFilePath, modelRunFilePath);
+            });
+        }
+        var rootPath = String.format("model_%s", modelMessage.getModelId());
+        var groundTruthFile = FileUtil.file(groundTruthFilePath);
+        var modelRunFile = FileUtil.file(modelRunFilePath);
+        var fileList = List.of(groundTruthFile, modelRunFile);
+        ModelResultEvaluateReqDTO modelResultEvaluateReqDTO = null;
+        try {
+            minioService.uploadFileList(minioProp.getBucketName(), rootPath, tempPath, fileList);
+
+            var groundTruthObjectName = String.format("%s/%s", rootPath, groundTruthFilePath.replace(tempPath, ""));
+            var modelRunObjectName = String.format("%s/%s", rootPath, modelRunFilePath.replace(tempPath, ""));
+            modelResultEvaluateReqDTO = ModelResultEvaluateReqDTO.builder().groundTruthResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), groundTruthObjectName))
+                    .modelRunResultFileUrl(minioService.getInternalUrl(minioProp.getBucketName(), modelRunObjectName)).build();
+        } catch (Exception e) {
+            log.error("Batch upload file error,filesPath:{}", JSONUtil.parseArray(fileList.stream().map(File::getAbsolutePath).collect(Collectors.toList())), e);
+        }
+        if (ObjectUtil.isNotNull(modelResultEvaluateReqDTO)) {
+            var apiResult = getRetryModelResultEvaluate(modelResultEvaluateReqDTO);
+            if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
+                return apiResult.getData();
+            }
+        }
+        return null;
+    }
+
+    public ApiResult<ModelResultEvaluateRespDTO> getRetryModelResultEvaluate(ModelResultEvaluateReqDTO modelResultEvaluateReqDTO) {
+        ApiResult<ModelResultEvaluateRespDTO> apiResult = null;
+        int count = 0;
+        while (count <= RETRY_COUNT && ObjectUtil.isNull(apiResult)) {
+            try {
+                apiResult = callResultEvaluateRemoteService(modelResultEvaluateReqDTO);
+                break;
+            } catch (Throwable throwable) {
+                log.error("call remote service is error", throwable);
+            }
+            count++;
+        }
+        if (apiResult != null && apiResult.getCode() == UsecaseCode.OK) {
+            return apiResult;
+        } else {
+            if (apiResult != null) {
+                return new ApiResult<>(apiResult.getCode(), apiResult.getMessage());
+            } else {
+                return new ApiResult<>(UsecaseCode.UNKNOWN, "service is busy");
+            }
+        }
+    }
+
+    private ApiResult<ModelResultEvaluateRespDTO> callResultEvaluateRemoteService(ModelResultEvaluateReqDTO modelResultEvaluateReqDTO) {
+        try {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            String requestBody = JSONUtil.toJsonStr(modelResultEvaluateReqDTO);
+            String resultEvaluateUrl = getResultEvaluateUrl();
+            HttpRequest httpRequest = HttpUtil.createPost(resultEvaluateUrl)
+                    .body(requestBody, ContentType.JSON.getValue());
+            HttpResponse httpResponse = httpRequest.execute();
+            stopWatch.stop();
+            log.info(String.format("call resultEvaluateService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
+            if (httpResponse.getStatus() == HttpStatus.HTTP_OK) {
+                ApiResult<ModelResultEvaluateRespDTO> apiResult = JSONUtil.toBean(httpResponse.body(), new TypeReference<>() {
+                }, false);
+                return apiResult;
+            } else {
+                log.error("resultEvaluate run error!,{}", httpResponse.body());
+                throw new UsecaseException("resultEvaluate run error!");
+            }
+        } catch (Throwable throwable) {
+            log.error("call result evaluate service error.", throwable);
+            throw new UsecaseException("resultEvaluate run error!");
+        }
+    }
+
 
     private void modelRunRecordFailure(ModelMessageBO modelMessage, RunStatusEnum runStatus) {
         List<ModelDatasetResult> modelDatasetErrorResults = modelDatasetResultDAO.getBaseMapper().selectList(
@@ -236,7 +363,7 @@ public abstract class AbstractModelMessageHandler<T> {
             errorMsg = null;
         }
 
-        updateModelRunRecordStatus(modelMessage, runStatus, errorMsg);
+        updateModelRunRecordStatus(modelMessage, runStatus, errorMsg, null);
     }
 
     private long getSizeFailure(ModelMessageBO modelMessage) {

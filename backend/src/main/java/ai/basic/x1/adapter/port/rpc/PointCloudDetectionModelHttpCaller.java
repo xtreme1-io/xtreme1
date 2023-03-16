@@ -1,15 +1,14 @@
 package ai.basic.x1.adapter.port.rpc;
 
 import ai.basic.x1.adapter.dto.ApiResult;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelReqDTO;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelRespDTO;
+import ai.basic.x1.adapter.port.rpc.dto.PointCloudDetectionReqDTO;
+import ai.basic.x1.adapter.port.rpc.dto.PointCloudDetectionRespDTO;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.http.*;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,10 +18,10 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class PreLabelModelHttpCaller {
+public class PointCloudDetectionModelHttpCaller {
 
 
-    public ApiResult<List<PreModelRespDTO>> callPreLabelModel(PreModelReqDTO preModelReqDTO,String url) {
+    public ApiResult<List<PointCloudDetectionRespDTO>> callPreLabelModel(PointCloudDetectionReqDTO preModelReqDTO, String url) {
         try {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
@@ -33,7 +32,7 @@ public class PreLabelModelHttpCaller {
             stopWatch.stop();
             log.info(String.format("call preLabelModelService took: %dms,req:%s ,resp:%s", stopWatch.getLastTaskTimeMillis(), requestBody, httpResponse.body()));
             if (httpResponse.getStatus() == HttpStatus.HTTP_OK) {
-                ApiResult<List<PreModelRespDTO>> apiResult = JSONUtil.toBean(httpResponse.body(), new TypeReference<>() {
+                ApiResult<List<PointCloudDetectionRespDTO>> apiResult = JSONUtil.toBean(httpResponse.body(), new TypeReference<>() {
                 }, false);
                 return apiResult;
             } else {

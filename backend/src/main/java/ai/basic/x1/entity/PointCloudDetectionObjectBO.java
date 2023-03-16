@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -15,7 +14,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PreLabelModelObjectBO extends ModelTaskInfoBO{
+public class PointCloudDetectionObjectBO extends ModelTaskInfoBO{
 
     private Long dataId;
     private List<ObjectBO> objects;

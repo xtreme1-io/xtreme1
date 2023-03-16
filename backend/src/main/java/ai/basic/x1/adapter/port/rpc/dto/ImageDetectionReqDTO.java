@@ -1,6 +1,5 @@
 package ai.basic.x1.adapter.port.rpc.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PredImageReqDTO {
+public class ImageDetectionReqDTO {
 
     private List<ImageData> datas;
 

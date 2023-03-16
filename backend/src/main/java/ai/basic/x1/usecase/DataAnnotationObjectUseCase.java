@@ -33,21 +33,19 @@ public class DataAnnotationObjectUseCase {
     @Autowired
     private DataAnnotationObjectDAO dataAnnotationObjectDAO;
 
-    @Autowired
-    private DataEditUseCase dataEditUseCase;
-
-    @Autowired
-    private UserUseCase userUseCase;
-
     /**
      * query results of annotation
      *
      * @param dataIds data id list
      * @return results pf annotation
      */
-    public List<DataAnnotationObjectBO> findByDataIds(List<Long> dataIds) {
+    public List<DataAnnotationObjectBO> findByDataIds(List<Long> dataIds, Boolean isAllResult, List<Long> sourceIdIds) {
+        if (!isAllResult && CollUtil.isEmpty(sourceIdIds)) {
+            List.of();
+        }
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationObject.class);
         lambdaQueryWrapper.in(DataAnnotationObject::getDataId, dataIds);
+        lambdaQueryWrapper.in(!isAllResult, DataAnnotationObject::getSourceId, sourceIdIds);
         return DefaultConverter.convert(dataAnnotationObjectDAO.list(lambdaQueryWrapper), DataAnnotationObjectBO.class);
     }
 

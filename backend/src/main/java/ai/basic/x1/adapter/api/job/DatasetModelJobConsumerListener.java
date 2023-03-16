@@ -1,6 +1,11 @@
 package ai.basic.x1.adapter.api.job;
 
+import ai.basic.x1.adapter.api.context.RequestContext;
+import ai.basic.x1.adapter.api.context.RequestContextHolder;
+import ai.basic.x1.adapter.api.context.UserInfo;
+import ai.basic.x1.adapter.dto.LoggedUserDTO;
 import ai.basic.x1.entity.ModelMessageBO;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -35,8 +40,15 @@ public class DatasetModelJobConsumerListener implements StreamListener<String, O
     public void onMessage(ObjectRecord message) {
         String modelMessageBOJSONStr = (String) message.getValue();
         ModelMessageBO modelMessageBO = JSONUtil.toBean(modelMessageBOJSONStr, ModelMessageBO.class);
+        buildRequestContext(modelMessageBO.getCreatedBy());
         if (modelMessageHandlerMap.get(modelMessageBO.getModelCode().name()).handleDatasetModelRun(modelMessageBO)) {
             redisTemplate.opsForStream().acknowledge(streamKey, group, message.getId());
         }
+    }
+
+    private void buildRequestContext(Long userId) {
+        RequestContext requestContext = RequestContextHolder.createEmptyContent();
+        requestContext.setUserInfo(UserInfo.builder().id(userId).build());
+        RequestContextHolder.setContext(requestContext);
     }
 }

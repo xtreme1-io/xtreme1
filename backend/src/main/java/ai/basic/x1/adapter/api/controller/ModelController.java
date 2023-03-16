@@ -51,8 +51,8 @@ public class ModelController {
     private ModelRecognitionUseCase modelRecognitionUseCase;
 
     @PostMapping("/add")
-    public void add(@RequestBody @Validated ModelAddDTO modelAddDTO) {
-        modelUseCase.add(DefaultConverter.convert(modelAddDTO, ModelBO.class));
+    public ModelDTO add(@RequestBody @Validated ModelAddDTO modelAddDTO) {
+        return DefaultConverter.convert(modelUseCase.add(DefaultConverter.convert(modelAddDTO, ModelBO.class)), ModelDTO.class);
     }
 
     @PostMapping("/update")

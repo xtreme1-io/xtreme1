@@ -1,9 +1,7 @@
 package ai.basic.x1.adapter.api.job.converter;
 
 import ai.basic.x1.adapter.port.rpc.dto.DataInfo;
-import ai.basic.x1.adapter.port.rpc.dto.ImageInfo;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelParam;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelReqDTO;
+import ai.basic.x1.adapter.port.rpc.dto.PointCloudDetectionReqDTO;
 import ai.basic.x1.entity.DataInfoBO;
 import ai.basic.x1.entity.FileBO;
 import ai.basic.x1.entity.ModelMessageBO;
@@ -19,15 +17,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import static ai.basic.x1.util.Constants.*;
-import static ai.basic.x1.util.Constants.PCD_SUFFIX;
 
 public class PointCloudDetectionModelReqConverter {
 
     private static final BigDecimal DEFAULT_CONFIDENCE = BigDecimal.valueOf(0);
 
-    public static PreModelReqDTO buildRequestParam(ModelMessageBO messageBo) {
+    public static PointCloudDetectionReqDTO buildRequestParam(ModelMessageBO messageBo) {
         DataInfo dataInfo = buildDataInfo(messageBo.getDataInfo());
-        return PreModelReqDTO.builder()
+        return PointCloudDetectionReqDTO.builder()
                 .datas(Arrays.asList(dataInfo))
                 .build();
     }

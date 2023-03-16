@@ -3,10 +3,9 @@ package ai.basic.x1.adapter.api.job.converter;
 import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.dto.PreModelParamDTO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelRespDTO;
-import ai.basic.x1.adapter.port.rpc.dto.PredImageRespDTO;
-import ai.basic.x1.entity.PreLabelModelObjectBO;
-import ai.basic.x1.entity.PredImageModelObjectBO;
+import ai.basic.x1.adapter.port.rpc.dto.ImageDetectionObject;
+import ai.basic.x1.adapter.port.rpc.dto.ImageDetectionRespDTO;
+import ai.basic.x1.entity.ImageDetectionObjectBO;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -26,10 +25,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelCocoResponseConverter {
 
-    public static PredImageModelObjectBO convert(ApiResult<PredImageRespDTO> predImageRespDTOApiResult,
+    public static ImageDetectionObjectBO convert(ApiResult<ImageDetectionRespDTO> predImageRespDTOApiResult,
                                                  Map<String, ModelClass> systemModelClassMap,
                                                  PreModelParamDTO filterCondition) {
-        PredImageModelObjectBO.PredImageModelObjectBOBuilder<?, ?> builder = PredImageModelObjectBO.builder();
+        ImageDetectionObjectBO.ImageDetectionObjectBOBuilder<?, ?> builder = ImageDetectionObjectBO.builder();
         var response = predImageRespDTOApiResult.getData();
         if (predImageRespDTOApiResult.getCode() == UsecaseCode.OK) {
             if (CollUtil.isEmpty(response.getObjects())) {
@@ -63,27 +62,27 @@ public class ModelCocoResponseConverter {
         return builder.build();
     }
 
-    private static PredImageModelObjectBO.ObjectBO buildObject(PredImageRespDTO.PredictItem predictItem, Map<String, ModelClass> modelClassMap) {
-        var topLeft = PredImageModelObjectBO.Point
+    private static ImageDetectionObjectBO.ObjectBO buildObject(ImageDetectionObject imageDetectionObject, Map<String, ModelClass> modelClassMap) {
+        var topLeft = ImageDetectionObjectBO.Point
                 .builder()
-                .x(predictItem.getLeftTopX())
-                .y(predictItem.getLeftTopY()).build();
-        var bottomRight = PredImageModelObjectBO.Point
+                .x(imageDetectionObject.getLeftTopX())
+                .y(imageDetectionObject.getLeftTopY()).build();
+        var bottomRight = ImageDetectionObjectBO.Point
                 .builder()
-                .x(predictItem.getRightBottomX())
-                .y(predictItem.getRightBottomY()).build();
+                .x(imageDetectionObject.getRightBottomX())
+                .y(imageDetectionObject.getRightBottomY()).build();
 
-        return PredImageModelObjectBO
+        return ImageDetectionObjectBO
                 .ObjectBO.builder()
-                .confidence(predictItem.getConfidence())
-                .modelClass(StrUtil.isNotEmpty(predictItem.getLabel()) ?
-                        ObjectUtil.isNotNull(modelClassMap.get(predictItem.getLabel())) ? modelClassMap.get(predictItem.getLabel()).getName() : null : null)
-                .objType("rectangle")
+                .confidence(imageDetectionObject.getConfidence())
+                .modelClass(StrUtil.isNotEmpty(imageDetectionObject.getLabel()) ?
+                        ObjectUtil.isNotNull(modelClassMap.get(imageDetectionObject.getLabel())) ? modelClassMap.get(imageDetectionObject.getLabel()).getName() : null : null)
+                .type("RECTANGLE")
                 .points(List.of(topLeft, bottomRight))
                 .build();
     }
 
-    private static boolean matchSelectedClassAndConfidence(PredImageRespDTO.PredictItem predictItem,
+    private static boolean matchSelectedClassAndConfidence(ImageDetectionObject imageDetectionObject,
                                                            PreModelParamDTO filterPredItem) {
         if (filterPredItem == null || CollUtil.isEmpty(filterPredItem.getClasses())) {
             throw new IllegalArgumentException("model param is empty");
@@ -96,9 +95,9 @@ public class ModelCocoResponseConverter {
         var selectedClasses = new HashSet<>(filterPredItem.getClasses());
         var selectedUpperClasses = selectedClasses.stream().map(c -> c.toUpperCase()).collect(Collectors.toList());
 
-        String label = predictItem.getLabel();
+        String label = imageDetectionObject.getLabel();
         return selectedUpperClasses.contains(label.toUpperCase()) &&
-                betweenConfidence(predictItem.getConfidence(), minConfidence, maxConfidence);
+                betweenConfidence(imageDetectionObject.getConfidence(), minConfidence, maxConfidence);
     }
 
     private static boolean betweenConfidence(BigDecimal predConfidence, BigDecimal minConfidence,

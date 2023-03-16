@@ -145,24 +145,29 @@ public class ModelRunRecordUseCase {
     }
 
     @Transactional(readOnly = true)
-    public List<ModelRunRecord> findByIds(List<Long> ids) {
-        return modelRunRecordDAO.listByIds(ids);
+    public List<ModelRunRecordBO> findByIds(List<Long> ids) {
+        return DefaultConverter.convert(modelRunRecordDAO.listByIds(ids),ModelRunRecordBO.class);
     }
 
-    public List<DatasetModelResultBO> getDatasetModelRunResult(Long datasetId) {
+    public List<ModelRunRecordBO> findByDatasetId(Long datasetId) {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(ModelRunRecord.class);
         lambdaQueryWrapper.select(ModelRunRecord::getId, ModelRunRecord::getModelId, ModelRunRecord::getRunNo);
         lambdaQueryWrapper.eq(ModelRunRecord::getDatasetId, datasetId);
         lambdaQueryWrapper.in(ModelRunRecord::getStatus, List.of(SUCCESS, SUCCESS_WITH_ERROR));
         var modelRunRecordList = modelRunRecordDAO.list(lambdaQueryWrapper);
-        if (CollUtil.isEmpty(modelRunRecordList)) {
+        return DefaultConverter.convert(modelRunRecordList,ModelRunRecordBO.class);
+    }
+
+    public List<DatasetModelResultBO> getDatasetModelRunResult(Long datasetId) {
+       var modelRunRecordBOList = this.findByDatasetId(datasetId);
+        if (CollUtil.isEmpty(modelRunRecordBOList)) {
             return List.of();
         }
         var modelResultBOList = new ArrayList<DatasetModelResultBO>();
-        var modelIds = modelRunRecordList.stream().map(ModelRunRecord::getModelId).collect(Collectors.toSet());
+        var modelIds = modelRunRecordBOList.stream().map(ModelRunRecordBO::getModelId).collect(Collectors.toSet());
         var modelList = modelDAO.listByIds(modelIds);
         var modelMap = modelList.stream().collect(Collectors.toMap(Model::getId, Model::getName));
-        var modelRunMap = modelRunRecordList.stream().collect(Collectors.groupingBy(ModelRunRecord::getModelId));
+        var modelRunMap = modelRunRecordBOList.stream().collect(Collectors.groupingBy(ModelRunRecordBO::getModelId));
         modelRunMap.forEach((modelId, runRecordList) -> {
             var runRecordBOList = runRecordList.stream().map(runRecord -> DefaultConverter.convert(runRecord, DatasetModelResultBO.RunRecordBO.class)).collect(Collectors.toList());
             var datasetModelResultBO = DatasetModelResultBO.builder().modelId(modelId)

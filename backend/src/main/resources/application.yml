@@ -127,13 +127,14 @@ dataset-initial:
         toolType: POLYLINE
         toolTypeOptions:
         attributes:
-model:
-  arithmetic:
-    image80:
-      url: http://image-object-detection:5000/basic_predict
-    preModel:
-      url: http://point-cloud-object-detection:5000/pointcloud/3dbox
-pointcloud:
+
+image:
+  resultEvaluate:
+    url: http://image-object-detection:5000/image/resultEvaluate
+
+pointCloud:
+  resultEvaluate:
+    url: http://pcd-tools:5000/pointCloud/resultEvaluate
   convertRender:
     url: http://pcd-tools:5000/pointcloud/convert_render
 

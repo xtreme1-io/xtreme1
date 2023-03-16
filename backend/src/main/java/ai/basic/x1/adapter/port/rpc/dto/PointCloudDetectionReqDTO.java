@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PreModelReqDTO {
+public class PointCloudDetectionReqDTO {
 
     private List<DataInfo> datas;
 
