@@ -157,6 +157,7 @@ public class ModelUseCase {
                 modelClassMap.putAll(modelClassBOList.stream().collect(Collectors.groupingBy(ModelClassBO::getModelId)));
             }
             modelBOList.forEach(m -> m.setClasses(modelClassMap.get(m.getId())));
+            return modelBOList;
         }
         return List.of();
     }
