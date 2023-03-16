@@ -41,7 +41,7 @@ public class DataAnnotationObjectUseCase {
      */
     public List<DataAnnotationObjectBO> findByDataIds(List<Long> dataIds, Boolean isAllResult, List<Long> sourceIdIds) {
         if (!isAllResult && CollUtil.isEmpty(sourceIdIds)) {
-            List.of();
+           return List.of();
         }
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationObject.class);
         lambdaQueryWrapper.in(DataAnnotationObject::getDataId, dataIds);
