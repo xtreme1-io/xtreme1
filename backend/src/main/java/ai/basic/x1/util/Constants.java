@@ -121,22 +121,26 @@ public interface Constants {
     }};
 
 
-    String DATA_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:data:modelRun";
+    String DATA_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:model:data:modelRun";
 
-    String DATASET_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:dataset:modelRun";
+    String DATASET_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:model:dataset:modelRun";
+
     String MODEL_RUN_CONSUMER_GROUP = "default-group";
     String MODEL_RUN_CONSUMER_NAME = "model-consumer";
 
-    String SIMILARITY_RESULT_PATH_FORMAT="datasetSimilarity/result/%s";
-    String SIMILARITY_SUBMIT_FILE_PATH_FORMAT="datasetSimilarity/commit/%s";
+    String DATASET_MODEL_RUN_CONSUMER_GROUP = "dataset-model-group";
+    String DATASET_MODEL_RUN_CONSUMER_NAME = "dataset-model-consumer";
 
-    String MODEL_RUN_RESULT_CODE="code";
+    String SIMILARITY_RESULT_PATH_FORMAT = "datasetSimilarity/result/%s";
+    String SIMILARITY_SUBMIT_FILE_PATH_FORMAT = "datasetSimilarity/commit/%s";
 
-    String MODEL_RUN_RESULT_MESSAGE="message";
+    String MODEL_RUN_RESULT_CODE = "code";
 
-    String MODEL_RUN_RESULT_DATA="data";
+    String MODEL_RUN_RESULT_MESSAGE = "message";
 
-    String MODEL_RUN_RESULT_DATA_CODE="data.code";
+    String MODEL_RUN_RESULT_DATA = "data";
 
-    String MODEL_RUN_RESULT_OBJECTS="objects";
+    String MODEL_RUN_RESULT_DATA_CODE = "data.code";
+
+    String MODEL_RUN_RESULT_OBJECTS = "objects";
 }
