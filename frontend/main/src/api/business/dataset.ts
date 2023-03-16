@@ -31,7 +31,7 @@ enum Api {
   DATASET = '/dataset',
   DATA = '/data',
   DATASET_CLASS = '/datasetClass',
-  MODEL_RUN = 'modelRun',
+  MODEL_RUN = '/modelRun',
 }
 
 /**

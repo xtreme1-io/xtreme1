@@ -7,6 +7,7 @@ import { getDateTime } from '/@/utils/business/timeFormater';
 import Icon, { SvgIcon } from '/@/components/Icon';
 import { defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
 import { findModelRunFilterDatasetNameApi } from '/@/api/business/models';
+import RunsCustomMetrics from './RunsCustomMetrics.vue';
 const { t } = useI18n();
 const inactiveFilterIcon = (
   <SvgIcon name={'filter-inactive'} size={14} style={{ transform: 'translateY(-2px)' }} />
@@ -206,15 +207,33 @@ export function getBasicColumns(): BasicColumn[] {
 
     {
       title: t('business.models.run.Metrics'),
+      width: 300,
       dataIndex: 'metrics',
       align: 'left',
-      // customRender: ({ record }) => {
-      //   return (
-      //     <div class="flex items-center gap-5px">
-      //       <Tooltip title={getErrorReason(record.errorReason)}>more</Tooltip>
-      //     </div>
-      //   );
-      // },
+      customRender: ({ record }) => {
+        return (
+          <div
+            style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <div>
+              {record?.metrics?.metrics[0].name} --{record?.metrics?.metrics[0].value}{' '}
+            </div>
+
+            <div>{record?.metrics?.metrics[0].description} </div>
+            {record?.metrics?.metrics.length > 1 ? (
+              <div>
+                {' '}
+                <RunsCustomMetrics metrics={record?.metrics?.metrics} />
+              </div>
+            ) : (
+              ''
+            )}
+          </div>
+        );
+      },
     },
     {
       title: t('business.models.run.createdAt'),

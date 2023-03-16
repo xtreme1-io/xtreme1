@@ -7,6 +7,7 @@
       @closeUpload="handleCloseUploadModal"
     />
     <ProgressModal
+      v-bind="progressModalPa"
       @register="registerProgressModal"
       :datasetType="props.datasetType"
       :id="(id as unknown as number)"
@@ -430,7 +431,8 @@
 
   const fileList = ref<any[]>([]);
   const uploadUrl = ref<string>('');
-  const handleCloseUploadModal = (data, source) => {
+  let progressModalPa = reactive({ resultType: undefined, modelId: undefined });
+  const handleCloseUploadModal = (data, { source, resultType, modelId }) => {
     console.log('handleCloseUploadModal', data);
     if (source == UploadSourceEnum.LOCAL) {
       fileList.value = data;
@@ -439,7 +441,8 @@
       uploadUrl.value = data;
       openProgressModal(true, { uploadUrl: uploadUrl.value, source: source });
     }
-
+    progressModalPa.resultType = resultType;
+    progressModalPa.modelId = modelId;
     closeUploadModal();
   };
   // Reset fileList after ProgressModal closed

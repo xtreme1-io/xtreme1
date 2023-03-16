@@ -61,11 +61,15 @@
     'fontsizeselect bold italic underline strikethrough alignleft aligncenter alignright outdent indent  blockquote undo redo',
   ];
   const FormItem = Form.Item;
-  const [registerForm, { validate, resetFields }] = useForm({
+  const [registerForm, { validate, resetFields, setFieldsValue }] = useForm({
     schemas: createForm,
     labelCol: { span: 4 },
     wrapperCol: { span: 18 },
     labelAlign: 'left',
+  });
+
+  defineExpose({
+    setFieldsValue,
   });
   const emit = defineEmits(['success']);
   const { t } = useI18n();
@@ -75,12 +79,17 @@
     try {
       const data = await validate();
 
-      await addModelApi(data);
+      let res = await addModelApi(data);
       emit('success');
       closeCreateModal();
       resetFields();
       changeOkLoading(false);
       createMessage.success(t('action.createSuccess'));
+
+      if (window.opener && window.opener.reConnect) {
+        let { resSetModelList } = window.opener?.reConnect;
+        resSetModelList(res);
+      }
     } catch (e) {
       changeOkLoading(false);
     }

@@ -101,6 +101,10 @@ export interface editParams {
   url?: string;
 }
 
+export interface testModelUrlConnectioParams {
+  modelId: Number;
+  url: string;
+}
 export interface modelClassList {
   name: string;
   code: string;

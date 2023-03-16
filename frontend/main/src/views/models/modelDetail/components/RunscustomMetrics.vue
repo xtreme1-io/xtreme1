@@ -1,0 +1,58 @@
+<template>
+  <Popover trigger="click" overlayClassName="taskAdminPopover" :destroyTooltipOnHide="true">
+    <template #content>
+      <div class="content">
+        <div class="item" :key="index + item.name" v-for="(item, index) in props?.metrics"
+          ><div> {{ item.name }} </div><div> {{ item.value }} </div
+          ><div> {{ item.description }} </div></div
+        >
+      </div>
+    </template>
+    <a class="more"> More </a>
+  </Popover>
+</template>
+<script lang="ts" setup>
+  import { computed, toRefs } from 'vue';
+  import { Popover } from 'ant-design-vue';
+
+  const props = defineProps<{ metrics: any }>();
+  // let {metricsList}=toRefs(props.metrics)
+</script>
+<style lang="less" scoped>
+  .content {
+    display: flex;
+    padding: 8px;
+    .item {
+      // display: flex;
+      // flex-direction: column;
+      border: 1px solid #aaa;
+      padding: 5px;
+      width: 150px;
+    }
+  }
+  .more {
+    cursor: pointer;
+  }
+</style>
+<style lang="less">
+  .taskAdminPopover {
+    .ant-popover-content {
+      border-radius: 8px;
+
+      .ant-popover-arrow {
+        display: none;
+      }
+
+      .ant-popover-inner {
+        position: relative;
+        overflow: auto;
+        border-radius: 8px;
+        box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+
+        &::-webkit-scrollbar {
+          width: 0;
+        }
+      }
+    }
+  }
+</style>
