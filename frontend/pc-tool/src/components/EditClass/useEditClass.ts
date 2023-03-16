@@ -179,10 +179,9 @@ export default function useEditClass() {
         }
 
         let object = objects[0];
-
         state.objectId = new Date().getTime() + '';
         state.modelClass = (object.userData as IUserData).modelClass || '';
-        state.classType = object.userData.classType || '';
+        state.classType = object.userData.classId || object.userData.classType || '';
 
         let confidenceMax = 0;
         let confidenceMin = 1;
@@ -221,7 +220,7 @@ export default function useEditClass() {
 
         state.objectId = object.uuid;
         state.modelClass = userData.modelClass || '';
-        state.classType = userData.classType || '';
+        state.classType = userData.classId || userData.classType || '';
         // state.isInvisible = !!userData.invisibleFlag;
         state.trackId = userData.trackId || '';
         state.trackName = userData.trackName || '';
@@ -264,7 +263,7 @@ export default function useEditClass() {
     }
 
     function updateAttrInfo(userData: IUserData, classType: string) {
-        let classConfig = _.find(editorState.classTypes, (e) => e.name === classType);
+        let classConfig = editor.getClassType(classType);
         if (!classConfig) return;
         let attrs = userData.attrs || {};
         // let newAttrs = classConfig.attrs.map((e) => {
@@ -324,9 +323,7 @@ export default function useEditClass() {
     }
 
     function updateClassInfo() {
-        let classConfig = editor.state.classTypes.find(
-            (e) => e.name === state.classType,
-        ) as IClassType;
+        let classConfig = editor.getClassType(state.classType);
         if (!classConfig) return;
 
         state.isClassStandard = classConfig.type === 'standard';
@@ -342,8 +339,10 @@ export default function useEditClass() {
 
         // let classConfig = editor.getClassType(state.classType);
         // let size3D = undefined;
+        let classConfig = editor.getClassType(state.classType);
         let userData = {
-            classType: state.classType,
+            classType: classConfig?.name,
+            classId: classConfig?.id,
             attrs: {},
             resultStatus: Const.True_Value,
         } as IUserData;
@@ -367,16 +366,17 @@ export default function useEditClass() {
         let ids = Object.keys(trackIdMap);
         if (ids.length === 0) return;
 
-        let userData = {} as IUserData;
-        userData.classType = state.classType;
-        userData.attrs = {};
+        // let userData = {} as IUserData;
+        // userData.classType = state.classType;
+        // userData.attrs = {};
         // userData.resultStatus = Const.True_Value;
-
+        let classConfig = editor.getClassType(state.classType);
         editor.cmdManager.execute('update-object-user-data', {
             objects: tempObjects,
 
             data: {
-                classType: state.classType,
+                classType: classConfig?.name,
+                classId: classConfig?.id,
             },
         });
     }
@@ -394,7 +394,6 @@ export default function useEditClass() {
 
     function onAttChange(name: string, value: any) {
         trackAttrs[name] = value;
-        console.log(trackAttrs);
         updateTrackAttr();
         state.resultStatus = Const.True_Value;
     }

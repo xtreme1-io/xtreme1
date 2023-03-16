@@ -5,6 +5,7 @@ import {
     IObject,
     utils,
     IFileConfig,
+    SourceType,
 } from 'pc-editor';
 import Editor from './Editor';
 import * as api from '../api';
@@ -61,5 +62,22 @@ export default class BusinessManager extends BaseBusinessManager {
             Array.isArray(frame) ? frame.map((e) => e.id) : frame.id,
         );
         return data;
+    }
+    async getResultSources() {
+        let { bsState, state } = this.editor;
+        let sources = await api.getResultSources(bsState.datasetId);
+        sources.unshift({
+            name: 'Without Task',
+            sourceId: state.config.withoutTaskId,
+            sourceType: SourceType.DATA_FLOW,
+        });
+
+        let sourceMap = {};
+        sources.forEach((e) => {
+            sourceMap[e.sourceId] = true;
+        });
+        state.sourceFilters = [state.config.withoutTaskId];
+        state.sources = sources;
+        return sources;
     }
 }

@@ -334,6 +334,7 @@ export const projectObject2D = define({
 
             let userData = object2D.userData as IUserData;
             userData.classType = object.userData.classType;
+            userData.classId = object.userData.classId;
             userData.modelClass = object.userData.modelClass;
             userData.trackId = object.userData.trackId;
             userData.trackName = object.userData.trackName;
