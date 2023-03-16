@@ -31,12 +31,25 @@ import static ai.basic.x1.util.Constants.*;
 public class JobConfig {
     private static final int PROCESSORS = Runtime.getRuntime().availableProcessors();
     @Bean
-    public Executor redisStreamExecutor() {
+    public Executor dataRedisStreamExecutor() {
         AtomicInteger index = new AtomicInteger(1);
         ThreadPoolExecutor executor = new ThreadPoolExecutor(PROCESSORS, PROCESSORS, 0, TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(), r -> {
             Thread thread = new Thread(r);
-            thread.setName("redisConsumer-executor" + index.getAndIncrement());
+            thread.setName("dataRedisConsumer-executor" + index.getAndIncrement());
+            thread.setDaemon(true);
+            return thread;
+        });
+        return executor;
+    }
+
+    @Bean
+    public Executor datasetRedisStreamExecutor() {
+        AtomicInteger index = new AtomicInteger(1);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(PROCESSORS, PROCESSORS, 0, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(), r -> {
+            Thread thread = new Thread(r);
+            thread.setName("datasetRedisConsumer-executor" + index.getAndIncrement());
             thread.setDaemon(true);
             return thread;
         });
@@ -56,8 +69,8 @@ public class JobConfig {
         return executor;
     }
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
-    public StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainer(Executor redisStreamExecutor,
+    @Bean
+    public StreamMessageListenerContainer<String, ObjectRecord<String, String>> dataStreamMessageListenerContainer(Executor dataRedisStreamExecutor,
                                                                                                                RedisConnectionFactory redisConnectionFactory,
                                                                                                                RedisTemplate redisTemplate,
                                                                                                                ApplicationContext applicationContext
@@ -72,7 +85,7 @@ public class JobConfig {
                 StreamMessageListenerContainer.StreamMessageListenerContainerOptions
                         .builder()
                         .batchSize(10)
-                        .executor(redisStreamExecutor)
+                        .executor(dataRedisStreamExecutor)
                         .keySerializer(RedisSerializer.string())
                         .hashKeySerializer(RedisSerializer.string())
                         .hashValueSerializer(RedisSerializer.string())
@@ -95,13 +108,12 @@ public class JobConfig {
         return streamMessageListenerContainer;
     }
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
-    public StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainerDataset(Executor redisStreamExecutor,
+    @Bean
+    public StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainerDataset(Executor datasetRedisStreamExecutor,
                                                                                                                RedisConnectionFactory redisConnectionFactory,
                                                                                                                RedisTemplate redisTemplate,
                                                                                                                ApplicationContext applicationContext
     ) {
-
         try {
             redisTemplate.opsForStream().createGroup(DATASET_MODEL_RUN_STREAM_KEY, DATASET_MODEL_RUN_CONSUMER_GROUP);
         } catch (RedisSystemException redisSystemException) {
@@ -111,7 +123,7 @@ public class JobConfig {
                 StreamMessageListenerContainer.StreamMessageListenerContainerOptions
                         .builder()
                         .batchSize(10)
-                        .executor(redisStreamExecutor)
+                        .executor(datasetRedisStreamExecutor)
                         .keySerializer(RedisSerializer.string())
                         .hashKeySerializer(RedisSerializer.string())
                         .hashValueSerializer(RedisSerializer.string())
