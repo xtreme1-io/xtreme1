@@ -15,6 +15,8 @@
       @fetchList="reloadList"
     />
     <ExportModal
+      :selectedList="props.selectedList"
+      v-bind="$attrs"
       @register="registerExportModal"
       :modelrunOption="modelrunOption"
       :groundTruthsOption="groundTruthsOption"
