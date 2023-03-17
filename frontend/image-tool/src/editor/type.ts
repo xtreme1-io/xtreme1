@@ -37,11 +37,20 @@ export enum AttrType {
     TEXT = 'TEXT',
 }
 export interface IAttr {
+    id: string;
     type: AttrType;
     name: string;
     label?: string;
     required: boolean;
     options: { value: any; label: string }[];
+
+    classId: string;
+    parent: string;
+    parentAttr: string;
+    parentValue: any;
+    key: string;
+    value: any;
+    leafFlag?: boolean;
 }
 
 export enum ToolType {

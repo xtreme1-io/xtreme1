@@ -81,6 +81,7 @@ export function translateToObjectV2(object: IObject, baseClassType: IClassType) 
         classId: object.classId,
         className: object.classType,
         sourceId: object.sourceId,
+        sourceType: object.sourceType,
         // classValues: object.attrs,
         classValues: objToArray(object.attrs, baseClassType),
         modelConfidence: object.confidence,

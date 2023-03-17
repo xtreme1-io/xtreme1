@@ -11,6 +11,7 @@ export function getDefaultConfig(): IToolConfig {
         FILTER_ALL: 'All',
     };
 }
+let withoutTaskId = '-1';
 export function getDefault(): IToolState {
     return {
         query: {},
@@ -28,7 +29,11 @@ export function getDefault(): IToolState {
         dataIndex: -1,
         // classification config
         classifications: [],
-
+        sources: [],
+        sourceFilters: [],
+        activeSourceData: withoutTaskId,
+        FILTER_ALL: '__All__',
+        withoutTaskId: withoutTaskId,
         // user
         user: {
             id: '',

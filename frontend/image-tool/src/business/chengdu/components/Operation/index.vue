@@ -1,8 +1,9 @@
 <template>
     <div class="pc-editor-operation">
         <!-- <Instructions /> -->
-        <Classification />
         <Instance />
+        <Classification />
+        <Results />
         <!-- <a-collapse v-model:activeKey="state.activeTabs" :bordered="false">
             <a-collapse-panel :showArrow="false" key="classification" header="Classifications">
                 <Classification />
@@ -18,7 +19,8 @@
     import { reactive } from 'vue';
 
     // import Instructions from './Instructions/index.vue';
-    import Instance from './Instance/index.vue';
+    import Instance from './Results/index.vue';
+    import Results from './Instance/index.vue';
     import Classification from './Classification/index.vue';
 
     let state = reactive({

@@ -84,7 +84,6 @@ export class Editor extends EventEmitter {
         });
     }
     addObject(objects: any) {
-        console.log(objects);
         this.tool?.fromJSON(objects);
     }
     reset() {

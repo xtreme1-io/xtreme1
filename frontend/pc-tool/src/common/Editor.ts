@@ -56,6 +56,7 @@ export default class Editor extends BaseEditor {
                     classId: classConfig?.id,
                     source: e.modelRun ? 'MODEL' : 'ARTIFICIAL',
                     sourceId: e.sourceId,
+                    sourceType: e.sourceType,
                     classAttributes: objectV2,
                 });
             });

@@ -486,7 +486,7 @@ export class ImageLabel extends EventEmitter {
         }
     }
     fromJSON(data: any) {
-        console.log(data);
+        // console.log(data);
         this.shapeIntId = Math.max(getMaxIntId(data), this.shapeIntId);
         data.forEach((item: any) => {
             if (Shape[item.type]) {

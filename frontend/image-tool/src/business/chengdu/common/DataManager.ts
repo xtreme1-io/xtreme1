@@ -21,6 +21,35 @@ export default class DataManager {
         // this.tool.editor.on(Event.ADD_OBJECT, () => {
         //     this.handleEditorResultChange();
         // });
+        this.tool.editor.on(Event.ADD_OBJECT, (data: any) => {
+            let object = data?.data?.object;
+            if (object) {
+                this.onEditorAdd(object.toJSON());
+            }
+        });
+        this.tool.editor.on(Event.REMOVE_OBJECT, (data: any) => {
+            let ids = data?.data?.removed || [];
+            let { dataList, dataIndex } = this.tool.state;
+            let dataInfo = dataList[dataIndex];
+            if (!dataInfo) return;
+            let allObjects = this.getDataObject(dataInfo.dataId) || [];
+            this.setDataObject(
+                dataInfo.dataId,
+                allObjects.filter((e) => ids.indexOf(e.uuid) < 0),
+            );
+        });
+        this.tool.editor.on(Event.DIMENSION_CHANGE, (data: any) => {
+            let object = data?.data;
+            let { dataList, dataIndex } = this.tool.state;
+            let dataInfo = dataList[dataIndex];
+            if (!dataInfo || !object) return;
+            let allObjects = this.getDataObject(dataInfo.dataId) || [];
+            let index = allObjects.findIndex((item) => item.uuid == object.uuid);
+            if (index > 0) {
+                allObjects[index] = object.toJSON();
+                this.setDataObject(dataInfo.dataId, allObjects);
+            }
+        });
         [
             Event.ADD_OBJECT,
             Event.CLEAR_DATA,
@@ -45,11 +74,11 @@ export default class DataManager {
     handleEditorResultChange() {
         let { dataList, dataIndex } = this.tool.state;
         let curData = dataList[dataIndex];
-        // let allObjects = this.getDataObject(curData.dataId) || [];
-        let objects = this.tool.editor.getObjects();
-        curData.needSave = true;
-        // allObjects.push(...objects);
-        this.setDataObject(curData.dataId, objects);
+        // // let allObjects = this.getDataObject(curData.dataId) || [];
+        // let objects = this.tool.editor.getObjects();
+        if (curData) curData.needSave = true;
+        // // allObjects.push(...objects);
+        // this.setDataObject(curData.dataId, objects);
     }
     handleEditorCmd(cmd: any, cmdType: 'undo' | 'redo' | 'execute') {
         let { dataList, dataIndex } = this.tool.state;
@@ -100,7 +129,7 @@ export default class DataManager {
     }
 
     onEditorRemove(objects: AnnotateObject[]) {
-        // console.log('onEditorRemove', objects);
+        console.log('onEditorRemove', objects);
         let { dataList, dataIndex } = this.tool.state;
         let curData = dataList[dataIndex];
         let allObjects = this.dataMap[curData.dataId];

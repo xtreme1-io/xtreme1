@@ -8,6 +8,7 @@ import {
     IClassificationAttr,
     IClassification,
     AttrType,
+    SourceType,
 } from '../type';
 import { Editor } from 'editor';
 import { getDefault, getDefaultConfig } from '../state';
@@ -67,7 +68,7 @@ export default class Tool {
 
                 // classification ==>
                 const annotationClassification = res.classificationValues ?? [];
-                console.log(annotationClassification);
+
                 const classifications = [] as IClassification[];
                 this.state.classifications.forEach((classification) => {
                     let copyClassification = {} as IClassification;
@@ -111,11 +112,13 @@ export default class Tool {
         });
         return maxId;
     }
-
+    getCurrentFrame() {
+        return this.state.dataList[this.state.dataIndex];
+    }
     addModelData(flag?: boolean) {
         let { state } = this;
         let dataInfo = state.dataList[state.dataIndex];
-        console.log(dataInfo.dataId);
+        // console.log(dataInfo.dataId);
         let objects = this.dataManager.modelMap[dataInfo.dataId];
         let oldAnnotate = this.dataManager.getDataObject(dataInfo.dataId);
         let annotates = utils.convertObject2Annotate(objects, this.editor);
@@ -152,16 +155,13 @@ export default class Tool {
         let objects = this.dataManager.dataMap[config.dataId];
 
         let filterMap = this.getActiveFilter();
+        let withoutTaskId = this.state.withoutTaskId;
         // console.log('filterMap', filterMap);
 
         let filterObjects = [] as AnnotateObject[];
         objects.forEach((e) => {
-            let project = e.project || '';
-            let modelRun = e.modelRun || '';
-            let valid =
-                filterMap.all ||
-                (modelRun && filterMap.model[modelRun]) ||
-                (!modelRun && filterMap.project[project]);
+            let sourceId = e.userData.sourceId || withoutTaskId;
+            let valid = filterMap.all || filterMap.source[sourceId];
 
             if (!valid) return;
 
@@ -173,23 +173,18 @@ export default class Tool {
     }
 
     getActiveFilter() {
-        let { FILTER_ALL } = this.config;
-        let valueMap = {};
-        this.state.resultActive.forEach((e: any) => {
-            valueMap[e] = true;
-        });
+        let { sourceFilters, FILTER_ALL } = this.state;
 
         let filterMap = {
             all: false,
-            project: {},
-            model: {},
+            source: {},
+            // project: {},
+            // model: {},
         };
-        this.state.resultFilter.forEach((filter: any) => {
-            if (filter.value === FILTER_ALL && valueMap[FILTER_ALL]) filterMap.all = true;
+        sourceFilters.forEach((filter) => {
+            if (filter === FILTER_ALL) filterMap.all = true;
             else {
-                filter.options?.forEach((option: any) => {
-                    if (valueMap[option.value]) filterMap[filter.type][option.value] = true;
-                });
+                filterMap.source[filter] = true;
             }
         });
 
@@ -262,7 +257,7 @@ export default class Tool {
 
     setResource(resource: IDataResource) {
         let data = this.state.dataList[this.state.dataIndex];
-        console.log('setResource ==>', resource, data);
+        // console.log('setResource ==>', resource, data);
 
         this.editor.state.dataId = data.dataId;
         this.editor.state.imageSize = data.dataConfig.size;
@@ -277,6 +272,24 @@ export default class Tool {
         this.editor.loadImage(resource.image);
     }
 
+    async getResultSources() {
+        let state = this.state;
+        let sources = await api.getResultSources(state.datasetId);
+        sources.unshift({
+            name: 'Without Task',
+            sourceId: state.withoutTaskId,
+            sourceType: SourceType.DATA_FLOW,
+        });
+
+        let sourceMap = {};
+        sources.forEach((e) => {
+            sourceMap[e.sourceId] = true;
+        });
+        state.sourceFilters = [state.withoutTaskId];
+        state.sources = sources;
+        return sources;
+    }
+
     needSave() {
         let needSaveData = this.state.dataList.filter((e) => e.needSave);
         return needSaveData.length > 0;
@@ -285,28 +298,7 @@ export default class Tool {
     // NOTE
     async saveObject() {
         let { state, editor } = this;
-        if (state.classificationForm) {
-            try {
-                await state.classificationForm.validate();
-                state.showVerify = false;
-            } catch (error: any) {
-                let values = error.values;
-                let errorFields = error.errorFields;
-                let requiredFileds = [];
-                errorFields.forEach((field: any) => {
-                    let key = field.name[0];
-                    let visible = isAttrVisible(values[key], values);
-                    if (values[key].required && visible) {
-                        requiredFileds.push(values[key]);
-                    }
-                });
-                if (requiredFileds.length) {
-                    state.showVerify = true;
-                    this.editor.showMsg('error', 'Classifications is not filled in as required');
-                    return;
-                }
-            }
-        }
+        let { withoutTaskId } = state;
         // let dataMeta = state.dataList[state.dataIndex];
         if (state.saving) return;
 
@@ -327,14 +319,15 @@ export default class Tool {
             // object  ==>
             const objectInfos = [] as any[];
             const annotates = this.dataManager.getDataObject(dataMeta.dataId) || [];
-            console.log(annotates);
-            annotates.forEach((e) => {
-                const annotate = utils.convertAnnotate2Object([e], editor);
+            let data = utils.convertAnnotate2Object(annotates, editor);
+
+            data.forEach((e) => {
                 objectInfos.push({
-                    id: e.id ?? undefined,
-                    frontId: e.uuid,
-                    classId: annotate[0]?.classId ?? undefined,
-                    classAttributes: annotate[0] ?? {},
+                    frontId: e.id,
+                    classId: +e.classId,
+                    sourceId: +e.sourceId,
+                    sourceType: e.sourceType,
+                    classAttributes: e,
                 });
             });
             // const data = utils.convertAnnotate2Object(annotates, editor); // 转换数据
@@ -371,8 +364,6 @@ export default class Tool {
                 datasetId: currentData.datasetId,
                 dataInfos,
             };
-            console.log(saveParams);
-
             await api.saveAnnotation(saveParams);
 
             state.dataList.forEach((e) => {

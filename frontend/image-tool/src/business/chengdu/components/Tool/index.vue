@@ -28,7 +28,7 @@
                         active: item.isActive(tool),
                         item: true,
                     }"
-                    :style="item.getStyle ? item.getStyle(tool) : ''"
+                    :style="item.getStyle ? item.getStyle(tool) : {}"
                     @click="onTool(item.action)"
                 >
                     <i :class="item.getIcon(tool)"></i>

@@ -1,5 +1,5 @@
 import { get, post } from './base';
-import { IModelResult, IDataMeta, IClassType, IFileConfig } from '../type';
+import { IModelResult, IDataMeta, IClassType, IFileConfig, IResultSource, SourceType } from '../type';
 import { traverseClassification2Arr, empty, parseClassesFromBackend } from '../utils';
 
 enum Api {
@@ -234,4 +234,26 @@ export async function saveAnnotation(params: ISaveAnnotationParams) {
 
     const res = await post(url, params);
     console.log(res);
+}
+export async function getResultSources(datasetId: string) {
+    let url = `/api/modelRun/getDatasetModelRunResult/${datasetId}`;
+    // let url = `/api/dataset/dataset/getDatasetAnnotateResult/${datasetId}`;
+    let data = await get(url);
+
+    data = data.data || {};
+
+    let sources = [] as IResultSource[];
+    data.forEach((item: any) => {
+        let { modelId, modelName, runRecords = [] } = item;
+        runRecords.forEach((e: any) => {
+            sources.push({
+                name: e.runNo,
+                sourceId: e.id,
+                modelId: modelId,
+                modelName: modelName,
+                sourceType: SourceType.MODEL,
+            });
+        });
+    });
+    return sources.filter((e) => e.sourceType !== SourceType.DATA_FLOW);
 }
