@@ -92,7 +92,7 @@ export default class LoadManager {
 
         // this.editor.reset();
         this.editor.state.filterActive = [];
-        this.editor.dataManager.setFilterFromData();
+        // this.editor.dataManager.setFilterFromData();
         this.editor.dataManager.loadDataFromManager();
         this.editor.updateIDCounter();
         // this.editor.pc.addObject(annotates);

@@ -3,7 +3,7 @@
         <div ref="dom" style="height: 100%; width: 100%; position: relative"></div>
         <Labels :data="state.labels" v-show="editor.state.config.showLabel" />
         <Labels :data="state.lineLabels" />
-        <Annotation :data="state.annotations" v-show="editor.state.config.showAnnotation" />
+        <!-- <Annotation :data="state.annotations" v-show="editor.state.config.showAnnotation" /> -->
         <slot name="info" v-if="$slots.info"></slot>
         <Info v-else />
         <Image2DMax />
@@ -133,7 +133,7 @@
                 if (!e.visible) return;
                 let userData = e.userData as IUserData;
                 let classType = userData.classType || '';
-                let classConfig = classTypeMap.value[classType];
+                let classConfig = editor.getClassType(userData);
                 let className = classConfig
                     ? classConfig.label || classConfig.name || ''
                     : classType;

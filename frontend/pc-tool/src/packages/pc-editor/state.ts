@@ -18,10 +18,12 @@ import {
     LangType,
     IModelClass,
     IModel,
+    IResultSource,
     ICheckConfig,
     IUserData,
 } from './type';
 
+const withoutTaskId = '-1';
 export interface IState {
     lang: LangType;
     // pointUrl: string;
@@ -43,6 +45,9 @@ export interface IState {
     imgViews: IImgViewConfig[];
     modeConfig: IModeConfig;
     status: StatusType;
+    activeSourceData: string;
+    sources: IResultSource[];
+    sourceFilters: string[];
     classTypes: IClassType[];
 }
 
@@ -79,6 +84,9 @@ export function getDefaultState(): IState {
         modeConfig: Modes.empty,
         status: StatusType.Default,
         classTypes: [],
+        activeSourceData: withoutTaskId,
+        sources: [],
+        sourceFilters: [],
     };
 
     return defaultState;
@@ -145,5 +153,6 @@ function getDefaultConfig(): IConfig {
         maxViewHeight: '100%',
         maxViewWidth: '100%',
         limitRect2Image: true,
+        withoutTaskId: withoutTaskId,
     };
 }

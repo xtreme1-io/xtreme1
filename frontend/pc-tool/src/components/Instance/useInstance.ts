@@ -253,8 +253,8 @@ export default function useInstance() {
             let trackId = userData.trackId;
             let trackName = userData.trackName;
             let { classify, classifyName } = getClassify(userData);
-            let { className, classType } = getClassInfo(userData);
-            let classConfig = editor.getClassType(classType);
+            let { className, classType, classId } = getClassInfo(userData);
+            let classConfig = editor.getClassType(classId || classType);
             if (classConfig && classConfig.label) className = classConfig.label;
 
             // attr update
@@ -263,7 +263,7 @@ export default function useInstance() {
             // only one classify
             classify = noClassifyKey;
             let trackMapId = trackId;
-            let classMapId = classify + classType;
+            let classMapId = classify + classId + classType;
 
             let name = userData.id.slice(-4);
 
@@ -343,8 +343,8 @@ export default function useInstance() {
             for (let trackId in attrObjectMap) {
                 let object = attrObjectMap[trackId];
 
-                let { classType } = getClassInfo(object.userData);
-                let classConfig = editor.getClassType(classType);
+                let { classType, classId } = getClassInfo(object.userData);
+                let classConfig = editor.getClassType(classId || classType);
                 let trackItem = state.globalTrackMap[trackId];
 
                 if (classConfig && trackItem) {
@@ -368,7 +368,7 @@ export default function useInstance() {
         let userData = selection[0].userData;
         let trackId = userData.trackId || '';
         let { classify, classifyName } = getClassify(userData);
-        let { className, classType } = getClassInfo(userData);
+        let { className, classType, classId } = getClassInfo(userData);
 
         let selectMap = {};
         selection.forEach((e) => {
@@ -376,7 +376,7 @@ export default function useInstance() {
         });
         state.selectMap = selectMap;
         state.trackId = userData.trackId;
-        let classMapId = classify + classType;
+        let classMapId = classify + classId + classType;
 
         state.list.forEach((classifyInfo) => {
             if (classifyInfo.key !== classify) {
@@ -508,7 +508,7 @@ export default function useInstance() {
         } else if (userData.modelClass) {
             classType = '__Model__##' + userData.modelClass;
         }
-        return { className, classType };
+        return { className, classType, classId: userData.classId };
     }
 
     function onItemClick(item: IItem) {

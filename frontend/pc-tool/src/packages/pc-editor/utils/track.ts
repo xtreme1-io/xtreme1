@@ -17,6 +17,7 @@ export function getTrackFromObject(info: Record<string, IObject[]>) {
                     trackName: obj.trackName,
                     trackId: obj.trackId,
                     classType: obj.classType,
+                    classId: obj.classId,
                     resultType: obj.resultType,
                 };
             } else {

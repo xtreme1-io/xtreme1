@@ -155,8 +155,9 @@
         const exclude = props.state.trackId;
         let option: IOption[] = [];
         boxs.forEach((box) => {
-            const { trackId, trackName, classType } = box.userData;
-            if (trackId === exclude || classType !== props.state.classType) return;
+            const { trackId, trackName, classType, classId } = box.userData;
+            if (trackId === exclude || ![classId, classType].includes(props.state.classType))
+                return;
             option.push({
                 label: `${trackName} (${trackId})`,
                 value: `${trackName}(${trackId})`,
@@ -189,13 +190,13 @@
         // console.log(box);
         if (box) {
             let { trackId, trackName } = box.userData;
-            let classType = box.userData.classType;
+            let { classType, classId } = box.userData;
             if (trackId === props.state.trackId) {
                 editor.showMsg('warning', $$('attr-from-self'));
                 return;
             }
 
-            if (classType !== props.state.classType) {
+            if (![classType, classId].includes(props.state.classType)) {
                 editor.showMsg('warning', $$('attr-from-different-class'));
                 return;
             }
@@ -230,8 +231,6 @@
     }
 
     function isAttrVisible(attr: IAttr): boolean {
-        const classConfig = editor.getClassType(attr.classId);
-        if (classConfig.name !== props.state.classType) return false;
         if (!attr.parent) return true;
         let parentAttr = attrMap[attr.parent];
         return isItemVisible(attr) && isAttrVisible(parentAttr);

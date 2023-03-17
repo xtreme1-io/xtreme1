@@ -70,7 +70,7 @@
         return editor.state.classTypes.map((item) => {
             return {
                 // ...item,
-                value: item.name,
+                value: item.id,
                 label: item.label || item.name,
             };
         });
@@ -88,7 +88,7 @@
     }
     function addRecentClass(value: any) {
         // first remove and add
-        const item = TState.classTypes.find((e) => e.name === value);
+        const item = TState.classTypes.find((e) => e.id === value);
         if (!item) return;
         let newRecentClass = TState.recentClass.filter((e) => e.name !== value);
         newRecentClass.unshift(item);

@@ -235,7 +235,9 @@ export default class DataManager {
         console.log('loadDataFromManager', this.editor.state.frameIndex);
 
         let objects = this.getFrameObject(frame.id) || [];
-
+        let {
+            config: { withoutTaskId },
+        } = this.editor.state;
         // console.log(config, config.dataId, objects);
 
         if (this.editor.needUpdateFilter) this.setFilterFromData();
@@ -248,19 +250,14 @@ export default class DataManager {
         objects.forEach((e) => {
             let userData = e.userData as Required<IUserData>;
 
-            let project = userData.project || '';
-            let modelRun = userData.modelRun ? userData.modelRun : '';
-            let valid =
-                filterMap.all ||
-                (modelRun && filterMap.model[modelRun]) ||
-                (!modelRun && filterMap.project[project]);
-
+            let sourceId = userData.sourceId || withoutTaskId;
+            let valid = filterMap.all || filterMap.source[sourceId];
             if (!valid) return;
 
             if (e instanceof Box) {
                 e.parent = this.editor.pc.annotate3D;
                 annotate3D.push(e);
-            } else annotate2D.push(e);
+            } else if (e instanceof Object2D) annotate2D.push(e);
 
             // filterObjects.push(e);
         });
@@ -325,22 +322,18 @@ export default class DataManager {
 
     getActiveFilter() {
         let { FILTER_ALL } = this.editor.state.config;
-        let valueMap = {};
-        this.editor.state.filterActive.forEach((e) => {
-            valueMap[e] = true;
-        });
+        let { sourceFilters } = this.editor.state;
 
         let filterMap = {
-            all: true,
-            project: {},
-            model: {},
+            all: false,
+            source: {},
+            // project: {},
+            // model: {},
         };
-        this.editor.state.filters.forEach((filter) => {
-            if (filter.value === FILTER_ALL && valueMap[FILTER_ALL]) filterMap.all = true;
+        sourceFilters.forEach((filter) => {
+            if (filter === FILTER_ALL) filterMap.all = true;
             else {
-                filter.options?.forEach((option) => {
-                    if (valueMap[option.value]) filterMap[filter.type][option.value] = true;
-                });
+                filterMap.source[filter] = true;
             }
         });
 
