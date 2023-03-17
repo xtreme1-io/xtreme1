@@ -21,6 +21,7 @@ export function view(): IPageHandler {
         tool.editor.showLoading(true);
         try {
             await Promise.all([loadDateSetClassification(), loadClasses(), loadDataInfo()]);
+            await tool.getResultSources();
             await tool.loadData(0, false);
         } catch (error: any) {
             tool.handleErr(new BSError('', 'Load Error', error));

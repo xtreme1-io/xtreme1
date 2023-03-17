@@ -201,8 +201,6 @@
     }, 100);
 
     function updateAttrInfo(object: AnnotateObject, classType: string) {
-        console.log(editorState.classTypes);
-
         const toolType = AnnotateType2ToolType[object.type];
         let classConfig = _.find(
             editorState.classTypes,

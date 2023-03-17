@@ -1,9 +1,8 @@
 <template>
-    <Collapse :header="$$('resultsSource')">
+    <Collapse header="Results source">
         <div class="operation-results">
             <div class="filter-wrap">
                 <a-select
-                    :disabled="editor.state.status === StatusType.Play"
                     v-model:value="state.sourceFilters"
                     mode="multiple"
                     :maxTagCount="1"
@@ -15,42 +14,14 @@
                 >
                 </a-select>
             </div>
-            <!-- <div class="result-source-wrap">
-                <div
-                    @click="onClick(item)"
-                    :class="
-                        item.sourceId === state.activeSourceData
-                            ? 'source-item active'
-                            : 'source-item'
-                    "
-                    v-for="item in filterTabs"
-                >
-                    <i
-                        class="iconfont icon-file"
-                        v-if="item.sourceType === SourceType.DATA_FLOW"
-                    ></i>
-                    <i class="iconfont icon-a-122" v-else></i>
-                    <span class="name limit" :title="itemName(item)">{{ itemName(item) }}</span>
-                    <CloseOutlined
-                        :style="{ opacity: item.sourceId === state.activeSourceData ? '0' : '1' }"
-                        class="remove"
-                        @click.stop="
-                            item.sourceId === state.activeSourceData ? null : onRemove(item)
-                        "
-                    />
-                </div>
-            </div> -->
         </div>
     </Collapse>
 </template>
-
-<script setup lang="ts">
-    import { computed, watch } from 'vue';
-    import { useInjectEditor } from '../../../state';
-    import { StatusType, SourceType, IResultSource } from 'pc-editor';
-    import { CloseOutlined } from '@ant-design/icons-vue';
+<script lang="ts" setup>
     import Collapse from '../../Collapse/index.vue';
-    import * as locale from './lang';
+    import { computed, watch } from 'vue';
+    import { useInjectTool } from '../../../state';
+    import { SourceType } from '../../../type';
 
     export interface IFilter {
         value?: string;
@@ -58,13 +29,11 @@
         // type: SourceType;
         options?: { value: string; label: string }[];
     }
-
-    let editor = useInjectEditor();
-    let $$ = editor.bindLocale(locale);
-    let { state } = editor;
+    let tool = useInjectTool();
+    let state = tool.state;
 
     let filterTabs = computed(() => {
-        let { FILTER_ALL } = state.config;
+        let { FILTER_ALL } = state;
         let filterMap = {};
         let hasAll = false;
         state.sourceFilters.forEach((e) => {
@@ -82,7 +51,7 @@
         () => {
             if (
                 filterTabs.value.length > 0 &&
-                !filterTabs.value.find((e) => e.sourceId === state.activeSourceData)
+                !filterTabs.value.find((e) => e.sourceId == state.activeSourceData)
             ) {
                 state.activeSourceData = filterTabs.value[0].sourceId;
             }
@@ -90,16 +59,16 @@
     );
 
     let filters = computed(() => {
-        let { FILTER_ALL, withoutTaskId } = state.config;
+        let { FILTER_ALL, withoutTaskId } = state;
         let sources = state.sources || [];
-        let all: IFilter = { value: FILTER_ALL, label: $$('labelAll') };
+        let all: IFilter = { value: FILTER_ALL, label: 'All' };
         let groundTruth: IFilter = {
-            label: $$('labelGroundTruth'),
-            options: [{ value: withoutTaskId, label: $$('labelWithoutTask') }],
+            label: 'Ground Truth',
+            options: [{ value: withoutTaskId, label: 'Without Task' }],
         };
         // let model: IFilter = { label: $$('labelModelRuns'), options: [] };
 
-        let filters = [all,groundTruth] as IFilter[];
+        let filters = [all, groundTruth] as IFilter[];
         let modelMap = {};
         sources.forEach((s) => {
             let { sourceId, sourceType, modelId = '', modelName = '', name } = s;
@@ -122,7 +91,7 @@
     });
 
     function onSelect(value: string) {
-        let ALL = state.config.FILTER_ALL;
+        let ALL = state.FILTER_ALL;
         if (value === ALL && state.sourceFilters.length > 1) {
             state.sourceFilters = [ALL];
         } else if (value !== ALL && state.sourceFilters.indexOf(ALL) >= 0) {
@@ -132,7 +101,7 @@
         updateData();
     }
     function onDeselect(value: string) {
-        let ALL = state.config.FILTER_ALL;
+        let ALL = state.FILTER_ALL;
 
         if (state.sourceFilters.length === 0) {
             state.sourceFilters = [ALL];
@@ -141,11 +110,10 @@
     }
 
     function updateData() {
-        editor.selectObject();
-        editor.dataManager.loadDataFromManager();
+        // tool.();
+        tool.loadDataFromManager(true);
     }
 </script>
-
 <style lang="less">
     .operation-results {
         // height: 40px;

@@ -2,7 +2,8 @@ import { IUserData, Editor, IClassType, IAttr, AnnotateType2ToolType } from 'edi
 // @ts-ignore
 import uuid from 'uuid/v4';
 import { empty } from './common';
-import { isArray } from 'lodash';
+import { copyClassAttrs, isClassAttrHasValue, isClassAttrVisible } from './classType';
+import { AttrType, IObjectV2, SourceType } from '../type';
 type IObject = any;
 type IAnnotateObject = any;
 
@@ -38,6 +39,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             version: obj?.version,
             userData: {
                 ...obj?.meta,
+                sourceId: e.sourceId || obj.sourceId,
+                sourceType: e.sourceType || obj.sourceType,
                 attrs: arrayToObj(obj?.classValues),
                 modelClass: obj.modelClass,
                 confidence: obj.modelConfidence,
@@ -50,7 +53,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         };
 
         if (annotate.type == 'rectangle') {
-            const [p0, p1] = obj.contour.points;
+            const defaultPoint = { x: 0, y: 0 };
+            const [p0 = defaultPoint, p1 = defaultPoint] = obj.contour?.points || obj.points || [];
             annotate.coordinate = [p0, { x: p1.x, y: p0.y }, p1, { x: p0.x, y: p1.y }];
         }
         annotates.push(annotate);
@@ -110,6 +114,8 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
             createdAt: userData.createdAt,
             createdBy: userData.createdBy,
             trackId: obj.intId,
+            sourceId: userData.sourceId || editor.state.withoutTaskId,
+            sourceType: userData.sourceType || SourceType.DATA_FLOW,
             trackName: obj.intId,
             classId: userData.classType ? targetClassType?.id : '',
             classValues: objToArray(userData.attrs || [], targetClassType ?? {}),

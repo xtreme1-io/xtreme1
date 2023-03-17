@@ -28,6 +28,7 @@ export function execute(): IPageHandler {
             await Promise.all([loadDateSetClassification(), loadClasses(), loadModels()]);
             // 自动加载资源
             // tool.dataResource.load();
+            await tool.getResultSources();
             await tool.loadData(0, false);
         } catch (error: any) {
             tool.handleErr(new BSError('', 'Load Error', error));
