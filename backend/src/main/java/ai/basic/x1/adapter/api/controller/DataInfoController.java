@@ -5,6 +5,7 @@ import ai.basic.x1.adapter.dto.*;
 import ai.basic.x1.adapter.dto.request.DataInfoSplitFilterDTO;
 import ai.basic.x1.adapter.dto.request.DataInfoSplitReqDTO;
 import ai.basic.x1.adapter.exception.ApiException;
+import ai.basic.x1.adapter.port.rpc.dto.DatasetModelResultDTO;
 import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
@@ -17,15 +18,19 @@ import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +42,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/data/")
 @Validated
+@Slf4j
 public class DataInfoController extends BaseDatasetController {
 
     @Autowired
@@ -193,6 +199,27 @@ public class DataInfoController extends BaseDatasetController {
         return String.valueOf(dataInfoUsecase.export(dataInfoQueryBO));
     }
 
+    @GetMapping("test")
+    public String test() throws IOException, InterruptedException {
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command("sh", "-c", "convert_ctl -src /tmp/x1/20230316114054.zip -out /tmp/x1/ -rps /tmp/x1/rep.json --format=coco");
+        Process process = builder.start();
+        BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        while ((line = in.readLine()) != null) {
+            stringBuilder.append(line);
+        }
+        if (StrUtil.isNotEmpty(stringBuilder.toString())) {
+            log.error(stringBuilder.toString());
+        }
+        in.close();
+        int exitCode = process.waitFor();
+        assert exitCode == 0;
+
+        return null;
+    }
+
     @GetMapping("findExportRecordBySerialNumbers")
     public List<ExportRecordDTO> findExportRecordBySerialNumber(
             @NotEmpty(message = "serialNumbers cannot be null") @RequestParam(required = false) List<String> serialNumbers) {
@@ -277,5 +304,9 @@ public class DataInfoController extends BaseDatasetController {
     public JSONObject getDataAndResult(@NotNull(message = "cannot be null") @RequestParam(required = false) Long datasetId, @RequestParam(required = false) List<Long> dataIds) {
         return JSONUtil.parseObj(JSONUtil.toJsonStr(dataInfoUsecase.getDataAndResult(datasetId, dataIds)));
     }
+
+    /*@GetMapping("getDataResultSource/{dataId}")
+    public List<DatasetModelResultDTO> getDataResultSource(@PathVariable Long dataId) {
+    }*/
 
 }

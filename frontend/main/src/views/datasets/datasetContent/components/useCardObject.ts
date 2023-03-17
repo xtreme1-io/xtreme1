@@ -32,6 +32,11 @@ const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
   POLYLINE: OBJECT_TYPE.POLYLINE,
 };
 
+// const fliterAnnotation=()=>{
+
+//   return
+// }
+
 export default function useCardObject() {
   const svg = ref<any>(null);
   const refs = ref({});
@@ -101,7 +106,11 @@ export default function useCardObject() {
     // }
     size.value.init = true;
   };
-  const updatePcResult = (target: any[], objects: any[], info: any) => {
+  const updatePcResult = (target: any[], { objects, selectedSourceIds }: any, info: any) => {
+    if (selectedSourceIds && selectedSourceIds.length) {
+      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+    }
+
     const size = getSize(svg.value);
     const dom = svg.value as SVGElement;
     if (info) {
@@ -142,12 +151,14 @@ export default function useCardObject() {
 
   const updatePcImageResult = (
     target: any[],
-    objects: any[],
+    { objects, selectedSourceIds }: any,
     index: number,
     svg: SVGElement,
     imgSize: any,
   ) => {
-    // const imgName = img.name
+    if (selectedSourceIds && selectedSourceIds.length) {
+      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+    }
     if (svg && imgSize) {
       // const aspect = imgSize.width / imgSize.height;
       const contextNode = svg.parentElement as HTMLDivElement;
@@ -225,7 +236,10 @@ export default function useCardObject() {
       });
     }
   };
-  const updateImageResult = (objects: any[]) => {
+  const updateImageResult = (objects: any[], selectedSourceIds: any[]) => {
+    if (selectedSourceIds && selectedSourceIds.length) {
+      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+    }
     const { width, height, svgWidth, svgHeight } = size.value;
     const convert = transformPos(width, height, svgWidth, svgHeight);
     const getPoints = function getPoints(points: { x: number; y: number }[]) {
@@ -236,7 +250,8 @@ export default function useCardObject() {
         })
         .join(' ');
     };
-    return objects.map((item) => {
+
+    const result = objects.map((item) => {
       const { contour = {}, id, type, meta = {} } = item;
       const { points = [], interior = [] } = contour;
       let _points: any = [];
@@ -268,7 +283,10 @@ export default function useCardObject() {
         uuid: id,
       };
     });
+
+    return result;
   };
+
   return {
     iState,
     size,
@@ -291,6 +309,7 @@ export function useImgCard(props: {
   data: DatasetItem;
   showAnnotation?: boolean;
   object?: any;
+  selectedSourceIds: any;
 }) {
   const {
     iState,
@@ -325,7 +344,11 @@ export function useImgCard(props: {
       );
       // let size = getSize(svg.value);
       const info = getExtraInfo();
-      updatePcResult(results, objects, info);
+      updatePcResult(
+        results,
+        { objects: objects, selectedSourceIds: props.selectedSourceIds },
+        info,
+      );
     }
     iState.pcObject = results;
   };
@@ -341,8 +364,9 @@ export function useImgCard(props: {
       size.value.init
     ) {
       const objects = props.object || [];
-      results = updateImageResult(objects);
+      results = updateImageResult(objects, props?.selectedSourceIds);
     }
+
     iState.imageObject = results;
   };
   watchEffect(updateImageObject);
@@ -358,6 +382,7 @@ export function useImgCard(props: {
             return Object.assign({}, img, { object: null });
           })
       : [];
+
     if (
       props.showAnnotation !== false &&
       props.info?.type === datasetTypeEnum.LIDAR_FUSION &&
@@ -376,7 +401,14 @@ export function useImgCard(props: {
         const svgElement = ref.querySelector('svg.easy-image') as SVGElement;
         if (imgSize) {
           const items: any[] = [];
-          updatePcImageResult(items, objects, index, svgElement, imgSize);
+          updatePcImageResult(
+            items,
+            { objects: objects, selectedSourceIds: props.selectedSourceIds },
+            index,
+            svgElement,
+            imgSize,
+          );
+
           img.object = items;
         }
       });

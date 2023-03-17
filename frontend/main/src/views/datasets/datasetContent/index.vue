@@ -86,6 +86,7 @@
         >
           <ScrollContainer ref="scrollRef">
             <ImgCard
+              :selectedSourceIds="runRecordIdDisplay"
               class="listcard"
               v-for="i in list"
               :key="i.id"
@@ -196,15 +197,15 @@
                   <span>All </span>
                 </Radio>
                 <Radio :value="SelectedDataSplitType.TRAINING">
-                  <SvgIcon name="annotated" />
+                  <SvgIcon name="dataset-split-training" />
                   <span class="ml-2">Training</span>
                 </Radio>
                 <Radio :value="SelectedDataSplitType.VALIDATION">
-                  <SvgIcon name="notAnnotated" />
+                  <SvgIcon name="dataset-split-validation" />
                   <span class="ml-2">Validation</span>
                 </Radio>
                 <Radio :value="SelectedDataSplitType.TEST">
-                  <SvgIcon name="invalid" />
+                  <SvgIcon name="dataset-split-test" />
                   <span class="ml-2">Test</span>
                 </Radio>
                 <Radio :value="SelectedDataSplitType.NOT_SPLIT">
@@ -217,8 +218,7 @@
             <CollContainer icon="mdi:calendar-month" title="Status">
               <Radio.Group name="status" v-model:value="annotationStatus">
                 <Radio :value="undefined">
-                  <SvgIcon name="annotated" />
-                  <span class="ml-2">All</span>
+                  <span>All</span>
                 </Radio>
                 <Radio value="ANNOTATED">
                   <SvgIcon name="annotated" />
@@ -589,7 +589,7 @@
             if (!res[dataId]) {
               res[dataId] = [];
             }
-            res[dataId] = objects.map((o) => o.classAttributes);
+            res[dataId] = objects.map((o) => ({ sourceId: o.sourceId, ...o.classAttributes }));
             return map;
           }, map);
           Object.assign(objectMap.value, map);
@@ -825,11 +825,6 @@
     'list',
     30,
   );
-
-  watch(runRecordIdDisplay, (id) => {
-    console.log(id);
-    // TODO;
-  });
 
   watch(sortWithLabel, (type) => {
     resetFilter(type);
