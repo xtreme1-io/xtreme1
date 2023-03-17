@@ -582,6 +582,7 @@ public class DataInfoUseCase {
             }
         }
         dataInfoQueryBO.setIsAllResult(false);
+        dataInfoQueryBO.setDataFormat(IMAGE.equals(dataInfoQueryBO.getDatasetType()) ? dataInfoQueryBO.getDataFormat() : DataFormatEnum.XTREME1);
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
                 exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, resultMap, dataInfoQueryBO,
                         this::findByPage,
@@ -1010,7 +1011,7 @@ public class DataInfoUseCase {
         lambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getAnnotationStatus()), DataInfo::getAnnotationStatus, modelRunFilterData.getAnnotationStatus());
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getSplitType()), DataInfo::getSplitType, modelRunFilterData.getSplitType());
-        lambdaQueryWrapper.eq(DataInfo::getIsDeleted,false);
+        lambdaQueryWrapper.eq(DataInfo::getIsDeleted, false);
         return lambdaQueryWrapper;
     }
 
@@ -1301,7 +1302,7 @@ public class DataInfoUseCase {
                         return;
                     }
 
-                    var classMap = getClassMap(result.getObjects());
+                    var classMap = getClassMap(dataAnnotationObjectBO.getDatasetId(), result.getObjects());
                     result.getObjects().forEach(object -> {
                         var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
                         object.setId(IdUtil.randomUUID());
@@ -1319,7 +1320,7 @@ public class DataInfoUseCase {
         }
     }
 
-    private Map<Long, DatasetClassBO> getClassMap(List<DataAnnotationResultObjectBO> objects) {
+    private Map<Long, DatasetClassBO> getClassMap(Long datasetId, List<DataAnnotationResultObjectBO> objects) {
         if (CollUtil.isEmpty(objects)) {
             return new HashMap<>();
         }
@@ -1329,7 +1330,7 @@ public class DataInfoUseCase {
         if (CollUtil.isEmpty(classIds)) {
             return new HashMap<>();
         }
-        var datasetClassBOList = datasetClassUseCase.findByIds(new ArrayList<>(classIds));
+        var datasetClassBOList = datasetClassUseCase.findByIds(datasetId, new ArrayList<>(classIds));
         if (CollUtil.isNotEmpty(datasetClassBOList)) {
             return datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId,
                     t -> t));
@@ -1344,6 +1345,7 @@ public class DataInfoUseCase {
         }
         var classId = object.getClassId();
         if (classMap.containsKey(classId)) {
+            object.setClassId(classId);
             object.setClassName(classMap.get(classId).getName());
         } else {
             object.setClassId(null);
@@ -1766,7 +1768,7 @@ public class DataInfoUseCase {
         var serialNumber = exportUseCase.createExportRecord(fileName);
         scenarioQueryBO.setPageNo(PAGE_NO);
         scenarioQueryBO.setPageSize(PAGE_SIZE_100);
-        var datasetClassBOList = datasetClassUseCase.findByIds(scenarioQueryBO.getClassIds());
+        var datasetClassBOList = datasetClassUseCase.findByIds(scenarioQueryBO.getDatasetId(), scenarioQueryBO.getClassIds());
         var classMap = new HashMap<Long, String>();
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));

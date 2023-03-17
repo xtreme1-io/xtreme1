@@ -2,6 +2,7 @@ package ai.basic.x1.entity;
 
 import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
+import ai.basic.x1.entity.enums.DataFormatEnum;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.entity.enums.SplitTypeEnum;
 import lombok.AllArgsConstructor;

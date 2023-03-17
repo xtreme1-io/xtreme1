@@ -1,10 +1,7 @@
 package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
-import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
-import ai.basic.x1.entity.enums.DataInfoSortFieldEnum;
-import ai.basic.x1.entity.enums.SortEnum;
-import ai.basic.x1.entity.enums.SplitTypeEnum;
+import ai.basic.x1.entity.enums.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -67,6 +64,12 @@ public class DataInfoQueryDTO {
      */
     @ValidStringEnum(message = "annotationStatus must be one of ANNOTATED, NOT_ANNOTATED, INVALID", enumClass = DataAnnotationStatusEnum.class)
     private String annotationStatus;
+
+    /**
+     * Data format XTREME1,COCO
+     */
+    @ValidStringEnum(message = "dataFormat must be one of XTREME1,COCO", enumClass = DataFormatEnum.class)
+    private String dataFormat;
 
     /**
      * Data split type TRAINING,VALIDATION,TEST,NOT_SPLIT
