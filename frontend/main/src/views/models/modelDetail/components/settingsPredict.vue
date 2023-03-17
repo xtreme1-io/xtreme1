@@ -128,6 +128,7 @@
     let val = urlVal.value;
     if (!reg.test(val) || !val) {
       message.warning(t('business.models.settingsModel.TestConnectionUrlErrorMsg'));
+      return;
     }
     let res: any = await testModelUrlConnectionApi({ modelId: Number(modelId), url: urlVal.value });
     let { code, content, errorMessage, status } = res;

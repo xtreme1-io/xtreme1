@@ -33,8 +33,12 @@
           </Select>
         </div>
         <div>
-          <span> 已选中{{ selectedData.length }}条数据 </span
-          ><Button @click="showSelectedData" v-if="selectedData.length" type="default"
+          <span style="font-size: 16px"> 已选中 {{ selectedData.length }} 条数据 </span> &nbsp;
+          <Button
+            style="border-radius: 8px"
+            @click="showSelectedData"
+            v-if="selectedData.length"
+            type="default"
             >导出到data</Button
           >
         </div>

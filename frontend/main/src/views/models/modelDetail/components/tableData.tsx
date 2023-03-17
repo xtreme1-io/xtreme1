@@ -136,7 +136,7 @@ export function getBasicColumns(): BasicColumn[] {
           <div style=" padding:10px">
             {' '}
             <Input
-              style="width: 100px; display: block"
+              style="max-width: 150px; display: block"
               value={selectedKeys}
               onChange={(e) => setSelectedKeys(e.target.value ? e.target.value : '')}
               onPressEnter={(A) => {}}
@@ -185,6 +185,7 @@ export function getBasicColumns(): BasicColumn[] {
       dataIndex: 'runRecordType',
       align: 'left',
       filterMultiple: false,
+      width: '80px',
       filters: [
         {
           text: 'Runs',
@@ -203,7 +204,12 @@ export function getBasicColumns(): BasicColumn[] {
       //   return formatTaskType(v);
       // },
     },
-    { title: t('business.models.run.DataCount'), dataIndex: 'dataCount', align: 'left' },
+    {
+      title: t('business.models.run.DataCount'),
+      width: '100px',
+      dataIndex: 'dataCount',
+      align: 'left',
+    },
 
     {
       title: t('business.models.run.Metrics'),
@@ -218,19 +224,28 @@ export function getBasicColumns(): BasicColumn[] {
               e.stopPropagation();
             }}
           >
-            <div>
-              {record?.metrics?.metrics[0].name} --{record?.metrics?.metrics[0].value}{' '}
-            </div>
-
-            <div>{record?.metrics?.metrics[0].description} </div>
-            {record?.metrics?.metrics.length > 1 ? (
+            <div style={'align-items: center'} class={'flex'}>
+              {' '}
               <div>
-                {' '}
-                <RunsCustomMetric metrics={record?.metrics?.metrics} />
-              </div>
-            ) : (
-              ''
-            )}
+                {record?.metrics?.metrics?.length ? (
+                  <div>
+                    {record?.metrics?.metrics[0].name} -- {record?.metrics?.metrics[0].value}
+                  </div>
+                ) : (
+                  ''
+                )}
+
+                {/* <div> {record?.metrics?.metrics[0].value} </div> */}
+              </div>{' '}
+              {record?.metrics?.metrics.length > 1 ? (
+                <div style={'margin-left:15px'}>
+                  {' '}
+                  <RunsCustomMetric metrics={record?.metrics?.metrics} />
+                </div>
+              ) : (
+                ''
+              )}{' '}
+            </div>
           </div>
         );
       },
@@ -241,6 +256,7 @@ export function getBasicColumns(): BasicColumn[] {
       slots: { customRender: 'createdAt' },
       align: 'left',
       sorter: true,
+      width: '160px',
       // sortDirections: ['ASC', 'DESC'],
 
       sortDirections: ['descend', 'ascend'],
@@ -252,6 +268,7 @@ export function getBasicColumns(): BasicColumn[] {
     {
       title: t('business.models.run.status'),
       dataIndex: 'status',
+      width: '100px',
       filterMultiple: false,
       align: 'left',
       filters: [

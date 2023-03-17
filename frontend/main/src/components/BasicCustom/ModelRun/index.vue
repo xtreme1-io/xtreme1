@@ -12,7 +12,6 @@
   >
     <!-- 内容 -->
     <div class="run__body">
-      {{ props }}
       <Form :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol" labelAlign="left">
         <Form.Item :label="props.selectName">
           <!-- 名称和值 由 props 接收传入 -->
@@ -179,7 +178,6 @@
   const handleRun = () => {
     // changeOkLoading(true);
 
-    console.log(formState.sliderValue);
     let preModelResults: Nullable<ResultsModelParam> = null;
     let preModelData: Nullable<DataModelParam> = null;
 
@@ -279,7 +277,6 @@
           return item;
         });
       }
-      console.log(classes);
     }
     // 表单值
     formState.tagsList = JSON.parse(JSON.stringify(classes));

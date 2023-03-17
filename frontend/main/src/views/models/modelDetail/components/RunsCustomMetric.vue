@@ -2,9 +2,10 @@
   <Popover trigger="click" overlayClassName="metricsPopover" :destroyTooltipOnHide="true">
     <template #content>
       <div class="content">
-        <div class="item" :key="index + item.name" v-for="(item, index) in props?.metrics"
-          ><div> {{ item.name }} </div><div> {{ item.value }} </div
-          ><div> {{ item.description }} </div></div
+        <div class="item" :key="index + item.name" v-for="(item, index) in data"
+          ><div style="border-bottom: 1px solid #aaa"> {{ item.name }} </div>
+          <div style="border-bottom: 1px solid #aaa"> {{ item.value }} </div>
+          <div> {{ item.description }} </div></div
         >
       </div>
     </template>
@@ -12,10 +13,14 @@
   </Popover>
 </template>
 <script lang="ts" setup>
-  // import { computed, toRefs } from 'vue';
+  import { computed, toRefs } from 'vue';
   import { Popover } from 'ant-design-vue';
 
   const props = defineProps<{ metrics: any }>();
+  let data = computed(() => {
+    // { name: 'name:', value: 'value:', description: 'description:' },
+    return [...props?.metrics];
+  });
   // let {metricsList}=toRefs(props.metrics)
 </script>
 <style lang="less" scoped>
@@ -28,6 +33,10 @@
       border: 1px solid #aaa;
       padding: 5px;
       width: 150px;
+    }
+    .item:nth-child(1) {
+      // border: none;
+      // width: 90px;
     }
   }
   .more {
@@ -51,6 +60,10 @@
 
         &::-webkit-scrollbar {
           width: 0;
+        }
+        .ant-popover-inner-content {
+          padding: 0;
+          margin-top: 0px;
         }
       }
     }
