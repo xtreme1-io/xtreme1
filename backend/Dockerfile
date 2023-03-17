@@ -6,8 +6,6 @@ RUN --mount=type=cache,target=/root/.m2 mvn package
 
 FROM openjdk:11-jre
 RUN apt update && \
-    apt install -y iputils-ping curl wget netcat \
-RUN apt update && \
     apt install -y iputils-ping curl wget netcat python3 python3-pip
 RUN pip3 install git+https://github.com/xtreme1-io/xtreme1-sdk.git
 WORKDIR /app
