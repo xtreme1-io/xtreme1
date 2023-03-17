@@ -242,7 +242,7 @@
         resultFilterParam: result,
         dataFilterParam: data,
       };
-      console.log(runParams);
+
       // return;
       if (!datasetId) {
         createMessage.error(t('business.models.runModel.selectDataset'));
@@ -256,9 +256,6 @@
         reload();
       }, 800);
     } catch (error: unknown) {
-      console.log(error);
-
-      console.log(String(error));
       createMessage.error(String(error));
       setTimeout(() => {
         setRunModalProps({ confirmLoading: false });
@@ -286,8 +283,6 @@
       datasetType = [datasetTypeEnum.LIDAR_BASIC, datasetTypeEnum.LIDAR_FUSION];
     }
     const res = await getAllDataset({ datasetTypes: datasetType.toString() });
-    console.log('model select', res, props.datasetType);
-
     selectOptions.value = res;
     selectId.value = selectOptions.value?.[0]?.id;
   };

@@ -149,6 +149,7 @@
         v-else-if="info?.type === datasetTypeEnum.LIDAR_BASIC"
         style="width: 100%; height: 100%"
       >
+      
         <img class="object-cover pointCloudImg image-loading" v-lazyload="getPlaceImg()" alt="" />
         <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
           <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
@@ -247,6 +248,7 @@
     type: PageTypeEnum | undefined;
     showAnnotation: boolean;
     object?: any[];
+    selectedSourceIds?: any;
   };
   const emits = defineEmits([
     'handleSelected',
