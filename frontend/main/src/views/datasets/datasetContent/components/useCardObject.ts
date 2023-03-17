@@ -252,8 +252,8 @@ export default function useCardObject() {
     };
 
     const result = objects.map((item) => {
-      const { contour = {}, id, type, meta = {} } = item;
-      const { points = [], interior = [] } = contour;
+      const { contour, id, type, meta = {} } = item;
+      const { points = [], interior = [] } = contour || item || {};
       let _points: any = [];
       if (type === OBJECT_TYPE.RECTANGLE) {
         if (points && points.length === 2) {

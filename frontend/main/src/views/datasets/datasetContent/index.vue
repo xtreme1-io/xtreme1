@@ -589,9 +589,13 @@
             if (!res[dataId]) {
               res[dataId] = [];
             }
-            res[dataId] = objects.map((o) => ({ sourceId: o.sourceId, ...o.classAttributes }));
-            return map;
+            res[dataId] = objects.map((o) => ({
+              sourceId: +(o.sourceId || o.classAttributes.sourceId || -1),
+              ...o.classAttributes,
+            }));
+            return res;
           }, map);
+
           Object.assign(objectMap.value, map);
         });
 
