@@ -38,12 +38,18 @@ export default class DataManager {
                 allObjects.filter((e) => ids.indexOf(e.uuid) < 0),
             );
         });
-        // this.tool.editor.on(Event.CLEAR_DATA, (data: any) => {
-        //     let object = data.object;
-        //     if (object) {
-        //         this.onEditorAdd(object.toJSON());
-        //     }
-        // });
+        this.tool.editor.on(Event.DIMENSION_CHANGE, (data: any) => {
+            let object = data?.data;
+            let { dataList, dataIndex } = this.tool.state;
+            let dataInfo = dataList[dataIndex];
+            if (!dataInfo || !object) return;
+            let allObjects = this.getDataObject(dataInfo.dataId) || [];
+            let index = allObjects.findIndex((item) => item.uuid == object.uuid);
+            if (index > 0) {
+                allObjects[index] = object.toJSON();
+                this.setDataObject(dataInfo.dataId, allObjects);
+            }
+        });
         [
             Event.ADD_OBJECT,
             Event.CLEAR_DATA,
