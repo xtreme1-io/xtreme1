@@ -34,6 +34,7 @@ public class DataModelJobConsumerListener implements StreamListener<String, Obje
     @Override
     public void onMessage(ObjectRecord message) {
         String modelMessageBOJSONStr = (String) message.getValue();
+        log.info("receive data message:{}",modelMessageBOJSONStr);
         ModelMessageBO modelMessageBO = JSONUtil.toBean(modelMessageBOJSONStr, ModelMessageBO.class);
         if (modelMessageHandlerMap.get(modelMessageBO.getModelCode().name()).handleDataModelRun(modelMessageBO)) {
             redisTemplate.opsForStream().acknowledge(streamKey, group, message.getId());

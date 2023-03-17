@@ -69,7 +69,7 @@ public class JobConfig {
         return executor;
     }
 
-    @Bean
+    @Bean(initMethod = "start", destroyMethod = "stop")
     public StreamMessageListenerContainer<String, ObjectRecord<String, String>> dataStreamMessageListenerContainer(Executor dataRedisStreamExecutor,
                                                                                                                RedisConnectionFactory redisConnectionFactory,
                                                                                                                RedisTemplate redisTemplate,
@@ -108,7 +108,7 @@ public class JobConfig {
         return streamMessageListenerContainer;
     }
 
-    @Bean
+    @Bean(initMethod = "start", destroyMethod = "stop")
     public StreamMessageListenerContainer<String, ObjectRecord<String, String>> streamMessageListenerContainerDataset(Executor datasetRedisStreamExecutor,
                                                                                                                RedisConnectionFactory redisConnectionFactory,
                                                                                                                RedisTemplate redisTemplate,
