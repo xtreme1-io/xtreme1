@@ -77,7 +77,7 @@ export async function getDataFile(dataId: string) {
     let data = await get(url, { dataIds: dataId });
 
     data = data.data || [];
-    console.log('getDataFile', data);
+    // console.log('getDataFile', data);
     let configs = [] as IFileConfig[];
     data[0].content.forEach((config: any) => {
         let file = config.file;
@@ -204,7 +204,7 @@ export async function getAnnotationByDataIds(dataIds: Array<number | string>) {
 
     const res = await get(url, { dataIds: dataIds.join(',') });
     const data = res.data as IGetAnnotationParams;
-    console.log(data[0]);
+    // console.log(data[0]);
     const { classificationValues } = data[0];
 
     const classifications = classificationValues.map((item: any) => item.classificationAttributes);
@@ -239,8 +239,16 @@ export interface IAnnotation {
 export async function saveAnnotation(params: ISaveAnnotationParams) {
     const url = `${Api.DATASET_ANNOTATION}/data/save`;
 
-    const res = await post(url, params);
-    console.log(res);
+    let data = await post(url, params);
+    data = data.data || [];
+    let keyMap = {} as Record<string, Record<string, string>>;
+    data.forEach((e: any) => {
+        let dataId = e.dataId;
+        keyMap[dataId] = keyMap[dataId] || {};
+        keyMap[dataId][e.frontId] = e.id;
+    });
+
+    return keyMap;
 }
 export async function getResultSources(dataId: string) {
     let url = `/api/data/getDataModelRunResult/${dataId}`;
