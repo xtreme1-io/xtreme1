@@ -24,11 +24,9 @@ export function execute(): IPageHandler {
         try {
             await loadRecord();
             if (tool.state.dataList.length === 0) return;
-
             await Promise.all([loadDateSetClassification(), loadClasses(), loadModels()]);
             // 自动加载资源
             // tool.dataResource.load();
-            await tool.getResultSources();
             await tool.loadData(0, false);
         } catch (error: any) {
             tool.handleErr(new BSError('', 'Load Error', error));

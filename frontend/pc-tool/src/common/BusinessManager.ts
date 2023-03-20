@@ -63,21 +63,4 @@ export default class BusinessManager extends BaseBusinessManager {
         );
         return data;
     }
-    async getResultSources() {
-        let { bsState, state } = this.editor;
-        let sources = await api.getResultSources(bsState.datasetId);
-        sources.unshift({
-            name: 'Without Task',
-            sourceId: state.config.withoutTaskId,
-            sourceType: SourceType.DATA_FLOW,
-        });
-
-        let sourceMap = {};
-        sources.forEach((e) => {
-            sourceMap[e.sourceId] = true;
-        });
-        state.sourceFilters = [state.config.withoutTaskId];
-        state.sources = sources;
-        return sources;
-    }
 }

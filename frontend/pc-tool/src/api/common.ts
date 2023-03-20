@@ -226,8 +226,8 @@ export async function getLockRecord(datasetId: string) {
     let data = await get(url, { datasetId });
     return data;
 }
-export async function getResultSources(datasetId: string) {
-    let url = `/api/modelRun/getDatasetModelRunResult/${datasetId}`;
+export async function getResultSources(dataId: string) {
+    let url = `/api/data/getDataModelRunResult/${dataId}`;
     // let url = `/api/dataset/dataset/getDatasetAnnotateResult/${datasetId}`;
     let data = await get(url);
 

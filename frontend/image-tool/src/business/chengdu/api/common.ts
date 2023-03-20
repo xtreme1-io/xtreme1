@@ -1,5 +1,12 @@
 import { get, post } from './base';
-import { IModelResult, IDataMeta, IClassType, IFileConfig, IResultSource, SourceType } from '../type';
+import {
+    IModelResult,
+    IDataMeta,
+    IClassType,
+    IFileConfig,
+    IResultSource,
+    SourceType,
+} from '../type';
 import { traverseClassification2Arr, empty, parseClassesFromBackend } from '../utils';
 
 enum Api {
@@ -235,8 +242,8 @@ export async function saveAnnotation(params: ISaveAnnotationParams) {
     const res = await post(url, params);
     console.log(res);
 }
-export async function getResultSources(datasetId: string) {
-    let url = `/api/modelRun/getDatasetModelRunResult/${datasetId}`;
+export async function getResultSources(dataId: string) {
+    let url = `/api/data/getDataModelRunResult/${dataId}`;
     // let url = `/api/dataset/dataset/getDatasetAnnotateResult/${datasetId}`;
     let data = await get(url);
 
