@@ -332,6 +332,7 @@ export interface IFrame {
     // flow
     dataStatus: 'INVALID' | 'VALID';
     annotationStatus: 'ANNOTATED' | 'NOT_ANNOTATED' | 'INVALID';
+    sources?: IResultSource[];
     skipped: boolean;
 }
 

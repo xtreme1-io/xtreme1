@@ -1,4 +1,4 @@
-import { Editor as BaseEditor, IFrame } from 'pc-editor';
+import { Editor as BaseEditor, IFrame, SourceType } from 'pc-editor';
 import { IBSState } from '../type';
 import { getDefault } from '../state';
 import { utils, AttrType, IClassificationAttr, IUserData } from 'pc-editor';
@@ -110,5 +110,27 @@ export default class Editor extends BaseEditor {
                 // annotate.uuid = backId;
             });
         });
+    }
+    async getResultSources(frame?: IFrame) {
+        let { state } = this;
+        frame = frame || this.getCurrentFrame();
+        if(!frame.sources){
+            let sources = await api.getResultSources(frame.id);
+            sources.unshift({
+                name: 'Without Task',
+                sourceId: state.config.withoutTaskId,
+                sourceType: SourceType.DATA_FLOW,
+            });
+            frame.sources = sources;
+        }
+        this.setSources(frame.sources);
+
+
+        // let sourceMap = {};
+        // sources.forEach((e) => {
+        //     sourceMap[e.sourceId] = true;
+        // });
+        // state.sourceFilters = [state.config.withoutTaskId];
+        // state.sources = sources;
     }
 }

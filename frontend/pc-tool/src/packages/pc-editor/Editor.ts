@@ -20,7 +20,15 @@ import ModelManager from './common/ModelManager';
 
 import { getDefaultState } from './state';
 import type { IState } from './state';
-import { IUserData, IClassType, IImgViewConfig, LangType, IFrame, Const } from './type';
+import {
+    IUserData,
+    IClassType,
+    IImgViewConfig,
+    LangType,
+    IFrame,
+    Const,
+    IResultSource,
+} from './type';
 import { IModeType, OPType, IModeConfig } from './config/type';
 import handleHack from './hack';
 import * as _ from 'lodash';
@@ -282,7 +290,20 @@ export default class Editor extends THREE.EventDispatcher {
             return this.classMap.get(name + '') as IClassType;
         }
     }
+    async getResultSources(frame?: IFrame): Promise<void> {}
+    setSources(sources: IResultSource[]) {
+        if (!sources) return;
+        let { FILTER_ALL, withoutTaskId } = this.state.config;
+        this.state.sources = sources;
 
+        let sourceMap = {};
+        sources.forEach((e) => {
+            sourceMap[e.sourceId] = true;
+        });
+
+        this.state.sourceFilters = this.state.sourceFilters.filter((e) => sourceMap[e]);
+        if (this.state.sourceFilters.length === 0) this.state.sourceFilters = [FILTER_ALL];
+    }
     setMode(modeConfig: IModeConfig) {
         // this.state.mode = modeConfig.name || '';
         this.state.modeConfig = modeConfig;
