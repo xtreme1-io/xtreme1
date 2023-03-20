@@ -9,6 +9,7 @@ import {
     IClassification,
     AttrType,
     SourceType,
+    IResultSource,
 } from '../type';
 import { Editor } from 'editor';
 import { getDefault, getDefaultConfig } from '../state';
@@ -94,7 +95,7 @@ export default class Tool {
             }
         }
         // console.log(annotates);
-
+        this.getResultSources();
         this.editor.reset();
         this.state.resultActive = [];
         this.setFilterFromData();
@@ -271,23 +272,40 @@ export default class Tool {
 
         this.editor.loadImage(resource.image);
     }
-
-    async getResultSources() {
-        let state = this.state;
-        let sources = await api.getResultSources(state.datasetId);
-        sources.unshift({
-            name: 'Without Task',
-            sourceId: state.withoutTaskId,
-            sourceType: SourceType.DATA_FLOW,
-        });
+    setResultSource(sources: IResultSource[]) {
+        if (!sources) return;
+        let { FILTER_ALL, withoutTaskId } = this.state;
+        this.state.sources = sources;
 
         let sourceMap = {};
         sources.forEach((e) => {
             sourceMap[e.sourceId] = true;
         });
-        state.sourceFilters = [state.withoutTaskId];
-        state.sources = sources;
-        return sources;
+
+        this.state.sourceFilters = this.state.sourceFilters.filter((e) => sourceMap[e]);
+        if (this.state.sourceFilters.length === 0) this.state.sourceFilters = [FILTER_ALL];
+    }
+    async getResultSources() {
+        let frame = this.getCurrentFrame();
+        if (!frame) return;
+        if (!frame.sources) {
+            let state = this.state;
+            let sources = await api.getResultSources(frame.dataId);
+            sources.unshift({
+                name: 'Without Task',
+                sourceId: state.withoutTaskId,
+                sourceType: SourceType.DATA_FLOW,
+            });
+            frame.sources = sources;
+        }
+        this.setResultSource(frame.sources);
+        // let sourceMap = {};
+        // sources.forEach((e) => {
+        //     sourceMap[e.sourceId] = true;
+        // });
+        // state.sourceFilters = [state.withoutTaskId];
+        // state.sources = sources;
+        // return sources;
     }
 
     needSave() {
@@ -323,6 +341,7 @@ export default class Tool {
 
             data.forEach((e) => {
                 objectInfos.push({
+                    id: e.backId,
                     frontId: e.id,
                     classId: +e.classId,
                     sourceId: +e.sourceId,
@@ -364,8 +383,8 @@ export default class Tool {
                 datasetId: currentData.datasetId,
                 dataInfos,
             };
-            await api.saveAnnotation(saveParams);
-
+            const keyMap = await api.saveAnnotation(saveParams);
+            this.updateBackId(keyMap);
             state.dataList.forEach((e) => {
                 e.needSave = false;
             });
@@ -406,8 +425,8 @@ export default class Tool {
                 let frontId = annotate.uuid;
                 let backId = dataKeyMap[frontId];
                 if (!backId) return;
-                annotate.backId = backId;
-                annotate.uuid = backId;
+                annotate.id = backId;
+                // annotate.uuid = backId;
             });
         });
     }

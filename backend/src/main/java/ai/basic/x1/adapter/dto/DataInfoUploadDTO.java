@@ -1,6 +1,7 @@
 package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
+import ai.basic.x1.entity.enums.DataFormatEnum;
 import ai.basic.x1.entity.enums.DataUploadSourceEnum;
 import ai.basic.x1.entity.enums.ResultTypeEnum;
 import lombok.AllArgsConstructor;
@@ -52,5 +53,11 @@ public class DataInfoUploadDTO {
      * Model id
      */
     private Long modelId;
+
+    /**
+     * Data format XTREME1,COCO
+     */
+    @ValidStringEnum(message = "dataFormat must be one of XTREME1,COCO", enumClass = DataFormatEnum.class)
+    private String dataFormat;
 
 }

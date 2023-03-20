@@ -111,6 +111,7 @@ export interface IDataMeta {
     validStatus: any;
     annotationStatus: any;
     isAnnotated: boolean;
+    sources?: IResultSource[];
 }
 
 export interface IFileConfig {

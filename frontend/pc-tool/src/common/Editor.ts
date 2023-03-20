@@ -1,4 +1,4 @@
-import { Editor as BaseEditor, IFrame } from 'pc-editor';
+import { Editor as BaseEditor, IFrame, SourceType } from 'pc-editor';
 import { IBSState } from '../type';
 import { getDefault } from '../state';
 import { utils, AttrType, IClassificationAttr, IUserData } from 'pc-editor';
@@ -47,11 +47,10 @@ export default class Editor extends BaseEditor {
             let infos = [] as any[];
             let dataAnnotations = [] as any[];
             data.forEach((e) => {
-                console.log(e);
                 let classConfig = this.getClassType(e.classId || e.classType || '');
                 let objectV2 = utils.translateToObjectV2(e, classConfig);
                 infos.push({
-                    id: e.backId || undefined,
+                    id: e.uuid || undefined,
                     frontId: e.frontId,
                     classId: classConfig?.id,
                     source: e.modelRun ? 'MODEL' : 'ARTIFICIAL',
@@ -85,6 +84,7 @@ export default class Editor extends BaseEditor {
         };
         bsState.saving = true;
         try {
+            // debugger
             await api.saveObject(objectInfo).then((keyMap) => {
                 this.updateBackId(keyMap);
             });
@@ -102,13 +102,35 @@ export default class Editor extends BaseEditor {
         Object.keys(keyMap).forEach((dataId) => {
             let dataKeyMap = keyMap[dataId];
             let annotates = this.dataManager.getFrameObject(dataId) || [];
-            annotates.forEach((annotate) => {
+            annotates.forEach((annotate:any) => {
                 let frontId = annotate.uuid;
                 let backId = dataKeyMap[frontId];
                 if (!backId) return;
-                (annotate.userData as IUserData).backId = backId;
+                annotate.id = backId;
                 // annotate.uuid = backId;
             });
         });
+    }
+    async getResultSources(frame?: IFrame) {
+        let { state } = this;
+        frame = frame || this.getCurrentFrame();
+        if(!frame.sources){
+            let sources = await api.getResultSources(frame.id);
+            sources.unshift({
+                name: 'Without Task',
+                sourceId: state.config.withoutTaskId,
+                sourceType: SourceType.DATA_FLOW,
+            });
+            frame.sources = sources;
+        }
+        this.setSources(frame.sources);
+
+
+        // let sourceMap = {};
+        // sources.forEach((e) => {
+        //     sourceMap[e.sourceId] = true;
+        // });
+        // state.sourceFilters = [state.config.withoutTaskId];
+        // state.sources = sources;
     }
 }

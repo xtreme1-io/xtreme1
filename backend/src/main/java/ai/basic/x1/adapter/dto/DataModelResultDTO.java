@@ -1,6 +1,6 @@
-package ai.basic.x1.adapter.port.rpc.dto;
+package ai.basic.x1.adapter.dto;
 
-import ai.basic.x1.adapter.dto.RunRecordDTO;
+import ai.basic.x1.adapter.port.rpc.dto.DatasetModelResultDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,15 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * @author fyb
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DatasetModelResultDTO {
-
+public class DataModelResultDTO {
 
     private String modelName;
 
@@ -25,5 +21,3 @@ public class DatasetModelResultDTO {
     private List<RunRecordDTO> runRecords;
 
 }
-
-

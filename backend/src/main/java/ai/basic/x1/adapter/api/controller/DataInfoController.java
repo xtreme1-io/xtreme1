@@ -177,7 +177,7 @@ public class DataInfoController extends BaseDatasetController {
     @GetMapping("split/totalDataCount")
     public Long getSplitDataTotalCount(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
                                        @RequestParam(value = "targetDataType", required = false) SplitTargetDataTypeEnum targetDataType) {
-        return dataInfoUsecase.getSplitDataTotalCount(datasetId,targetDataType);
+        return dataInfoUsecase.getSplitDataTotalCount(datasetId, targetDataType);
     }
 
     @PostMapping("deleteBatch")
@@ -197,27 +197,6 @@ public class DataInfoController extends BaseDatasetController {
         var dataInfoQueryBO = DefaultConverter.convert(dataInfoQueryDTO, DataInfoQueryBO.class);
         assert dataInfoQueryBO != null;
         return String.valueOf(dataInfoUsecase.export(dataInfoQueryBO));
-    }
-
-    @GetMapping("test")
-    public String test() throws IOException, InterruptedException {
-        ProcessBuilder builder = new ProcessBuilder();
-        builder.command("sh", "-c", "convert_ctl -src /tmp/x1/20230316114054.zip -out /tmp/x1/ -rps /tmp/x1/rep.json --format=coco");
-        Process process = builder.start();
-        BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        String line = null;
-        StringBuilder stringBuilder = new StringBuilder();
-        while ((line = in.readLine()) != null) {
-            stringBuilder.append(line);
-        }
-        if (StrUtil.isNotEmpty(stringBuilder.toString())) {
-            log.error(stringBuilder.toString());
-        }
-        in.close();
-        int exitCode = process.waitFor();
-        assert exitCode == 0;
-
-        return null;
     }
 
     @GetMapping("findExportRecordBySerialNumbers")
@@ -305,8 +284,9 @@ public class DataInfoController extends BaseDatasetController {
         return JSONUtil.parseObj(JSONUtil.toJsonStr(dataInfoUsecase.getDataAndResult(datasetId, dataIds)));
     }
 
-    /*@GetMapping("getDataResultSource/{dataId}")
-    public List<DatasetModelResultDTO> getDataResultSource(@PathVariable Long dataId) {
-    }*/
+    @GetMapping("getDataModelRunResult/{dataId}")
+    public List<DatasetModelResultDTO> getDataModelRunResult(@PathVariable Long dataId) {
+        return DefaultConverter.convert(dataAnnotationObjectUseCase.getDataModelRunResult(dataId), DatasetModelResultDTO.class);
+    }
 
 }

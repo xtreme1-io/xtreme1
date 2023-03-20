@@ -5,21 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-/**
- * @author fyb
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DatasetModelResultBO {
+public class RunRecordBO {
 
-    private String modelName;
+    private Long id;
 
-    private Long modelId;
-
-    private List<RunRecordBO> runRecords;
-
+    private String runNo;
 }

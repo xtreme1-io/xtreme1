@@ -7,8 +7,10 @@ import ai.basic.x1.adapter.port.dao.ModelRunRecordDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationObject;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit;
 import ai.basic.x1.adapter.port.dao.mybatis.model.Model;
+import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord;
 import ai.basic.x1.adapter.port.dao.mybatis.query.ScenarioQuery;
 import ai.basic.x1.entity.*;
+import ai.basic.x1.entity.enums.DataAnnotationObjectSourceTypeEnum;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollUtil;
@@ -47,7 +49,7 @@ public class DataAnnotationObjectUseCase {
      */
     public List<DataAnnotationObjectBO> findByDataIds(List<Long> dataIds, Boolean isAllResult, List<Long> sourceIdIds) {
         if (!isAllResult && CollUtil.isEmpty(sourceIdIds)) {
-           return List.of();
+            return List.of();
         }
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationObject.class);
         lambdaQueryWrapper.in(DataAnnotationObject::getDataId, dataIds);
@@ -88,6 +90,8 @@ public class DataAnnotationObjectUseCase {
             } else if (ObjectUtil.isNull(object.getId())) {
                 object.setCreatedAt(OffsetDateTime.now());
                 object.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
+                object.setSourceId(-1L);
+                object.setSourceType(DataAnnotationObjectSourceTypeEnum.DATA_FLOW);
                 needInsertObjectBOs.add(object);
             }
         });
@@ -148,24 +152,34 @@ public class DataAnnotationObjectUseCase {
         return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
     }
 
-    /*public List<DataAnnotationObjectBO> getDataResultSource(Long dataId) {
+    public List<DataModelResultBO> getDataModelRunResult(Long dataId) {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationObject.class);
         lambdaQueryWrapper.select(DataAnnotationObject::getSourceId);
-        lambdaQueryWrapper.eq(DataAnnotationObject::getDataId,dataId);
+        lambdaQueryWrapper.eq(DataAnnotationObject::getDataId, dataId);
+        lambdaQueryWrapper.isNotNull(DataAnnotationObject::getSourceId);
         lambdaQueryWrapper.groupBy(DataAnnotationObject::getSourceId);
         var dataAnnotationObjectList = dataAnnotationObjectDAO.list(lambdaQueryWrapper);
-        var modelIds = modelRunRecordBOList.stream().map(ModelRunRecordBO::getModelId).collect(Collectors.toSet());
+        if (CollUtil.isEmpty(dataAnnotationObjectList)) {
+            return List.of();
+        }
+        var sourceIds = dataAnnotationObjectList.stream().map(DataAnnotationObject::getSourceId).collect(Collectors.toList());
+        var modelRunRecordList = modelRunRecordDAO.listByIds(sourceIds);
+        if (CollUtil.isEmpty(modelRunRecordList)) {
+            return List.of();
+        }
+        var modelRunMap = modelRunRecordList.stream().collect(Collectors.groupingBy(ModelRunRecord::getModelId));
+        var modelIds = modelRunRecordList.stream().map(ModelRunRecord::getModelId).collect(Collectors.toList());
         var modelList = modelDAO.listByIds(modelIds);
         var modelMap = modelList.stream().collect(Collectors.toMap(Model::getId, Model::getName));
-        var modelRunMap = modelRunRecordBOList.stream().collect(Collectors.groupingBy(ModelRunRecordBO::getModelId));
+        var modelResultBOList = new ArrayList<DataModelResultBO>();
         modelRunMap.forEach((modelId, runRecordList) -> {
-            var runRecordBOList = runRecordList.stream().map(runRecord -> DefaultConverter.convert(runRecord, DatasetModelResultBO.RunRecordBO.class)).collect(Collectors.toList());
-            var datasetModelResultBO = DatasetModelResultBO.builder().modelId(modelId)
+            var runRecordBOList = runRecordList.stream().map(runRecord -> DefaultConverter.convert(runRecord, RunRecordBO.class)).collect(Collectors.toList());
+            var datasetModelResultBO = DataModelResultBO.builder().modelId(modelId)
                     .modelName(modelMap.get(modelId)).runRecords(runRecordBOList).build();
             modelResultBOList.add(datasetModelResultBO);
 
         });
-        return DefaultConverter.convert(page, DataAnnotationObjectBO.class);
-    }*/
+        return modelResultBOList;
+    }
 
 }

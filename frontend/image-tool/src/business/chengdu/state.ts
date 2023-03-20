@@ -12,6 +12,7 @@ export function getDefaultConfig(): IToolConfig {
     };
 }
 let withoutTaskId = '-1';
+let FILTER_ALL = 'All';
 export function getDefault(): IToolState {
     return {
         query: {},
@@ -30,16 +31,16 @@ export function getDefault(): IToolState {
         // classification config
         classifications: [],
         sources: [],
-        sourceFilters: [],
+        sourceFilters: [FILTER_ALL],
         activeSourceData: withoutTaskId,
-        FILTER_ALL: '__All__',
+        FILTER_ALL: 'All',
         withoutTaskId: withoutTaskId,
         // user
         user: {
             id: '',
             nickname: '',
         },
-        classificationForm: null,
+        // classificationForm: null,
         showVerify: false,
         modelConfig: {
             confidence: [0.5, 1],

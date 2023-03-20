@@ -100,6 +100,10 @@ public interface Constants {
 
     Integer PAGE_SIZE_100 = 100;
 
+    String CONVERT_UPLOAD = "upload";
+
+    String CONVERT_EXPORT = "export";
+
     Set<String> COMPRESSED_DATA_TYPE = new HashSet<>() {{
         add("application/zip");
         add("application/x-rar");

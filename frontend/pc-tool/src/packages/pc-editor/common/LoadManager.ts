@@ -24,6 +24,7 @@ export default class LoadManager {
 
         showLoading && this.editor.showLoading(true);
         try {
+            await this.editor.getResultSources();
             await Promise.all([this.loadObjectAndClassification(), this.loadResource()]);
             // if (!this.editor.playManager.playing) this.editor.dataResource.load();
         } catch (error: any) {
