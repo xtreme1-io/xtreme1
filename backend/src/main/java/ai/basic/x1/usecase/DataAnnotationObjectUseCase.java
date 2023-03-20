@@ -153,12 +153,13 @@ public class DataAnnotationObjectUseCase {
         var lambdaQueryWrapper = Wrappers.lambdaQuery(DataAnnotationObject.class);
         lambdaQueryWrapper.select(DataAnnotationObject::getSourceId);
         lambdaQueryWrapper.eq(DataAnnotationObject::getDataId, dataId);
+        lambdaQueryWrapper.isNotNull(DataAnnotationObject::getSourceId);
         lambdaQueryWrapper.groupBy(DataAnnotationObject::getSourceId);
         var dataAnnotationObjectList = dataAnnotationObjectDAO.list(lambdaQueryWrapper);
         if (CollUtil.isEmpty(dataAnnotationObjectList)) {
             return List.of();
         }
-        var sourceIds = dataAnnotationObjectList.stream().map(DataAnnotationObject::getSourceId).collect(Collectors.toSet());
+        var sourceIds = dataAnnotationObjectList.stream().map(DataAnnotationObject::getSourceId).collect(Collectors.toList());
         var modelRunRecordList = modelRunRecordDAO.listByIds(sourceIds);
         if (CollUtil.isEmpty(modelRunRecordList)) {
             return List.of();
