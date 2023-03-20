@@ -10,6 +10,7 @@ import ai.basic.x1.adapter.port.dao.mybatis.model.Model;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord;
 import ai.basic.x1.adapter.port.dao.mybatis.query.ScenarioQuery;
 import ai.basic.x1.entity.*;
+import ai.basic.x1.entity.enums.DataAnnotationObjectSourceTypeEnum;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollUtil;
@@ -89,6 +90,8 @@ public class DataAnnotationObjectUseCase {
             } else if (ObjectUtil.isNull(object.getId())) {
                 object.setCreatedAt(OffsetDateTime.now());
                 object.setCreatedBy(RequestContextHolder.getContext().getUserInfo().getId());
+                object.setSourceId(-1L);
+                object.setSourceType(DataAnnotationObjectSourceTypeEnum.DATA_FLOW);
                 needInsertObjectBOs.add(object);
             }
         });

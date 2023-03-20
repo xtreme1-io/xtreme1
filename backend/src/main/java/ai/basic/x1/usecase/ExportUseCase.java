@@ -10,6 +10,7 @@ import ai.basic.x1.entity.enums.DataFormatEnum;
 import ai.basic.x1.entity.enums.ExportStatusEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.Constants;
+import ai.basic.x1.util.DataFormatUtil;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.bean.BeanUtil;
@@ -131,9 +132,8 @@ public class ExportUseCase {
         FileUtil.del(srcPath);
         FileUtil.mkdir(srcPath);
         if (DataFormatEnum.COCO.equals(query.getDataFormat())) {
-            var respPath = String.format("%s%s/resp.json",tempPath,IdUtil.fastSimpleUUID());
-            FileUtil.mkParentDirs(respPath);
-            convertExport(zipPath, srcPath, respPath);
+            var respPath = String.format("%s%s/resp.json", tempPath, IdUtil.fastSimpleUUID());
+            DataFormatUtil.convert(Constants.CONVERT_EXPORT, zipPath, srcPath, respPath);
             if (FileUtil.exist(respPath) && UsecaseCode.OK.equals(DefaultConverter.convert(JSONUtil.readJSONObject(FileUtil.file(respPath), Charset.defaultCharset()), ApiResult.class).getCode())) {
                 zipFile = ZipUtil.zip(srcPath, zipPath, true);
             } else {
@@ -163,34 +163,11 @@ public class ExportUseCase {
                     .build();
             exportRecordUsecase.saveOrUpdate(exportRecordBO);
             logger.error("Upload file error", e);
-        }finally {
+        } finally {
             FileUtil.del(zipFile);
             FileUtil.del(srcPath);
         }
 
-    }
-
-    private void convertExport(String srcPath, String outPath, String respPath) {
-        try {
-            ProcessBuilder builder = new ProcessBuilder();
-            String command = String.format("/Users/fyb/Library/Python/3.9/bin/convert_ctl -src %s -out %s -rps %s --format=coco", srcPath, outPath, respPath);
-            builder.command("sh", "-c", command);
-            Process process = builder.start();
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            String line = null;
-            StringBuilder stringBuilder = new StringBuilder();
-            while ((line = in.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            if (StrUtil.isNotEmpty(stringBuilder.toString())) {
-                log.error("convert export file error：{}", stringBuilder);
-            }
-            in.close();
-            int exitCode = process.waitFor();
-            assert exitCode == 0;
-        } catch (Exception e) {
-            log.error("convert export file error", e);
-        }
     }
 
     private <T, Q extends BaseQueryBO> void writeFile(List<T> list, String zipPath, Map<Long, String> classMap, Map<Long, String> resultMap, Q query, Function4<List<T>, Q, Map<Long, String>, Map<Long, String>, List<DataExportBO>> processData) {
