@@ -17,10 +17,7 @@ import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
-import ai.basic.x1.util.Constants;
-import ai.basic.x1.util.DecompressionFileUtils;
-import ai.basic.x1.util.DefaultConverter;
-import ai.basic.x1.util.Page;
+import ai.basic.x1.util.*;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
@@ -48,9 +45,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.*;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
@@ -534,8 +530,8 @@ public class DataInfoUseCase {
             }
         })));
         return uploadRecordBO.getSerialNumber();
-
     }
+
 
     /**
      * Verify url file suffix
@@ -721,6 +717,19 @@ public class DataInfoUseCase {
     }
 
     public void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+        if (DataFormatEnum.COCO.equals(dataInfoUploadBO.getDataFormat())) {
+            var respPath = cocoConvertToX1(dataInfoUploadBO);
+            var apiResult = new ApiResult<>();
+            if (!FileUtil.exist(respPath) || !(OK.equals((apiResult = DefaultConverter.convert(JSONUtil.readJSONObject(FileUtil.file(respPath), Charset.defaultCharset()), ApiResult.class)).getCode()))) {
+                var uploadRecordBOBuilder = UploadRecordBO.builder()
+                        .id(dataInfoUploadBO.getUploadRecordId());
+                var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(FileUtil.exist(respPath) ? apiResult.getMessage() : DATASET_DATA_FILE_FORMAT_ERROR.getMessage()).build();
+                uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+                FileUtil.del(respPath);
+                return;
+            }
+            FileUtil.del(respPath);
+        }
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
         var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, filefilter);
@@ -795,6 +804,18 @@ public class DataInfoUseCase {
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
             log.error("Image compressed package is empty,dataset id:{},filePath:{}", datasetId, dataInfoUploadBO.getFileUrl());
         }
+    }
+
+    private String cocoConvertToX1(DataInfoUploadBO dataInfoUploadBO) {
+        var fileName = FileUtil.getPrefix(dataInfoUploadBO.getSavePath());
+        var baseSavePath = String.format("%s%s/", tempPath, IdUtil.fastSimpleUUID());
+        String srcPath = String.format("%s%s", dataInfoUploadBO.getBaseSavePath(), fileName);
+        String outPath = String.format("%s%s", baseSavePath, fileName);
+        ProcessBuilder builder = new ProcessBuilder();
+        var respPath = String.format("%s%s/resp.json", tempPath, IdUtil.fastSimpleUUID());
+        DataFormatUtil.convert(Constants.CONVERT_UPLOAD,srcPath, outPath, respPath);
+        dataInfoUploadBO.setBaseSavePath(baseSavePath);
+        return respPath;
     }
 
     /**
