@@ -4,10 +4,7 @@ import ai.basic.x1.adapter.port.dao.ModelDAO;
 import ai.basic.x1.adapter.port.dao.ModelDatasetResultDAO;
 import ai.basic.x1.adapter.port.dao.ModelRunRecordDAO;
 import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendLambdaQueryWrapper;
-import ai.basic.x1.adapter.port.dao.mybatis.model.Model;
-import ai.basic.x1.adapter.port.dao.mybatis.model.ModelDatasetResult;
-import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunFilterData;
-import ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord;
+import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoCountDAO;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoIncrDAO;
 import ai.basic.x1.entity.*;
@@ -169,7 +166,7 @@ public class ModelRunRecordUseCase {
         var modelMap = modelList.stream().collect(Collectors.toMap(Model::getId, Model::getName));
         var modelRunMap = modelRunRecordBOList.stream().collect(Collectors.groupingBy(ModelRunRecordBO::getModelId));
         modelRunMap.forEach((modelId, runRecordList) -> {
-            var runRecordBOList = runRecordList.stream().map(runRecord -> DefaultConverter.convert(runRecord, DatasetModelResultBO.RunRecordBO.class)).collect(Collectors.toList());
+            var runRecordBOList = runRecordList.stream().map(runRecord -> DefaultConverter.convert(runRecord, RunRecordBO.class)).collect(Collectors.toList());
             var datasetModelResultBO = DatasetModelResultBO.builder().modelId(modelId)
                     .modelName(modelMap.get(modelId)).runRecords(runRecordBOList).build();
             modelResultBOList.add(datasetModelResultBO);
@@ -177,7 +174,6 @@ public class ModelRunRecordUseCase {
         });
         return modelResultBOList;
     }
-
 
     public Long save(Long modelId, Long datasetId, Long totalDataNum) {
         ModelBO modelBO = modelUseCase.findById(modelId);

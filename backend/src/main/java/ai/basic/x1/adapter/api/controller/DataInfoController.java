@@ -177,7 +177,7 @@ public class DataInfoController extends BaseDatasetController {
     @GetMapping("split/totalDataCount")
     public Long getSplitDataTotalCount(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
                                        @RequestParam(value = "targetDataType", required = false) SplitTargetDataTypeEnum targetDataType) {
-        return dataInfoUsecase.getSplitDataTotalCount(datasetId,targetDataType);
+        return dataInfoUsecase.getSplitDataTotalCount(datasetId, targetDataType);
     }
 
     @PostMapping("deleteBatch")
@@ -305,8 +305,9 @@ public class DataInfoController extends BaseDatasetController {
         return JSONUtil.parseObj(JSONUtil.toJsonStr(dataInfoUsecase.getDataAndResult(datasetId, dataIds)));
     }
 
-    /*@GetMapping("getDataResultSource/{dataId}")
-    public List<DatasetModelResultDTO> getDataResultSource(@PathVariable Long dataId) {
-    }*/
+    @GetMapping("getDataModelRunResult/{dataId}")
+    public List<DatasetModelResultDTO> getDataModelRunResult(@PathVariable Long dataId) {
+        return DefaultConverter.convert(dataAnnotationObjectUseCase.getDataModelRunResult(dataId), DatasetModelResultDTO.class);
+    }
 
 }
