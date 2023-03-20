@@ -89,7 +89,7 @@
         })
         .catch((errorInfo) => {
           changeOkLoading(false);
-          console.log(errorInfo);
+        
         });
     } catch (e) {
       changeOkLoading(false);

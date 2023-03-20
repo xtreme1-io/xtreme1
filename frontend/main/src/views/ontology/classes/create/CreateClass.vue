@@ -243,7 +243,6 @@
       if (config.isKeep) {
         return;
       }
-      console.log('createClass detail', props.detail);
       // from Edit
       if (config.isEdit) {
         modalTitle.value = 'Edit Class';
@@ -322,7 +321,6 @@
         dataSchema.value = { attributes: [] };
         defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
       }
-      console.log(formState);
     });
   provide('changeLoading', changeLoading);
 

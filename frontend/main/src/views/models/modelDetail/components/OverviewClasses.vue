@@ -49,7 +49,6 @@
   });
 
   const groupClass = computed(() => {
-    console.log(groupBy(props.classes, 'typeName'));
     return groupBy(props.classes, 'typeName');
   });
 
@@ -58,7 +57,6 @@
   const handleOpenInfo = (record) => {
     // const classInfo = Array.isArray(item) ? item[0] : item;
     const index = props.classes.findIndex((item) => item.id === record.id);
-    console.log(index);
 
     openModal(true, { index });
   };

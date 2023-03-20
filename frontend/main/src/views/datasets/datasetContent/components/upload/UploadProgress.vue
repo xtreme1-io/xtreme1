@@ -96,7 +96,6 @@
   watch(
     fileList,
     (list) => {
-      console.log('fileList change -- ', list);
       if (!isUploading.value) {
         isUploading.value = true;
         if (props.source == UploadSourceEnum.LOCAL) {

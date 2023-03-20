@@ -178,7 +178,6 @@
     if (pageType == ClassTypeEnum.CLASS) {
       openCreateClassModal(true, { isEdit });
     } else {
-      console.log('handleOpenCreate', isEdit);
       openCreateClassificationModal(true, { isEdit });
     }
   };
@@ -190,7 +189,6 @@
         detail.value = await getOntologyClassByIdApi({ id: id });
       } else {
         detail.value = await getOntologyClassificationByIdApi({ id: id });
-        console.log(detail.value);
       }
       handleOpenCreate(true);
     } catch (error: any) {

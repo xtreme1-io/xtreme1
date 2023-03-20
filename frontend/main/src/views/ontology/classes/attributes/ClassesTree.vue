@@ -133,7 +133,6 @@
   // change node
   emitter.off('changeSelected');
   emitter.on('changeSelected', (newSelectedKeys) => {
-    console.log('tree changeSelected', newSelectedKeys);
     selectedKeys.value = newSelectedKeys;
   });
 </script>

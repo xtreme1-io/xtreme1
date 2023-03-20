@@ -19,7 +19,6 @@
       ...toRaw(props),
     };
     Object.assign(modalData, { width: 720, height: 540 });
-    console.log(modalData);
     setModalProps(modalData);
   });
   defineEmits(['register']);

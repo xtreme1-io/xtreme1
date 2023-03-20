@@ -398,7 +398,7 @@
       return curr.selectedList.some((record) => record === item.id);
     });
     makeFrameDisable.value = !data.every((item) => {
-      console.log(item, item.type);
+     
       return item.type === dataTypeEnum.SINGLE_DATA;
     });
     annotateAndModelRun.value =
@@ -435,7 +435,7 @@
   const uploadUrl = ref<string>('');
   let progressModalPa = reactive({ resultType: undefined, modelId: undefined });
   const handleCloseUploadModal = (data, { source, resultType, modelId }) => {
-    console.log('handleCloseUploadModal', data);
+  
     if (source == UploadSourceEnum.LOCAL) {
       fileList.value = data;
       openProgressModal(true, { fileList: fileList.value, source: source });
@@ -540,7 +540,6 @@
   };
 
   const setExportRecord = (res) => {
-    console.log('setExportRecord', res);
     // File information cannot be obtained here. The current information is custom
     exportList.value = exportList.value.concat([
       { serialNumber: res, status: ExportStatus.GENERATING, fileName: 'pending...' },

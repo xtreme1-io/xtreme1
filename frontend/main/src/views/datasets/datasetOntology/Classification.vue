@@ -195,7 +195,7 @@
     if (pageType == ClassTypeEnum.CLASS) {
       openCreateClassModal(true, { isEdit });
     } else {
-      console.log('handleOpenCreate', isEdit);
+    
       openCreateClassificationModal(true, { isEdit });
     }
   };
@@ -304,8 +304,6 @@
     } else {
       unref(selectedList).splice(index, 1);
     }
-
-    console.log(unref(selectedList));
   };
 
   /** Sync */

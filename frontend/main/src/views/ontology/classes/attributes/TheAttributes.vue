@@ -96,7 +96,6 @@
   const [register, { closeModal, setModalProps }] = useModalInner(() => {
     emitter.emit('changeRootName', props.formState.name || 'Root');
     dataSchema.value = _.cloneDeep(props.dataSchema);
-    console.log('===>', dataSchema.value);
     indexList.value = [];
 
     // if is Edit ,Change text to Save
@@ -172,7 +171,6 @@
   /** DataSchema */
   const dataSchema = ref<IDataSchema>({});
   const handleSetDataSchema = async (setOption) => {
-    console.log(setOption);
     if (props.activeTab === ClassTypeEnum.CLASS) {
       await setClassSchema(dataSchema.value, indexList.value, setOption);
     } else {
@@ -323,7 +321,6 @@
   const handleUpdateDataSchema = async () => {
     emits('update', dataSchema.value);
     handleClose();
-    console.log(props.dataSchema);
   };
 
   const showOptionForm = computed(() => {

@@ -145,8 +145,7 @@
   const resSetModelList = async (res) => {
     let result = await getmodelRunsList();
     if (result.code === 200) {
-      // TODO
-      modelId = res?.id;
+      modelId.value = res?.id;
     }
   };
   const CreatModel = () => {
