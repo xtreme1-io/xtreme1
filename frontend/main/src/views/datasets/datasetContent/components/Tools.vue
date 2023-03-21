@@ -15,6 +15,7 @@
       @fetchList="reloadList"
     />
     <ExportModal
+      :datasetType="props.datasetType"
       :selectedList="props.selectedList"
       v-bind="$attrs"
       @register="registerExportModal"
@@ -398,7 +399,6 @@
       return curr.selectedList.some((record) => record === item.id);
     });
     makeFrameDisable.value = !data.every((item) => {
-     
       return item.type === dataTypeEnum.SINGLE_DATA;
     });
     annotateAndModelRun.value =
@@ -433,9 +433,12 @@
 
   const fileList = ref<any[]>([]);
   const uploadUrl = ref<string>('');
-  let progressModalPa = reactive({ resultType: undefined, modelId: undefined });
-  const handleCloseUploadModal = (data, { source, resultType, modelId }) => {
-  
+  let progressModalPa = reactive({
+    resultType: undefined,
+    modelId: undefined,
+    dataFormat: undefined,
+  });
+  const handleCloseUploadModal = (data, { source, resultType, modelId, dataFormat }) => {
     if (source == UploadSourceEnum.LOCAL) {
       fileList.value = data;
       openProgressModal(true, { fileList: fileList.value, source: source });
@@ -445,6 +448,7 @@
     }
     progressModalPa.resultType = resultType;
     progressModalPa.modelId = modelId;
+    progressModalPa.dataFormat = dataFormat;
     closeUploadModal();
   };
   // Reset fileList after ProgressModal closed

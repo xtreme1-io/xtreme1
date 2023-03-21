@@ -70,6 +70,7 @@
     uploadUrl: string;
     modelId?: number;
     resultType?: string;
+    dataFormat?: string;
   }>();
   const emits = defineEmits(['fetchList']);
 
@@ -212,6 +213,7 @@
                 source: props.source,
                 resultType: props.resultType as string,
                 modelId: props.modelId as number,
+                dataFormat: props.dataFormat as string,
               };
 
               const serialNumbers = await uploadDatasetApi(

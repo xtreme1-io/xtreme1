@@ -88,7 +88,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, reactive, onMounted } from 'vue';
+  import { ref, reactive, onMounted, computed } from 'vue';
   import { Form, Input, Upload, Divider, Select, Checkbox } from 'ant-design-vue';
   import { Icon, SvgIcon } from '/@/components/Icon';
   import { Button } from '/@@/Button';
@@ -101,16 +101,26 @@
   import { getModelPageApi } from '/@/api/business/models';
 
   const router = useRouter();
-  const dataFormatOption = [
-    {
-      value: 'Xtreme1 v0.5.5',
-      label: 'Xtreme1 v0.5.5',
-    },
-    {
-      value: 'CO CO v0.5.5',
-      label: 'CO CO v0.5.5',
-    },
-  ];
+
+  let dataFormatOption = computed(() => {
+    return props.datasetType?.includes('LIDAR')
+      ? [
+          {
+            value: 'XTREME1',
+            label: 'Xtreme1 v0.5.5',
+          },
+        ]
+      : [
+          {
+            value: 'XTREME1',
+            label: 'Xtreme1 v0.5.5',
+          },
+          {
+            value: 'COCO',
+            label: 'CO CO v0.5.5',
+          },
+        ];
+  });
   const resultTypeOption = [
     {
       value: 'GROUND_TRUTH',
@@ -128,6 +138,7 @@
     let datasetType = props.datasetType?.includes('LIDAR')
       ? datasetTypeEnum.LIDAR
       : datasetTypeEnum.IMAGE;
+
     const params = { datasetType: datasetType };
     const res: any = await getModelPageApi({
       pageNo: 1,
@@ -200,6 +211,7 @@
       source: UploadSourceEnum.LOCAL,
       resultType: resultType.value,
       modelId: modelId.value,
+      dataFormat: dataFormat.value,
     });
     // console.log(modelId.value)
     return false;

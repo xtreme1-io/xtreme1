@@ -253,8 +253,9 @@ export interface UploadParams {
   fileUrl: string;
   datasetId: string;
   source: UploadSourceEnum;
-  resultType: string;
-  modelId: number;
+  resultType?: string;
+  modelId?: number;
+  dataFormat?: string;
 }
 
 export enum UploadStatusEnum {
