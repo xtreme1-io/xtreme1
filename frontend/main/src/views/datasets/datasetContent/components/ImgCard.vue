@@ -118,9 +118,10 @@
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
         <div class="place relation-container image-loading">
           <img class="pointCloudImg h-83px" v-lazyload="getPlaceImg()" alt="" />
-          <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
+          <NodePc :pcObject="iState.pcObject" ref="svg" />
+          <!-- <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
             <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
-          </svg>
+          </svg> -->
         </div>
         <div class="camera">
           <div
@@ -130,7 +131,8 @@
             :key="item"
           >
             <img :key="item" v-lazyload="getPcImage(iState.pcImageObject[item])" alt="" />
-            <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
+            <NodePcImage :pcImageObject="iState.pcImageObject[item]?.object" />
+            <!-- <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
               <template v-for="_item in iState.pcImageObject[item]?.object || []">
                 <polygon v-if="_item.type === '2D_RECT'" :key="_item.id" :points="_item.points" />
                 <polyline
@@ -139,7 +141,7 @@
                   :points="_item.points"
                 />
               </template>
-            </svg>
+            </svg> -->
           </div>
         </div>
         <div class="name"> {{ data.name }} </div>
@@ -149,11 +151,11 @@
         v-else-if="info?.type === datasetTypeEnum.LIDAR_BASIC"
         style="width: 100%; height: 100%"
       >
-      
         <img class="object-cover pointCloudImg image-loading" v-lazyload="getPlaceImg()" alt="" />
-        <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
+        <NodePc :pcObject="iState.pcObject" ref="svg" />
+        <!-- <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
           <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
-        </svg>
+        </svg> -->
         <div class="p-2 name bottom"> {{ data.name }} </div>
       </div>
       <div
@@ -169,7 +171,11 @@
           v-lazyload="getImageUrl(data) || placeImg"
           alt=""
         />
-        <svg
+        <NodeImage
+          :viewBox="{ width: size.svgWidth, height: size.svgHeight }"
+          :imageObject="iState.imageObject"
+        />
+        <!-- <svg
           class="easy-image"
           :style="{
             width: size.svgWidth + 'px',
@@ -215,7 +221,7 @@
               :points="item.points"
             />
           </template>
-        </svg>
+        </svg> -->
         <div class="p-2 name bottom"> {{ data.name }} </div>
       </div>
     </div>
@@ -235,7 +241,7 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { dataTypeEnum } from '/@/api/business/model/datasetModel';
   import { PageTypeEnum } from './data';
-  import { useImgCard } from './useCardObject';
+  import { useImgCard, NodeImage, NodePcImage, NodePc } from './useCardObject';
   import { Icon } from '/@/components/Icon';
   import { goToTool } from '/@/utils/business';
   import { useRoute } from 'vue-router';
@@ -544,7 +550,7 @@
 
         .img-item {
           width: 33.33%;
-          height: 50px;
+          // height: 50px;
           // margin-left: 3px;
           // margin-right: 3px;
           position: relative;

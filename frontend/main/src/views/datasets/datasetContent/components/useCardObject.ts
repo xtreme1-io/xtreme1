@@ -1,4 +1,4 @@
-import { reactive, ref, watchEffect, watch, computed } from 'vue';
+import { reactive, ref, watchEffect, watch, computed, h } from 'vue';
 import { transformToPc, focusTransform } from '/@/utils/annotation';
 import {
   datasetTypeEnum,
@@ -19,7 +19,11 @@ export enum OBJECT_TYPE {
   BOX2D = '2D_BOX',
   BOX3D = '3D_BOX',
 }
-
+export const NodeType = {
+  '2D_RECT': 'polygon',
+  '2D_BOX': 'polyline',
+  '3D_BOX': 'polygon',
+};
 const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
   '2D_RECT': OBJECT_TYPE.RECT,
   '2D_BOX': OBJECT_TYPE.BOX2D,
@@ -36,6 +40,131 @@ const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
 
 //   return
 // }
+
+export function NodeImage({ imageObject, viewBox }) {
+  return h(
+    'svg',
+    {
+      class: 'easy-image',
+      'stroke-width': 1,
+      stroke: 'white',
+      fill: 'transparent',
+      viewBox: `0 0 ${viewBox.width} ${viewBox.height}`,
+    },
+    imageObject?.reduce((childs, { type, color, uuid, points, hole }) => {
+      color = color || '#fff';
+      switch (type) {
+        case OBJECT_TYPE.RECTANGLE:
+          childs.push(
+            h('polygon', {
+              stroke: color,
+              key: type + uuid,
+              points: points,
+            }),
+          );
+          break;
+        case OBJECT_TYPE.POLYGON:
+          if (hole.length > 0) {
+            childs.push(
+              h(
+                'mask',
+                {
+                  id: uuid,
+                  key: uuid,
+                },
+                [
+                  h('polygon', {
+                    points: points,
+                    fill: 'currentColor',
+                  }),
+                  ...hole.map((_h, i) =>
+                    h('polygon', {
+                      fill: '#000',
+                      key: i,
+                      points: _h,
+                    }),
+                  ),
+                ],
+              ),
+            );
+            childs.push(
+              h('rect', {
+                x: 0,
+                y: 0,
+                width: '100%',
+                height: '100%',
+                fill: color || '#fff',
+                key: uuid,
+                style: { mask: `url(#${uuid})` },
+              }),
+            );
+          } else {
+            childs.push(
+              h('polygon', {
+                stroke: color,
+                key: type + uuid,
+                points: points,
+              }),
+            );
+          }
+          break;
+        case OBJECT_TYPE.POLYLINE:
+          childs.push(
+            h('polyline', {
+              stroke: color,
+              key: uuid,
+              points: points,
+            }),
+          );
+          break;
+      }
+      return childs;
+    }, []),
+  );
+}
+
+export function NodePc({ pcObject, ref }) {
+  return h(
+    'svg',
+    {
+      class: 'easy-pc',
+      fill: 'transparent',
+      'stroke-width': 1,
+      stroke: 'currentColor',
+      ref: ref,
+    },
+    pcObject?.map(({ id, points, type }) => {
+      return h(NodeType[type], {
+        key: id,
+        points: points,
+      });
+    }),
+  );
+}
+
+export function NodePcImage({ pcImageObject }) {
+  return h(
+    'svg',
+    {
+      class: 'easy-image',
+      'stroke-width': '1',
+      stroke: 'currentColor',
+      fill: 'transparent',
+    },
+    pcImageObject?.reduce((childs, { type, uuid, points }) => {
+      const nodeType = NodeType[type];
+      if (nodeType) {
+        childs.push(
+          h(NodeType[type], {
+            key: uuid,
+            points: points,
+          }),
+        );
+      }
+      return childs;
+    }, []),
+  );
+}
 
 export default function useCardObject() {
   const svg = ref<any>(null);
@@ -120,7 +249,11 @@ export default function useCardObject() {
         const { center3D, rotation3D, size3D } = contour;
         if (center3D && rotation3D && size3D) {
           const { points } = transformToPc(contour, size, info);
-          target.push({ id: obj.id, points: points.map((pos) => pos.join(',')).join(' ') });
+          target.push({
+            id: obj.id,
+            type: OBJECT_TYPE.BOX3D,
+            points: points.map((pos) => pos.join(',')).join(' '),
+          });
         }
       });
     }
