@@ -1311,7 +1311,7 @@ public class DataInfoUseCase {
         // Indicates that no result data was imported
         if (ObjectUtil.isNotNull(dataAnnotationObjectBO.getSourceId())) {
             var resultFile = FileUtil.loopFiles(file, 2, null).stream()
-                    .filter(fc -> JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fc)) && dataName.equals(FileUtil.getPrefix(fc))
+                    .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && dataName.equals(FileUtil.getPrefix(fc))
                             && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
             if (resultFile.isPresent()) {
                 try {
