@@ -38,8 +38,8 @@
         </div>
         <div class="flex items-center gap-10px">
           <div class="whitespace-nowrap" style="color: #333; width: 100px">Export Format</div>
-          <Select v-model:value="selectValue" style="width: 300px" allowClear>
-            <Select.Option v-for="item in selectOption" :key="item.value" :value="item.value">
+          <Select v-model:value="dataFormat" style="width: 300px" allowClear>
+            <Select.Option v-for="item in dataFormatOption" :key="item.value" :value="item.value">
               {{ item.label }}
             </Select.Option>
           </Select>
@@ -57,7 +57,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { defineEmits, ref } from 'vue';
+  import { defineEmits, ref, computed } from 'vue';
   import { useRoute } from 'vue-router';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useDesign } from '/@/hooks/web/useDesign';
@@ -80,20 +80,31 @@
     filterForm: any;
     modelRunResultList?: any;
     selectedList: string[];
+    datasetType: string | undefined;
   }>();
   const emit = defineEmits(['setExportRecord']);
 
-  const selectValue = ref<string>('');
-  const selectOption = [
-    {
-      value: 'Xtreme1 v0.5.5',
-      label: 'Xtreme1 v0.5.5',
-    },
-    {
-      value: 'CO CO v0.5.5',
-      label: 'CO CO v0.5.5',
-    },
-  ];
+  const dataFormat = ref<string>('XTREME1');
+
+  let dataFormatOption = computed(() => {
+    return props.datasetType?.includes('LIDAR')
+      ? [
+          {
+            value: 'XTREME1',
+            label: 'Xtreme1 v0.5.5',
+          },
+        ]
+      : [
+          {
+            value: 'XTREME1',
+            label: 'Xtreme1 v0.5.5',
+          },
+          {
+            value: 'COCO',
+            label: 'CO CO v0.5.5',
+          },
+        ];
+  });
 
   enum dataOptionEmu {
     ALL = '',
@@ -145,7 +156,6 @@
     if (data.type === dataTypeEnum.ALL) {
       data.type = undefined;
     }
-  
 
     if (data.runRecordId && data.runRecordId.length) {
       data.runRecordId = data.runRecordId[1];
@@ -183,6 +193,7 @@
       }
     }
     res.selectModelRunIds = selectModelRunIds.value.toString();
+    res.dataFormat = dataFormat.value;
     return res;
   };
 </script>

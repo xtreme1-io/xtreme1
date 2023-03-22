@@ -136,7 +136,6 @@
     (config) => {
       // from attributes
       if (config.isKeep) {
-        console.log(formState);
         return;
       }
       console.log('createClassification detail', props.detail);
@@ -173,7 +172,6 @@
         dataSchema.value = { options: [] };
         defaultFormState.value = JSON.parse(JSON.stringify(unref(formState)));
       }
-      console.log(formState);
     },
   );
 

@@ -57,7 +57,6 @@
         const status = file?.status;
         const url = file?.response?.data.url;
         const name = file?.name;
-        console.log(info.file);
         if (status === 'uploading') {
           if (!uploading) {
             emit('uploading', name);

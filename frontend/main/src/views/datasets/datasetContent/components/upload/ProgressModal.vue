@@ -51,7 +51,7 @@
   const uploadUrl = ref<string>('');
 
   const [register, { closeModal }] = useModalInner((data: any) => {
-    console.log('ProgressModal: ', data);
+    // console.log('ProgressModal: ', data);
     source.value = data.source;
     if (source.value == UploadSourceEnum.LOCAL) {
       fileList.value = data.fileList;
@@ -78,7 +78,6 @@
         content: 'You have files are uploading, do you want to discard them all?',
         okText: 'Discard',
         onOk: async () => {
-          console.log('modal discard');
           closeModal();
           reset();
           handleReset();

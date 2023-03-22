@@ -15,9 +15,7 @@
   }>();
 
   function handleCopy() {
-    console.log(props.text);
     const isSuccessRef = copyTextToClipboard(props.text);
-    console.log(isSuccessRef);
     isSuccessRef &&
       message.success({
         content: t('sys.login.teamIDCopiedTips'),

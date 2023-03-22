@@ -102,7 +102,7 @@
     formRef.value
       .validate()
       .then((res) => {
-        console.log(typeof res);
+     
         if (typeof res == 'boolean') {
           isValid.value = false;
         } else {

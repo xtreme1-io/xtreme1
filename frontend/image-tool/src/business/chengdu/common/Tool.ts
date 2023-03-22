@@ -341,6 +341,7 @@ export default class Tool {
 
             data.forEach((e) => {
                 objectInfos.push({
+                    id: e.backId,
                     frontId: e.id,
                     classId: +e.classId,
                     sourceId: +e.sourceId,
@@ -382,8 +383,8 @@ export default class Tool {
                 datasetId: currentData.datasetId,
                 dataInfos,
             };
-            await api.saveAnnotation(saveParams);
-
+            const keyMap = await api.saveAnnotation(saveParams);
+            this.updateBackId(keyMap);
             state.dataList.forEach((e) => {
                 e.needSave = false;
             });
@@ -424,8 +425,8 @@ export default class Tool {
                 let frontId = annotate.uuid;
                 let backId = dataKeyMap[frontId];
                 if (!backId) return;
-                annotate.backId = backId;
-                annotate.uuid = backId;
+                annotate.id = backId;
+                // annotate.uuid = backId;
             });
         });
     }

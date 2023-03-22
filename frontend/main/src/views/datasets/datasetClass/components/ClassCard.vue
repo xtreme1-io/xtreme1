@@ -63,7 +63,6 @@
     emits('fetchList');
   };
   const handleEdit = async () => {
-    console.log(props.record.id);
     emits('handleDetail', props.record.id);
   };
 </script>

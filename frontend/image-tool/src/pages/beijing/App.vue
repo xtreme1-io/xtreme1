@@ -9,6 +9,7 @@
     import Editor from '/@/business/beijing/Editor.vue';
 
     import enUS from 'ant-design-vue/es/locale/en_US';
+
     import zhCN from 'ant-design-vue/es/locale/zh_CN';
     // const { getAntdLocale } = useLocale();
 </script>

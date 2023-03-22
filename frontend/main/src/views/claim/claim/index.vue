@@ -25,7 +25,7 @@
       page: 1,
       pageSize: 10,
     });
-    console.log(res);
+
     list.value = res.list;
   };
   onBeforeMount(() => {

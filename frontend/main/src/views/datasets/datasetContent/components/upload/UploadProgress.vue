@@ -70,6 +70,7 @@
     uploadUrl: string;
     modelId?: number;
     resultType?: string;
+    dataFormat?: string;
   }>();
   const emits = defineEmits(['fetchList']);
 
@@ -96,7 +97,6 @@
   watch(
     fileList,
     (list) => {
-      console.log('fileList change -- ', list);
       if (!isUploading.value) {
         isUploading.value = true;
         if (props.source == UploadSourceEnum.LOCAL) {
@@ -213,6 +213,7 @@
                 source: props.source,
                 resultType: props.resultType as string,
                 modelId: props.modelId as number,
+                dataFormat: props.dataFormat as string,
               };
 
               const serialNumbers = await uploadDatasetApi(

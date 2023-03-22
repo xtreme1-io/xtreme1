@@ -45,7 +45,6 @@
 
   const props = defineProps(dataProps);
   const data = getSchema(props.dataSchema, props.indexList);
-  console.log(props);
   const { handleSet, handleAddIndex, handleRemoveIndex } = unref(props);
   const handleCancel = () => {
     handleRemoveIndex && handleRemoveIndex();

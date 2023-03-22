@@ -108,6 +108,7 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
 
         // debugger;
         const newInfo: any = {
+            backId: obj.id,
             id: obj.uuid,
             type: obj.type.toLocaleUpperCase(),
             version: userData.version,
@@ -220,7 +221,6 @@ export function classAttrToPath(obj: Record<string, any> = {}) {
 }
 
 export function pathToClassAttr(paths: string[][]) {
-    console.log(paths);
     let values = {} as Record<string, any>;
     // 兼容处理以前的键值对
     if (!paths.length) paths = [];

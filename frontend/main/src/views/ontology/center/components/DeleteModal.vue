@@ -114,7 +114,7 @@
       setTimeout(() => {
         isLoading.value = false;
       }, 300);
-      console.log('error', error);
+    
     }
   };
 
