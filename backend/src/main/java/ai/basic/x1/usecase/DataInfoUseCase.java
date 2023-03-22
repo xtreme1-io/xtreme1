@@ -1328,11 +1328,11 @@ public class DataInfoUseCase {
                         var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
                         object.setId(IdUtil.randomUUID());
                         object.setVersion(0);
+                        processClassAttributes(classMap, object);
                         Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
                         if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
                             dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
                         }
-                        processClassAttributes(classMap, object);
                     });
                 } catch (Exception e) {
                     log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
