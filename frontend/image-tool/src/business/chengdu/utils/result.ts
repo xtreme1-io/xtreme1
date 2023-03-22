@@ -35,7 +35,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             color: targetClassType?.color ?? '#dedede',
             coordinate: obj?.contour?.points ?? [],
             interior: obj?.contour?.interior || [],
-            type: obj?.type.toLocaleLowerCase(),
+            type: obj?.type?.toLocaleLowerCase(),
             version: obj?.version,
             userData: {
                 ...obj?.meta,
@@ -110,7 +110,7 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
         const newInfo: any = {
             backId: obj.id,
             id: obj.uuid,
-            type: obj.type.toLocaleUpperCase(),
+            type: obj?.type?.toLocaleUpperCase(),
             version: userData.version,
             createdAt: userData.createdAt,
             createdBy: userData.createdBy,

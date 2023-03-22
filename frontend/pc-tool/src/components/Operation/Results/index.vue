@@ -93,13 +93,10 @@
         let { FILTER_ALL, withoutTaskId } = state.config;
         let sources = state.sources || [];
         let all: IFilter = { value: FILTER_ALL, label: $$('labelAll') };
-        let groundTruth: IFilter = {
-            label: $$('labelGroundTruth'),
-            options: [{ value: withoutTaskId, label: $$('labelWithoutTask') }],
-        };
+        let groundTruth: IFilter = { value: withoutTaskId, label: $$('labelGroundTruth') };
         // let model: IFilter = { label: $$('labelModelRuns'), options: [] };
 
-        let filters = [all,groundTruth] as IFilter[];
+        let filters = [all, groundTruth] as IFilter[];
         let modelMap = {};
         sources.forEach((s) => {
             let { sourceId, sourceType, modelId = '', modelName = '', name } = s;

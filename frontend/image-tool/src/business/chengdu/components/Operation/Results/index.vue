@@ -62,10 +62,7 @@
         let { FILTER_ALL, withoutTaskId } = state;
         let sources = state.sources || [];
         let all: IFilter = { value: FILTER_ALL, label: 'All' };
-        let groundTruth: IFilter = {
-            label: 'Ground Truth',
-            options: [{ value: withoutTaskId, label: 'Without Task' }],
-        };
+        let groundTruth: IFilter = { value: withoutTaskId, label: 'Ground Truth' };
         // let model: IFilter = { label: $$('labelModelRuns'), options: [] };
 
         let filters = [all, groundTruth] as IFilter[];
