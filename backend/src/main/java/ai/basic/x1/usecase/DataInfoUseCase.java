@@ -1311,7 +1311,7 @@ public class DataInfoUseCase {
         // Indicates that no result data was imported
         if (ObjectUtil.isNotNull(dataAnnotationObjectBO.getSourceId())) {
             var resultFile = FileUtil.loopFiles(file, 2, null).stream()
-                    .filter(fc -> JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fc)) && dataName.equals(FileUtil.getPrefix(fc))
+                    .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && dataName.equals(FileUtil.getPrefix(fc))
                             && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
             if (resultFile.isPresent()) {
                 try {
@@ -1328,11 +1328,11 @@ public class DataInfoUseCase {
                         var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
                         object.setId(IdUtil.randomUUID());
                         object.setVersion(0);
+                        processClassAttributes(classMap, object);
                         Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
                         if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
                             dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
                         }
-                        processClassAttributes(classMap, object);
                     });
                 } catch (Exception e) {
                     log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
