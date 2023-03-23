@@ -149,7 +149,7 @@
 
     return { code: 200 };
   };
-  let dataFormat = ref<string>('Xtreme1');
+  let dataFormat = ref<string>('XTREME1');
   let resultType = ref<string | undefined>(undefined);
   let modelId = ref<number | undefined>(undefined);
   let containsAnnotationResult = ref<boolean>(false);
