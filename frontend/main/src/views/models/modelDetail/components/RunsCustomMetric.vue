@@ -13,7 +13,7 @@
             <tr class="body" :key="index + item.name" v-for="(item, index) in data">
               <td>{{ item.name }}</td>
               <td>{{ item.value }}</td>
-              <td>{{ item.description }}%</td>
+              <td>{{ item.description }}</td>
             </tr>
           </tbody>
         </table>

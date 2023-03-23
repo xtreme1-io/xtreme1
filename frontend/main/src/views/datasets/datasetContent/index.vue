@@ -78,6 +78,7 @@
           @fetchList="fixedFetchList"
           @handleSplite="handleSplite"
           v-model:name="name"
+          @resetMoelResult="getMoelResult"
         />
         <div
           class="list"
@@ -846,6 +847,14 @@
     30,
   );
 
+  watch(
+    () => runRecordIdDisplay.value,
+    (val) => {
+      if (!val?.length) {
+        showAnnotation.value = false;
+      }
+    },
+  );
   watch(sortWithLabel, (type) => {
     resetFilter(type);
   });
