@@ -99,7 +99,7 @@ export default class Tool {
         this.editor.reset();
         this.state.resultActive = [];
         this.setFilterFromData();
-        this.loadDataFromManager();
+        this.loadDataFromManager(true);
     }
     getMaxId(dataId?: string) {
         let { dataIndex, dataList } = this.state;
@@ -121,17 +121,21 @@ export default class Tool {
         let dataInfo = state.dataList[state.dataIndex];
         // console.log(dataInfo.dataId);
         let objects = this.dataManager.modelMap[dataInfo.dataId];
-        let oldAnnotate = this.dataManager.getDataObject(dataInfo.dataId);
+        // let oldAnnotate = this.dataManager.getDataObject(dataInfo.dataId);
         let annotates = utils.convertObject2Annotate(objects, this.editor);
-        this.dataManager.setDataObject(dataInfo.dataId, [...oldAnnotate, ...annotates]);
-
-        if (!flag) {
-            this.editor.cmdManager.execute('add-modelRun', {
-                annotates,
-                objects,
-                id: dataInfo.dataId,
-            });
-        }
+        annotates.forEach((e) => {
+            e.userData.sourceId = state.withoutTaskId;
+            e.userData.sourceType = SourceType.DATA_FLOW;
+        });
+        // this.dataManager.setDataObject(dataInfo.dataId, [...oldAnnotate, ...annotates]);
+        this.editor.cmdManager.execute('add-object', annotates);
+        // if (!flag) {
+        //     this.editor.cmdManager.execute('add-modelRun', {
+        //         annotates,
+        //         objects,
+        //         id: dataInfo.dataId,
+        //     });
+        // }
         dataInfo.model = undefined;
 
         dataInfo.needSave = true;
@@ -139,7 +143,7 @@ export default class Tool {
         this.setFilterFromData();
         this.loadDataFromManager(true);
 
-        delete this.dataManager.modelMap[dataInfo.dataId];
+        // delete this.dataManager.modelMap[dataInfo.dataId];
     }
 
     createTrackId() {
@@ -158,7 +162,6 @@ export default class Tool {
         let filterMap = this.getActiveFilter();
         let withoutTaskId = this.state.withoutTaskId;
         // console.log('filterMap', filterMap);
-
         let filterObjects = [] as AnnotateObject[];
         objects.forEach((e) => {
             let sourceId = e.userData.sourceId || withoutTaskId;
@@ -168,7 +171,6 @@ export default class Tool {
 
             filterObjects.push(e);
         });
-
         this.editor.addObject(filterObjects);
         this.editor.idCount = this.getMaxId() + 1;
     }
