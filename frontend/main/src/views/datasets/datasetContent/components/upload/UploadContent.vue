@@ -107,17 +107,17 @@
       ? [
           {
             value: 'XTREME1',
-            label: 'Xtreme1 v0.5.5',
+            label: 'Xtreme1',
           },
         ]
       : [
           {
             value: 'XTREME1',
-            label: 'Xtreme1 v0.5.5',
+            label: 'Xtreme1',
           },
           {
             value: 'COCO',
-            label: 'CO CO v0.5.5',
+            label: 'CoCo',
           },
         ];
   });
@@ -149,7 +149,7 @@
 
     return { code: 200 };
   };
-  let dataFormat = ref<string>('Xtreme1 v0.5.5');
+  let dataFormat = ref<string>('Xtreme1');
   let resultType = ref<string | undefined>(undefined);
   let modelId = ref<number | undefined>(undefined);
   let containsAnnotationResult = ref<boolean>(false);
