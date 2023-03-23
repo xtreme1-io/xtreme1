@@ -74,7 +74,7 @@ minio:
 
 export:
   data:
-    version: Basic AI V1.0
+    version: Xtreme1 V0.6
 file:
   tempPath: /tmp/xtreme1/
   size:
