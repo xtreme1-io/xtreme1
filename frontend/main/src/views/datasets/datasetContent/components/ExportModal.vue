@@ -91,17 +91,17 @@
       ? [
           {
             value: 'XTREME1',
-            label: 'Xtreme1 v0.5.5',
+            label: 'Xtreme1',
           },
         ]
       : [
           {
             value: 'XTREME1',
-            label: 'Xtreme1 v0.5.5',
+            label: 'Xtreme1',
           },
           {
             value: 'COCO',
-            label: 'CO CO v0.5.5',
+            label: 'CoCo',
           },
         ];
   });
