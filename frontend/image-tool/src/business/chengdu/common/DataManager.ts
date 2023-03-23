@@ -33,10 +33,7 @@ export default class DataManager {
             let dataInfo = dataList[dataIndex];
             if (!dataInfo) return;
             let allObjects = this.getDataObject(dataInfo.dataId) || [];
-            this.setDataObject(
-                dataInfo.dataId,
-                allObjects.filter((e) => ids.indexOf(e.uuid) < 0),
-            );
+            this.onEditorRemove(allObjects.filter((e) => ids.indexOf(e.uuid) >= 0));
         });
         this.tool.editor.on(Event.DIMENSION_CHANGE, (data: any) => {
             let object = data?.data;
@@ -85,15 +82,16 @@ export default class DataManager {
         let curData = dataList[dataIndex];
 
         let name = cmd.name as ICmdName;
-        if (name === 'add-object') {
-            let data = cmd.data as any;
-            if (cmdType === 'undo') {
-                this.onEditorRemove(data);
-            } else {
-                this.onEditorAdd(data);
-            }
-            // console.log('handleEditorCmd', name, cmdType);
-        } else if (name === 'delete-object') {
+        // if (name === 'add-object') {
+        //     let data = cmd.data as any;
+        //     if (cmdType === 'undo') {
+        //         this.onEditorRemove(data);
+        //     } else {
+        //         this.onEditorAdd(data);
+        //     }
+        //     // console.log('handleEditorCmd', name, cmdType);
+        // } else
+        if (name === 'delete-object') {
             let data = cmd.data as any;
             if (cmdType === 'undo') {
                 this.onEditorAdd(data);
@@ -195,9 +193,9 @@ export default class DataManager {
 
     async pollDataModelResult() {
         let _this = this;
-        let { editor } = this.tool;
+        let { editor, state } = this.tool;
         let modelMap = {} as Record<string, IDataMeta[]>;
-
+        let confidence = state.modelConfig.confidence || [0.5, 1];
         let dataList = this.tool.state.dataList;
 
         dataList.forEach((data) => {
@@ -227,7 +225,7 @@ export default class DataManager {
             let request = api
                 .getModelResult(ids, recordId)
                 .then((data) => {
-                    console.log('getModelResult ==> ', data);
+                    // console.log('getModelResult ==> ', data);
                     let { dataIndex, dataList } = _this.tool.state;
                     let curData = dataList[dataIndex];
                     // return;
@@ -262,7 +260,7 @@ export default class DataManager {
                         if (info) {
                             let modelResult = info.modelResult;
                             let objects = (modelResult.objects || []) as IObject[];
-                            if (modelResult.code !== 0) {
+                            if (modelResult.code != 'OK') {
                                 dataMeta.model = undefined;
                                 if (dataMeta.dataId === curData.dataId)
                                     editor.showMsg('error', 'Model Run Error.');
@@ -273,9 +271,10 @@ export default class DataManager {
                                 // 更新状态
                                 model.state = 'complete';
                                 // 过滤
-                                objects = objects.filter(
-                                    (e) => e.confidence && e.confidence >= 0.5,
-                                );
+                                objects = objects.filter((e) => {
+                                    let c = e.confidence;
+                                    return !c || (c >= confidence[0] && c <= confidence[1]);
+                                });
                                 _this.modelMap[dataMeta.dataId] = convertModelRunResult(objects);
                             } else {
                                 dataMeta.model = undefined;
