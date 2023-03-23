@@ -39,8 +39,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             version: obj?.version,
             userData: {
                 ...obj?.meta,
-                sourceId: e.sourceId || obj.sourceId,
-                sourceType: e.sourceType || obj.sourceType,
+                sourceId: e.sourceId || obj.sourceId || editor.state.withoutTaskId,
+                sourceType: e.sourceType || obj.sourceType || SourceType.DATA_FLOW,
                 attrs: arrayToObj(obj?.classValues),
                 modelClass: obj.modelClass,
                 confidence: obj.modelConfidence,
@@ -49,7 +49,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
                 version: obj.version,
             },
             intId: Number(obj.trackName),
-            uuid: obj.id,
+            uuid: obj.id || uuid(),
         };
 
         if (annotate.type == 'rectangle') {
@@ -152,7 +152,7 @@ export function convertModelRunResult(objects: any[]) {
                 contour: {
                     points: item.points,
                 },
-                type: item.objType,
+                type: item.objType || item.type,
                 modelClass: item.modelClass,
                 modelConfidence: item.confidence,
             },

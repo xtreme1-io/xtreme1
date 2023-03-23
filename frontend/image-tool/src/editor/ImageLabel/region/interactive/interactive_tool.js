@@ -108,9 +108,7 @@ export class InteractiveTool extends BaseTool {
             polygon && polygon.shape && this.shapelayer.add(polygon.shape);
             this.offPolygon(polygon);
             polygon.selectShape(true);
-            this.view.editor.cmdManager.execute('add-object', {
-                uuid: polygon.uuid,
-            });
+            this.view.editor.cmdManager.execute('add-object', this.toJSON());
             this.view.editor.emit(Event.SHOW_CLASS_INFO, {
                 data: {
                     object: polygon,
