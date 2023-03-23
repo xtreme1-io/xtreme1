@@ -7,6 +7,7 @@
       :width="600"
       :title="t('common.exportText')"
       @ok="handleSubmit"
+      @cancel="handleReset"
       ok-text="Export"
       :okButtonProps="{
         loading: isLoading,
@@ -177,6 +178,11 @@
     setTimeout(() => {
       isLoading.value = false;
     }, 300);
+  };
+  let handleReset = () => {
+    dataFormat.value = 'XTREME1';
+    dataType.value = '';
+    selectModelRunIds.value = [];
   };
 
   let fliterPa = (data) => {

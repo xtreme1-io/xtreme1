@@ -2,11 +2,27 @@
   <Popover trigger="click" overlayClassName="metricsPopover" :destroyTooltipOnHide="true">
     <template #content>
       <div class="content">
-        <div class="item" :key="index + item.name" v-for="(item, index) in data"
-          ><div style="border-bottom: 1px solid #aaa"> {{ item.name }} </div>
-          <div style="border-bottom: 1px solid #aaa"> {{ item.value }} </div>
+        <table style="margin-top: 0.5rem">
+          <tbody>
+            <tr class="header">
+              <td>name</td>
+              <td>value</td>
+              <td>description</td>
+            </tr>
+
+            <tr class="body" :key="index + item.name" v-for="(item, index) in data">
+              <td>{{ item.name }}</td>
+              <td>{{ item.value }}</td>
+              <td>{{ item.description }}%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- <div class="item" :key="index + item.name" v-for="(item, index) in data"
+          ><div style="border-right: 1px solid #aaa"> {{ item.name }} </div>
+          <div style="border-right: 1px solid #aaa"> {{ item.value }} </div>
           <div> {{ item.description }} </div></div
-        >
+        > -->
       </div>
     </template>
     <a class="more"> More </a>
@@ -25,18 +41,25 @@
 </script>
 <style lang="less" scoped>
   .content {
-    display: flex;
-    padding: 8px;
-    .item {
+    padding: 0 8px 8px 8px;
+    max-height: 70vh;
+    overflow: auto;
+    tbody {
       // display: flex;
-      // flex-direction: column;
-      border: 1px solid #aaa;
-      padding: 5px;
-      width: 150px;
-    }
-    .item:nth-child(1) {
-      // border: none;
-      // width: 90px;
+
+      td {
+        padding: 5px 10px;
+      }
+      tr.header {
+        background: #eee;
+        border-bottom: 1px solid #aaa;
+        td {
+          font-weight: 700;
+        }
+      }
+      tr.body {
+        border-bottom: 1px solid #aaa;
+      }
     }
   }
   .more {
