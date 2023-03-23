@@ -1889,7 +1889,8 @@ public class DataInfoUseCase {
     private Boolean verifyDataResult(DataAnnotationResultObjectBO dataAnnotationResultObjectBO, Long dataId, String dataName) {
         var boo = true;
         var types = List.of(ObjectTypeEnum.RECTANGLE.getValue(),
-                ObjectTypeEnum.TWO_D_BOX.getValue(), ObjectTypeEnum.THREE_D_BOX.getValue(), ObjectTypeEnum.THREE_D_SEGMENT_POINTS);
+                ObjectTypeEnum.TWO_D_BOX.getValue(), ObjectTypeEnum.THREE_D_BOX.getValue(), ObjectTypeEnum.TWO_RECT.getValue(),
+                ObjectTypeEnum.POLYLINE.getValue(), ObjectTypeEnum.POLYGON.getValue(), ObjectTypeEnum.THREE_D_SEGMENT_POINTS.getValue());
         if (!types.contains(dataAnnotationResultObjectBO.getType())) {
             log.error("Object type error，dataId:{},dataName:{}", dataId, dataName);
             boo = false;
