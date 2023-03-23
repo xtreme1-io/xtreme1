@@ -7,7 +7,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn package
 FROM openjdk:11-jre
 RUN apt update && \
     apt install -y iputils-ping curl wget netcat python3 python3-pip
-RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git
+RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git@97f0e90
 WORKDIR /app
 COPY --from=build /build/target/xtreme1-backend-0.5.6-SNAPSHOT.jar ./app.jar
 RUN mkdir -p config
