@@ -86,6 +86,8 @@ public class DataAnnotationObjectUseCase {
             if (ObjectUtil.isNotNull(object.getId()) && ObjectUtil.isNotNull(oldInfoMap.get(object.getId()))) {
                 object.setCreatedAt(oldInfoMap.get(object.getId()).getCreatedAt());
                 object.setCreatedBy(oldInfoMap.get(object.getId()).getCreatedBy());
+                object.setSourceId(oldInfoMap.get(object.getId()).getSourceId());
+                object.setSourceType(oldInfoMap.get(object.getId()).getSourceType());
                 needUpdateObjectBOs.add(object);
             } else if (ObjectUtil.isNull(object.getId())) {
                 object.setCreatedAt(OffsetDateTime.now());
