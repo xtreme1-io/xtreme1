@@ -49,9 +49,9 @@
         t('business.models.settingsModel.TestConnection')
       }}</Button>
     </div>
-    <div class="status"> <span class="tab">Status: </span> {{ connectionRes.status }}</div>
+    <div class="status"> <span class="tab">Status:</span>{{ connectionRes.status }}</div>
     <div class="response flex">
-      <div class="tab mr-4px">Response: </div
+      <div class="tab">Response: </div
       ><div style="width: 90%"
         ><div v-if="connectionRes.errorMessage" class="errorMessage">
           <Alert :message="connectionRes.errorMessage" type="error" closable /> </div
@@ -98,6 +98,15 @@
     },
     {
       immediate: true,
+      deep: true,
+    },
+  );
+  watch(
+    () => urlVal,
+    () => {
+      hasConnection.value = false;
+    },
+    {
       deep: true,
     },
   );
