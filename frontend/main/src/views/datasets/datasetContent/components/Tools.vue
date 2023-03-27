@@ -7,6 +7,7 @@
       @closeUpload="handleCloseUploadModal"
     />
     <ProgressModal
+      @resetMoelResult="emits('resetMoelResult')"
       v-bind="progressModalPa"
       @register="registerProgressModal"
       :datasetType="props.datasetType"
@@ -417,6 +418,7 @@
     'update:showAnnotation',
     'update:name',
     'update:cardSliderWidthValue',
+    'resetMoelResult',
   ]);
 
   const reloadList = () => {

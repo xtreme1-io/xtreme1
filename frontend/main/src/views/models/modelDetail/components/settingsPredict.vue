@@ -51,12 +51,13 @@
     </div>
     <div class="status"> <span class="tab">Status: </span> {{ connectionRes.status }}</div>
     <div class="response flex">
-      <div class="tab mr-32px">Response: </div
+      <div class="tab mr-4px">Response: </div
       ><div style="width: 90%"
         ><div v-if="connectionRes.errorMessage" class="errorMessage">
           <Alert :message="connectionRes.errorMessage" type="error" closable /> </div
         ><div v-if="connectionRes.content" class="content">
-          <Alert :message="connectionRes.content" type="success" />
+          <json-viewer :value="connectionRes.content" expand-depth="3" copyable boxed sort />
+          <!-- <Alert :message="connectionRes.content" type="success" /> -->
         </div>
       </div>
     </div>
@@ -138,7 +139,7 @@
     }
     connectionRes.status = status;
     connectionRes.errorMessage = errorMessage;
-    connectionRes.content = JSON.stringify(content);
+    connectionRes.content = content;
   };
 </script>
 <style lang="less" scoped>

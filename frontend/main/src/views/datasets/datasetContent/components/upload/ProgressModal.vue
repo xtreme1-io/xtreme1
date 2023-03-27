@@ -35,11 +35,10 @@
 
   const { t } = useI18n();
   const props = defineProps<{
-    
     datasetType: datasetTypeEnum | undefined;
     id: number;
   }>();
-  const emits = defineEmits(['fetchList']);
+  const emits = defineEmits(['fetchList', 'resetMoelResult']);
 
   const handleFetchList = () => {
     emits('fetchList');
@@ -72,6 +71,7 @@
       closeModal();
       reset();
       handleReset();
+      emits('resetMoelResult');
     } else {
       ModalConfirmCustom({
         title: 'Reminder',

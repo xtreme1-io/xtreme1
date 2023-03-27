@@ -78,6 +78,7 @@
           @fetchList="fixedFetchList"
           @handleSplite="handleSplite"
           v-model:name="name"
+          @resetMoelResult="getMoelResult"
         />
         <div
           class="list"
@@ -264,7 +265,7 @@
           ><div>
             <div class="custom-item">
               <div class="custom-label font-bold"> If display results</div>
-              <Switch v-model:checked="showAnnotation" />
+              <Switch @change="showAnnotationChange" v-model:checked="showAnnotation" />
             </div>
             <div>
               <div class="custom-label font-bold"> Results</div>
@@ -406,9 +407,25 @@
   let modelRunResultList = ref<any>([]);
   const modelRunResultListForDisplay = computed(() => {
     let result: Array<any> = [{ label: 'Ground Truths', value: -1 }, ...modelRunResultList.value];
-
     return result;
   });
+
+  let showAnnotationChange = (value) => {
+    if (value) {
+      let values: any = [];
+      modelRunResultListForDisplay.value.map((item) => {
+        if (item.children) {
+          item.children.map((k) => {
+            values.push(k.value);
+          });
+        } else {
+          values.push(item.value);
+        }
+      });
+      runRecordIdDisplay.value = values;
+    }
+  };
+
   let runRecordIdDisplay = ref();
   const splitType = ref<any>();
   const DataConfidence = ref<string>('DataConfidence');
@@ -830,6 +847,14 @@
     30,
   );
 
+  watch(
+    () => runRecordIdDisplay.value,
+    (val) => {
+      if (!val?.length) {
+        showAnnotation.value = false;
+      }
+    },
+  );
   watch(sortWithLabel, (type) => {
     resetFilter(type);
   });
