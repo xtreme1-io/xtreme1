@@ -6,6 +6,8 @@ RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/x
 WORKDIR /app
 COPY target/$BACKEND_PACKAGE_NAME ./app.jar
 RUN mkdir -p config
+RUN wget 'https://basicai-asset.s3.us-west-2.amazonaws.com/xtreme1/xtreme1-lidar-fusion-trial.zip' -O xtreme1-lidar-fusion-trial.zip
+RUN wget 'https://basicai-asset.s3.us-west-2.amazonaws.com/xtreme1/xtreme1-image-trial.zip' -O xtreme1-image-trial.zip
 
 EXPOSE 8080
 
