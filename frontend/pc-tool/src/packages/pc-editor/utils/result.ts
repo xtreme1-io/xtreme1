@@ -143,7 +143,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
     // });
     objects.forEach((obj) => {
         let userData = {} as IUserData;
-
+        let objType = obj.objType || obj.type;
         let classConfig = editor.getClassType(obj.classId as string);
         if (!obj.classId && obj.classType) {
             classConfig = editor.getClassType(obj.classType);
@@ -167,7 +167,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         userData.sourceType = obj.sourceType;
         userData.attrs = obj.attrs || {};
         userData.pointN = obj.pointN || 0;
-        if (obj.objType === ObjectType.TYPE_3D_BOX || obj.objType === ObjectType.TYPE_3D) {
+        if (objType === ObjectType.TYPE_3D_BOX || objType === ObjectType.TYPE_3D) {
             position.set(obj.center3D.x, obj.center3D.y, obj.center3D.z);
             rotation.set(obj.rotation3D.x, obj.rotation3D.y, obj.rotation3D.z);
             scale.set(obj.size3D.x, obj.size3D.y, obj.size3D.z);
@@ -181,8 +181,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             bindInfo(box, obj);
             annotates.push(box);
         } else if (
-            obj.objType === ObjectType.TYPE_2D_RECT ||
-            obj.objType === ObjectType.TYPE_RECT
+            objType === ObjectType.TYPE_2D_RECT ||
+            objType === ObjectType.TYPE_RECT
         ) {
             let bbox = getBBox(obj.points as any);
             center.set((bbox.xMax + bbox.xMin) / 2, (bbox.yMax + bbox.yMin) / 2);
@@ -194,8 +194,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             bindInfo(rect, obj);
             annotates.push(rect);
         } else if (
-            obj.objType === ObjectType.TYPE_2D_BOX ||
-            obj.objType === ObjectType.TYPE_BOX2D
+            objType === ObjectType.TYPE_2D_BOX ||
+            objType === ObjectType.TYPE_BOX2D
         ) {
             let positions1 = [] as THREE.Vector2[];
             let positions2 = [] as THREE.Vector2[];

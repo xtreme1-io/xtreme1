@@ -26,6 +26,8 @@ import { cloneDeep } from 'lodash';
 export class BaseShape {
     constructor(view, opt = {}) {
         this.view = view;
+
+        this.id = opt.id;
         this.uuid = opt.uuid || uuid();
         this.intId = typeof opt.intId !== 'undefined' ? opt.intId : this._getIntId();
         this.shapelayer = view.shapelayer;
@@ -746,6 +748,7 @@ export class BaseShape {
             coordinate.push(this._toCoordinate(p));
         });
         return {
+            id: this.id,
             type: this.type,
             uuid: this.uuid,
             color: this.stroke,

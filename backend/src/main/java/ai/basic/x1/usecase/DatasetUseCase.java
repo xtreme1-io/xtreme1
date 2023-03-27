@@ -97,12 +97,12 @@ public class DatasetUseCase {
 
     @PostConstruct
     public void init() {
-        // initDataset(pointCloudDatasetInitialInfo);
+        initDataset(pointCloudDatasetInitialInfo);
         initDataset(imageDatasetInitialInfo);
     }
 
     private void initDataset(DatasetInitialInfo datasetInitialInfo) {
-        var file = FileUtil.file("/Users/fyb/Downloads/xtreme1-image-trial.zip");
+        var file = FileUtil.file(".", datasetInitialInfo.getFileName());
         if (file.isFile()) {
             executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
                 var datasetName = datasetInitialInfo.getName();
