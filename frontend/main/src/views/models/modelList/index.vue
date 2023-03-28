@@ -131,7 +131,6 @@
         datasetType = datasetType.includes('LIDAR') ? datasetTypeEnum.LIDAR : datasetTypeEnum.IMAGE;
         setTimeout(() => {
           CreateModalRef.value.setFieldsValue({ datasetType: datasetType });
-          // window.opener = null;
         });
       }
     }, 500);
@@ -144,6 +143,11 @@
   // 刷新列表
   const handleRefresh = () => {
     getList();
+    setTimeout(() => {
+      if (window.opener && window.opener.reConnect) {
+        window.opener = null;
+      }
+    }, 500);
   };
 </script>
 <style lang="less" scoped>
