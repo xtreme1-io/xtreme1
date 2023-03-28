@@ -161,7 +161,7 @@
       <div
         v-else-if="info?.type === datasetTypeEnum.IMAGE"
         class="relation-container image-loading"
-        style="width: 100%; height: 100%; margin-bottom: 5px"
+        style="width: 100%; height: 100%"
       >
         <img
           class="place image-card"

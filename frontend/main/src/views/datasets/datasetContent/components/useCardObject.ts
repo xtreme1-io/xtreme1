@@ -491,6 +491,7 @@ export function useImgCard(props: {
    */
   const updateImageObject = () => {
     let results: any[] = [];
+    onImgLoad(props.data);
     if (
       props.showAnnotation !== false &&
       props.info?.type === datasetTypeEnum.IMAGE &&
