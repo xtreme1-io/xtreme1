@@ -32,6 +32,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -813,7 +814,7 @@ public class DataInfoUseCase {
         String outPath = String.format("%s%s", baseSavePath, fileName);
         ProcessBuilder builder = new ProcessBuilder();
         var respPath = String.format("%s%s/resp.json", tempPath, IdUtil.fastSimpleUUID());
-        DataFormatUtil.convert(Constants.CONVERT_UPLOAD,srcPath, outPath, respPath);
+        DataFormatUtil.convert(Constants.CONVERT_UPLOAD, srcPath, outPath, respPath);
         dataInfoUploadBO.setBaseSavePath(baseSavePath);
         return respPath;
     }
@@ -1315,8 +1316,17 @@ public class DataInfoUseCase {
                             && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
             if (resultFile.isPresent()) {
                 try {
-                    var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
-                    var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
+                    var resultJson = JSONUtil.readJSON(resultFile.get(), Charset.defaultCharset());
+                    var result = new DataImportResultBO();
+                    if (resultJson instanceof JSONArray) {
+                        var dataImportResultBOList = JSONUtil.toList(JSONUtil.toJsonStr(resultJson), DataImportResultBO.class);
+                        var objects = new ArrayList<DataAnnotationResultObjectBO>();
+                        dataImportResultBOList.stream().filter(dataImportResultBO -> CollUtil.isNotEmpty(dataImportResultBO.getObjects())).forEach(dataImportResultBO ->
+                                objects.addAll(dataImportResultBO.getObjects()));
+                        result.setObjects(objects);
+                    } else {
+                        result = JSONUtil.toBean(JSONUtil.toJsonStr(resultJson), DataImportResultBO.class);
+                    }
                     if (CollectionUtil.isEmpty(result.getObjects())) {
                         log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
                         errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
@@ -1339,6 +1349,12 @@ public class DataInfoUseCase {
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+        var resultJSON = JSONUtil.readJSON(FileUtil.file("/Users/fyb/Downloads/00.json"), Charset.defaultCharset());
+        var result = JSONUtil.readJSON(FileUtil.file("/Users/fyb/Downloads/00json.json"), Charset.defaultCharset());
+        System.out.println("");
     }
 
     private Map<Long, DatasetClassBO> getClassMap(Long datasetId, List<DataAnnotationResultObjectBO> objects) {
