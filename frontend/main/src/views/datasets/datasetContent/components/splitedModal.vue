@@ -150,7 +150,7 @@
   watch(
     () => formData.totalSize.percent,
     (val) => {
-      formData.totalSize.count = Math.floor((val * formData.totalSize.maxCount) / 100);
+      formData.totalSize.count = ((val * formData.totalSize.maxCount) / 100).toFixed(0);
       resetSpliteSize();
     },
   );
@@ -166,8 +166,8 @@
   let TestCountPercent = ref(10);
   let resetSpliteSize = () => {
     let [start, end] = formData.spliteSize;
-    let TrainingCount = Math.floor((formData.totalSize.count * start) / 100);
-    let ValidationCount = Math.floor((formData.totalSize.count * (end - start)) / 100);
+    let TrainingCount = ((formData.totalSize.count * start) / 100).toFixed(0);
+    let ValidationCount = ((formData.totalSize.count * (end - start)) / 100).toFixed(0);
     let TestCount = formData.totalSize.count - TrainingCount - ValidationCount;
 
     TrainingCountPercent.value = start;
