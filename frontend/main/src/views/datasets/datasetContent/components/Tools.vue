@@ -25,7 +25,12 @@
       :filterForm="filterForm"
       @setExportRecord="setExportRecord"
     />
-    <SplitedModal @register="registerSplitedModal" @fetchList="reloadList" />
+    <SplitedModal
+      v-if="showSplitedModal"
+      @register="registerSplitedModal"
+      @fetchList="reloadList"
+      @closeSpliteModel="showSplitedModal = false"
+    />
     <Modal
       :title="t('business.datasetContent.terminateExport')"
       @register="registerCancelExportModal"
@@ -468,7 +473,10 @@
   /** Export */
   const exportResultList = ref<exportFileRecord[]>([]);
   const [registerExportModal, { openModal: openExportModal }] = useModal();
-  const [registerSplitedModal, { openModal: openSplitedModal }] = useModal();
+  const [registerSplitedModal, { openModal: openSplitedModal, closeModal: closeSplitedModal }] =
+    useModal();
+  let showSplitedModal = ref(false);
+
   const [
     registerCancelExportModal,
     { openModal: openExportCancelModal, closeModal: closeExportCancelModal },
@@ -478,7 +486,11 @@
     openExportModal();
   };
   const handleOpenSplited = async () => {
-    openSplitedModal();
+    // showSplitedModal  Destroy the pop-up assembly
+    showSplitedModal.value = true;
+    setTimeout(() => {
+      openSplitedModal();
+    });
   };
 
   // Cancel

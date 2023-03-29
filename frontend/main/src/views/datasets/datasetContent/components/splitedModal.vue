@@ -11,6 +11,8 @@
       :okButtonProps="{
         loading: isLoading,
       }"
+      destroy-on-close
+      @cancel="cancelModel"
     >
       <div class="content">
         <div class="flex items-center gap-30px">
@@ -160,8 +162,10 @@
       resetSpliteSize();
     },
   );
-  const emits = defineEmits(['fetchList']);
-
+  const emits = defineEmits(['fetchList', 'closeSpliteModel']);
+  const cancelModel = () => {
+    emits('closeSpliteModel');
+  };
   let TrainingCountPercent = ref(80);
   let TestCountPercent = ref(10);
   let resetSpliteSize = () => {
@@ -212,7 +216,9 @@
         content: 'successed',
         duration: 5,
       });
+
       closeModal();
+      emits('closeSpliteModel');
     } catch (e) {}
 
     setTimeout(() => {
