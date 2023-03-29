@@ -11,6 +11,8 @@
       :okButtonProps="{
         loading: isLoading,
       }"
+      destroy-on-close
+      @cancel="cancelModel"
     >
       <div class="content">
         <div class="flex items-center gap-30px">
@@ -150,7 +152,7 @@
   watch(
     () => formData.totalSize.percent,
     (val) => {
-      formData.totalSize.count = Math.floor((val * formData.totalSize.maxCount) / 100);
+      formData.totalSize.count = ((val * formData.totalSize.maxCount) / 100).toFixed(0);
       resetSpliteSize();
     },
   );
@@ -160,14 +162,16 @@
       resetSpliteSize();
     },
   );
-  const emits = defineEmits(['fetchList']);
-
+  const emits = defineEmits(['fetchList', 'closeSpliteModel']);
+  const cancelModel = () => {
+    emits('closeSpliteModel');
+  };
   let TrainingCountPercent = ref(80);
   let TestCountPercent = ref(10);
   let resetSpliteSize = () => {
     let [start, end] = formData.spliteSize;
-    let TrainingCount = Math.floor((formData.totalSize.count * start) / 100);
-    let ValidationCount = Math.floor((formData.totalSize.count * (end - start)) / 100);
+    let TrainingCount = ((formData.totalSize.count * start) / 100).toFixed(0);
+    let ValidationCount = ((formData.totalSize.count * (end - start)) / 100).toFixed(0);
     let TestCount = formData.totalSize.count - TrainingCount - ValidationCount;
 
     TrainingCountPercent.value = start;
@@ -212,7 +216,9 @@
         content: 'successed',
         duration: 5,
       });
+
       closeModal();
+      emits('closeSpliteModel');
     } catch (e) {}
 
     setTimeout(() => {

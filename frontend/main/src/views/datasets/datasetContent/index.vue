@@ -844,7 +844,7 @@
   let sliderWidthValue = ref<number>(200);
   let { cardHeight, cardWidth, paddingX, changeWidth, resetWidth, maxSliderWidth } = useFlowLayout(
     'list',
-    30,
+    0,
   );
 
   watch(
@@ -864,7 +864,7 @@
   watch(cardWidth, (count) => {
     sliderWidthValue.value = parseInt(count);
   });
-  watchEffect(() => {
+  watchEffect(() => {   
     // @ts-ignore
     cardHeight, paddingX;
   });
