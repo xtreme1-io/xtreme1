@@ -342,10 +342,17 @@
   });
 
   // 重置 formState
+
   const handleReset = () => {
     formState.checkedResult = false;
+    formState.checkedData = false;
     formState.sliderValue = [0.5, 1];
     formState.tagsList = JSON.parse(JSON.stringify(classes));
+
+    formState.dataCountRatio = 100;
+    formState.isExcludeModelData = false;
+    formState.splitType = '';
+    formState.annotationStatus = '';
   };
 </script>
 <style lang="less" scoped>
