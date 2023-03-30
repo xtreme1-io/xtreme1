@@ -78,7 +78,7 @@
     </select>
 
     <select id="selectDataPage" resultMap="BaseResultMap">
-        SELECT distinct d.* FROM data d
+        SELECT distinct d.*,mdr.data_confidence FROM data d
             LEFT JOIN model_dataset_result mdr ON d.id=mdr.data_id
         ${ew.customSqlSegment("d")}
         <if test="dataInfoQuery.runRecordId != null">
