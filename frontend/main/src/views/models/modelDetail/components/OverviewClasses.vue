@@ -22,13 +22,13 @@
       </div>
     </div>
   </div>
-  <OverviewClassesInfo @register="registerModal" :groupClass="props.classes" />
+  <!-- <OverviewClassesInfo @register="registerModal" :groupClass="props.classes" /> -->
 </template>
 <script lang="ts" setup>
   import { computed } from 'vue';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { IClasses } from './typing';
-  import OverviewClassesInfo from './OverviewClassesInfo.vue';
+  // import OverviewClassesInfo from './OverviewClassesInfo.vue';
   import { useModal } from '/@/components/Modal';
   import { groupBy } from 'lodash';
 

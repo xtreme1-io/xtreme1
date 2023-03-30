@@ -32,7 +32,7 @@ export const createForm: FormSchema[] = [
         {
           label: (
             <span>
-              <span> LIDAR </span>
+              <span> Lidar </span>
               <Tooltip placement="rightTop" title={t('business.models.create.lidarTips')}>
                 <Icon size={'15'} icon={'uiw:information'} />{' '}
               </Tooltip>

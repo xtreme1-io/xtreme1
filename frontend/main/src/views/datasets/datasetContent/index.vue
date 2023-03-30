@@ -171,8 +171,10 @@
               />
             </div>
             <div class="custom-item">
-              <Select style="flex: 1" size="small" v-model:value="DataConfidence">
-                <Select.Option value="DataConfidence"> Data Confidence </Select.Option>
+              <Select style="flex: 1" size="small" v-model:value="sortField">
+                <Select.Option :value="SortFieldEnum.DATA_CONFIDENCE">
+                  Data Confidence
+                </Select.Option>
               </Select>
             </div>
           </template>
@@ -257,7 +259,14 @@
               icon="data-confidence|svg"
               title="Data confidence"
             >
-              <Slider style="width: 100%" v-model:value="confidenceSlider" range />
+              <Slider
+                style="width: 100%"
+                :min="0"
+                :max="1"
+                v-model:value="confidenceSlider"
+                range
+                :step="0.01"
+              />
             </CollContainer>
           </div>
         </template>
@@ -393,7 +402,7 @@
   const lockedNum = ref<number>(0);
   const sliderType = ref<string>('fliter');
   const sortWithLabel = ref<string>('Data');
-  const confidenceSlider = ref([0, 100]);
+  const confidenceSlider = ref([0, 1]);
   const runRecordId = ref<any>();
   const type = ref<PageTypeEnum>();
   const { id, dataId } = query;
@@ -428,7 +437,7 @@
 
   let runRecordIdDisplay = ref();
   const splitType = ref<any>();
-  const DataConfidence = ref<string>('DataConfidence');
+
   const selectName = t('business.models.models');
   const title = t('business.models.run.runModel');
   const modelId = ref<number>();
@@ -535,13 +544,13 @@
   const resetFilter = (type) => {
     filterForm.name = '';
     filterForm.createStartTime = null;
-    filterForm.sortField = type === 'Result' ? undefined : SortFieldEnum.NAME;
+    filterForm.sortField = type === 'Result' ? SortFieldEnum.DATA_CONFIDENCE : SortFieldEnum.NAME;
     filterForm.ascOrDesc = SortTypeEnum.ASC;
     filterForm.createEndTime = null;
     filterForm.annotationStatus = undefined;
     filterForm.splitType = undefined;
     filterForm.runRecordId = undefined;
-    filterForm.confidenceSlider = [0, 100];
+    filterForm.confidenceSlider = [0, 1];
   };
 
   const getSelectOptions = async () => {
@@ -576,8 +585,8 @@
 
     if (params.runRecordId && params.runRecordId.length) {
       params.runRecordId = params.runRecordId[1];
-      params.minDataConfidence = filter.confidenceSlider[0] / 100;
-      params.maxDataConfidence = filter.confidenceSlider[1] / 100;
+      params.minDataConfidence = filter.confidenceSlider[0];
+      params.maxDataConfidence = filter.confidenceSlider[1];
     }
 
     if (dataId) {
@@ -864,7 +873,7 @@
   watch(cardWidth, (count) => {
     sliderWidthValue.value = parseInt(count);
   });
-  watchEffect(() => {   
+  watchEffect(() => {
     // @ts-ignore
     cardHeight, paddingX;
   });
