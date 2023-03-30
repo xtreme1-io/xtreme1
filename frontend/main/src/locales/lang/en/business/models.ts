@@ -12,7 +12,7 @@ export default {
     createModels: 'Create My Model',
     modelsName: 'Models Name',
     createHolder: 'Input name...',
-    lidarTips: '包括LiDAR Basic 和LiDAR Fusion',
+    lidarTips: 'Includes LiDAR Basic and LiDAR Fusion',
   },
   list: {
     myModels: 'My Models',

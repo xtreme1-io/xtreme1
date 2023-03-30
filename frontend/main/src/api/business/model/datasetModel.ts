@@ -33,6 +33,7 @@ export enum SortFieldEnum {
   CREATED_AT = 'CREATED_AT',
   ANNOTATION_COUNT = 'ANNOTATION_COUNT',
   UPDATED_AT = 'UPDATED_AT',
+  DATA_CONFIDENCE = 'DATA_CONFIDENCE',
 }
 
 export type ListParams = BasicPageParams;
