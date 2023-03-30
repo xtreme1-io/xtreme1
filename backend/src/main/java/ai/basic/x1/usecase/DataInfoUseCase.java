@@ -18,6 +18,7 @@ import ai.basic.x1.entity.enums.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.*;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
@@ -219,7 +220,7 @@ public class DataInfoUseCase {
         if (SplittingByEnum.RANDOM.equals(splitFilterBO.getSplittingBy())) {
             dataInfoLambdaQueryWrapper.last(" ORDER BY RAND()");
         } else {
-            boolean isAsc = ObjectUtil.isNotNull(splitFilterBO.getAscOrDesc()) || SortEnum.ASC.name().equals(splitFilterBO.getAscOrDesc());
+            boolean isAsc = ObjectUtil.isNull(splitFilterBO.getAscOrDesc()) || SortEnum.ASC.equals(splitFilterBO.getAscOrDesc());
             dataInfoLambdaQueryWrapper.orderBy(SortByEnum.NAME.equals(splitFilterBO.getSortBy()), isAsc, DataInfo::getName);
             dataInfoLambdaQueryWrapper.orderBy(SortByEnum.CREATE_TIME.equals(splitFilterBO.getSortBy()), isAsc, DataInfo::getCreatedAt);
         }
@@ -1336,7 +1337,7 @@ public class DataInfoUseCase {
                     var classMap = getClassMap(dataAnnotationObjectBO.getDatasetId(), result.getObjects());
                     result.getObjects().forEach(object -> {
                         var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
-                        object.setId(IdUtil.randomUUID());
+                        object.setId(IdUtil.fastSimpleUUID());
                         object.setVersion(0);
                         processClassAttributes(classMap, object);
                         Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
@@ -1349,12 +1350,6 @@ public class DataInfoUseCase {
                 }
             }
         }
-    }
-
-    public static void main(String[] args) {
-        var resultJSON = JSONUtil.readJSON(FileUtil.file("/Users/fyb/Downloads/00.json"), Charset.defaultCharset());
-        var result = JSONUtil.readJSON(FileUtil.file("/Users/fyb/Downloads/00json.json"), Charset.defaultCharset());
-        System.out.println("");
     }
 
     private Map<Long, DatasetClassBO> getClassMap(Long datasetId, List<DataAnnotationResultObjectBO> objects) {
