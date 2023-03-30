@@ -160,8 +160,8 @@
 
     if (data.runRecordId && data.runRecordId.length) {
       data.runRecordId = data.runRecordId[1];
-      data.minDataConfidence = data.confidenceSlider[0] / 100;
-      data.maxDataConfidence = data.confidenceSlider[1] / 100;
+      data.minDataConfidence = data.confidenceSlider[0];
+      data.maxDataConfidence = data.confidenceSlider[1];
     }
     delete data.confidenceSlider;
     try {

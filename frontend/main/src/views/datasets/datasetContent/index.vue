@@ -585,8 +585,8 @@
 
     if (params.runRecordId && params.runRecordId.length) {
       params.runRecordId = params.runRecordId[1];
-      params.minDataConfidence = filter.confidenceSlider[0] / 100;
-      params.maxDataConfidence = filter.confidenceSlider[1] / 100;
+      params.minDataConfidence = filter.confidenceSlider[0];
+      params.maxDataConfidence = filter.confidenceSlider[1];
     }
 
     if (dataId) {
