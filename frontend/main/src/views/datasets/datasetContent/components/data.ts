@@ -298,8 +298,8 @@ export enum PageTypeEnum {
 
 export enum SplitedTypeEnum {
   All = 'All',
-  Splited = 'Splited',
-  NotSplited = 'Not Splited',
+  Splited = 'Split',
+  NotSplited = 'Not Split',
   Training = 'Training',
   Validation = 'Validation',
   Test = 'Test',

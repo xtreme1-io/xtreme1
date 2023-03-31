@@ -215,7 +215,7 @@
                 </Radio>
                 <Radio :value="SelectedDataSplitType.NOT_SPLIT">
                   <SvgIcon name="invalid" />
-                  <span class="ml-2">Not Splited</span>
+                  <span class="ml-2">Not Split</span>
                 </Radio>
               </Radio.Group>
             </CollContainer>

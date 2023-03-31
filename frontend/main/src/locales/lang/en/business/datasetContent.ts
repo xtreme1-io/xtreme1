@@ -126,12 +126,11 @@ export default {
   splitModel: {
     title: 'Split Dataset',
     splitInto: 'Split into',
-
     Training: 'Training',
     Validation: 'Validation',
     Test: 'Test',
-    NotSplited: 'Not Splited',
-    Splited: 'Splited',
+    NotSplited: 'Not Split',
+    Splited: 'Split',
     All: 'All',
   },
   unLock: {

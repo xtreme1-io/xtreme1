@@ -33,64 +33,66 @@
           </Select>
         </div>
         <div>
-          <span style="font-size: 16px"> 已选中 {{ selectedData.length }} 条数据 </span> &nbsp;
-          <Button
-            style="border-radius: 8px"
-            @click="showSelectedData"
-            v-if="selectedData.length"
-            type="default"
-            >导出到data</Button
-          >
-          
-        </div>
+          <div class="flex gap-4px items-center">
+            <span v-if="!selectedBrush" className="select-label">Select data by</span>
+            <div
+              v-else
+              class="flex items-center gap-4px text-primary cursor-pointer"
+              @click="handleChangeBrush()"
+            >
+              <Icon icon="ion:arrow-back" />
+              <span>Back</span>
+            </div>
 
-        <div class="flex gap-4px items-center">
-          <span v-if="!selectedBrush" className="select-label">Select data by</span>
-          <div
-            v-else
-            class="flex items-center gap-4px text-primary cursor-pointer"
-            @click="handleChangeBrush()"
-          >
-            <Icon icon="ion:arrow-back" />
-            <span>Back</span>
-          </div>
-          <div class="brush_container">
-            <div
-              class="brush-item"
-              :class="selectedBrush == brushEnum.PATH ? 'active' : ''"
-              @click="handleChangeBrush(brushEnum.PATH)"
-            >
-              <SvgIcon
-                :name="
-                  selectedBrush == brushEnum.PATH
-                    ? 'dataset-overview-path-inactive'
-                    : 'dataset-overview-path'
-                "
-                :size="24"
-              />
+            <div class="brush_container">
+              <div
+                class="brush-item"
+                :class="selectedBrush == brushEnum.PATH ? 'active' : ''"
+                @click="handleChangeBrush(brushEnum.PATH)"
+              >
+                <SvgIcon
+                  :name="
+                    selectedBrush == brushEnum.PATH
+                      ? 'dataset-overview-path-inactive'
+                      : 'dataset-overview-path'
+                  "
+                  :size="24"
+                />
+              </div>
+              <div
+                class="brush-item"
+                :class="selectedBrush == brushEnum.RECT ? 'active' : ''"
+                @click="handleChangeBrush(brushEnum.RECT)"
+              >
+                <SvgIcon
+                  :name="
+                    selectedBrush == brushEnum.RECT
+                      ? 'dataset-overview-rect-inactive'
+                      : 'dataset-overview-rect'
+                  "
+                  :size="24"
+                />
+              </div>
             </div>
-            <div
-              class="brush-item"
-              :class="selectedBrush == brushEnum.RECT ? 'active' : ''"
-              @click="handleChangeBrush(brushEnum.RECT)"
-            >
-              <SvgIcon
-                :name="
-                  selectedBrush == brushEnum.RECT
-                    ? 'dataset-overview-rect-inactive'
-                    : 'dataset-overview-rect'
-                "
-                :size="24"
-              />
-            </div>
+            <div @click="handleChangeBrush('fliter')">
+              <Icon
+                :style="selectedBrush !== 'fliter' ? '' : ' background-color: #60a9fe; color: #fff'"
+                size="22"
+                class="zoom"
+                icon="ant-design:zoom-in-outlined"
+            /></div>
           </div>
-          <div @click="handleChangeBrush('fliter')">
-            <Icon
-              :style="selectedBrush !== 'fliter' ? '' : ' background-color: #60a9fe; color: #fff'"
-              size="22"
-              class="zoom"
-              icon="ant-design:zoom-in-outlined"
-          /></div>
+          <div>
+            <span style="font-size: 14px"> Selected {{ selectedData.length }} data </span> &nbsp;
+            <Button
+             
+              style="border-radius: 8px"
+              @click="showSelectedData"
+              v-if="selectedData.length"
+              type="default"
+              >View data</Button
+            >
+          </div>
         </div>
       </div>
       <div class="chartContainer">
