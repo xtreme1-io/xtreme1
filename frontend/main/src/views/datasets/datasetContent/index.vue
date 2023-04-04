@@ -86,11 +86,13 @@
           :style="type === PageTypeEnum.frame ? 'height:calc(100vh - 230px)' as any : null"
         >
           <ScrollContainer ref="scrollRef">
+            <!-- <div :key="i.id + Math.random()" v-for="i in list"> {{ i.name }}-{{ i.id }} </div> -->
+            <!-- :key="i.id + Math.random()" -->
             <ImgCard
               :selectedSourceIds="runRecordIdDisplay"
               class="listcard"
               v-for="i in list"
-              :key="i.id"
+              :key="i.id + Math.random()"
               :object="objectMap[i.id]"
               @handleSelected="handleSelected"
               :showAnnotation="showAnnotation"
@@ -213,7 +215,7 @@
                 </Radio>
                 <Radio :value="SelectedDataSplitType.NOT_SPLIT">
                   <SvgIcon name="invalid" />
-                  <span class="ml-2">Not Splited</span>
+                  <span class="ml-2">Not Split</span>
                 </Radio>
               </Radio.Group>
             </CollContainer>
@@ -541,7 +543,8 @@
     fetchList(filter, false);
   };
 
-  const resetFilter = (type) => {
+  const resetFilter = () => {
+    let type = sortWithLabel.value;
     filterForm.name = '';
     filterForm.createStartTime = null;
     filterForm.sortField = type === 'Result' ? SortFieldEnum.DATA_CONFIDENCE : SortFieldEnum.NAME;
@@ -603,6 +606,7 @@
       } else {
         const res: DatasetGetResultModel = await datasetApi(params);
         tempList = res.list;
+
         list.value = res.list;
         total.value = res.total;
       }
@@ -864,8 +868,8 @@
       }
     },
   );
-  watch(sortWithLabel, (type) => {
-    resetFilter(type);
+  watch(sortWithLabel, () => {
+    resetFilter();
   });
   watch(sliderWidthValue, (count) => {
     changeWidth(count);

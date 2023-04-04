@@ -117,7 +117,7 @@
           },
           {
             value: 'COCO',
-            label: 'CoCo',
+            label: 'COCO',
           },
         ];
   });
