@@ -377,7 +377,7 @@ CREATE TABLE `model_data_result`
 (
     `id`                  bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
     `model_id`            bigint(20) NOT NULL COMMENT 'Model id',
-    `model_version`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Model version',
+    `model_version`       varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Model version',
     `dataset_id`          bigint(20) NOT NULL COMMENT 'Dataset id',
     `data_id`             bigint(20) NOT NULL COMMENT 'Data id',
     `model_serial_no`     bigint(20) DEFAULT NULL COMMENT 'Serial number',
@@ -399,7 +399,7 @@ CREATE TABLE `model_dataset_result`
 (
     `id`                  bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
     `model_id`            bigint(20) NOT NULL COMMENT 'Model id',
-    `model_version`       varchar(255) NOT NULL COMMENT 'Model version',
+    `model_version`       varchar(255) DEFAULT NULL COMMENT 'Model version',
     `run_record_id`       bigint(20) NOT NULL COMMENT 'Model run record id',
     `run_no`              varchar(255) NOT NULL COMMENT 'Serial number(For interface display)',
     `dataset_id`          bigint(20) NOT NULL COMMENT 'Dataset ID',
