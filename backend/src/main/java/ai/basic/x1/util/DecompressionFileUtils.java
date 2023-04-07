@@ -17,6 +17,7 @@ import java.net.URL;
 
 import static ai.basic.x1.util.Constants.*;
 import static cn.hutool.core.util.CharsetUtil.GBK;
+import static cn.hutool.core.util.CharsetUtil.UTF_8;
 
 /**
  * @author : fyb
@@ -35,7 +36,7 @@ public class DecompressionFileUtils {
         var zfile = FileUtil.file(filePath);
         ZipFile zipFile;
         try {
-            zipFile = new ZipFile(zfile, GBK, true);
+            zipFile = new ZipFile(zfile, UTF_8, true);
         } catch (IOException e) {
             zipFile = new ZipFile(zfile);
         }
