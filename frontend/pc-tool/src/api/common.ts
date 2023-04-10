@@ -1,5 +1,5 @@
 import { get, post } from './base';
-import { IClassType, AttrType } from 'pc-editor';
+import { IClassType, AttrType, IResultSource, SourceType } from 'pc-editor';
 import {
     IFrame,
     IFileConfig,
@@ -49,7 +49,10 @@ export async function getDataObject(dataIds: string[] | string) {
     data.forEach((e: any) => {
         const { dataId, objects, classificationValues } = e;
         objectsMap[dataId] = objects.map((o: any) => {
-            return utils.translateToObject(Object.assign(o.classAttributes, { backId: o.id }));
+            let { id, sourceId, sourceType, classId } = o;
+            return utils.translateToObject(
+                Object.assign({ backId: id, sourceId, sourceType, classId }, o.classAttributes),
+            );
         });
         classificationMap[dataId] = classificationValues.reduce((map: any, c: any) => {
             return Object.assign(
@@ -198,7 +201,7 @@ export async function getDataFile(dataId: string) {
         });
     });
 
-    return { configs, name: data[0]?.name || ''};
+    return { configs, name: data[0]?.name || '' };
 }
 
 export async function getUserInfo() {
@@ -222,4 +225,26 @@ export async function getLockRecord(datasetId: string) {
     let url = `/api/data/findLockRecordIdByDatasetId`;
     let data = await get(url, { datasetId });
     return data;
+}
+export async function getResultSources(dataId: string) {
+    let url = `/api/data/getDataModelRunResult/${dataId}`;
+    // let url = `/api/dataset/dataset/getDatasetAnnotateResult/${datasetId}`;
+    let data = await get(url);
+
+    data = data.data || {};
+
+    let sources = [] as IResultSource[];
+    data.forEach((item: any) => {
+        let { modelId, modelName, runRecords = [] } = item;
+        runRecords.forEach((e: any) => {
+            sources.push({
+                name: e.runNo,
+                sourceId: e.id,
+                modelId: modelId,
+                modelName: modelName,
+                sourceType: SourceType.MODEL,
+            });
+        });
+    });
+    return sources.filter((e) => e.sourceType !== SourceType.DATA_FLOW);
 }

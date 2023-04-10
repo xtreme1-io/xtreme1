@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.ModelRunRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord">
+        <id column="id" property="id" />
+        <result column="model_id" property="modelId" />
+        <result column="model_version" property="modelVersion" />
+        <result column="run_no" property="runNo" />
+        <result column="dataset_id" property="datasetId" />
+        <result column="status" property="status" />
+        <result column="error_reason" property="errorReason" />
+        <result column="run_record_type" property="runRecordType" />
+        <result column="data_count" property="dataCount" />
+        <result column="metrics" property="metrics"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="result_filter_param" property="resultFilterParam"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="data_filter_param" property="dataFilterParam"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="is_deleted" property="isDeleted" />
+        <result column="created_at" property="createdAt" />
+        <result column="created_by" property="createdBy" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="updated_by" property="updatedBy" />
+        <result column="dataset_name" property="datasetName" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, model_id, model_version, run_no, dataset_id, status, error_reason, is_deleted, created_at, created_by, updated_at, updated_by
+    </sql>
+    <select id="selectListWithDatasetNotDeleted"
+            resultMap="BaseResultMap">
+        SELECT
+        a.*,
+        b.`name` as dataset_name
+        FROM
+            model_run_record a
+                INNER JOIN dataset b
+                           ON a.dataset_id = b.id
+                               AND a.is_deleted = 0
+                               AND b.is_deleted = 0
+            ${ew.customSqlSegment("a")}
+    </select>
+    <select id="countGroupByModelId"
+            resultType="ai.basic.x1.adapter.port.dao.mybatis.model.ModelRunRecord">
+        SELECT
+            a.model_id,
+            count(*) as runCount
+        FROM
+            model_run_record a
+                INNER JOIN dataset b
+                    ON a.dataset_id = b.id
+                       AND a.is_deleted = 0
+                       AND b.is_deleted = 0
+            ${ew.customSqlSegment}
+    </select>
+
+
+    <select id="findModelRunFilterDatasetName"
+            resultType="ai.basic.x1.adapter.port.dao.mybatis.model.Dataset">
+        SELECT
+            id,`name`
+        FROM
+            dataset
+        WHERE
+            id IN ( SELECT dataset_id FROM model_run_record GROUP BY dataset_id )
+        <if test="datasetName != null and datasetName != ''">
+            AND `name` LIKE CONCAT('%',#{datasetName},'%')
+        </if>
+        limit 10
+    </select>
+
+
+
+
+</mapper>

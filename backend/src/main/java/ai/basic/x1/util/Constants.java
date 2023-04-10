@@ -100,6 +100,10 @@ public interface Constants {
 
     Integer PAGE_SIZE_100 = 100;
 
+    String CONVERT_UPLOAD = "upload";
+
+    String CONVERT_EXPORT = "export";
+
     Set<String> COMPRESSED_DATA_TYPE = new HashSet<>() {{
         add("application/zip");
         add("application/x-rar");
@@ -121,10 +125,26 @@ public interface Constants {
     }};
 
 
-    String MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:modelRun";
+    String DATA_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:model:data:modelRun";
+
+    String DATASET_MODEL_RUN_STREAM_KEY = "ai:basic:xtreme1:model:dataset:modelRun";
+
     String MODEL_RUN_CONSUMER_GROUP = "default-group";
     String MODEL_RUN_CONSUMER_NAME = "model-consumer";
 
-    String SIMILARITY_RESULT_PATH_FORMAT="datasetSimilarity/result/%s";
-    String SIMILARITY_SUBMIT_FILE_PATH_FORMAT="datasetSimilarity/commit/%s";
+    String DATASET_MODEL_RUN_CONSUMER_GROUP = "dataset-model-group";
+    String DATASET_MODEL_RUN_CONSUMER_NAME = "dataset-model-consumer";
+
+    String SIMILARITY_RESULT_PATH_FORMAT = "datasetSimilarity/result/%s";
+    String SIMILARITY_SUBMIT_FILE_PATH_FORMAT = "datasetSimilarity/commit/%s";
+
+    String MODEL_RUN_RESULT_CODE = "code";
+
+    String MODEL_RUN_RESULT_MESSAGE = "message";
+
+    String MODEL_RUN_RESULT_DATA = "data";
+
+    String MODEL_RUN_RESULT_DATA_CODE = "data.code";
+
+    String MODEL_RUN_RESULT_OBJECTS = "objects";
 }

@@ -5,12 +5,13 @@ package ai.basic.x1.entity.enums;
  */
 
 public enum ModelCodeEnum {
-    /**
-     * PRE_LABEL
-     */
-    PRE_LABEL,
+
     /**
      * COCO_80
      */
-    COCO_80
+    IMAGE_DETECTION,
+    /**
+     * PRE_LABEL
+     */
+    LIDAR_DETECTION
 }

@@ -40,6 +40,8 @@ public class DataAnnotationResultObjectBO {
      */
     private Long classId;
 
+    private String className;
+
     /**
      * Selected type attribute value
      */

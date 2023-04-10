@@ -30,7 +30,6 @@
   const mydata = ref();
 
   const [registerModal, { closeModal }] = useModalInner(async (data) => {
-    console.log(data);
     mydata.value = data;
   });
 

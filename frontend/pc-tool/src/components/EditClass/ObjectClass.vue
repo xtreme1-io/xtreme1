@@ -10,7 +10,7 @@
         <div class="classType-tag-container">
             <a-tag
                 class="classType-tag"
-                @click="canEdit() ? onClassChange(item.name, item) : null"
+                @click="canEdit() ? onClassChange(item) : null"
                 v-for="item in editor.state.classTypes"
                 :style="style(item)"
                 :key="item.name"
@@ -50,7 +50,7 @@
     let { formatNumStr: format } = utils;
 
     function style(item: IClassType) {
-        return item.name === iState.classType
+        return item.id === iState.classType
             ? {
                   backgroundColor: '#177ddc',
                   color: '#ffffff',
@@ -89,7 +89,7 @@
 
     let classInfo = computed(() => {
         let classType = props.state.classType;
-        let classConfig = editor.state.classTypes.find((e) => e.name === classType);
+        let classConfig = editor.getClassType(classType);
 
         if (classConfig) {
             return getClassInfo(classConfig);
@@ -110,19 +110,19 @@
         },
     );
 
-    function onClassChange(value: any, item: any) {
+    function onClassChange(classConfig: IClassType) {
         editor.blurPage();
 
-        let classConfig = editor.state.classTypes.find((e) => e.name === value) as IClassType;
+        // let classConfig = editor.state.classTypes.find((e) => e.id === value) as IClassType;
 
-        iState.newClassType = value;
-        iState.newClassName = item.label;
+        iState.newClassType = classConfig.id;
+        iState.newClassName = classConfig.label;
         if (!props.state.classType) {
             props.state.classType = iState.newClassType;
             props.state.showMsgType = '';
             emit('change');
             return;
-        } else if (props.state.classType === value) {
+        } else if (props.state.classType === classConfig.id) {
             props.state.showMsgType = '';
             return;
         }

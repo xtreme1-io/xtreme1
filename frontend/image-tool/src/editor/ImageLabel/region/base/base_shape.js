@@ -26,6 +26,8 @@ import { cloneDeep } from 'lodash';
 export class BaseShape {
     constructor(view, opt = {}) {
         this.view = view;
+
+        this.id = opt.id;
         this.uuid = opt.uuid || uuid();
         this.intId = typeof opt.intId !== 'undefined' ? opt.intId : this._getIntId();
         this.shapelayer = view.shapelayer;
@@ -233,16 +235,15 @@ export class BaseShape {
             const currentShape = getSelectedShapByCurrentTool(this.view.editor);
             // console.log('finish currentShape', currentShape);
 
-            if (currentShape.type != UIType.interactive) {
-                this.view.editor.cmdManager.execute('add-object', {
-                    uuid: this.uuid,
-                });
-            }
-            this.view.emit(Event.ADD_OBJECT, {
-                data: {
-                    object: this,
-                },
-            });
+            // if (currentShape.type != UIType.interactive) {
+
+            // }
+            this.view.editor.cmdManager.execute('add-object', this.toJSON());
+            // this.view.emit(Event.ADD_OBJECT, {
+            //     data: {
+            //         object: this,
+            //     },
+            // });
         }
     }
     _getScaleFactor() {
@@ -747,6 +748,7 @@ export class BaseShape {
             coordinate.push(this._toCoordinate(p));
         });
         return {
+            id: this.id,
             type: this.type,
             uuid: this.uuid,
             color: this.stroke,
@@ -763,7 +765,7 @@ export class BaseShape {
             lineLength: this.length,
         };
     }
-    destroy(notify = true) {
+    destroy(notify = false) {
         this.anchors.forEach((anchor) => {
             anchor.off();
             anchor.destroy();
@@ -796,6 +798,7 @@ export class BaseShape {
         if (this.view.currentSoloShape === this) {
             this.view.currentSoloShape = null;
         }
+
         notify &&
             this.view.emit(Event.REMOVE_OBJECT, {
                 data: {

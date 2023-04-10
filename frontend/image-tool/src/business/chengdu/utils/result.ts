@@ -2,7 +2,8 @@ import { IUserData, Editor, IClassType, IAttr, AnnotateType2ToolType } from 'edi
 // @ts-ignore
 import uuid from 'uuid/v4';
 import { empty } from './common';
-import { isArray } from 'lodash';
+import { copyClassAttrs, isClassAttrHasValue, isClassAttrVisible } from './classType';
+import { AttrType, IObjectV2, SourceType } from '../type';
 type IObject = any;
 type IAnnotateObject = any;
 
@@ -34,10 +35,12 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             color: targetClassType?.color ?? '#dedede',
             coordinate: obj?.contour?.points ?? [],
             interior: obj?.contour?.interior || [],
-            type: obj?.type.toLocaleLowerCase(),
+            type: obj?.type?.toLocaleLowerCase(),
             version: obj?.version,
             userData: {
                 ...obj?.meta,
+                sourceId: e.sourceId || obj.sourceId || editor.state.withoutTaskId,
+                sourceType: e.sourceType || obj.sourceType || SourceType.DATA_FLOW,
                 attrs: arrayToObj(obj?.classValues),
                 modelClass: obj.modelClass,
                 confidence: obj.modelConfidence,
@@ -46,11 +49,12 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
                 version: obj.version,
             },
             intId: Number(obj.trackName),
-            uuid: obj.id,
+            uuid: obj.id || uuid(),
         };
 
         if (annotate.type == 'rectangle') {
-            const [p0, p1] = obj.contour.points;
+            const defaultPoint = { x: 0, y: 0 };
+            const [p0 = defaultPoint, p1 = defaultPoint] = obj.contour?.points || obj.points || [];
             annotate.coordinate = [p0, { x: p1.x, y: p0.y }, p1, { x: p0.x, y: p1.y }];
         }
         annotates.push(annotate);
@@ -104,12 +108,15 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
 
         // debugger;
         const newInfo: any = {
+            backId: obj.id,
             id: obj.uuid,
-            type: obj.type.toLocaleUpperCase(),
+            type: obj?.type?.toLocaleUpperCase(),
             version: userData.version,
             createdAt: userData.createdAt,
             createdBy: userData.createdBy,
             trackId: obj.intId,
+            sourceId: userData.sourceId || editor.state.withoutTaskId,
+            sourceType: userData.sourceType || SourceType.DATA_FLOW,
             trackName: obj.intId,
             classId: userData.classType ? targetClassType?.id : '',
             classValues: objToArray(userData.attrs || [], targetClassType ?? {}),
@@ -145,7 +152,7 @@ export function convertModelRunResult(objects: any[]) {
                 contour: {
                     points: item.points,
                 },
-                type: item.objType,
+                type: item.objType || item.type,
                 modelClass: item.modelClass,
                 modelConfidence: item.confidence,
             },
@@ -214,7 +221,6 @@ export function classAttrToPath(obj: Record<string, any> = {}) {
 }
 
 export function pathToClassAttr(paths: string[][]) {
-    console.log(paths);
     let values = {} as Record<string, any>;
     // 兼容处理以前的键值对
     if (!paths.length) paths = [];

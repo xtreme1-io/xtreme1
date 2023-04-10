@@ -9,6 +9,7 @@ import {
     IObjectV2,
     AttrType,
     IAttr,
+    SourceType,
 } from '../type';
 import Editor from '../Editor';
 import * as createUtils from './create';
@@ -79,6 +80,8 @@ export function translateToObjectV2(object: IObject, baseClassType: IClassType) 
         trackName: object.trackName,
         classId: object.classId,
         className: object.classType,
+        sourceId: object.sourceId,
+        sourceType: object.sourceType,
         // classValues: object.attrs,
         classValues: objToArray(object.attrs, baseClassType),
         modelConfidence: object.confidence,
@@ -134,14 +137,13 @@ function bindInfo(target: any, info: IObject) {
 }
 export function convertObject2Annotate(objects: IObject[], editor: Editor) {
     let annotates = [] as AnnotateObject[];
-    let classMap = {} as Record<string, IClassType>;
-    editor.state.classTypes.forEach((e) => {
-        classMap[e.name] = e;
-    });
-
+    // let classMap = {} as Record<string, IClassType>;
+    // editor.state.classTypes.forEach((e) => {
+    //     classMap[e.name] = e;
+    // });
     objects.forEach((obj) => {
         let userData = {} as IUserData;
-
+        let objType = obj.objType || obj.type;
         let classConfig = editor.getClassType(obj.classId as string);
         if (!obj.classId && obj.classType) {
             classConfig = editor.getClassType(obj.classType);
@@ -161,9 +163,11 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         userData.modelClass = obj.modelClass || '';
         userData.modelRun = obj.modelRun || '';
         userData.modelRunLabel = obj.modelRunLabel || '';
+        userData.sourceId = obj.sourceId;
+        userData.sourceType = obj.sourceType;
         userData.attrs = obj.attrs || {};
         userData.pointN = obj.pointN || 0;
-        if (obj.objType === ObjectType.TYPE_3D_BOX || obj.objType === ObjectType.TYPE_3D) {
+        if (objType === ObjectType.TYPE_3D_BOX || objType === ObjectType.TYPE_3D) {
             position.set(obj.center3D.x, obj.center3D.y, obj.center3D.z);
             rotation.set(obj.rotation3D.x, obj.rotation3D.y, obj.rotation3D.z);
             scale.set(obj.size3D.x, obj.size3D.y, obj.size3D.z);
@@ -177,8 +181,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             bindInfo(box, obj);
             annotates.push(box);
         } else if (
-            obj.objType === ObjectType.TYPE_2D_RECT ||
-            obj.objType === ObjectType.TYPE_RECT
+            objType === ObjectType.TYPE_2D_RECT ||
+            objType === ObjectType.TYPE_RECT
         ) {
             let bbox = getBBox(obj.points as any);
             center.set((bbox.xMax + bbox.xMin) / 2, (bbox.yMax + bbox.yMin) / 2);
@@ -190,8 +194,8 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             bindInfo(rect, obj);
             annotates.push(rect);
         } else if (
-            obj.objType === ObjectType.TYPE_2D_BOX ||
-            obj.objType === ObjectType.TYPE_BOX2D
+            objType === ObjectType.TYPE_2D_BOX ||
+            objType === ObjectType.TYPE_BOX2D
         ) {
             let positions1 = [] as THREE.Vector2[];
             let positions2 = [] as THREE.Vector2[];
@@ -248,7 +252,7 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
     annotates.forEach((obj) => {
         let userData = editor.getObjectUserData(obj) as Required<IUserData>;
         let points = obj instanceof Box ? [] : get2DPoints(obj as any);
-        let classConfig = editor.getClassType(userData.classType);
+        let classConfig = editor.getClassType(userData);
         updateObjectVersion(obj as any);
         let bsObj = obj as any;
         let info: IObject = {
@@ -273,6 +277,8 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
             modelRun: userData.modelRun || '',
             modelClass: userData.modelClass || '',
             modelRunLabel: userData.modelRunLabel || '',
+            sourceId: userData.sourceId || editor.state.config.withoutTaskId,
+            sourceType: userData.sourceType || SourceType.DATA_FLOW,
             points: points,
             pointN: userData.pointN || 0,
             viewIndex: 0,

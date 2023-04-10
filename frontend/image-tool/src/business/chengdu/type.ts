@@ -1,8 +1,38 @@
-import type { FormInstance } from 'ant-design-vue';
+// import type { FormInstance } from 'ant-design-vue';
 export interface IUser {
     id: string;
     nickname: string;
 }
+
+export interface IObjectV2 {
+    id?: string;
+    type?: ObjectType;
+    version?: number;
+    createdBy?: number;
+    createdAt?: string;
+
+    trackId?: string;
+    trackName?: string;
+    classId?: string;
+    className?: string;
+    backId?: string;
+    frontId?: string;
+    classType?: string;
+    classValues?: any[];
+    // classValues?: Record<string, any>;
+    modelConfidence?: number;
+    modelClass?: string;
+    contour: {
+        [k: string]: any;
+    };
+    meta?: {
+        [k: string]: any;
+    };
+    // other
+    sourceId?: string;
+    sourceType?: string;
+}
+
 export interface IModelConfig {
     confidence: number[];
     predict: boolean;
@@ -12,6 +42,20 @@ export interface IModelConfig {
 }
 export interface IToolConfig {
     FILTER_ALL: string;
+}
+
+export enum SourceType {
+    TASK = 'TASK',
+    DATA_FLOW = 'DATA_FLOW',
+    MODEL = 'MODEL',
+}
+
+export interface IResultSource {
+    name: string;
+    sourceId: string;
+    sourceType: SourceType;
+    modelId?: string;
+    modelName?: string;
 }
 export interface IToolState {
     query: Record<string, string>;
@@ -30,13 +74,18 @@ export interface IToolState {
     dataIndex: number;
     // classification config
     classifications: IClassification[];
-    classificationForm: FormInstance | null;
+    // classificationForm: FormInstance | null;
     showVerify?: boolean;
     // run model config
     modelConfig: IModelConfig;
     resultActive?: any;
     seriesFrameId?: any;
     resultFilter?: any;
+    sources: IResultSource[];
+    sourceFilters: string[];
+    activeSourceData: string;
+    FILTER_ALL: string;
+    withoutTaskId: string;
     focus?: any;
 }
 
@@ -62,6 +111,7 @@ export interface IDataMeta {
     validStatus: any;
     annotationStatus: any;
     isAnnotated: boolean;
+    sources?: IResultSource[];
 }
 
 export interface IFileConfig {

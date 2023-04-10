@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ai.basic.x1.adapter.port.dao.mybatis.mapper.ModelDatasetResultMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.ModelDatasetResult">
+        <id column="id" property="id"/>
+        <result column="model_id" property="modelId"/>
+        <result column="model_version" property="modelVersion"/>
+        <result column="run_record_id" property="runRecordId"/>
+        <result column="run_no" property="runNo"/>
+        <result column="dataset_id" property="datasetId"/>
+        <result column="data_id" property="dataId"/>
+        <result column="result_filter_param" property="resultFilterParam" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="model_result" property="modelResult" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="data_confidence" property="dataConfidence"/>
+        <result column="is_success" property="isSuccess"/>
+        <result column="error_message" property="errorMessage"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, team_id, model_id, model_version, run_record_id, run_no, dataset_id, data_id, model_result, is_success, error_message, created_at, created_by, updated_at, updated_by
+    </sql>
+
+    <select id="getModelDatasetResult" resultMap="BaseResultMap" >
+        SELECT id,data_id,result_filter_param,model_result FROM model_dataset_result a
+        WHERE
+        a.data_id IN
+        <foreach collection="dataIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND a.model_id = #{modelId} AND a.model_version= #{modelVersion} AND
+        NOT EXISTS (SELECT 1 FROM model_dataset_result b WHERE
+                    b.data_id IN
+                    <foreach collection="dataIds" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                    </foreach>
+                    AND b.model_id = #{modelId} AND b.model_version= #{modelVersion} AND
+                     a.data_id=b.data_id AND a.created_at <![CDATA[ < ]]> b.created_at)
+
+
+    </select>
+
+</mapper>

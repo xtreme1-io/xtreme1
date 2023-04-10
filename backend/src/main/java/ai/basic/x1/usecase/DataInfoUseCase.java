@@ -1,10 +1,14 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.ApiResult;
+import ai.basic.x1.adapter.dto.DatasetClassDTO;
 import ai.basic.x1.adapter.port.dao.*;
+import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendLambdaQueryWrapper;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
+import ai.basic.x1.adapter.port.dao.mybatis.query.DataInfoQuery;
 import ai.basic.x1.adapter.port.minio.MinioProp;
 import ai.basic.x1.adapter.port.minio.MinioService;
 import ai.basic.x1.adapter.port.rpc.PointCloudConvertRenderHttpCaller;
@@ -13,10 +17,8 @@ import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
-import ai.basic.x1.util.Constants;
-import ai.basic.x1.util.DecompressionFileUtils;
-import ai.basic.x1.util.DefaultConverter;
-import ai.basic.x1.util.Page;
+import ai.basic.x1.util.*;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
@@ -31,8 +33,10 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.ttl.TtlRunnable;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Sets;
@@ -43,13 +47,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.*;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -60,9 +61,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DataUploadSourceEnum.LOCAL;
-import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
 import static ai.basic.x1.entity.enums.RelationEnum.*;
+import static ai.basic.x1.entity.enums.SplitTypeEnum.NOT_SPLIT;
 import static ai.basic.x1.entity.enums.UploadStatusEnum.*;
 import static ai.basic.x1.usecase.exception.UsecaseCode.*;
 import static ai.basic.x1.util.Constants.*;
@@ -134,6 +136,13 @@ public class DataInfoUseCase {
     @Autowired
     private DatasetClassUseCase datasetClassUseCase;
 
+    @Autowired
+    private DatasetUseCase datasetUseCase;
+
+    @Autowired
+    private ModelRunRecordUseCase modelRunRecordUseCase;
+
+
     @Value("${file.tempPath:/tmp/xtreme1/}")
     private String tempPath;
 
@@ -169,6 +178,10 @@ public class DataInfoUseCase {
     private static final Integer PC_RENDER_IMAGE_WIDTH = 2000;
     private static final Integer PC_RENDER_IMAGE_HEIGHT = 2000;
     private static final Integer RETRY_COUNT = 3;
+
+    private static final Long GROUND_TRUTH = -1L;
+
+    private static final String GROUND_TRUTH_NAME = "Ground Truth";
     /**
      * Filter out files whose file suffix is not image, and discard the file when it returns false
      */
@@ -176,6 +189,85 @@ public class DataInfoUseCase {
         //if the file extension is image return true, else false
         return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath())) && Constants.IMAGE.equals(FileUtil.getName(file.getParentFile()));
     };
+
+    /**
+     * Data split
+     *
+     * @param dataIds   Data id collection
+     * @param splitType split type
+     */
+    public void splitByDataIds(List<Long> dataIds, SplitTypeEnum splitType) {
+        var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+        dataInfoLambdaUpdateWrapper.in(DataInfo::getId, dataIds);
+        dataInfoLambdaUpdateWrapper.set(DataInfo::getSplitType, splitType);
+        dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+    }
+
+    /**
+     * Data split
+     *
+     * @param splitFilterBO split filter parameter
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void splitByFilter(DataInfoSplitFilterBO splitFilterBO) {
+        var dataInfoLambdaQueryWrapper = getCommonSplitWrapper(splitFilterBO.getDatasetId(), splitFilterBO.getTargetDataType());
+        var dataCount = dataInfoDAO.count(dataInfoLambdaQueryWrapper);
+        var oneHundred = BigDecimal.valueOf(100);
+        var limit = (int) Math.round(BigDecimal.valueOf(dataCount).multiply(BigDecimal.valueOf(splitFilterBO.getTotalSizeRatio())).divide(oneHundred).doubleValue());
+        if (limit == 0) {
+            return;
+        }
+        if (SplittingByEnum.RANDOM.equals(splitFilterBO.getSplittingBy())) {
+            dataInfoLambdaQueryWrapper.last(" ORDER BY RAND()");
+        } else {
+            boolean isAsc = ObjectUtil.isNull(splitFilterBO.getAscOrDesc()) || SortEnum.ASC.equals(splitFilterBO.getAscOrDesc());
+            dataInfoLambdaQueryWrapper.orderBy(SortByEnum.NAME.equals(splitFilterBO.getSortBy()), isAsc, DataInfo::getName);
+            dataInfoLambdaQueryWrapper.orderBy(SortByEnum.CREATE_TIME.equals(splitFilterBO.getSortBy()), isAsc, DataInfo::getCreatedAt);
+        }
+        dataInfoLambdaQueryWrapper.last(" limit " + limit + "");
+        var dataList = dataInfoDAO.list(dataInfoLambdaQueryWrapper);
+        var dataIdList = dataList.stream().map(DataInfo::getId).collect(Collectors.toList());
+        int indexTraining = (int) Math.round(BigDecimal.valueOf(limit).multiply(BigDecimal.valueOf(splitFilterBO.getTrainingRatio())).divide(oneHundred).doubleValue());
+        int indexValidation = (int) Math.round(BigDecimal.valueOf(limit).multiply(BigDecimal.valueOf(splitFilterBO.getValidationRatio())).divide(oneHundred).doubleValue()) + indexTraining;
+        var trainingDataIdList = dataIdList.subList(0, indexTraining);
+        var validationDataIdList = dataIdList.subList(indexTraining, indexValidation);
+        var testDataIdList = dataIdList.subList(indexValidation, limit);
+        this.updateBatchByIds(trainingDataIdList, SplitTypeEnum.TRAINING);
+        this.updateBatchByIds(validationDataIdList, SplitTypeEnum.VALIDATION);
+        this.updateBatchByIds(testDataIdList, SplitTypeEnum.TEST);
+    }
+
+    private void updateBatchByIds(List<Long> dataIds, SplitTypeEnum splitType) {
+        if (CollUtil.isNotEmpty(dataIds)) {
+            var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+            dataInfoLambdaUpdateWrapper.in(DataInfo::getId, dataIds);
+            dataInfoLambdaUpdateWrapper.set(DataInfo::getSplitType, splitType);
+            dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+        }
+    }
+
+    /**
+     * Total amount of segmented data obtained
+     *
+     * @param datasetId      Dataset id
+     * @param targetDataType Data type
+     * @return
+     */
+    public Long getSplitDataTotalCount(Long datasetId, SplitTargetDataTypeEnum targetDataType) {
+        var dataInfoLambdaQueryWrapper = getCommonSplitWrapper(datasetId, targetDataType);
+        var dataCount = dataInfoDAO.count(dataInfoLambdaQueryWrapper);
+        return dataCount;
+    }
+
+    private LambdaQueryWrapper<DataInfo> getCommonSplitWrapper(Long datasetId, SplitTargetDataTypeEnum targetDataType) {
+        var dataInfoLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        dataInfoLambdaQueryWrapper.select(DataInfo::getId);
+        dataInfoLambdaQueryWrapper.ne(SplitTargetDataTypeEnum.SPLIT.equals(targetDataType), DataInfo::getSplitType, SplitTargetDataTypeEnum.NOT_SPLIT);
+        dataInfoLambdaQueryWrapper.eq(SplitTargetDataTypeEnum.NOT_SPLIT.equals(targetDataType), DataInfo::getSplitType, targetDataType);
+        return dataInfoLambdaQueryWrapper;
+    }
+
 
     /**
      * Batch delete
@@ -223,27 +315,17 @@ public class DataInfoUseCase {
      * @return DataInfo page
      */
     public Page<DataInfoBO> findByPage(DataInfoQueryBO queryBO) {
-        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        var lambdaQueryWrapper = new ExtendLambdaQueryWrapper<DataInfo>();
         lambdaQueryWrapper.eq(DataInfo::getDatasetId, queryBO.getDatasetId());
         lambdaQueryWrapper.eq(DataInfo::getIsDeleted, false);
-        if (StrUtil.isNotBlank(queryBO.getName())) {
-            lambdaQueryWrapper.like(DataInfo::getName, queryBO.getName());
-        }
-        if (ObjectUtil.isNotNull(queryBO.getAnnotationStatus())) {
-            lambdaQueryWrapper.eq(DataInfo::getAnnotationStatus, queryBO.getAnnotationStatus());
-        }
-        if (ObjectUtil.isNotEmpty(queryBO.getCreateStartTime()) && ObjectUtil.isNotEmpty(queryBO.getCreateEndTime())) {
-            lambdaQueryWrapper.ge(DataInfo::getCreatedAt, queryBO.getCreateStartTime()).le(DataInfo::getCreatedAt, queryBO.getCreateEndTime());
-        }
-
-        if (CollectionUtil.isNotEmpty(queryBO.getIds())) {
-            lambdaQueryWrapper.in(DataInfo::getId, queryBO.getIds());
-        }
-        if (StrUtil.isNotBlank(queryBO.getSortField())) {
-            lambdaQueryWrapper.last(" order by " + queryBO.getSortField().toLowerCase() + " " + queryBO.getAscOrDesc());
-        }
-
-        var dataInfoPage = dataInfoDAO.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()), lambdaQueryWrapper);
+        lambdaQueryWrapper.like(StrUtil.isNotEmpty(queryBO.getName()), DataInfo::getName, queryBO.getName());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(queryBO.getAnnotationStatus()), DataInfo::getAnnotationStatus, queryBO.getAnnotationStatus());
+        lambdaQueryWrapper.ge(ObjectUtil.isNotEmpty(queryBO.getCreateStartTime()), DataInfo::getCreatedAt, queryBO.getCreateStartTime());
+        lambdaQueryWrapper.le(ObjectUtil.isNotEmpty(queryBO.getCreateEndTime()), DataInfo::getCreatedAt, queryBO.getCreateEndTime());
+        lambdaQueryWrapper.in(CollUtil.isNotEmpty(queryBO.getIds()), DataInfo::getId, queryBO.getIds());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(queryBO.getSplitType()), DataInfo::getSplitType, queryBO.getSplitType());
+        var dataInfoPage = dataInfoDAO.getBaseMapper().selectDataPage(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(queryBO.getPageNo(), queryBO.getPageSize()),
+                lambdaQueryWrapper, DefaultConverter.convert(queryBO, DataInfoQuery.class));
         var dataInfoBOPage = DefaultConverter.convert(dataInfoPage, DataInfoBO.class);
         var dataInfoBOList = dataInfoBOPage.getList();
         if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
@@ -450,8 +532,8 @@ public class DataInfoUseCase {
             }
         })));
         return uploadRecordBO.getSerialNumber();
-
     }
+
 
     /**
      * Verify url file suffix
@@ -487,8 +569,20 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
+        var resultMap = new HashMap<Long, String>();
+        if (CollectionUtil.isNotEmpty(dataInfoQueryBO.getSelectModelRunIds())) {
+            var modelRunRecordBOList = modelRunRecordUseCase.findByIds(dataInfoQueryBO.getSelectModelRunIds());
+            if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
+                resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
+            }
+            if (dataInfoQueryBO.getSelectModelRunIds().contains(GROUND_TRUTH)) {
+                resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
+            }
+        }
+        dataInfoQueryBO.setIsAllResult(false);
+        dataInfoQueryBO.setDataFormat(IMAGE.equals(dataInfoQueryBO.getDatasetType()) ? dataInfoQueryBO.getDataFormat() : DataFormatEnum.XTREME1);
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
-                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, dataInfoQueryBO,
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, resultMap, dataInfoQueryBO,
                         this::findByPage,
                         this::processData))));
         return serialNumber;
@@ -519,6 +613,13 @@ public class DataInfoUseCase {
         if (totalDataNum <= 0) {
             uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED, COMPRESSED_PACKAGE_EMPTY.getMessage());
             throw new UsecaseException(COMPRESSED_PACKAGE_EMPTY);
+        }
+        Long sourceId = null;
+        if (ObjectUtil.isNotNull(dataInfoUploadBO.getResultType())) {
+            sourceId = -1L;
+            if (ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+                sourceId = modelRunRecordUseCase.save(dataInfoUploadBO.getModelId(), datasetId, totalDataNum);
+            }
         }
         pointCloudList.forEach(pointCloudFile -> {
             var isError = this.validDirectoryFormat(pointCloudFile.getParentFile(), datasetType);
@@ -554,7 +655,7 @@ public class DataInfoUseCase {
                             handleDataResult(pointCloudFile.getParentFile(), dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                             var fileNodeList = assembleContent(dataFiles, rootPath, dataInfoUploadBO);
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
-                            var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).tempDataId(tempDataId).build();
+                            var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
                         }
                     });
@@ -579,6 +680,9 @@ public class DataInfoUseCase {
         });
         var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+        if (ObjectUtil.isNotNull(sourceId) && ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+            modelRunRecordUseCase.updateById(sourceId, RunStatusEnum.SUCCESS);
+        }
     }
 
     private void parseImageUploadFile(DataInfoUploadBO dataInfoUploadBO) {
@@ -601,7 +705,7 @@ public class DataInfoUseCase {
         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(FILE).build();
         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file))
-                .content(Collections.singletonList(fileNodeBO)).build();
+                .content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).build();
         dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
         var rootPath = String.format("%s/%s", userId, datasetId);
         var newSavePath = tempPath + fileBO.getPath().replace(rootPath, "");
@@ -614,7 +718,20 @@ public class DataInfoUseCase {
         datasetSimilarityJobUseCase.submitJob(datasetId);
     }
 
-    private void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+    public void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+        if (DataFormatEnum.COCO.equals(dataInfoUploadBO.getDataFormat())) {
+            var respPath = cocoConvertToX1(dataInfoUploadBO);
+            var apiResult = new ApiResult<>();
+            if (!FileUtil.exist(respPath) || !(OK.equals((apiResult = DefaultConverter.convert(JSONUtil.readJSONObject(FileUtil.file(respPath), Charset.defaultCharset()), ApiResult.class)).getCode()))) {
+                var uploadRecordBOBuilder = UploadRecordBO.builder()
+                        .id(dataInfoUploadBO.getUploadRecordId());
+                var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(FileUtil.exist(respPath) ? apiResult.getMessage() : DATASET_DATA_FILE_FORMAT_ERROR.getMessage()).build();
+                uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+                FileUtil.del(respPath);
+                return;
+            }
+            FileUtil.del(respPath);
+        }
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
         var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, filefilter);
@@ -634,6 +751,14 @@ public class DataInfoUseCase {
         var uploadRecordBOBuilder = UploadRecordBO.builder()
                 .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
         if (CollectionUtil.isNotEmpty(files)) {
+            Long sourceId = null;
+            if (ObjectUtil.isNotNull(dataInfoUploadBO.getResultType())) {
+                sourceId = -1L;
+                if (ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+                    sourceId = modelRunRecordUseCase.save(dataInfoUploadBO.getModelId(), datasetId, totalDataNum);
+                }
+            }
+            dataAnnotationObjectBOBuilder.sourceId(sourceId).sourceType(DataAnnotationObjectSourceTypeEnum.IMPORTED);
             var list = ListUtil.split(files, 10);
             CountDownLatch countDownLatch = new CountDownLatch(list.size());
             list.forEach(fl -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
@@ -648,7 +773,7 @@ public class DataInfoUseCase {
                         handleDataResult(file.getParentFile().getParentFile(), getFileName(file), dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                                 .fileId(fileBO.getId()).type(FILE).build();
-                        var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).tempDataId(tempDataId).build();
+                        var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
                         dataInfoBOList.add(dataInfoBO);
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
@@ -672,12 +797,27 @@ public class DataInfoUseCase {
             }
             var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+            if (ObjectUtil.isNotNull(sourceId) && ResultTypeEnum.MODEL_RUN.equals(dataInfoUploadBO.getResultType())) {
+                modelRunRecordUseCase.updateById(sourceId, RunStatusEnum.SUCCESS);
+            }
             datasetSimilarityJobUseCase.submitJob(datasetId);
         } else {
             var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
             uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
             log.error("Image compressed package is empty,dataset id:{},filePath:{}", datasetId, dataInfoUploadBO.getFileUrl());
         }
+    }
+
+    private String cocoConvertToX1(DataInfoUploadBO dataInfoUploadBO) {
+        var fileName = FileUtil.getPrefix(dataInfoUploadBO.getSavePath());
+        var baseSavePath = String.format("%s%s/", tempPath, IdUtil.fastSimpleUUID());
+        String srcPath = String.format("%s%s", dataInfoUploadBO.getBaseSavePath(), fileName);
+        String outPath = String.format("%s%s", baseSavePath, fileName);
+        ProcessBuilder builder = new ProcessBuilder();
+        var respPath = String.format("%s%s/resp.json", tempPath, IdUtil.fastSimpleUUID());
+        DataFormatUtil.convert(Constants.CONVERT_UPLOAD, srcPath, outPath, respPath);
+        dataInfoUploadBO.setBaseSavePath(baseSavePath);
+        return respPath;
     }
 
     /**
@@ -811,6 +951,7 @@ public class DataInfoUseCase {
         modelMessageBO.setModelSerialNo(serialNo);
         modelMessageBO.setModelId(modelBO.getId());
         modelMessageBO.setModelVersion(modelBO.getVersion());
+        modelMessageBO.setUrl(modelBO.getUrl());
         int i = 1;
         var modelDataResultBuilder = ModelDataResult.builder()
                 .modelId(modelBO.getId())
@@ -833,7 +974,7 @@ public class DataInfoUseCase {
             modelMessageBO.setDataId(dataId);
             modelMessageBO.setDataInfo(dataMap.get(dataId));
             modelMessageBO.setDatasetId(dataMap.get(dataId).getDatasetId());
-            modelUseCase.sendModelMessageToMQ(modelMessageBO);
+            modelUseCase.sendDataModelMessageToMQ(modelMessageBO);
         }
     }
 
@@ -859,6 +1000,42 @@ public class DataInfoUseCase {
                     .modelDataResults(DefaultConverter.convert(modelDataResultList, ModelDataResultBO.class)).build();
         }
         return new ModelObjectBO();
+    }
+
+    /**
+     * Get Model run data id
+     *
+     * @param modelRunFilterData Model run Filter data parameter
+     * @param datasetId          Dataset id
+     * @param modelId            Model id
+     * @param limit              data id count
+     * @return data id
+     */
+    public List<Long> findModelRunDataIds(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId, Long limit) {
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId);
+        return dataInfoDAO.getBaseMapper().findModelRunDataIds(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData(), limit);
+    }
+
+    /**
+     * Get Model run data count
+     *
+     * @param modelRunFilterData Model run Filter data parameter
+     * @param datasetId          Dataset id
+     * @param modelId            Model id
+     * @return data count
+     */
+    public Long findModelRunDataCount(ModelRunFilterDataBO modelRunFilterData, Long datasetId, Long modelId) {
+        var lambdaQueryWrapper = this.getCommonModelRunDataWrapper(modelRunFilterData, datasetId);
+        return dataInfoDAO.getBaseMapper().findModelRunDataCount(lambdaQueryWrapper, modelId, modelRunFilterData.getIsExcludeModelData());
+    }
+
+    private Wrapper<DataInfo> getCommonModelRunDataWrapper(ModelRunFilterDataBO modelRunFilterData, Long datasetId) {
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        lambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getAnnotationStatus()), DataInfo::getAnnotationStatus, modelRunFilterData.getAnnotationStatus());
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getSplitType()), DataInfo::getSplitType, modelRunFilterData.getSplitType());
+        lambdaQueryWrapper.eq(DataInfo::getIsDeleted, false);
+        return lambdaQueryWrapper;
     }
 
     /**
@@ -1132,29 +1309,82 @@ public class DataInfoUseCase {
      */
     public void handleDataResult(File file, String dataName, DataAnnotationObjectBO dataAnnotationObjectBO,
                                  List<DataAnnotationObjectBO> dataAnnotationObjectBOList, StringBuilder errorBuilder) {
-        var resultFile = FileUtil.loopFiles(file, 2, null).stream()
-                .filter(fc -> JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fc)) && dataName.equals(FileUtil.getPrefix(fc))
-                        && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
-        if (resultFile.isPresent()) {
-            try {
-                var resultJson = JSONUtil.readJSONObject(resultFile.get(), Charset.defaultCharset());
-                var result = JSONUtil.toBean(resultJson, DataImportResultBO.class);
-                if (CollectionUtil.isEmpty(result.getObjects())) {
-                    log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
-                    errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
-                    return;
-                }
-                result.getObjects().forEach(object -> {
-                    var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
-                    object.setId(IdUtil.randomUUID());
-                    object.setVersion(0);
-                    Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
-                    if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
-                        dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
+
+        // Indicates that no result data was imported
+        if (ObjectUtil.isNotNull(dataAnnotationObjectBO.getSourceId())) {
+            var resultFile = FileUtil.loopFiles(file, 2, null).stream()
+                    .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && dataName.equals(FileUtil.getPrefix(fc))
+                            && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
+            if (resultFile.isPresent()) {
+                try {
+                    var resultJson = JSONUtil.readJSON(resultFile.get(), Charset.defaultCharset());
+                    var result = new DataImportResultBO();
+                    if (resultJson instanceof JSONArray) {
+                        var dataImportResultBOList = JSONUtil.toList(JSONUtil.toJsonStr(resultJson), DataImportResultBO.class);
+                        var objects = new ArrayList<DataAnnotationResultObjectBO>();
+                        dataImportResultBOList.stream().filter(dataImportResultBO -> CollUtil.isNotEmpty(dataImportResultBO.getObjects())).forEach(dataImportResultBO ->
+                                objects.addAll(dataImportResultBO.getObjects()));
+                        result.setObjects(objects);
+                    } else {
+                        result = JSONUtil.toBean(JSONUtil.toJsonStr(resultJson), DataImportResultBO.class);
                     }
-                });
-            } catch (Exception e) {
-                log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
+                    if (CollectionUtil.isEmpty(result.getObjects())) {
+                        log.error("Objects is empty，dataId:{},dataName:{}", dataAnnotationObjectBO.getDataId(), dataName);
+                        errorBuilder.append(FileUtil.getPrefix(dataName)).append(".json the objects in the result file cannot be empty;");
+                        return;
+                    }
+
+                    var classMap = getClassMap(dataAnnotationObjectBO.getDatasetId(), result.getObjects());
+                    result.getObjects().forEach(object -> {
+                        var insertDataAnnotationObjectBO = DefaultConverter.convert(dataAnnotationObjectBO, DataAnnotationObjectBO.class);
+                        object.setId(IdUtil.fastSimpleUUID());
+                        object.setVersion(0);
+                        processClassAttributes(classMap, object);
+                        Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
+                        if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
+                            dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
+                        }
+                    });
+                } catch (Exception e) {
+                    log.error("Handle result json error,userId:{},datasetId:{}", dataAnnotationObjectBO.getCreatedBy(), dataAnnotationObjectBO.getDatasetId(), e);
+                }
+            }
+        }
+    }
+
+    private Map<Long, DatasetClassBO> getClassMap(Long datasetId, List<DataAnnotationResultObjectBO> objects) {
+        if (CollUtil.isEmpty(objects)) {
+            return new HashMap<>();
+        }
+        var classIds = objects.stream().map(DataAnnotationResultObjectBO::getClassId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (CollUtil.isEmpty(classIds)) {
+            return new HashMap<>();
+        }
+        var datasetClassBOList = datasetClassUseCase.findByIds(datasetId, new ArrayList<>(classIds));
+        if (CollUtil.isNotEmpty(datasetClassBOList)) {
+            return datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId,
+                    t -> t));
+        }
+        return Map.of();
+    }
+
+    private void processClassAttributes(Map<Long, DatasetClassBO> classMap,
+                                        DataAnnotationResultObjectBO object) {
+        if (object == null) {
+            return;
+        }
+        var classId = object.getClassId();
+        if (classMap.containsKey(classId)) {
+            object.setClassId(classId);
+            object.setClassName(classMap.get(classId).getName());
+        } else {
+            object.setClassId(null);
+            object.setClassValues(null);
+            if (StrUtil.isNotEmpty(object.getClassName())) {
+                object.setModelClass(object.getClassName());
+                object.setClassName(null);
             }
         }
     }
@@ -1329,9 +1559,10 @@ public class DataInfoUseCase {
      * @param dataList Data list
      * @param queryBO  Data query parameters
      * @param classMap Class id and class name associated map
+     * @param classMap Result id and result name associated map
      * @return Data export collection
      */
-    public List<DataExportBO> processData(List<DataInfoBO> dataList, DataInfoQueryBO queryBO, Map<Long, String> classMap) {
+    public List<DataExportBO> processData(List<DataInfoBO> dataList, DataInfoQueryBO queryBO, Map<Long, String> classMap, Map<Long, String> resultMap) {
         if (CollectionUtil.isEmpty(dataList)) {
             return List.of();
         }
@@ -1340,7 +1571,7 @@ public class DataInfoUseCase {
         var dataAnnotationList = dataAnnotationClassificationUseCase.findByDataIds(dataIds);
         Map<Long, List<DataAnnotationClassificationBO>> dataAnnotationMap = CollectionUtil.isNotEmpty(dataAnnotationList) ? dataAnnotationList.stream().collect(
                 Collectors.groupingBy(DataAnnotationClassificationBO::getDataId)) : Map.of();
-        var dataAnnotationObjectList = dataAnnotationObjectUseCase.findByDataIds(dataIds);
+        var dataAnnotationObjectList = dataAnnotationObjectUseCase.findByDataIds(dataIds, queryBO.getIsAllResult(), queryBO.getSelectModelRunIds());
         Map<Long, List<DataAnnotationObjectBO>> dataAnnotationObjectMap = CollectionUtil.isNotEmpty(dataAnnotationObjectList) ?
                 dataAnnotationObjectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getDataId))
                 : Map.of();
@@ -1349,23 +1580,33 @@ public class DataInfoUseCase {
             var dataExportBaseBO = assembleExportDataContent(dataInfoBO, queryBO.getDatasetType());
             var annotationList = dataAnnotationMap.get(dataId);
             var objectList = dataAnnotationObjectMap.get(dataId);
-            var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
-            if (CollectionUtil.isNotEmpty(annotationList)) {
-                var classificationAttributes = annotationList.stream().map(dataAnnotationBO -> dataAnnotationBO.getClassificationAttributes()).collect(Collectors.toList());
-                dataResultExportBO.setClassificationValues(JSONUtil.parseArray(classificationAttributes));
-            }
+            var dataResultExportBOList = new ArrayList<DataResultExportBO>();
             if (CollectionUtil.isNotEmpty(objectList)) {
-                var objects = new ArrayList<DataResultObjectExportBO>();
-                objectList.forEach(o -> {
-                    var dataResultObjectExportBO = DefaultConverter.convert(o.getClassAttributes(), DataResultObjectExportBO.class);
-                    dataResultObjectExportBO.setClassName(classMap.get(o.getClassId()));
-                    objects.add(dataResultObjectExportBO);
+                var objectSourceMap = objectList.stream().collect(Collectors.groupingBy(DataAnnotationObjectBO::getSourceId));
+                objectSourceMap.forEach((sourceId, objectSourceList) -> {
+                    var dataResultExportBO = DataResultExportBO.builder().dataId(dataId).version(version).build();
+                    var objects = new ArrayList<DataResultObjectExportBO>();
+                    objectSourceList.forEach(o -> {
+                        var dataResultObjectExportBO = DefaultConverter.convert(o.getClassAttributes(), DataResultObjectExportBO.class);
+                        dataResultObjectExportBO.setClassName(classMap.get(o.getClassId()));
+                        objects.add(dataResultObjectExportBO);
+                    });
+                    dataResultExportBO.setObjects(objects);
+                    dataResultExportBO.setSourceName(resultMap.get(sourceId));
+
+                    if (GROUND_TRUTH.equals(sourceId)) {
+                        if (CollectionUtil.isNotEmpty(annotationList)) {
+                            var classificationAttributes = annotationList.stream().map(dataAnnotationBO -> dataAnnotationBO.getClassificationAttributes()).collect(Collectors.toList());
+                            dataResultExportBO.setClassificationValues(JSONUtil.parseArray(classificationAttributes));
+                        }
+                    }
+                    dataResultExportBOList.add(dataResultExportBO);
                 });
-                dataResultExportBO.setObjects(objects);
+
             }
             var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
             if (CollectionUtil.isNotEmpty(annotationList) || CollectionUtil.isNotEmpty(objectList)) {
-                dataInfoExportBO.setResult(dataResultExportBO);
+                dataInfoExportBO.setResult(dataResultExportBOList);
             }
             dataInfoExportBOList.add(dataInfoExportBO);
         });
@@ -1559,20 +1800,21 @@ public class DataInfoUseCase {
         var serialNumber = exportUseCase.createExportRecord(fileName);
         scenarioQueryBO.setPageNo(PAGE_NO);
         scenarioQueryBO.setPageSize(PAGE_SIZE_100);
-        var datasetClassBOList = datasetClassUseCase.findByIds(scenarioQueryBO.getClassIds());
+        var datasetClassBOList = datasetClassUseCase.findByIds(scenarioQueryBO.getDatasetId(), scenarioQueryBO.getClassIds());
         var classMap = new HashMap<Long, String>();
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
+        var resultMap = this.getResultMap(scenarioQueryBO.getDatasetId());
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() ->
-                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, scenarioQueryBO,
+                exportUseCase.asyncExportDataZip(fileName, serialNumber, classMap, resultMap, scenarioQueryBO,
                         dataAnnotationObjectUseCase::findDataIdByScenarioPage,
                         this::processScenarioData))));
         return serialNumber;
     }
 
 
-    public List<DataExportBO> processScenarioData(List<DataAnnotationObjectBO> dataAnnotationObjectBOList, ScenarioQueryBO queryBO, Map<Long, String> classMap) {
+    public List<DataExportBO> processScenarioData(List<DataAnnotationObjectBO> dataAnnotationObjectBOList, ScenarioQueryBO queryBO, Map<Long, String> classMap, Map<Long, String> resultMap) {
         if (CollectionUtil.isEmpty(dataAnnotationObjectBOList)) {
             return List.of();
         }
@@ -1600,7 +1842,7 @@ public class DataInfoUseCase {
             }
             var dataInfoExportBO = DataExportBO.builder().data(dataExportBaseBO).build();
             if (CollectionUtil.isNotEmpty(objectList)) {
-                dataInfoExportBO.setResult(dataResultExportBO);
+                dataInfoExportBO.setResult(List.of(dataResultExportBO));
             }
             dataInfoExportBOList.add(dataInfoExportBO);
         });
@@ -1658,7 +1900,8 @@ public class DataInfoUseCase {
     private Boolean verifyDataResult(DataAnnotationResultObjectBO dataAnnotationResultObjectBO, Long dataId, String dataName) {
         var boo = true;
         var types = List.of(ObjectTypeEnum.RECTANGLE.getValue(),
-                ObjectTypeEnum.TWO_D_BOX.getValue(), ObjectTypeEnum.THREE_D_BOX.getValue(), ObjectTypeEnum.THREE_D_SEGMENT_POINTS);
+                ObjectTypeEnum.TWO_D_BOX.getValue(), ObjectTypeEnum.THREE_D_BOX.getValue(), ObjectTypeEnum.TWO_RECT.getValue(),
+                ObjectTypeEnum.POLYLINE.getValue(), ObjectTypeEnum.POLYGON.getValue(), ObjectTypeEnum.THREE_D_SEGMENT_POINTS.getValue());
         if (!types.contains(dataAnnotationResultObjectBO.getType())) {
             log.error("Object type error，dataId:{},dataName:{}", dataId, dataName);
             boo = false;
@@ -1689,7 +1932,10 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
-        var dataExportBOList = processData(dataInfoBOList, dataInfoQueryBO, classMap);
+
+        var resultMap = this.getResultMap(datasetId);
+        dataInfoQueryBO.setIsAllResult(true);
+        var dataExportBOList = processData(dataInfoBOList, dataInfoQueryBO, classMap, resultMap);
         var exportTime = TemporalAccessorUtil.format(OffsetDateTime.now(), DatePattern.PURE_DATETIME_PATTERN);
         var data = new ArrayList<DataExportBaseBO>();
         var results = new ArrayList<DataResultExportBO>();
@@ -1697,12 +1943,22 @@ public class DataInfoUseCase {
             if (ObjectUtil.isNotNull(dataExportBO.getData())) {
                 data.add(dataExportBO.getData());
             }
-            if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
-                results.add(dataExportBO.getResult());
+            if (CollUtil.isNotEmpty(dataExportBO.getResult())) {
+                results.addAll(dataExportBO.getResult());
             }
         });
         return DataResultBO.builder().version(version).datasetId(dataset.getId())
                 .datasetName(dataset.getName()).exportTime(exportTime).data(data).results(results).build();
+    }
+
+    private Map<Long, String> getResultMap(Long datasetId) {
+        var resultMap = new HashMap<Long, String>();
+        var modelRunRecordBOList = modelRunRecordUseCase.findByDatasetId(datasetId);
+        if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
+            resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
+        }
+        resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
+        return resultMap;
     }
 
     public void setDatasetSixData(List<DatasetBO> datasetBOList) {
@@ -1734,4 +1990,18 @@ public class DataInfoUseCase {
             datasetBOList.forEach(datasetBO -> datasetBO.setDatas(dataMap.get(datasetBO.getId())));
         }
     }
+
+    public DataInfoBO getInitDataInfoBO(DatasetInitialInfo datasetInitialInfo) {
+        var dataset = datasetUseCase.getInitDataset(datasetInitialInfo);
+        if (ObjectUtil.isNull(dataset)) {
+            throw new UsecaseException(DEFAULT_DATASET_NOT_FOUND);
+        }
+        var dataInfoLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getDatasetId, dataset.getId());
+        dataInfoLambdaQueryWrapper.last("limit 1");
+        var dataInfoBO = DefaultConverter.convert(dataInfoDAO.getOne(dataInfoLambdaQueryWrapper), DataInfoBO.class);
+        setDataInfoBOListFile(List.of(dataInfoBO));
+        return dataInfoBO;
+    }
+
 }

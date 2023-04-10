@@ -10,8 +10,10 @@
                     <template #title> {{ editor.state.dataName }} </template>
                     <span class="data-name">{{ editor.state.dataName }}</span>
                 </a-tooltip>
-                <div class="header-divider"></div>
-                <i style="font-size: 14px" class="iconfont icon-Job-information"></i>
+                <div>
+                    <div class="header-divider"></div>
+                    <i style="font-size: 14px" class="iconfont icon-Job-information"></i>
+                </div>
             </div>
         </div>
         <div class="flow-center">
@@ -45,16 +47,23 @@
             <div class="flow-item" @click="onSave" v-if="has(BsUIType.flowSave)">
                 <a-tooltip placement="bottom" trigger="hover">
                     <template #title> {{ storageTitle }} </template>
-                    <LoadingOutlined
-                        v-if="state.saving"
-                        style="font-size: 23px; margin-bottom: 10px; position: relative; top: 5px"
-                    ></LoadingOutlined>
-                    <i
-                        v-else
-                        style="font-size: 14px"
-                        class="iconfont icon-save"
-                        :title="storageTitle"
-                    ></i>
+                    <div>
+                        <LoadingOutlined
+                            v-if="state.saving"
+                            style="
+                                font-size: 23px;
+                                margin-bottom: 10px;
+                                position: relative;
+                                top: 5px;
+                            "
+                        ></LoadingOutlined>
+                        <i
+                            v-else
+                            style="font-size: 14px"
+                            class="iconfont icon-save"
+                            :title="storageTitle"
+                        ></i>
+                    </div>
                 </a-tooltip>
                 <span class="icon-text">Save</span>
             </div>
@@ -143,7 +152,7 @@
         :maskClosable="false"
         @close="toggleKeyboard"
         v-model:visible="showKeyboard"
-        headerStyle="position:sticky;top:0"
+        :headerStyle="{ position: 'sticky', top: 0 }"
     >
         <template #title>
             <div class="header-title">Hotkeys</div>

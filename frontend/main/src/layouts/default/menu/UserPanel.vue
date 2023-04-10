@@ -109,7 +109,7 @@
   };
 
   const handleGoDocs = () => {
-    window.location.href = 'https://docs.basic.ai/docs';
+    window.location.href = 'https://docs.xtreme1.io/xtreme1-docs/';
   };
 </script>
 <style lang="less" scoped>

@@ -1,0 +1,33 @@
+export enum BuriedPointEnum {
+  ENTER_SING_IN = 'Enter Login Page',
+  ENTER_SING_UP = 'Enter Signup Page',
+  ENTER_HOME = 'Enter Home Page',
+  ENTER_MODELS = 'Enter Models List',
+  ENTER_ONTOLOGY_CENTER = 'Enter Ontology Center',
+  ENTER_DATASETS = 'Enter Datasets List',
+  ENTER_DATASETS_DETAIL = 'Enter Dataset Detail',
+  ENTER_CREATE_TASK = 'Task-Start to Create a Task',
+  EXIT_TASK_CREATING = 'Task-User Exit Task Creating',
+  TASK_PREVIOUS = 'Task-Previous',
+  TASK_BASIC_DONE = 'Task-Task Basic Done',
+  TASK_UPLOAD_DONE = 'Task-Upload Task data Done',
+  TASK_ONTOLOGY_DONE = 'Task-Ontology Done',
+  TASK_INSTRUCTION_DONE = 'Task-Instruction Done',
+  TASK_WORKFLOW_DONE = 'Task-Workflow Done',
+  ENTER_A_TASK = 'Task- Enter a Task',
+  ENTER_DATA_TAB = 'Task-Enter Data Tab',
+  ENTER_SETTING_TAB = 'Task-Enter Setting Tab',
+  TASK_ADD_DATA = 'Task-Add Data',
+  TASK_SAMPLING_DATA = 'Task-Sampling',
+  TASK_ACCEPT = 'Task-Accept',
+  TASK_REJECT = 'Task-Reject',
+  TASK_REMOVE_FROM_TASK = 'Task-Remove from Task',
+  TASK_ONTOLOGY_CHANGE = 'Task-Ontology Changed',
+  TASK_INSTRUCTION_CHANGE = 'Task-Instruction Changed',
+  TASK_WORKFLOW_CHANGE = 'Task-Workflow Changed',
+}
+
+export enum SourceEnum {
+  OFFICIAL = 'Official',
+  WEBSITE = 'Website',
+}

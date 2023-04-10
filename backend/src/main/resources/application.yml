@@ -74,49 +74,67 @@ minio:
 
 export:
   data:
-    version: Basic AI V1.0
+    version: Xtreme1 V0.6
 file:
   tempPath: /tmp/xtreme1/
   size:
-    large: 400
-    medium: 200
-    small: 100
+    large: 800
+    medium: 400
+    small: 200
   prefix:
     large: large
     medium: medium
     small: small
 dataset-initial:
   dataset:
-    name: LiDAR Fusion Trial
-    fileName: xtreme1-lidar-fusion-trial.zip
-    type: LIDAR_FUSION
-    userName: admin@xtreme1.io
-    classes[0]:
-      name: Car
-      color: "#f39c12"
-      toolType: CUBOID
-      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
-      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
-    classes[1]:
-      name: Van
-      color: "#2ecc71"
-      toolType: CUBOID
-      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
-      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
-    classes[2]:
-      name: Truck
-      color: "#d1ccc0"
-      toolType: CUBOID
-      toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
-      attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
+    point-cloud:
+      name: LiDAR Fusion Trial
+      fileName: xtreme1-lidar-fusion-trial.zip
+      type: LIDAR_FUSION
+      userName: admin@xtreme1.io
+      classes[0]:
+        name: Car
+        color: "#f39c12"
+        toolType: CUBOID
+        toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+        attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
+      classes[1]:
+        name: Van
+        color: "#2ecc71"
+        toolType: CUBOID
+        toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+        attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
+      classes[2]:
+        name: Truck
+        color: "#d1ccc0"
+        toolType: CUBOID
+        toolTypeOptions: '{defaultHeight:"",isConstraints:false,minHeight:"",minPoints:""}'
+        attributes: '[{"name":"Occlusion","type":"RADIO","required":false,"options":[{"name":"Yes","attributes":[]},{"name":"No","attributes":[]}]},{"name":"Confidence","type":"RADIO","required":false,"options":[{"name":"High","attributes":[]},{"name":"Medium","attributes":[]},{"name":"Low","attributes":[]}]}]'
+    image:
+      name: Image Trial
+      fileName: xtreme1-image-trial.zip
+      type: IMAGE
+      userName: admin@xtreme1.io
+      classes[0]:
+        name: Cat
+        color: "#7dfaf2"
+        toolType: BOUNDING_BOX
+        toolTypeOptions:
+        attributes:
+      classes[1]:
+        name: Dog
+        color: "#f87d7d"
+        toolType: POLYLINE
+        toolTypeOptions:
+        attributes:
 
-model:
-  arithmetic:
-    image80:
-      url: http://image-object-detection:5000/basic_predict
-    preModel:
-      url: http://point-cloud-object-detection:5000/pointcloud/3dbox
-pointcloud:
+image:
+  resultEvaluate:
+    url: http://image-object-detection:5000/image/resultEvaluate
+
+pointCloud:
+  resultEvaluate:
+    url: http://pcd-tools:5000/pointCloud/resultEvaluate
   convertRender:
     url: http://pcd-tools:5000/pointcloud/convert_render
 

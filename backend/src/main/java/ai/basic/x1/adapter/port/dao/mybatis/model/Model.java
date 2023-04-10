@@ -3,6 +3,7 @@ package ai.basic.x1.adapter.port.dao.mybatis.model;
 import ai.basic.x1.adapter.port.dao.mybatis.typehandler.ModelClassTypeHandler;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ModelDatasetTypeEnum;
+import ai.basic.x1.entity.enums.ModelTypeEnum;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,15 +44,19 @@ public class Model {
     private String scenario;
 
     /**
-     * recognizable thing(class)
-     */
-    @TableField(typeHandler = ModelClassTypeHandler.class)
-    private List<ModelClass> classes;
-
-    /**
      * Supported dataset types
      */
     private ModelDatasetTypeEnum datasetType;
+
+    /**
+     * Model url
+     */
+    private String url;
+
+    /**
+     * Model type
+     */
+    private ModelTypeEnum modelType;
 
     /**
      * Determine the uniqueness of the model

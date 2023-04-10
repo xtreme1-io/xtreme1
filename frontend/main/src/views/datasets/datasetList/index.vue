@@ -6,8 +6,20 @@
         Create
       </Button>
     </div>
+
     <div class="wrapper">
       <div :class="`${prefixCls}-list`" ref="listPage">
+        <div style="width: 260px; float: right"
+          ><Input
+            size="large"
+            autocomplete="off"
+            v-model:value="name"
+            :placeholder="t('business.ontology.searchForm.searchItems')"
+          >
+            <template #suffix>
+              <Icon icon="ant-design:search-outlined" style="color: #aaa" size="16" />
+            </template> </Input
+        ></div>
         <div v-show="list.length === 0" class="empty">
           <div class="text-center empty-wrapper">
             <img class="inline-block mb-4" width="136" :src="datasetEmpty" alt="" />
@@ -21,7 +33,7 @@
           viewClass="dataset-list-card-scroll"
         >
           <ListCard
-          class="listcard"
+            class="listcard"
             v-for="item in list"
             :key="item.id"
             :data="item"
@@ -31,7 +43,7 @@
         </ScrollContainer>
       </div>
       <div class="sider">
-        <Input
+        <!-- <Input
           autocomplete="off"
           v-model:value="name"
           :placeholder="t('business.ontology.searchForm.searchItems')"
@@ -39,7 +51,7 @@
           <template #suffix>
             <Icon icon="ant-design:search-outlined" style="color: #aaa" size="16" />
           </template>
-        </Input>
+        </Input> -->
         <div class="custom-item">
           <div class="font-bold custom-label">Sort</div>
           <Select style="flex: 1" size="small" v-model:value="sortField">
@@ -105,7 +117,7 @@
   import CustomRadio from '/@@/CustomRadio/index.vue';
   import { useLoading } from '/@/components/Loading';
   import Icon, { SvgIcon } from '/@/components/Icon';
-import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
+  import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
   const annotationStatus = ref<any>();
   const start = ref<Nullable<Dayjs>>(null);
   const type = ref<Nullable<string>>(null);
@@ -158,7 +170,7 @@ import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
   let timeout;
   watch(filterForm, (count) => {
     /* ... */
-    console.log(1234);
+
     if (
       (count.createStartTime && !count.createEndTime) ||
       (!count.createStartTime && count.createEndTime)
@@ -230,9 +242,10 @@ import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
   });
 </script>
 <style lang="less" scoped>
+  @wrapper-height: 40px;
   @prefix-cls: ~'@{namespace}-datasetList';
   .@{prefix-cls} {
-    display: flex;
+    // display: flex;
 
     .empty {
       display: flex;
@@ -280,7 +293,7 @@ import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
       flex: 1;
       width: 80%;
       padding: 20px 10px 0;
-      height: calc(100vh - @header-height);
+      height: calc(100vh - @header-height - @wrapper-height);
 
       :deep(.dataset-list-card-scroll) {
         display: grid;

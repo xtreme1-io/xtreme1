@@ -1,11 +1,14 @@
 package ai.basic.x1.usecase;
 
 import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
+import ai.basic.x1.adapter.api.config.ImageDatasetInitialInfo;
+import ai.basic.x1.adapter.api.config.PointCloudDatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.api.context.UserInfo;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.entity.*;
+import ai.basic.x1.entity.enums.DatasetTypeEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DecompressionFileUtils;
@@ -30,11 +33,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.LIDAR_FUSION;
 import static ai.basic.x1.util.Constants.PAGE_SIZE_100;
 
@@ -65,7 +70,10 @@ public class DatasetUseCase {
     private UserUseCase userUseCase;
 
     @Autowired
-    private DatasetInitialInfo datasetInitialInfo;
+    private PointCloudDatasetInitialInfo pointCloudDatasetInitialInfo;
+
+    @Autowired
+    private ImageDatasetInitialInfo imageDatasetInitialInfo;
 
     @Autowired
     private DataAnnotationObjectUseCase dataAnnotationObjectUseCase;
@@ -89,14 +97,16 @@ public class DatasetUseCase {
 
     @PostConstruct
     public void init() {
+        initDataset(pointCloudDatasetInitialInfo);
+        initDataset(imageDatasetInitialInfo);
+    }
+
+    private void initDataset(DatasetInitialInfo datasetInitialInfo) {
         var file = FileUtil.file(".", datasetInitialInfo.getFileName());
         if (file.isFile()) {
             executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
                 var datasetName = datasetInitialInfo.getName();
-                var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
-                datasetLambdaQueryWrapper.eq(Dataset::getName, datasetName);
-                datasetLambdaQueryWrapper.last("limit 1");
-                var dataset = datasetDAO.getOne(datasetLambdaQueryWrapper);
+                var dataset = this.getInitDataset(datasetInitialInfo);
                 if (ObjectUtil.isNull(dataset)) {
                     var userBO = userUseCase.findByUsername(datasetInitialInfo.getUserName());
                     var requestContext = RequestContextHolder.createEmptyContent();
@@ -114,16 +124,38 @@ public class DatasetUseCase {
                     } catch (IOException e) {
                         log.error("Decompression file error", e);
                     }
-                    var dataInfoUploadBO = DataInfoUploadBO.builder().datasetId(datasetId).type(LIDAR_FUSION)
+                    var dataInfoUploadBO = DataInfoUploadBO.builder().datasetId(datasetId).type(datasetInitialInfo.getType())
                             .userId(userBO.getId()).savePath(filePath).baseSavePath(baseSavePath).fileName(FileUtil.getPrefix(datasetInitialInfo.getFileName())).build();
-                    dataInfoUseCase.parsePointCloudUploadFile(dataInfoUploadBO);
+
+                    if (IMAGE.equals(datasetInitialInfo.getType())) {
+                        dataInfoUseCase.parseImageCompressedUploadFile(dataInfoUploadBO);
+                    } else {
+                        dataInfoUseCase.parsePointCloudUploadFile(dataInfoUploadBO);
+                    }
                     var datasetClassPropertiesList = datasetInitialInfo.getClasses();
+                    datasetClassPropertiesList.forEach(datasetClassProperties -> {
+                        if (StrUtil.isEmpty(datasetClassProperties.getToolTypeOptions())) {
+                            datasetClassProperties.setToolTypeOptions(null);
+                        }
+                        if (StrUtil.isEmpty(datasetClassProperties.getAttributes())) {
+                            datasetClassProperties.setAttributes(null);
+                        }
+                    });
                     var datasetClassBOList = DefaultConverter.convert(datasetClassPropertiesList, DatasetClassBO.class);
                     datasetClassBOList.forEach(datasetClassBO -> datasetClassBO.setDatasetId(datasetId));
                     datasetClassDAO.saveBatch(DefaultConverter.convert(datasetClassBOList, DatasetClass.class));
                 }
             })));
         }
+    }
+
+    public Dataset getInitDataset(DatasetInitialInfo datasetInitialInfo) {
+        var datasetName = datasetInitialInfo.getName();
+        var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
+        datasetLambdaQueryWrapper.eq(Dataset::getName, datasetName);
+        datasetLambdaQueryWrapper.last("limit 1");
+        var dataset = datasetDAO.getOne(datasetLambdaQueryWrapper);
+        return dataset;
     }
 
     /**
@@ -198,7 +230,7 @@ public class DatasetUseCase {
      */
     public void delete(Long id) {
         var task = datasetDAO.getById(id);
-        if(ObjectUtil.isNull(task)){
+        if (ObjectUtil.isNull(task)) {
             throw new UsecaseException(UsecaseCode.DATASET_NOT_FOUND);
         }
 
@@ -219,6 +251,19 @@ public class DatasetUseCase {
             dataAnnotationClassificationLambdaUpdateWrapper.eq(DataAnnotationClassification::getDatasetId, id);
             dataAnnotationClassificationDAO.remove(dataAnnotationClassificationLambdaUpdateWrapper);
         })));
+    }
+
+    /**
+     * Query dataset by type
+     *
+     * @param datasetTypes Dataset type
+     * @return Dataset page
+     */
+    public List<DatasetBO> findByType(List<DatasetTypeEnum> datasetTypes) {
+        var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
+        datasetLambdaQueryWrapper.select(Dataset::getId, Dataset::getName);
+        datasetLambdaQueryWrapper.in(Dataset::getType, datasetTypes);
+        return DefaultConverter.convert(datasetDAO.list(datasetLambdaQueryWrapper), DatasetBO.class);
     }
 
     /**

@@ -1,8 +1,8 @@
 package ai.basic.x1.entity;
 
-import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ModelDatasetTypeEnum;
+import ai.basic.x1.entity.enums.ModelTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,7 +41,7 @@ public class ModelBO {
     /**
      * recognizable thing(class)
      */
-    private List<ModelClass> classes;
+    private List<ModelClassBO> classes;
 
     /**
      * Supported dataset types
@@ -52,4 +52,14 @@ public class ModelBO {
      * Determine the uniqueness of the model
      */
     private ModelCodeEnum modelCode;
+
+    /**
+     * Model url
+     */
+    private String url;
+
+    /**
+     * Model type
+     */
+    private ModelTypeEnum modelType;
 }

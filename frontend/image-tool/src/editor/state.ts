@@ -59,6 +59,7 @@ export interface IClassEditStyle {
 }
 export interface IEditorState {
     imageUrl: string;
+    withoutTaskId: string;
     user: IUserInfo;
     annotationTags: IAnnotationTag[];
     annotations: IAnnotationInfo[];
@@ -105,6 +106,7 @@ export function getDefaultState(): IEditorState {
         user: {
             id: 'test-123123',
         },
+        withoutTaskId: '-1',
         annotationTags: tags,
         annotations: [],
         mode: 'empty',

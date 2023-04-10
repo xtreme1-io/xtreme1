@@ -1,7 +1,9 @@
 package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
+import ai.basic.x1.entity.enums.DataFormatEnum;
 import ai.basic.x1.entity.enums.DataUploadSourceEnum;
+import ai.basic.x1.entity.enums.ResultTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,5 +42,22 @@ public class DataInfoUploadDTO {
     @ValidStringEnum(message = "source must be one of LOCAL, URL", enumClass = DataUploadSourceEnum.class)
     @NotNull(message = "source cannot be null")
     private String source;
+
+    /**
+     * Result type GROUND_TRUTH,MODEL_RUN
+     */
+    @ValidStringEnum(message = "resultType must be one of GROUND_TRUTH,MODEL_RUN", enumClass = ResultTypeEnum.class)
+    private String resultType;
+
+    /**
+     * Model id
+     */
+    private Long modelId;
+
+    /**
+     * Data format XTREME1,COCO
+     */
+    @ValidStringEnum(message = "dataFormat must be one of XTREME1,COCO", enumClass = DataFormatEnum.class)
+    private String dataFormat;
 
 }

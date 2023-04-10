@@ -35,6 +35,7 @@ public enum UsecaseCode {
 
     DATASET_NOT_FOUND("DATASET_NOT_FOUND", "Dataset not found"),
 
+    DEFAULT_DATASET_NOT_FOUND("DEFAULT_DATASET_NOT_FOUND", "Default dataset not found"),
     DATA_NOT_FOUND("DATA_NOT_FOUND", "Data not found"),
 
     DATASET__DATA__DATA_HAS_BEEN_UNLOCKED("DATASET__DATA_DATA_HAS_BEEN_UNLOCKED", "The data has been unlocked"),
@@ -53,7 +54,20 @@ public enum UsecaseCode {
 
     DATASET_DATA_SCENARIO_NOT_FOUND("DATASET_DATA_SCENARIO_NOT_FOUND", "No data has been found"),
 
-    DATASET_DATA_ALL_EMPTY("DATASET_DATA_ALL_EMPTY", "DatasetId and dataIds cannot be empty at the same time");
+    DATASET_DATA_ALL_EMPTY("DATASET_DATA_ALL_EMPTY", "DatasetId and dataIds cannot be empty at the same time"),
+
+    DATASET__NOT_EXIST_DATA("DATASET__NOT_EXIST_DATA", "dataset have not data"),
+
+    DATASET__MODEL_NOT_EXIST("DATASET__MODEL_NOT_EXIT", "model is not exist"),
+
+    DATASET__MODEL_RUN_RECORD_NOT_EXIST("DATASET__MODEL_RUN_RECORD_NOT_EXIST","run record not exist"),
+
+    DATASET__MODEL_RERUN_ERROR("DATASET__MODEL_RERUN_ERROR","model rerun error"),
+    DATASET__NOT_EXIST("DATASET__NOT_EXIST", "dataset not exist"),
+
+    MODEL__MISS_FILED("MODEL__MISS_FILED", "We were unable to locate the %s key(s) in your response JSON. As a result, Xtreme1 cannot process your response successfully. Please verify your API.");
+
+
 
 
     // Storage

@@ -1,50 +1,50 @@
 <template>
-    <Form.Item
-        :validateFirst="true"
-        :rules="{ required: item.required, validator: checkValue, trigger: 'change' }"
-        :label="item.parentValue ? `${item.parentValue} ${item.name}` : item.name"
-        :name="item.id"
-        :autoLink="false"
-        @click="handleToggle(item, $event)"
-    >
-        <Radio
-            :disabled="!canEdit()"
-            :name="item.name"
-            v-model:value="item.value"
-            @change="onAttChange"
-            :options="item.options"
-            v-if="item.type === AttrType.RADIO"
-        />
-        <Select
-            :disabled="!canEdit()"
-            :name="item.name"
-            v-model:value="item.value"
-            @change="onAttChange"
-            :options="item.options"
-            v-else-if="item.type === AttrType.DROPDOWN"
-        />
-        <Text
-            :disabled="!canEdit()"
-            :name="item.name"
-            v-model:value="item.value"
-            @change="onAttChange"
-            v-else-if="item.type === AttrType.TEXT"
-        />
-        <Check
-            :disabled="!canEdit()"
-            :name="item.name"
-            v-model:value="item.value"
-            @change="onAttChange"
-            :options="item.options"
-            v-else-if="item.type === AttrType.MULTI_SELECTION"
-        />
-    </Form.Item>
+    <div class="attr-item">
+        <div class="name" :span="10">
+            {{ item.parentValue ? `${item.parentValue} ${item.name}` : item.name }}
+            <span v-if="item.type === AttrType.RADIO || item.type === AttrType.MULTI_SELECTION">
+                <!-- {{item.type === AttrType.RADIO ? '(Single)' : '(Multi)'}} -->
+            </span>
+        </div>
+        <div class="value" :span="14">
+            <Radio
+                :disabled="!canEdit()"
+                :name="item.name"
+                v-model:value="item.value"
+                @change="onAttChange"
+                :options="item.options"
+                v-if="item.type === AttrType.RADIO"
+            />
+            <Select
+                :disabled="!canEdit()"
+                :name="item.name"
+                v-model:value="item.value"
+                @change="onAttChange"
+                :options="item.options"
+                v-else-if="item.type === AttrType.DROPDOWN"
+            />
+            <Text
+                :disabled="!canEdit()"
+                :name="item.name"
+                v-model:value="item.value"
+                @change="onAttChange"
+                v-else-if="item.type === AttrType.TEXT"
+            />
+            <Check
+                :disabled="!canEdit()"
+                :name="item.name"
+                v-model:value="item.value"
+                @change="onAttChange"
+                :options="item.options"
+                v-else-if="item.type === AttrType.MULTI_SELECTION"
+            />
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-    import { IClassificationAttr, AttrType } from '../../../type';
-
-    import { Form } from 'ant-design-vue';
+    import { ref, getCurrentInstance } from 'vue';
+    import { AttrType, IClassificationAttr } from '../../../type';
 
     import Radio from '../../MainView/sub/Radio.vue';
     import Select from '../../MainView/sub/Select.vue';
@@ -55,55 +55,36 @@
 
     interface IProps {
         item: IClassificationAttr;
-        visible: Boolean;
     }
 
-    // Validate
-    const checkValue = (_: any, target: IClassificationAttr) => {
-        // console.log('isVisible: ', props.visible);
-        // If it's not displayed, Verification passed
-        if (!props.visible) return Promise.resolve();
-
-        if (!target.required) {
-            emit('validate', true);
-            return Promise.resolve();
-        }
-
-        if (target.required && target.value.length) {
-            emit('validate', true);
-            return Promise.resolve();
-        }
-
-        emit('validate', false);
-        return Promise.reject(new Error(props.item.name + ' is Required'));
-    };
-
     // ***************Props and Emits***************
-    let emit = defineEmits(['change', 'toggle', 'validate']);
+    let emit = defineEmits(['change']);
     let props = defineProps<IProps>();
     // *********************************************
 
     let { canEdit } = useUI();
 
-    let timer: any = null;
     function onAttChange(...args: any[]) {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            emit('change', props.item);
-        }, 500);
+        emit('change', ...args);
     }
-
-    const handleToggle = (item: any, e: any) => {
-        // console.log('get', item, e);
-        const parent = item.parent;
-        const className = e.target.className;
-        const nodeName = e.target.nodeName;
-        if (nodeName == 'LABEL') e.preventDefault();
-
-        if (className.includes('ant-form-item-label') && parent == '') {
-            emit('toggle', item.classificationId);
-        }
-    };
 </script>
 
-<style lang="less"></style>
+<style lang="less">
+    .instance-item {
+        display: inline-block;
+        padding: 2px 6px;
+        background: #177ddc;
+        margin-right: 4px;
+        margin-bottom: 4px;
+        border-radius: 2px;
+
+        .remove {
+            cursor: pointer;
+        }
+
+        .name {
+            font-size: 14px;
+            margin: 0px 4px;
+        }
+    }
+</style>

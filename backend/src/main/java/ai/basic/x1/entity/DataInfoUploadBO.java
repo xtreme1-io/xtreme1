@@ -1,7 +1,9 @@
 package ai.basic.x1.entity;
 
+import ai.basic.x1.entity.enums.DataFormatEnum;
 import ai.basic.x1.entity.enums.DataUploadSourceEnum;
 import ai.basic.x1.entity.enums.DatasetTypeEnum;
+import ai.basic.x1.entity.enums.ResultTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -61,5 +63,20 @@ public class DataInfoUploadBO {
      * File name
      */
     private String fileName;
+
+    /**
+     * Result type
+     */
+    private ResultTypeEnum resultType;
+
+    /**
+     * Model id
+     */
+    private Long modelId;
+
+    /**
+     * Data format XTREME1,COCO
+     */
+    private DataFormatEnum dataFormat;
 
 }

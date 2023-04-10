@@ -23,7 +23,6 @@ export const validatePassword = async (_: RuleObject, value: string) => {
   numberVali.value = tR.n;
   letterVali.value = tR.l;
   lengthVali.value = value.length >= 8 && value.length <= 64;
-  console.log(lengthVali.value, numberVali.value, letterVali.value);
   if (tR.l && tR.n && lengthVali.value) {
     return Promise.resolve();
   }

@@ -25,6 +25,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -193,14 +194,17 @@ public class DatasetClassUseCase {
     }
 
     private Map<Long, DatasetClassBO> getClassMap(List<Long> classIds) {
-        return findByIds(classIds).stream().collect(toMap(DatasetClassBO::getId, t -> t));
+        return findByIds(null,classIds).stream().collect(toMap(DatasetClassBO::getId, t -> t));
     }
 
-    public List<DatasetClassBO> findByIds(List<Long> classIds) {
+    public List<DatasetClassBO> findByIds(Long datasetId,List<Long> classIds) {
         if (CollUtil.isEmpty(classIds)) {
             return List.of();
         }
-        return DefaultConverter.convert(datasetClassDAO.listByIds(classIds), DatasetClassBO.class);
+        var lambdaQueryWrapper = Wrappers.lambdaQuery(DatasetClass.class);
+        lambdaQueryWrapper.in(DatasetClass::getId,classIds);
+        lambdaQueryWrapper.eq(ObjectUtil.isNotNull(datasetId),DatasetClass::getDatasetId,datasetId);
+        return DefaultConverter.convert(datasetClassDAO.list(lambdaQueryWrapper), DatasetClassBO.class);
     }
 
 

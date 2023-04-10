@@ -14,12 +14,12 @@ public abstract class AbstractRedisDAO<T> {
 
     protected AbstractRedisDAO(T template, String service) {
         this.template = template;
-        this.keyPrefix = "basicai" + KEY_SEPERATOR + service;
+        this.keyPrefix = "x1" + KEY_SEPERATOR + service;
     }
 
     protected AbstractRedisDAO(T template, String service, String table) {
         this.template = template;
-        this.keyPrefix = "basicai" + KEY_SEPERATOR + service + KEY_SEPERATOR + table;
+        this.keyPrefix = "x1" + KEY_SEPERATOR + service + KEY_SEPERATOR + table;
     }
 
     public String prefixedKey(String key) {

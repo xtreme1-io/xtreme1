@@ -508,7 +508,6 @@ export default function useInstance() {
         });
 
         const color = targetClassType ? targetClassType.color : obj.color || '#ffffff';
-        console.log('getColor: ', classType, toolType, targetClassType, color);
 
         return {
             color,

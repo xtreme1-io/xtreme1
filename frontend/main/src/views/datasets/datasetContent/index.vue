@@ -21,6 +21,7 @@
       </div>
       <TipModal @register="tipRegister" />
       <ModelRun
+        modelType="model"
         @register="registerRunModel"
         :selectName="selectName"
         :title="title"
@@ -51,6 +52,10 @@
           @fetchList="fixedFetchList"
         />
         <Tools
+          :modelRunResultList="modelRunResultListForDisplay"
+          :cardMaxSliderWidth="maxSliderWidth"
+          v-model:cardSliderWidthValue="sliderWidthValue"
+          :cardResetWidth="resetWidth"
           :sliderValue="sliderValue"
           :setSlider="setSlider"
           :selectedList="selectedList"
@@ -71,6 +76,9 @@
           @handleMultipleFrame="openFrameModal"
           @handleModelRun="handleModelRun"
           @fetchList="fixedFetchList"
+          @handleSplite="handleSplite"
+          v-model:name="name"
+          @resetMoelResult="getMoelResult"
         />
         <div
           class="list"
@@ -78,10 +86,13 @@
           :style="type === PageTypeEnum.frame ? 'height:calc(100vh - 230px)' as any : null"
         >
           <ScrollContainer ref="scrollRef">
+            <!-- <div :key="i.id + Math.random()" v-for="i in list"> {{ i.name }}-{{ i.id }} </div> -->
+            <!-- :key="i.id + Math.random()" -->
             <ImgCard
+              :selectedSourceIds="runRecordIdDisplay"
               class="listcard"
               v-for="i in list"
-              :key="i.id"
+              :key="i.id + Math.random()"
               :object="objectMap[i.id]"
               @handleSelected="handleSelected"
               :showAnnotation="showAnnotation"
@@ -104,7 +115,21 @@
         </div>
       </div>
       <div class="sider">
-        <Input
+        <div class="header">
+          <div
+            @click="sliderType = 'fliter'"
+            :class="{ notActive: sliderType !== 'fliter', fliter: true }"
+          >
+            Fliter</div
+          >
+          <div
+            @click="sliderType = 'display'"
+            :class="{ notActive: sliderType !== 'display', display: true }"
+          >
+            Display</div
+          >
+        </div>
+        <!-- <Input
           autocomplete="off"
           v-model:value="name"
           :placeholder="t('business.ontology.searchForm.searchItems')"
@@ -112,55 +137,167 @@
           <template #suffix>
             <Icon icon="ant-design:search-outlined" style="color: #aaa" size="16" />
           </template>
-        </Input>
-        <div class="custom-item">
-          <div class="custom-label font-bold">Sort</div>
-          <Select style="flex: 1" size="small" v-model:value="sortField">
-            <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </Select.Option>
-          </Select>
-        </div>
-        <div class="custom-item">
-          <Radio.Group name="sortType" v-model:value="sortType">
-            <Radio v-for="item in SortTypeOption" :key="item.value" :value="item.value">
-              <span class="radioText">{{ item.label }}</span>
-            </Radio>
-          </Radio.Group>
-        </div>
-        <div class="filter">
-          <div class="font-bold mb-2 flex justify-between">
-            <div>Filter</div>
-            <div>
-              <SvgIcon @click="resetFilter" name="reload" />
+        </Input> -->
+        <template v-if="sliderType === 'fliter'">
+          <div class="custom-item font-bold mb-2 flex justify-between">
+            <div class="font-bold">Filter and Sort</div>
+
+            <div class="cursor-pointer"> <SvgIcon @click="resetFilter" name="reload" /> </div
+          ></div>
+          <div>Sort with</div>
+          <Tabs size="small" v-model:activeKey="sortWithLabel">
+            <Tabs.TabPane key="Data">
+              <template #tab> Data </template>
+            </Tabs.TabPane>
+            <Tabs.TabPane key="Result">
+              <template #tab> Result </template>
+            </Tabs.TabPane>
+          </Tabs>
+
+          <template v-if="sortWithLabel === 'Data'">
+            <div class="custom-item">
+              <Select style="flex: 1" size="small" v-model:value="sortField">
+                <Select.Option v-for="item in dataSortOption" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </Select.Option>
+              </Select>
             </div>
-          </div>
-          <CollContainer icon="mdi:calendar-month" title="Uploaded date">
-            <DatePicker v-model:start="start" v-model:end="end" />
-          </CollContainer>
-          <CollContainer icon="mdi:calendar-month" title="Status">
-            <Radio.Group name="status" v-model:value="annotationStatus">
-              <Radio :value="undefined">
-                <SvgIcon name="annotated" />
-                <span class="ml-2">All</span>
-              </Radio>
-              <Radio value="ANNOTATED">
-                <SvgIcon name="annotated" />
-                <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
-              </Radio>
-              <Radio value="NOT_ANNOTATED">
-                <SvgIcon name="notAnnotated" />
-                <span class="ml-2"
-                  >Not Annotated({{ countFormat(statusInfo.notAnnotatedCount) }})</span
-                >
-              </Radio>
-              <Radio value="INVALID">
-                <SvgIcon name="invalid" />
-                <span class="ml-2">Invalid({{ countFormat(statusInfo.invalidCount) }})</span>
+          </template>
+          <template v-else>
+            <div class="custom-item">
+              <Cascader
+                showSearch
+                v-model:value="runRecordId"
+                :options="modelRunResultList"
+                placeholder="Please select"
+              />
+            </div>
+            <div class="custom-item">
+              <Select style="flex: 1" size="small" v-model:value="sortField">
+                <Select.Option :value="SortFieldEnum.DATA_CONFIDENCE">
+                  Data Confidence
+                </Select.Option>
+              </Select>
+            </div>
+          </template>
+
+          <div class="custom-item">
+            <Radio.Group name="sortType" v-model:value="sortType">
+              <Radio v-for="item in SortTypeOption" :key="item.value" :value="item.value">
+                <span class="radioText">{{ item.label }}</span>
               </Radio>
             </Radio.Group>
-          </CollContainer>
-        </div>
+          </div>
+          <div class="filter">
+            <div class="font-bold mb-2 flex justify-between">
+              <div>Filter with data</div>
+            </div>
+            <CollContainer icon="mdi:calendar-month" title="Uploaded at">
+              <DatePicker v-model:start="start" v-model:end="end" />
+            </CollContainer>
+
+            <CollContainer icon="splite|svg" title="Split">
+              <Radio.Group name="status" v-model:value="splitType">
+                <Radio style="display: block" :value="undefined">
+                  <span>All </span>
+                </Radio>
+                <Radio :value="SelectedDataSplitType.TRAINING">
+                  <SvgIcon name="dataset-split-training" />
+                  <span class="ml-2">Training</span>
+                </Radio>
+                <Radio :value="SelectedDataSplitType.VALIDATION">
+                  <SvgIcon name="dataset-split-validation" />
+                  <span class="ml-2">Validation</span>
+                </Radio>
+                <Radio :value="SelectedDataSplitType.TEST">
+                  <SvgIcon name="dataset-split-test" />
+                  <span class="ml-2">Test</span>
+                </Radio>
+                <Radio :value="SelectedDataSplitType.NOT_SPLIT">
+                  <SvgIcon name="invalid" />
+                  <span class="ml-2">Not Split</span>
+                </Radio>
+              </Radio.Group>
+            </CollContainer>
+
+            <CollContainer icon="mdi:calendar-month" title="Status">
+              <Radio.Group name="status" v-model:value="annotationStatus">
+                <Radio :value="undefined">
+                  <span>All</span>
+                </Radio>
+                <Radio value="ANNOTATED">
+                  <SvgIcon name="annotated" />
+                  <span class="ml-2">Annotated({{ countFormat(statusInfo.annotatedCount) }})</span>
+                </Radio>
+                <Radio value="NOT_ANNOTATED">
+                  <SvgIcon name="notAnnotated" />
+                  <span class="ml-2"
+                    >Not Annotated({{ countFormat(statusInfo.notAnnotatedCount) }})</span
+                  >
+                </Radio>
+                <Radio value="INVALID">
+                  <SvgIcon name="invalid" />
+                  <span class="ml-2">Invalid({{ countFormat(statusInfo.invalidCount) }})</span>
+                </Radio>
+              </Radio.Group>
+            </CollContainer>
+          </div>
+
+          <div class="filter" v-if="sortWithLabel !== 'Data'">
+            <div class="font-bold mb-2 flex justify-between">
+              <div>Filter with result</div>
+            </div>
+            <div class="custom-item">
+              <Cascader
+                disabled
+                v-model:value="runRecordId"
+                :options="modelRunResultList"
+                placeholder="Please select"
+              />
+            </div>
+
+            <CollContainer
+              v-if="runRecordId?.length > 0"
+              icon="data-confidence|svg"
+              title="Data confidence"
+            >
+              <Slider
+                style="width: 100%"
+                :min="0"
+                :max="1"
+                v-model:value="confidenceSlider"
+                range
+                :step="0.01"
+              />
+            </CollContainer>
+          </div>
+        </template>
+        <template v-else
+          ><div>
+            <div class="custom-item">
+              <div class="custom-label font-bold"> If display results</div>
+              <Switch @change="showAnnotationChange" v-model:checked="showAnnotation" />
+            </div>
+            <div>
+              <div class="custom-label font-bold"> Results</div>
+
+              <TreeSelect
+                :dropdownStyle="{ width: '200px' }"
+                size="small"
+                style="width: 100%"
+                v-model:value="runRecordIdDisplay"
+                :tree-data="modelRunResultListForDisplay"
+                tree-checkable
+                allow-clear
+                placeholder="Please select"
+                showSearch
+                treeDefaultExpandAll
+              />
+
+              <!-- fieldNames -->
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -175,6 +312,8 @@
     watch,
     onMounted,
     onUnmounted,
+    watchEffect,
+    computed,
   } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
   import {
@@ -182,6 +321,7 @@
     datasetObjectApi,
     deleteBatchDataset,
     getLockedByDataset,
+    getMoelResultApi,
     getStatusNum,
     hasOntologyApi,
     makeFrameSeriesApi,
@@ -190,6 +330,7 @@
     ungroupFrameSeriesApi,
     unLock,
   } from '/@/api/business/dataset';
+  import { SelectedDataSplitType } from '/@/api/business/model/datasetModel';
   import { ScrollContainer, ScrollActionType } from '/@/components/Container/index';
   import { useRoute } from 'vue-router';
   import {
@@ -203,7 +344,18 @@
   // import emitter from 'tiny-emitter/instance';
   import ImgCard from './components/ImgCard.vue';
   import Tools from './components/Tools.vue';
-  import { Select, Radio, Input, Modal } from 'ant-design-vue';
+  import {
+    Select,
+    Radio,
+    Input,
+    Modal,
+    Switch,
+    Tabs,
+    Slider,
+    message,
+    Cascader,
+    TreeSelect,
+  } from 'ant-design-vue';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { datasetItemDetail } from '/@/api/business/dataset';
   import { dataTypeEnum } from '/@/api/business/model/datasetModel';
@@ -219,7 +371,7 @@
   import datasetEmpty from '/@/assets/images/dataset/data_empty.png';
   // import WarningModalVue from './components/WarningModal.vue';
   import { ModelRun } from '/@@/ModelRun';
-  import { PreModelParam } from '/@/api/business/model/modelsModel';
+  import { ResultsModelParam, DataModelParam } from '/@/api/business/model/modelsModel';
   import { countFormat, goToTool, setDatasetBreadcrumb } from '/@/utils/business';
   import { useLoading } from '/@/components/Loading';
   import { setEndTime, setStartTime } from '/@/utils/business/timeFormater';
@@ -227,6 +379,7 @@
   import { Button } from '/@/components/BasicCustom/Button';
   import { getModelAllApi } from '/@/api/business/models';
   import { useFlowLayout } from '/@/hooks/web/useFlowLayout';
+  import { splitDataSelected } from '/@/api/business/dataset';
   // import { VScroll } from '/@/components/VirtualScroll/index';
   // const [warningRegister, { openModal: openWarningModal, closeModal: closeWarningModal }] =
   //   useModal();
@@ -245,11 +398,14 @@
   const end = ref<Nullable<Dayjs>>(null);
   const showAnnotation = ref<boolean>(false);
   const name = ref<string>('');
-  const sortField = ref<SortFieldEnum>(SortFieldEnum.NAME);
+  const sortField = ref<SortFieldEnum | undefined>(SortFieldEnum.NAME);
   const sortType = ref<SortTypeEnum>(SortTypeEnum.ASC);
   const lockedId = ref<number>(0);
   const lockedNum = ref<number>(0);
-
+  const sliderType = ref<string>('fliter');
+  const sortWithLabel = ref<string>('Data');
+  const confidenceSlider = ref([0, 1]);
+  const runRecordId = ref<any>();
   const type = ref<PageTypeEnum>();
   const { id, dataId } = query;
   const [register, { openModal }] = useModal();
@@ -259,6 +415,31 @@
   const pageNo = ref<number>(1);
   const modelrunOption = ref<any>();
   const annotationStatus = ref<any>();
+  let modelRunResultList = ref<any>([]);
+  const modelRunResultListForDisplay = computed(() => {
+    let result: Array<any> = [{ label: 'Ground Truths', value: -1 }, ...modelRunResultList.value];
+    return result;
+  });
+
+  let showAnnotationChange = (value) => {
+    if (value) {
+      let values: any = [];
+      modelRunResultListForDisplay.value.map((item) => {
+        if (item.children) {
+          item.children.map((k) => {
+            values.push(k.value);
+          });
+        } else {
+          values.push(item.value);
+        }
+      });
+      runRecordIdDisplay.value = values;
+    }
+  };
+
+  let runRecordIdDisplay = ref();
+  const splitType = ref<any>();
+
   const selectName = t('business.models.models');
   const title = t('business.models.run.runModel');
   const modelId = ref<number>();
@@ -271,6 +452,7 @@
     },
   ]);
   const objectMap = ref<Record<string, any>>({});
+
   onBeforeMount(async () => {
     // fetchList({});
     // max.value = await getMaxCountApi({ datasetId: id as unknown as number });
@@ -287,10 +469,30 @@
     ascOrDesc: sortType,
     createEndTime: end,
     annotationStatus: annotationStatus,
+    splitType: splitType,
+    confidenceSlider: confidenceSlider,
+    runRecordId: runRecordId,
   });
   let timeout;
+
+  let getMoelResult = async () => {
+    let res = await getMoelResultApi(id);
+
+    modelRunResultList.value = res.map((item) => {
+      let result = {
+        label: item.modelName,
+        value: item.modelId,
+        children: item.runRecords.map((i) => ({
+          label: i.runNo,
+          value: i.id,
+        })),
+      };
+
+      return result;
+    });
+  };
   onMounted(async () => {
-    console.log(scrollRef.value);
+    getMoelResult();
     fetchStatusNum();
     getLockedData();
     fetchList(filterForm);
@@ -342,12 +544,16 @@
   };
 
   const resetFilter = () => {
+    let type = sortWithLabel.value;
     filterForm.name = '';
     filterForm.createStartTime = null;
-    filterForm.sortField = SortFieldEnum.NAME;
+    filterForm.sortField = type === 'Result' ? SortFieldEnum.DATA_CONFIDENCE : SortFieldEnum.NAME;
     filterForm.ascOrDesc = SortTypeEnum.ASC;
     filterForm.createEndTime = null;
     filterForm.annotationStatus = undefined;
+    filterForm.splitType = undefined;
+    filterForm.runRecordId = undefined;
+    filterForm.confidenceSlider = [0, 1];
   };
 
   const getSelectOptions = async () => {
@@ -378,6 +584,14 @@
           ? setEndTime(filter.createEndTime)
           : undefined,
     };
+    delete params.confidenceSlider;
+
+    if (params.runRecordId && params.runRecordId.length) {
+      params.runRecordId = params.runRecordId[1];
+      params.minDataConfidence = filter.confidenceSlider[0];
+      params.maxDataConfidence = filter.confidenceSlider[1];
+    }
+
     if (dataId) {
       params.ids = [dataId].toString();
     }
@@ -392,6 +606,7 @@
       } else {
         const res: DatasetGetResultModel = await datasetApi(params);
         tempList = res.list;
+
         list.value = res.list;
         total.value = res.total;
       }
@@ -404,9 +619,13 @@
             if (!res[dataId]) {
               res[dataId] = [];
             }
-            res[dataId] = objects.map((o) => o.classAttributes);
-            return map;
+            res[dataId] = objects.map((o) => ({
+              sourceId: +(o.sourceId || o.classAttributes.sourceId || -1),
+              ...o.classAttributes,
+            }));
+            return res;
           }, map);
+
           Object.assign(objectMap.value, map);
         });
 
@@ -437,6 +656,18 @@
     fixedFetchList();
   };
 
+  const handleSplite = async (type) => {
+    await splitDataSelected({
+      dataIds: selectedList.value,
+      splitType: type,
+    });
+    message.success({
+      content: 'successed',
+      duration: 5,
+    });
+    fixedFetchList();
+  };
+
   const handleDelete = async () => {
     Modal.confirm({
       title: () => 'Delete Data',
@@ -447,7 +678,6 @@
         danger: true,
       },
       onOk() {
-        console.log(id);
         return new Promise(async (resolve) => {
           await deleteBatchDataset({
             ids: selectedList.value,
@@ -507,7 +737,6 @@
     if (index > -1 && !flag) {
       unref(selectedList).splice(index, 1);
     }
-    console.log(unref(selectedList));
   };
 
   const handleSelectAll = () => {
@@ -589,7 +818,10 @@
     openRunModal(true, {});
   };
 
-  const handleRun = async (params: Nullable<PreModelParam>) => {
+  const handleRun = async (
+    resultModel: Nullable<ResultsModelParam>,
+    dataModel: Nullable<DataModelParam>,
+  ) => {
     let templist: DatasetItem[] = [];
     let type = dataTypeEnum.SINGLE_DATA;
     const data = unref(list).filter((item) => {
@@ -601,14 +833,15 @@
       type = dataTypeEnum.FRAME_SERIES;
       templist = selectedList.value;
     }
-
+    // debugger
     const res = await takeRecordByDataModel({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
       dataType: type,
       modelId: modelId.value as number,
       modelCode: selectOptions.value.filter((item) => item.id === modelId.value)[0].modelCode,
-      resultFilterParam: params,
+      resultFilterParam: resultModel,
+      // dataFilterParam: dataModel,
     });
     goToTool({ recordId: res, type: 'modelRun' }, info.value?.type);
     // window.location.reload();
@@ -620,17 +853,34 @@
     pageNo.value = 1;
     selectedList.value = [];
   };
-  let { cardHeight, cardWidth, paddingX } = useFlowLayout('list', 30);
 
-  // watch(sliderWidthValue, (count) => {
-  //   changeWidth(count);
-  // });
-  // watch(cardWidth, (count) => {
-  //   sliderWidthValue.value = parseInt(count);
-  // });
-  // watchEffect(() => {
-  //   cardHeight, paddingX;
-  // });
+  let sliderWidthValue = ref<number>(200);
+  let { cardHeight, cardWidth, paddingX, changeWidth, resetWidth, maxSliderWidth } = useFlowLayout(
+    'list',
+    0,
+  );
+
+  watch(
+    () => runRecordIdDisplay.value,
+    (val) => {
+      if (!val?.length) {
+        showAnnotation.value = false;
+      }
+    },
+  );
+  watch(sortWithLabel, () => {
+    resetFilter();
+  });
+  watch(sliderWidthValue, (count) => {
+    changeWidth(count);
+  });
+  watch(cardWidth, (count) => {
+    sliderWidthValue.value = parseInt(count);
+  });
+  watchEffect(() => {
+    // @ts-ignore
+    cardHeight, paddingX;
+  });
 </script>
 <style lang="less" scoped>
   @import url(./index.less);
@@ -638,7 +888,7 @@
     margin: 0 -10px;
     position: relative;
     display: flex;
-    height: calc(100vh - 187px);
+    height: calc(100vh - 226px) !important;
 
     :deep(.scrollbar__view) {
       width: 100%;
@@ -649,8 +899,6 @@
     }
 
     .listcard {
-      // margin: 0 !important;
-
       margin: v-bind(paddingX) !important;
       height: v-bind(cardHeight) !important;
     }

@@ -32,62 +32,83 @@
             </Select.Option>
           </Select>
         </div>
-        <div class="flex gap-4px items-center">
-          <span v-if="!selectedBrush" className="select-label">Select data by</span>
-          <div
-            v-else
-            class="flex items-center gap-4px text-primary cursor-pointer"
-            @click="handleChangeBrush()"
-          >
-            <Icon icon="ion:arrow-back" />
-            <span>Back</span>
+        <div>
+          <div class="flex gap-4px items-center">
+            <span v-if="!selectedBrush" className="select-label">Select data by</span>
+            <div
+              v-else
+              class="flex items-center gap-4px text-primary cursor-pointer"
+              @click="handleChangeBrush()"
+            >
+              <Icon icon="ion:arrow-back" />
+              <span>Back</span>
+            </div>
+
+            <div class="brush_container">
+              <div
+                class="brush-item"
+                :class="selectedBrush == brushEnum.PATH ? 'active' : ''"
+                @click="handleChangeBrush(brushEnum.PATH)"
+              >
+                <SvgIcon
+                  :name="
+                    selectedBrush == brushEnum.PATH
+                      ? 'dataset-overview-path-inactive'
+                      : 'dataset-overview-path'
+                  "
+                  :size="24"
+                />
+              </div>
+              <div
+                class="brush-item"
+                :class="selectedBrush == brushEnum.RECT ? 'active' : ''"
+                @click="handleChangeBrush(brushEnum.RECT)"
+              >
+                <SvgIcon
+                  :name="
+                    selectedBrush == brushEnum.RECT
+                      ? 'dataset-overview-rect-inactive'
+                      : 'dataset-overview-rect'
+                  "
+                  :size="24"
+                />
+              </div>
+            </div>
+            <div @click="handleChangeBrush('fliter')">
+              <Icon
+                :style="selectedBrush !== 'fliter' ? '' : ' background-color: #60a9fe; color: #fff'"
+                size="22"
+                class="zoom"
+                icon="ant-design:zoom-in-outlined"
+            /></div>
           </div>
-          <div class="brush_container">
-            <div
-              class="brush-item"
-              :class="selectedBrush == brushEnum.PATH ? 'active' : ''"
-              @click="handleChangeBrush(brushEnum.PATH)"
+          <div>
+            <span style="font-size: 14px"> Selected {{ selectedData.length }} data </span> &nbsp;
+            <Button
+             
+              style="border-radius: 8px"
+              @click="showSelectedData"
+              v-if="selectedData.length"
+              type="default"
+              >View data</Button
             >
-              <SvgIcon
-                :name="
-                  selectedBrush == brushEnum.PATH
-                    ? 'dataset-overview-path-inactive'
-                    : 'dataset-overview-path'
-                "
-                :size="24"
-              />
-            </div>
-            <div
-              class="brush-item"
-              :class="selectedBrush == brushEnum.RECT ? 'active' : ''"
-              @click="handleChangeBrush(brushEnum.RECT)"
-            >
-              <SvgIcon
-                :name="
-                  selectedBrush == brushEnum.RECT
-                    ? 'dataset-overview-rect-inactive'
-                    : 'dataset-overview-rect'
-                "
-                :size="24"
-              />
-            </div>
           </div>
         </div>
       </div>
       <div class="chartContainer">
-        <div ref="plotRef" class="chartContainer__box"></div>
+        <div class="container"> <div ref="plotRef" class="chartContainer__box"></div> </div>
       </div>
     </template>
   </div>
 </template>
 <script lang="ts" setup>
   import axios from 'axios';
-  import { computed, onMounted, ref, h } from 'vue';
+  import { computed, onMounted, ref, h, watch } from 'vue';
   import { useGo } from '/@/hooks/web/usePage';
-  import { RouteEnum } from '/@/enums/routeEnum';
+  import { RouteChildEnum, RouteEnum } from '/@/enums/routeEnum';
   import { setDatasetBreadcrumb } from '/@/utils/business';
-  import { Select, Spin, Tooltip } from 'ant-design-vue';
-  import { LoadingOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
+  import { Select, Spin, Tooltip, Button } from 'ant-design-vue';
+  import { LoadingOutlined, InfoCircleOutline } from '@ant-design/icons-vue';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import ChartEmpty from './ChartEmpty.vue';
   import emptyImg from '/@/assets/images/ontology/overview-empty-img.svg';
@@ -103,7 +124,9 @@
   import { datasetDetailApi } from '/@/api/business/dataset';
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import _ from 'lodash';
-
+  import { Column, G2 } from '@antv/g2plot';
+  import { parseParam } from '/@/utils/business/parseParams';
+  import { useRouter } from 'vue-router';
   const go = useGo();
   const props = defineProps<{ datasetId: number | string }>();
 
@@ -174,17 +197,27 @@
   };
 
   /** Brush */
-  const selectedBrush = ref<brushEnum>();
+  const selectedBrush = ref<brushEnum | 'fliter'>();
   const handleChangeBrush = (value?) => {
     selectedBrush.value = value;
-
     const plot = chartRef.value;
     if (plot && !!value) {
-      plot.update({ brush: { enabled: true, type: value } });
+      if (value == 'fliter') {
+        plot.update({
+          brush: {
+            enabled: true,
+            action: 'filter',
+            type: brushEnum.RECT,
+          },
+        });
+      } else {
+        plot.update({ brush: { action: 'highlight', enabled: true, type: value } });
+      }
     } else {
-      plot.update({ brush: { enabled: false } });
+      plot.update({ brush: { action: 'highlight', enabled: false } });
     }
   };
+  let showG2Tooltip = computed(() => (selectedBrush.value ? 'none' : 'block'));
 
   /** List */
   const isLoading = ref<boolean>(false);
@@ -253,6 +286,40 @@
       maskDom.style.display = 'none';
     }
   };
+  const selectedData = ref([]);
+  let getHighlightData = _.debounce((data) => {
+    let result = data?.map((item) => item.data.id);
+    console.log(result);
+    if (result?.length) {
+      selectedData.value = result;
+    }
+  }, 200);
+  const { currentRoute } = useRouter();
+  let showSelectedData = () => {
+    const params = { dataId: selectedData.value, ...currentRoute.value.query };
+    go(parseParam(RouteChildEnum.DATASETS_DATA, params));
+  };
+  watch(
+    () => selectedBrush.value,
+    (val) => {
+      if (!val || val === 'fliter') {
+        selectedData.value = [];
+      }
+    },
+    {},
+  );
+
+  let setTypeAsFilter = () => {
+    chartRef.value.update({
+      brush: {
+        enabled: true,
+        // 圈选高亮，不指定默认为: filter
+        action: 'filter',
+        // isStartEnable: () => !!selectedBrush.value,
+      },
+    });
+    // selectedBrush.value = undefined;
+  };
 
   const chartRef = ref<any>();
   onMounted(async () => {
@@ -264,14 +331,12 @@
       data: scatterList.value,
       ...defaultScatterOptions,
       brush: {
-        enabled: false,
+        enabled: true,
         // 圈选高亮，不指定默认为: filter
         action: 'highlight',
         mask: {
           style: {
-            fill: 'rgba(0,0,0,0.15)',
-            stroke: 'rgba(0,0,0,0.45)',
-            lineWidth: 0.5,
+            fill: 'rgba(255,0,0,0.15)',
           },
         },
         isStartEnable: () => !!selectedBrush.value,
@@ -327,12 +392,44 @@
         },
       },
     });
+
+    chartRef.value.on(G2.ELEMENT_RANGE_HIGHLIGHT_EVENTS.AFTER_HIGHLIGHT, ({ data }) => {
+      getHighlightData(data.highlightElements);
+    });
+
+    chartRef.value.getStates(G2.BRUSH_FILTER_EVENTS.AFTER_RESET, () => {
+      // after brush filter reset
+      // debugger
+      console.log(chartRef.value.chart.getStates());
+    });
   });
 </script>
 <style lang="less" scoped>
   @import './index.less';
-  .chartContainer__box {
-    width: 90%;
+  .zoom {
+    cursor: pointer;
+    border-radius: 30%;
+    padding: 2px;
+  }
+  .container {
+    width: 100%;
+    // max-width: 20000px;
+    height: 0;
+    position: relative;
+    padding-top: 50%;
+    // overflow: auto;
+    .chartContainer__box {
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0 20px;
+    }
+    :deep(.g2-tooltip) {
+      display: v-bind(showG2Tooltip);
+    }
   }
   .brush_container {
     display: flex;

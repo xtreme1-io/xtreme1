@@ -52,4 +52,10 @@ public class DataEdit {
      */
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createdAt;
+
+    /**
+     * Locked num
+     */
+    @TableField(exist = false)
+    private Long lockedNum;
 }

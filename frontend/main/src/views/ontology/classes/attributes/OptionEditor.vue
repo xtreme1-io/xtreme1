@@ -131,14 +131,11 @@
   const handleSave = async () => {
     try {
       if (getFieldsValue && getFieldsValue()) {
-        console.log(getFieldsValue());
-
         const { name } = getFieldsValue();
-        console.log(name);
 
         if (!name) return;
       }
-      console.log('save', props);
+
       // if (!props.isBasic) {
       // }
       await formRef.value.validate();

@@ -3,8 +3,6 @@ package ai.basic.x1.adapter.port.rpc;
 import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.port.rpc.dto.PointCloudCRReqDTO;
 import ai.basic.x1.adapter.port.rpc.dto.PointCloudCRRespDTO;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelReqDTO;
-import ai.basic.x1.adapter.port.rpc.dto.PreModelRespDTO;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.TypeReference;
@@ -23,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class PointCloudConvertRenderHttpCaller {
 
-    @Value("${pointcloud.convertRender.url}")
+    @Value("${pointCloud.convertRender.url}")
     private String url;
 
 

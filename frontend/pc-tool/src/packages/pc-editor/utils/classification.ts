@@ -82,7 +82,7 @@ export function traverseClass2Arr(data: any) {
     let classTypes = [] as IClassType[];
     data.forEach((config: any) => {
         let classType: IClassType = {
-            id: config.id + '',
+            id: config.id || config.name,
             name: config.name || '',
             // label: config.name + '-label',
             label: config.name || '',

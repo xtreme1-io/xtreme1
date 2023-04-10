@@ -19,6 +19,10 @@ import VueLazyLoad from 'vue3-lazyload';
 import placeImg from '/@/assets/images/placeImg.png';
 import { setupLazyLoadDirective } from './directives/lazy';
 
+import JsonViewer from 'vue3-json-viewer';
+//添加样式
+import 'vue3-json-viewer/dist/index.css';
+
 // Importing on demand in local development will increase the number of browser requests by around 20%.
 // This may slow down the browser refresh speed.
 // Therefore, only enable on-demand importing in production environments .
@@ -32,7 +36,7 @@ if (import.meta.env.DEV) {
 
 async function bootstrap() {
   const app = createApp(App);
-
+  app.use(JsonViewer);
   // app.use(apolloProvider);
 
   app.use(V3ColorPicker);

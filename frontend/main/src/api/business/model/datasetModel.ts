@@ -1,5 +1,5 @@
 import { BasicPageParams, BasicFetchResult, SortType } from '/@/api/model/baseModel';
-import { PreModelParam } from '/@/api/business/model/modelsModel';
+import { resultFilterParam } from '/@/api/business/model/modelsModel';
 
 export enum listTypeEnum {
   list = 'LIST',
@@ -33,6 +33,7 @@ export enum SortFieldEnum {
   CREATED_AT = 'CREATED_AT',
   ANNOTATION_COUNT = 'ANNOTATION_COUNT',
   UPDATED_AT = 'UPDATED_AT',
+  DATA_CONFIDENCE = 'DATA_CONFIDENCE',
 }
 
 export type ListParams = BasicPageParams;
@@ -97,6 +98,7 @@ export enum datasetTypeEnum {
   LIDAR_FUSION = 'LIDAR_FUSION',
   LIDAR_BASIC = 'LIDAR_BASIC',
   IMAGE = 'IMAGE',
+  LIDAR = 'LIDAR',
 }
 
 export interface fileItem {
@@ -149,6 +151,7 @@ export interface DatasetItem {
   name: string;
   lockedBy: Nullable<string>;
   datasetName?: string;
+  splitType: string;
 }
 
 export interface DatasetListItem {
@@ -205,7 +208,7 @@ export interface takeRecordParams {
   modelId?: Nullable<number>;
   modelCode?: modelCode;
   isFilterData?: boolean;
-  resultFilterParam?: Nullable<PreModelParam>;
+  resultFilterParam?: Nullable<resultFilterParam>;
 }
 
 export interface exportFileRecord {
@@ -251,6 +254,9 @@ export interface UploadParams {
   fileUrl: string;
   datasetId: string;
   source: UploadSourceEnum;
+  resultType?: string;
+  modelId?: number;
+  dataFormat?: string;
 }
 
 export enum UploadStatusEnum {
@@ -270,4 +276,31 @@ export interface ResponseUploadRecord {
   totalDataNum: string;
   parsedDataNum: string;
   status: UploadStatusEnum;
+}
+
+export enum SelectedDataSplitType {
+  TRAINING = 'TRAINING',
+  VALIDATION = 'VALIDATION',
+  TEST = 'TEST',
+  NOT_SPLIT = 'NOT_SPLIT',
+}
+export interface SelectedDataPa {
+  dataIds: string[];
+  splitType: SelectedDataSplitType;
+}
+export interface splitFliterParams {
+  datasetId: Number;
+  targetDataType?: string;
+  totalSizeRatio: number;
+  trainingRatio: number;
+  validationRatio: number;
+  testRatio: number;
+  splittingBy: String;
+  sortBy?: string;
+  ascOrDesc?: string;
+}
+
+export interface TotalDataCountPa {
+  datasetId: Number;
+  targetDataType?: string;
 }

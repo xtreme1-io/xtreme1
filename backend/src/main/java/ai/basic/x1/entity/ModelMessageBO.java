@@ -36,4 +36,6 @@ public class ModelMessageBO {
 
     private DataInfoBO dataInfo;
 
+    private String url;
+
 }

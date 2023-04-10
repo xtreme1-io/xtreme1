@@ -48,6 +48,20 @@ export enum ObjectType {
 //     modelClass?: string;
 //     modelRunLabel?: string;
 // }
+export enum SourceType {
+    TASK = 'TASK',
+    DATA_FLOW = 'DATA_FLOW',
+    MODEL = 'MODEL',
+}
+
+export interface IResultSource {
+    name: string;
+    sourceId: string;
+    sourceType: SourceType;
+    modelId?: string;
+    modelName?: string;
+}
+
 export interface IObjectV2 {
     id?: string;
     type?: ObjectType;
@@ -105,6 +119,8 @@ export interface IUserData {
     version?: number;
     createdBy?: any;
     createdAt?: string;
+    sourceId?: string;
+    sourceType?: string;
 }
 
 export interface IObject extends IUserData {
@@ -212,7 +228,7 @@ export interface IConfig {
     renderBox: boolean;
     renderProjectBox: boolean;
     renderProjectPoint: boolean;
-
+    withoutTaskId: string;
     //
     FILTER_ALL: string;
     aspectRatio: number;
@@ -316,6 +332,7 @@ export interface IFrame {
     // flow
     dataStatus: 'INVALID' | 'VALID';
     annotationStatus: 'ANNOTATED' | 'NOT_ANNOTATED' | 'INVALID';
+    sources?: IResultSource[];
     skipped: boolean;
 }
 

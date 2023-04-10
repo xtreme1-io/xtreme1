@@ -26,6 +26,11 @@ public class DataResultExportBO {
     private Long dataId;
 
     /**
+     * Source name
+     */
+    private String sourceName;
+
+    /**
      * Classification values
      */
     private JSONArray classificationValues;

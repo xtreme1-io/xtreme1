@@ -110,7 +110,6 @@ export const setSchema = (
       getItem(tempData, i);
     }
     const deleteIndex = index[index.length - 1];
-    console.log('delete', deleteIndex);
     tempData[getClassificationSchemaName(list.length)].splice(deleteIndex, 1);
   } else if (setType === 'update') {
     for (let i = 0; i < list.length - 1; i++) {
@@ -154,7 +153,6 @@ export const setClassSchema = (
       getItem(tempData, i);
     }
     const deleteIndex = index[index.length - 1];
-    console.log('delete', deleteIndex);
     tempData[getClassSchemaName(list.length - 1)].splice(deleteIndex, 1);
   } else if (setType === 'update') {
     for (let i = 0; i < list.length - 1; i++) {

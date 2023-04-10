@@ -7,7 +7,7 @@ import BSError from '../common/BSError';
 export function view(): IPageHandler {
     let tool = useInjectTool();
 
-    let { loadClasses, loadDataFromFrameSeries, loadDateSetClassification } = useTool();
+    let { loadClasses, loadDateSetClassification } = useTool();
 
     async function init() {
         let { query } = tool.state;

@@ -13,6 +13,7 @@
     <div class="flex justify-center">
       <UploadProgress
         ref="progressRef"
+        v-bind="$attrs"
         :datasetType="props.datasetType"
         :id="props.id"
         :file="fileList"
@@ -37,7 +38,7 @@
     datasetType: datasetTypeEnum | undefined;
     id: number;
   }>();
-  const emits = defineEmits(['fetchList']);
+  const emits = defineEmits(['fetchList', 'resetMoelResult']);
 
   const handleFetchList = () => {
     emits('fetchList');
@@ -49,7 +50,7 @@
   const uploadUrl = ref<string>('');
 
   const [register, { closeModal }] = useModalInner((data: any) => {
-    console.log('ProgressModal: ', data);
+    // console.log('ProgressModal: ', data);
     source.value = data.source;
     if (source.value == UploadSourceEnum.LOCAL) {
       fileList.value = data.fileList;
@@ -70,13 +71,13 @@
       closeModal();
       reset();
       handleReset();
+      emits('resetMoelResult');
     } else {
       ModalConfirmCustom({
         title: 'Reminder',
         content: 'You have files are uploading, do you want to discard them all?',
         okText: 'Discard',
         onOk: async () => {
-          console.log('modal discard');
           closeModal();
           reset();
           handleReset();

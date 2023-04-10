@@ -3,8 +3,10 @@ import { SortTypeEnum } from '/@/api/model/baseModel';
 import annotate from '/@/assets/images/dataset/annotate.png';
 import unmakeFrameSeries from '/@/assets/images/dataset/unmakeFrameSeries.png';
 import modelRun from '/@/assets/images/dataset/modelRun.png';
+import splite from '/@/assets/icons/splite.svg';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { TeamStatusEnum } from '/@/api/business/model/teamModel';
+import { SelectedDataSplitType } from '/@/api/business/model/datasetModel';
 const { t } = useI18n();
 
 export type actionItem = {
@@ -17,6 +19,7 @@ export type actionItem = {
   hasDivider: boolean;
   permission?: string;
   statusFlag?: TeamStatusEnum;
+  children?: any;
 };
 export const actionList: actionItem[] = [
   {
@@ -45,6 +48,44 @@ export const actionList: actionItem[] = [
     isDisabledFlag: 'annotateAndModelRun',
     img: modelRun,
     hasDivider: true,
+  },
+
+  {
+    text: t('business.datasetContent.splitModel.splitInto'),
+    function: '',
+    isDisabledFlag: 'annotateAndMoelRun',
+    img: splite,
+    hasDivider: true,
+    children: [
+      {
+        text: t('business.datasetContent.splitModel.Training'),
+        type: SelectedDataSplitType.TRAINING,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.Validation'),
+        type: SelectedDataSplitType.VALIDATION,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.Test'),
+        type: SelectedDataSplitType.TEST,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.NotSplited'),
+        function: 'handleSplite',
+        type: SelectedDataSplitType.NOT_SPLIT,
+        img: modelRun,
+        hasDivider: true,
+      },
+    ],
   },
   {
     text: t('common.delText'),
@@ -80,6 +121,43 @@ export const actionImageList: actionItem[] = [
     hasDivider: true,
   },
   {
+    text: t('business.datasetContent.splitModel.splitInto'),
+    function: '',
+    isDisabledFlag: 'annotateAndMoelRun',
+    img: splite,
+    hasDivider: true,
+    children: [
+      {
+        text: t('business.datasetContent.splitModel.Training'),
+        type: SelectedDataSplitType.TRAINING,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.Validation'),
+        type: SelectedDataSplitType.VALIDATION,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.Test'),
+        type: SelectedDataSplitType.TEST,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.NotSplited'),
+        function: 'handleSplite',
+        type: SelectedDataSplitType.NOT_SPLIT,
+        img: modelRun,
+        hasDivider: true,
+      },
+    ],
+  },
+  {
     text: t('common.delText'),
     function: 'handleDelete',
     icon: 'ic:baseline-delete-forever',
@@ -111,6 +189,43 @@ export const actionListFrame: actionItem[] = [
     function: 'handleUngroup',
     img: unmakeFrameSeries,
     hasDivider: false,
+  },
+  {
+    text: t('business.datasetContent.splitModel.splitInto'),
+    function: '',
+    isDisabledFlag: 'annotateAndMoelRun',
+    img: splite,
+    hasDivider: true,
+    children: [
+      {
+        text: t('business.datasetContent.splitModel.Training'),
+        type: SelectedDataSplitType.TRAINING,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.Validation'),
+        type: SelectedDataSplitType.VALIDATION,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.Test'),
+        type: SelectedDataSplitType.TEST,
+        function: 'handleSplite',
+        img: modelRun,
+        hasDivider: true,
+      },
+      {
+        text: t('business.datasetContent.splitModel.NotSplited'),
+        function: 'handleSplite',
+        type: SelectedDataSplitType.NOT_SPLIT,
+        img: modelRun,
+        hasDivider: true,
+      },
+    ],
   },
   {
     text: t('common.delText'),
@@ -179,4 +294,17 @@ export const SortTypeOption = [
 export enum PageTypeEnum {
   frame = 'FRAME',
   list = 'LIST',
+}
+
+export enum SplitedTypeEnum {
+  All = 'All',
+  Splited = 'Split',
+  NotSplited = 'Not Split',
+  Training = 'Training',
+  Validation = 'Validation',
+  Test = 'Test',
+}
+export enum SplitedTargetDataTypeEnum {
+  SPLIT = 'SPLIT',
+  NOT_SPLIT = 'NOT_SPLIT',
 }

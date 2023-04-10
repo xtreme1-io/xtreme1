@@ -26,12 +26,10 @@ export function view(): IPageHandler {
             await loadDataSetInfo();
             await loadUserInfo();
             await Promise.all([loadDateSetClassification(), loadClasses(), loadDataInfo()]);
-
             await editor.loadFrame(0, false);
         } catch (error: any) {
             editor.handleErr(new BSError('', editor.lang('load-error'), error));
         }
-
         editor.showLoading(false);
     }
 

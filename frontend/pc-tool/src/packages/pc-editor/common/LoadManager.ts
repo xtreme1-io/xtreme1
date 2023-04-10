@@ -24,6 +24,7 @@ export default class LoadManager {
 
         showLoading && this.editor.showLoading(true);
         try {
+            await this.editor.getResultSources();
             await Promise.all([this.loadObjectAndClassification(), this.loadResource()]);
             // if (!this.editor.playManager.playing) this.editor.dataResource.load();
         } catch (error: any) {
@@ -92,7 +93,7 @@ export default class LoadManager {
 
         // this.editor.reset();
         this.editor.state.filterActive = [];
-        this.editor.dataManager.setFilterFromData();
+        // this.editor.dataManager.setFilterFromData();
         this.editor.dataManager.loadDataFromManager();
         this.editor.updateIDCounter();
         // this.editor.pc.addObject(annotates);

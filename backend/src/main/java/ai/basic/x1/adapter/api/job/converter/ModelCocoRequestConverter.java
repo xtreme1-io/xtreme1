@@ -1,6 +1,6 @@
 package ai.basic.x1.adapter.api.job.converter;
 
-import ai.basic.x1.adapter.port.rpc.dto.PredImageReqDTO;
+import ai.basic.x1.adapter.port.rpc.dto.ImageDetectionReqDTO;
 import ai.basic.x1.entity.ModelMessageBO;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ModelCocoRequestConverter {
 
-    public static PredImageReqDTO convert(ModelMessageBO message) {
+    public static ImageDetectionReqDTO convert(ModelMessageBO message) {
         var dataInfo = message.getDataInfo();
         if (dataInfo == null) {
             throw new IllegalArgumentException(String.format("%s data is not found",
@@ -26,8 +26,8 @@ public class ModelCocoRequestConverter {
         if (StrUtil.isEmpty(url)) {
             throw new IllegalArgumentException("file url is empty");
         }
-        return PredImageReqDTO.builder().datas(List.of(PredImageReqDTO.ImageData.builder()
-                .imageId(String.valueOf(dataInfo.getId())).imgUrl(url).build())).params("").build();
+        return ImageDetectionReqDTO.builder().datas(List.of(ImageDetectionReqDTO.ImageData.builder()
+                .id(dataInfo.getId()).url(url).build())).build();
     }
 
 }

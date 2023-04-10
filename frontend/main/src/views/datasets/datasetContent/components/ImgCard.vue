@@ -5,8 +5,11 @@
     @mouseleave="handleLeave"
     :style="info?.type !== datasetTypeEnum.LIDAR_FUSION ? 'margin-bottom: 20px' : ''"
   >
-    <div class="lockInfo" v-if="data.lockedBy">
-      <Icon icon="bx:bxs-lock" /> Editing by {{ data.lockedBy }}
+    <div class="lockInfo">
+      <div v-if="data?.splitType && data.splitType !== 'NOT_SPLIT'" class="splitType"
+        ><span :style="getSplitColor(data.splitType)">{{ data.splitType }} </span></div
+      >
+      <div v-if="data.lockedBy"> <Icon icon="bx:bxs-lock" /> Editing by {{ data.lockedBy }} </div>
     </div>
     <div class="img">
       <div :class="getCheckboxClass" v-if="!data.lockedBy">
@@ -115,9 +118,10 @@
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
         <div class="place relation-container image-loading">
           <img class="pointCloudImg h-83px" v-lazyload="getPlaceImg()" alt="" />
-          <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
+          <NodePc :pcObject="iState.pcObject" ref="svg" />
+          <!-- <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
             <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
-          </svg>
+          </svg> -->
         </div>
         <div class="camera">
           <div
@@ -127,7 +131,8 @@
             :key="item"
           >
             <img :key="item" v-lazyload="getPcImage(iState.pcImageObject[item])" alt="" />
-            <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
+            <NodePcImage :pcImageObject="iState.pcImageObject[item]?.object" />
+            <!-- <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
               <template v-for="_item in iState.pcImageObject[item]?.object || []">
                 <polygon v-if="_item.type === '2D_RECT'" :key="_item.id" :points="_item.points" />
                 <polyline
@@ -136,7 +141,7 @@
                   :points="_item.points"
                 />
               </template>
-            </svg>
+            </svg> -->
           </div>
         </div>
         <div class="name"> {{ data.name }} </div>
@@ -147,15 +152,16 @@
         style="width: 100%; height: 100%"
       >
         <img class="object-cover pointCloudImg image-loading" v-lazyload="getPlaceImg()" alt="" />
-        <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
+        <NodePc :pcObject="iState.pcObject" ref="svg" />
+        <!-- <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
           <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
-        </svg>
+        </svg> -->
         <div class="p-2 name bottom"> {{ data.name }} </div>
       </div>
       <div
         v-else-if="info?.type === datasetTypeEnum.IMAGE"
         class="relation-container image-loading"
-        style="width: 100%; height: 100%; margin-bottom: 5px"
+        style="width: 100%; height: 100%"
       >
         <img
           class="place image-card"
@@ -165,7 +171,11 @@
           v-lazyload="getImageUrl(data) || placeImg"
           alt=""
         />
-        <svg
+        <NodeImage
+          :viewBox="{ width: size.svgWidth, height: size.svgHeight }"
+          :imageObject="iState.imageObject"
+        />
+        <!-- <svg
           class="easy-image"
           :style="{
             width: size.svgWidth + 'px',
@@ -211,7 +221,7 @@
               :points="item.points"
             />
           </template>
-        </svg>
+        </svg> -->
         <div class="p-2 name bottom"> {{ data.name }} </div>
       </div>
     </div>
@@ -231,7 +241,7 @@
   import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import { dataTypeEnum } from '/@/api/business/model/datasetModel';
   import { PageTypeEnum } from './data';
-  import { useImgCard } from './useCardObject';
+  import { useImgCard, NodeImage, NodePcImage, NodePc } from './useCardObject';
   import { Icon } from '/@/components/Icon';
   import { goToTool } from '/@/utils/business';
   import { useRoute } from 'vue-router';
@@ -244,6 +254,7 @@
     type: PageTypeEnum | undefined;
     showAnnotation: boolean;
     object?: any[];
+    selectedSourceIds?: any;
   };
   const emits = defineEmits([
     'handleSelected',
@@ -309,9 +320,10 @@
     return props.data.type && props.data?.type === dataTypeEnum.FRAME_SERIES;
   };
 
-  // const handleGo = () => {
-  //   go(`${RouteEnum.DATASETS}/detail?id=${dataId}`);
-  // };
+  const getSplitColor = (type) => {
+    let color = type === 'TRAINING' ? '#32D583' : type === 'TEST' ? '#FDB022' : '#3E8BE9';
+    return `background:${color}`;
+  };
 
   const handleAnnotate = (id) => {
     emits('handleSingleAnnotate', id);
@@ -362,13 +374,25 @@
       position: absolute;
       padding: 0 10px;
       width: 100%;
-      text-align: center;
+      text-align: right;
       top: 6px;
       color: white;
       z-index: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      .splitType {
+        span {
+          display: inline-block;
+          height: 20px;
+          width: 85px;
+          line-height: 20px;
+          text-align: center;
+          font-size: 12px;
+          background: #fdb022;
+          border-radius: 15px;
+        }
+      }
     }
 
     .floder-img {
@@ -526,7 +550,7 @@
 
         .img-item {
           width: 33.33%;
-          height: 50px;
+          // height: 50px;
           // margin-left: 3px;
           // margin-right: 3px;
           position: relative;

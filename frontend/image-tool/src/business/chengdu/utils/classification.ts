@@ -5,27 +5,31 @@ export function traverseClassification2Arr(data: any[]) {
     let classifications = [] as IClassification[];
 
     data.forEach((e: any) => {
+        let attribute = e.attribute || e;
         let classificationId = e.id + '';
+
         let classification: IClassification = {
             id: classificationId,
             name: e.name,
             label: e.name,
             attrs: [],
         };
-        let options = e.options || [];
+        let options = attribute.options || [];
+        if (e.inputType) {
+            attribute.type = e.inputType;
+        }
         let classificationAttr: IClassificationAttr = {
-            id: e.id,
-            // id: e.name,
-            key: e.name,
+            id: attribute.id,
+            key: attribute.name,
             classificationId,
             parent: '',
             parentValue: '',
             parentAttr: e.name,
-            type: e.inputType,
-            name: e.name,
-            label: e.name,
-            value: e.inputType === AttrType.MULTI_SELECTION ? [] : '',
-            required: e.isRequired,
+            type: attribute.type,
+            name: attribute.name,
+            label: attribute.name,
+            value: attribute.type === AttrType.MULTI_SELECTION ? [] : '',
+            required: attribute.required,
             options: options.map((e: any) => {
                 return { value: e.name, label: e.name };
             }),
@@ -33,7 +37,7 @@ export function traverseClassification2Arr(data: any[]) {
 
         classification.attrs.push(classificationAttr);
         options.forEach((option: any) => {
-            traverseOption(classification, option, classificationAttr.id, e.name);
+            traverseOption(classification, option, classificationAttr.id, attribute.name);
         });
         classifications.push(classification);
     });
@@ -52,7 +56,6 @@ export function traverseClassification2Arr(data: any[]) {
             let name = attr.name;
             let classificationAttr: IClassificationAttr = {
                 id: attr.id,
-                // id: `${parent}[${option.name}]-${name}`,
                 key: `${parent}[${option.name}]-${name}`,
                 classificationId: classification.id,
                 parent,
@@ -63,7 +66,7 @@ export function traverseClassification2Arr(data: any[]) {
                 label: name,
                 value: attr.type === AttrType.MULTI_SELECTION ? [] : '',
                 required: attr.required,
-                options: (attr.options || []).map((e: any) => {
+                options: attr.options.map((e: any) => {
                     return { value: e.name, label: e.name };
                 }),
             };
@@ -102,7 +105,7 @@ export function copyClassification(
 export function parseClassesFromBackend(data: any[]) {
     let classTypes = [] as IClassType[];
 
-    console.log(data);
+    // console.log(data);
     data.forEach((config: any) => {
         let classType: IClassType = {
             id: config.id + '',
@@ -160,9 +163,6 @@ export function parseClassesFromBackend(data: any[]) {
 
         classTypes.push(classType);
     });
-
-    console.log(classTypes);
-
     return classTypes;
 }
 
@@ -189,20 +189,19 @@ export function classificationToSave(classification: IClassification) {
         let parent = e.parent && attrMap[e.parent] ? attrMap[e.parent] : null;
         if (parent) parent.leafFlag = false;
     });
-
     let data = attrs.map((e) => {
+        const isParentMulti = e.parent && attrMap[e.parent]?.type === AttrType.MULTI_SELECTION;
         return {
             id: e.id,
             pid: e.parent ? e.parent : null,
             name: e.name,
             value: e.value,
             alias: e.label,
+            pvalue: isParentMulti ? e.parentValue : undefined,
             type: e.type,
             isLeaf: !!e.leafFlag,
         };
     });
-
-    console.log(data);
     return data;
 }
 

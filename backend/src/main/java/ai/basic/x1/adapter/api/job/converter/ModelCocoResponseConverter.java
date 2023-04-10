@@ -1,10 +1,15 @@
 package ai.basic.x1.adapter.api.job.converter;
 
+import ai.basic.x1.adapter.dto.ApiResult;
 import ai.basic.x1.adapter.dto.PreModelParamDTO;
 import ai.basic.x1.adapter.port.dao.mybatis.model.ModelClass;
-import ai.basic.x1.adapter.port.rpc.dto.PredImageRespDTO;
-import ai.basic.x1.entity.PredImageModelObjectBO;
+import ai.basic.x1.adapter.port.rpc.dto.ImageDetectionObject;
+import ai.basic.x1.adapter.port.rpc.dto.ImageDetectionRespDTO;
+import ai.basic.x1.entity.ImageDetectionObjectBO;
+import ai.basic.x1.usecase.exception.UsecaseCode;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,57 +25,64 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ModelCocoResponseConverter {
 
-    public static PredImageModelObjectBO convert(PredImageRespDTO response,
-                                               Map<String, ModelClass> systemModelClassMap,
-                                              PreModelParamDTO filterCondition) {
-        if (CollUtil.isEmpty(response.getPredictItems())) {
-            return PredImageModelObjectBO.builder().code(1)
-                    .message("success")
-                    .dataId(response.getImageId())
-                    .objects(List.of()).build();
+    public static ImageDetectionObjectBO convert(ApiResult<ImageDetectionRespDTO> predImageRespDTOApiResult,
+                                                 Map<String, ModelClass> systemModelClassMap,
+                                                 PreModelParamDTO filterCondition) {
+        ImageDetectionObjectBO.ImageDetectionObjectBOBuilder<?, ?> builder = ImageDetectionObjectBO.builder();
+        var response = predImageRespDTOApiResult.getData();
+        if (predImageRespDTOApiResult.getCode() == UsecaseCode.OK) {
+            if (CollUtil.isEmpty(response.getObjects())) {
+                builder.code(UsecaseCode.OK.getCode())
+                        .message("success")
+                        .dataId(response.getId())
+                        .objects(List.of());
+            } else {
+                log.info("start filter predItem. filter condition: " + JSONUtil.toJsonStr(filterCondition));
+                var predObjects = response.getObjects()
+                        .stream()
+                        .filter(item -> matchSelectedClassAndConfidence(item, filterCondition)
+                        )
+                        .map(item -> buildObject(item, systemModelClassMap))
+                        .collect(Collectors.toList());
+                builder.confidence(response.getConfidence());
+                if (CollUtil.isNotEmpty(predObjects) && ObjectUtil.isNull(response.getConfidence())) {
+                    var dataConfidence = predObjects.stream().mapToDouble(object -> object.getConfidence().doubleValue()).summaryStatistics();
+                    builder.confidence(BigDecimal.valueOf(dataConfidence.getAverage()));
+                }
+                builder.code(UsecaseCode.OK.getCode())
+                        .message("success")
+                        .dataId(response.getId())
+                        .objects(predObjects);
+            }
         } else {
-            log.info("start filter predItem. filter condition: " + JSONUtil.toJsonStr(filterCondition));
-            var predObjects = response.getPredictItems()
-                    .stream()
-                    .filter(item -> matchSystemModelClass(item.getClsid(), systemModelClassMap)
-                            && matchSelectedClassAndConfidence(item, filterCondition)
-                    )
-                    .map(item -> buildObject(item, systemModelClassMap.get(String.valueOf(item.getClsid()))))
-                    .collect(Collectors.toList());
-
-            return PredImageModelObjectBO.builder().code(0)
-                    .message("success")
-                    .dataId(response.getImageId())
-                    .objects(predObjects).build();
+            builder.code(UsecaseCode.ERROR.getCode())
+                    .message(predImageRespDTOApiResult.getMessage())
+                    .objects(null).build();
         }
+        return builder.build();
     }
 
-    private static PredImageModelObjectBO.ObjectBO buildObject(PredImageRespDTO.PredictItem predictItem,
-                                                        ModelClass modelClass) {
-        var topLeft = PredImageModelObjectBO.Point
+    private static ImageDetectionObjectBO.ObjectBO buildObject(ImageDetectionObject imageDetectionObject, Map<String, ModelClass> modelClassMap) {
+        var topLeft = ImageDetectionObjectBO.Point
                 .builder()
-                .x(predictItem.getLeftTopX())
-                .y(predictItem.getLeftTopY()).build();
-        var bottomRight = PredImageModelObjectBO.Point
+                .x(imageDetectionObject.getLeftTopX())
+                .y(imageDetectionObject.getLeftTopY()).build();
+        var bottomRight = ImageDetectionObjectBO.Point
                 .builder()
-                .x(predictItem.getRightBottomX())
-                .y(predictItem.getRightBottomY()).build();
+                .x(imageDetectionObject.getRightBottomX())
+                .y(imageDetectionObject.getRightBottomY()).build();
 
-        return PredImageModelObjectBO
+        return ImageDetectionObjectBO
                 .ObjectBO.builder()
-                .confidence(predictItem.getScore())
-                .modelClass(modelClass.getName())
-                .modelClassId(Integer.valueOf(modelClass.getCode()))
-                .objType("rectangle")
+                .confidence(imageDetectionObject.getConfidence())
+                .modelClass(StrUtil.isNotEmpty(imageDetectionObject.getLabel()) ?
+                        ObjectUtil.isNotNull(modelClassMap.get(imageDetectionObject.getLabel())) ? modelClassMap.get(imageDetectionObject.getLabel()).getName() : null : null)
+                .type("RECTANGLE")
                 .points(List.of(topLeft, bottomRight))
                 .build();
     }
 
-    private static boolean matchSystemModelClass(Integer clsid, Map<String, ModelClass> systemModelClassMap) {
-        return systemModelClassMap.containsKey(String.valueOf(clsid));
-    }
-
-    private static boolean matchSelectedClassAndConfidence(PredImageRespDTO.PredictItem predictItem,
+    private static boolean matchSelectedClassAndConfidence(ImageDetectionObject imageDetectionObject,
                                                            PreModelParamDTO filterPredItem) {
         if (filterPredItem == null || CollUtil.isEmpty(filterPredItem.getClasses())) {
             throw new IllegalArgumentException("model param is empty");
@@ -81,10 +93,11 @@ public class ModelCocoResponseConverter {
         var maxConfidence = getMaxConfidence(filterPredItem.getMaxConfidence());
         var minConfidence = getMinConfidence(filterPredItem.getMinConfidence());
         var selectedClasses = new HashSet<>(filterPredItem.getClasses());
+        var selectedUpperClasses = selectedClasses.stream().map(c -> c.toUpperCase()).collect(Collectors.toList());
 
-        String clsId = String.valueOf(predictItem.getClsid());
-        return selectedClasses.contains(clsId) &&
-                betweenConfidence(predictItem.getScore(), minConfidence, maxConfidence);
+        String label = imageDetectionObject.getLabel();
+        return selectedUpperClasses.contains(label.toUpperCase()) &&
+                betweenConfidence(imageDetectionObject.getConfidence(), minConfidence, maxConfidence);
     }
 
     private static boolean betweenConfidence(BigDecimal predConfidence, BigDecimal minConfidence,

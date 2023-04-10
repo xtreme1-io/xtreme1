@@ -12,5 +12,9 @@ public enum DataInfoSortFieldEnum {
     /**
      * CREATED_AT
      */
-    CREATED_AT
+    CREATED_AT,
+    /**
+     * DATA_CONFIDENCE
+     */
+    DATA_CONFIDENCE
 }

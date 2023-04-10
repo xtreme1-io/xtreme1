@@ -186,4 +186,11 @@ public class CommonConfig implements WebMvcConfigurer {
     public ModelRecognitionUseCase modelRecognitionUseCase() {
         return new ModelRecognitionUseCase();
     }
+
+    @Bean
+    public ModelRunRecordUseCase modelRunRecordUseCase() {
+        return new ModelRunRecordUseCase();
+    }
+
+
 }

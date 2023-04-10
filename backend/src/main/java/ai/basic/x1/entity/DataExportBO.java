@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author fyb
  */
@@ -22,6 +24,6 @@ public class DataExportBO {
     /**
      * Data result information
      */
-    private DataResultExportBO result;
+    private List<DataResultExportBO> result;
 
 }

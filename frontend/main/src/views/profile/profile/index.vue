@@ -75,7 +75,6 @@
     avatarId: '',
   });
   onMounted(async () => {
-    console.log(userStore.getUserInfo);
     setCurrentUserInfo();
   });
   const setCurrentUserInfo = () => {
@@ -94,14 +93,11 @@
     if (!isImage) {
       return createMessage.error('You can only upload jpg/jpeg/png file!');
     }
-
-    console.log(file);
     const upload = async ({ file: resultImg }) => {
       try {
         const res: any = await uploadAvatar({
           file: resultImg,
         });
-        console.log('upload', res);
         // return;
         const params = {
           avatarId: res.data,

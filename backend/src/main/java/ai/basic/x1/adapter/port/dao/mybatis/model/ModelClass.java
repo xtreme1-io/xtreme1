@@ -1,38 +1,54 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
+import com.baomidou.mybatisplus.annotation.*;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
- * @author chenchao
- * @date 2022/8/26
+ * @author fyb
+ * @date 2023-03-02
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelClass {
-    /**
-     * name
-     */
-    private String name;
+@TableName(autoResultMap = true)
+public class ModelClass  {
+
+    @TableId(type = IdType.AUTO)
+    private Long  id;
 
     /**
-     * code
-     */
-    private String code;
+    * Model id
+    */
+    private Long  modelId;
 
     /**
-     * icon url
-     */
-    private String url;
+    * Model name
+    */
+    private String  name;
 
     /**
-     * sub class
-     */
-    private List<ModelClass> subClasses;
+    * Model class code
+    */
+    private String  code;
+
+    @TableField(fill = FieldFill.INSERT)
+    private OffsetDateTime createdAt;
+
+    @TableField(fill = FieldFill.INSERT)
+    private Long createdBy;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private OffsetDateTime updatedAt;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updatedBy;
+
 }

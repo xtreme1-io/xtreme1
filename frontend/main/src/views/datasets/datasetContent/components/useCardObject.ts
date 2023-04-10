@@ -1,4 +1,4 @@
-import { reactive, ref, watchEffect, watch, computed } from 'vue';
+import { reactive, ref, watchEffect, watch, computed, h } from 'vue';
 import { transformToPc, focusTransform } from '/@/utils/annotation';
 import {
   datasetTypeEnum,
@@ -19,7 +19,11 @@ export enum OBJECT_TYPE {
   BOX2D = '2D_BOX',
   BOX3D = '3D_BOX',
 }
-
+export const NodeType = {
+  '2D_RECT': 'polygon',
+  '2D_BOX': 'polyline',
+  '3D_BOX': 'polygon',
+};
 const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
   '2D_RECT': OBJECT_TYPE.RECT,
   '2D_BOX': OBJECT_TYPE.BOX2D,
@@ -31,6 +35,136 @@ const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
   RECTANGLE: OBJECT_TYPE.RECTANGLE,
   POLYLINE: OBJECT_TYPE.POLYLINE,
 };
+
+// const fliterAnnotation=()=>{
+
+//   return
+// }
+
+export function NodeImage({ imageObject, viewBox }) {
+  return h(
+    'svg',
+    {
+      class: 'easy-image',
+      'stroke-width': 1,
+      stroke: 'white',
+      fill: 'transparent',
+      viewBox: `0 0 ${viewBox.width} ${viewBox.height}`,
+    },
+    imageObject?.reduce((childs, { type, color, uuid, points, hole }) => {
+      color = color || '#fff';
+      switch (type) {
+        case OBJECT_TYPE.RECTANGLE:
+          childs.push(
+            h('polygon', {
+              stroke: color,
+              key: type + uuid,
+              points: points,
+            }),
+          );
+          break;
+        case OBJECT_TYPE.POLYGON:
+          if (hole.length > 0) {
+            childs.push(
+              h(
+                'mask',
+                {
+                  id: uuid,
+                  key: uuid,
+                },
+                [
+                  h('polygon', {
+                    points: points,
+                    fill: 'currentColor',
+                  }),
+                  ...hole.map((_h, i) =>
+                    h('polygon', {
+                      fill: '#000',
+                      key: i,
+                      points: _h,
+                    }),
+                  ),
+                ],
+              ),
+            );
+            childs.push(
+              h('rect', {
+                x: 0,
+                y: 0,
+                width: '100%',
+                height: '100%',
+                fill: color || '#fff',
+                key: uuid,
+                style: { mask: `url(#${uuid})` },
+              }),
+            );
+          } else {
+            childs.push(
+              h('polygon', {
+                stroke: color,
+                key: type + uuid,
+                points: points,
+              }),
+            );
+          }
+          break;
+        case OBJECT_TYPE.POLYLINE:
+          childs.push(
+            h('polyline', {
+              stroke: color,
+              key: uuid,
+              points: points,
+            }),
+          );
+          break;
+      }
+      return childs;
+    }, []),
+  );
+}
+
+export function NodePc({ pcObject, ref }) {
+  return h(
+    'svg',
+    {
+      class: 'easy-pc',
+      fill: 'transparent',
+      'stroke-width': 1,
+      stroke: 'currentColor',
+      ref: ref,
+    },
+    pcObject?.map(({ id, points, type }) => {
+      return h(NodeType[type], {
+        key: id,
+        points: points,
+      });
+    }),
+  );
+}
+
+export function NodePcImage({ pcImageObject }) {
+  return h(
+    'svg',
+    {
+      class: 'easy-image',
+      'stroke-width': '1',
+      stroke: 'currentColor',
+      fill: 'transparent',
+    },
+    pcImageObject?.reduce((childs, { type, uuid, points }) => {
+      const nodeType = NodeType[type];
+      if (nodeType) {
+        childs.push(
+          h(NodeType[type], {
+            key: uuid,
+            points: points,
+          }),
+        );
+      }
+      return childs;
+    }, []),
+  );
+}
 
 export default function useCardObject() {
   const svg = ref<any>(null);
@@ -67,8 +201,8 @@ export default function useCardObject() {
   const getImageUrl = (item: any) => {
     const info = item.content && item.content[0]?.file?.extraInfo;
     const url = item.content && item.content[0]?.file?.url;
-    const mediumUrl = item.content && item.content[0]?.file?.mediumThumbnail?.url;
-    return info ? mediumUrl || url : url;
+    const largeThumbnail = item.content && item.content[0]?.file?.largeThumbnail?.url;
+    return info ? largeThumbnail || url : url;
   };
   const canPreview = (data: any, info: any) => {
     const isPc =
@@ -101,7 +235,11 @@ export default function useCardObject() {
     // }
     size.value.init = true;
   };
-  const updatePcResult = (target: any[], objects: any[], info: any) => {
+  const updatePcResult = (target: any[], { objects, selectedSourceIds }: any, info: any) => {
+    if (selectedSourceIds && selectedSourceIds.length) {
+      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+    }
+
     const size = getSize(svg.value);
     const dom = svg.value as SVGElement;
     if (info) {
@@ -111,7 +249,11 @@ export default function useCardObject() {
         const { center3D, rotation3D, size3D } = contour;
         if (center3D && rotation3D && size3D) {
           const { points } = transformToPc(contour, size, info);
-          target.push({ id: obj.id, points: points.map((pos) => pos.join(',')).join(' ') });
+          target.push({
+            id: obj.id,
+            type: OBJECT_TYPE.BOX3D,
+            points: points.map((pos) => pos.join(',')).join(' '),
+          });
         }
       });
     }
@@ -142,12 +284,14 @@ export default function useCardObject() {
 
   const updatePcImageResult = (
     target: any[],
-    objects: any[],
+    { objects, selectedSourceIds }: any,
     index: number,
     svg: SVGElement,
     imgSize: any,
   ) => {
-    // const imgName = img.name
+    if (selectedSourceIds && selectedSourceIds.length) {
+      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+    }
     if (svg && imgSize) {
       // const aspect = imgSize.width / imgSize.height;
       const contextNode = svg.parentElement as HTMLDivElement;
@@ -225,7 +369,10 @@ export default function useCardObject() {
       });
     }
   };
-  const updateImageResult = (objects: any[]) => {
+  const updateImageResult = (objects: any[], selectedSourceIds: any[]) => {
+    if (selectedSourceIds && selectedSourceIds.length) {
+      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+    }
     const { width, height, svgWidth, svgHeight } = size.value;
     const convert = transformPos(width, height, svgWidth, svgHeight);
     const getPoints = function getPoints(points: { x: number; y: number }[]) {
@@ -236,9 +383,10 @@ export default function useCardObject() {
         })
         .join(' ');
     };
-    return objects.map((item) => {
-      const { contour = {}, id, type, meta = {} } = item;
-      const { points = [], interior = [] } = contour;
+
+    const result = objects.map((item) => {
+      const { contour, id, type, meta = {} } = item;
+      const { points = [], interior = [] } = contour || item || {};
       let _points: any = [];
       if (type === OBJECT_TYPE.RECTANGLE) {
         if (points && points.length === 2) {
@@ -268,7 +416,10 @@ export default function useCardObject() {
         uuid: id,
       };
     });
+
+    return result;
   };
+
   return {
     iState,
     size,
@@ -291,6 +442,7 @@ export function useImgCard(props: {
   data: DatasetItem;
   showAnnotation?: boolean;
   object?: any;
+  selectedSourceIds: any;
 }) {
   const {
     iState,
@@ -325,7 +477,11 @@ export function useImgCard(props: {
       );
       // let size = getSize(svg.value);
       const info = getExtraInfo();
-      updatePcResult(results, objects, info);
+      updatePcResult(
+        results,
+        { objects: objects, selectedSourceIds: props.selectedSourceIds },
+        info,
+      );
     }
     iState.pcObject = results;
   };
@@ -335,14 +491,16 @@ export function useImgCard(props: {
    */
   const updateImageObject = () => {
     let results: any[] = [];
+    onImgLoad(props.data);
     if (
       props.showAnnotation !== false &&
       props.info?.type === datasetTypeEnum.IMAGE &&
       size.value.init
     ) {
       const objects = props.object || [];
-      results = updateImageResult(objects);
+      results = updateImageResult(objects, props?.selectedSourceIds);
     }
+
     iState.imageObject = results;
   };
   watchEffect(updateImageObject);
@@ -358,6 +516,7 @@ export function useImgCard(props: {
             return Object.assign({}, img, { object: null });
           })
       : [];
+
     if (
       props.showAnnotation !== false &&
       props.info?.type === datasetTypeEnum.LIDAR_FUSION &&
@@ -376,7 +535,14 @@ export function useImgCard(props: {
         const svgElement = ref.querySelector('svg.easy-image') as SVGElement;
         if (imgSize) {
           const items: any[] = [];
-          updatePcImageResult(items, objects, index, svgElement, imgSize);
+          updatePcImageResult(
+            items,
+            { objects: objects, selectedSourceIds: props.selectedSourceIds },
+            index,
+            svgElement,
+            imgSize,
+          );
+
           img.object = items;
         }
       });
@@ -400,7 +566,7 @@ export function useImgCard(props: {
       ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
       : { files: null };
     const file = pc.files && pc.files[0].file;
-    const thumbnailUrl = file?.mediumThumbnail?.url;
+    const thumbnailUrl = file?.largeThumbnail?.url;
     const url = file?.renderImage?.url;
     return thumbnailUrl || url || placeImgType;
   };
@@ -441,7 +607,7 @@ export function useSearchCard(props: {
       ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
       : { files: null };
     const file = pc.files && pc.files[0].file;
-    const thumbnailUrl = file?.mediumThumbnail?.url;
+    const thumbnailUrl = file?.largeThumbnail?.url;
     const url = file?.renderImage?.url;
     return thumbnailUrl || url || placeImgType;
   };

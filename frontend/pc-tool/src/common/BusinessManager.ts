@@ -5,6 +5,7 @@ import {
     IObject,
     utils,
     IFileConfig,
+    SourceType,
 } from 'pc-editor';
 import Editor from './Editor';
 import * as api from '../api';

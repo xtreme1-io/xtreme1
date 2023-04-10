@@ -2,13 +2,15 @@ package ai.basic.x1.adapter.api.controller;
 
 import ai.basic.x1.adapter.api.annotation.user.LoggedUser;
 import ai.basic.x1.adapter.dto.*;
+import ai.basic.x1.adapter.dto.request.DataInfoSplitFilterDTO;
+import ai.basic.x1.adapter.dto.request.DataInfoSplitReqDTO;
 import ai.basic.x1.adapter.exception.ApiException;
-import ai.basic.x1.entity.DataInfoQueryBO;
-import ai.basic.x1.entity.DataInfoUploadBO;
-import ai.basic.x1.entity.DataPreAnnotationBO;
-import ai.basic.x1.entity.ScenarioQueryBO;
+import ai.basic.x1.adapter.port.rpc.dto.DatasetModelResultDTO;
+import ai.basic.x1.entity.*;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import ai.basic.x1.entity.enums.ScenarioQuerySourceEnum;
+import ai.basic.x1.entity.enums.SplitTargetDataTypeEnum;
+import ai.basic.x1.entity.enums.SplitTypeEnum;
 import ai.basic.x1.usecase.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.util.DefaultConverter;
@@ -16,15 +18,19 @@ import ai.basic.x1.util.ModelParamUtils;
 import ai.basic.x1.util.Page;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +42,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/data/")
 @Validated
+@Slf4j
 public class DataInfoController extends BaseDatasetController {
 
     @Autowired
@@ -147,9 +154,35 @@ public class DataInfoController extends BaseDatasetController {
         return DefaultConverter.convert(dataAnnotationRecordBO, DataAnnotationRecordDTO.class);
     }
 
+    @GetMapping("findLockRecordByDatasetId")
+    public List<LockRecordDTO> findLockRecordByDatasetId(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId) {
+        return DefaultConverter.convert(dataAnnotationRecordUseCase.findLockRecordByDatasetId(datasetId), LockRecordDTO.class);
+    }
+
+    @PostMapping("unLockByLockRecordIds")
+    public void unLockByLockRecordIds(@RequestBody @Validated DataBatchUnlockDTO dataBatchUnlockDTO) {
+        dataAnnotationRecordUseCase.unLockByLockRecordIds(dataBatchUnlockDTO.getLockRecordIds());
+    }
+
+    @PostMapping("split/dataIds")
+    public void splitByDataIds(@RequestBody @Validated DataInfoSplitReqDTO dto) {
+        dataInfoUsecase.splitByDataIds(dto.getDataIds(), EnumUtil.fromString(SplitTypeEnum.class, dto.getSplitType()));
+    }
+
+    @PostMapping("split/filter")
+    public void splitByFilter(@RequestBody @Validated DataInfoSplitFilterDTO dto) {
+        dataInfoUsecase.splitByFilter(DefaultConverter.convert(dto, DataInfoSplitFilterBO.class));
+    }
+
+    @GetMapping("split/totalDataCount")
+    public Long getSplitDataTotalCount(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
+                                       @RequestParam(value = "targetDataType", required = false) SplitTargetDataTypeEnum targetDataType) {
+        return dataInfoUsecase.getSplitDataTotalCount(datasetId, targetDataType);
+    }
+
     @PostMapping("deleteBatch")
     public void deleteBatch(@RequestBody @Validated DataInfoDeleteDTO dto) {
-        dataInfoUsecase.deleteBatch(dto.getDatasetId(),dto.getIds());
+        dataInfoUsecase.deleteBatch(dto.getDatasetId(), dto.getIds());
     }
 
     @GetMapping("generatePresignedUrl")
@@ -249,6 +282,11 @@ public class DataInfoController extends BaseDatasetController {
     @GetMapping("getDataAndResult")
     public JSONObject getDataAndResult(@NotNull(message = "cannot be null") @RequestParam(required = false) Long datasetId, @RequestParam(required = false) List<Long> dataIds) {
         return JSONUtil.parseObj(JSONUtil.toJsonStr(dataInfoUsecase.getDataAndResult(datasetId, dataIds)));
+    }
+
+    @GetMapping("getDataModelRunResult/{dataId}")
+    public List<DatasetModelResultDTO> getDataModelRunResult(@PathVariable Long dataId) {
+        return DefaultConverter.convert(dataAnnotationObjectUseCase.getDataModelRunResult(dataId), DatasetModelResultDTO.class);
     }
 
 }

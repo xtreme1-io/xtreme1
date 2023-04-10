@@ -11,6 +11,7 @@
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
         <result column="status" property="status"/>
         <result column="annotation_status" property="annotationStatus"/>
+        <result column="split_type" property="splitType"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="created_at" property="createdAt"/>
         <result column="created_by" property="createdBy"/>
@@ -60,4 +61,56 @@
         GROUP BY
             dataset_id
     </select>
+
+    <select id="findModelRunDataIds" resultType="java.lang.Long">
+        SELECT id FROM data ${ew.customSqlSegment}
+        <if test="isExcludeModelData == true">
+            AND id not in (SELECT data_id FROM model_dataset_result WHERE model_id =  #{modelId})
+        </if>
+        limit #{limit}
+    </select>
+
+    <select id="findModelRunDataCount" resultType="java.lang.Long">
+        SELECT count(*) FROM data ${ew.customSqlSegment}
+        <if test="isExcludeModelData == true">
+            AND id not in (SELECT data_id FROM model_dataset_result WHERE model_id =  #{modelId})
+        </if>
+    </select>
+
+    <select id="selectDataPage" resultMap="BaseResultMap">
+        SELECT distinct d.*,mdr.data_confidence FROM data d
+            LEFT JOIN model_dataset_result mdr ON d.id=mdr.data_id
+        ${ew.customSqlSegment("d")}
+        <if test="dataInfoQuery.runRecordId != null">
+          AND  mdr.run_record_id = #{dataInfoQuery.runRecordId}
+        </if>
+
+        <if test="dataInfoQuery.minDataConfidence != null">
+            AND  mdr.data_confidence <![CDATA[ >= ]]>  #{dataInfoQuery.minDataConfidence}
+        </if>
+
+        <if test="dataInfoQuery.maxDataConfidence != null">
+            AND  mdr.data_confidence <![CDATA[ <= ]]>   #{dataInfoQuery.maxDataConfidence}
+        </if>
+        <include refid="selectDataByPageOrder"/>
+    </select>
+
+    <sql id="selectDataByPageOrder">
+        ORDER BY
+        <choose>
+            <when test="dataInfoQuery.sortField != null and dataInfoQuery.sortField != ''
+        and dataInfoQuery.ascOrDesc != null and dataInfoQuery.ascOrDesc != ''">
+                <if test="dataInfoQuery.sortField == 'DATA_CONFIDENCE'">
+                    mdr.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
+                </if>
+                <if test="dataInfoQuery.sortField != 'DATA_CONFIDENCE'">
+                    d.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
+                </if>
+            </when>
+            <otherwise>
+                d.name ASC
+            </otherwise>
+        </choose>
+        ,d.id ASC
+    </sql>
 </mapper>

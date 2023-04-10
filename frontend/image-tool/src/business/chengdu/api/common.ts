@@ -1,5 +1,12 @@
 import { get, post } from './base';
-import { IModelResult, IDataMeta, IClassType, IFileConfig } from '../type';
+import {
+    IModelResult,
+    IDataMeta,
+    IClassType,
+    IFileConfig,
+    IResultSource,
+    SourceType,
+} from '../type';
 import { traverseClassification2Arr, empty, parseClassesFromBackend } from '../utils';
 
 enum Api {
@@ -70,7 +77,7 @@ export async function getDataFile(dataId: string) {
     let data = await get(url, { dataIds: dataId });
 
     data = data.data || [];
-    console.log('getDataFile', data);
+    // console.log('getDataFile', data);
     let configs = [] as IFileConfig[];
     data[0].content.forEach((config: any) => {
         let file = config.file;
@@ -197,7 +204,7 @@ export async function getAnnotationByDataIds(dataIds: Array<number | string>) {
 
     const res = await get(url, { dataIds: dataIds.join(',') });
     const data = res.data as IGetAnnotationParams;
-    console.log(data[0]);
+    // console.log(data[0]);
     const { classificationValues } = data[0];
 
     const classifications = classificationValues.map((item: any) => item.classificationAttributes);
@@ -232,6 +239,36 @@ export interface IAnnotation {
 export async function saveAnnotation(params: ISaveAnnotationParams) {
     const url = `${Api.DATASET_ANNOTATION}/data/save`;
 
-    const res = await post(url, params);
-    console.log(res);
+    let data = await post(url, params);
+    data = data.data || [];
+    let keyMap = {} as Record<string, Record<string, string>>;
+    data.forEach((e: any) => {
+        let dataId = e.dataId;
+        keyMap[dataId] = keyMap[dataId] || {};
+        keyMap[dataId][e.frontId] = e.id;
+    });
+
+    return keyMap;
+}
+export async function getResultSources(dataId: string) {
+    let url = `/api/data/getDataModelRunResult/${dataId}`;
+    // let url = `/api/dataset/dataset/getDatasetAnnotateResult/${datasetId}`;
+    let data = await get(url);
+
+    data = data.data || {};
+
+    let sources = [] as IResultSource[];
+    data.forEach((item: any) => {
+        let { modelId, modelName, runRecords = [] } = item;
+        runRecords.forEach((e: any) => {
+            sources.push({
+                name: e.runNo,
+                sourceId: e.id,
+                modelId: modelId,
+                modelName: modelName,
+                sourceType: SourceType.MODEL,
+            });
+        });
+    });
+    return sources.filter((e) => e.sourceType !== SourceType.DATA_FLOW);
 }

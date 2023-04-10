@@ -21,6 +21,9 @@ import {
   ResponsePresignedParams,
   UploadParams,
   ResponseUploadRecord,
+  SelectedDataPa,
+  splitFliterParams,
+  TotalDataCountPa,
 } from './model/datasetModel';
 import { BasicIdParams } from '/@/api/model/baseModel';
 
@@ -28,6 +31,7 @@ enum Api {
   DATASET = '/dataset',
   DATA = '/data',
   DATASET_CLASS = '/datasetClass',
+  MODEL_RUN = '/modelRun',
 }
 
 /**
@@ -385,6 +389,65 @@ export const createByScenario = (params) =>
 export const getClassificationOptions = (params) =>
   defHttp.get<any>({
     url: `${Api.DATA}/classificationOption/findAll`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+export const splitFliter = (params: splitFliterParams) =>
+  defHttp.post<null>({
+    url: `${Api.DATA}/split/filter`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getTotalDataCount = (params: TotalDataCountPa) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/split/totalDataCount`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const splitDataSelected = (params: SelectedDataPa) =>
+  defHttp.post<any>({
+    url: `${Api.DATA}/split/dataIds`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getMoelResultApi = (datasetId: number) =>
+  defHttp.get<any>({
+    url: `${Api.MODEL_RUN}/getDatasetModelRunResult/${datasetId}`,
+
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const getLockedRecordByDataset = (params: any) =>
+  defHttp.get<any>({
+    url: `${Api.DATA}/findLockRecordByDatasetId`,
+    params,
+    headers: {
+      // @ts-ignore
+      ignoreCancelToken: true,
+    },
+  });
+
+export const unLockApi = (params: any) =>
+  defHttp.post<null>({
+    url: `${Api.DATA}/unLockByLockRecordIds`,
     params,
     headers: {
       // @ts-ignore

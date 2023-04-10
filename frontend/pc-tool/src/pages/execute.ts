@@ -43,7 +43,6 @@ export function execute(): IPageHandler {
                 // load model
                 loadModels(),
             ]);
-
             // load first data
             await editor.loadFrame(0, false);
             focusObject();
