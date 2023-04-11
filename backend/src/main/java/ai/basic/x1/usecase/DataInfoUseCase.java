@@ -811,7 +811,7 @@ public class DataInfoUseCase {
     private String cocoConvertToX1(DataInfoUploadBO dataInfoUploadBO) {
         var fileName = FileUtil.getPrefix(dataInfoUploadBO.getSavePath());
         var baseSavePath = String.format("%s%s/", tempPath, IdUtil.fastSimpleUUID());
-        String srcPath = String.format("%s%s", dataInfoUploadBO.getBaseSavePath(), fileName);
+        String srcPath = dataInfoUploadBO.getBaseSavePath();
         String outPath = String.format("%s%s", baseSavePath, fileName);
         ProcessBuilder builder = new ProcessBuilder();
         var respPath = String.format("%s%s/resp.json", tempPath, IdUtil.fastSimpleUUID());
