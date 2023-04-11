@@ -53,6 +53,9 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { ref } from 'vue';
   import { addModelApi } from '/@/api/business/models';
+  import { useGo } from '/@/hooks/web/usePage';
+  import { RouteChildEnum, RouteNameEnum } from '/@/enums/routeEnum';
+  import { parseParam } from '/@/utils/business/parseParams';
   //表单
   const plugins = [
     'advlist anchor autolink autosave code codesample  directionality  fullscreen hr insertdatetime link lists media nonbreaking noneditable pagebreak paste preview print save searchreplace spellchecker tabfocus  template  textpattern visualblocks visualchars wordcount',
@@ -71,6 +74,7 @@
   defineExpose({
     setFieldsValue,
   });
+  const go = useGo();
   const emit = defineEmits(['success']);
   const { t } = useI18n();
   const [registerModal, { closeModal: closeCreateModal, changeOkLoading }] = useModalInner();
@@ -89,6 +93,8 @@
       if (window.opener && window.opener.reConnect) {
         let { resSetModelList } = window.opener?.reConnect;
         resSetModelList(res);
+      } else {
+        go(parseParam(RouteChildEnum.MODELS_DETAIL, { id: res?.id }));
       }
     } catch (e) {
       changeOkLoading(false);

@@ -367,6 +367,15 @@ export function getActionColumn(funcObj: {
             >
               {t('business.models.run.reRun')}
             </Button>
+            <Button
+              type="primary"
+              danger
+              onClick={() => {
+                funcObj.delete(record);
+              }}
+            >
+              {t('business.models.run.delete')}
+            </Button>
           </div>
         );
       }
