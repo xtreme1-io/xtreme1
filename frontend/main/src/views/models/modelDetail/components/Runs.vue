@@ -213,7 +213,7 @@
           emits('setActiveKey', tabId);
         },
         okButtonProps: {
-          style: { background: '#d27575', 'border-radius': '6px', padding: '10px 16px' },
+          style: { background: '#60a9fe', 'border-radius': '6px', padding: '10px 16px' },
         } as any,
       });
     } else {
