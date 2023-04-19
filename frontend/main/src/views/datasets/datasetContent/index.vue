@@ -92,7 +92,7 @@
               :selectedSourceIds="runRecordIdDisplay"
               class="listcard"
               v-for="i in list"
-              :key="i.id + sliderType"
+              :key="i.id + sortWithLabel"
               :object="objectMap[i.id]"
               @handleSelected="handleSelected"
               :showAnnotation="showAnnotation"
