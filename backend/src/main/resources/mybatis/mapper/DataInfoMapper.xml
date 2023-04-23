@@ -13,6 +13,7 @@
         <result column="annotation_status" property="annotationStatus"/>
         <result column="split_type" property="splitType"/>
         <result column="is_deleted" property="isDeleted"/>
+        <result column="del_unique_key" property="delUniqueKey"/>
         <result column="created_at" property="createdAt"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_at" property="updatedAt"/>
@@ -123,4 +124,12 @@
         </choose>
         ,d.id ASC
     </sql>
+
+    <delete id="deleteById">
+        update data set del_unique_key = id, is_deleted = true where id = #{id}
+    </delete>
+
+    <delete id="deleteByDatasetId">
+        update dataset set del_unique_key = id, is_deleted = true where dataset_id = #{datasetId}
+    </delete>
 </mapper>

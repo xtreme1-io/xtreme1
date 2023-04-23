@@ -1,5 +1,6 @@
 SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+SET
+FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
 -- Table structure for class
@@ -20,7 +21,7 @@ CREATE TABLE `class`
     `updated_by`        bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_ontology_id_name_tool_type` (`ontology_id`,`name`,`tool_type`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=200 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for classification
@@ -40,7 +41,7 @@ CREATE TABLE `classification`
     `updated_by`  bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_ontology_id_name` (`ontology_id`,`name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for data
@@ -56,19 +57,15 @@ CREATE TABLE `data`
     `annotation_status` enum('ANNOTATED','NOT_ANNOTATED','INVALID') DEFAULT 'NOT_ANNOTATED' COMMENT 'Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID',
     `split_type`        enum('TRAINING','VALIDATION','TEST','NOT_SPLIT') DEFAULT 'NOT_SPLIT' COMMENT 'Split type',
     `is_deleted`        bit(1)   NOT NULL DEFAULT b'0' COMMENT 'Is deleted',
-    `created_at`        datetime          DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+    `del_unique_key`    bigint(20) NOT NULL DEFAULT '0' COMMENT '删除唯一标志，写入时为0，逻辑删除后置为主键id',
+    `created_at`        datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
     `created_by`        bigint(20) DEFAULT NULL COMMENT 'Creator id',
     `updated_at`        datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
     `updated_by`        bigint(20) DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
-    KEY                 `idx_dataset_id_type_created_at` (`dataset_id`,`created_at`) USING BTREE,
-    KEY                 `idx_dataset_id_type_annotation_count` (`dataset_id`) USING BTREE,
-    KEY                 `idx_dataset_id_type` (`dataset_id`) USING BTREE,
-    KEY                 `idx_dataset_id_type_num_created_at` (`dataset_id`,`created_at`) USING BTREE,
-    KEY                 `idx_dataset_id_type_num_annotation_count` (`dataset_id`) USING BTREE,
-    KEY                 `idx_dataset_id_type_name` (`dataset_id`,`name`) USING BTREE,
-    KEY                 `idx_dataset_id_type_num_name` (`dataset_id`,`name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3120553 DEFAULT CHARSET=utf8mb4 COMMENT='Data';
+    UNIQUE KEY `uk_dataset_id_name` (`dataset_id`,`name`,`del_unique_key`) USING BTREE,
+    KEY                 `idx_dataset_id_created_at` (`dataset_id`,`created_at`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='Data';
 
 -- ----------------------------
 -- Table structure for data_annotation_classification
@@ -86,7 +83,7 @@ CREATE TABLE `data_annotation_classification`
     `updated_at`                datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `updated_by`                bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=978 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for data_annotation_object
@@ -106,7 +103,7 @@ CREATE TABLE `data_annotation_object`
     `updated_at`       datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `updated_by`       bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22737 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for data_annotation_record
@@ -121,7 +118,7 @@ CREATE TABLE `data_annotation_record`
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uk_dataset_id_created_by` (`dataset_id`,`created_by`) USING BTREE COMMENT 'dataset_id,created_by unique index'
-) ENGINE=InnoDB AUTO_INCREMENT=1461 DEFAULT CHARSET=utf8mb4 COMMENT='Data annotation record';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='Data annotation record';
 
 -- ----------------------------
 -- Table structure for data_classification_option
@@ -144,7 +141,7 @@ CREATE TABLE `data_classification_option`
     KEY                 `idx_attribute_id` (`attribute_id`) USING BTREE,
     KEY                 `idx_dataset_id` (`dataset_id`) USING BTREE,
     KEY                 `idx_data_id` (`data_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for data_edit
@@ -162,7 +159,7 @@ CREATE TABLE `data_edit`
     `created_at`           datetime NOT NULL                                      DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uk_data_id` (`data_id`) USING BTREE COMMENT 'data_id unique index'
-) ENGINE=InnoDB AUTO_INCREMENT=2695 DEFAULT CHARSET=utf8mb4 COMMENT='Data edit';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='Data edit';
 
 -- ----------------------------
 -- Table structure for dataset
@@ -170,17 +167,19 @@ CREATE TABLE `data_edit`
 DROP TABLE IF EXISTS `dataset`;
 CREATE TABLE `dataset`
 (
-    `id`          bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
-    `name`        varchar(255) NOT NULL COMMENT 'Dataset name',
-    `type`        enum('LIDAR_FUSION','LIDAR_BASIC','IMAGE') NOT NULL DEFAULT 'LIDAR_FUSION' COMMENT 'Dataset type LIDAR_FUSION,LIDAR_BASIC,IMAGE',
-    `description` text COMMENT 'Dataset description',
-    `is_deleted`  bit(1)       NOT NULL DEFAULT b'0' COMMENT 'Is deleted',
-    `created_at`  datetime              DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
-    `created_by`  bigint(20) DEFAULT NULL COMMENT 'Creator id',
-    `updated_at`  datetime              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
-    `updated_by`  bigint(20) DEFAULT NULL COMMENT 'Modify person id',
-    PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=766538 DEFAULT CHARSET=utf8mb4 COMMENT='Dataset';
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `name`           varchar(255) NOT NULL COMMENT 'Dataset name',
+    `type`           enum('LIDAR_FUSION','LIDAR_BASIC','IMAGE') NOT NULL DEFAULT 'LIDAR_FUSION' COMMENT 'Dataset type LIDAR_FUSION,LIDAR_BASIC,IMAGE',
+    `description`    text COMMENT 'Dataset description',
+    `is_deleted`     bit(1)       NOT NULL DEFAULT b'0' COMMENT 'Is deleted',
+    `del_unique_key` bigint(20) NOT NULL DEFAULT '0' COMMENT 'Delete unique flag, 0 when writing, set as primary key id after tombstone',
+    `created_at`     datetime              DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+    `created_by`     bigint(20) DEFAULT NULL COMMENT 'Creator id',
+    `updated_at`     datetime              DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+    `updated_by`     bigint(20) DEFAULT NULL COMMENT 'Modify person id',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uk_name` (`name`,`del_unique_key`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='Dataset';
 
 -- ----------------------------
 -- Table structure for dataset_class
@@ -201,7 +200,7 @@ CREATE TABLE `dataset_class`
     `updated_by`        bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_dataset_id_name` (`dataset_id`,`name`,`tool_type`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=455555556315 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for dataset_class_ontology
@@ -219,7 +218,7 @@ CREATE TABLE `dataset_class_ontology`
     `updated_by`       bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uk_dataset_class_id` (`dataset_class_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=360281 DEFAULT CHARSET=utf8mb4 COMMENT='dataset class和ontology中的class关联表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='dataset class和ontology中的class关联表';
 
 -- ----------------------------
 -- Table structure for dataset_classification
@@ -239,7 +238,7 @@ CREATE TABLE `dataset_classification`
     `updated_by`  bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_dataset_id_name` (`dataset_id`,`name`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=183 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for dataset_similarity_job
@@ -255,7 +254,7 @@ CREATE TABLE `dataset_similarity_job`
     `updated_by` bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_dataset_id` (`dataset_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=625 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for dataset_similarity_record
@@ -275,7 +274,7 @@ CREATE TABLE `dataset_similarity_record`
     `updated_by`    bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`),
     KEY             `idx_dataset_id` (`dataset_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=74674 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for export_record
@@ -296,7 +295,7 @@ CREATE TABLE `export_record`
     `updated_by`    bigint(20) DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `unx_serial_number` (`serial_number`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=480172 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for file
@@ -323,7 +322,7 @@ CREATE TABLE `file`
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `idx_path_hash` (`path_hash`) USING BTREE,
     KEY             `idx_relation_id` (`relation_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=148757 DEFAULT CHARSET=utf8mb4 COMMENT='File table';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='File table';
 
 -- ----------------------------
 -- Table structure for model
@@ -336,7 +335,6 @@ CREATE TABLE `model`
     `version`        varchar(255)          DEFAULT NULL,
     `description`    text,
     `scenario`       varchar(128)          DEFAULT NULL COMMENT 'Scenes',
-    `classes`        json                  DEFAULT NULL COMMENT 'Class that this model can identify',
     `dataset_type`   enum('LIDAR_FUSION','LIDAR_BASIC','IMAGE','LIDAR') DEFAULT NULL COMMENT 'Dataset types supported by this model',
     `model_type`     enum('DETECTION') DEFAULT 'DETECTION' COMMENT 'Model type',
     `model_code`     enum('PRE_LABEL','COCO_80','LIDAR_DETECTION','IMAGE_DETECTION') DEFAULT NULL COMMENT 'Model''s unique identifier',
@@ -349,7 +347,7 @@ CREATE TABLE `model`
     `updated_by`     bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uk_name_dataset_type` (`name`,`dataset_type`,`del_unique_key`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=30035 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for model_class
@@ -367,7 +365,7 @@ CREATE TABLE `model_class`
     `updated_by` bigint(20) DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uk_model_id_code` (`model_id`,`code`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=390 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for model_data_result
@@ -381,15 +379,15 @@ CREATE TABLE `model_data_result`
     `dataset_id`          bigint(20) NOT NULL COMMENT 'Dataset id',
     `data_id`             bigint(20) NOT NULL COMMENT 'Data id',
     `model_serial_no`     bigint(20) DEFAULT NULL COMMENT 'Serial number',
-    `result_filter_param` json     DEFAULT NULL COMMENT 'Model results filtering parameters',
-    `model_result`        json     DEFAULT NULL COMMENT 'The result returned by running the model',
-    `created_at`          datetime                                               NOT NULL COMMENT 'Create time',
+    `result_filter_param` json                                                   DEFAULT NULL COMMENT 'Model results filtering parameters',
+    `model_result`        json                                                   DEFAULT NULL COMMENT 'The result returned by running the model',
+    `created_at`          datetime NOT NULL COMMENT 'Create time',
     `created_by`          bigint(20) DEFAULT NULL COMMENT 'Creator id',
-    `updated_at`          datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+    `updated_at`          datetime                                               DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
     `updated_by`          bigint(20) DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
     KEY                   `idx_model_serial_no_data_id` (`model_serial_no`,`data_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=62152 DEFAULT CHARSET=utf8mb4 COMMENT='Data model result';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='Data model result';
 
 -- ----------------------------
 -- Table structure for model_dataset_result
@@ -399,7 +397,7 @@ CREATE TABLE `model_dataset_result`
 (
     `id`                  bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
     `model_id`            bigint(20) NOT NULL COMMENT 'Model id',
-    `model_version`       varchar(255) DEFAULT NULL COMMENT 'Model version',
+    `model_version`       varchar(255)          DEFAULT NULL COMMENT 'Model version',
     `run_record_id`       bigint(20) NOT NULL COMMENT 'Model run record id',
     `run_no`              varchar(255) NOT NULL COMMENT 'Serial number(For interface display)',
     `dataset_id`          bigint(20) NOT NULL COMMENT 'Dataset ID',
@@ -416,7 +414,7 @@ CREATE TABLE `model_dataset_result`
     `updated_by`          bigint(20) DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uk_model_serial_no_data_id` (`model_serial_no`,`data_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=992623 DEFAULT CHARSET=utf8mb4 COMMENT='dataset 模型结果表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='dataset 模型结果表';
 
 -- ----------------------------
 -- Table structure for model_run_record
@@ -426,7 +424,7 @@ CREATE TABLE `model_run_record`
 (
     `id`                  bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
     `model_id`            bigint(20) NOT NULL COMMENT 'Model id',
-    `model_version`       varchar(255) DEFAULT NULL COMMENT 'Model version',
+    `model_version`       varchar(255) NOT NULL COMMENT 'Model version',
     `run_no`              varchar(20)  NOT NULL COMMENT 'Serial number(For interface display)',
     `dataset_id`          bigint(20) NOT NULL COMMENT 'Dataset id',
     `status`              enum('STARTED','RUNNING','SUCCESS','FAILURE','SUCCESS_WITH_ERROR') CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Model running status',
@@ -444,7 +442,7 @@ CREATE TABLE `model_run_record`
     `updated_by`          bigint(20) DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
     KEY                   `idx_model_serial_no` (`model_serial_no`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=660107 DEFAULT CHARSET=utf8mb4 COMMENT='模型dataset运行记录';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='模型dataset运行记录';
 
 -- ----------------------------
 -- Table structure for ontology
@@ -461,7 +459,7 @@ CREATE TABLE `ontology`
     `updated_by` bigint(20) DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_name_type` (`name`,`type`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=480052 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for upload_record
@@ -485,7 +483,7 @@ CREATE TABLE `upload_record`
     `updated_by`           bigint(20) DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `unx_serial_number` (`serial_number`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1056 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Table structure for user
@@ -504,7 +502,7 @@ CREATE TABLE `user`
     `status`        enum('NORMAL','FORBIDDEN') DEFAULT 'NORMAL' COMMENT 'the status of user',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uniq_username` (`username`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1049 DEFAULT CHARSET=utf8mb4 COMMENT='User table';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='User table';
 
 -- ----------------------------
 -- Table structure for user_token
@@ -523,7 +521,7 @@ CREATE TABLE `user_token`
     PRIMARY KEY (`id`) USING BTREE,
     KEY          `idx_created_by` (`created_by`) USING BTREE,
     KEY          `idx_token` (`token`(90))
-) ENGINE=InnoDB AUTO_INCREMENT=378 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 SET
 FOREIGN_KEY_CHECKS = 1;

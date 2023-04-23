@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -51,30 +52,44 @@ public interface DataInfoMapper extends ExtendBaseMapper<DataInfo> {
      * Get Model run data id
      *
      * @param queryWrapper Model run Filter data parameter
-     * @param modelId Model id
-     * @param limit data id count
+     * @param modelId      Model id
+     * @param limit        data id count
      * @return data id
      */
-    List<Long> findModelRunDataIds(@Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper,@Param("modelId") Long modelId,
-                                   @Param("isExcludeModelData") Boolean isExcludeModelData,@Param("limit") Long limit);
+    List<Long> findModelRunDataIds(@Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper, @Param("modelId") Long modelId,
+                                   @Param("isExcludeModelData") Boolean isExcludeModelData, @Param("limit") Long limit);
 
     /**
      * Get Model run data count
      *
      * @param queryWrapper Model run Filter data parameter
-     * @param modelId Model id
+     * @param modelId      Model id
      * @return data count
      */
-    Long findModelRunDataCount(@Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper,@Param("modelId") Long modelId,
-                                   @Param("isExcludeModelData") Boolean isExcludeModelData);
-
+    Long findModelRunDataCount(@Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper, @Param("modelId") Long modelId,
+                               @Param("isExcludeModelData") Boolean isExcludeModelData);
 
     /**
      * Select data
-     * @param page page
+     *
+     * @param page         page
      * @param queryWrapper parameter
      * @return data page
      */
-    Page<DataInfo> selectDataPage(Page<DataInfo> page, @Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper,@Param("dataInfoQuery") DataInfoQuery dataInfoQuery);
+    Page<DataInfo> selectDataPage(Page<DataInfo> page, @Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper, @Param("dataInfoQuery") DataInfoQuery dataInfoQuery);
 
+    /**
+     * This method overrides the deleteById method of baseMapper
+     *
+     * @param id
+     */
+    @Override
+    int deleteById(Serializable id);
+
+    /**
+     * Delete data based on dataset Id
+     *
+     * @param datasetId Dataset id
+     */
+    int deleteByDatasetId(@Param("datasetId") Long datasetId);
 }

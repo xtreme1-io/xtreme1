@@ -67,6 +67,11 @@ public class DataInfo implements Serializable {
     private Boolean isDeleted;
 
     /**
+     * Delete unique flag, 0 when writing, set as primary key id after tombstone
+     */
+    private Long delUniqueKey;
+
+    /**
      * Create time
      */
     @TableField(fill = FieldFill.INSERT)
