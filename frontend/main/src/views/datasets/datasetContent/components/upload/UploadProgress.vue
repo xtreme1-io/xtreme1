@@ -253,7 +253,9 @@
                   if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
                     clearInterval(processTimer.value);
                     temp[0].percent = 100;
-                    fileItem.status = UploadResultStatus.SUCCESS;
+                    fileItem.status = errorMessage
+                      ? UploadResultStatus.SUCCESS_WITH_ERROR
+                      : UploadResultStatus.SUCCESS;
                     isUploading.value = false;
                     emits('fetchList');
                   }
@@ -370,7 +372,9 @@
             if (uploadStatus.value == UploadStatusEnum.PARSE_COMPLETED) {
               clearInterval(processTimer.value);
               temp[0].percent = 100;
-              fileItem.status = UploadResultStatus.SUCCESS;
+              fileItem.status = errorMessage
+                ? UploadResultStatus.SUCCESS_WITH_ERROR
+                : UploadResultStatus.SUCCESS;
               isUploading.value = false;
               emits('fetchList');
             }
