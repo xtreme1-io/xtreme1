@@ -621,6 +621,8 @@ public class DataInfoUseCase {
                 sourceId = modelRunRecordUseCase.save(dataInfoUploadBO.getModelId(), datasetId, totalDataNum);
             }
         }
+        var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
+                .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now()).sourceId(sourceId);
         pointCloudList.forEach(pointCloudFile -> {
             var isError = this.validDirectoryFormat(pointCloudFile.getParentFile(), datasetType);
             if (isError) {
@@ -639,8 +641,6 @@ public class DataInfoUseCase {
                     .updatedAt(OffsetDateTime.now())
                     .createdBy(userId)
                     .isDeleted(false);
-            var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
-                    .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
             var list = ListUtil.split(dataNameList, 5);
             CountDownLatch countDownLatch = new CountDownLatch(list.size());
             list.forEach(subDataNameList -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
