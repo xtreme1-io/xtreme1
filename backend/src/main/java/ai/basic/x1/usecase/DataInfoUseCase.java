@@ -728,14 +728,20 @@ public class DataInfoUseCase {
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(FILE).build();
         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file))
                 .content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).build();
-        dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
+        var errorBuilder = new StringBuilder();
+        try {
+            dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
+        } catch (DuplicateKeyException e) {
+            log.error("Duplicate data name", e);
+            errorBuilder.append("Duplicate data name;");
+        }
         var rootPath = String.format("%s/%s", userId, datasetId);
         var newSavePath = tempPath + fileBO.getPath().replace(rootPath, "");
         FileUtil.copy(dataInfoUploadBO.getSavePath(), newSavePath, true);
         createUploadThumbnail(userId, fileBOS, rootPath);
         FileUtil.clean(newSavePath);
         var uploadRecordBO = UploadRecordBO.builder()
-                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).status(PARSE_COMPLETED).build();
+                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
         datasetSimilarityJobUseCase.submitJob(datasetId);
     }
