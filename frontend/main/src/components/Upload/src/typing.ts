@@ -6,6 +6,7 @@ export enum UploadResultStatus {
   PROCESSING = 'Processing',
   // COMPLETED = 'completed',
   SUCCESS = 'Completed',
+  SUCCESS_WITH_ERROR = 'Success with error',
   CANCELED = 'Canceled',
   // FAILED = 'failed',
   ERROR = 'Failed',
