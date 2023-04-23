@@ -492,7 +492,7 @@ public class DataInfoUseCase {
         }
         try {
             List<DataInfo> infos = DefaultConverter.convert(dataInfoBOList, DataInfo.class);
-            dataInfoDAO.getBaseMapper().insertBatch(infos);
+            dataInfoDAO.saveBatch(infos);
             return DefaultConverter.convert(infos, DataInfoBO.class);
         } catch (DuplicateKeyException e) {
             log.error("Duplicate data name", e);
