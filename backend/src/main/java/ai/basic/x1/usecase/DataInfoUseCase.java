@@ -1670,6 +1670,7 @@ public class DataInfoUseCase {
                 lidarFusionImageBO = ObjectUtil.isNull(lidarFusionImageBO) ? new LidarFusionDataExportBO.LidarFusionImageBO() : lidarFusionImageBO;
                 lidarFusionImageBO.setUrl(url);
                 lidarFusionImageBO.setZipPath(zipPath);
+                lidarFusionImageBO.setFilePath(relationFileBO.getPath());
                 images.add(lidarFusionImageBO);
             }
         }
@@ -1694,6 +1695,7 @@ public class DataInfoUseCase {
                 ((ImageDataExportBO) dataExportBaseBO).setImageZipPath(image.getZipPath());
                 ((ImageDataExportBO) dataExportBaseBO).setWidth(image.getWidth());
                 ((ImageDataExportBO) dataExportBaseBO).setHeight(image.getHeight());
+                ((ImageDataExportBO) dataExportBaseBO).setFilePath(image.getFilePath());
                 break;
             default:
                 break;

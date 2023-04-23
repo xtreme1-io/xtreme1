@@ -23,6 +23,7 @@ import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
+import io.minio.errors.*;
 import kotlin.jvm.functions.Function4;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -31,9 +32,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -125,7 +130,7 @@ public class ExportUseCase {
         if (DataFormatEnum.COCO.equals(query.getDataFormat())) {
             var basePath = String.format("%s/%s", tempPath, IdUtil.fastSimpleUUID());
             var respPath = String.format("%s/resp.json", basePath);
-            var baseOutPath = String.format("%s/out", basePath);
+            var baseOutPath = String.format("%s/%s", basePath,FileUtil.getPrefix(zipPath));
             var outPathNew = String.format("%s/result", baseOutPath);
             FileUtil.move(Path.of(String.format("%s/image", srcPath)), Path.of(String.format("%s/image", baseOutPath)), true);
             ZipUtil.zip(srcPath, zipPath, true);
@@ -172,7 +177,11 @@ public class ExportUseCase {
             var dataExportBaseBO = dataExportBO.getData();
             if (dataExportBaseBO instanceof ImageDataExportBO && DataFormatEnum.COCO.equals(query.getDataFormat())) {
                 var imageDataExportBO = (ImageDataExportBO) dataExportBaseBO;
-                HttpUtil.downloadFile(imageDataExportBO.getImageUrl(), String.format("%s/%s/%s", zipPath, Constants.IMAGE, FileUtil.getName(DecompressionFileUtils.removeUrlParameter(imageDataExportBO.getImageUrl()))));
+                try {
+                    HttpUtil.downloadFile(minioService.getInternalUrl(minioProp.getBucketName(), imageDataExportBO.getFilePath()), String.format("%s/%s/%s", zipPath, Constants.IMAGE, FileUtil.getName(DecompressionFileUtils.removeUrlParameter(imageDataExportBO.getImageUrl()))));
+                } catch (Exception e) {
+                    logger.error("Download object error", e);
+                }
             }
             var dataPath = String.format("%s/%s/%s-%s%s", zipPath, Constants.DATA, dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
             FileUtil.writeString(JSONUtil.toJsonStr(dataExportBaseBO, jsonConfig), dataPath, StandardCharsets.UTF_8);

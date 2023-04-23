@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Transient;
 
 @Data
 @Builder
@@ -30,5 +31,10 @@ public class ImageDataExportBO extends DataExportBaseBO {
      * Camera image height
      */
     private Long height;
+
+    /**
+     * File relative path
+     */
+    private transient String filePath;
 
 }
