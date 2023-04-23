@@ -28,6 +28,8 @@
           </div>
         </div>
         <ScrollContainer
+          :loadMore="loadMore"
+          :canload="canload"
           v-show="list.length !== 0"
           ref="scrollRef"
           viewClass="dataset-list-card-scroll"
@@ -127,7 +129,7 @@
   const sortField = ref<SortFieldEnum>(SortFieldEnum.CREATED_AT);
   const sortType = ref<SortTypeEnum>(SortTypeEnum.ASC);
   const { t } = useI18n();
-
+  const canload = ref(true);
   const { prefixCls } = useDesign('datasetList');
   const [registerCreateModal, { openModal: openCreateModal, closeModal: closeCreateModal }] =
     useModal();
@@ -147,16 +149,23 @@
   watchEffect(() => {
     cardHeight, cardWidth, paddingX;
   });
+  const loadMore = () => {
+    if (canload.value) {
+      pageNo.value++;
+      fetchList(filterForm, true);
+    }
+  };
   onMounted(() => {
     setTimeout(() => {
       fetchList(filterForm);
     }, 50);
-    handleScroll(scrollRef, () => {
-      if (total.value > list.value.length) {
-        pageNo.value++;
-        fetchList(filterForm, true);
-      }
-    });
+    handleScroll(
+      scrollRef,
+      () => {
+        loadMore();
+      },
+      canload.value,
+    );
   });
   let filterForm = reactive({
     name,
@@ -204,6 +213,9 @@
       if (fetchType) {
         const res: DatasetListGetResultModel = await datasetListApi(params);
         list.value = list.value.concat(res.list);
+        if (res.list.length === 0) {
+          canload.value = false;
+        }
         total.value = res.total;
       } else {
         const res: DatasetListGetResultModel = await datasetListApi(params);
@@ -224,6 +236,7 @@
   const handleReset = async () => {
     unref(scrollRef)?.scrollTo(0);
     pageNo.value = 1;
+    canload.value = true;
   };
 
   const resetFilter = () => {
