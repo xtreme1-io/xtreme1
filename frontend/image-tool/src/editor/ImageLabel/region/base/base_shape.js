@@ -747,6 +747,7 @@ export class BaseShape {
         this.points.forEach((p) => {
             coordinate.push(this._toCoordinate(p));
         });
+        this.userData.color = this.stroke;
         return {
             id: this.id,
             type: this.type,
