@@ -12,10 +12,9 @@
 # Intro #
 Xtreme1 is the world's first open-source platform for Multimodal training data.
 
-Xtreme1 provides deep insight into data annotation, data curation, and ontology management to solve 2D image and 3D point cloud dataset ML challenges.
-The built-in AI-assisted tools take your annotation efforts to the next level of efficiency for your 2D/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion projects.
+Xtreme1 unlocks deep insights into data annotation, curation and ontology management for tackling machine learning challenges in 2D images and 3D point cloud datasets. The platform's AI-fueled tools elevate your annotation game to the next level of efficiency, powering your projects in 2D/3D Object Detection, 3D Instance Segmentation and LiDAR-Camera Fusion like never before.
 
-It is now hosted in [LF AI & Data Foundation](https://medium.com/multisensory-data-training/xtreme1-the-first-open-source-labeling-annotation-and-visualization-project-is-debuting-at-the-da1d157d1512) as a sandbox project.
+It is now hosted in [LF AI & Data Foundation](https://medium.com/multisensory-data-training/xtreme1-the-first-open-source-labeling-annotation-and-visualization-project-is-debuting-at-the-da1d157d1512) as the 1st open source data labeling annotation and visualization project.
 
 # Join community #
 [Website](https://xtreme1.io) | [Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
@@ -48,7 +47,7 @@ Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xi
 
 # Quick start
 
-* Get early access to [Xtreme1 online version](https://app.basic.ai/#/login/) without any installation :rocket:
+* Get access to [Xtreme1 online version](https://app.basic.ai/#/login/) without any installation :rocket:
 
 * [Install and Quick start](https://docs.xtreme1.io/xtreme1-docs/get-started/quick-start) :cd:
 * [Install with Docker](https://docs.xtreme1.io/xtreme1-docs/get-started/install-with-docker) 🐋
@@ -99,7 +98,7 @@ For more installation, development and deployment, check out [Xtreme1 Docs](docs
 ![](/docs/images/3d_annotation2.png) 
 
 # License #
-This software is licensed under the Apache 2.0 LICENSE. Xtreme1 is a trademark of LF AI Projects.
+This software is licensed under the Apache 2.0 LICENSE. Xtreme1 is a trademark of LF AI & Data Foundation.
 
 <img src="/docs/images/LFAI_DATA_horizontal-color.png" width="250">
 
@@ -107,9 +106,9 @@ If Xtreme1 is part of your development process / project / publication, please c
 ```bash
 @misc{Xtreme1,
 title = {Xtreme1 - The Next GEN Platform For Multisensory Training Data},
-year = {2022},
+year = {2023},
 note = {Software available from https://github.com/xtreme1-io/xtreme1/},
 url={https://xtreme1.io/},
-author = {LF AI Projects},
+author = {LF AI & Data Foundation},
 }
 ```
