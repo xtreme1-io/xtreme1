@@ -68,15 +68,19 @@ export const datasetObjectApi = (params: { dataIds: string }) =>
     },
   });
 
-export const datasetDetailApi = (params: BasicIdParams) =>
-  defHttp.get<DatasetItem>({
-    url: `${Api.DATA}/info/${params.id}`,
-    params,
-    headers: {
-      // @ts-ignore
-      ignoreCancelToken: true,
+export const datasetDetailApi = (params: BasicIdParams) => {
+  return defHttp.get<DatasetItem>(
+    {
+      url: `${Api.DATA}/info/${params.id}`,
+      params,
+      headers: {
+        // @ts-ignore
+        hiddenErrorMsg: true,
+      },
     },
-  });
+    { errorMessageMode: 'none' },
+  );
+};
 
 export const createDatasetApi = (params: CreateParams) =>
   defHttp.post<DatasetItem>({

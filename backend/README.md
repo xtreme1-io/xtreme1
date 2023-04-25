@@ -92,7 +92,7 @@ cd backend
 mvn package
 
 # Using local configuration to start application.
-java -Dspring.profiles.active=local -jar target/xtreme1-backend-0.6.0-SNAPSHOT.jar
+java -Dspring.profiles.active=local -jar target/xtreme1-backend-0.6.1-SNAPSHOT.jar
 ```
 
 Now you can access the backend service at `http://localhost:8080/`.

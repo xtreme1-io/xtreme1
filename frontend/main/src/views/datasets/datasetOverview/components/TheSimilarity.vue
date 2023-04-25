@@ -85,7 +85,6 @@
           <div>
             <span style="font-size: 14px"> Selected {{ selectedData.length }} data </span> &nbsp;
             <Button
-             
               style="border-radius: 8px"
               @click="showSelectedData"
               v-if="selectedData.length"
@@ -255,11 +254,15 @@
       maskDom.style.display = 'flex';
     }
 
-    const res: any = await datasetDetailApi({ id });
-    imgSrc.value = res?.content?.[0]?.file?.largeThumbnail?.url ?? res?.content?.[0]?.file?.url;
-    labelName.value = res.name;
-
-    getToolTipDom(id);
+    try {
+      const res: any = await datasetDetailApi({ id });
+      console.log(1111);
+      imgSrc.value = res?.content?.[0]?.file?.largeThumbnail?.url ?? res?.content?.[0]?.file?.url;
+      labelName.value = res.name;
+      getToolTipDom(id);
+    } catch (error) {
+      getToolTipDom(id);
+    }
   });
 
   const getToolTipDom = (id) => {

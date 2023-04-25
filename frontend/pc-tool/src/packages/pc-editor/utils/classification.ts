@@ -223,7 +223,6 @@ export function classificationToSave(classification: IClassification) {
         };
     });
 
-    console.log(data);
     return data;
 }
 export function isAttrVisible(

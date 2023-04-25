@@ -52,7 +52,7 @@ public class DatasetSimilarityResultScheduledJob {
     private static final String UPDATE_RESULT_LOCK = "update_dataset_similarity_result_lock";
     private static final String GENERATE_LOCK = "generate_similarity_result_lock";
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    //@Scheduled(cron = "0/5 * * * * ?")
     public void updateDatasetSimilarityResult() {
         boolean getLock = similarityDistributedLock.tryLock(UPDATE_RESULT_LOCK);
         if (getLock) {
@@ -91,7 +91,7 @@ public class DatasetSimilarityResultScheduledJob {
         }
     }
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    //@Scheduled(cron = "0/5 * * * * ?")
     public void generateSimilarity() {
         boolean getLock = similarityDistributedLock.tryLock(GENERATE_LOCK);
         if (getLock) {

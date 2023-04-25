@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Transient;
 
 import java.util.List;
 
@@ -61,6 +62,11 @@ public class LidarFusionDataExportBO extends DataExportBaseBO {
          * Camera image height
          */
         private Long height;
+
+        /**
+         * File relative path
+         */
+        private transient String filePath;
     }
 
 }

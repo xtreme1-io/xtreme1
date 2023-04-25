@@ -289,11 +289,7 @@ public class DataInfoUseCase {
         if (count > 0) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_OTHERS_ANNOTATING);
         }
-        var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
-        dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, datasetId);
-        dataInfoLambdaUpdateWrapper.in(DataInfo::getId, ids);
-        dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
-        dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+        dataInfoDAO.removeBatchByIds(ids);
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
@@ -483,10 +479,28 @@ public class DataInfoUseCase {
      *
      * @param dataInfoBOList Collection of data details
      */
-    public List<DataInfoBO> insertBatch(List<DataInfoBO> dataInfoBOList) {
-        List<DataInfo> infos = DefaultConverter.convert(dataInfoBOList, DataInfo.class);
-        dataInfoDAO.getBaseMapper().insertBatch(infos);
-        return DefaultConverter.convert(infos, DataInfoBO.class);
+    public List<DataInfoBO> insertBatch(List<DataInfoBO> dataInfoBOList, Long datasetId, StringBuilder errorBuilder) {
+        var names = dataInfoBOList.stream().map(DataInfoBO::getName).collect(Collectors.toList());
+        var existDataInfoList = this.findByNames(datasetId, names);
+        if (CollUtil.isNotEmpty(existDataInfoList)) {
+            var existNames = existDataInfoList.stream().map(DataInfoBO::getName).collect(Collectors.toList());
+            dataInfoBOList = dataInfoBOList.stream().filter(dataInfoBO -> !existNames.contains(dataInfoBO.getName())).collect(Collectors.toList());
+            errorBuilder.append("Duplicate data names;");
+        }
+        if (CollUtil.isEmpty(dataInfoBOList)) {
+            return List.of();
+        }
+        try {
+            List<DataInfo> infos = DefaultConverter.convert(dataInfoBOList, DataInfo.class);
+            dataInfoDAO.saveBatch(infos);
+            return DefaultConverter.convert(infos, DataInfoBO.class);
+        } catch (DuplicateKeyException e) {
+            log.error("Duplicate data name", e);
+            if (!errorBuilder.toString().contains("Duplicate")) {
+                errorBuilder.append("Duplicate data names;");
+            }
+            return List.of();
+        }
     }
 
     /**
@@ -621,6 +635,8 @@ public class DataInfoUseCase {
                 sourceId = modelRunRecordUseCase.save(dataInfoUploadBO.getModelId(), datasetId, totalDataNum);
             }
         }
+        var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
+                .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now()).sourceId(sourceId);
         pointCloudList.forEach(pointCloudFile -> {
             var isError = this.validDirectoryFormat(pointCloudFile.getParentFile(), datasetType);
             if (isError) {
@@ -639,8 +655,6 @@ public class DataInfoUseCase {
                     .updatedAt(OffsetDateTime.now())
                     .createdBy(userId)
                     .isDeleted(false);
-            var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
-                    .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
             var list = ListUtil.split(dataNameList, 5);
             CountDownLatch countDownLatch = new CountDownLatch(list.size());
             list.forEach(subDataNameList -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
@@ -660,8 +674,8 @@ public class DataInfoUseCase {
                         }
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
-                        var resDataInfoList = insertBatch(dataInfoBOList);
-                        saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
+                        var resDataInfoList = this.insertBatch(dataInfoBOList, datasetId, errorBuilder);
+                        this.saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
                     }
                 } catch (Exception e) {
                     log.error("Handle data error", e);
@@ -685,6 +699,14 @@ public class DataInfoUseCase {
         }
     }
 
+
+    private List<DataInfoBO> findByNames(Long datasetId, List<String> names) {
+        var dataInfoLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
+        dataInfoLambdaQueryWrapper.in(DataInfo::getName, names);
+        return DefaultConverter.convert(dataInfoDAO.list(dataInfoLambdaQueryWrapper), DataInfoBO.class);
+    }
+
     private void parseImageUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
@@ -706,14 +728,20 @@ public class DataInfoUseCase {
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(FILE).build();
         var dataInfoBO = dataInfoBOBuilder.name(getFileName(file))
                 .content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).build();
-        dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
+        var errorBuilder = new StringBuilder();
+        try {
+            dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
+        } catch (DuplicateKeyException e) {
+            log.error("Duplicate data name", e);
+            errorBuilder.append("Duplicate data name;");
+        }
         var rootPath = String.format("%s/%s", userId, datasetId);
         var newSavePath = tempPath + fileBO.getPath().replace(rootPath, "");
         FileUtil.copy(dataInfoUploadBO.getSavePath(), newSavePath, true);
         createUploadThumbnail(userId, fileBOS, rootPath);
         FileUtil.clean(newSavePath);
         var uploadRecordBO = UploadRecordBO.builder()
-                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).status(PARSE_COMPLETED).build();
+                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(1L).parsedDataNum(1L).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
         uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
         datasetSimilarityJobUseCase.submitJob(datasetId);
     }
@@ -777,7 +805,7 @@ public class DataInfoUseCase {
                         dataInfoBOList.add(dataInfoBO);
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
-                        var resDataInfoList = insertBatch(dataInfoBOList);
+                        var resDataInfoList = insertBatch(dataInfoBOList, datasetId, errorBuilder);
                         saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
                     }
                 } catch (Exception e) {
@@ -811,7 +839,7 @@ public class DataInfoUseCase {
     private String cocoConvertToX1(DataInfoUploadBO dataInfoUploadBO) {
         var fileName = FileUtil.getPrefix(dataInfoUploadBO.getSavePath());
         var baseSavePath = String.format("%s%s/", tempPath, IdUtil.fastSimpleUUID());
-        String srcPath = String.format("%s%s", dataInfoUploadBO.getBaseSavePath(), fileName);
+        String srcPath = dataInfoUploadBO.getBaseSavePath();
         String outPath = String.format("%s%s", baseSavePath, fileName);
         ProcessBuilder builder = new ProcessBuilder();
         var respPath = String.format("%s%s/resp.json", tempPath, IdUtil.fastSimpleUUID());
@@ -1476,8 +1504,12 @@ public class DataInfoUseCase {
         var dataIdMap = dataInfoBOList.stream()
                 .collect(Collectors.toMap(DataInfoBO::getTempDataId, DataInfoBO::getId, (k1, k2) -> k1));
         if (CollectionUtil.isNotEmpty(dataAnnotationObjectBOList)) {
-            dataAnnotationObjectBOList.forEach(d -> d.setDataId(dataIdMap.get(d.getDataId())));
-            dataAnnotationObjectDAO.getBaseMapper().insertBatch(DefaultConverter.convert(dataAnnotationObjectBOList, DataAnnotationObject.class));
+            var newDataAnnotationObjectBOList = dataAnnotationObjectBOList.stream().filter(d -> dataIdMap.containsKey(d.getDataId())).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(newDataAnnotationObjectBOList)) {
+                newDataAnnotationObjectBOList.forEach(d -> d.setDataId(dataIdMap.get(d.getDataId())));
+                dataAnnotationObjectDAO.getBaseMapper().insertBatch(DefaultConverter.convert(dataAnnotationObjectBOList, DataAnnotationObject.class));
+                newDataAnnotationObjectBOList.clear();
+            }
             dataAnnotationObjectBOList.clear();
         }
     }
@@ -1644,6 +1676,7 @@ public class DataInfoUseCase {
                 lidarFusionImageBO = ObjectUtil.isNull(lidarFusionImageBO) ? new LidarFusionDataExportBO.LidarFusionImageBO() : lidarFusionImageBO;
                 lidarFusionImageBO.setUrl(url);
                 lidarFusionImageBO.setZipPath(zipPath);
+                lidarFusionImageBO.setFilePath(relationFileBO.getPath());
                 images.add(lidarFusionImageBO);
             }
         }
@@ -1668,6 +1701,7 @@ public class DataInfoUseCase {
                 ((ImageDataExportBO) dataExportBaseBO).setImageZipPath(image.getZipPath());
                 ((ImageDataExportBO) dataExportBaseBO).setWidth(image.getWidth());
                 ((ImageDataExportBO) dataExportBaseBO).setHeight(image.getHeight());
+                ((ImageDataExportBO) dataExportBaseBO).setFilePath(image.getFilePath());
                 break;
             default:
                 break;

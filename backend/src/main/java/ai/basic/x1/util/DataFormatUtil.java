@@ -15,7 +15,7 @@ public class DataFormatUtil {
             FileUtil.mkParentDirs(respPath);
             ProcessBuilder builder = new ProcessBuilder();
             FileUtil.mkParentDirs(respPath);
-            String command = String.format("xtreme1_ctl --mode %s -src %s -out %s --rps %s --format=coco", type, srcPath, outPath, respPath);
+            String command = String.format("xtreme1_ctl --mode '%s' -src '%s' -out '%s' --rps '%s' --format=coco", type, srcPath, outPath, respPath);
             builder.command("sh", "-c", command);
             Process process = builder.start();
             BufferedReader in = new BufferedReader(new InputStreamReader(process.getErrorStream()));

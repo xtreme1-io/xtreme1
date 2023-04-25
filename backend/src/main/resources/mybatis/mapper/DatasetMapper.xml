@@ -9,6 +9,7 @@
         <result column="type" property="type"/>
         <result column="description" property="description"/>
         <result column="is_deleted" property="isDeleted"/>
+        <result column="del_unique_key" property="delUniqueKey"/>
         <result column="created_at" property="createdAt"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_at" property="updatedAt"/>
@@ -51,4 +52,8 @@
             on d.id = dao.data_id
         where d.dataset_id = #{datasetId} and d.is_deleted = FALSE
     </select>
+
+    <delete id="deleteById">
+        update dataset set del_unique_key = id, is_deleted = true where id = #{id}
+    </delete>
 </mapper>

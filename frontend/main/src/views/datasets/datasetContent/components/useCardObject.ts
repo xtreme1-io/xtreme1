@@ -237,7 +237,7 @@ export default function useCardObject() {
   };
   const updatePcResult = (target: any[], { objects, selectedSourceIds }: any, info: any) => {
     if (selectedSourceIds && selectedSourceIds.length) {
-      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+      objects = objects.filter((item) => selectedSourceIds.some((e) => e == item.sourceId));
     }
 
     const size = getSize(svg.value);
@@ -290,7 +290,7 @@ export default function useCardObject() {
     imgSize: any,
   ) => {
     if (selectedSourceIds && selectedSourceIds.length) {
-      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+      objects = objects.filter((item) => selectedSourceIds.some((e) => e == item.sourceId));
     }
     if (svg && imgSize) {
       // const aspect = imgSize.width / imgSize.height;
@@ -371,7 +371,7 @@ export default function useCardObject() {
   };
   const updateImageResult = (objects: any[], selectedSourceIds: any[]) => {
     if (selectedSourceIds && selectedSourceIds.length) {
-      objects = objects.filter((item) => selectedSourceIds.includes(item.sourceId));
+      objects = objects.filter((item) => selectedSourceIds.some((e) => e == item.sourceId));
     }
     const { width, height, svgWidth, svgHeight } = size.value;
     const convert = transformPos(width, height, svgWidth, svgHeight);

@@ -93,6 +93,7 @@ export default class Editor extends BaseEditor {
             });
             this.showMsg('success', this.lang('save-ok'));
         } catch (e: any) {
+            console.error(e);
             this.showMsg('error', this.lang('save-error'));
         }
         bsState.saving = false;
@@ -102,11 +103,11 @@ export default class Editor extends BaseEditor {
         Object.keys(keyMap).forEach((dataId) => {
             let dataKeyMap = keyMap[dataId];
             let annotates = this.dataManager.getFrameObject(dataId) || [];
-            annotates.forEach((annotate:any) => {
+            annotates.forEach((annotate: any) => {
                 let frontId = annotate.uuid;
                 let backId = dataKeyMap[frontId];
                 if (!backId) return;
-                annotate.id = backId;
+                annotate.userData.backId = backId;
                 // annotate.uuid = backId;
             });
         });
@@ -114,7 +115,7 @@ export default class Editor extends BaseEditor {
     async getResultSources(frame?: IFrame) {
         let { state } = this;
         frame = frame || this.getCurrentFrame();
-        if(!frame.sources){
+        if (!frame.sources) {
             let sources = await api.getResultSources(frame.id);
             sources.unshift({
                 name: 'Without Task',
@@ -124,7 +125,6 @@ export default class Editor extends BaseEditor {
             frame.sources = sources;
         }
         this.setSources(frame.sources);
-
 
         // let sourceMap = {};
         // sources.forEach((e) => {

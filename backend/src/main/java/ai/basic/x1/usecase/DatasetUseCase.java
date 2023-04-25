@@ -14,7 +14,6 @@ import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DecompressionFileUtils;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
-import ai.basic.x1.util.lock.IDistributedLock;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
@@ -26,8 +25,8 @@ import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -40,7 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
-import static ai.basic.x1.entity.enums.DatasetTypeEnum.LIDAR_FUSION;
 import static ai.basic.x1.util.Constants.PAGE_SIZE_100;
 
 /**
@@ -52,10 +50,6 @@ public class DatasetUseCase {
 
     @Autowired
     private DatasetDAO datasetDAO;
-
-    @Autowired
-    @Qualifier("distributedLock")
-    private IDistributedLock distributedLock;
 
     @Autowired
     private DatasetClassDAO datasetClassDAO;
@@ -164,18 +158,13 @@ public class DatasetUseCase {
      * @param bo Dataset information
      */
     public DatasetBO create(DatasetBO bo) {
-        var lockKey = String.format("%s/%s", "datasetName", bo.getName());
-        var boo = distributedLock.tryLock(lockKey, 1000);
-        if (!boo) {
-            throw new UsecaseException(UsecaseCode.DATASET_NAME_DUPLICATED);
-        }
-        if (nameExists(bo.getName(), null)) {
-            distributedLock.unlock(lockKey);
-            throw new UsecaseException(UsecaseCode.DATASET_NAME_DUPLICATED);
-        }
         var dataset = DefaultConverter.convert(bo, Dataset.class);
-        datasetDAO.save(dataset);
-        distributedLock.unlock(lockKey);
+        try {
+            datasetDAO.save(dataset);
+        } catch (DuplicateKeyException e) {
+            log.error("Dataset duplicate name", e);
+            throw new UsecaseException(UsecaseCode.DATASET_NAME_DUPLICATED);
+        }
         return DefaultConverter.convert(dataset, DatasetBO.class);
     }
 
@@ -186,41 +175,17 @@ public class DatasetUseCase {
      * @param updateBO Dataset update information
      */
     public void update(Long id, DatasetBO updateBO) {
-        var lockKey = String.format("%s/%s", "datasetName", updateBO.getName());
-        var boo = distributedLock.tryLock(lockKey, 1000);
-        if (!boo) {
-            throw new UsecaseException(UsecaseCode.DATASET_NAME_DUPLICATED);
-        }
         var datasetBO = findById(id);
-        if (datasetBO == null) {
-            distributedLock.unlock(lockKey);
-            throw new UsecaseException(UsecaseCode.NOT_FOUND);
-        }
-        if (nameExists(updateBO.getName(), id)) {
-            distributedLock.unlock(lockKey);
-            throw new UsecaseException(UsecaseCode.DATASET_NAME_DUPLICATED);
-        }
         datasetBO.setName(updateBO.getName());
         datasetBO.setDescription(updateBO.getDescription());
-        var lambdaUpdateWrapper = Wrappers.lambdaUpdate(Dataset.class);
-        lambdaUpdateWrapper.eq(Dataset::getId, id);
-        datasetDAO.update(DefaultConverter.convert(datasetBO, Dataset.class), lambdaUpdateWrapper);
-        distributedLock.unlock(lockKey);
-    }
-
-    /**
-     * Determine if the dataset name exists
-     *
-     * @param name Dataset name
-     * @param id   Dataset id
-     */
-    private boolean nameExists(String name, Long id) {
-        var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
-        datasetLambdaQueryWrapper.eq(Dataset::getName, name);
-        if (ObjectUtil.isNotEmpty(id)) {
-            datasetLambdaQueryWrapper.ne(Dataset::getId, id);
+        try {
+            var lambdaUpdateWrapper = Wrappers.lambdaUpdate(Dataset.class);
+            lambdaUpdateWrapper.eq(Dataset::getId, id);
+            datasetDAO.update(DefaultConverter.convert(datasetBO, Dataset.class), lambdaUpdateWrapper);
+        } catch (DuplicateKeyException e) {
+            log.error("Dataset duplicate name", e);
+            throw new UsecaseException(UsecaseCode.DATASET_NAME_DUPLICATED);
         }
-        return datasetDAO.getBaseMapper().exists(datasetLambdaQueryWrapper);
     }
 
     /**
@@ -233,17 +198,10 @@ public class DatasetUseCase {
         if (ObjectUtil.isNull(task)) {
             throw new UsecaseException(UsecaseCode.DATASET_NOT_FOUND);
         }
-
-        var datasetLambdaUpdateWrapper = Wrappers.lambdaUpdate(Dataset.class);
-        datasetLambdaUpdateWrapper.eq(Dataset::getId, id);
-        datasetLambdaUpdateWrapper.set(Dataset::getIsDeleted, true);
-        datasetDAO.update(datasetLambdaUpdateWrapper);
+        datasetDAO.removeById(id);
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
-            var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
-            dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, id);
-            dataInfoLambdaUpdateWrapper.set(DataInfo::getIsDeleted, true);
-            dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
+            dataInfoDAO.getBaseMapper().deleteByDatasetId(id);
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
             dataAnnotationObjectLambdaUpdateWrapper.eq(DataAnnotationObject::getDatasetId, id);
             dataAnnotationObjectDAO.remove(dataAnnotationObjectLambdaUpdateWrapper);

@@ -7,7 +7,9 @@
   >
     <div class="lockInfo">
       <div v-if="data?.splitType && data.splitType !== 'NOT_SPLIT'" class="splitType"
-        ><span :style="getSplitColor(data.splitType)">{{ data.splitType }} </span></div
+        ><span :style="getSplitColor(data.splitType)"
+          >{{ translateSplit(data.splitType) }}
+        </span></div
       >
       <div v-if="data.lockedBy"> <Icon icon="bx:bxs-lock" /> Editing by {{ data.lockedBy }} </div>
     </div>
@@ -262,6 +264,10 @@
     'handleSingleAnnotate',
     'handleAnotateFrame',
   ]);
+  const translateSplit = (type) => {
+    let LowerCase = type.toLowerCase();
+    return type.slice(0, 1) + LowerCase.slice(1, LowerCase.length);
+  };
   const props = defineProps<Props>();
   const { iState, size, svg, getPcImage, getPlaceImg, setRef, onImgLoad, getImageUrl } =
     useImgCard(props);

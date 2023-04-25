@@ -30,6 +30,9 @@ public class ClassAndClassificationExportBO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Class{
+
+        private Long id;
+
         private String name;
 
         private String color;
@@ -49,6 +52,8 @@ public class ClassAndClassificationExportBO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Classification{
+
+        private Long id;
 
         private String name;
 

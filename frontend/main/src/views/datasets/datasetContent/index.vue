@@ -85,14 +85,14 @@
           v-show="list.length > 0"
           :style="type === PageTypeEnum.frame ? 'height:calc(100vh - 230px)' as any : null"
         >
-          <ScrollContainer ref="scrollRef">
+          <ScrollContainer ref="scrollRef" :loadMore="loadMore" :canload="canload">
             <!-- <div :key="i.id + Math.random()" v-for="i in list"> {{ i.name }}-{{ i.id }} </div> -->
             <!-- :key="i.id + Math.random()" -->
             <ImgCard
               :selectedSourceIds="runRecordIdDisplay"
               class="listcard"
               v-for="i in list"
-              :key="i.id + Math.random()"
+              :key="i.id + sortWithLabel"
               :object="objectMap[i.id]"
               @handleSelected="handleSelected"
               :showAnnotation="showAnnotation"
@@ -437,6 +437,7 @@
     }
   };
 
+  const canload = ref(true);
   let runRecordIdDisplay = ref();
   const splitType = ref<any>();
 
@@ -491,18 +492,25 @@
       return result;
     });
   };
+  const loadMore = () => {
+    if (canload.value) {
+      pageNo.value++;
+      fetchList(filterForm, true);
+    }
+  };
   onMounted(async () => {
     getMoelResult();
     fetchStatusNum();
     getLockedData();
     fetchList(filterForm);
     document.addEventListener('visibilitychange', getLockedData);
-    handleScroll(scrollRef, () => {
-      if (total.value > list.value.length) {
-        pageNo.value++;
-        fetchList(filterForm, true);
-      }
-    });
+    handleScroll(
+      scrollRef,
+      () => {
+        loadMore();
+      },
+      canload.value,
+    );
     watch(filterForm, () => {
       /* ... */
       clearTimeout(timeout);
@@ -517,6 +525,7 @@
   };
 
   onUnmounted(async () => {
+    canload.value = true;
     document.removeEventListener('visibilitychange', getLockedData);
     // window.sessionStorage.removeItem('breadcrumbTitle');
     // window.sessionStorage.removeItem('breadcrumbType');
@@ -570,7 +579,7 @@
     open();
     let params = {
       pageNo: pageNo.value,
-      pageSize: 100,
+      pageSize: 16,
       datasetId: id as string,
       // listType: listTypeEnum.list,
 
@@ -602,6 +611,9 @@
         const res: DatasetGetResultModel = await datasetApi(params);
         tempList = res.list;
         list.value = list.value.concat(res.list);
+        if (res.list.length === 0) {
+          canload.value = false;
+        }
         total.value = res.total;
       } else {
         const res: DatasetGetResultModel = await datasetApi(params);
@@ -852,6 +864,7 @@
     unref(scrollRef)?.scrollTo(0);
     pageNo.value = 1;
     selectedList.value = [];
+    canload.value = true;
   };
 
   let sliderWidthValue = ref<number>(200);

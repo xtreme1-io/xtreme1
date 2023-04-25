@@ -127,7 +127,7 @@ export function convertAnnotate2Object(annotates: IAnnotateObject[], editor: Edi
                 interior: obj.interior ?? undefined,
             },
             meta: {
-                color: obj.color,
+                color: targetClassType?.color || obj.color,
                 classType: userData.classType,
                 sourceId: userData.sourceId,
                 sourceType: userData.sourceType,
