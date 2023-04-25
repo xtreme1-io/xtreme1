@@ -1,7 +1,7 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.6.0-green) 
+![](https://img.shields.io/badge/Release-v0.6.1-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/Xtreme1io)
@@ -58,8 +58,8 @@ Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xi
 Download the latest release package and unzip it.
 
 ```bash
-wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.6.0/xtreme1-v0.6.0.zip
-unzip -d xtreme1-v0.6.0 xtreme1-v0.6.0.zip
+wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.6.1/xtreme1-v0.6.1.zip
+unzip -d xtreme1-v0.6.1 xtreme1-v0.6.1.zip
 ```
 
 ## Start all services
