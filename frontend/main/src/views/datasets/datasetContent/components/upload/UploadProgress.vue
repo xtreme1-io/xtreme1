@@ -175,6 +175,7 @@
       list.filter(
         (item) =>
           item.status !== UploadResultStatus.SUCCESS &&
+          item.status !== UploadResultStatus.SUCCESS_WITH_ERROR &&
           item.status !== UploadResultStatus.ERROR &&
           item.status !== UploadResultStatus.CANCELED,
       ) ?? [];
@@ -312,6 +313,7 @@
       list.filter(
         (item) =>
           item.status !== UploadResultStatus.SUCCESS &&
+          item.status !== UploadResultStatus.SUCCESS_WITH_ERROR &&
           item.status !== UploadResultStatus.ERROR &&
           item.status !== UploadResultStatus.CANCELED,
       ) ?? [];

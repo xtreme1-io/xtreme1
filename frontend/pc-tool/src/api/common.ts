@@ -25,7 +25,6 @@ export async function saveObject(config: any) {
     let url = '/api/annotate/data/save';
     let data = await post(url, config);
     data = data.data || [];
-    console.log(data);
     let keyMap = {} as Record<string, Record<string, string>>;
     data.forEach((e: any) => {
         let dataId = e.dataId;
