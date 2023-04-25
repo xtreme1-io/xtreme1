@@ -2,7 +2,7 @@ FROM openjdk:11
 
 RUN apt update && \
     apt install -y iputils-ping curl wget netcat python3 python3-pip
-RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git@bddaa8d
+RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git@d0cf4cc
 WORKDIR /app
 COPY target/$BACKEND_PACKAGE_NAME ./app.jar
 RUN mkdir -p config
