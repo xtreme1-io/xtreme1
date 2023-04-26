@@ -16,7 +16,7 @@
           </template>
         </Input>
       </div>
-      <div class="btn">
+      <div class="btn" v-if="datasetType !== datasetTypeEnum.TEXT">
         <HeaderDropdown
           :datasetType="datasetType"
           :datasetId="datasetId"
