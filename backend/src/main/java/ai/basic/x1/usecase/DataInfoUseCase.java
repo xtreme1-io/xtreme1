@@ -1748,6 +1748,8 @@ public class DataInfoUseCase {
         String pointCloudZipPath = null;
         String cameraConfigUrl = null;
         String cameraConfigZipPath = null;
+        String textUrl = null;
+        String textZipPath = null;
         var images = new ArrayList<LidarFusionDataExportBO.LidarFusionImageBO>();
         for (DataInfoBO.FileNodeBO f : dataInfoBO.getContent()) {
             var relationFileBO = FILE.equals(f.getType()) ? f.getFile() : CollectionUtil.getFirst(f.getFiles()).getFile();
@@ -1757,6 +1759,9 @@ public class DataInfoUseCase {
             } else if (f.getName().equals(StrUtil.toCamelCase(CAMERA_CONFIG))) {
                 cameraConfigUrl = relationFileBO.getUrl();
                 cameraConfigZipPath = relationFileBO.getZipPath();
+            } else if (f.getName().toUpperCase().endsWith(JSON_SUFFIX) && TEXT.equals(datasetType)) {
+                textUrl = relationFileBO.getUrl();
+                textZipPath = relationFileBO.getZipPath();
             } else {
                 var url = relationFileBO.getUrl();
                 var zipPath = relationFileBO.getZipPath();
@@ -1790,6 +1795,11 @@ public class DataInfoUseCase {
                 ((ImageDataExportBO) dataExportBaseBO).setWidth(image.getWidth());
                 ((ImageDataExportBO) dataExportBaseBO).setHeight(image.getHeight());
                 ((ImageDataExportBO) dataExportBaseBO).setFilePath(image.getFilePath());
+                break;
+            case TEXT:
+                dataExportBaseBO = DefaultConverter.convert(dataExportBaseBO, TextDataExportBO.class);
+                ((TextDataExportBO) dataExportBaseBO).setTextUrl(textUrl);
+                ((TextDataExportBO) dataExportBaseBO).setTextZipPath(textZipPath);
                 break;
             default:
                 break;
