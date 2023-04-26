@@ -8,7 +8,7 @@
         </Select.Option>
       </Select>
     </div>
-    <div class="custom-item mb-15px">
+    <div class="custom-item mb-15px" v-if="datasetType !== datasetTypeEnum.TEXT">
       <Checkbox v-model:checked="containsAnnotationResult">Contains annotation result</Checkbox>
     </div>
     <div v-if="containsAnnotationResult" class="flex items-center gap-10px mb-15px">
