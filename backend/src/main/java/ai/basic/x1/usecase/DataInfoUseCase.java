@@ -2150,7 +2150,7 @@ public class DataInfoUseCase {
         if (CollUtil.isEmpty(list)) {
             return List.of();
         }
-        //转换器
+        // convert to tree
         List<Tree<String>> treeNodes = TreeUtil.build(list, null,
                 (treeNode, tree) -> {
                     tree.setId(treeNode.getId());
@@ -2163,7 +2163,7 @@ public class DataInfoUseCase {
 
         var leafNodeList = new ArrayList<Tree<String>>();
         getLeafNodeList(treeNodes, leafNodeList);
-        // 获取所有链路
+        // get all links
         List<List<TextDataContentBO>> paths = new ArrayList<>();
         for (Tree<String> treeNode : leafNodeList) {
             List<TextDataContentBO> path = new ArrayList<>();
