@@ -2156,7 +2156,7 @@ public class DataInfoUseCase {
                     tree.setId(treeNode.getId());
                     tree.setParentId(treeNode.getParentId());
                     tree.setName(treeNode.getId());
-                    // 扩展属性 ...
+                    // Extended properties ...
                     tree.putExtra("text", treeNode.getText());
                     tree.putExtra("role", treeNode.getRole());
                 });
