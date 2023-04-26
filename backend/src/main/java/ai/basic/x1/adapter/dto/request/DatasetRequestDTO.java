@@ -34,7 +34,7 @@ public class DatasetRequestDTO {
      * Dataset type LIDAR_FUSION, LIDAR_BASIC, IMAGE
      */
     @NotEmpty(message = "dataset type cannot be null", groups = GroupInsert.class)
-    @ValidStringEnum(message = "dataset type must be one of LIDAR_FUSION, LIDAR_BASIC, IMAGE", enumClass = DatasetTypeEnum.class)
+    @ValidStringEnum(message = "dataset type must be one of LIDAR_FUSION, LIDAR_BASIC, IMAGE,TEXT", enumClass = DatasetTypeEnum.class)
     private String type;
 
     /**

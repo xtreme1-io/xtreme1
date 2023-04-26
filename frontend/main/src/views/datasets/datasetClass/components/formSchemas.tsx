@@ -83,6 +83,7 @@ export const inputItemImg = {
   [inputType.MultiSelection]: checkIcon,
   [inputType.Dropdown]: dropdownIcon,
   [inputType.Text]: textIcon,
+  [inputType.LongText]: textIcon,
 };
 
 function getOption() {

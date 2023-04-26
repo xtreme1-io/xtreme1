@@ -5,6 +5,7 @@ export enum inputType {
   MultiSelection = 'MULTI_SELECTION',
   Dropdown = 'DROPDOWN',
   Text = 'TEXT',
+  LongText = 'LONG_TEXT',
 }
 
 export enum formType {

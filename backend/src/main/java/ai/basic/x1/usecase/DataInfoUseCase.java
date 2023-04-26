@@ -3,7 +3,6 @@ package ai.basic.x1.usecase;
 import ai.basic.x1.adapter.api.config.DatasetInitialInfo;
 import ai.basic.x1.adapter.api.context.RequestContextHolder;
 import ai.basic.x1.adapter.dto.ApiResult;
-import ai.basic.x1.adapter.dto.DatasetClassDTO;
 import ai.basic.x1.adapter.port.dao.*;
 import ai.basic.x1.adapter.port.dao.mybatis.extension.ExtendLambdaQueryWrapper;
 import ai.basic.x1.adapter.port.dao.mybatis.model.DataInfo;
@@ -18,7 +17,6 @@ import ai.basic.x1.entity.enums.*;
 import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.*;
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
@@ -29,6 +27,8 @@ import cn.hutool.core.img.Img;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.lang.tree.Tree;
+import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
@@ -47,15 +47,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -63,6 +66,7 @@ import java.util.stream.Collectors;
 import static ai.basic.x1.entity.enums.DataUploadSourceEnum.LOCAL;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.*;
+import static ai.basic.x1.entity.enums.DatasetTypeEnum.TEXT;
 import static ai.basic.x1.entity.enums.RelationEnum.*;
 import static ai.basic.x1.entity.enums.SplitTypeEnum.NOT_SPLIT;
 import static ai.basic.x1.entity.enums.UploadStatusEnum.*;
@@ -185,10 +189,16 @@ public class DataInfoUseCase {
     /**
      * Filter out files whose file suffix is not image, and discard the file when it returns false
      */
-    private final FileFilter filefilter = file -> {
+    private final FileFilter imageFileFilter = file -> {
         //if the file extension is image return true, else false
-        return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath())) && Constants.IMAGE.equals(FileUtil.getName(file.getParentFile()));
+        return IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath())) && Constants.IMAGE.equalsIgnoreCase(FileUtil.getName(file.getParentFile()));
     };
+
+    private final FileFilter textFileFilter = file -> {
+        //if the file extension is json return true, else false
+        return file.getAbsolutePath().toUpperCase().endsWith(JSON_SUFFIX) && Constants.TEXT.equalsIgnoreCase(FileUtil.getName(file.getParentFile()));
+    };
+
 
     /**
      * Data split
@@ -485,7 +495,9 @@ public class DataInfoUseCase {
         if (CollUtil.isNotEmpty(existDataInfoList)) {
             var existNames = existDataInfoList.stream().map(DataInfoBO::getName).collect(Collectors.toList());
             dataInfoBOList = dataInfoBOList.stream().filter(dataInfoBO -> !existNames.contains(dataInfoBO.getName())).collect(Collectors.toList());
-            errorBuilder.append("Duplicate data names;");
+            if (!errorBuilder.toString().contains("Duplicate")) {
+                errorBuilder.append("Duplicate data names;");
+            }
         }
         if (CollUtil.isEmpty(dataInfoBOList)) {
             return List.of();
@@ -535,11 +547,13 @@ public class DataInfoUseCase {
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             try {
                 if (IMAGE.equals(dataset.getType()) && IMAGE_DATA_TYPE.contains(mimeType)) {
-                    downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageUploadFile);
+                    this.downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageUploadFile);
                 } else if (IMAGE.equals(dataset.getType()) && COMPRESSED_DATA_TYPE.contains(mimeType)) {
-                    downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageCompressedUploadFile);
+                    this.downloadAndDecompressionFile(dataInfoUploadBO, this::parseImageCompressedUploadFile);
+                } else if (TEXT.equals(dataset.getType())) {
+                    this.downloadAndDecompressionFile(dataInfoUploadBO, this::parseTextUploadFile);
                 } else {
-                    downloadAndDecompressionFile(dataInfoUploadBO, this::parsePointCloudUploadFile);
+                    this.downloadAndDecompressionFile(dataInfoUploadBO, this::parsePointCloudUploadFile);
                 }
             } catch (IOException e) {
                 log.error("Download decompression file error", e);
@@ -746,6 +760,83 @@ public class DataInfoUseCase {
         datasetSimilarityJobUseCase.submitJob(datasetId);
     }
 
+
+    public void parseTextUploadFile(DataInfoUploadBO dataInfoUploadBO) {
+        var userId = dataInfoUploadBO.getUserId();
+        var datasetId = dataInfoUploadBO.getDatasetId();
+        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 10, textFileFilter);
+        var rootPath = String.format("%s/%s", userId, datasetId);
+        var errorBuilder = new StringBuilder();
+        var dataInfoBOBuilder = DataInfoBO.builder().datasetId(datasetId).status(DataStatusEnum.VALID)
+                .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
+                .createdAt(OffsetDateTime.now())
+                .updatedAt(OffsetDateTime.now())
+                .createdBy(userId)
+                .isDeleted(false);
+        var totalDataNum = Long.valueOf(files.size());
+        AtomicReference<Long> parsedDataNum = new AtomicReference<>(0L);
+        var uploadRecordBOBuilder = UploadRecordBO.builder()
+                .id(dataInfoUploadBO.getUploadRecordId()).totalDataNum(totalDataNum).parsedDataNum(parsedDataNum.get()).status(PARSING);
+        if (CollectionUtil.isNotEmpty(files)) {
+            CountDownLatch countDownLatch = new CountDownLatch(files.size());
+            files.forEach(f -> parseExecutorService.submit(Objects.requireNonNull(TtlRunnable.get(() -> {
+                try {
+                    var dataInfoBOList = new ArrayList<DataInfoBO>();
+                    var textJson = JSONUtil.readJSONArray(f, StandardCharsets.UTF_8);
+                    var list = JSONUtil.toList(textJson.toString(), TextDataContentBO.class);
+                    var pathList = this.getTreeAllPath(list);
+                    if (CollUtil.isEmpty(pathList)) {
+                        return;
+                    }
+                    var newTextFileList = new ArrayList<File>();
+                    AtomicInteger i = new AtomicInteger(1);
+                    pathList.forEach(path -> {
+                        ListUtil.reverse(path);
+                        var suffix = FileUtil.getSuffix(f);
+                        var originalPath = f.getAbsolutePath();
+                        var newPath = String.format("%s_%s.%s", StrUtil.removeSuffix(originalPath, String.format(".%s", suffix)), i.get(), suffix);
+                        var file = FileUtil.writeString(JSONUtil.toJsonStr(path), newPath, StandardCharsets.UTF_8);
+                        newTextFileList.add(file);
+                        i.getAndIncrement();
+                    });
+                    var fileBOS = uploadFileList(rootPath, newTextFileList, dataInfoUploadBO);
+                    createUploadThumbnail(userId, fileBOS, rootPath);
+                    fileBOS.forEach(fileBO -> {
+                        var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
+                        var file = FileUtil.file(tempPath + fileBO.getPath().replace(rootPath, ""));
+                        var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
+                                .fileId(fileBO.getId()).type(FILE).build();
+                        var dataInfoBO = dataInfoBOBuilder.name(getFileName(file)).content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
+                        dataInfoBOList.add(dataInfoBO);
+                    });
+                    if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+                        insertBatch(dataInfoBOList, datasetId, errorBuilder);
+                    }
+                } catch (Exception e) {
+                    log.error("Handle data error", e);
+                } finally {
+                    parsedDataNum.set(parsedDataNum.get() + 1);
+                    var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(parsedDataNum.get()).build();
+                    uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+                    countDownLatch.countDown();
+                }
+
+            }))));
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                log.error("Parse image count down latch error", e);
+            }
+            var uploadRecordBO = uploadRecordBOBuilder.parsedDataNum(totalDataNum).errorMessage(errorBuilder.toString()).status(PARSE_COMPLETED).build();
+            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+            datasetSimilarityJobUseCase.submitJob(datasetId);
+        } else {
+            var uploadRecordBO = uploadRecordBOBuilder.status(FAILED).errorMessage(COMPRESSED_PACKAGE_EMPTY.getMessage()).build();
+            uploadRecordDAO.updateById(DefaultConverter.convert(uploadRecordBO, UploadRecord.class));
+            log.error("Image compressed package is empty,dataset id:{},filePath:{}", datasetId, dataInfoUploadBO.getFileUrl());
+        }
+    }
+
     public void parseImageCompressedUploadFile(DataInfoUploadBO dataInfoUploadBO) {
         if (DataFormatEnum.COCO.equals(dataInfoUploadBO.getDataFormat())) {
             var respPath = cocoConvertToX1(dataInfoUploadBO);
@@ -762,7 +853,7 @@ public class DataInfoUseCase {
         }
         var userId = dataInfoUploadBO.getUserId();
         var datasetId = dataInfoUploadBO.getDatasetId();
-        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, filefilter);
+        var files = FileUtil.loopFiles(Paths.get(dataInfoUploadBO.getBaseSavePath()), 3, imageFileFilter);
         var rootPath = String.format("%s/%s", userId, datasetId);
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now());
@@ -1660,6 +1751,8 @@ public class DataInfoUseCase {
         String pointCloudZipPath = null;
         String cameraConfigUrl = null;
         String cameraConfigZipPath = null;
+        String textUrl = null;
+        String textZipPath = null;
         var images = new ArrayList<LidarFusionDataExportBO.LidarFusionImageBO>();
         for (DataInfoBO.FileNodeBO f : dataInfoBO.getContent()) {
             var relationFileBO = FILE.equals(f.getType()) ? f.getFile() : CollectionUtil.getFirst(f.getFiles()).getFile();
@@ -1669,6 +1762,9 @@ public class DataInfoUseCase {
             } else if (f.getName().equals(StrUtil.toCamelCase(CAMERA_CONFIG))) {
                 cameraConfigUrl = relationFileBO.getUrl();
                 cameraConfigZipPath = relationFileBO.getZipPath();
+            } else if (f.getName().toUpperCase().endsWith(JSON_SUFFIX) && TEXT.equals(datasetType)) {
+                textUrl = relationFileBO.getUrl();
+                textZipPath = relationFileBO.getZipPath();
             } else {
                 var url = relationFileBO.getUrl();
                 var zipPath = relationFileBO.getZipPath();
@@ -1702,6 +1798,11 @@ public class DataInfoUseCase {
                 ((ImageDataExportBO) dataExportBaseBO).setWidth(image.getWidth());
                 ((ImageDataExportBO) dataExportBaseBO).setHeight(image.getHeight());
                 ((ImageDataExportBO) dataExportBaseBO).setFilePath(image.getFilePath());
+                break;
+            case TEXT:
+                dataExportBaseBO = DefaultConverter.convert(dataExportBaseBO, TextDataExportBO.class);
+                ((TextDataExportBO) dataExportBaseBO).setTextUrl(textUrl);
+                ((TextDataExportBO) dataExportBaseBO).setTextZipPath(textZipPath);
                 break;
             default:
                 break;
@@ -2038,4 +2139,60 @@ public class DataInfoUseCase {
         return dataInfoBO;
     }
 
+    /**
+     * Get all paths in the tree list
+     *
+     * @param list tree list
+     * @return
+     */
+    private List<List<TextDataContentBO>> getTreeAllPath(List<TextDataContentBO> list) {
+        list = list.stream().filter(t -> StrUtil.isNotEmpty(t.getId()) && StrUtil.isNotEmpty(t.getRole()) && StrUtil.isNotEmpty(t.getText())).collect(Collectors.toList());
+        if (CollUtil.isEmpty(list)) {
+            return List.of();
+        }
+        // convert to tree
+        List<Tree<String>> treeNodes = TreeUtil.build(list, null,
+                (treeNode, tree) -> {
+                    tree.setId(treeNode.getId());
+                    tree.setParentId(treeNode.getParentId());
+                    tree.setName(treeNode.getId());
+                    // Extended properties ...
+                    tree.putExtra("text", treeNode.getText());
+                    tree.putExtra("role", treeNode.getRole());
+                });
+
+        var leafNodeList = new ArrayList<Tree<String>>();
+        getLeafNodeList(treeNodes, leafNodeList);
+        // get all links
+        List<List<TextDataContentBO>> paths = new ArrayList<>();
+        for (Tree<String> treeNode : leafNodeList) {
+            List<TextDataContentBO> path = new ArrayList<>();
+            path.add(DefaultConverter.convert(treeNode, TextDataContentBO.class));
+            Tree<String> parent = treeNode.getParent();
+            while (parent != null) {
+                if (ObjectUtil.isNotNull(parent.getId())) {
+                    path.add(DefaultConverter.convert(parent, TextDataContentBO.class));
+                }
+                parent = parent.getParent();
+            }
+            paths.add(path);
+        }
+        return paths;
+    }
+
+    /**
+     * Get all leaf nodes under the tree
+     *
+     * @param treeNodes    tree node
+     * @param leafNodeList collection of leaf nodes
+     */
+    private void getLeafNodeList(List<Tree<String>> treeNodes, List<Tree<String>> leafNodeList) {
+        treeNodes.forEach(tree -> {
+            if (CollUtil.isNotEmpty(tree.getChildren())) {
+                getLeafNodeList(tree.getChildren(), leafNodeList);
+            } else {
+                leafNodeList.add(tree);
+            }
+        });
+    }
 }

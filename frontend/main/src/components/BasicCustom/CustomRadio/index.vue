@@ -1,6 +1,6 @@
 <template>
   <div :class="`${prefixCls}`">
-    <div>
+    <div class="options">
       <span
         :class="`item ${type === null ? 'active' : null}`"
         @click="
@@ -11,8 +11,6 @@
       >
         All
       </span>
-    </div>
-    <div class="options">
       <span
         v-for="item in options"
         :key="item.label"

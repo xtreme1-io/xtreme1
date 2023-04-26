@@ -52,6 +52,7 @@
           @fetchList="fixedFetchList"
         />
         <Tools
+          v-if="info?.type"
           :modelRunResultList="modelRunResultListForDisplay"
           :cardMaxSliderWidth="maxSliderWidth"
           v-model:cardSliderWidthValue="sliderWidthValue"
@@ -114,8 +115,8 @@
           </div>
         </div>
       </div>
-      <div class="sider">
-        <div class="header">
+      <div class="sider" :style="info?.type === datasetTypeEnum.TEXT ? { paddingTop: 0 } : null">
+        <div class="header" v-if="info?.type !== datasetTypeEnum.TEXT">
           <div
             @click="sliderType = 'fliter'"
             :class="{ notActive: sliderType !== 'fliter', fliter: true }"
@@ -149,7 +150,7 @@
             <Tabs.TabPane key="Data">
               <template #tab> Data </template>
             </Tabs.TabPane>
-            <Tabs.TabPane key="Result">
+            <Tabs.TabPane key="Result" v-if="info?.type !== datasetTypeEnum.TEXT">
               <template #tab> Result </template>
             </Tabs.TabPane>
           </Tabs>
@@ -459,7 +460,9 @@
     // max.value = await getMaxCountApi({ datasetId: id as unknown as number });
     // endCount.value = max.value;
     info.value = await datasetItemDetail({ id: id as string });
-    getSelectOptions();
+    if (info?.value.type !== datasetTypeEnum.TEXT) {
+      getSelectOptions();
+    }
     setDatasetBreadcrumb(info.value.name, info.value.type);
   });
 
@@ -499,7 +502,6 @@
     }
   };
   onMounted(async () => {
-    getMoelResult();
     fetchStatusNum();
     getLockedData();
     fetchList(filterForm);
@@ -518,6 +520,10 @@
         fetchFilterFun(filterForm);
       }, 400);
     });
+
+    setTimeout(() => {
+      getMoelResult();
+    }, 200);
   });
 
   const fetchStatusNum = async () => {

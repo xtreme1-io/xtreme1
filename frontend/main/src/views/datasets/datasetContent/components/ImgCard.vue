@@ -66,56 +66,80 @@
           </div>
         </div>
         <div class="wrapper" v-else>
-          <div class="openBtn" v-if="type !== PageTypeEnum.frame">
-            <Button
-              type="primary"
-              block
-              border
-              @click="
-                (e) => {
-                  e.stopPropagation();
-                  handleView(data.id, isFrame());
-                }
-              "
-            >
-              View
-            </Button>
+          <div class="wrapper-line">
+            <div class="openBtn" v-if="type !== PageTypeEnum.frame">
+              <Button
+                type="primary"
+                block
+                border
+                @click="
+                  (e) => {
+                    e.stopPropagation();
+                    handleView(data.id, isFrame());
+                  }
+                "
+              >
+                View
+              </Button>
+            </div>
+            <div class="openBtn">
+              <Button
+                type="danger"
+                block
+                border
+                @click="
+                  (e) => {
+                    e.stopPropagation();
+                    handleDel(e);
+                  }
+                "
+              >
+                Delete
+              </Button>
+            </div>
           </div>
-          <div class="openBtn" v-if="type !== PageTypeEnum.frame">
-            <Button
-              type="primary"
-              block
-              border
-              @click="
-                (e) => {
-                  e.stopPropagation();
-                  handleAnnotate(data.id);
-                }
-              "
-            >
-              Annotate
-            </Button>
-          </div>
-          <div class="openBtn">
-            <Button
-              type="danger"
-              block
-              border
-              @click="
-                (e) => {
-                  e.stopPropagation();
-                  handleDel(e);
-                }
-              "
-            >
-              Delete
-            </Button>
+          <div class="wrapper-line">
+            <div class="openBtn" v-if="type !== PageTypeEnum.frame">
+              <Button
+                type="primary"
+                block
+                border
+                @click="
+                  (e) => {
+                    e.stopPropagation();
+                    handleAnnotate(data.id);
+                  }
+                "
+              >
+                Annotate
+              </Button>
+            </div>
           </div>
         </div>
       </div>
       <div class="floder-img" v-if="isFrame()">
         <img :src="floder" alt="" />
         <div class="title"> {{ data.name }} </div>
+      </div>
+      <div
+        v-else-if="info?.type === datasetTypeEnum.TEXT"
+        class="relation-container image-loading"
+        style="width: 100%; height: 100%"
+      >
+        <!-- {{ convaersationData }} -->
+        <div class="text-box">
+          <template v-for="item in convaersationData" :key="item.id">
+            <div class="question" v-if="item.role === 'prompter'">
+              <div class="head">P</div>
+              <div class="conversation">{{ item.text }}</div>
+            </div>
+            <div class="answer" v-else>
+              <div class="conversation">{{ item.text }}</div>
+              <div class="head">A</div>
+            </div>
+          </template>
+        </div>
+        <div class="p-2 name bottom"> {{ data.name }} </div>
       </div>
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
         <div class="place relation-container image-loading">
@@ -230,7 +254,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { computed, ref, unref, defineProps, defineEmits } from 'vue';
+  import { computed, ref, unref, defineProps, defineEmits, onBeforeMount } from 'vue';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { Checkbox } from 'ant-design-vue';
   import Button from '/@@/Button/index.vue';
@@ -269,8 +293,17 @@
     return type.slice(0, 1) + LowerCase.slice(1, LowerCase.length);
   };
   const props = defineProps<Props>();
-  const { iState, size, svg, getPcImage, getPlaceImg, setRef, onImgLoad, getImageUrl } =
-    useImgCard(props);
+  const {
+    iState,
+    size,
+    svg,
+    getPcImage,
+    getPlaceImg,
+    setRef,
+    onImgLoad,
+    getImageUrl,
+    getTextJson,
+  } = useImgCard(props);
   const dataId = unref(props).data.id;
   // const originalUrl = unref(props).data.files ? unref(props).data.files[0].url.originalUrl : null;
   const { prefixCls } = useDesign('img-card');
@@ -278,6 +311,12 @@
   const hover = ref<boolean>(false);
   const checked = ref<boolean>(false);
   const { t } = useI18n();
+  const convaersationData: any = ref({});
+
+  onBeforeMount(async () => {
+    convaersationData.value = await getTextJson();
+    console.log(convaersationData.value);
+  });
 
   const getMaskClass = computed(() => {
     return unref(hover) ? 'mask animate-fadeIn animate-animated' : 'mask hidden';
@@ -454,12 +493,23 @@
 
         .wrapper {
           position: absolute;
+          padding-left: 9px;
+          padding-right: 9px;
           width: 100%;
           bottom: 5px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
           height: 100%;
+          display: flex;
+          justify-content: center;
+          flex-direction: column;
+          gap: 8px;
+          .wrapper-line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            .openBtn {
+              flex: 1;
+            }
+          }
         }
 
         .frameWrapper {
@@ -485,6 +535,54 @@
         overflow: hidden;
         width: 100%;
         flex: 1;
+      }
+
+      .text-box {
+        background: #232932;
+        height: 100%;
+        color: white;
+        padding: 15px 10px;
+        .head {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background-color: #e4f0fe;
+          text-align: center;
+          line-height: 16px;
+          font-size: 10px;
+          color: #57ccef;
+        }
+        .conversation {
+          background: #515f74;
+          border-radius: 12px;
+          padding: 6px 8px;
+          max-width: 70%;
+          font-size: 11px;
+          line-height: 16px;
+          word-break: break-word;
+        }
+        .question {
+          display: flex;
+          justify-content: flex-start;
+          margin-bottom: 12px;
+          .head {
+            margin-right: 6px;
+          }
+          .conversation {
+            border-top-left-radius: 0;
+          }
+        }
+        .answer {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 12px;
+          .head {
+            margin-left: 6px;
+          }
+          .conversation {
+            border-top-right-radius: 0;
+          }
+        }
       }
 
       .place {

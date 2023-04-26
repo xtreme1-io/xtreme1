@@ -8,7 +8,7 @@
         </Select.Option>
       </Select>
     </div>
-    <div class="custom-item mb-15px">
+    <div class="custom-item mb-15px" v-if="datasetType !== datasetTypeEnum.TEXT">
       <Checkbox v-model:checked="containsAnnotationResult">Contains annotation result</Checkbox>
     </div>
     <div v-if="containsAnnotationResult" class="flex items-center gap-10px mb-15px">
@@ -103,7 +103,7 @@
   const router = useRouter();
 
   let dataFormatOption = computed(() => {
-    return props.datasetType?.includes('LIDAR')
+    return props.datasetType?.includes('LIDAR') || props.datasetType?.includes('TEXT')
       ? [
           {
             value: 'XTREME1',

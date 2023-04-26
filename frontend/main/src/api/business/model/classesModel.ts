@@ -28,6 +28,7 @@ export enum inputTypeEnum {
   MULTI_SELECTION = 'MULTI_SELECTION',
   DROPDOWN = 'DROPDOWN',
   TEXT = 'TEXT',
+  LONG_TEXT = 'LONG_TEXT',
 }
 
 /** searchForm params */
