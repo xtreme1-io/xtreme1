@@ -785,6 +785,9 @@ public class DataInfoUseCase {
                     var textJson = JSONUtil.readJSONArray(f, StandardCharsets.UTF_8);
                     var list = JSONUtil.toList(textJson.toString(), TextDataContentBO.class);
                     var pathList = this.getTreeAllPath(list);
+                    if (CollUtil.isEmpty(pathList)) {
+                        return;
+                    }
                     var newTextFileList = new ArrayList<File>();
                     AtomicInteger i = new AtomicInteger(1);
                     pathList.forEach(path -> {
@@ -2143,6 +2146,10 @@ public class DataInfoUseCase {
      * @return
      */
     private List<List<TextDataContentBO>> getTreeAllPath(List<TextDataContentBO> list) {
+        list = list.stream().filter(t -> StrUtil.isNotEmpty(t.getId()) && StrUtil.isNotEmpty(t.getRole()) && StrUtil.isNotEmpty(t.getText())).collect(Collectors.toList());
+        if (CollUtil.isEmpty(list)) {
+            return List.of();
+        }
         //转换器
         List<Tree<String>> treeNodes = TreeUtil.build(list, null,
                 (treeNode, tree) -> {
