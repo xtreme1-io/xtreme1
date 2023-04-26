@@ -79,6 +79,11 @@ public interface Constants {
      */
     String IMAGE = "image";
 
+    /**
+     * image
+     */
+    String TEXT = "text";
+
     String RESULT = "result";
 
     String SLANTING_BAR = "/";
