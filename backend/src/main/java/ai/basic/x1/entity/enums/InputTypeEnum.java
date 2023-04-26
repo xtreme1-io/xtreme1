@@ -22,6 +22,8 @@ public enum InputTypeEnum {
     /**
      * TEXT
      */
-    TEXT
+    TEXT,
+
+    LONG_TEXT
 
 }

@@ -41,10 +41,10 @@ public class ClassificationUtils {
             var classificationNodes = JSONUtil.toList(values, ClassificationNode.class);
             var classificationNodeMap =
                     classificationNodes.stream().collect(Collectors.toUnmodifiableMap(ClassificationNode::getId,
-                    t -> t));
+                            t -> t));
 
             return classificationNodes.stream()
-                    .filter(e -> e.isLeaf && !Objects.equals(e.getType(), InputTypeEnum.TEXT))
+                    .filter(e -> e.isLeaf && !Objects.equals(e.getType(), InputTypeEnum.TEXT) && !Objects.equals(e.getType(), InputTypeEnum.LONG_TEXT))
                     .map(leafNode -> convert(leafNode, classificationNodeMap, dataAnnotation))
                     .flatMap(Collection::stream)
                     .collect(Collectors.toList());
@@ -54,7 +54,7 @@ public class ClassificationUtils {
     }
 
     private static List<DataClassificationOption> convert(ClassificationNode leafNode, Map<String,
-                ClassificationNode> classificationNodeMap, DataAnnotationClassificationBO dataAnnotation) {
+            ClassificationNode> classificationNodeMap, DataAnnotationClassificationBO dataAnnotation) {
         var results = new ArrayList<DataClassificationOption>();
         if (leafNode.value instanceof Collection) {
             Collection optionNames = (Collection) leafNode.value;
