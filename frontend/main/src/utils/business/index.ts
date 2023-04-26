@@ -3,11 +3,26 @@ import qs from 'qs';
 import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
 
 export const goToTool = (query: any, type?: datasetTypeEnum) => {
-  let toolPath = type === datasetTypeEnum.IMAGE ? '/tool/image' : '/tool/pc';
+  let toolPath;
+  console.log(type === datasetTypeEnum.TEXT);
+  switch (type) {
+    case datasetTypeEnum.IMAGE:
+      toolPath = '/tool/image';
+      break;
+    case datasetTypeEnum.TEXT:
+      toolPath = '/#/texttool';
+      break;
+    default:
+      toolPath = '/tool/pc';
+      break;
+  }
   if (import.meta.env.DEV) {
     switch (type) {
       case datasetTypeEnum.IMAGE:
         toolPath = 'http://localhost:3300/tool/image';
+        break;
+      case datasetTypeEnum.TEXT:
+        toolPath = '/#/texttool';
         break;
       default:
         toolPath = 'http://localhost:3200/tool/pc';
