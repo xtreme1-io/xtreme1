@@ -28,3 +28,24 @@ export const actionList = [
     hasDivider: false,
   },
 ];
+
+export const textActionList = [
+  {
+    text: t('common.action.selectAll'),
+    function: 'handleSelectAll',
+    svgIcon: 'action-classes-selectAll',
+    hasDivider: false,
+  },
+  {
+    text: t('common.action.unselectAll'),
+    function: 'handleUnselectAll',
+    svgIcon: 'action-classes-unselectAll',
+    hasDivider: false,
+  },
+  {
+    text: 'Delete',
+    function: 'handleDeleted',
+    svgIcon: 'action-classes-delete',
+    hasDivider: false,
+  },
+];

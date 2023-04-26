@@ -1,7 +1,7 @@
 <template>
   <ActionSelect
     :selectedList="selectedItemIds"
-    :actionList="actionList"
+    :actionList="datasetType === datasetTypeEnum.TEXT ? textActionList : actionList"
     :functionMap="functionMap"
   />
   <SaveToModal
@@ -20,7 +20,7 @@
   import SaveToModal from './saveTo/SaveToModal.vue';
 
   import { ActionSelect } from '/@/components/BasicCustom/ActionSelect';
-  import { actionList } from './actionList';
+  import { actionList, textActionList } from './actionList';
   import {
     deleteSelectedDatasetClassApi,
     deleteSelectedDatasetClassificationApi,

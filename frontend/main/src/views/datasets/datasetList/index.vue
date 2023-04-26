@@ -141,6 +141,7 @@
     { label: 'Lidar Fusion', value: datasetTypeEnum.LIDAR_FUSION },
     { label: 'Lidar Basic', value: datasetTypeEnum.LIDAR_BASIC },
     { label: 'Image', value: datasetTypeEnum.IMAGE },
+    { label: 'Text', value: datasetTypeEnum.TEXT },
   ];
   const [openFullLoading, closeFullLoading] = useLoading({
     target: listPage,

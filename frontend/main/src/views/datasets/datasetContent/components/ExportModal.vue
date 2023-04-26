@@ -88,7 +88,7 @@
   const dataFormat = ref<string>('XTREME1');
 
   let dataFormatOption = computed(() => {
-    return props.datasetType?.includes('LIDAR')
+    return props.datasetType?.includes('LIDAR') || props.datasetType?.includes('TEXT')
       ? [
           {
             value: 'XTREME1',

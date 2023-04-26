@@ -37,6 +37,12 @@
                     <div class="img-title">{{ t('common.imageText') }}</div>
                   </div>
                 </Radio>
+                <Radio :value="datasetTypeEnum.TEXT">
+                  <div class="img-tool-form">
+                    <img src="../../../../assets/images/dataset/text_type.png" alt="" />
+                    <div class="img-title">Text</div>
+                  </div>
+                </Radio>
               </Radio.Group>
             </FormItem>
           </div>
