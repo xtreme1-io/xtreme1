@@ -1,5 +1,10 @@
 <template>
-    <div v-for="item in dataList" :key="item.id" class="pc-editor-tool">
+    <div
+        :class="index === dataList.length - 1 ? 'text-card-last' : ''"
+        v-for="(item, index) in dataList"
+        :key="item.id"
+        class="pc-editor-tool"
+    >
         <TextItem :item="item" />
     </div>
 </template>
@@ -29,5 +34,11 @@
         padding: 20px 10px;
         position: relative;
         min-width: 300px;
+    }
+    .text-card-last {
+        .assistant,
+        .prompter {
+            border: 1px solid #57ccef;
+        }
     }
 </style>

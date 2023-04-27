@@ -1,6 +1,6 @@
 <template>
     <div class="text" v-if="item?.role === 'prompter'">
-        <div class="user"> A </div>
+        <div class="user" style="color: #57ccef"> A </div>
         <div class="prompter">
             <div>
                 {{ item?.text }}
@@ -62,7 +62,7 @@
                 />
             </div>
         </div>
-        <div class="user"> B </div>
+        <div class="user" style="color: #576ff3"> B </div>
     </div>
 </template>
 
@@ -83,9 +83,10 @@
 
 <style lang="less" scoped>
     .text {
-      width: calc(100% - 270px);
+        width: calc(100% - 270px);
         display: flex;
     }
+
     .thumbs {
         text-align: right;
         padding-top: 10px;
@@ -101,7 +102,7 @@
         font-size: 16px;
         line-height: 26px;
         padding: 16px;
-        background: #555b76;
+        background: #515f74;
         border-radius: 0px 24px 24px 24px;
         margin-bottom: 20px;
     }
@@ -111,18 +112,19 @@
         font-size: 16px;
         line-height: 26px;
         padding: 16px;
-        background: #5e80a9;
+        background: #555b76;
         border-radius: 24px 0px 24px 24px;
         margin-bottom: 20px;
     }
     .user {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        border: 1px solid #aaa;
+        // border: 1px solid #aaa;
         text-align: center;
-        line-height: 30px;
+        line-height: 32px;
         margin: 0 10px;
         background: #fff;
+        font-weight: 700;
     }
 </style>

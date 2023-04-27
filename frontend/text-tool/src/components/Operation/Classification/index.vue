@@ -102,7 +102,7 @@
     .operation-classification {
         text-align: left;
         padding: 4px 10px;
-        max-height: 350px;
+        max-height: calc(100vh - 200px);
         overflow: auto;
         position: relative;
 
