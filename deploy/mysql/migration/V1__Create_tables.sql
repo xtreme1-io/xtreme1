@@ -424,7 +424,7 @@ CREATE TABLE `model_run_record`
 (
     `id`                  bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
     `model_id`            bigint(20) NOT NULL COMMENT 'Model id',
-    `model_version`       varchar(255) NOT NULL COMMENT 'Model version',
+    `model_version`       varchar(255) DEFAULT NULL COMMENT 'Model version',
     `run_no`              varchar(20)  NOT NULL COMMENT 'Serial number(For interface display)',
     `dataset_id`          bigint(20) NOT NULL COMMENT 'Dataset id',
     `status`              enum('STARTED','RUNNING','SUCCESS','FAILURE','SUCCESS_WITH_ERROR') CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Model running status',
