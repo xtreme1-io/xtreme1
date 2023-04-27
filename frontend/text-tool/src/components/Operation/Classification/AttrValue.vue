@@ -30,6 +30,13 @@
                 @change="onAttChange"
                 v-else-if="item.type === AttrType.TEXT"
             />
+            <TextLong
+            :disabled="!canEdit()"
+            :name="item.id"
+            v-model:value="item.value"
+            @change="onAttChange"
+            v-else-if="item.type === AttrType.TEXT_LONG"
+        />
             <Check
                 :disabled="!canEdit()"
                 :name="item.name"
@@ -55,6 +62,7 @@
     import Radio from '../../MainView/sub/Radio.vue';
     import Select from '../../MainView/sub/Select.vue';
     import Text from '../../MainView/sub/Text.vue';
+    import TextLong from '../../MainView/sub/TextLong.vue';
     import Check from '../../MainView/sub/Check.vue';
 
     import useUI from '../../../hook/useUI';

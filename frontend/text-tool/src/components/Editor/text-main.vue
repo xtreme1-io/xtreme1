@@ -27,10 +27,7 @@
 <style lang="less">
     .pc-editor-tool {
         padding: 20px 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         position: relative;
-        width: calc(100% - 350px);
+        min-width: 300px;
     }
 </style>

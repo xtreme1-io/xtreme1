@@ -16,6 +16,7 @@ export enum AttrType {
     MULTI_SELECTION = 'MULTI_SELECTION',
     DROPDOWN = 'DROPDOWN',
     TEXT = 'TEXT',
+    TEXT_LONG= 'LONG_TEXT',
 }
 
 export enum Const {

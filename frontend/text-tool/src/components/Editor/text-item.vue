@@ -83,7 +83,7 @@
 
 <style lang="less" scoped>
     .text {
-        width: calc(100% - 450px);
+      width: calc(100% - 270px);
         display: flex;
     }
     .thumbs {
