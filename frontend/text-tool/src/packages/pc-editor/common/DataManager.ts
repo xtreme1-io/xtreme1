@@ -64,12 +64,31 @@ export default class DataManager {
     setJSONData(data: ITextItem[]) {
         this.clearTextMap();
         data.forEach((e) => {
-            this.textMap.set(e.id, e);
+            let initItem: ITextItem = {
+                ...e,
+                uuid: '',
+                direction: ''
+            }
+            this.textMap.set(e.id, initItem);
         });
 
     }
     getTextById(id: string) {
-        this.textMap.get(id);
+        return this.textMap.get(id);
+    }
+    updateTextDataState(data: Record<string, any>) {
+        let curFrame = this.editor.getCurrentFrame();
+        let frameData = data[curFrame.id];
+        if (!frameData || frameData.length == 0) return;
+        frameData.forEach((e: any) => {
+            let item = this.getTextById(e.messageId);
+            if (!item) return;
+            item.uuid = e.id;
+            item.direction = e.direction;
+            item.type = e.type;
+            item.createdAt = e.createdAt;
+            item.createdBy = e.createdBy;
+        });
     }
     clearTextMap() {
       this.textMap.clear();

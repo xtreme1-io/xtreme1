@@ -67,6 +67,8 @@ export default class LoadManager {
             try {
                 // let data = await api.getDataObject(datInfo.dataId);
                 let data = await this.editor.businessManager.getFrameObject(frame);
+                this.editor.dataManager.updateTextDataState(data.objectsMap as any);
+                this.editor.dispatchEvent({ type: Event.ANNOTATE_LOADED});
                 // frame.queryTime = data.queryTime;
                 // this.setTrackData(data.objectsMap);
 
@@ -209,7 +211,6 @@ export default class LoadManager {
     }
 
     setResource(data: ITextItem[]) {
-        console.log('=======setResource:', data);
         this.editor.dataManager.setJSONData(data);
     }
 }

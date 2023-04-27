@@ -333,11 +333,18 @@ export interface IFrame {
 }
 
 export interface ITextItem {
-    id: string;
+    id: string; // messageid
+    uuid: string;
     role: string;
     text: string;
-    // 点赞
-    // 踩
+    direction: 'up' | 'down' | '';
+    parentId?: string;
+    meta?: any;
+    type?: string;
+
+    version?: string;
+    createdBy?: any;
+    createdAt?: string;
 }
 
 export interface IAnnotationItem {
