@@ -119,3 +119,27 @@ spec:
     - hosts:
         - xtreme1.alidev.beisai.com
       secretName: alidev.beisai.com
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /text-tool/$2
+  name: frontend-text-tool
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: xtreme1.alidev.beisai.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+            path: /tool/text(/|$)(.*)
+            pathType: Prefix
+  tls:
+    - hosts:
+        - xtreme1.alidev.beisai.com
+      secretName: alidev.beisai.com
