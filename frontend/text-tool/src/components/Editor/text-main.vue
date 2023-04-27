@@ -5,7 +5,7 @@
         :key="item.id"
         class="pc-editor-tool"
     >
-        <TextItem :item="item" />
+        <TextItem :item="item" @changed="onItemDirection"/>
     </div>
 </template>
 
@@ -23,9 +23,10 @@
     const dataList = ref<ITextItem[]>([]);
 
     function updateData() {
-        let dataMap = editor.dataManager.textMap;
-        dataList.value = Array.from(dataMap.values());
-        console.log('==============>', dataList);
+        dataList.value = editor.dataManager.getTextItemsByFrame();
+    }
+    function onItemDirection(item:ITextItem, type: 'up' | 'down' | '') {
+        editor.dataManager.onTextChange(item, type);
     }
 </script>
 

@@ -133,7 +133,6 @@ export default class LoadManager {
 
             filterFrames.forEach((frame) => {
                 let objects = data.objectsMap[frame.id] || [];
-                frame.queryTime = data.queryTime;
 
                 let annotates = utils.convertObject2Annotate(objects, this.editor);
                 annotates.forEach((obj) => {

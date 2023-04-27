@@ -18,16 +18,16 @@ export default function useHeader() {
         fullScreen: false,
         dataName: '',
     });
-    watch(
-        () => state.frameIndex,
-        () => {
-            if (dataIndex.value !== state.frameIndex + 1) dataIndex.value = state.frameIndex + 1;
-            updateName();
-        },
-    );
+    // watch(
+    //     () => state.frameIndex,
+    //     () => {
+    //         if (dataIndex.value !== state.frameIndex + 1) dataIndex.value = state.frameIndex + 1;
+    //         updateName();
+    //     },
+    // );
 
     onMounted(() => {
-        editor.addEventListener(Event.RESOURCE_LOAD_COMPLETE, updateName);
+        editor.addEventListener(Event.ANNOTATE_LOADED, updateName);
     });
 
     let currentFrame = computed(() => {
@@ -59,8 +59,8 @@ export default function useHeader() {
     }
 
     let updateName = () => {
-        const { id } = currentFrame.value;
-        iState.dataName = editor.dataResource.dataMap[id]?.name || '';
+        let frame = editor.getCurrentFrame();
+        iState.dataName = frame.jsonFile?.name || '';
     };
     function onSave() {
         editor.saveObject();

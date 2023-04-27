@@ -22,7 +22,8 @@ export type IAnnotateTransform = ITransform2DBox | ITransform2DRect;
 export default class DataManager {
     editor: Editor;
     sceneMap: Map<string, IFrame[]> = new Map();
-    textMap: Map<string, ITextItem> = new Map();
+    // <frame_id, <message_id, ITextItem>>
+    frameTextMap: Map<string, Map<string, ITextItem>> = new Map();
 
     //////////////////////////////////////////////
     // object
@@ -61,37 +62,52 @@ export default class DataManager {
     /**
      * 文本内容数据
     */
-    setJSONData(data: ITextItem[]) {
-        this.clearTextMap();
+    setJSONData(data: ITextItem[], frame?: IFrame) {
+        let dataFrame = frame || this.editor.getCurrentFrame();
+        let textMap = new Map<string, ITextItem>();
         data.forEach((e) => {
             let initItem: ITextItem = {
                 ...e,
                 uuid: '',
                 direction: ''
             }
-            this.textMap.set(e.id, initItem);
+            textMap.set(e.id, initItem);
         });
-
+        this.frameTextMap.set(String(dataFrame.id), textMap);
     }
-    getTextById(id: string) {
-        return this.textMap.get(id);
+    getTextById(id: string, frame?: IFrame) {
+        let dataFrame = frame || this.editor.getCurrentFrame();
+        let map = this.frameTextMap.get(String(dataFrame.id));
+        return map?.get(id) || null;
+    }
+    getTextItemsByFrame(frame?: IFrame) {
+        let dataFrame = frame || this.editor.getCurrentFrame();
+        let map = this.frameTextMap.get(String(dataFrame.id));
+        return map ? Array.from(map.values()) : [];
     }
     updateTextDataState(data: Record<string, any>) {
-        let curFrame = this.editor.getCurrentFrame();
-        let frameData = data[curFrame.id];
-        if (!frameData || frameData.length == 0) return;
-        frameData.forEach((e: any) => {
-            let item = this.getTextById(e.messageId);
-            if (!item) return;
-            item.uuid = e.id;
-            item.direction = e.direction;
-            item.type = e.type;
-            item.createdAt = e.createdAt;
-            item.createdBy = e.createdBy;
+        let frameIds = Object.keys(data);
+        if (frameIds.length === 0) return;
+        frameIds.forEach((id) => {
+            let frameData = data[id];
+            if (!frameData || frameData.length == 0) return;
+            let frame = this.editor.getFrame(id);
+            frameData.forEach((e: any) => {
+                let item = this.getTextById(e.messageId, frame);
+                if (!item) return;
+                item.backId = e.backId;
+                item.direction = e.direction;
+                item.type = e.type;
+                item.createdAt = e.createdAt;
+                item.createdBy = e.createdBy;
+            });
         });
     }
-    clearTextMap() {
-      this.textMap.clear();
+    clearTextMap() {}
+    onTextChange(item: ITextItem, direction: '' | 'up' | 'down') {
+        item.direction = direction;
+        item.needSave = true;
+        this.editor.getCurrentFrame().needSave = true;
     }
 
 

@@ -9,23 +9,23 @@
                 <img
                     :src="thumbsUp"
                     v-if="item.direction !== 'up'"
-                    @click="item.direction = 'up'"
+                    @click="onDirection(item, 'up')"
                 />
                 <img
                     v-if="item.direction === 'up'"
                     :src="hadThumbsUp"
-                    @click="item.direction = ''"
+                    @click="onDirection(item, '')"
                 />
 
                 <img
                     :src="thumbsDown"
                     v-if="item.direction !== 'down'"
-                    @click="item.direction = 'down'"
+                    @click="onDirection(item, 'down')"
                 />
                 <img
                     v-if="item.direction === 'down'"
                     :src="hadThumbsDown"
-                    @click="item.direction = ''"
+                    @click="onDirection(item, '')"
                     name="hasThumbsDown"
                 />
             </div>
@@ -41,23 +41,23 @@
                 <img
                     :src="thumbsUp"
                     v-if="item.direction !== 'up'"
-                    @click="item.direction = 'up'"
+                    @click="onDirection(item, 'up')"
                 />
                 <img
                     v-if="item.direction === 'up'"
                     :src="hadThumbsUp"
-                    @click="item.direction = ''"
+                    @click="onDirection(item, '')"
                 />
 
                 <img
                     :src="thumbsDown"
                     v-if="item.direction !== 'down'"
-                    @click="item.direction = 'down'"
+                    @click="onDirection(item, 'down')"
                 />
                 <img
                     v-if="item.direction === 'down'"
                     :src="hadThumbsDown"
-                    @click="item.direction = ''"
+                    @click="onDirection(item, '')"
                     name="hasThumbsDown"
                 />
             </div>
@@ -78,7 +78,11 @@
     }
 
     const props = defineProps<IProps>();
-    function onDirection(type: 'up' | 'down') {}
+    const emit = defineEmits(['changed']);
+
+    function onDirection(item:ITextItem, type: 'up' | 'down' | '') {
+      emit('changed', item, type);
+    }
 </script>
 
 <style lang="less" scoped>

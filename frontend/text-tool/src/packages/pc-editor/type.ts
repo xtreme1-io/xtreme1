@@ -318,6 +318,8 @@ export interface IFrame {
     id: string;
     teamId?: string;
     loadState: LoadStatus;
+    // json file
+    jsonFile?: IFileConfig;
     // model
     model?: IModelResult;
     // classification values
@@ -332,16 +334,25 @@ export interface IFrame {
     sources?: IResultSource[];
     skipped: boolean;
 }
+export interface IFileConfig {
+    fileId: string;
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+}
 
 export interface ITextItem {
     id: string; // messageid
-    uuid: string;
+    uuid: string; // 前端生成的uuid
+    backId?: number;
     role: string;
     text: string;
     direction: 'up' | 'down' | '';
     parentId?: string;
     meta?: any;
     type?: string;
+    needSave?: boolean;
 
     version?: string;
     createdBy?: any;
@@ -408,13 +419,6 @@ export interface IResourceLoader {
     onProgress?: (percent: number) => void;
 }
 
-export interface IFileConfig {
-    fileId: string;
-    name: string;
-    url: string;
-    type: string;
-    size: number;
-}
 
 export interface ICheckStatus {
     frameIndex: number;

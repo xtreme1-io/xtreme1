@@ -31,10 +31,12 @@ export class ResourceLoader {
     load() {
         let promise: Promise<any> = new Promise(async (resolve, reject) => {
             try {
-                let config = await this.dataResource.loadDataConfig(this.data);
                 this.data.loadState = 'loading';
+                let config = await this.dataResource.loadDataConfig(this.data);
+                this.data.jsonFile = config;
                 let jsonStr = await this.onLoadJSON(config.url);
                 let jsonObj = JSON.parse(jsonStr);
+                this.data.loadState = 'complete';
                 resolve(jsonObj);
             } catch (e) {
                 console.log(`load resource: ${this.data.id} err`);
