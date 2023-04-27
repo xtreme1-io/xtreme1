@@ -10,7 +10,7 @@ export const goToTool = (query: any, type?: datasetTypeEnum) => {
       toolPath = '/tool/image';
       break;
     case datasetTypeEnum.TEXT:
-      toolPath = '/#/texttool';
+      toolPath = '/tool/text';
       break;
     default:
       toolPath = '/tool/pc';
