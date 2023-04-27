@@ -22,7 +22,7 @@ export const goToTool = (query: any, type?: datasetTypeEnum) => {
         toolPath = 'http://localhost:3300/tool/image';
         break;
       case datasetTypeEnum.TEXT:
-        toolPath = '/#/texttool';
+        toolPath = 'http://localhost:3300/tool/text';
         break;
       default:
         toolPath = 'http://localhost:3200/tool/pc';
