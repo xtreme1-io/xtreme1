@@ -1,0 +1,150 @@
+@import 'ant.less';
+
+#app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    // text-align: center;
+    color: #dee5eb;
+    margin: 0px;
+    height: 100%;
+}
+
+body {
+    margin: 0px;
+    overflow: hidden;
+}
+
+.limit {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 2px;
+}
+::-webkit-scrollbar-thumb {
+    background: #4c4c4c;
+    border-radius: 10px;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #4a4a4a;
+}
+
+.over-not-allowed {
+    position: absolute;
+    inset: 0px;
+    cursor: not-allowed;
+}
+
+// 2d view
+.edit-2d-wrap {
+    shape-rendering: auto;
+    .rect-dot {
+        stroke: #1890ff;
+        stroke-width: 2;
+        fill: rgb(255 255 255);
+        pointer-events: visible;
+        cursor: pointer;
+        opacity: 0;
+    }
+    .rect-line {
+        pointer-events: visible;
+        opacity: 0;
+    }
+    circle.rect-lt {
+        cursor: nw-resize;
+    }
+    circle.rect-lb {
+        cursor: sw-resize;
+    }
+    circle.rect-rt {
+        cursor: ne-resize;
+    }
+    circle.rect-rb {
+        cursor: se-resize;
+    }
+    .rect-right,
+    .rect-left {
+        cursor: col-resize;
+    }
+    .rect-rotate {
+        fill: rgba(204, 204, 204, 0.63);
+        stroke: rgba(204, 204, 204, 0.63);
+        cursor: grabbing;
+        pointer-events: visible;
+    }
+    .rect-top,
+    .rect-bottom {
+        cursor: row-resize;
+    }
+
+    .rect-bg,
+    .rect-back-bg,
+    .rect-front-bg {
+        fill: rgb(250 173 20 / 0%);
+        cursor: move;
+        pointer-events: visible;
+    }
+
+    .rect-bg {
+        stroke: red;
+        stroke-width: 1;
+    }
+
+    .wrap-8 {
+        .rect-back-bg:hover,
+        .rect-front-bg:hover {
+            fill: rgb(250 173 20 / 24%);
+        }
+    }
+
+    .wrap-8 {
+        .rect-back-bg,
+        .rect-front-bg {
+            stroke-dasharray: 5;
+            stroke: red;
+            stroke-width: 1;
+        }
+    }
+}
+.vc-colorpicker {
+    width: 200px !important;
+    .vc-colorpicker--container {
+        padding: 4px;
+        .vc-saturation {
+            height: 100px;
+        }
+        .vc-chrome-colorPicker > .vc-chrome-colorPicker-body {
+            .vc-display {
+                margin: 0;
+            }
+            .chrome-controls > .chrome-color-wrap {
+                display: none;
+            }
+        }
+    }
+}
+
+@keyframes loading-360 {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading {
+    animation: loading-360 0.8s infinite linear;
+}
+
+.no-info {
+    color: #ccc;
+}
