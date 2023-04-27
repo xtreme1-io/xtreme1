@@ -92,6 +92,9 @@ export default class Editor extends BaseEditor {
             frames.forEach((e) => {
                 e.needSave = false;
             });
+            dataInfos.forEach((datainfo) => {
+                datainfo.objects.forEach((e: ITextItem) => e.needSave = false);
+            });
             this.showMsg('success', this.lang('save-ok'));
         } catch (e: any) {
             console.error(e);
@@ -109,7 +112,6 @@ export default class Editor extends BaseEditor {
             texts.forEach((item: ITextItem) => {
                 let frontId = item.id;
                 let backId = dataKeyMap[frontId];
-                item.needSave = false;
                 if (!backId) return;
                 item.backId = Number(backId);
             });
