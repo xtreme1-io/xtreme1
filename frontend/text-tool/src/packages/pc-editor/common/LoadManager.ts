@@ -88,9 +88,9 @@ export default class LoadManager {
         // console.log(annotates);
 
         // this.editor.reset();
-        this.editor.state.filterActive = [];
+        // this.editor.state.filterActive = [];
         // this.editor.dataManager.setFilterFromData();
-        this.editor.dataManager.loadDataFromManager();
+        // this.editor.dataManager.loadDataFromManager();
         // this.editor.updateIDCounter();
         // this.editor.pc.addObject(annotates);
     }
