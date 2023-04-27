@@ -3,8 +3,8 @@ const baseConfig = require('./vite.config');
 
 // https://vitejs.dev/config/
 module.exports = mergeConfig(baseConfig, {
-    base: '/tool/pc/',
+    base: '/tool/text/',
     build: {
-        outDir: '../dist/pc-tool',
+        outDir: '../dist/text-tool',
     },
 });
