@@ -16,6 +16,7 @@ export enum AttrType {
     MULTI_SELECTION = 'MULTI_SELECTION',
     DROPDOWN = 'DROPDOWN',
     TEXT = 'TEXT',
+    TEXT_LONG= 'LONG_TEXT',
 }
 
 export enum Const {
@@ -317,6 +318,8 @@ export interface IFrame {
     id: string;
     teamId?: string;
     loadState: LoadStatus;
+    // json file
+    jsonFile?: IFileConfig;
     // model
     model?: IModelResult;
     // classification values
@@ -331,13 +334,29 @@ export interface IFrame {
     sources?: IResultSource[];
     skipped: boolean;
 }
+export interface IFileConfig {
+    fileId: string;
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+}
 
 export interface ITextItem {
-    id: string;
+    id: string; // messageid
+    uuid: string; // 前端生成的uuid
+    backId?: number;
     role: string;
     text: string;
-    // 点赞
-    // 踩
+    direction: 'up' | 'down' | '';
+    parentId?: string;
+    meta?: any;
+    type?: string;
+    needSave?: boolean;
+
+    version?: string;
+    createdBy?: any;
+    createdAt?: string;
 }
 
 export interface IAnnotationItem {
@@ -400,13 +419,6 @@ export interface IResourceLoader {
     onProgress?: (percent: number) => void;
 }
 
-export interface IFileConfig {
-    fileId: string;
-    name: string;
-    url: string;
-    type: string;
-    size: number;
-}
 
 export interface ICheckStatus {
     frameIndex: number;

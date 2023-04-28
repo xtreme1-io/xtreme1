@@ -67,6 +67,8 @@ export default class LoadManager {
             try {
                 // let data = await api.getDataObject(datInfo.dataId);
                 let data = await this.editor.businessManager.getFrameObject(frame);
+                this.editor.dataManager.updateTextDataState(data.objectsMap as any);
+                this.editor.dispatchEvent({ type: Event.ANNOTATE_LOADED});
                 // frame.queryTime = data.queryTime;
                 // this.setTrackData(data.objectsMap);
 
@@ -86,9 +88,9 @@ export default class LoadManager {
         // console.log(annotates);
 
         // this.editor.reset();
-        this.editor.state.filterActive = [];
+        // this.editor.state.filterActive = [];
         // this.editor.dataManager.setFilterFromData();
-        this.editor.dataManager.loadDataFromManager();
+        // this.editor.dataManager.loadDataFromManager();
         // this.editor.updateIDCounter();
         // this.editor.pc.addObject(annotates);
     }
@@ -131,7 +133,6 @@ export default class LoadManager {
 
             filterFrames.forEach((frame) => {
                 let objects = data.objectsMap[frame.id] || [];
-                frame.queryTime = data.queryTime;
 
                 let annotates = utils.convertObject2Annotate(objects, this.editor);
                 annotates.forEach((obj) => {
@@ -209,7 +210,6 @@ export default class LoadManager {
     }
 
     setResource(data: ITextItem[]) {
-        console.log('=======setResource:', data);
         this.editor.dataManager.setJSONData(data);
     }
 }

@@ -216,7 +216,7 @@
   watch(
     () => formState.inputType,
     (newVal) => {
-      if (newVal === inputTypeEnum.TEXT) {
+      if (newVal === inputTypeEnum.TEXT || newVal === inputTypeEnum.LONG_TEXT) {
         isDisabled.value = true;
         dataSchema.value = { options: [] };
       } else {

@@ -53,12 +53,12 @@
                 <div class="title">{{ $$('btn-save') }}</div>
             </a-button>
             <!-- shortcut -->
-            <a-button class="basic-btn" size="large" @click="onHelp">
+            <!-- <a-button class="basic-btn" size="large" @click="onHelp">
                 <template #icon
                     ><i style="font-size: 16px" class="iconfont icon-help"></i
                 ></template>
                 <div class="title">{{ $$('btn-shortcut') }}</div>
-            </a-button>
+            </a-button> -->
             <!-- full screen -->
             <a-button class="basic-btn" size="large" @click="onFullScreen">
                 <template #icon>

@@ -1,10 +1,11 @@
-import { Editor as BaseEditor, IFrame, SourceType } from 'pc-editor';
+import { Editor as BaseEditor, IFrame, ITextItem, SourceType } from 'pc-editor';
 import { IBSState } from '../type';
 import { getDefault } from '../state';
 import { utils, AttrType, IClassificationAttr, IUserData } from 'pc-editor';
 import * as api from '../api';
 import BusinessManager from './BusinessManager';
 import DataManager from './DataManager';
+import * as THREE from 'three';
 
 export default class Editor extends BaseEditor {
     businessManager: BusinessManager;
@@ -26,7 +27,6 @@ export default class Editor extends BaseEditor {
     async saveObject(frames?: IFrame[], force?: boolean) {
         let { bsState } = this;
         let { classTypes } = this.state;
-        // let dataMeta = state.dataList[state.dataIndex];
         if (bsState.saving) return;
 
         frames = frames || this.state.frames;
@@ -34,29 +34,28 @@ export default class Editor extends BaseEditor {
         if (!force && !this.needSave(frames)) return;
 
         let dataInfos = [] as any[];
-        let queryTime = frames[0].queryTime;
         frames.forEach((dataMeta) => {
-            // if (dataMeta.skipped) return;
             if (!dataMeta.needSave) return;
-            let annotates = this.dataManager.getFrameObject(dataMeta.id) || [];
-            if (new Date(dataMeta.queryTime).getTime() > new Date(queryTime).getTime())
-                queryTime = dataMeta.queryTime;
+            let texts = this.dataManager.getTextItemsByFrame(dataMeta);
 
             // result object
-            let data = utils.convertAnnotate2Object(annotates, this);
             let infos = [] as any[];
             let dataAnnotations = [] as any[];
-            data.forEach((e) => {
-                let classConfig = this.getClassType(e.classId || e.classType || '');
-                let objectV2 = utils.translateToObjectV2(e, classConfig);
+            texts.forEach((e) => {
+                console.log()
+                if (!e.needSave) return;
                 infos.push({
-                    id: e.uuid || undefined,
-                    frontId: e.frontId,
-                    classId: classConfig?.id,
-                    source: e.modelRun ? 'MODEL' : 'ARTIFICIAL',
-                    sourceId: e.sourceId,
-                    sourceType: e.sourceType,
-                    classAttributes: objectV2,
+                    classAttributes: {
+                        messageId: e.id,
+                        direction: e.direction,
+                        type: 'CHAT_THUMB',
+                        version: e.version,
+                        createdBy: e.createdBy,
+                        createdAt: e.createdAt,
+
+                    },
+                    id: e.backId,
+                    frontId: e.id,
                 });
             });
 
@@ -83,6 +82,8 @@ export default class Editor extends BaseEditor {
             dataInfos: dataInfos,
         };
         bsState.saving = true;
+        // console.log('================>save', objectInfo);
+        // return;
         try {
             // debugger
             await api.saveObject(objectInfo).then((keyMap) => {
@@ -90,6 +91,9 @@ export default class Editor extends BaseEditor {
             });
             frames.forEach((e) => {
                 e.needSave = false;
+            });
+            dataInfos.forEach((datainfo) => {
+                datainfo.objects.forEach((e: ITextItem) => e.needSave = false);
             });
             this.showMsg('success', this.lang('save-ok'));
         } catch (e: any) {
@@ -102,13 +106,14 @@ export default class Editor extends BaseEditor {
     updateBackId(keyMap: Record<string, Record<string, string>>) {
         Object.keys(keyMap).forEach((dataId) => {
             let dataKeyMap = keyMap[dataId];
-            let annotates = this.dataManager.getFrameObject(dataId) || [];
-            annotates.forEach((annotate: any) => {
-                let frontId = annotate.uuid;
+            let frame = this.getFrame(dataId);
+            if (!frame) return;
+            let texts = this.dataManager.getTextItemsByFrame(frame);
+            texts.forEach((item: ITextItem) => {
+                let frontId = item.id;
                 let backId = dataKeyMap[frontId];
                 if (!backId) return;
-                annotate.userData.backId = backId;
-                // annotate.uuid = backId;
+                item.backId = Number(backId);
             });
         });
     }

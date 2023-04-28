@@ -1,8 +1,17 @@
 const Event = {
+    // text tool
+    // common
+    // load
+    ANNOTATE_LOADED: 'annotate_loaded',
+
+
+
     UNDO: 'undo',
     REDO: 'redo',
     RESET: 'reset',
     EXECUTE: 'execute',
+
+
     SHOW_CLASS_INFO: 'show_class_info',
     POINTS_CHANGE: 'points_change',
 
