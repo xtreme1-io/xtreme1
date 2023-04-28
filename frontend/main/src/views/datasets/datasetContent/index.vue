@@ -19,7 +19,7 @@
           <Button type="primary" @click="handleUnlock">Unlock</Button>
         </div>
       </div>
-      <TipModal @register="tipRegister" />
+      <TipModal @register="tipRegister" :datasetType="info?.type" />
       <ModelRun
         modelType="model"
         @register="registerRunModel"
