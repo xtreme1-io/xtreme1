@@ -87,7 +87,7 @@
 
 <style lang="less" scoped>
     .text {
-        width: calc(100% - 270px);
+       width: 100%;
         display: flex;
     }
 

@@ -1,11 +1,13 @@
 <template>
-    <div
-        :class="index === dataList.length - 1 ? 'text-card-last' : ''"
-        v-for="(item, index) in dataList"
-        :key="item.id"
-        class="pc-editor-tool"
-    >
-        <TextItem :item="item" @changed="onItemDirection"/>
+    <div class="text-editor-tool">
+        <div
+            :class="index === dataList.length - 1 ? 'text-card-last' : ''"
+            v-for="(item, index) in dataList"
+            :key="item.id"
+            class="pc-editor-tool"
+        >
+            <TextItem :item="item" @changed="onItemDirection" />
+        </div>
     </div>
 </template>
 
@@ -25,21 +27,29 @@
     function updateData() {
         dataList.value = editor.dataManager.getTextItemsByFrame();
     }
-    function onItemDirection(item:ITextItem, type: 'up' | 'down' | '') {
+    function onItemDirection(item: ITextItem, type: 'up' | 'down' | '') {
         editor.dataManager.onTextChange(item, type);
     }
 </script>
 
 <style lang="less">
-    .pc-editor-tool {
+    .text-editor-tool {
         padding: 20px 10px;
         position: relative;
         min-width: 300px;
-    }
-    .text-card-last {
-        .assistant,
-        .prompter {
-            border: 1px solid #57ccef;
+        width: calc(100% - 270px);
+        height: 100%;
+        overflow-y: auto;
+        .pc-editor-tool {
+            padding: 20px 10px;
+            position: relative;
+            min-width: 300px;
+        }
+        .text-card-last {
+            .assistant,
+            .prompter {
+                border: 1px solid #57ccef;
+            }
         }
     }
 </style>
