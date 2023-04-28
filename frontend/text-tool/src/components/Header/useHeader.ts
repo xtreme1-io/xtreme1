@@ -181,7 +181,7 @@ export default function useHeader() {
                         "you don't have any annotation yet, are you sure you want to submit this data? If you can't annotate this data, you'd better mark this data as invalid. Cancel/ submit anyway",
                 })
                 .then(async () => {
-                    await onToggleValid();
+                    // await onToggleValid();
                 })
                 .catch(() => {
                     continueFlag = false;
