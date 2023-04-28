@@ -183,11 +183,11 @@ public class ExportUseCase {
                     logger.error("Download object error", e);
                 }
             }
-            var dataPath = String.format("%s/%s/%s-%s%s", zipPath, Constants.DATA, dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
+            var dataPath = String.format("%s/%s/%s%s", zipPath, Constants.DATA, dataExportBaseBO.getName(), ".json");
             FileUtil.writeString(JSONUtil.toJsonStr(dataExportBaseBO, jsonConfig), dataPath, StandardCharsets.UTF_8);
             if (ObjectUtil.isNotNull(dataExportBO.getResult())) {
-                var resultPath = String.format("%s/%s/%s-%s%s", zipPath, Constants.RESULT,
-                        dataExportBaseBO.getName(), dataExportBaseBO.getId(), ".json");
+                var resultPath = String.format("%s/%s/%s%s", zipPath, Constants.RESULT,
+                        dataExportBaseBO.getName(), ".json");
                 FileUtil.writeString(JSONUtil.toJsonStr(dataExportBO.getResult(), jsonConfig), resultPath, StandardCharsets.UTF_8);
             }
         });

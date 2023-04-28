@@ -99,6 +99,7 @@ export enum datasetTypeEnum {
   LIDAR_BASIC = 'LIDAR_BASIC',
   IMAGE = 'IMAGE',
   LIDAR = 'LIDAR',
+  TEXT = 'TEXT',
 }
 
 export interface fileItem {

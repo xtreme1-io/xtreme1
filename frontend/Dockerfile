@@ -8,6 +8,8 @@ RUN --mount=type=cache,target=image-tool/node_modules \
     cd image-tool && npm install && npm run build
 RUN --mount=type=cache,target=pc-tool/node_modules \
     cd pc-tool && npm install && npm run build
+RUN --mount=type=cache,target=text-tool/node_modules \
+    cd text-tool && npm install && npm run build
 
 FROM nginx:1.22
 COPY --from=build /build/dist /usr/share/nginx/html

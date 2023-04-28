@@ -16,7 +16,7 @@
           </template>
         </Input>
       </div>
-      <div class="btn">
+      <div class="btn" v-if="datasetType !== datasetTypeEnum.TEXT">
         <HeaderDropdown
           :datasetType="datasetType"
           :datasetId="datasetId"
@@ -133,7 +133,7 @@
   const datasetId = Number(route.query.id);
 
   /** Tab */
-  const tabListDataset = [
+  const tabListDataset = ref([
     {
       name: t('business.dataset.overview'),
       url: RouteChildEnum.DATASETS_OVERVIEW,
@@ -159,8 +159,9 @@
       icon: Ontology,
       activeIcon: OntologyActive,
     },
-  ];
-  const tabListOntology = [
+  ]);
+
+  const tabListOntology = ref([
     {
       name: t('business.class.class'),
       url: RouteChildEnum.DATASETS_CLASS,
@@ -173,7 +174,7 @@
       active: pageType == ClassTypeEnum.CLASSIFICATION,
       params: { id: datasetId },
     },
-  ];
+  ]);
 
   /** Clicked Detail */
   const detail = ref<datasetClassItem | datasetClassificationItem>();
@@ -195,7 +196,6 @@
     if (pageType == ClassTypeEnum.CLASS) {
       openCreateClassModal(true, { isEdit });
     } else {
-    
       openCreateClassificationModal(true, { isEdit });
     }
   };
@@ -264,6 +264,18 @@
     const res = await datasetItemDetail({ id: datasetId });
     datasetType.value = res.type;
     setDatasetBreadcrumb(res.name, res.type);
+    if (res.type === datasetTypeEnum.TEXT) {
+      tabListDataset.value = tabListDataset.value
+        .map((item) => {
+          if (item.name === t('business.ontology.ontology')) {
+            return { ...item, url: RouteChildEnum.DATASETS_CLASSIFICATION };
+          } else {
+            return { ...item };
+          }
+        })
+        .slice(1);
+      tabListOntology.value = tabListOntology.value.slice(1);
+    }
   };
 
   const scrollRef = ref<Nullable<ScrollActionType>>(null);

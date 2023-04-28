@@ -13,21 +13,27 @@
       <template v-if="data.datas === null">
         <div style="width: 100%">
           <img
-            style="width: 100%;"
+            style="width: 100%"
             v-if="data.type === datasetTypeEnum.IMAGE"
             :src="imageEmpty"
             alt=""
           />
           <img
-            style="width: 100%;"
+            style="width: 100%"
             v-if="data.type === datasetTypeEnum.LIDAR_FUSION"
             :src="fusionEmpty"
             alt=""
           />
           <img
-            style="width: 100%; "
+            style="width: 100%"
             v-if="data.type === datasetTypeEnum.LIDAR_BASIC"
             :src="basicEmpty"
+            alt=""
+          />
+          <img
+            style="width: 100%"
+            v-if="data.type === datasetTypeEnum.TEXT"
+            :src="textEmpty"
             alt=""
           />
         </div>
@@ -37,6 +43,9 @@
           <div class="img image-loading" v-for="(item, index) in new Array(6)" :key="item">
             <img v-lazyload="getImgUrl(index)" alt="" />
           </div>
+        </div>
+        <div class="img-content" v-else-if="data.type === datasetTypeEnum.TEXT">
+          <img v-lazyload="textImg" alt="" />
         </div>
         <div class="img-content" v-else-if="data.type === datasetTypeEnum.LIDAR_FUSION">
           <div class="wrapper">
@@ -137,6 +146,8 @@
   import basicEmpty from '/@/assets/images/dataset/basicEmpty.png';
   import fusionEmpty from '/@/assets/images/dataset/fusionEmpty.png';
   import imageEmpty from '/@/assets/images/dataset/imageEmpty.png';
+  import textEmpty from '/@/assets/images/dataset/textEmpty.png';
+  import textImg from '/@/assets/images/dataset/textImg.png';
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { setDatasetBreadcrumb } from '/@/utils/business';
   const [renameRegister, { openModal: openRenameModal }] = useModal();

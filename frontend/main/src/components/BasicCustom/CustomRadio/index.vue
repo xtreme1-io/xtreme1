@@ -1,7 +1,7 @@
 <template>
   <div :class="`${prefixCls}`">
-    <div>
-      <span
+    <div class="options">
+      <div
         :class="`item ${type === null ? 'active' : null}`"
         @click="
           () => {
@@ -10,10 +10,8 @@
         "
       >
         All
-      </span>
-    </div>
-    <div class="options">
-      <span
+      </div>
+      <div
         v-for="item in options"
         :key="item.label"
         :class="`item ${item.value === type ? 'active' : null}`"
@@ -24,7 +22,7 @@
         "
       >
         {{ item.label }}
-      </span>
+      </div>
     </div>
   </div>
 </template>
@@ -53,20 +51,21 @@
     // display: flex;
     margin-top: 6px;
     font-size: 12px;
-    // .options {
-    .item {
-      cursor: pointer;
-      margin-right: 10px;
+    .options {
+      .item {
+        display: inline-flex;
+        cursor: pointer;
+        margin-right: 5px;
 
-      &:last-child {
-        margin-right: 0;
-      }
+        &:last-child {
+          margin-right: 0;
+        }
 
-      &.active {
-        color: @primary-color;
+        &.active {
+          color: @primary-color;
+        }
       }
     }
-    // }
     // .box {
     //   text-align: center;
     // }
