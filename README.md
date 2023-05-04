@@ -12,7 +12,7 @@
 # Intro #
 Xtreme1 is the world's first open-source platform for Multimodal training data.
 
-Xtreme1 unlocks deep insights into data annotation, curation and ontology management for tackling machine learning challenges in 2D images and 3D point cloud datasets. The platform's AI-fueled tools elevate your annotation game to the next level of efficiency, powering your projects in 2D/3D Object Detection, 3D Instance Segmentation and LiDAR-Camera Fusion like never before.
+Xtreme1 unlocks deep insights into data annotation, curation and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation game to the next level of efficiency, powering your projects in 2D/3D Object Detection, 3D Instance Segmentation and LiDAR-Camera Fusion like never before.
 
 It is now hosted in [LF AI & Data Foundation](https://medium.com/multisensory-data-training/xtreme1-the-first-open-source-labeling-annotation-and-visualization-project-is-debuting-at-the-da1d157d1512) as the 1st open source data labeling annotation and visualization project.
 
@@ -25,7 +25,7 @@ Join the Xtreme1 community on Slack to share your suggestions, advice, and quest
 
 # Key features #
 
-Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/yolor) & [RITM](https://github.com/saic-vul/ritm_interactive_segmentation) |  Lidar-camera Fusion (Frame series) Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
+Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/yolor) & [RITM](https://github.com/saic-vul/ritm_interactive_segmentation) |  Lidar-camera Fusion Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
 :-------------------------:|:-------------------------:
 ![](/docs/images/image_ai.gif)  |  ![](/docs/images/3d_ai.gif)
 
@@ -40,10 +40,12 @@ Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/y
  :five: Find labeling errors and fix them
 
  :six: Model results visualization to help you evaluate your model
+ 
+ :seven: RLHF for Large Language Models :new: (beta version)
 
-Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE)  |  Lidar-camera Fusion Data Curation (Filter by Class name X Cross Dataset)
+Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE)  | RLHF Annotation tool for LLM (beta version)
 :-------------------------:|:-------------------------:
-![](/docs/images/2d_v.gif) |  <img src="/docs/images/dv.png" width="640"> 
+![](/docs/images/2d_v.gif) |  <img src="/docs/images/0.7rlhf.webp" width="640"> 
 
 # Quick start
 
