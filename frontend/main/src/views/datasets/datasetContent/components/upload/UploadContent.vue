@@ -235,7 +235,12 @@
       isLoading.value = true;
       setTimeout(() => {
         isLoading.value = false;
-        emits('closeUpload', formState.url, UploadSourceEnum.URL);
+        emits('closeUpload', formState.url, {
+          source: UploadSourceEnum.URL,
+          resultType: resultType.value,
+          modelId: modelId.value,
+          dataFormat: dataFormat.value,
+        });
       }, 1000);
     } catch {}
   };
