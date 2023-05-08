@@ -1712,6 +1712,7 @@ public class DataInfoUseCase {
                     objectSourceList.forEach(o -> {
                         var dataResultObjectExportBO = DefaultConverter.convert(o.getClassAttributes(), DataResultObjectExportBO.class);
                         dataResultObjectExportBO.setClassName(classMap.get(o.getClassId()));
+                        dataResultObjectExportBO.setClassId(o.getClassId());
                         objects.add(dataResultObjectExportBO);
                     });
                     dataResultExportBO.setObjects(objects);
