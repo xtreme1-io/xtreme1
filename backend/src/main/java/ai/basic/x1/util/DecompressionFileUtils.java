@@ -2,6 +2,7 @@ package ai.basic.x1.util;
 
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -125,7 +126,7 @@ public class DecompressionFileUtils {
      */
     public static boolean validateUrl(String urlStr) {
         try {
-            var url = new URL(urlStr);
+            var url = new URL(URLUtil.encode(urlStr));
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
             oc.setConnectTimeout(1000);
