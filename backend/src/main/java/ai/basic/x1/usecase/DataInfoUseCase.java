@@ -1460,6 +1460,7 @@ public class DataInfoUseCase {
                         object.setVersion(0);
                         processClassAttributes(classMap, object);
                         Objects.requireNonNull(insertDataAnnotationObjectBO).setClassAttributes(JSONUtil.parseObj(object));
+                        insertDataAnnotationObjectBO.setClassId(object.getClassId());
                         if (verifyDataResult(object, dataAnnotationObjectBO.getDataId(), dataName)) {
                             dataAnnotationObjectBOList.add(insertDataAnnotationObjectBO);
                         }
