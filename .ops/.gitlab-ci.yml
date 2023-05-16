@@ -5,7 +5,7 @@ stages:
 
 variables:
   APP_NAME: "xtreme1"
-  APP_VERSION: "0.6.0"
+  APP_VERSION: "0.7.0"
 
   FRONTEND_PACKAGE_DIR: "dist"
   BACKEND_PACKAGE_NAME: "${APP_NAME}-backend-${APP_VERSION}-SNAPSHOT.jar"
@@ -65,6 +65,9 @@ build-frontend-package:
     - cd ../pc-tool
     - npm install
     - npm run build
+    - cd ../text-tool
+    - npm install
+    - npm run build
   artifacts:
     paths:
       - frontend/$FRONTEND_PACKAGE_DIR
@@ -73,6 +76,7 @@ build-frontend-package:
       - frontend/main/node_modules
       - frontend/image-tool/node_modules
       - frontend/pc-tool/node_modules
+      - frontend/text-tool/node_modules
 
 build-release-package:
   stage: build-package

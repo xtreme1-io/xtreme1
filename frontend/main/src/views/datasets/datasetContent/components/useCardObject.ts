@@ -570,6 +570,15 @@ export function useImgCard(props: {
     const url = file?.renderImage?.url;
     return thumbnailUrl || url || placeImgType;
   };
+
+  const getTextJson = async () => {
+    if (props.data.content[0].name.includes('json')) {
+      const jsonUrl = props.data.content[0]?.file?.url;
+      const data = (await fetch(jsonUrl as string)).json();
+      return data;
+    }
+  };
+
   return {
     getPcImage,
     getPlaceImg,
@@ -579,6 +588,7 @@ export function useImgCard(props: {
     size,
     onImgLoad,
     getImageUrl,
+    getTextJson,
   };
 }
 

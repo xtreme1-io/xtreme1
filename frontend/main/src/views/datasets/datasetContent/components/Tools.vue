@@ -79,7 +79,7 @@
         <Tabs.TabPane key="File">
           <template #tab> File </template>
         </Tabs.TabPane>
-        <Tabs.TabPane key="Scenario">
+        <Tabs.TabPane key="Scenario" v-if="datasetType !== datasetTypeEnum.TEXT">
           <template #tab> Scenario </template>
         </Tabs.TabPane>
       </Tabs>
@@ -331,6 +331,7 @@
   import DownloadIcon from '/@/assets/svg/dataset/download.svg';
   import { Authority } from '/@/components/Authority';
   import { useGo } from '/@/hooks/web/usePage';
+  import { onMounted } from 'vue';
 
   const go = useGo();
   const makeFrameDisable = ref<boolean>(false);
@@ -359,7 +360,7 @@
       handleGoSearch();
     }
   };
-  const tabList = [
+  const tabList: any = ref([
     {
       name: t('business.dataset.overview'),
       url: RouteChildEnum.DATASETS_OVERVIEW,
@@ -381,7 +382,7 @@
       icon: Ontology,
       activeIcon: OntologyActive,
     },
-  ];
+  ]);
 
   const props = defineProps<{
     name: string;
@@ -399,6 +400,20 @@
     cardResetWidth: (val) => void;
     cardSliderWidthValue: number;
   }>();
+
+  onMounted(() => {
+    if (props?.datasetType === datasetTypeEnum.TEXT) {
+      tabList.value = tabList.value
+        .map((item) => {
+          if (item.name === t('business.ontology.ontology')) {
+            return { ...item, url: RouteChildEnum.DATASETS_CLASSIFICATION };
+          } else {
+            return { ...item };
+          }
+        })
+        .slice(1);
+    }
+  });
 
   watch(props, (curr) => {
     const data = unref(props.dataList).filter((item) => {

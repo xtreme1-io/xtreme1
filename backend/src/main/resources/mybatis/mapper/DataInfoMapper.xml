@@ -130,6 +130,6 @@
     </delete>
 
     <delete id="deleteByDatasetId">
-        update dataset set del_unique_key = id, is_deleted = true where dataset_id = #{datasetId}
+        update data set del_unique_key = id, is_deleted = true where dataset_id = #{datasetId}
     </delete>
 </mapper>

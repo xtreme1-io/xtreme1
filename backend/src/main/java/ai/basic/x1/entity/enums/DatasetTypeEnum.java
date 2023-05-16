@@ -17,5 +17,9 @@ public enum DatasetTypeEnum {
     /**
      * IMAGE
      */
-    IMAGE
+    IMAGE,
+    /**
+     * TEXT
+     */
+    TEXT
 }

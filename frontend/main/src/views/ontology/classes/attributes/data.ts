@@ -119,6 +119,7 @@ export const inputItemImg = {
   MULTI_SELECTION: checkIcon,
   DROPDOWN: dropdownIcon,
   TEXT: textIcon,
+  LONG_TEXT: textIcon,
 };
 export const inputTypeList: Array<{
   label: string;
