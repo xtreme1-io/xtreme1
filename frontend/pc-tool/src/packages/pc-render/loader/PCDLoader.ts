@@ -1,4 +1,4 @@
-import { FileLoader, Loader, LoaderUtils } from 'three';
+import { FileLoader, Loader, LoaderUtils, MathUtils } from 'three';
 
 type ICallBack = (args?: any) => void;
 type PCDData = 'ascii' | 'binary_compressed' | 'binary';
@@ -182,8 +182,8 @@ class PCDLoader extends Loader {
         const position = [];
         // const normal = [];
         const color = [];
-        const intensity = [];
-
+        let intensity = [];
+        let maxIntensity = -Infinity;
         // ascii
 
         let N = 1;
@@ -218,12 +218,16 @@ class PCDLoader extends Loader {
                 }
                 if (offset.i !== undefined) {
                     // [...Array(N)].forEach((e) => {
-                    intensity.push(parseFloat(line[offset.i]));
+                    const _i = parseFloat(line[offset.i]);
+                    intensity.push(_i);
+                    maxIntensity = Math.max(_i, maxIntensity);
                     // });
                 }
                 if (offset.intensity !== undefined) {
                     // [...Array(N)].forEach((e) => {
-                    intensity.push(parseFloat(line[offset.intensity]));
+                    const _i = parseFloat(line[offset.intensity]);
+                    intensity.push(_i);
+                    maxIntensity = Math.max(_i, maxIntensity);
                     // });
                 }
                 // if (offset.normal_x !== undefined) {
@@ -323,9 +327,13 @@ class PCDLoader extends Loader {
                 }
 
                 if (offset.i !== undefined) {
-                    intensity.push(dataview.getFloat32(row + offset.i, this.littleEndian));
+                    const _i = dataview.getFloat32(row + offset.i, this.littleEndian);
+                    intensity.push(_i);
+                    maxIntensity = Math.max(_i, maxIntensity);
                 } else if (offset.intensity !== undefined) {
-                    intensity.push(dataview.getFloat32(row + offset.intensity, this.littleEndian));
+                    const _i = dataview.getFloat32(row + offset.intensity, this.littleEndian);
+                    intensity.push(_i);
+                    maxIntensity = Math.max(_i, maxIntensity);
                 }
 
                 if (offset.rgb !== undefined) {
@@ -341,7 +349,9 @@ class PCDLoader extends Loader {
                 // }
             }
         }
-
+        if (maxIntensity > 255 || maxIntensity < 2) {
+            intensity = intensity.map((i) => MathUtils.mapLinear(i, 0, maxIntensity, 0, 255));
+        }
         // build geometry
         return {
             position,
