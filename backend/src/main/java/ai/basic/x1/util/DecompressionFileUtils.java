@@ -2,6 +2,7 @@ package ai.basic.x1.util;
 
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -15,6 +16,8 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static ai.basic.x1.entity.enums.UploadStatusEnum.FAILED;
+import static ai.basic.x1.usecase.exception.UsecaseCode.DATASET_DATA_FILE_URL_ERROR;
 import static ai.basic.x1.util.Constants.*;
 import static cn.hutool.core.util.CharsetUtil.GBK;
 import static cn.hutool.core.util.CharsetUtil.UTF_8;
@@ -124,6 +127,14 @@ public class DecompressionFileUtils {
      * @return boolean
      */
     public static boolean validateUrl(String urlStr) {
+        var boo = validateUrlS(urlStr);
+        if (!boo) {
+            return validateUrlS(URLUtil.encode(urlStr));
+        }
+        return boo;
+    }
+
+    private static boolean validateUrlS(String urlStr) {
         try {
             var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();

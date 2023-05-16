@@ -510,11 +510,11 @@ export function useImgCard(props: {
   const updatePcImageObject = () => {
     const imgs: any[] = props.data.content
       ? props.data.content
-        .filter((record) => record?.directoryType?.includes('image'))
-        .slice(0, 3)
-        .map((img) => {
-          return Object.assign({}, img, { object: null });
-        })
+          .filter((record) => record?.directoryType?.includes('image'))
+          .slice(0, 3)
+          .map((img) => {
+            return Object.assign({}, img, { object: null });
+          })
       : [];
 
     if (
@@ -572,9 +572,11 @@ export function useImgCard(props: {
   };
 
   const getTextJson = async () => {
-    const jsonUrl = props.data.content[0]?.file?.url;
-    const data = (await fetch(jsonUrl as string)).json();
-    return data;
+    if (props.data.content[0].name.includes('json')) {
+      const jsonUrl = props.data.content[0]?.file?.url;
+      const data = (await fetch(jsonUrl as string)).json();
+      return data;
+    }
   };
 
   return {

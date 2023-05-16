@@ -20,6 +20,11 @@ public class DataResultObjectExportBO {
     private String type;
 
     /**
+     * Class id
+     */
+    private Long classId;
+
+    /**
      * Class name
      */
     private String className;
