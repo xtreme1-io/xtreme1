@@ -13,7 +13,7 @@ const config = defineConfig({
         proxy: {
             '/api': {
                 changeOrigin: true,
-                target: 'https://xtreme1.alidev.beisai.com',
+                target: 'http://localhost:8190',
             },
         },
     },
