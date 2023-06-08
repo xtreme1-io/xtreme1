@@ -14,7 +14,7 @@ Xtreme1 is the world's first open-source platform for Multimodal training data.
 
 Xtreme1 unlocks deep insights into data annotation, curation and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation game to the next level of efficiency, powering your projects in 2D/3D Object Detection, 3D Instance Segmentation and LiDAR-Camera Fusion like never before.
 
-It is now hosted in [LF AI & Data Foundation](https://medium.com/multisensory-data-training/xtreme1-the-first-open-source-labeling-annotation-and-visualization-project-is-debuting-at-the-da1d157d1512) as the 1st open source data labeling annotation and visualization project.
+Today, building upon this initiative, we're delighted to present our [AI-powered Cloud platform](https://app.basic.ai/#/login/) — **completely FREE of charge!** This groundbreaking decision marks another important step towards AI democracy, making AI solutions more accessible to everyone.
 
 # Join community #
 [Website](https://xtreme1.io) | [Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
@@ -95,7 +95,7 @@ docker compose --profile model up
 }
 ```
 
-For more installation, development and deployment, check out [Xtreme1 Docs](docs.xtreme1.io/).
+For more installation, development and deployment, check out [Xtreme1 Docs](https://docs.xtreme1.io/).
 
 ![](/docs/images/3d_annotation2.png) 
 
@@ -103,6 +103,9 @@ For more installation, development and deployment, check out [Xtreme1 Docs](docs
 This software is licensed under the Apache 2.0 LICENSE. Xtreme1 is a trademark of LF AI & Data Foundation.
 
 <img src="/docs/images/LFAI_DATA_horizontal-color.png" width="250">
+
+Xtreme1 is now hosted in [LF AI & Data Foundation](https://medium.com/multisensory-data-training/xtreme1-the-first-open-source-labeling-annotation-and-visualization-project-is-debuting-at-the-da1d157d1512) as the 1st open source data labeling annotation and visualization project.
+
 
 If Xtreme1 is part of your development process / project / publication, please cite us ❤️ :
 ```bash
