@@ -21,6 +21,7 @@ import ai.basic.x1.util.Page;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
@@ -49,10 +50,16 @@ public class UserController extends BaseController {
     @Autowired
     private UserTokenUseCase userTokenUseCase;
 
+    @Value("${user.auth.register.enabled}")
+    private Boolean enabledRegister;
+
     @PostMapping("/register")
     public UserLoginResponseDTO register(@Validated @RequestBody UserAuthRequestDTO authDto) {
-        var user =  UserDTO.fromBO(userUseCase.create(authDto.getUsername(),
+        var user = UserDTO.fromBO(userUseCase.create(authDto.getUsername(),
                 authDto.getPassword()));
+        if (Boolean.FALSE.equals(enabledRegister)) {
+            throw new UsecaseException(UsecaseCode.PARAM_ERROR, "Registration is temporarily closed");
+        }
         return UserLoginResponseDTO.builder()
                 .token(userTokenUseCase.generateGatewayToken(user.getId()).getToken())
                 .user(user)

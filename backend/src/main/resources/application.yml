@@ -54,6 +54,10 @@ jwt:
   secret: G6j7j#$&YOy9&p(s2b@v53^)38E!cG49
   issuer: BasicAI
   expireHours: 120
+auth:
+  # 是否开启注册功能
+  register:
+    enabled: true
 
 mybatis-plus:
   global-config:
