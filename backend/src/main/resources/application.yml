@@ -55,7 +55,7 @@ jwt:
   issuer: BasicAI
   expireHours: 120
 auth:
-  # 是否开启注册功能
+  # Whether to enable the registration
   register:
     enabled: true
 
