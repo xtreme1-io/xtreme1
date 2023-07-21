@@ -50,7 +50,7 @@ public class UserController extends BaseController {
     @Autowired
     private UserTokenUseCase userTokenUseCase;
 
-    @Value("${user.auth.register.enabled}")
+    @Value("${auth.register.enabled}")
     private Boolean enabledRegister;
 
     @PostMapping("/register")
