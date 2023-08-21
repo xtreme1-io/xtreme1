@@ -44,7 +44,7 @@ services:
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: 1tQB970y
-      MINIO_DEFAULT_BUCKETS: x1-community:download
+      MINIO_DEFAULT_BUCKETS: xtreme1:download
     ports:
       - 8193:9000
       - 8194:9001

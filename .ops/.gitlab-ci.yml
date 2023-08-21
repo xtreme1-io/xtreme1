@@ -16,7 +16,7 @@ variables:
   DOCKER_HUB_FRONTEND_IMAGE_NAME: "basicai/${APP_NAME}-frontend"
   DOCKER_HUB_BACKEND_IMAGE_NAME: "basicai/${APP_NAME}-backend"
 
-  KUBERNETES_NAMESPACE: "x1-community"
+  KUBERNETES_NAMESPACE: "basicai-xtreme1"
 
 build-backend-package:
   stage: build-package
@@ -206,37 +206,3 @@ deploy-frontend-to-alidev:
   script:
     - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
     - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_DEVELOPMENT
-
-deploy-backend-to-alitest:
-  extends: .deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
-      changes:
-        - .ops/*
-        - .ops/**/*
-        - backend/*
-        - backend/**/*
-  when: manual
-  variables:
-    ENV: alitest
-    DEPLOYMENT: backend-deployment.yml
-  script:
-    - sed -i 's|$BACKEND_IMAGE_NAME|'"$BACKEND_IMAGE_NAME"'|g' $DEPLOYMENT
-    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING
-
-deploy-frontend-to-alitest:
-  extends: .deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
-      changes:
-        - .ops/*
-        - .ops/**/*
-        - frontend/*
-        - frontend/**/*
-  when: manual
-  variables:
-    ENV: alitest
-    DEPLOYMENT: frontend-deployment.yml
-  script:
-    - sed -i 's|$FRONTEND_IMAGE_NAME|'"$FRONTEND_IMAGE_NAME"'|g' $DEPLOYMENT
-    - kubectl apply -f $DEPLOYMENT -n $KUBERNETES_NAMESPACE --kubeconfig=$KUBECONFIG_ALIYUN_TESTING

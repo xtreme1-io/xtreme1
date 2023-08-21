@@ -74,7 +74,7 @@ minio:
   endpoint: http://minio:9000/
   accessKey: admin
   secretKey: 1tQB970y
-  bucketName: x1-community
+  bucketName: xtreme1
 
 export:
   data:
