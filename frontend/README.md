@@ -8,7 +8,6 @@ Xtreme1 frontend mainly includes three parts, each part is a separate project an
 - [image-tool](./image-tool/README.md) - Image annotation tool
 - [text-tool](./text-tool/README.md) - Text annotation tool
 
-
 ## Deploy
 
 Each part is developed independently, and finally the static files are put together to `frontend/dist`.  
