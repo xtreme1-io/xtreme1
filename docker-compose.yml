@@ -13,8 +13,8 @@ services:
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: ImOxO8Lz
-      MYSQL_DATABASE: x1_community
-      MYSQL_USER: x1_community
+      MYSQL_DATABASE: xtreme1
+      MYSQL_USER: xtreme1
       MYSQL_PASSWORD: Rc4K3L6f
     ports:
       - 8191:3306
@@ -22,7 +22,7 @@ services:
       - mysql-data:/var/lib/mysql
       - ./deploy/mysql/migration:/docker-entrypoint-initdb.d
     healthcheck:
-      test: '/usr/bin/mysql --user=x1_community --password=Rc4K3L6f --execute "SHOW DATABASES;"'
+      test: '/usr/bin/mysql --user=xtreme1 --password=Rc4K3L6f --execute "SHOW DATABASES;"'
       interval: 10s
       timeout: 10s
       start_period: 10s
