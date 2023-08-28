@@ -94,6 +94,7 @@ docker compose --profile model up
   "default-runtime": "nvidia"
 }
 ```
+If you use **Docker Desktop** + **WSL2.0**, please find this [issue #144](https://github.com/xtreme1-io/xtreme1/issues/144) for your reference.
 
 For more installation, development and deployment, check out [Xtreme1 Docs](https://docs.xtreme1.io/).
 
