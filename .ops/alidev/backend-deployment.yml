@@ -22,7 +22,7 @@ spec:
         - name: basicai-registry
       containers:
         - name: backend
-          image: $BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+          image: $BACKEND_IMAGE
           env:
             - name: JAVA_OPTS
               value: "-XX:InitialRAMPercentage=20.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -XshowSettings:vm"

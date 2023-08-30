@@ -22,7 +22,7 @@ spec:
         - name: basicai-registry
       containers:
         - name: frontend
-          image: $FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+          image: $FRONTEND_IMAGE
           resources:
             requests:
               memory: 200Mi
