@@ -17,7 +17,28 @@ export enum AttrType {
     DROPDOWN = 'DROPDOWN',
     TEXT = 'TEXT',
 }
-
+export interface ITrackCount {
+    object3D: number;
+    // 每个2d视图中相应的统计值，有多个2d视图
+    object2D: IInfo2D[];
+    count: number;
+}
+export interface IInfo2D {
+    [ObjectType.TYPE_2D_BOX]: number;
+    [ObjectType.TYPE_2D_RECT]: number;
+}
+export interface IBSObject {
+    isHolder: boolean;
+    needValid?: boolean;
+    frame: IFrame;
+    // timeStamp
+    lastTime: number;
+    updateTime: number;
+    createdAt?: string;
+    createdBy?: any;
+    classVersion?: number;
+    version?: number;
+}
 export enum Const {
     Fixed = 'Fixed',
     Dynamic = 'Dynamic',
@@ -121,6 +142,7 @@ export interface IUserData {
     createdAt?: string;
     sourceId?: string;
     sourceType?: string;
+    viewIndex?: number;
 }
 
 export interface IObject extends IUserData {
@@ -235,6 +257,8 @@ export interface IConfig {
     maxViewHeight: string;
     maxViewWidth: string;
     limitRect2Image: boolean;
+
+    autoLoad: boolean;
 }
 
 export interface IAnnotationInfo {

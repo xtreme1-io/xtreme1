@@ -11,7 +11,7 @@
                 <i class="iconfont icon-a-Jobinformation task-header-icon"></i>
             </div>
         </div>
-        <div class="item-wrap data-index" v-if="state.frames.length > 0">
+        <div class="item-wrap data-index" v-if="!state.isSeriesFrame && state.frames.length > 0">
             <LeftOutlined
                 :class="state.frameIndex > 0 && !blocking ? 'icon' : 'icon disable'"
                 @click="state.frameIndex > 0 && !blocking ? onPre() : null"

@@ -11,6 +11,9 @@
                 <template #side-view><SideView /></template>
             </Layout>
         </div>
+        <div class="frame-wrap" v-if="state.isSeriesFrame">
+            <TimeLine :config="{ noModelTrack: true }" />
+        </div>
     </div>
 </template>
 
@@ -20,6 +23,10 @@
     import ImgView from '../ImgView/index.vue';
     import SideView from '../SideView/index.vue';
     import EditClass from '../EditClass/bs/main.vue';
+    import TimeLine from '../TimeLine/index.vue';
+    import { useInjectEditor } from '../../state';
+    const editor = useInjectEditor();
+    const { state } = editor;
 </script>
 
 <style lang="less">

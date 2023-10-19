@@ -12,7 +12,7 @@ import * as _ from 'lodash';
 import Editor from '../../../Editor';
 import { define } from '../define';
 import { setIdInfo, clamRange } from '../../../utils';
-import { Const, IAnnotationInfo, IUserData, StatusType } from '../../../type';
+import { Const, IAnnotationInfo, IObject, IUserData, StatusType } from '../../../type';
 
 export const create2DRect = define({
     valid(editor: Editor) {
@@ -76,17 +76,47 @@ export const create2DRect = define({
                         size.copy(data[0]).sub(data[1]);
                         size.x = Math.abs(size.x);
                         size.y = Math.abs(size.y);
-
-                        let rect = editor.createAnnotateRect(center, size, {
+                        const viewId = view.renderId || view.id;
+                        const viewIndex = parseInt((viewId.match(/[0-9]{1,5}$/) as any)[0]);
+                        const classConfig = editor.getClassType(editor.state.currentClass);
+                        const userData = {
                             resultStatus: Const.True_Value,
                             resultType: Const.Dynamic,
-                        } as IUserData);
-                        let userData = rect.userData;
-                        rect.viewId = view.renderId || view.id;
+                        } as IUserData;
+                        if (classConfig) {
+                            userData.classType = classConfig.name;
+                            userData.classId = classConfig.id;
+                        }
+                        if (editor.currentTrack) {
+                            const object2d = editor.pc.getAnnotate3D().find((e) => {
+                                return (
+                                    e instanceof Rect &&
+                                    !(e as any).isHolder &&
+                                    e.userData.viewIndex === viewIndex &&
+                                    e.userData.trackId == editor.currentTrack
+                                );
+                            });
+                            if (!object2d) {
+                                userData.trackId = editor.currentTrack as string;
+                                userData.trackName = editor.currentTrackName;
+                            }
+                        }
+                        let trackObject: Partial<IObject> = {
+                            trackId: userData.trackId,
+                            trackName: userData.trackName,
+                            classType: userData.classType,
+                            classId: userData.classId,
+                        };
+
+                        let rect = editor.createAnnotateRect(center, size, userData);
+                        rect.viewId = viewId;
                         editor.state.config.showClassView = true;
 
                         editor.cmdManager.withGroup(() => {
                             editor.cmdManager.execute('add-object', [{ objects: rect }]);
+                            if (editor.state.isSeriesFrame) {
+                                editor.cmdManager.execute('add-track', trackObject);
+                            }
                             editor.cmdManager.execute('select-object', rect);
                         });
 
@@ -143,20 +173,51 @@ export const create2DBox = define({
                         let positions1 = getPositionFromPoints([data[0], data[1]]);
                         let positions2 = getPositionFromPoints([data[2], data[3]]);
 
+                        const viewId = view.renderId || view.id;
+                        const viewIndex = parseInt((viewId.match(/[0-9]{1,5}$/) as any)[0]);
+                        const classConfig = editor.getClassType(editor.state.currentClass);
+                        const userData = {
+                            resultStatus: Const.True_Value,
+                            resultType: Const.Dynamic,
+                        } as IUserData;
+                        if (classConfig) {
+                            userData.classType = classConfig.name;
+                            userData.classId = classConfig.id;
+                        }
+                        if (editor.currentTrack) {
+                            const object2d = editor.pc.getAnnotate3D().find((e) => {
+                                return (
+                                    e instanceof Box2D &&
+                                    !(e as any).isHolder &&
+                                    e.userData.viewIndex === viewIndex &&
+                                    e.userData.trackId == editor.currentTrack
+                                );
+                            });
+                            if (!object2d) {
+                                userData.trackId = editor.currentTrack as string;
+                                userData.trackName = editor.currentTrackName;
+                            }
+                        }
+                        let trackObject: Partial<IObject> = {
+                            trackId: userData.trackId,
+                            trackName: userData.trackName,
+                            classType: userData.classType,
+                            classId: userData.classId,
+                        };
+
                         let box = editor.createAnnotateBox2D(
                             positions1 as any,
                             positions2 as any,
-                            {
-                                resultStatus: Const.True_Value,
-                                resultType: Const.Dynamic,
-                            } as IUserData,
+                            userData,
                         );
-                        let userData = box.userData;
-                        box.viewId = view.renderId || view.id;
+                        box.viewId = viewId;
 
                         editor.state.config.showClassView = true;
                         editor.cmdManager.withGroup(() => {
                             editor.cmdManager.execute('add-object', [{ objects: box }]);
+                            if (editor.state.isSeriesFrame) {
+                                editor.cmdManager.execute('add-track', trackObject);
+                            }
                             editor.cmdManager.execute('select-object', box);
                         });
 
