@@ -36,7 +36,7 @@ export class PolylineTool extends BaseTool {
             console.log('????');
             this.poly.destroy();
             this.poly = null;
-            this.lastLine.destroy();
+            this.lastLine?.destroy();
             this.lastLine = null;
             this.view.setDrawingState(false);
             this.view.editor.state.status = StatusType.Default;
@@ -70,16 +70,18 @@ export class PolylineTool extends BaseTool {
     }
     done() {
         if (this.poly.points.length < 2) return;
-        this.lastLine.destroy();
-        this.lastLine = null;
-        this.view.editor.state.status = StatusType.Default;
-        this.view.emit(Event.DIMENSION_CHANGE_AFTER);
         this.poly.setPoints(this.poly.points);
-        // this.poly.shape.closed(true);
         this.poly.finishDraw();
-        this.poly.updateAnchors();
-        this.poly.draw();
-        this.poly = null;
+
+        if (this.poly) {
+            this.poly.updateAnchors();
+            this.poly.draw();
+            this.poly = null;
+            this.lastLine.destroy();
+            this.lastLine = null;
+            this.view.editor.state.status = StatusType.Default;
+            this.view.emit(Event.DIMENSION_CHANGE_AFTER);
+        }
     }
     createShape(point) {
         if (!this.poly) {
