@@ -63,8 +63,8 @@ debug: false
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:8191/x1_community
-    username: x1_community
+    url: jdbc:mysql://localhost:8191/xtreme1
+    username: xtreme1
     password: Rc4K3L6f
   redis:
     host: localhost

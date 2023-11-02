@@ -18,8 +18,8 @@ spring:
   application:
     name: xtreme1
   datasource:
-    url: jdbc:mysql://mysql:3306/x1_community
-    username: x1_community
+    url: jdbc:mysql://mysql:3306/xtreme1
+    username: xtreme1
     password: Rc4K3L6f
     hikari:
       connection-test-query: SELECT 1
@@ -54,6 +54,10 @@ jwt:
   secret: G6j7j#$&YOy9&p(s2b@v53^)38E!cG49
   issuer: BasicAI
   expireHours: 120
+auth:
+  # Whether to enable the registration
+  register:
+    enabled: true
 
 mybatis-plus:
   global-config:
@@ -70,7 +74,7 @@ minio:
   endpoint: http://minio:9000/
   accessKey: admin
   secretKey: 1tQB970y
-  bucketName: x1-community
+  bucketName: xtreme1
 
 export:
   data:

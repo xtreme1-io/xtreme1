@@ -52,13 +52,7 @@ export const setDatasetBreadcrumb = (name, type?) => {
 };
 
 export const handleGoPortal = () => {
-  if (window.location.href.includes('dev')) {
-    window.location.href = 'http://portal.alidev.beisai.com/';
-  } else if (window.location.href.includes('test')) {
-    window.location.href = 'http://portal.alitest.beisai.com/';
-  } else {
-    window.location.href = 'https://basic.ai';
-  }
+  window.location.href = 'https://www.basic.ai';
 };
 
 export const handleToast = (list, action) => {
