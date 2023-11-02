@@ -81,7 +81,7 @@ build-frontend-package:
 build-release-package:
   stage: build-package
   tags:
-    - ubuntu
+    - ubuntu-22
   rules:
     - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main"
       changes:
@@ -102,7 +102,7 @@ build-release-package:
 .build-image:
   stage: build-image
   tags:
-    - docker
+    - docker-20
   variables:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_TLS_CERTDIR: "/certs"
@@ -168,7 +168,7 @@ build-frontend-image:
 .deploy:
   stage: deploy
   tags:
-    - kubectl
+    - kubectl-1-24
   before_script:
     - cd .ops/$ENV
     - sed -i 's/$APP_NAME/'"$APP_NAME"'/g' $DEPLOYMENT
