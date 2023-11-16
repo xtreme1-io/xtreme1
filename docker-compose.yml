@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   nginx:
     image: nginx:1.22
@@ -65,9 +64,9 @@ services:
       retries: 10
   backend:
     # By default, Compose will pull image from Docker Hub when no local image found.
-    image: basicai/xtreme1-backend:v0.7.2
+    image: basicai/xtreme1-backend:v0.7.3
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
-    # build: ./backend
+    build: ./backend
     ports:
       - 8290:8080
     # volumes:
@@ -95,13 +94,24 @@ services:
         condition: service_healthy
   frontend:
     # By default, Compose will pull image from Docker Hub when no local image found.
-    image: basicai/xtreme1-frontend:v0.7.2
+    image: basicai/xtreme1-frontend:v0.7.3
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
-    # build: ./frontend
+    build: ./frontend
     ports:
       - 8291:80
+  pcd-tools:
+    image: basicai/xtreme1-pcd-tools
+    pull_policy: always
+    ports:
+      - 8295:5000
+  image-vect-visualization:
+    image: basicai/xtreme1-image-vect-visualization
+    pull_policy: always
+    ports:
+      - 8294:5000
   image-object-detection:
     image: basicai/xtreme1-image-object-detection
+    pull_policy: always
     ports:
       - 8292:5000
     # You need to explicitly specify model profile to start this service.
@@ -110,20 +120,13 @@ services:
     runtime: nvidia
   point-cloud-object-detection:
     image: basicai/xtreme1-point-cloud-object-detection
+    pull_policy: always
     ports:
       - 8293:5000
     # You need to explicitly specify model profile to start this service.
     profiles:
       - model
     runtime: nvidia
-  image-vect-visualization:
-    image: basicai/xtreme1-image-vect-visualization
-    ports:
-      - 8294:5000
-  pcd-tools:
-    image: basicai/xtreme1-pcd-tools
-    ports:
-      - 8295:5000
 volumes:
   mysql-data:
   redis-data:
