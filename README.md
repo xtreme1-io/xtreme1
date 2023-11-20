@@ -9,21 +9,28 @@
 [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.xtreme1.io/) 
 </div>
 
-# Intro #
+# Intro 
 Xtreme1 is the world's first open-source platform for Multimodal training data.
 
 Xtreme1 unlocks deep insights into data annotation, curation and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation game to the next level of efficiency, powering your projects in 2D/3D Object Detection, 3D Instance Segmentation and LiDAR-Camera Fusion like never before.
 
 Today, building upon this initiative, we're delighted to present our [AI-powered Cloud platform](https://app.basic.ai/#/login/) — **completely FREE of charge!** This groundbreaking decision marks another important step towards AI democracy, making AI solutions more accessible to everyone.
 
-# Join community #
+# Documentation 
+
+🎆 Welcome aboard! If you have any questions or doubts about features, installation, development, and deployment, you can always refer to our documentation. 
+
+[📙 Find our docs here! ](https://docs.xtreme1.io/xtreme1-docs/)
+
+
+# Join community 
 [Website](https://xtreme1.io) | [Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
 
 Join the Xtreme1 community on Slack to share your suggestions, advice, and questions with us.
 
 [👉 Join us on Slack today!](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
 
-# Key features #
+# Key features 
 
 Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/yolor) & [RITM](https://github.com/saic-vul/ritm_interactive_segmentation) |  Lidar-camera Fusion Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
 :-------------------------:|:-------------------------:
@@ -96,11 +103,9 @@ docker compose --profile model up
 ```
 If you use **Docker Desktop** + **WSL2.0**, please find this [issue #144](https://github.com/xtreme1-io/xtreme1/issues/144) for your reference.
 
-For more installation, development and deployment, check out [Xtreme1 Docs](https://docs.xtreme1.io/).
-
 ![](/docs/images/3d_annotation2.png) 
 
-# License #
+# License 
 This software is licensed under the Apache 2.0 LICENSE. Xtreme1 is a trademark of LF AI & Data Foundation.
 
 <img src="/docs/images/LFAI_DATA_horizontal-color.png" width="250">
