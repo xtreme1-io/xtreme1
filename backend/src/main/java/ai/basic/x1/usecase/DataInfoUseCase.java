@@ -567,13 +567,13 @@ public class DataInfoUseCase {
         var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) ? dataPreAnnotationBO.getIsFilterData() : false;
         var boo = true;
         var dataAnnotationRecord = DataAnnotationRecord.builder()
-                .datasetId(dataPreAnnotationBO.getDatasetId()).type(dataPreAnnotationBO.getOperateItemType()).createdBy(userId).serialNo(serialNo).build();
+                .datasetId(dataPreAnnotationBO.getDatasetId()).itemType(dataPreAnnotationBO.getOperateItemType()).createdBy(userId).serialNo(serialNo).build();
         try {
             dataAnnotationRecordDAO.save(dataAnnotationRecord);
         } catch (DuplicateKeyException duplicateKeyException) {
             boo = false;
             dataAnnotationRecord = dataAnnotationRecordDAO.getOne(lambdaQueryWrapper);
-            if (!dataAnnotationRecord.getType().equals(dataPreAnnotationBO.getOperateItemType())) {
+            if (!dataAnnotationRecord.getItemType().equals(dataPreAnnotationBO.getOperateItemType())) {
                 throw new UsecaseException(UsecaseCode.DATASET_DATA_EXIST_OTHER_TYPE_ANNOTATE);
             }
             var dataEditLambdaQueryWrapper = Wrappers.lambdaQuery(DataEdit.class);
