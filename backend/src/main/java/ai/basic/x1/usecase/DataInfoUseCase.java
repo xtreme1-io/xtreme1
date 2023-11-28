@@ -329,7 +329,7 @@ public class DataInfoUseCase {
 
     private void setSceneFirstData(Long datasetId, List<DataInfoBO> dataInfoBOList) {
         List<Long> dataIds = null;
-        var sceneIds = dataInfoBOList.stream().filter(dataInfoBO -> SCENE.equals(dataInfoBO.getType())).map(DataInfoBO::getId).collect(Collectors.toList());
+        var sceneIds = dataInfoBOList.stream().filter(dataInfoBO -> ItemTypeEnum.SCENE.equals(dataInfoBO.getType())).map(DataInfoBO::getId).collect(Collectors.toList());
         if (CollectionUtil.isNotEmpty(sceneIds)) {
             dataIds = dataInfoDAO.getBaseMapper().selectFirstDataIdBySceneIds(datasetId, sceneIds);
         }
@@ -338,7 +338,7 @@ public class DataInfoUseCase {
             var sceneDataInfoMap = dataInfoList.stream()
                     .collect(Collectors.toMap(DataInfo::getParentId, dataInfo -> dataInfo, (k1, k2) -> k1));
             dataInfoBOList.forEach(dataInfoBO -> {
-                if (SCENE.equals(dataInfoBO.getType())) {
+                if (ItemTypeEnum.SCENE.equals(dataInfoBO.getType())) {
                     var dataInfo = sceneDataInfoMap.get(dataInfoBO.getId());
                     if (ObjectUtil.isNotNull(dataInfo)) {
                         dataInfoBO.setContent(DefaultConverter.convert(dataInfo.getContent(), DataInfoBO.FileNodeBO.class));
