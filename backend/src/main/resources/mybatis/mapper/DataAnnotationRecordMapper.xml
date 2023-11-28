@@ -6,7 +6,7 @@
     <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.DataAnnotationRecord">
         <id column="id" property="id" />
         <result column="dataset_id" property="datasetId" />
-        <result column="type" property="type" />
+        <result column="item_type" property="itemType" />
         <result column="serial_no" property="serialNo" />
         <result column="created_by" property="createdBy" />
         <result column="created_at" property="createdAt" />
@@ -14,7 +14,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id,dataset_id,type,serial_no,created_by, created_at
+        id,dataset_id,item_type,serial_no,created_by, created_at
     </sql>
 
 

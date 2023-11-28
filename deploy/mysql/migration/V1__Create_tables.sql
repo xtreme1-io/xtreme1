@@ -125,7 +125,7 @@ CREATE TABLE `data_annotation_record`
 (
     `id`         bigint(20)                   NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
     `dataset_id` bigint(20)                   NOT NULL COMMENT 'Dataset id',
-    `data_type`  enum ('SINGLE_DATA','SCENE') NOT NULL DEFAULT 'SINGLE_DATA' COMMENT 'Type (indicates continuous frames, non-consecutive frames)',
+    `item_type`  enum ('SINGLE_DATA','SCENE') NOT NULL DEFAULT 'SINGLE_DATA' COMMENT 'Type (indicates continuous frames, non-consecutive frames)',
     `serial_no`  bigint(20)                            DEFAULT NULL COMMENT 'Serial number',
     `created_by` bigint(20)                            DEFAULT NULL COMMENT 'Creator id',
     `created_at` datetime                              DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',

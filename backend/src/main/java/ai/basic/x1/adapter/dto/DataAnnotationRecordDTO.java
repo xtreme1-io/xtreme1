@@ -24,7 +24,7 @@ public class DataAnnotationRecordDTO {
      */
     private Long datasetId;
 
-    private ItemTypeEnum type;
+    private ItemTypeEnum itemType;
 
     /**
      * Serial number
