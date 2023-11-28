@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,13 +15,8 @@ import lombok.NoArgsConstructor;
 public class LidarBasicDataExportBO extends DataExportBaseBO{
 
     /**
-     * Pcd url
+     * Lidar point cloud file list
      */
-    private String pointCloudUrl;
-
-    /**
-     * The path in the compressed package
-     */
-    private String pointCloudZipPath;
+    private List<ExportDataLidarPointCloudFileBO> lidarPointClouds;
 
 }

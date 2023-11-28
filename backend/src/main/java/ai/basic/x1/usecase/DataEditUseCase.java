@@ -54,6 +54,7 @@ public class DataEditUseCase {
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();
         lambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, recordId);
         lambdaQueryWrapper.eq(DataEdit::getCreatedBy, userId);
+        lambdaQueryWrapper.orderByAsc(DataEdit::getId);
         var dataEditList = dataEditDAO.list(lambdaQueryWrapper);
         return DefaultConverter.convert(dataEditList, DataEditBO.class);
     }

@@ -192,5 +192,20 @@ public class CommonConfig implements WebMvcConfigurer {
         return new ModelRunRecordUseCase();
     }
 
+    @Bean
+    public UploadDataUseCase uploadDataUseCase() {
+        return new UploadDataUseCase();
+    }
+
+    @Bean
+    public PointCloudUploadUseCase pointCloudUploadUseCase() {
+        return new PointCloudUploadUseCase();
+    }
+
+    @Bean
+    public ImageUploadUseCase imageUploadUseCase() {
+        return new ImageUploadUseCase();
+    }
+
 
 }

@@ -1,5 +1,6 @@
-package ai.basic.basicai.dataset.usecase.upload;
+package ai.basic.x1.usecase;
 
+import ai.basic.x1.util.Constants;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +12,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ai.basic.basicai.dataset.usecase.constants.CommonConstant.*;
-
 public class ImageUploadUseCase {
 
     @Autowired
     private UploadDataUseCase uploadDataUseCase;
 
     /**
-     * 获取data的名称
+     * 获取图片data的名称
      *
      * @param sceneFile 连续帧文件夹
      */
@@ -27,9 +26,9 @@ public class ImageUploadUseCase {
         var sceneNames = new LinkedHashSet<String>();
         for (var f : sceneFile.listFiles()) {
             var filename = f.getName().toLowerCase();
-            var boo = f.isDirectory() && ReUtil.isMatch(IMAGE_PATTERN, filename);
+            var boo = f.isDirectory() && ReUtil.isMatch(Constants.IMAGE_PATTERN, filename);
             if (boo) {
-                var list = Arrays.stream(f.listFiles()).filter(fl -> IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(fl.getAbsolutePath()))).map(uploadDataUseCase::getFilename).collect(Collectors.toSet());
+                var list = Arrays.stream(f.listFiles()).filter(fl -> Constants.IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(fl.getAbsolutePath()))).map(uploadDataUseCase::getFilename).collect(Collectors.toSet());
                 sceneNames.addAll(list);
             }
         }
@@ -61,7 +60,7 @@ public class ImageUploadUseCase {
      */
     private void getImageFile(File file, Set<File> imageParentList) {
         var filename = FileUtil.getName(file).toLowerCase();
-        if (ReUtil.isMatch(IMAGE_PATTERN, filename) && FileUtil.isDirectory(file)) {
+        if (ReUtil.isMatch(Constants.IMAGE_PATTERN, filename) && FileUtil.isDirectory(file)) {
             imageParentList.add(file.getParentFile());
         }
     }

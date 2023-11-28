@@ -60,6 +60,10 @@ public class DatasetUseCase {
     @Autowired
     private DataInfoUseCase dataInfoUseCase;
 
+
+    @Autowired
+    private UploadDataUseCase uploadDataUseCase;
+
     @Autowired
     private UserUseCase userUseCase;
 
@@ -122,9 +126,9 @@ public class DatasetUseCase {
                             .userId(userBO.getId()).savePath(filePath).baseSavePath(baseSavePath).fileName(FileUtil.getPrefix(datasetInitialInfo.getFileName())).build();
 
                     if (IMAGE.equals(datasetInitialInfo.getType())) {
-                        dataInfoUseCase.parseImageCompressedUploadFile(dataInfoUploadBO);
+                        uploadDataUseCase.parseImageCompressedUploadFile(dataInfoUploadBO);
                     } else {
-                        dataInfoUseCase.parsePointCloudUploadFile(dataInfoUploadBO);
+                        uploadDataUseCase.parsePointCloudUploadFile(dataInfoUploadBO);
                     }
                     var datasetClassPropertiesList = datasetInitialInfo.getClasses();
                     datasetClassPropertiesList.forEach(datasetClassProperties -> {

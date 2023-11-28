@@ -1,4 +1,4 @@
-package ai.basic.basicai.common.util.natural;
+package ai.basic.x1.util;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
@@ -60,21 +60,4 @@ public class NaturalSortUtil {
         stringBuffer.append(n);
         stringBuffer.append(StrUtil.fill(NumberUtil.toStr(NumberUtil.sub(999, NumberUtil.sub(originalStr.length(), n.length()))), '0', 3, true));
     }
-
-    public static void main(String[] args) {
-        /*for (String string : strings) {
-            var name = String.format("%s.jpg", string);
-            System.out.println("INSERT INTO `basicai_dataset`.`test_name`(`name`, `len`,`acc`) VALUES ('" + name + "', " + convert(name).length() + ",'" + convert(name) + "');");
-        }*/
-
-        var list = Arrays.asList(strings);
-        list.sort(Comparator.comparing(NaturalSortUtil::convert));
-        System.out.println();
-    }
-
-    static String[] strings = new String[]{"17115327_cam_lucid_autofill_image_raw_2023_04_14_11_29_43_595",
-            "1-2", "1-02", "1-20", "10-20", "fred", "jane", "pic01",
-            "17115327_cam_lucid_autofill_image_raw_2023_04_14_11_29_53_85", "17115327_cam_lucid_autofill_image_raw_2023_04_14_11_29_43_85", "pic2", "pic02", "pic02a", "pic3", "pic4", "pic 4 else", "pic 5", "pic05", "pic 5",
-            "pic 5 something", "pic 6", "pic   7", "pic100", "pic100a", "pic120", "pic121",
-            "pic02000", "tom", "x2-g8", "x2-y7", "x2-y08", "x8-y8", "a0121a", "a111a"};
 }

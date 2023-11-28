@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.port.dao.mybatis.model;
 
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,8 @@ public class DataAnnotationRecord {
      * Dataset id
      */
     private Long datasetId;
+
+    private ItemTypeEnum type;
 
     /**
      * Serial number

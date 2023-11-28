@@ -7,8 +7,11 @@
         <id column="id" property="id"/>
         <result column="dataset_id" property="datasetId"/>
         <result column="name" property="name"/>
+        <result column="order_name" property="orderName"/>
         <result column="content" property="content"
                 typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="type" property="type"/>
+        <result column="parent_id" property="parentId"/>
         <result column="status" property="status"/>
         <result column="annotation_status" property="annotationStatus"/>
         <result column="split_type" property="splitType"/>
@@ -78,19 +81,15 @@
         </if>
     </select>
 
-    <select id="selectDataPage" resultMap="BaseResultMap">
-        SELECT distinct d.*
-        <if test="dataInfoQuery.runRecordId != null">
-            ,mdr.data_confidence
-        </if>
-        FROM data d
+
+    <sql id="commonSelectData">
         <if test="dataInfoQuery.runRecordId != null">
             LEFT JOIN model_dataset_result mdr ON d.id=mdr.data_id
         </if>
 
         ${ew.customSqlSegment("d")}
         <if test="dataInfoQuery.runRecordId != null">
-          AND  mdr.run_record_id = #{dataInfoQuery.runRecordId}
+            AND  mdr.run_record_id = #{dataInfoQuery.runRecordId}
         </if>
 
         <if test="dataInfoQuery.runRecordId != null and dataInfoQuery.minDataConfidence != null">
@@ -100,26 +99,43 @@
         <if test="dataInfoQuery.runRecordId != null and dataInfoQuery.maxDataConfidence != null">
             AND  mdr.data_confidence <![CDATA[ <= ]]>   #{dataInfoQuery.maxDataConfidence}
         </if>
+    </sql>
+
+    <select id="selectDataPage" resultMap="BaseResultMap">
+        SELECT distinct d.*
+        <if test="dataInfoQuery.runRecordId != null">
+            ,mdr.data_confidence
+        </if>
+        FROM data d
+        <include refid="commonSelectData"/>
+        <include refid="selectDataByPageOrder"/>
+    </select>
+
+
+    <select id="getExportData" resultMap="BaseResultMap">
+        SELECT distinct d.id,d.type
+        FROM data d
+        <include refid="commonSelectData"/>
         <include refid="selectDataByPageOrder"/>
     </select>
 
     <sql id="selectDataByPageOrder">
-        ORDER BY
+        ORDER BY d.type DESC
         <choose>
             <when test="dataInfoQuery.sortField != null and dataInfoQuery.sortField != ''
         and dataInfoQuery.ascOrDesc != null and dataInfoQuery.ascOrDesc != ''">
                 <if test="dataInfoQuery.runRecordId != null and dataInfoQuery.sortField == 'DATA_CONFIDENCE'">
-                    mdr.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
+                    ,mdr.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
                 </if>
                 <if test="dataInfoQuery.runRecordId == null and dataInfoQuery.sortField == 'DATA_CONFIDENCE'">
-                    d.name ASC
+                    ,d.name ASC
                 </if>
                 <if test="dataInfoQuery.sortField != 'DATA_CONFIDENCE'">
-                    d.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
+                    ,d.${dataInfoQuery.sortField} ${dataInfoQuery.ascOrDesc}
                 </if>
             </when>
             <otherwise>
-                d.name ASC
+                ,d.name ASC
             </otherwise>
         </choose>
         ,d.id ASC
@@ -132,4 +148,20 @@
     <delete id="deleteByDatasetId">
         update data set del_unique_key = id, is_deleted = true where dataset_id = #{datasetId}
     </delete>
+
+    <select id="selectFirstDataIdBySceneIds" resultType="java.lang.Long">
+        SELECT
+        SUBSTRING_INDEX(GROUP_CONCAT(d.id ORDER BY d.`name` ASC,d.id ASC),',',1) as dataId
+        FROM
+        data d
+        WHERE
+        d.dataset_id = #{datasetId}
+        AND d.parent_id in
+        <foreach collection="sceneIds" item="sceneId" open="(" separator="," close=")">
+            #{sceneId}
+        </foreach>
+        AND is_deleted = 0
+        GROUP BY
+        parent_id
+    </select>
 </mapper>

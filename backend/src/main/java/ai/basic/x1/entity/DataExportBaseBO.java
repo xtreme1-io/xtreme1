@@ -12,7 +12,7 @@ public class DataExportBaseBO {
     /**
      * Data id
      */
-    private Long id;
+    private Long dataId;
 
     /**
      * Export version
@@ -28,4 +28,5 @@ public class DataExportBaseBO {
      * Type
      */
     private String type;
+
 }

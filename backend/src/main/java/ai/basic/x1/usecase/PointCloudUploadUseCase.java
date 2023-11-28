@@ -1,5 +1,6 @@
 package ai.basic.x1.usecase;
 
+import ai.basic.x1.util.Constants;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ReUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +12,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ai.basic.basicai.dataset.usecase.constants.CommonConstant.*;
-
-public class ImageUploadUseCase {
+public class PointCloudUploadUseCase {
 
     @Autowired
     private UploadDataUseCase uploadDataUseCase;
 
     /**
-     * 获取data的名称
+     * 获取点云data的名称
      *
      * @param sceneFile 连续帧文件夹
      */
@@ -27,9 +26,9 @@ public class ImageUploadUseCase {
         var sceneNames = new LinkedHashSet<String>();
         for (var f : sceneFile.listFiles()) {
             var filename = f.getName().toLowerCase();
-            var boo = f.isDirectory() && ReUtil.isMatch(IMAGE_PATTERN, filename);
+            var boo = f.isDirectory() && ReUtil.isMatch(Constants.LIDAR_POINT_CLOUD_PATTERN, filename);
             if (boo) {
-                var list = Arrays.stream(f.listFiles()).filter(fl -> IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(fl.getAbsolutePath()))).map(uploadDataUseCase::getFilename).collect(Collectors.toSet());
+                var list = Arrays.stream(f.listFiles()).filter(fl -> Constants.PCD_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(fl))).map(uploadDataUseCase::getFilename).collect(Collectors.toSet());
                 sceneNames.addAll(list);
             }
         }
@@ -37,32 +36,33 @@ public class ImageUploadUseCase {
     }
 
     /**
-     * 查找所有图片文件夹的父文件夹
+     * 查找所有点云的文件夹
      *
-     * @param path path
+     * @param path                 path
+     * @param pointCloudParentList point_cloud文件夹父级目录集合
      */
-    public void findImageParentList(String path, Set<File> imageParentList) {
+    public void findPointCloudParentList(String path, Set<File> pointCloudParentList) {
         var file = new File(path);
         if (FileUtil.isDirectory(path)) {
             for (var f : file.listFiles()) {
-                getImageFile(f, imageParentList);
+                getPointCloudParentFile(f, pointCloudParentList);
                 if (f.isDirectory()) {
-                    findImageParentList(f.getAbsolutePath(), imageParentList);
+                    findPointCloudParentList(f.getAbsolutePath(), pointCloudParentList);
                 }
             }
         }
     }
 
     /**
-     * 获取image上级目录
+     * 获取lidar_point_cloud或者radar_point_cloud上级目录
      *
-     * @param file            file
-     * @param imageParentList image父文件夹集合
+     * @param file                 file
+     * @param pointCloudParentList point_cloud文件夹父级目录集合
      */
-    private void getImageFile(File file, Set<File> imageParentList) {
-        var filename = FileUtil.getName(file).toLowerCase();
-        if (ReUtil.isMatch(IMAGE_PATTERN, filename) && FileUtil.isDirectory(file)) {
-            imageParentList.add(file.getParentFile());
+    private void getPointCloudParentFile(File file, Set<File> pointCloudParentList) {
+        var filename = file.getName().toLowerCase().trim();
+        if (ReUtil.isMatch(Constants.LIDAR_POINT_CLOUD_PATTERN, filename) && FileUtil.isDirectory(file)) {
+            pointCloudParentList.add(file.getParentFile());
         }
     }
 }

@@ -98,4 +98,9 @@ public class DataInfoQueryBO extends BaseQueryBO {
 
     private Boolean isAllResult;
 
+    /**
+     * Parent Id
+     */
+    private Long parentId;
+
 }

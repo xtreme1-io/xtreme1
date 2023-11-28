@@ -21,4 +21,6 @@ public interface DataAnnotationObjectMapper extends ExtendBaseMapper<DataAnnotat
    List<DataAnnotationObject> listByScenario(@Param("scenarioQuery") ScenarioQuery scenarioQuery);
 
    Page<DataAnnotationObject> findDataIdByScenarioPage(Page<DataAnnotationObject> page, @Param("scenarioQuery") ScenarioQuery scenarioQuery);
+
+   List<Long> findDataIdByScenario(@Param("scenarioQuery") ScenarioQuery scenarioQuery);
 }

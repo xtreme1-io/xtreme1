@@ -8,16 +8,5 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-public class ExportDataImageFileBO extends ExportDataFileBaseBO{
-
-    /**
-     * Camera image width
-     */
-    private Long width;
-
-    /**
-     * Camera image height
-     */
-    private Long height;
+public class ExportDataTextFileBO extends ExportDataFileBaseBO{
 }

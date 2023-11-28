@@ -1,5 +1,6 @@
 package ai.basic.x1.entity;
 
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,8 @@ public class DataAnnotationRecordBO {
     * Dataset id
     */
    private Long datasetId;
+
+   private ItemTypeEnum type;
 
    /**
     * Serial number

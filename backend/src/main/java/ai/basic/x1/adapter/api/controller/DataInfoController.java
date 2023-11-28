@@ -69,12 +69,15 @@ public class DataInfoController extends BaseDatasetController {
     @Autowired
     private DataClassificationOptionUseCase dataClassificationOptionUseCase;
 
+    @Autowired
+    protected UploadDataUseCase uploadDataUseCase;
+
     @PostMapping("upload")
     public String upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);
         assert dataInfoUploadBO != null;
         dataInfoUploadBO.setUserId(userDTO.getId());
-        return String.valueOf(dataInfoUsecase.upload(dataInfoUploadBO));
+        return String.valueOf(uploadDataUseCase.upload(dataInfoUploadBO));
     }
 
     @GetMapping("findUploadRecordBySerialNumbers")

@@ -1,16 +1,14 @@
-package ai.basic.basicai.common.entity.enums;
+package ai.basic.x1.entity.enums;
 
 /**
- * @author chenchao
- * @date 2022/9/28
+ * @author fyb
+ * @date 2023/10/26 14:13
  */
 public enum ItemTypeEnum {
 
     SINGLE_DATA("Single Data"),
 
-    SCENE("Scene"),
-
-    BATCH("Batch");
+    SCENE("Scene");
 
     private String desc;
 
