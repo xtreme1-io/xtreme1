@@ -576,7 +576,6 @@ public class UploadDataUseCase {
     @Transactional(rollbackFor = Exception.class)
     public Long saveScene(File file, DataInfoUploadBO uploadDataBO) {
         var fileName = FileUtil.getName(file);
-        // 音视频 不支持连续帧
         if (fileName.toLowerCase().startsWith(Constants.SCENE)) {
             var datasetId = uploadDataBO.getDatasetId();
             var userId = uploadDataBO.getUserId();
@@ -826,21 +825,23 @@ public class UploadDataUseCase {
                     var fileBOBuilder = FileBO.builder().name(fileBO.getName()).originalName(fileBO.getName())
                             .bucketName(fileBO.getBucketName()).type(mimeType);
                     var file = FileUtil.file(savePath);
-                    var baseSavePath = file.getParentFile().getAbsolutePath();
-                    var largeFile = FileUtil.file(baseSavePath, String.format("%s/%s", large, fileName));
-                    var mediumFile = FileUtil.file(baseSavePath, String.format("%s/%s", medium, fileName));
-                    var smallFile = FileUtil.file(baseSavePath, String.format("%s/%s", small, fileName));
+                    var suffix = FileUtil.getSuffix(fileName);
+                    suffix = suffix.equalsIgnoreCase(TIFF_SUFFIX) || suffix.equalsIgnoreCase(TIF_SUFFIX) ? "jpg" : suffix;
+                    var prefix = FileUtil.getPrefix(fileName);
+                    var largeFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, large, suffix));
+                    var mediumFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, medium, suffix));
+                    var smallFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, small, suffix));
                     Thumbnails.of(file).size(largeFileSize, largeFileSize).toFile(largeFile);
                     Thumbnails.of(file).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
                     Thumbnails.of(file).size(smallFileSize, smallFileSize).toFile(smallFile);
                     // large thumbnail
-                    var largePath = String.format("%s%s/%s", basePath, large, fileName);
+                    var largePath = String.format("%s%s", basePath, FileUtil.getName(largeFile));
                     var largeFileBO = fileBOBuilder.path(largePath).relation(LARGE_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
                     // medium thumbnail
-                    var mediumPath = String.format("%s%s/%s", basePath, medium, fileName);
+                    var mediumPath = String.format("%s%s", basePath, FileUtil.getName(mediumFile));
                     var mediumFileBO = fileBOBuilder.path(mediumPath).relation(MEDIUM_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
                     // small thumbnail
-                    var smallPath = String.format("%s%s/%s", basePath, small, fileName);
+                    var smallPath = String.format("%s%s", basePath, FileUtil.getName(smallFile));
                     var smallFileBO = fileBOBuilder.path(smallPath).relation(SMALL_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
                     thumbnailFileBOS.addAll(ListUtil.toList(largeFileBO, mediumFileBO, smallFileBO));
                     files.addAll(ListUtil.toList(largeFile, mediumFile, smallFile));

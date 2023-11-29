@@ -133,6 +133,16 @@ public interface Constants {
 
     String CONVERT_EXPORT = "export";
 
+    /**
+     * TIFF
+     */
+    String TIFF_SUFFIX = "TIFF";
+
+    /**
+     * TIF
+     */
+    String TIF_SUFFIX = "TIF";
+
     Set<String> COMPRESSED_DATA_TYPE = new HashSet<>() {{
         add("application/zip");
         add("application/x-rar");
@@ -145,6 +155,9 @@ public interface Constants {
         add("image/png");
         add("image/jpeg");
         add("image/bmp");
+        add("image/x-ms-bmp");
+        add("image/webp");
+        add("image/tiff");
     }};
 
 
