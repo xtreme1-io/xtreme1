@@ -18,9 +18,9 @@ public class PointCloudUploadUseCase {
     private UploadDataUseCase uploadDataUseCase;
 
     /**
-     * 获取点云data的名称
+     * Get the name of point cloud data
      *
-     * @param sceneFile 连续帧文件夹
+     * @param sceneFile Continuous frames folder
      */
     public List<String> getDataNames(File sceneFile) {
         var sceneNames = new LinkedHashSet<String>();
@@ -36,10 +36,10 @@ public class PointCloudUploadUseCase {
     }
 
     /**
-     * 查找所有点云的文件夹
+     * Find folders for all point clouds
      *
      * @param path                 path
-     * @param pointCloudParentList point_cloud文件夹父级目录集合
+     * @param pointCloudParentList lidar_point_cloud folder parent directory collection
      */
     public void findPointCloudParentList(String path, Set<File> pointCloudParentList) {
         var file = new File(path);
@@ -54,10 +54,10 @@ public class PointCloudUploadUseCase {
     }
 
     /**
-     * 获取lidar_point_cloud或者radar_point_cloud上级目录
+     * Get lidar_point_cloud upper-level directory
      *
      * @param file                 file
-     * @param pointCloudParentList point_cloud文件夹父级目录集合
+     * @param pointCloudParentList lidar_point_cloud folder parent directory collection
      */
     private void getPointCloudParentFile(File file, Set<File> pointCloudParentList) {
         var filename = file.getName().toLowerCase().trim();

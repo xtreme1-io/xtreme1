@@ -18,9 +18,9 @@ public class ImageUploadUseCase {
     private UploadDataUseCase uploadDataUseCase;
 
     /**
-     * 获取图片data的名称
+     * Get the name of image data
      *
-     * @param sceneFile 连续帧文件夹
+     * @param sceneFile Continuous frames folder
      */
     public List<String> getDataNames(File sceneFile) {
         var sceneNames = new LinkedHashSet<String>();
@@ -36,7 +36,7 @@ public class ImageUploadUseCase {
     }
 
     /**
-     * 查找所有图片文件夹的父文件夹
+     * Find the parent folder of all picture folders
      *
      * @param path path
      */
@@ -53,10 +53,10 @@ public class ImageUploadUseCase {
     }
 
     /**
-     * 获取image上级目录
+     * Get the upper-level directory of image
      *
      * @param file            file
-     * @param imageParentList image父文件夹集合
+     * @param imageParentList image parent folder collection
      */
     private void getImageFile(File file, Set<File> imageParentList) {
         var filename = FileUtil.getName(file).toLowerCase();

@@ -918,7 +918,7 @@ public class DataInfoUseCase {
     private void addSceneInfo(List<DataInfoBO> dataInfoBOList) {
         var sceneMap = new HashMap<Long, DataInfoBO>();
         var sceneIds = dataInfoBOList.stream().filter(dataInfoBO -> ObjectUtil.isNotNull(dataInfoBO.getParentId()) && dataInfoBO.getParentId() != 0).map(DataInfoBO::getParentId).collect(Collectors.toList());
-        // 查找上层Scene 以及Batch
+        // Find the upper Scene
         if (CollUtil.isNotEmpty(sceneIds)) {
             var sceneList = dataInfoDAO.listByIds(sceneIds);
             if (CollUtil.isNotEmpty(sceneList)) {

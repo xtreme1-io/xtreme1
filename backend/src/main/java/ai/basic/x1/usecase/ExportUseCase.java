@@ -215,7 +215,7 @@ public class ExportUseCase {
     }
 
     /**
-     * 下载原始文件
+     * Download original file
      */
     private void downLoadRawFile(String destDir, List<? extends ExportDataFileBaseBO> list, String dataName) {
         if (CollUtil.isEmpty(list)) {

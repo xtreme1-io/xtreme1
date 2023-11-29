@@ -115,9 +115,9 @@ public class ClassUseCase {
     }
 
     /**
-     * 创建更新class
+     * Create update class
      *
-     * @param bo class对象
+     * @param bo class object
      */
     public void saveClass(ClassBO bo) {
         Assert.notNull(bo.getOntologyId(), () -> new UsecaseException(UsecaseCode.UNKNOWN, "ontologyId can not be null"));

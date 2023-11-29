@@ -15,7 +15,7 @@ import java.util.List;
 public class ModelClassReqDTO {
 
     /**
-     * 模型id
+     * Model id
      */
     @NotNull(message = "Model id cannot be null")
     private Long modelId;

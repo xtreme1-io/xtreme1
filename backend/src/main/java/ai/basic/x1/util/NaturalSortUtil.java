@@ -7,20 +7,20 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * 对字符串进行自然排序处理 用于数据库中排序
+ * Perform natural sorting on strings for sorting in the database
  */
 public class NaturalSortUtil {
 
     /**
-     * 将传入的字符串判断是否有数字，如果有数字则在前加入数字的长度以及后面加入999减去删除0个数
+     * Determine whether the incoming string contains numbers. If there are numbers, add the length of the number in front and add 999 in the end, minus the number of 0 deletions.
      *
-     * @param s 需要转换的字符串
+     * @param str String to be converted
      * @return
      */
-    public static String convert(String s) {
+    public static String convert(String str) {
         StringBuffer sbu = new StringBuffer();
-        char[] cs = s.toCharArray();
-        // 记录数字单元开头的索引位置
+        char[] cs = str.toCharArray();
+        // Record the index position of the beginning of the number unit
         int tmp = -1;
         for (int i = 0; i < cs.length; i++) {
             char c = cs[i];
@@ -30,18 +30,18 @@ public class NaturalSortUtil {
                 }
             } else {
                 if (tmp >= 0) {
-                    // 将该字符之前的数字部分加入比较单元
-                    var o = s.substring(tmp, i);
+                    // Add the numeric part before the character to the comparison unit
+                    var o = str.substring(tmp, i);
                     addNumberLength(sbu, o);
                     tmp = -1;
                 }
                 sbu.append(c);
             }
         }
-        // 如果最后一个是数字,将最后的数字加入list中
+        // If the last one is a number, add the last number to the list
         if (Character.isDigit(cs[cs.length - 1])) {
             tmp = tmp < 0 ? cs.length - 1 : tmp;
-            var o = s.substring(tmp, cs.length);
+            var o = str.substring(tmp, cs.length);
             addNumberLength(sbu, o);
         }
         return sbu.toString();
@@ -49,7 +49,7 @@ public class NaturalSortUtil {
     }
 
     /**
-     * 在字符串包含数字前加入数字的长度以及后面加入999减去删除0个数
+     * Add the length of the number before the string contains the number and add 999 after it minus delete the 0 number
      *
      * @param stringBuffer
      * @param originalStr
