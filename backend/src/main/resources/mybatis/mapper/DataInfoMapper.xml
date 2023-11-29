@@ -61,7 +61,7 @@
                      close=")">
                 #{datasetId}
             </foreach>
-            AND d.is_deleted = 0
+        AND d.type = 'SINGLE_DATA' AND d.is_deleted = 0
         GROUP BY
             dataset_id
     </select>

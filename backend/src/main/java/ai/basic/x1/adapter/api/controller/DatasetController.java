@@ -93,9 +93,7 @@ public class DatasetController extends BaseDatasetController {
             }
             if (CollectionUtil.isNotEmpty(datasetBO.getDatas())) {
                 var dataInfoDTOS = new ArrayList<DataInfoDTO>();
-                datasetBO.getDatas().forEach(dataInfoBO -> {
-                    dataInfoDTOS.add(convertDataInfoDTO(dataInfoBO));
-                });
+                datasetBO.getDatas().forEach(dataInfoBO -> dataInfoDTOS.add(convertDataInfoDTO(dataInfoBO)));
                 datasetDTO.setDatas(dataInfoDTOS);
             }
             return datasetDTO;
