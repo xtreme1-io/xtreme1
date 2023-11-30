@@ -32,6 +32,9 @@ public class DataInfoQueryDTO {
     @NotNull(message = "datasetId cannot be null")
     private Long datasetId;
 
+
+    private Long parentId;
+
     /**
      * Data name
      */
