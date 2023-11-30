@@ -185,7 +185,7 @@
 
   const getImgUrl = (index) => {
     const files = props.data.datas || [];
-    const file = files[index]?.content[0]?.file;
+    const file = files[index]?.content[0]?.file ?? files[index]?.content[0]?.files?.[0]?.file;
     return file?.mediumThumbnail?.url || file?.url || placeImg;
   };
 
