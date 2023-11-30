@@ -107,7 +107,7 @@
                 @click="
                   (e) => {
                     e.stopPropagation();
-                    handleAnnotate(data.id);
+                    handleAnnotate(data);
                   }
                 "
               >
@@ -303,7 +303,7 @@
     onImgLoad,
     getImageUrl,
     getTextJson,
-  } = useImgCard(props);
+  } = useImgCard(props as any);
   const dataId = unref(props).data.id;
   // const originalUrl = unref(props).data.files ? unref(props).data.files[0].url.originalUrl : null;
   const { prefixCls } = useDesign('img-card');
@@ -370,8 +370,9 @@
     return `background:${color}`;
   };
 
-  const handleAnnotate = (id) => {
-    emits('handleSingleAnnotate', id);
+  const handleAnnotate = (data) => {
+    console.log('handleAnnotate', data);
+    emits('handleSingleAnnotate', data);
   };
 
   const handleDel = (e) => {

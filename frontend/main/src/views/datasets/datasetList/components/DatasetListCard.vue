@@ -322,6 +322,7 @@
         .img{
           flex-shrink: 0;
           width: 33.3%;
+          height: 50%;
           img{
             width: 100%;
             height: 100%;
