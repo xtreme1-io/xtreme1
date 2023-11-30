@@ -134,7 +134,9 @@ public class DataInfoUseCase {
      */
     public void splitByDataIds(List<Long> dataIds, SplitTypeEnum splitType) {
         var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
-        dataInfoLambdaUpdateWrapper.in(DataInfo::getId, dataIds);
+        dataInfoLambdaUpdateWrapper.nested(wq -> wq.in(DataInfo::getId, dataIds)
+                .or()
+                .in(DataInfo::getParentId, dataIds));
         dataInfoLambdaUpdateWrapper.set(DataInfo::getSplitType, splitType);
         dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
     }
@@ -176,7 +178,9 @@ public class DataInfoUseCase {
     private void updateBatchByIds(List<Long> dataIds, SplitTypeEnum splitType) {
         if (CollUtil.isNotEmpty(dataIds)) {
             var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
-            dataInfoLambdaUpdateWrapper.in(DataInfo::getId, dataIds);
+            dataInfoLambdaUpdateWrapper.nested(wq -> wq.in(DataInfo::getId, dataIds)
+                    .or()
+                    .in(DataInfo::getParentId, dataIds));
             dataInfoLambdaUpdateWrapper.set(DataInfo::getSplitType, splitType);
             dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
         }
@@ -200,6 +204,7 @@ public class DataInfoUseCase {
         dataInfoLambdaQueryWrapper.select(DataInfo::getId);
         dataInfoLambdaQueryWrapper.ne(SplitTargetDataTypeEnum.SPLIT.equals(targetDataType), DataInfo::getSplitType, SplitTargetDataTypeEnum.NOT_SPLIT);
         dataInfoLambdaQueryWrapper.eq(SplitTargetDataTypeEnum.NOT_SPLIT.equals(targetDataType), DataInfo::getSplitType, targetDataType);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getParentId, DEFAULT_PARENT_ID);
         return dataInfoLambdaQueryWrapper;
     }
 
@@ -781,7 +786,7 @@ public class DataInfoUseCase {
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getAnnotationStatus()), DataInfo::getAnnotationStatus, modelRunFilterData.getAnnotationStatus());
         lambdaQueryWrapper.eq(ObjectUtil.isNotNull(modelRunFilterData.getSplitType()), DataInfo::getSplitType, modelRunFilterData.getSplitType());
         lambdaQueryWrapper.eq(DataInfo::getIsDeleted, false);
-        lambdaQueryWrapper.eq(DataInfo::getType,ItemTypeEnum.SINGLE_DATA);
+        lambdaQueryWrapper.eq(DataInfo::getType, ItemTypeEnum.SINGLE_DATA);
         return lambdaQueryWrapper;
     }
 
