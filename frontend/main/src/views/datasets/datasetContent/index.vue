@@ -19,7 +19,7 @@
           <Button type="primary" @click="handleUnlock">Unlock</Button>
         </div>
       </div>
-      <TipModal @register="tipRegister" :datasetType="info?.type" />
+      <TipModal @register="tipRegister" :datasetType="(info?.type as datasetTypeEnum )" />
       <ModelRun
         modelType="model"
         @register="registerRunModel"
@@ -115,7 +115,7 @@
           </div>
         </div>
       </div>
-      <div class="sider" :style="info?.type === datasetTypeEnum.TEXT ? { paddingTop: 0 } : null">
+      <div class="sider" :style="info?.type === datasetTypeEnum.TEXT ? { paddingTop: 0 } : ''">
         <div class="header" v-if="info?.type !== datasetTypeEnum.TEXT">
           <div
             @click="sliderType = 'fliter'"
@@ -348,7 +348,6 @@
   import {
     Select,
     Radio,
-    Input,
     Modal,
     Switch,
     Tabs,
@@ -480,7 +479,7 @@
   let timeout;
 
   let getMoelResult = async () => {
-    let res = await getMoelResultApi(id);
+    let res = await getMoelResultApi(id as any);
 
     modelRunResultList.value = res.map((item) => {
       let result = {
@@ -765,17 +764,11 @@
   };
 
   const handleAnnotate = async () => {
-    let templist: DatasetItem[] = [];
-    let type = dataTypeEnum.SINGLE_DATA;
-    const data = unref(list).filter((item) => {
-      return unref(selectedList).some((record) => record === item.id);
-    });
-    if (data.some((item) => item.type === dataTypeEnum.SINGLE_DATA)) {
-      templist = data.filter((item) => item.type === dataTypeEnum.SINGLE_DATA);
-    } else {
-      type = dataTypeEnum.FRAME_SERIES;
-      templist = selectedList.value;
-    }
+    const data = unref(list).filter((item) => unref(selectedList).includes(item.id));
+
+    const type = data[0].type;
+    const templist: DatasetItem[] = data.filter((item) => item.type == type);
+
     const flag = await handleEmpty(templist.map((item) => item.id || item) as string[], type);
     if (!flag) {
       return;
@@ -784,13 +777,16 @@
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
-      dataType: type,
+      operateItemType: type,
     });
     goToTool({ recordId: res }, info.value?.type);
     fixedFetchList();
   };
 
-  const handleSingleAnnotate = async (dataId) => {
+  const handleSingleAnnotate = async (data) => {
+    const dataId = data.id;
+    const dataType = data.type;
+    console.log(dataId, dataType);
     const flag = await handleEmpty([dataId], dataTypeEnum.SINGLE_DATA);
     if (!flag) {
       return;
@@ -798,7 +794,8 @@
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: [dataId],
-      dataType: dataTypeEnum.SINGLE_DATA,
+      // dataType: dataTypeEnum.SINGLE_DATA,
+      operateItemType: dataType,
     });
     getLockedData();
     goToTool({ recordId: res }, info.value?.type);
@@ -813,7 +810,7 @@
           const res = await takeRecordByData({
             datasetId: id as unknown as number,
             dataIds: list,
-            dataType: type,
+            operateItemType: type,
           });
           goToTool({ recordId: res }, info.value?.type);
         },
@@ -823,10 +820,11 @@
   };
 
   const handleAnotateFrame = async (dataId) => {
+    console.log('handleAnotateFrame ==>', dataId);
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: [dataId],
-      dataType: dataTypeEnum.FRAME_SERIES,
+      operateItemType: dataTypeEnum.FRAME_SERIES,
     });
     goToTool({ recordId: res });
     // window.location.reload();
@@ -838,7 +836,7 @@
 
   const handleRun = async (
     resultModel: Nullable<ResultsModelParam>,
-    dataModel: Nullable<DataModelParam>,
+    _dataModel: Nullable<DataModelParam>,
   ) => {
     let templist: DatasetItem[] = [];
     let type = dataTypeEnum.SINGLE_DATA;
@@ -855,7 +853,7 @@
     const res = await takeRecordByDataModel({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
-      dataType: type,
+      operateItemType: type,
       modelId: modelId.value as number,
       modelCode: selectOptions.value.filter((item) => item.id === modelId.value)[0].modelCode,
       resultFilterParam: resultModel,

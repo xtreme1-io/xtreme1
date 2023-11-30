@@ -25,7 +25,7 @@ export enum CompressSourceType {
 export enum dataTypeEnum {
   ALL = 'ALL',
   SINGLE_DATA = 'SINGLE_DATA',
-  FRAME_SERIES = 'FRAME_SERIES',
+  FRAME_SERIES = 'SCENE',
 }
 
 export enum SortFieldEnum {
@@ -205,11 +205,12 @@ export enum modelCode {
 export interface takeRecordParams {
   datasetId: number;
   dataIds: string[];
-  dataType: dataTypeEnum;
+  dataType?: dataTypeEnum;
   modelId?: Nullable<number>;
   modelCode?: modelCode;
   isFilterData?: boolean;
   resultFilterParam?: Nullable<resultFilterParam>;
+  operateItemType: dataTypeEnum;
 }
 
 export interface exportFileRecord {
