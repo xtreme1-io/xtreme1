@@ -80,7 +80,17 @@
           @handleSplite="handleSplite"
           v-model:name="name"
           @resetMoelResult="getMoelResult"
-        />
+        >
+          <template #scene>
+            <div key="scene" class="tool-info" v-if="type === PageTypeEnum.frame">
+              <div class="back-btn" @click="handleBack">
+                <Icon icon="ep:back" size="16" />
+                <span class="text">{{ t('common.back') }}</span>
+              </div>
+              <div class="frame-name">{{ frameDetailName }}</div>
+            </div>
+          </template>
+        </Tools>
         <div
           class="list"
           v-show="list.length > 0"
@@ -104,6 +114,7 @@
               @handleDelete="handleDeleteSingle"
               @handleSingleAnnotate="handleSingleAnnotate"
               @handleAnotateFrame="handleAnotateFrame"
+              @handleChangeType="handleChangeType"
             />
           </ScrollContainer>
         </div>
@@ -150,7 +161,7 @@
             <Tabs.TabPane key="Data">
               <template #tab> Data </template>
             </Tabs.TabPane>
-            <Tabs.TabPane key="Result" v-if="info?.type !== datasetTypeEnum.TEXT">
+            <Tabs.TabPane key="Result" v-if="false">
               <template #tab> Result </template>
             </Tabs.TabPane>
           </Tabs>
@@ -406,7 +417,7 @@
   const sortWithLabel = ref<string>('Data');
   const confidenceSlider = ref([0, 1]);
   const runRecordId = ref<any>();
-  const type = ref<PageTypeEnum>();
+  const type = ref<PageTypeEnum>(PageTypeEnum.list);
   const { id, dataId } = query;
   const [register, { openModal }] = useModal();
   const [frameRegister, { openModal: openFrameModal }] = useModal();
@@ -608,6 +619,10 @@
 
     if (dataId) {
       params.ids = [dataId].toString();
+    }
+
+    if (type.value == PageTypeEnum.frame) {
+      params.parentId = parentIdScene.value;
     }
 
     try {
@@ -828,6 +843,25 @@
     });
     goToTool({ recordId: res });
     // window.location.reload();
+  };
+  // Open Frame
+  const frameDetailName = ref<string>('');
+  const parentIdScene = ref<number>(0);
+  const handleChangeType = (value, id, name) => {
+    // Frames
+    if (value == dataTypeEnum.FRAME_SERIES) {
+      parentIdScene.value = id;
+      frameDetailName.value = name;
+      type.value = PageTypeEnum.frame;
+      fetchFilterFun(filterForm);
+    }
+    sortWithLabel.value = 'Data';
+  };
+  const handleBack = () => {
+    parentIdScene.value = 0;
+    frameDetailName.value = '';
+    type.value = PageTypeEnum.list;
+    fetchFilterFun(filterForm);
   };
 
   const handleModelRun = async () => {

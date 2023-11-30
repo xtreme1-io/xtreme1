@@ -14,12 +14,19 @@
       <div v-if="data.lockedBy"> <Icon icon="bx:bxs-lock" /> Editing by {{ data.lockedBy }} </div>
     </div>
     <div class="img">
-      <div :class="getCheckboxClass" v-if="!data.lockedBy">
+      <div :class="getCheckboxClass" v-if="!data.lockedBy && type !== PageTypeEnum.frame">
         <Checkbox :checked="isSelected" @change="handleSelectedChange" />
       </div>
-      <div :class="getMaskClass" v-if="!data.lockedBy" @click="handleCheck">
+      <div
+        :class="getMaskClass"
+        v-if="!data.lockedBy && type !== PageTypeEnum.frame"
+        @click="handleCheck"
+      >
         <div class="frameWrapper" v-if="isFrame()">
           <div class="openBtn">
+            <Button type="primary" block border @click.stop="handleOpen"> Open </Button>
+          </div>
+          <div class="openBtn" v-if="info?.type != datasetTypeEnum.IMAGE">
             <Button
               type="primary"
               block
@@ -34,7 +41,7 @@
               View
             </Button>
           </div>
-          <div class="openBtn" v-if="isFrame()">
+          <div class="openBtn" v-if="info?.type != datasetTypeEnum.IMAGE">
             <Button
               type="primary"
               block
@@ -67,7 +74,7 @@
         </div>
         <div class="wrapper" v-else>
           <div class="wrapper-line">
-            <div class="openBtn" v-if="type !== PageTypeEnum.frame">
+            <div class="openBtn">
               <Button
                 type="primary"
                 block
@@ -99,7 +106,7 @@
             </div>
           </div>
           <div class="wrapper-line">
-            <div class="openBtn" v-if="type !== PageTypeEnum.frame">
+            <div class="openBtn" v-if="props.type != PageTypeEnum.frame">
               <Button
                 type="primary"
                 block
@@ -117,7 +124,7 @@
           </div>
         </div>
       </div>
-      <div class="floder-img" v-if="isFrame()">
+      <div class="floder-img" v-if="false && isFrame()">
         <img :src="floder" alt="" />
         <div class="title"> {{ data.name }} </div>
       </div>
@@ -287,6 +294,7 @@
     'handleDelete',
     'handleSingleAnnotate',
     'handleAnotateFrame',
+    'handleChangeType',
   ]);
   const translateSplit = (type) => {
     let LowerCase = type.toLowerCase();
@@ -407,6 +415,11 @@
       params.dataType = 'frame';
     }
     goToTool(params, props.info?.type);
+  };
+
+  const handleOpen = (e) => {
+    e.stopPropagation();
+    emits('handleChangeType', dataTypeEnum.FRAME_SERIES, props.data.id, props.data.name);
   };
 </script>
 <style lang="less" scoped>
