@@ -87,7 +87,7 @@
     </div>
 
     <div class="wrapper">
-      <div class="actions">
+      <div class="actions" v-if="props.pageType != PageTypeEnum.frame">
         <Dropdown placement="bottomLeft">
           <div class="actionSelect">
             <div class="label">
@@ -176,6 +176,7 @@
           <span class="inline-block ml-2">Preview annotation objects</span>
         </div> -->
       </div>
+      <slot name="scene"></slot>
       <!-- <div class="view-actions" v-if="false">
         <div class="num-wrapper">
           <div class="num-input">1000</div>
@@ -292,7 +293,6 @@
     Divider,
     Progress,
     Tooltip,
-    Checkbox,
     SubMenu,
     Tabs,
     Input,
@@ -336,9 +336,13 @@
   const go = useGo();
   const makeFrameDisable = ref<boolean>(false);
   const annotateAndModelRun = ref<boolean>(false);
+  const annotateActionFlag = ref<boolean>(false);
+  const modelRunActionFlag = ref<boolean>(false);
   const flagReactive = reactive({
     makeFrameDisable,
     annotateAndModelRun,
+    annotateActionFlag,
+    modelRunActionFlag,
   });
   const { query } = useRoute();
   const { id, dataId } = query;
@@ -426,6 +430,15 @@
       data.every((item) => {
         return item.type === dataTypeEnum.FRAME_SERIES;
       }) && data.length > 1;
+
+    if (props.datasetType == datasetTypeEnum.IMAGE) {
+      annotateActionFlag.value = data.some((item) => {
+        return item.type == dataTypeEnum.FRAME_SERIES;
+      });
+      modelRunActionFlag.value = data.some((item) => {
+        return item.type == dataTypeEnum.FRAME_SERIES;
+      });
+    }
   });
 
   const emits = defineEmits([

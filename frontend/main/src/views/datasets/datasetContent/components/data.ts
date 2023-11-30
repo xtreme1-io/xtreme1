@@ -113,12 +113,14 @@ export const actionImageList: actionItem[] = [
     function: 'handleAnnotate',
     img: annotate,
     hasDivider: false,
+    isDisabledFlag: 'annotateActionFlag',
   },
   {
     text: t('business.models.models'),
     function: 'handleModelRun',
     img: modelRun,
     hasDivider: true,
+    isDisabledFlag: 'modelRunActionFlag',
   },
   {
     text: t('business.datasetContent.splitModel.splitInto'),
