@@ -18,7 +18,7 @@
           <slot name="select"></slot>
         </Form.Item>
 
-        <template v-if="props.modelType !== 'model'">
+        <template v-if="props.modelType !== 'model' && false">
           <Form.Item>
             <Checkbox v-model:checked="formState.checkedData">
               {{ t('business.models.runModel.FliterData') }}
