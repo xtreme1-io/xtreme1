@@ -1,10 +1,402 @@
 {
   "id": "3295834",
-  "name": "3D Point",
+  "name": "3D Point Cloud",
   "font_family": "iconfont",
   "css_prefix_text": "icon-",
   "description": "点云类工具图标",
   "glyphs": [
+    {
+      "icon_id": "25069128",
+      "name": "biaoqian",
+      "font_class": "label",
+      "unicode": "e76f",
+      "unicode_decimal": 59247
+    },
+    {
+      "icon_id": "36275575",
+      "name": "polyline-v1",
+      "font_class": "polyline-v1",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "36275522",
+      "name": "polygon-v1",
+      "font_class": "polygon-v1",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "3270854",
+      "name": "ruler",
+      "font_class": "ruler",
+      "unicode": "e6a7",
+      "unicode_decimal": 59047
+    },
+    {
+      "icon_id": "34596995",
+      "name": "lunkuo",
+      "font_class": "lunkuo",
+      "unicode": "e76d",
+      "unicode_decimal": 59245
+    },
+    {
+      "icon_id": "34596996",
+      "name": "jiance",
+      "font_class": "jiance",
+      "unicode": "e76e",
+      "unicode_decimal": 59246
+    },
+    {
+      "icon_id": "34059152",
+      "name": "Hotkeys",
+      "font_class": "Hotkeys",
+      "unicode": "e767",
+      "unicode_decimal": 59239
+    },
+    {
+      "icon_id": "7405528",
+      "name": "rect",
+      "font_class": "rect1",
+      "unicode": "e67c",
+      "unicode_decimal": 59004
+    },
+    {
+      "icon_id": "7405851",
+      "name": "bone",
+      "font_class": "bone",
+      "unicode": "e68e",
+      "unicode_decimal": 59022
+    },
+    {
+      "icon_id": "7405861",
+      "name": "splinecurve",
+      "font_class": "splinecurve",
+      "unicode": "e698",
+      "unicode_decimal": 59032
+    },
+    {
+      "icon_id": "7405864",
+      "name": "polygon",
+      "font_class": "polygon1",
+      "unicode": "e69b",
+      "unicode_decimal": 59035
+    },
+    {
+      "icon_id": "7405872",
+      "name": "unclosedpolygon",
+      "font_class": "unclosedpolygon",
+      "unicode": "e6a3",
+      "unicode_decimal": 59043
+    },
+    {
+      "icon_id": "30360434",
+      "name": "beisaierquxian",
+      "font_class": "bezier-curve",
+      "unicode": "e7ab",
+      "unicode_decimal": 59307
+    },
+    {
+      "icon_id": "34058500",
+      "name": "point",
+      "font_class": "point",
+      "unicode": "e76c",
+      "unicode_decimal": 59244
+    },
+    {
+      "icon_id": "34058417",
+      "name": "liebiao",
+      "font_class": "liebiao",
+      "unicode": "e768",
+      "unicode_decimal": 59240
+    },
+    {
+      "icon_id": "34058418",
+      "name": "Crop non-first object",
+      "font_class": "a-Cropnon-firstobject",
+      "unicode": "e769",
+      "unicode_decimal": 59241
+    },
+    {
+      "icon_id": "34058419",
+      "name": "Crop the first object",
+      "font_class": "a-Cropthefirstobject",
+      "unicode": "e76a",
+      "unicode_decimal": 59242
+    },
+    {
+      "icon_id": "34058420",
+      "name": "图层显示",
+      "font_class": "tucengxianshi",
+      "unicode": "e76b",
+      "unicode_decimal": 59243
+    },
+    {
+      "icon_id": "34058411",
+      "name": "group",
+      "font_class": "group",
+      "unicode": "e762",
+      "unicode_decimal": 59234
+    },
+    {
+      "icon_id": "34058412",
+      "name": "tuichuzu",
+      "font_class": "tuichuzu",
+      "unicode": "e763",
+      "unicode_decimal": 59235
+    },
+    {
+      "icon_id": "34058413",
+      "name": "ai",
+      "font_class": "ai1",
+      "unicode": "e764",
+      "unicode_decimal": 59236
+    },
+    {
+      "icon_id": "34058414",
+      "name": "cancel",
+      "font_class": "cancel",
+      "unicode": "e765",
+      "unicode_decimal": 59237
+    },
+    {
+      "icon_id": "34058415",
+      "name": "jiaohushi",
+      "font_class": "jiaohushi",
+      "unicode": "e766",
+      "unicode_decimal": 59238
+    },
+    {
+      "icon_id": "33327126",
+      "name": "add",
+      "font_class": "add",
+      "unicode": "e758",
+      "unicode_decimal": 59224
+    },
+    {
+      "icon_id": "33327127",
+      "name": "more",
+      "font_class": "more",
+      "unicode": "e759",
+      "unicode_decimal": 59225
+    },
+    {
+      "icon_id": "33327128",
+      "name": "error",
+      "font_class": "error",
+      "unicode": "e75a",
+      "unicode_decimal": 59226
+    },
+    {
+      "icon_id": "33327129",
+      "name": "fangda",
+      "font_class": "fangda",
+      "unicode": "e75b",
+      "unicode_decimal": 59227
+    },
+    {
+      "icon_id": "33327130",
+      "name": "cube",
+      "font_class": "cube",
+      "unicode": "e75c",
+      "unicode_decimal": 59228
+    },
+    {
+      "icon_id": "33327131",
+      "name": "No result in this frame",
+      "font_class": "a-Noresultinthisframe",
+      "unicode": "e75d",
+      "unicode_decimal": 59229
+    },
+    {
+      "icon_id": "33327132",
+      "name": "ai kuang",
+      "font_class": "a-aikuang",
+      "unicode": "e75e",
+      "unicode_decimal": 59230
+    },
+    {
+      "icon_id": "33327133",
+      "name": "noun-isometric",
+      "font_class": "noun-isometric",
+      "unicode": "e75f",
+      "unicode_decimal": 59231
+    },
+    {
+      "icon_id": "33327134",
+      "name": "Ground Truth in all frames",
+      "font_class": "a-GroundTruthinallframes",
+      "unicode": "e760",
+      "unicode_decimal": 59232
+    },
+    {
+      "icon_id": "33327135",
+      "name": "Ground truth",
+      "font_class": "a-Groundtruth",
+      "unicode": "e761",
+      "unicode_decimal": 59233
+    },
+    {
+      "icon_id": "33305053",
+      "name": "restore",
+      "font_class": "huifu",
+      "unicode": "e757",
+      "unicode_decimal": 59223
+    },
+    {
+      "icon_id": "33285949",
+      "name": "Acceptance",
+      "font_class": "Acceptance",
+      "unicode": "e752",
+      "unicode_decimal": 59218
+    },
+    {
+      "icon_id": "33285950",
+      "name": "review",
+      "font_class": "review1",
+      "unicode": "e753",
+      "unicode_decimal": 59219
+    },
+    {
+      "icon_id": "33285951",
+      "name": "Annotate",
+      "font_class": "Annotate",
+      "unicode": "e754",
+      "unicode_decimal": 59220
+    },
+    {
+      "icon_id": "33285952",
+      "name": "Modify",
+      "font_class": "Modify",
+      "unicode": "e755",
+      "unicode_decimal": 59221
+    },
+    {
+      "icon_id": "33285953",
+      "name": "QA",
+      "font_class": "QA",
+      "unicode": "e756",
+      "unicode_decimal": 59222
+    },
+    {
+      "icon_id": "33261081",
+      "name": "arrow",
+      "font_class": "Frame3",
+      "unicode": "e751",
+      "unicode_decimal": 59217
+    },
+    {
+      "icon_id": "32608833",
+      "name": "suspend",
+      "font_class": "Frame2",
+      "unicode": "e74f",
+      "unicode_decimal": 59215
+    },
+    {
+      "icon_id": "32608846",
+      "name": "ongoing",
+      "font_class": "Frame23",
+      "unicode": "e750",
+      "unicode_decimal": 59216
+    },
+    {
+      "icon_id": "32487336",
+      "name": "Classfication",
+      "font_class": "Classfication",
+      "unicode": "e74b",
+      "unicode_decimal": 59211
+    },
+    {
+      "icon_id": "32487337",
+      "name": "Comments",
+      "font_class": "Comments",
+      "unicode": "e74c",
+      "unicode_decimal": 59212
+    },
+    {
+      "icon_id": "32487338",
+      "name": "Results",
+      "font_class": "Results",
+      "unicode": "e74d",
+      "unicode_decimal": 59213
+    },
+    {
+      "icon_id": "32487339",
+      "name": "Validity",
+      "font_class": "Validity",
+      "unicode": "e74e",
+      "unicode_decimal": 59214
+    },
+    {
+      "icon_id": "32437132",
+      "name": "Group",
+      "font_class": "Group",
+      "unicode": "e74a",
+      "unicode_decimal": 59210
+    },
+    {
+      "icon_id": "32410227",
+      "name": "abnormal",
+      "font_class": "Frame1",
+      "unicode": "e748",
+      "unicode_decimal": 59208
+    },
+    {
+      "icon_id": "32271954",
+      "name": "rectangular",
+      "font_class": "rectangular",
+      "unicode": "e747",
+      "unicode_decimal": 59207
+    },
+    {
+      "icon_id": "32271725",
+      "name": "3d",
+      "font_class": "a-3d",
+      "unicode": "e749",
+      "unicode_decimal": 59209
+    },
+    {
+      "icon_id": "32271488",
+      "name": "bofang",
+      "font_class": "bofang",
+      "unicode": "e741",
+      "unicode_decimal": 59201
+    },
+    {
+      "icon_id": "32271489",
+      "name": "hebing",
+      "font_class": "hebing",
+      "unicode": "e742",
+      "unicode_decimal": 59202
+    },
+    {
+      "icon_id": "32271490",
+      "name": "chongxinbofang",
+      "font_class": "chongxinbofang",
+      "unicode": "e743",
+      "unicode_decimal": 59203
+    },
+    {
+      "icon_id": "32271491",
+      "name": "jiancha",
+      "font_class": "jiancha",
+      "unicode": "e744",
+      "unicode_decimal": 59204
+    },
+    {
+      "icon_id": "32271492",
+      "name": "zuo-fuzhi",
+      "font_class": "zuo-fuzhi",
+      "unicode": "e745",
+      "unicode_decimal": 59205
+    },
+    {
+      "icon_id": "32271493",
+      "name": "right-fuzhi",
+      "font_class": "right-fuzhi",
+      "unicode": "e746",
+      "unicode_decimal": 59206
+    },
     {
       "icon_id": "31026982",
       "name": "file",

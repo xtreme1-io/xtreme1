@@ -8,7 +8,14 @@ import Update2DBox from './Update2DBox';
 import SelectObject from './SelectObject';
 import UpdateObjectDataBatch, { IUpdateObjectUserDataOption } from './UpdateObjectUserData';
 import ToggleVisible, { IToggleVisibleOption } from './ToggleVisible';
-
+import UpdateTransformBatch, { IUpdateTransformBatchOption } from './UpdateTransformBatch';
+import UpdateTrackDataBatch, {
+    ITrackOption,
+    IUpdateTrackBatchOption,
+} from './UpdateTrackDataBatch';
+import UpdateTrackData from './UpdateTrackData';
+import DeleteTrack, { IDeleteTrackOption } from './DeleteTrack';
+import AddTrack, { IAddTrackOption } from './AddTrack';
 export interface ICmdOption {
     'add-object': IAddObjectOption;
     'delete-object': IDeleteObjectOption;
@@ -30,6 +37,11 @@ export interface ICmdOption {
     };
     'update-object-user-data': IUpdateObjectUserDataOption;
     'toggle-visible': IToggleVisibleOption;
+    'update-transform-batch': IUpdateTransformBatchOption;
+    'update-track-data-batch': IUpdateTrackBatchOption;
+    'update-track-data': ITrackOption;
+    'delete-track': IDeleteTrackOption;
+    'add-track': IAddTrackOption;
 }
 
 type Name = keyof ICmdOption;
@@ -43,6 +55,11 @@ const CMD: Record<Name, any> = {
     'update-2d-box': Update2DBox,
     'update-object-user-data': UpdateObjectDataBatch,
     'toggle-visible': ToggleVisible,
+    'update-transform-batch': UpdateTransformBatch,
+    'update-track-data-batch': UpdateTrackDataBatch,
+    'update-track-data': UpdateTrackData,
+    'delete-track': DeleteTrack,
+    'add-track': AddTrack,
 };
 
 export default CMD;

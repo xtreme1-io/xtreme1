@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3295834 */
-  src: url('iconfont.woff2?t=1659510737631') format('woff2'),
-       url('iconfont.woff?t=1659510737631') format('woff'),
-       url('iconfont.ttf?t=1659510737631') format('truetype');
+  src: url('iconfont.woff2?t=1693477727245') format('woff2'),
+       url('iconfont.woff?t=1693477727245') format('woff'),
+       url('iconfont.ttf?t=1693477727245') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,230 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-label:before {
+  content: "\e76f";
+}
+
+.icon-polyline-v1:before {
+  content: "\e602";
+}
+
+.icon-polygon-v1:before {
+  content: "\e601";
+}
+
+.icon-ruler:before {
+  content: "\e6a7";
+}
+
+.icon-lunkuo:before {
+  content: "\e76d";
+}
+
+.icon-jiance:before {
+  content: "\e76e";
+}
+
+.icon-Hotkeys:before {
+  content: "\e767";
+}
+
+.icon-rect1:before {
+  content: "\e67c";
+}
+
+.icon-bone:before {
+  content: "\e68e";
+}
+
+.icon-splinecurve:before {
+  content: "\e698";
+}
+
+.icon-polygon1:before {
+  content: "\e69b";
+}
+
+.icon-unclosedpolygon:before {
+  content: "\e6a3";
+}
+
+.icon-bezier-curve:before {
+  content: "\e7ab";
+}
+
+.icon-point:before {
+  content: "\e76c";
+}
+
+.icon-liebiao:before {
+  content: "\e768";
+}
+
+.icon-a-Cropnon-firstobject:before {
+  content: "\e769";
+}
+
+.icon-a-Cropthefirstobject:before {
+  content: "\e76a";
+}
+
+.icon-tucengxianshi:before {
+  content: "\e76b";
+}
+
+.icon-group:before {
+  content: "\e762";
+}
+
+.icon-tuichuzu:before {
+  content: "\e763";
+}
+
+.icon-ai1:before {
+  content: "\e764";
+}
+
+.icon-cancel:before {
+  content: "\e765";
+}
+
+.icon-jiaohushi:before {
+  content: "\e766";
+}
+
+.icon-add:before {
+  content: "\e758";
+}
+
+.icon-more:before {
+  content: "\e759";
+}
+
+.icon-error:before {
+  content: "\e75a";
+}
+
+.icon-fangda:before {
+  content: "\e75b";
+}
+
+.icon-cube:before {
+  content: "\e75c";
+}
+
+.icon-a-Noresultinthisframe:before {
+  content: "\e75d";
+}
+
+.icon-a-aikuang:before {
+  content: "\e75e";
+}
+
+.icon-noun-isometric:before {
+  content: "\e75f";
+}
+
+.icon-a-GroundTruthinallframes:before {
+  content: "\e760";
+}
+
+.icon-a-Groundtruth:before {
+  content: "\e761";
+}
+
+.icon-huifu:before {
+  content: "\e757";
+}
+
+.icon-Acceptance:before {
+  content: "\e752";
+}
+
+.icon-review1:before {
+  content: "\e753";
+}
+
+.icon-Annotate:before {
+  content: "\e754";
+}
+
+.icon-Modify:before {
+  content: "\e755";
+}
+
+.icon-QA:before {
+  content: "\e756";
+}
+
+.icon-Frame3:before {
+  content: "\e751";
+}
+
+.icon-Frame2:before {
+  content: "\e74f";
+}
+
+.icon-Frame23:before {
+  content: "\e750";
+}
+
+.icon-Classfication:before {
+  content: "\e74b";
+}
+
+.icon-Comments:before {
+  content: "\e74c";
+}
+
+.icon-Results:before {
+  content: "\e74d";
+}
+
+.icon-Validity:before {
+  content: "\e74e";
+}
+
+.icon-Group:before {
+  content: "\e74a";
+}
+
+.icon-Frame1:before {
+  content: "\e748";
+}
+
+.icon-rectangular:before {
+  content: "\e747";
+}
+
+.icon-a-3d:before {
+  content: "\e749";
+}
+
+.icon-bofang:before {
+  content: "\e741";
+}
+
+.icon-hebing:before {
+  content: "\e742";
+}
+
+.icon-chongxinbofang:before {
+  content: "\e743";
+}
+
+.icon-jiancha:before {
+  content: "\e744";
+}
+
+.icon-zuo-fuzhi:before {
+  content: "\e745";
+}
+
+.icon-right-fuzhi:before {
+  content: "\e746";
 }
 
 .icon-file:before {

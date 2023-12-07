@@ -27,6 +27,8 @@ export const sideActions: IBsActionName[] = [
 export const generalActions: IBsActionName[] = [
     'nextFrame',
     'preFrame',
+    'copyForward',
+    'copyBackWard',
     'toggleClassView',
     'toggleShowAnnotation',
     'toggleShowLabel',

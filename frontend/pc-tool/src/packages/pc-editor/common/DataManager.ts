@@ -63,6 +63,7 @@ export default class DataManager {
             if (this.hasObject(e.uuid, frame)) return;
             allObjects.push(e);
             this.setHasMap(e.uuid, e, frame);
+            this.editor.trackManager.updateObjectRenderInfo(e);
         });
 
         frame.needSave = true;
@@ -143,7 +144,14 @@ export default class DataManager {
             if (frame) frame.needSave = true;
 
             let data = Array.isArray(datas) ? datas[index] : datas;
+            const needUpdateInfo = data.hasOwnProperty('trackId');
+            if (needUpdateInfo) {
+                this.editor.trackManager.removeTrackCount(obj, frame);
+            }
             Object.assign(obj.userData, data);
+            if (needUpdateInfo) {
+                this.editor.trackManager.addTrackCount(obj, frame);
+            }
         });
         // this.editor.pc.setObjectUserData(objects,datas);
         this.onAnnotatesChange(objects, frame, { type: 'userData', datas });
@@ -206,6 +214,7 @@ export default class DataManager {
         frame.needSave = true;
         this.editor.pc.render();
         console.log('onAnnotatesAdd', { objects, frame });
+        this.editor.trackManager.addTrackCount(objects, frame);
         this.editor.dispatchEvent({ type: Event.ANNOTATE_ADD, data: { objects, frame } });
     }
 
@@ -214,6 +223,7 @@ export default class DataManager {
         frame.needSave = true;
         this.editor.pc.render();
         console.log('onAnnotatesRemove', { objects, frame });
+        this.editor.trackManager.removeTrackCount(objects, frame);
         this.editor.dispatchEvent({ type: Event.ANNOTATE_REMOVE, data: { objects, frame } });
     }
 
@@ -399,88 +409,88 @@ export default class DataManager {
     //     trackIdName: Record<string, string>,
     //     onComplete?: () => void,
     // ) {}
-    // copyForward() {
-    //     return this.track({
-    //         direction: 'FORWARD',
-    //         object: this.editor.pc.selection.length > 0 ? 'select' : 'all',
-    //         method: 'copy',
-    //         frameN: 1,
-    //     });
-    // }
-    // copyBackWard() {
-    //     return this.track({
-    //         direction: 'BACKWARD',
-    //         object: this.editor.pc.selection.length > 0 ? 'select' : 'all',
-    //         method: 'copy',
-    //         frameN: 1,
-    //     });
-    // }
-    // async track(option: {
-    //     method: 'copy' | 'model';
-    //     object: 'select' | 'all';
-    //     direction: 'BACKWARD' | 'FORWARD';
-    //     frameN: number;
-    // }) {
-    //     let editor = this.editor;
-    //     let { frameIndex, frames } = editor.state;
-    //     let curId = frames[frameIndex].id;
+    copyForward() {
+        return this.track({
+            direction: 'FORWARD',
+            object: 'select',
+            method: 'copy',
+            frameN: 1,
+        });
+    }
+    copyBackWard() {
+        return this.track({
+            direction: 'BACKWARD',
+            object: 'select',
+            method: 'copy',
+            frameN: 1,
+        });
+    }
+    async track(option: {
+        method: 'copy' | 'model';
+        object: 'select' | 'all';
+        direction: 'BACKWARD' | 'FORWARD';
+        frameN: number;
+    }) {
+        let editor = this.editor;
+        let { frameIndex, frames } = editor.state;
+        let curId = frames[frameIndex].id;
 
-    //     const getToDataId = function getToDataId() {
-    //         let ids = [] as string[];
-    //         let forward = option.direction === 'FORWARD' ? 1 : -1;
-    //         let frameN = option.frameN;
+        const getToDataId = function getToDataId() {
+            let ids = [] as string[];
+            let forward = option.direction === 'FORWARD' ? 1 : -1;
+            let frameN = option.frameN;
 
-    //         if (frameN > 0)
-    //             for (let i = 1; i <= frameN; i++) {
-    //                 let frame = frames[frameIndex + forward * i];
-    //                 if (frame) {
-    //                     ids.push(frame.id);
-    //                 }
-    //             }
-    //         return ids;
-    //     };
-    //     const getObjects = function getObjects() {
-    //         let dataId = frames[frameIndex].id;
-    //         let objects = editor.dataManager.getFrameObject(dataId) || [];
+            if (frameN > 0)
+                for (let i = 1; i <= frameN; i++) {
+                    let frame = frames[frameIndex + forward * i];
+                    if (frame) {
+                        ids.push(frame.id);
+                    }
+                }
+            return ids;
+        };
+        const getObjects = function getObjects() {
+            let dataId = frames[frameIndex].id;
+            let objects = editor.dataManager.getFrameObject(dataId) || [];
 
-    //         if (option.object === 'select') {
-    //             objects = editor.pc.selection;
-    //         }
+            if (option.object === 'select') {
+                objects = editor.pc.selection;
+            }
 
-    //         objects = objects.filter((object) => {
-    //             return object instanceof Box && !object.userData.invisibleFlag;
-    //         });
+            objects = objects.filter((object) => {
+                return object instanceof Box && !object.userData.invisibleFlag;
+            });
 
-    //         return objects as Box[];
-    //     };
-    //     let ids = getToDataId();
-    //     if (ids.length === 0) {
-    //         // editor.showMsg('warning', props.state.$$('warnEmptyTarget'));
-    //         return;
-    //     }
+            return objects as Box[];
+        };
+        let ids = getToDataId();
+        if (ids.length === 0) {
+            // editor.showMsg('warning', props.state.$$('warnEmptyTarget'));
+            return;
+        }
 
-    //     let objects = getObjects();
-    //     if (objects.length === 0) {
-    //         editor.showMsg('warning', editor.lang('track-no-source'));
-    //         return;
-    //     }
+        let objects = getObjects();
+        if (objects.length === 0) {
+            editor.showMsg('warning', editor.lang('track-no-source'));
+            return;
+        }
 
-    //     if (option.method === 'copy') {
-    //         utils.copyData(editor, curId, ids, objects);
-    //         editor.showMsg('success', editor.lang('track-ok'));
-    //         this.gotoNext(ids[0]);
-    //     } else {
-    //         await this.modelTrack(ids, objects, option.direction);
-    //     }
-    // }
-    // gotoNext(dataId: string) {
-    //     let { frames } = this.editor.state;
-    //     let index = frames.findIndex((e) => e.id === dataId);
-    //     // index = Math.max(0, Math.min(editor.state.frames.length-1, index))
-    //     if (index < 0) return;
-    //     this.editor.loadFrame(index);
-    //     this.editor.dispatchEvent({ type: EditorEvent.UPDATE_TIME_LINE });
-    // }
+        if (option.method === 'copy') {
+            utils.copyData(editor, curId, ids, objects);
+            editor.showMsg('success', editor.lang('track-ok'));
+            this.gotoNext(ids[0]);
+        } else {
+            // await this.modelTrack(ids, objects, option.direction);
+        }
+    }
+    gotoNext(dataId: string) {
+        let { frames } = this.editor.state;
+        let index = frames.findIndex((e) => e.id === dataId);
+        // index = Math.max(0, Math.min(editor.state.frames.length-1, index))
+        if (index < 0) return;
+        this.editor.loadFrame(index);
+        // this.editor.dispatchEvent({ type: EditorEvent.UPDATE_TIME_LINE });
+    }
     // async modelTrack(
     //     toIds: string[],
     //     objects: AnnotateObject[],

@@ -44,6 +44,8 @@ const hotkeyConfig: IHotkeyConfig[] = [
     //
     { key: 'right', action: 'nextFrame' },
     { key: 'left', action: 'preFrame' },
+    { key: `alt+right`, action: 'copyForward' },
+    { key: `alt+left`, action: 'copyBackWard' },
 ];
 
 export default hotkeyConfig;

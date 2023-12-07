@@ -22,6 +22,7 @@ export function getTrackFromObject(info: Record<string, IObject[]>) {
                 };
             } else {
                 Object.assign(obj, globalTrack[trackId]);
+                obj.resultType = globalTrack[trackId].resultType;
             }
         });
     });
