@@ -157,12 +157,12 @@
   type Props = {
     data: DatasetListItem;
   };
-
+  const regLidar = new RegExp(/point(_?)cloud/i);
+  const regImage = new RegExp(/image/i);
   const getLidarImgUrl = (index: number) => {
     const content = props.data.datas && props.data.datas[0]?.content;
     if (content && content[0] && content[0].files) {
-      const files = content.filter((record) => record.directoryType?.includes('image'))[index]
-        ?.files;
+      const files = content.filter((record) => regImage.test(record.name))[index]?.files;
       if (files && files[0].file) {
         const file = files[0].file;
         return file.mediumThumbnail?.url || file.url || placeImgSm;
@@ -192,7 +192,7 @@
   const getPcImgUrl = () => {
     const placeImgType =
       props.data?.type === datasetTypeEnum.LIDAR_BASIC ? bannerFull : fusionBanner;
-    const pc = props.data.datas[0]?.content.filter((item) => item.name === 'pointCloud')[0];
+    const pc = props.data.datas[0]?.content.filter((item) => regLidar.test(item.name))[0];
     return (pc && pc.files && pc?.files[0].file?.renderImage?.url) || placeImgType;
   };
 
