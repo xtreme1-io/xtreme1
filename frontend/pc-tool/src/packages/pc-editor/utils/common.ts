@@ -10,8 +10,8 @@ export function isMatrixColumnMajor(elements: number[]) {
 }
 
 export function translateCameraConfig(info: any) {
-    let cameraExternal = info.cameraExternal || info.camera_external;
-    let cameraInternal = info.cameraInternal || info.camera_internal;
+    let cameraExternal = info?.cameraExternal || info?.camera_external;
+    let cameraInternal = info?.cameraInternal || info?.camera_internal;
 
     if (!info || !cameraExternal || cameraExternal.length !== 16) return null;
 
@@ -33,12 +33,13 @@ export function clamRange(v: number, min: number, max: number) {
 export function createViewConfig(fileConfig: IFileConfig[], cameraInfo: any[]) {
     let viewConfig = [] as IImgViewConfig[];
     let pointsUrl = '';
-
+    const regLidar = new RegExp(/point(_?)cloud/i);
+    const regImage = new RegExp(/image/i);
     fileConfig.forEach((e) => {
-        if (e.dirName === 'pointCloud') {
+        if (regLidar.test(e.dirName)) {
             pointsUrl = e.url;
-        } else if (e.dirName.startsWith('image')) {
-            let index = +e.dirName.replace('image', '');
+        } else if (regImage.test(e.dirName)) {
+            const index = +(e.dirName.match(/[0-9]{1,5}$/) as any)[0];
             viewConfig[index] = {
                 cameraInternal: { fx: 0, fy: 0, cx: 0, cy: 0 },
                 cameraExternal: [],
@@ -49,7 +50,8 @@ export function createViewConfig(fileConfig: IFileConfig[], cameraInfo: any[]) {
             };
         }
     });
-
+    viewConfig = viewConfig.filter((e) => !!e);
+    console.log(cameraInfo);
     viewConfig.forEach((config, index) => {
         let info = cameraInfo[index];
 

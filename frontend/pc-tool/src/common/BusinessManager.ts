@@ -18,12 +18,14 @@ export default class BusinessManager extends BaseBusinessManager {
     }
 
     async loadFrameConfig(data: IFrame): Promise<IDataResource> {
+        const regLidar = new RegExp(/point(_?)cloud/i);
+        const regConfig = new RegExp(/camera(_?)config/i);
         let { configs: fileConfig, name } = await api.getDataFile(data.id + '');
-        if (fileConfig.filter((e) => e.dirName === 'pointCloud').length === 0) {
+        if (fileConfig.filter((e) => regLidar.test(e.dirName)).length === 0) {
             throw this.editor.lang('no-point-data');
         }
-
-        let cameraConfig = fileConfig.find((e) => e.dirName === 'cameraConfig') as IFileConfig;
+        console.log(fileConfig);
+        let cameraConfig = fileConfig.find((e) => regConfig.test(e.dirName)) as IFileConfig;
 
         // no camera config
         let cameraInfo = [];
