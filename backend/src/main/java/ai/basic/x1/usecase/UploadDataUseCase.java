@@ -565,7 +565,7 @@ public class UploadDataUseCase {
             boo = Constants.IMAGE_DATA_TYPE.contains(mimeType);
         } else {
             boo = Constants.IMAGE_DATA_TYPE.contains(mimeType) || Constants.PCD_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(filename)) ||
-                    Constants.JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(filename));
+                    file.getAbsolutePath().toUpperCase().endsWith(Constants.JSON_SUFFIX);
         }
         if (!boo) {
             log.warn("this format file is not supported,filePath:{}", file.getAbsolutePath());
@@ -828,12 +828,12 @@ public class UploadDataUseCase {
                     var suffix = FileUtil.getSuffix(fileName);
                     suffix = suffix.equalsIgnoreCase(TIFF_SUFFIX) || suffix.equalsIgnoreCase(TIF_SUFFIX) ? "jpg" : suffix;
                     var prefix = FileUtil.getPrefix(fileName);
-                    var largeFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, large, suffix));
-                    var mediumFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, medium, suffix));
-                    var smallFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, small, suffix));
+                    var largeFile = FileUtil.file(basePath, String.format("%s_%s.%s", prefix, large, suffix));
+                    var mediumFile = FileUtil.file(basePath, String.format("%s_%s.%s", prefix, medium, suffix));
+                    var smallFile = FileUtil.file(basePath, String.format("%s_%s.%s", prefix, small, suffix));
                     Thumbnails.of(file).size(largeFileSize, largeFileSize).toFile(largeFile);
-                    Thumbnails.of(file).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
-                    Thumbnails.of(file).size(smallFileSize, smallFileSize).toFile(smallFile);
+                    Thumbnails.of(largeFile).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
+                    Thumbnails.of(largeFile).size(smallFileSize, smallFileSize).toFile(smallFile);
                     // large thumbnail
                     var largePath = String.format("%s%s", basePath, FileUtil.getName(largeFile));
                     var largeFileBO = fileBOBuilder.path(largePath).relation(LARGE_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();

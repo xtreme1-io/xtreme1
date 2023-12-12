@@ -652,7 +652,7 @@ public class DataInfoUseCase {
         for (var dataInfo : dataInfos) {
             var dataEdit = dataEditBuilder.dataId(dataInfo.getId()).sceneId(dataInfo.getParentId()).build();
             dataEditSubList.add(dataEdit);
-            if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
+            if ((i % BATCH_SIZE == 0) || i == dataInfos.size()) {
                 insertCount += dataEditDAO.getBaseMapper().insertIgnoreBatch(dataEditSubList);
                 dataEditSubList.clear();
             }
