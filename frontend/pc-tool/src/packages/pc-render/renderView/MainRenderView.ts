@@ -82,14 +82,17 @@ export default class MainRenderView extends Render {
         const intersects = this.raycaster.intersectObjects(annotate3D);
         return intersects.length > 0 ? intersects[0].object : null;
     }
-
+    getProjectPos(p: { x: number; y: number }, target?: THREE.Vector2) {
+        const { clientHeight: height, clientWidth: width } = this.renderer.domElement;
+        const x = (p.x / width) * 2 - 1;
+        const y = (-p.y / height) * 2 + 1;
+        target = target || new THREE.Vector2();
+        target.set(x, y);
+        return target;
+    }
     canvasToWorld(p: THREE.Vector2) {
-        let { clientHeight: height, clientWidth: width } = this.renderer.domElement;
-
         let ground = this.pointCloud.ground.plane;
-        let x = (p.x / width) * 2 - 1;
-        let y = (-p.y / height) * 2 + 1;
-        // let projectP = this.getProjectPos(e);
+        const { x, y } = this.getProjectPos(p);
         this.raycaster.setFromCamera({ x, y }, this.camera);
 
         let intersectP = new THREE.Vector3();

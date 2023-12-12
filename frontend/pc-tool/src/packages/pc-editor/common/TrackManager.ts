@@ -51,7 +51,7 @@ export default class TrackManager {
         // console.log(trackId, object, frame);
 
         const trackObject = this.getTrackObject(trackId);
-        console.log(trackId, trackObject, object);
+        // console.log(trackId, trackObject, object);
         Object.assign(trackObject, object || {});
         // this.editor.dispatchEvent({ type: Event.TRACK_OBJECT_CHANGE, data: { trackId } });
 

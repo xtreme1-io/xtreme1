@@ -42,6 +42,7 @@ import BSError from './common/BSError';
 import * as locale from './lang';
 import * as utils from './utils';
 import { RegisterFn, ModalFn, MsgFn, ConfirmFn, LoadingFn } from './uitype';
+import TaskManager from './common/TaskManager/TaskManager';
 
 type LocaleType = typeof locale;
 
@@ -71,6 +72,7 @@ export default class Editor extends THREE.EventDispatcher {
     dataResource: DataResource;
     modelManager: ModelManager;
     trackManager: TrackManager;
+    taskManager: TaskManager;
 
     // ui
     registerModal: RegisterFn = () => {};
@@ -99,6 +101,7 @@ export default class Editor extends THREE.EventDispatcher {
         this.businessManager = new BusinessManager(this);
         this.modelManager = new ModelManager(this);
         this.trackManager = new TrackManager(this);
+        this.taskManager = new TaskManager(this);
 
         handleHack(this);
 

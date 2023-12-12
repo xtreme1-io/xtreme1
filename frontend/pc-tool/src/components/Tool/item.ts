@@ -3,6 +3,7 @@ import Editor from '../../common/Editor';
 import { BsUIType as UIType } from '../../config/ui';
 import { Component } from 'vue';
 import ToolTip from './modelConfig.vue';
+import SetBox from './setBox.vue';
 import { ILocale } from './lang/type';
 export interface IItemConfig {
     action: string;
@@ -59,8 +60,22 @@ export const allItems: IItemConfig[] = [
         action: 'create3DBox',
         title: ($$) => $$('title_create3DBox'),
         getIcon: function (editor: Editor) {
-            return 'iconfont icon-biaozhunkuang';
+            const { config } = editor.state;
+            const classMap = {
+                AI: 'iconfont icon-a-aikuang',
+                STANDARD: 'iconfont icon-biaozhunkuang',
+            };
+            return classMap[config.boxMethod] || classMap['STANDARD'];
         },
+        getStyle: function (editor: Editor) {
+            return {
+                'margin-bottom': 0,
+                'border-bottom-right-radius': 0,
+                'border-bottom-left-radius': 0,
+                'padding-bottom': 0,
+            };
+        },
+        extra: () => SetBox,
         isDisplay: function (editor: Editor) {
             let state = editor.state;
             return state.modeConfig.ui[UIType.create3dBox] && !state.config.showSingleImgView;

@@ -110,7 +110,7 @@ export async function getInfoByRecordId(recordId: string) {
     if (!data || !data.datas || data.datas.length === 0)
         return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
 
-    let isSeriesFrame = ['FRAME_SERIES', 'SCENE'].includes(data.dataType);
+    let isSeriesFrame = ['FRAME_SERIES', 'SCENE'].includes(data.itemType);
     let modelRecordId = data.serialNo || '';
     let model = undefined as IModelResult | undefined;
     if (modelRecordId) {

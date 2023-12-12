@@ -232,7 +232,7 @@ export interface IConfig {
     projectPoint4: boolean;
     projectPoint8: boolean;
     projectMap3d: boolean;
-
+    boxMethod: 'AI' | 'STANDARD';
     //
     // type: string;
     pointSize: number;

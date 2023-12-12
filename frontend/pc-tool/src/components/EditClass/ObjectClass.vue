@@ -53,6 +53,7 @@
         return item.id === iState.classType
             ? {
                   backgroundColor: '#177ddc',
+                  borderColor: '#177ddc',
                   color: '#ffffff',
               }
             : {
