@@ -84,10 +84,19 @@ export default function useClassItem() {
             pc.setVisible(object2D, visible);
         }
     }
-
+    function onHeaderClick(item: IClass) {
+        if (editor.state.currentClass == item.classId) return;
+        editor.pc.selectObject();
+        if (item.isModel) {
+            editor.state.currentClass = '';
+        } else {
+            editor.state.currentClass = item.classId;
+        }
+    }
     return {
         onEdit,
         onDelete,
         onToggleVisible,
+        onHeaderClick,
     };
 }

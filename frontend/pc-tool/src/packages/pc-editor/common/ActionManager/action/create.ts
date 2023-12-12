@@ -46,9 +46,31 @@ export const createObjectWith3 = define({
                     transform.scale.z = Math.max(0.2, transform.scale.z);
                     // debugger;
 
-                    let userData = {} as IUserData;
+                    let userData = {
+                        resultStatus: Const.True_Value,
+                        resultType: Const.Dynamic,
+                    } as IUserData;
                     // userData.resultType = Const.Dynamic;
                     // userData.resultStatus = Const.True_Value;
+                    const classConfig = editor.getClassType(editor.state.currentClass);
+
+                    if (classConfig) {
+                        userData.classType = classConfig.name;
+                        userData.classId = classConfig.id;
+                    }
+                    if (editor.currentTrack) {
+                        const object3d = editor.pc.getAnnotate3D().find((e) => {
+                            return (
+                                e instanceof Box &&
+                                !(e as any).isHolder &&
+                                e.userData.trackId == editor.currentTrack
+                            );
+                        });
+                        if (!object3d) {
+                            userData.trackId = editor.currentTrack as string;
+                            userData.trackName = editor.currentTrackName;
+                        }
+                    }
 
                     let box = editor.createAnnotate3D(
                         transform.position,
@@ -60,17 +82,17 @@ export const createObjectWith3 = define({
                     let trackObject: Partial<IObject> = {
                         trackId: userData.trackId,
                         trackName: userData.trackName,
-                        // resultType: userData.resultType,
-                        // resultStatus: userData.resultStatus,
+                        classType: userData.classType,
+                        classId: userData.classId,
                     };
 
                     editor.state.config.showClassView = true;
 
                     editor.cmdManager.withGroup(() => {
                         editor.cmdManager.execute('add-object', box);
-                        // if (editor.state.isSeriesFrame) {
-                        //     editor.cmdManager.execute('add-track', trackObject);
-                        // }
+                        if (editor.state.isSeriesFrame) {
+                            editor.cmdManager.execute('add-track', trackObject);
+                        }
 
                         editor.cmdManager.execute('select-object', box);
                     });

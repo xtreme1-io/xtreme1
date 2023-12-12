@@ -192,6 +192,7 @@ export default class DataResource {
 
     setLoadMode(mode: LoadMode) {
         this.loadMode = mode;
+        this.editor.state.config.autoLoad = mode === 'all';
     }
 
     load(fromIndex?: number) {

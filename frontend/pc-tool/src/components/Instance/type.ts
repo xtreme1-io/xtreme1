@@ -19,6 +19,7 @@ export interface IItem {
 export interface IClass {
     key: string;
     isModel: boolean;
+    classId: string;
     classType: string;
     className: string;
     data: IItem[];

@@ -43,6 +43,10 @@ export function execute(): IPageHandler {
                 // load model
                 loadModels(),
             ]);
+            if (state.isSeriesFrame) {
+                await editor.loadManager.loadAllObjects();
+                await editor.loadManager.loadAllClassification();
+            }
             // load first data
             await editor.loadFrame(0, false);
             focusObject();

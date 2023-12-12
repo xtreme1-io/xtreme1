@@ -17,6 +17,8 @@ import BusinessManager from './common/BusinessManager';
 import LoadManager from './common/LoadManager';
 import DataResource from './common/DataResource';
 import ModelManager from './common/ModelManager';
+import PlayManager from './common/PlayManager';
+import TrackManager from './common/TrackManager';
 
 import { getDefaultState } from './state';
 import type { IState } from './state';
@@ -48,7 +50,9 @@ export default class Editor extends THREE.EventDispatcher {
     idCount: number = 1;
     pc: PointCloud;
     state: IState;
-    // currentTrack: string | null = null;
+    currentTrack?: string;
+    currentTrackName: string = '';
+    currentClass: string = '';
     frameMap: Map<string, IFrame> = new Map();
     frameIndexMap: Map<string, number> = new Map();
     classMap: Map<string, IClassType> = new Map();
@@ -62,11 +66,11 @@ export default class Editor extends THREE.EventDispatcher {
     configManager: ConfigManager;
     dataManager: DataManager;
     businessManager: BusinessManager;
-    // playManager: PlayManager;
+    playManager: PlayManager;
     loadManager: LoadManager;
     dataResource: DataResource;
     modelManager: ModelManager;
-    // trackManager: TrackManager;
+    trackManager: TrackManager;
 
     // ui
     registerModal: RegisterFn = () => {};
@@ -89,12 +93,12 @@ export default class Editor extends THREE.EventDispatcher {
         this.viewManager = new ViewManager(this);
         this.configManager = new ConfigManager(this);
         this.dataManager = new DataManager(this);
-        // this.playManager = new PlayManager(this);
+        this.playManager = new PlayManager(this);
         this.loadManager = new LoadManager(this);
         this.dataResource = new DataResource(this);
         this.businessManager = new BusinessManager(this);
         this.modelManager = new ModelManager(this);
-        // this.trackManager = new TrackManager(this);
+        this.trackManager = new TrackManager(this);
 
         handleHack(this);
 
@@ -113,10 +117,16 @@ export default class Editor extends THREE.EventDispatcher {
             if (config.activeTranslate && box) {
                 this.toggleTranslate(true, box as THREE.Object3D);
             }
-
+            this.updateTrack();
             this.dispatchEvent({ type: Event.ANNOTATE_SELECT, data: { ...data.data } });
         });
+        this.cmdManager.addEventListener(Event.UNDO, () => {
+            this.updateTrack();
+        });
 
+        this.cmdManager.addEventListener(Event.REDO, () => {
+            this.updateTrack();
+        });
         this.pc.addEventListener(RenderEvent.OBJECT_DBLCLICK, (data) => {
             let object = data.data as AnnotateObject;
             let trackId = object.userData.trackId;
@@ -132,7 +142,23 @@ export default class Editor extends THREE.EventDispatcher {
             }
         });
     }
+    updateTrack() {
+        const selection = this.pc.selection;
+        const userData =
+            selection.length > 0 ? (selection[0].userData as Required<IUserData>) : undefined;
 
+        this.setCurrentTrack(
+            userData ? userData.trackId : undefined,
+            userData ? userData.trackName : '',
+        );
+    }
+    setCurrentTrack(trackId: string | undefined = undefined, trackName: string) {
+        if (this.currentTrack !== trackId) {
+            this.currentTrack = trackId;
+            this.currentTrackName = trackName;
+            this.dispatchEvent({ type: Event.CURRENT_TRACK_CHANGE, data: this.currentTrack });
+        }
+    }
     // locale
     lang<T extends keyof LocaleType['en']>(name: T, args?: Record<string, any>) {
         return this.getLocale(name, locale, args);

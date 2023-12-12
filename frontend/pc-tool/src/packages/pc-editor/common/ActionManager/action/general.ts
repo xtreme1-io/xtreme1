@@ -51,9 +51,9 @@ export const toggleShowAnnotation = define({
         return true;
     },
     execute(editor: Editor) {
-        let config = editor.state.config;
-        config.showAnnotation = !config.showAnnotation;
-        editor.pc.render();
+        // let config = editor.state.config;
+        // config.showAnnotation = !config.showAnnotation;
+        // editor.pc.render();
     },
 });
 

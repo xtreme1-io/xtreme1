@@ -110,8 +110,7 @@ export async function getInfoByRecordId(recordId: string) {
     if (!data || !data.datas || data.datas.length === 0)
         return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
 
-    let isSeriesFrame = data.dataType === 'FRAME_SERIES';
-    let seriesFrameId = data.frameSeriesId ? data.frameSeriesId + '' : '';
+    let isSeriesFrame = ['FRAME_SERIES', 'SCENE'].includes(data.dataType);
     let modelRecordId = data.serialNo || '';
     let model = undefined as IModelResult | undefined;
     if (modelRecordId) {
@@ -154,7 +153,7 @@ export async function getInfoByRecordId(recordId: string) {
         data.annotationStatus = status.annotationStatus || 'NOT_ANNOTATED';
     });
 
-    return { dataInfos, isSeriesFrame, seriesFrameId };
+    return { dataInfos, isSeriesFrame };
 }
 
 export async function saveDataClassification(config: any) {

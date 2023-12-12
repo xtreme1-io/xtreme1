@@ -32,6 +32,8 @@
         color: white;
         height: 100%;
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
 
         .collapse-title {
             font-weight: 600;

@@ -191,11 +191,11 @@ export default function useInstance() {
     function onAnnotateChange(data: any) {
         let objects = data.data.objects as AnnotateObject[];
         let type = data.data.type as string;
-        let datas = (data.data.datas || {}) as Record<string, any>;
+        let datas = data.data.datas ?? {};
         let curFrame = editor.getCurrentFrame();
-
+        const _data = Array.isArray(datas) ? datas[0] : datas;
         if (type === 'userData') {
-            if ('trackId' in datas || 'classType' in datas) {
+            if ('trackId' in _data || 'classType' in _data) {
                 updateListFlag = true;
             }
         }
@@ -233,6 +233,7 @@ export default function useInstance() {
         let noClassMapKey = noProject.key + noClassKey;
         let noClass: IClass = {
             key: noClassMapKey,
+            classId: '',
             classType: '',
             className: $$('class-required'),
             data: [],
@@ -245,6 +246,22 @@ export default function useInstance() {
 
         classMap[noClassMapKey] = noClass;
         classifyMap[noProject.key] = noProject;
+
+        editor.state.classTypes.forEach((item) => {
+            let classMapId = noClassifyKey + item.id + item.name;
+            let insList: IClass = {
+                key: classMapId,
+                classId: item.id,
+                classType: item.id,
+                className: item.name,
+                color: item.color,
+                data: [],
+                visible: false,
+                isModel: false,
+            };
+            classifyMap[noClassifyKey].data.push(insList);
+            classMap[classMapId] = insList;
+        });
 
         objects.forEach((obj) => {
             let uuid = obj.uuid;
@@ -293,6 +310,7 @@ export default function useInstance() {
                 let color = classConfig ? classConfig.color : '#ffffff';
                 let insList: IClass = {
                     key: classMapId,
+                    classId: classId,
                     classType,
                     className: className,
                     color,
@@ -376,6 +394,7 @@ export default function useInstance() {
         });
         state.selectMap = selectMap;
         state.trackId = userData.trackId;
+        editor.state.currentClass = userData.classId || '';
         let classMapId = classify + classId + classType;
 
         state.list.forEach((classifyInfo) => {
@@ -508,7 +527,7 @@ export default function useInstance() {
         } else if (userData.modelClass) {
             classType = '__Model__##' + userData.modelClass;
         }
-        return { className, classType, classId: userData.classId };
+        return { className, classType, classId: userData.classId ?? '' };
     }
 
     function onItemClick(item: IItem) {
@@ -544,7 +563,10 @@ export default function useInstance() {
         }
     }
 
-    function onClassTool(action: 'toggleVisible' | 'edit' | 'delete', item: IClass) {
+    function onClassTool(
+        action: 'toggleVisible' | 'edit' | 'delete' | 'clickHeader',
+        item: IClass,
+    ) {
         switch (action) {
             case 'toggleVisible':
                 classHandler.onToggleVisible(item);
@@ -554,6 +576,9 @@ export default function useInstance() {
                 break;
             case 'delete':
                 classHandler.onDelete(item);
+                break;
+            case 'clickHeader':
+                classHandler.onHeaderClick(item);
                 break;
         }
     }
@@ -594,6 +619,7 @@ export default function useInstance() {
     }
 
     return {
+        editor,
         noClassKey,
         state,
         domRef,

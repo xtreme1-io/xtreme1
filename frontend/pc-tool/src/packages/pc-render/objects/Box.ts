@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Intersect } from '../type';
 import { get } from '../utils/tempVar';
 import { AnnotateType } from '../type';
+import { ObjectType } from 'pc-editor';
 
 let defaultMaterial = new THREE.LineBasicMaterial({
     color: 0xffffff,
@@ -42,6 +43,7 @@ export default class Box extends THREE.LineSegments {
     annotateType: AnnotateType;
     editConfig: IEditConfig = { resize: true };
     color: THREE.Color;
+    objectType = ObjectType.TYPE_3D_BOX;
     constructor() {
         super(defaultGeometry, defaultMaterial);
 

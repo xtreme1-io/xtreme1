@@ -4,100 +4,100 @@ import { convertObject2Annotate } from './result';
 import * as THREE from 'three';
 import { setIdInfo } from './create';
 
-// export function copyData(editor: Editor, copyId: string, toIds: string[], objects: Box[]) {
-//     // let { dataManager, editor, state } = tool;
-//     // let { frames } = editor.state;
+export function copyData(editor: Editor, copyId: string, toIds: string[], objects: Box[]) {
+    // let { dataManager, editor, state } = tool;
+    // let { frames } = editor.state;
 
-//     let updateDatas = { objects: [], data: [] } as { objects: AnnotateObject[]; data: IUserData[] };
-//     let updateTrans = { objects: [], transforms: [] } as {
-//         objects: Box[];
-//         transforms: ITransform[];
-//     };
-//     let addDatas = [] as { objects: AnnotateObject[]; frame: IFrame }[];
+    let updateDatas = { objects: [], data: [] } as { objects: AnnotateObject[]; data: IUserData[] };
+    let updateTrans = { objects: [], transforms: [] } as {
+        objects: Box[];
+        transforms: ITransform[];
+    };
+    let addDatas = [] as { objects: AnnotateObject[]; frame: IFrame }[];
 
-//     // debugger;
-//     toIds.forEach((id) => {
-//         if (id === copyId) return;
+    // debugger;
+    toIds.forEach((id) => {
+        if (id === copyId) return;
 
-//         let frame = editor.getFrame(id);
-//         let oldObjects = editor.dataManager.dataMap.get(id) || [];
-//         let oldMap = {} as Record<string, Box>;
-//         oldObjects.forEach((e: AnnotateObject) => {
-//             if (!(e instanceof Box)) return;
-//             oldMap[e.userData.trackId] = e;
-//         });
+        let frame = editor.getFrame(id);
+        let oldObjects = editor.dataManager.dataMap.get(id) || [];
+        let oldMap = {} as Record<string, Box>;
+        oldObjects.forEach((e: AnnotateObject) => {
+            if (!(e instanceof Box)) return;
+            oldMap[e.userData.trackId] = e;
+        });
 
-//         let addOption = { objects: [], frame: frame } as {
-//             objects: AnnotateObject[];
-//             frame: IFrame;
-//         };
+        let addOption = { objects: [], frame: frame } as {
+            objects: AnnotateObject[];
+            frame: IFrame;
+        };
 
-//         objects.forEach((annotate) => {
-//             let userData = annotate.userData as Required<IUserData>;
+        objects.forEach((annotate) => {
+            let userData = annotate.userData as Required<IUserData>;
 
-//             let trackId = userData.trackId;
-//             let object = oldMap[trackId];
+            let trackId = userData.trackId;
+            let object = oldMap[trackId];
 
-//             if (object) {
-//                 let updateData = object.userData as IUserData;
-//                 updateData.trackName = userData.trackName;
-//                 // updateData.resultType = userData.resultType;
-//                 // updateData.isStandard = userData.isStandard;
-//                 updateData.classType = userData.classType;
-//                 // updateData.resultStatus = Const.Copied;
-//                 updateData.attrs = JSON.parse(JSON.stringify(userData.attrs || {}));
+            if (object) {
+                let updateData = object.userData as IUserData;
+                updateData.trackName = userData.trackName;
+                // updateData.resultType = userData.resultType;
+                // updateData.isStandard = userData.isStandard;
+                updateData.classType = userData.classType;
+                // updateData.resultStatus = Const.Copied;
+                updateData.attrs = JSON.parse(JSON.stringify(userData.attrs || {}));
 
-//                 // object.position.copy(annotate.position);
-//                 // TODO
-//                 (object as any).frame = frame;
+                // object.position.copy(annotate.position);
+                // TODO
+                (object as any).frame = frame;
 
-//                 updateDatas.objects.push(object);
-//                 updateDatas.data.push(updateData);
+                updateDatas.objects.push(object);
+                updateDatas.data.push(updateData);
 
-//                 updateTrans.objects.push(object);
-//                 updateTrans.transforms.push({
-//                     position: annotate.position,
-//                     scale: annotate.scale,
-//                     rotation: annotate.rotation,
-//                 });
-//             } else {
-//                 let newUserData = JSON.parse(JSON.stringify(userData)) as IUserData;
-//                 newUserData.backId = '';
-//                 newUserData.pointN = undefined;
-//                 // newUserData.resultStatus = Const.Copied;
+                updateTrans.objects.push(object);
+                updateTrans.transforms.push({
+                    position: annotate.position,
+                    scale: annotate.scale,
+                    rotation: annotate.rotation,
+                });
+            } else {
+                let newUserData = JSON.parse(JSON.stringify(userData)) as IUserData;
+                newUserData.backId = '';
+                newUserData.pointN = undefined;
+                // newUserData.resultStatus = Const.Copied;
 
-//                 // newUserData.cBy = '';
+                // newUserData.cBy = '';
 
-//                 object = editor.createAnnotate3D(
-//                     annotate.position,
-//                     annotate.scale,
-//                     annotate.rotation,
-//                     newUserData,
-//                 );
+                object = editor.createAnnotate3D(
+                    annotate.position,
+                    annotate.scale,
+                    annotate.rotation,
+                    newUserData,
+                );
 
-//                 addOption.objects.push(object);
-//                 editor.updateObjectRenderInfo(object);
-//             }
-//         });
+                addOption.objects.push(object);
+                editor.updateObjectRenderInfo(object);
+            }
+        });
 
-//         if (addOption.objects.length > 0) addDatas.push(addOption);
-//     });
+        if (addOption.objects.length > 0) addDatas.push(addOption);
+    });
 
-//     editor.cmdManager.withGroup(() => {
-//         if (addDatas.length > 0) {
-//             editor.cmdManager.execute('add-object', addDatas);
-//         }
+    editor.cmdManager.withGroup(() => {
+        if (addDatas.length > 0) {
+            editor.cmdManager.execute('add-object', addDatas);
+        }
 
-//         if (updateDatas.objects.length > 0) {
-//             // updateDatas
-//             editor.cmdManager.execute('update-object-user-data', updateDatas);
-//         }
+        if (updateDatas.objects.length > 0) {
+            // updateDatas
+            editor.cmdManager.execute('update-object-user-data', updateDatas);
+        }
 
-//         if (updateTrans.objects.length > 0) {
-//             editor.cmdManager.execute('update-transform-batch', updateTrans);
-//         }
-//     });
-// }
+        if (updateTrans.objects.length > 0) {
+            editor.cmdManager.execute('update-transform-batch', updateTrans);
+        }
+    });
+}
 
 export function addModelTrackData(editor: Editor, objectsMap: Record<string, IObject[]>) {
     let curFrame = editor.getCurrentFrame();
