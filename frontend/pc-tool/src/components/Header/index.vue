@@ -98,7 +98,7 @@
                 </a-button>
                 <a-button
                     class="basic skip"
-                    v-show="canEdit()"
+                    v-show="canEdit() && !state.isSeriesFrame"
                     @click="onToggleSkip"
                     :disabled="blocking"
                 >

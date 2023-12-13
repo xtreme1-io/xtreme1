@@ -156,7 +156,7 @@ function getDefaultConfig(): IConfig {
         maxViewWidth: '100%',
         limitRect2Image: true,
         withoutTaskId: withoutTaskId,
-
+        boxMethod: 'AI',
         autoLoad: false,
     };
 }

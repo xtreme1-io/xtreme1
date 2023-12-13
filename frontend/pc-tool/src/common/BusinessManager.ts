@@ -24,7 +24,6 @@ export default class BusinessManager extends BaseBusinessManager {
         if (fileConfig.filter((e) => regLidar.test(e.dirName)).length === 0) {
             throw this.editor.lang('no-point-data');
         }
-        console.log(fileConfig);
         let cameraConfig = fileConfig.find((e) => regConfig.test(e.dirName)) as IFileConfig;
 
         // no camera config

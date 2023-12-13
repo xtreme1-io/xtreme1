@@ -51,7 +51,6 @@ export function createViewConfig(fileConfig: IFileConfig[], cameraInfo: any[]) {
         }
     });
     viewConfig = viewConfig.filter((e) => !!e);
-    console.log(cameraInfo);
     viewConfig.forEach((config, index) => {
         let info = cameraInfo[index];
 
@@ -83,9 +82,7 @@ export function queryStr(data: Record<string, any> = {}) {
     Object.keys(data).forEach((name) => {
         let value = data[name];
         if (Array.isArray(value)) {
-            value.forEach((e) => {
-                queryArr.push(`${name}=${e}`);
-            });
+            queryArr.push(`${name}=${value.join(',')}`);
         } else {
             queryArr.push(`${name}=${value}`);
         }
