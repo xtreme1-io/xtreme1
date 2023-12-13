@@ -161,32 +161,6 @@ CREATE TABLE `data_classification_option`
   DEFAULT CHARSET = utf8mb4;
 
 -- ----------------------------
--- Table structure for data_copy1
--- ----------------------------
-DROP TABLE IF EXISTS `data_copy1`;
-CREATE TABLE `data_copy1`
-(
-    `id`                bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
-    `dataset_id`        bigint(20)                                        DEFAULT NULL COMMENT 'Dataset id',
-    `name`              varchar(255)                                      DEFAULT NULL COMMENT 'Data name',
-    `content`           json                                              DEFAULT NULL COMMENT 'Content (folder path, version information)',
-    `status`            enum ('INVALID','VALID')                          DEFAULT 'VALID' COMMENT 'Data status INVALID,VALID',
-    `annotation_status` enum ('ANNOTATED','NOT_ANNOTATED','INVALID')      DEFAULT 'NOT_ANNOTATED' COMMENT 'Data annotation status ANNOTATED, NOT_ANNOTATED, INVALID',
-    `split_type`        enum ('TRAINING','VALIDATION','TEST','NOT_SPLIT') DEFAULT 'NOT_SPLIT' COMMENT 'Split type',
-    `is_deleted`        bit(1)     NOT NULL                               DEFAULT b'0' COMMENT 'Is deleted',
-    `del_unique_key`    bigint(20) NOT NULL                               DEFAULT '0' COMMENT 'Delete unique flag, 0 when writing, set as primary key id after tombstone',
-    `created_at`        datetime   NOT NULL                               DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
-    `created_by`        bigint(20)                                        DEFAULT NULL COMMENT 'Creator id',
-    `updated_at`        datetime   NOT NULL                               DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
-    `updated_by`        bigint(20)                                        DEFAULT NULL COMMENT 'Modify person id',
-    PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `uk_dataset_id_name` (`dataset_id`, `name`, `del_unique_key`) USING BTREE,
-    KEY `idx_dataset_id_created_at` (`dataset_id`, `created_at`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 1
-  DEFAULT CHARSET = utf8mb4 COMMENT ='Data';
-
--- ----------------------------
 -- Table structure for data_edit
 -- ----------------------------
 DROP TABLE IF EXISTS `data_edit`;
