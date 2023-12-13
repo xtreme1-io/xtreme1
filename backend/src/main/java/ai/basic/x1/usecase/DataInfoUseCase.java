@@ -697,7 +697,7 @@ public class DataInfoUseCase {
     private void batchInsertModelDataResult(DataPreAnnotationBO dataPreAnnotationBO, ModelBO modelBO, Long userId, Long serialNo) {
         var modelDataResultList = new ArrayList<ModelDataResult>();
         var dataIds = dataPreAnnotationBO.getDataIds();
-        if (dataPreAnnotationBO.getOperateItemType().equals(ItemTypeEnum.SCENE)) {
+        if (ItemTypeEnum.SCENE.equals(dataPreAnnotationBO.getOperateItemType())) {
             var dataInfos = getDataInfoBySceneIds(dataPreAnnotationBO.getDatasetId(), dataIds);
             dataIds = dataInfos.stream().map(DataInfoBO::getId).collect(Collectors.toList());
         }
