@@ -353,7 +353,7 @@
                         border: 1px solid red;
                         z-index: 6;
                         background-size: 100% 100%;
-                        background-image: url('/image/x.png');
+                        background-image: url('/x.png');
                     }
 
                     &.miss {

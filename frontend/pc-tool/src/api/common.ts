@@ -112,6 +112,7 @@ export async function getInfoByRecordId(recordId: string) {
 
     let isSeriesFrame = ['FRAME_SERIES', 'SCENE'].includes(data.itemType);
     let modelRecordId = data.serialNo || '';
+    const seriesFrameId = data.datas[0]?.sceneId;
     let model = undefined as IModelResult | undefined;
     if (modelRecordId) {
         model = {
@@ -153,7 +154,7 @@ export async function getInfoByRecordId(recordId: string) {
         data.annotationStatus = status.annotationStatus || 'NOT_ANNOTATED';
     });
 
-    return { dataInfos, isSeriesFrame };
+    return { dataInfos, isSeriesFrame, seriesFrameId };
 }
 
 export async function saveDataClassification(config: any) {

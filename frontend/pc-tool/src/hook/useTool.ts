@@ -41,8 +41,11 @@ export default function useTool() {
 
     async function loadRecord() {
         try {
-            let { dataInfos, isSeriesFrame } = await api.getInfoByRecordId(bsState.recordId);
+            let { dataInfos, isSeriesFrame, seriesFrameId } = await api.getInfoByRecordId(
+                bsState.recordId,
+            );
             state.isSeriesFrame = isSeriesFrame;
+            bsState.seriesFrameId = seriesFrameId;
             let dataId = bsState.query.dataId;
             if (dataId) {
                 dataInfos = dataInfos.filter((data) => data.id === dataId);
