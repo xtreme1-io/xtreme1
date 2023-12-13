@@ -168,6 +168,7 @@ export default function useHeader() {
     }
     async function onSubmit() {
         let { frameIndex, frames, isSeriesFrame } = editor.state;
+        const seriesFrameId = editor.bsState.seriesFrameId;
         let frame = frames[frameIndex];
 
         let objects = editor.dataManager.getFrameObject(frame.id) || [];
@@ -201,8 +202,11 @@ export default function useHeader() {
         try {
             if (isSeriesFrame) {
                 editor.saveObject(frames, true);
-                // await api.submitData(frame.id);
+                await api.submitData(seriesFrameId ?? '');
+                // await updateDataStatus(frames);
                 unlockData();
+                bsState.submitting = false;
+                return;
             } else {
                 await editor.saveObject([frame], true);
                 await api.submitData(frame.id);
