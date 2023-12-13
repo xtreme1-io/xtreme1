@@ -49,7 +49,7 @@ public class PointCloudDetectionModelReqConverter {
             }
             String prePath = subPaths[subPaths.length - 2];
             //images
-            if (prePath.startsWith(POINT_CLOUD_IMG)) {
+            if (prePath.startsWith(CAMERA_IMAGE)) {
                 if (CollUtil.isEmpty(dataInfo.getImageUrls())) {
                     List<String> imageUrlList = new ArrayList<>();
                     imageUrlList.add(fileNodeBO.getFile().getInternalUrl());
@@ -59,7 +59,7 @@ public class PointCloudDetectionModelReqConverter {
                 }
             }
             //pcd
-            if (prePath.startsWith(POINT_CLOUD)) {
+            if (prePath.startsWith(LIDAR_POINT_CLOUD)) {
                 dataInfo.setPointCloudUrl(getFileBO(fileNodeBO.getFile()).getInternalUrl());
             }
             //cameraConfig
