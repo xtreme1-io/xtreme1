@@ -661,6 +661,18 @@ public class DataInfoUseCase {
         return insertCount;
     }
 
+    public Map<Long, List<Long>> getDataIdBySceneIds(Long datasetId, List<Long> sceneIds) {
+        var dataInfoList = getDataInfoBySceneIds(datasetId, sceneIds);
+        var sceneDataMap = new HashMap<Long, List<Long>>();
+        if (CollUtil.isEmpty(dataInfoList)) {
+            return sceneDataMap;
+
+        }
+        dataInfoList.forEach(dataInfo -> sceneDataMap.computeIfAbsent(dataInfo.getParentId(),
+                k -> new ArrayList<>()).add(dataInfo.getId()));
+        return sceneDataMap;
+    }
+
     public List<DataInfoBO> getDataInfoBySceneIds(Long datasetId, List<Long> sceneIds) {
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataInfo>();
         lambdaQueryWrapper.select(DataInfo::getId, DataInfo::getName, DataInfo::getOrderName, DataInfo::getParentId);
