@@ -170,7 +170,7 @@ export default class LoadManager {
 
     // SeriesFrame load
     async loadAllObjects() {
-        let { frames, isSeriesFrame } = this.editor.state;
+        let { frames, isSeriesFrame, classifications } = this.editor.state;
 
         let filterFrames = frames.filter((e) => !this.editor.dataManager.getFrameObject(e.id));
 
@@ -179,12 +179,17 @@ export default class LoadManager {
         try {
             let data = await this.editor.businessManager.getFrameObject(filterFrames);
             // let data = await api.getDataObject(dataIds);
-
+            console.log(data);
             if (isSeriesFrame) this.setTrackData(data.objectsMap);
 
             filterFrames.forEach((frame) => {
                 let objects = data.objectsMap[frame.id] || [];
                 frame.queryTime = data.queryTime;
+
+                frame.classifications = utils.copyClassification(
+                    classifications,
+                    data.classificationMap[frame.id] || {},
+                );
 
                 let annotates = utils.convertObject2Annotate(objects, this.editor);
                 annotates.forEach((obj) => {

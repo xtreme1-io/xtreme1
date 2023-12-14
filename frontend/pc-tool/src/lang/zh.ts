@@ -17,6 +17,7 @@ const zh: ILocale = {
     'track-no-data': '无追踪结果，请检查你的结果信息和追踪方向是否正确',
     'track-error': '追踪错误',
     'track-ok': '追踪成功',
+    'copy-ok': '复制成功',
 
     // info
     'load-point': '加载点云....',

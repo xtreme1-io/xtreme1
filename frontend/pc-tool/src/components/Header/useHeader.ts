@@ -269,9 +269,14 @@ export default function useHeader() {
         let frame = editor.getCurrentFrame();
         let config = {
             dataIds: [frame.id],
-            dataType: 'SINGLE_DATA',
+            operateItemType: 'SINGLE_DATA',
             datasetId: bsState.datasetId,
         };
+
+        if (editor.state.isSeriesFrame) {
+            config.dataIds = [bsState.seriesFrameId ?? ''];
+            config.operateItemType = 'SCENE';
+        }
 
         bsState.modifying = true;
         try {

@@ -477,7 +477,7 @@ export default class DataManager {
 
         if (option.method === 'copy') {
             utils.copyData(editor, curId, ids, objects);
-            editor.showMsg('success', editor.lang('track-ok'));
+            editor.showMsg('success', editor.lang('copy-ok'));
             this.gotoNext(ids[0]);
         } else {
             // await this.modelTrack(ids, objects, option.direction);

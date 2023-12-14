@@ -80,7 +80,7 @@ export async function getDataFile(dataId: string) {
     // console.log('getDataFile', data);
     let configs = [] as IFileConfig[];
     data[0].content.forEach((config: any) => {
-        let file = config.file;
+        let file = config.file || (config.files && config.files[0]?.file);
         configs.push({
             name: config.name,
             size: +file.size,

@@ -270,7 +270,7 @@ export default function useInstance() {
             let trackId = userData.trackId;
             let trackName = userData.trackName;
             let { classify, classifyName } = getClassify(userData);
-            let { className, classType, classId } = getClassInfo(userData);
+            let { className, classType, classId, isModel } = getClassInfo(userData);
             let classConfig = editor.getClassType(classId || classType);
             if (classConfig && classConfig.label) className = classConfig.label;
 
@@ -316,7 +316,7 @@ export default function useInstance() {
                     color,
                     data: [],
                     visible: false,
-                    isModel: false,
+                    isModel: isModel,
                 };
                 classifyMap[classify].data.push(insList);
                 classMap[classMapId] = insList;
@@ -330,7 +330,7 @@ export default function useInstance() {
                     isTrackItem: true,
                     annotateType: '',
                     visible: false,
-                    isModel: false,
+                    isModel: isModel,
                     data: [],
                     attrLabel: '',
                     active: oldActive[trackMapId] || [],
@@ -522,12 +522,14 @@ export default function useInstance() {
     function getClassInfo(userData: IUserData) {
         let className = userData.classType || userData.modelClass || '';
         let classType = noClassKey;
+        let isModel = false;
         if (userData.classType) {
             classType = userData.classType;
         } else if (userData.modelClass) {
             classType = '__Model__##' + userData.modelClass;
+            isModel = true;
         }
-        return { className, classType, classId: userData.classId ?? '' };
+        return { className, classType, isModel, classId: userData.classId ?? '' };
     }
 
     function onItemClick(item: IItem) {

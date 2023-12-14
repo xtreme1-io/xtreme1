@@ -45,7 +45,7 @@ export function execute(): IPageHandler {
             ]);
             if (state.isSeriesFrame) {
                 await editor.loadManager.loadAllObjects();
-                await editor.loadManager.loadAllClassification();
+                // await editor.loadManager.loadAllClassification();
             }
             // load first data
             await editor.loadFrame(0, false);

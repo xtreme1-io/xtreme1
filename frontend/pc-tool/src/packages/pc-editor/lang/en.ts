@@ -17,6 +17,7 @@ const en = {
     'track-no-source': 'No Tracking Objects',
     'track-error': 'Track Error',
     'track-ok': 'Track Success',
+    'copy-ok': 'Copy Success',
 
     // info
     'load-point': 'Loading....',
