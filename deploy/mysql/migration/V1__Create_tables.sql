@@ -69,7 +69,7 @@ CREATE TABLE `data`
     `updated_at`        datetime                                                               NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
     `updated_by`        bigint(20)                                                                      DEFAULT NULL COMMENT 'Modify person id',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE KEY `uk_dataset_id_type_prent_id_name` (`dataset_id`, `type`, `parent_id`, `name`, `del_unique_key`) USING BTREE,
+    UNIQUE KEY `uk_dataset_id_type_parent_id_name` (`dataset_id`, `type`, `parent_id`, `name`, `del_unique_key`) USING BTREE,
     KEY `idx_dataset_id_created_at` (`dataset_id`, `created_at`) USING BTREE
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1

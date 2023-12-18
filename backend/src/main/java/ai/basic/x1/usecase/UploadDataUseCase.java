@@ -830,9 +830,9 @@ public class UploadDataUseCase {
                     var suffix = FileUtil.getSuffix(fileName);
                     suffix = suffix.equalsIgnoreCase(TIFF_SUFFIX) || suffix.equalsIgnoreCase(TIF_SUFFIX) ? "jpg" : suffix;
                     var prefix = FileUtil.getPrefix(fileName);
-                    var largeFile = FileUtil.file(basePath, String.format("%s_%s.%s", prefix, large, suffix));
-                    var mediumFile = FileUtil.file(basePath, String.format("%s_%s.%s", prefix, medium, suffix));
-                    var smallFile = FileUtil.file(basePath, String.format("%s_%s.%s", prefix, small, suffix));
+                    var largeFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, large, suffix));
+                    var mediumFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, medium, suffix));
+                    var smallFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, small, suffix));
                     Thumbnails.of(file).size(largeFileSize, largeFileSize).toFile(largeFile);
                     Thumbnails.of(largeFile).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
                     Thumbnails.of(largeFile).size(smallFileSize, smallFileSize).toFile(smallFile);

@@ -229,12 +229,14 @@ public class DataInfoUseCase {
         if (count > 0) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_OTHERS_ANNOTATING);
         }
-        var dataInfoDeleteLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
-        dataInfoDeleteLambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
-        dataInfoDeleteLambdaQueryWrapper.nested(wq -> wq.in(DataInfo::getId, ids)
+
+        var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+        dataInfoLambdaUpdateWrapper.setSql("del_unique_key=id,is_deleted=1");
+        dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, datasetId);
+        dataInfoLambdaUpdateWrapper.nested(wq -> wq.in(DataInfo::getId, ids)
                 .or()
                 .in(DataInfo::getParentId, ids));
-        dataInfoDAO.remove(dataInfoDeleteLambdaQueryWrapper);
+        dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
