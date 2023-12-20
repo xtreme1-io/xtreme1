@@ -19,7 +19,7 @@
           <Button type="primary" @click="handleUnlock">Unlock</Button>
         </div>
       </div>
-      <TipModal @register="tipRegister" :datasetType="info?.type" />
+      <TipModal @register="tipRegister" :datasetType="(info?.type as datasetTypeEnum )" />
       <ModelRun
         modelType="model"
         @register="registerRunModel"
@@ -80,7 +80,17 @@
           @handleSplite="handleSplite"
           v-model:name="name"
           @resetMoelResult="getMoelResult"
-        />
+        >
+          <template #scene>
+            <div key="scene" class="tool-info" v-if="type === PageTypeEnum.frame">
+              <div class="back-btn" @click="handleBack">
+                <Icon icon="ep:back" size="16" />
+                <span class="text">{{ t('common.back') }}</span>
+              </div>
+              <div class="frame-name">{{ frameDetailName }}</div>
+            </div>
+          </template>
+        </Tools>
         <div
           class="list"
           v-show="list.length > 0"
@@ -104,6 +114,7 @@
               @handleDelete="handleDeleteSingle"
               @handleSingleAnnotate="handleSingleAnnotate"
               @handleAnotateFrame="handleAnotateFrame"
+              @handleChangeType="handleChangeType"
             />
           </ScrollContainer>
         </div>
@@ -115,7 +126,7 @@
           </div>
         </div>
       </div>
-      <div class="sider" :style="info?.type === datasetTypeEnum.TEXT ? { paddingTop: 0 } : null">
+      <div class="sider" :style="info?.type === datasetTypeEnum.TEXT ? { paddingTop: 0 } : ''">
         <div class="header" v-if="info?.type !== datasetTypeEnum.TEXT">
           <div
             @click="sliderType = 'fliter'"
@@ -150,7 +161,7 @@
             <Tabs.TabPane key="Data">
               <template #tab> Data </template>
             </Tabs.TabPane>
-            <Tabs.TabPane key="Result" v-if="info?.type !== datasetTypeEnum.TEXT">
+            <Tabs.TabPane key="Result" v-if="false">
               <template #tab> Result </template>
             </Tabs.TabPane>
           </Tabs>
@@ -348,7 +359,6 @@
   import {
     Select,
     Radio,
-    Input,
     Modal,
     Switch,
     Tabs,
@@ -407,7 +417,7 @@
   const sortWithLabel = ref<string>('Data');
   const confidenceSlider = ref([0, 1]);
   const runRecordId = ref<any>();
-  const type = ref<PageTypeEnum>();
+  const type = ref<PageTypeEnum>(PageTypeEnum.list);
   const { id, dataId } = query;
   const [register, { openModal }] = useModal();
   const [frameRegister, { openModal: openFrameModal }] = useModal();
@@ -480,7 +490,7 @@
   let timeout;
 
   let getMoelResult = async () => {
-    let res = await getMoelResultApi(id);
+    let res = await getMoelResultApi(id as any);
 
     modelRunResultList.value = res.map((item) => {
       let result = {
@@ -609,6 +619,10 @@
 
     if (dataId) {
       params.ids = [dataId].toString();
+    }
+
+    if (type.value == PageTypeEnum.frame) {
+      params.parentId = parentIdScene.value;
     }
 
     try {
@@ -765,17 +779,11 @@
   };
 
   const handleAnnotate = async () => {
-    let templist: DatasetItem[] = [];
-    let type = dataTypeEnum.SINGLE_DATA;
-    const data = unref(list).filter((item) => {
-      return unref(selectedList).some((record) => record === item.id);
-    });
-    if (data.some((item) => item.type === dataTypeEnum.SINGLE_DATA)) {
-      templist = data.filter((item) => item.type === dataTypeEnum.SINGLE_DATA);
-    } else {
-      type = dataTypeEnum.FRAME_SERIES;
-      templist = selectedList.value;
-    }
+    const data = unref(list).filter((item) => unref(selectedList).includes(item.id));
+
+    const type = data[0].type;
+    const templist: DatasetItem[] = data.filter((item) => item.type == type);
+
     const flag = await handleEmpty(templist.map((item) => item.id || item) as string[], type);
     if (!flag) {
       return;
@@ -784,13 +792,16 @@
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
-      dataType: type,
+      operateItemType: type,
     });
     goToTool({ recordId: res }, info.value?.type);
     fixedFetchList();
   };
 
-  const handleSingleAnnotate = async (dataId) => {
+  const handleSingleAnnotate = async (data) => {
+    const dataId = data.id;
+    const dataType = data.type;
+    console.log(dataId, dataType);
     const flag = await handleEmpty([dataId], dataTypeEnum.SINGLE_DATA);
     if (!flag) {
       return;
@@ -798,7 +809,8 @@
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: [dataId],
-      dataType: dataTypeEnum.SINGLE_DATA,
+      // dataType: dataTypeEnum.SINGLE_DATA,
+      operateItemType: dataType,
     });
     getLockedData();
     goToTool({ recordId: res }, info.value?.type);
@@ -813,7 +825,7 @@
           const res = await takeRecordByData({
             datasetId: id as unknown as number,
             dataIds: list,
-            dataType: type,
+            operateItemType: type,
           });
           goToTool({ recordId: res }, info.value?.type);
         },
@@ -823,13 +835,33 @@
   };
 
   const handleAnotateFrame = async (dataId) => {
+    console.log('handleAnotateFrame ==>', dataId);
     const res = await takeRecordByData({
       datasetId: id as unknown as number,
       dataIds: [dataId],
-      dataType: dataTypeEnum.FRAME_SERIES,
+      operateItemType: dataTypeEnum.FRAME_SERIES,
     });
     goToTool({ recordId: res });
     // window.location.reload();
+  };
+  // Open Frame
+  const frameDetailName = ref<string>('');
+  const parentIdScene = ref<number>(0);
+  const handleChangeType = (value, id, name) => {
+    // Frames
+    if (value == dataTypeEnum.FRAME_SERIES) {
+      parentIdScene.value = id;
+      frameDetailName.value = name;
+      type.value = PageTypeEnum.frame;
+      fetchFilterFun(filterForm);
+    }
+    sortWithLabel.value = 'Data';
+  };
+  const handleBack = () => {
+    parentIdScene.value = 0;
+    frameDetailName.value = '';
+    type.value = PageTypeEnum.list;
+    fetchFilterFun(filterForm);
   };
 
   const handleModelRun = async () => {
@@ -838,7 +870,7 @@
 
   const handleRun = async (
     resultModel: Nullable<ResultsModelParam>,
-    dataModel: Nullable<DataModelParam>,
+    _dataModel: Nullable<DataModelParam>,
   ) => {
     let templist: DatasetItem[] = [];
     let type = dataTypeEnum.SINGLE_DATA;
@@ -855,7 +887,7 @@
     const res = await takeRecordByDataModel({
       datasetId: id as unknown as number,
       dataIds: templist.map((item) => item.id || item) as string[],
-      dataType: type,
+      operateItemType: type,
       modelId: modelId.value as number,
       modelCode: selectOptions.value.filter((item) => item.id === modelId.value)[0].modelCode,
       resultFilterParam: resultModel,

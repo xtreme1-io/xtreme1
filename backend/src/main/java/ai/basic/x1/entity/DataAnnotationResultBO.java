@@ -1,6 +1,5 @@
 package ai.basic.x1.entity;
 
-import cn.hutool.json.JSONArray;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,37 +24,37 @@ public class DataAnnotationResultBO {
     private Long id;
 
     /**
-     * 数据ID
+     * Data Id
      */
     private Long dataId;
 
     /**
-     * Classification 属性取值
+     * Classification values
      */
     private List<DataAnnotationClassificationBO> classificationValues;
 
     /**
-     * Data 包含的 Object 列表
+     * Object list
      */
     private List<DataAnnotationObjectBO> objects;
 
     /**
-     * 创建时间
+     * Create time
      */
     private OffsetDateTime createdAt;
 
     /**
-     * 创建人ID
+     * Creator id
      */
     private Long createdBy;
 
     /**
-     * 更新时间
+     *  Update time
      */
     private OffsetDateTime updatedAt;
 
     /**
-     * 更改人ID
+     *  Modify person id
      */
     private Long updatedBy;
 

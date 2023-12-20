@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,9 @@ public class DataAnnotateDTO {
 
     @NotNull(message = "not allow null")
     private Long datasetId;
+
+    @NotNull(message = "not allow null")
+    private ItemTypeEnum operateItemType;
 
     @NotEmpty(message = "not allow null")
     private List<Long> dataIds;

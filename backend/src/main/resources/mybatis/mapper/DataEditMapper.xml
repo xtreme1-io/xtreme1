@@ -6,6 +6,7 @@
     <resultMap id="BaseResultMap" type="ai.basic.x1.adapter.port.dao.mybatis.model.DataEdit">
         <id column="id" property="id" />
         <result column="annotation_record_id" property="annotationRecordId" />
+        <result column="scene_id" property="sceneId" />
         <result column="data_id" property="dataId" />
         <result column="dataset_id" property="datasetId" />
         <result column="model_id" property="modelId" />
@@ -16,7 +17,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id,annotation_record_id, data_id, dataset_id, model_id, model_version, created_by, created_at
+        id,annotation_record_id,scene_id, data_id, dataset_id, model_id, model_version, created_by, created_at
     </sql>
 
 

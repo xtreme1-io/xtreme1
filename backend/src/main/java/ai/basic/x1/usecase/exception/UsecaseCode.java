@@ -46,9 +46,15 @@ public enum UsecaseCode {
 
     DATASET_DATA_EXIST_ANNOTATE("DATASET_DATA_EXIST_ANNOTATE", "The selected data has been annotated by others"),
 
+    DATASET_DATA_EXIST_OTHER_TYPE_ANNOTATE("DATASET_DATA_EXIST_OTHER_TYPE_ANNOTATE", "Other types of annotations exist"),
+
     MODEL_DOES_NOT_EXIST("MODEL_DOES_NOT_EXIST", "Model does not exist"),
     
-    POINT_CLOUD_COMPRESSED_FILE_ERROR("POINT_CLOUD_COMPRESSED_FILE_ERROR", "The format of the compressed package is incorrect. It must contain point_cloud"),
+    POINT_CLOUD_COMPRESSED_FILE_ERROR("POINT_CLOUD_COMPRESSED_FILE_ERROR", "The format of the compressed package is incorrect. It must contain lidar_point_cloud_"),
+
+    IMAGE_COMPRESSED_FILE_ERROR("IMAGE_COMPRESSED_FILE_ERROR", "The format of the compressed package is incorrect. It must contain image_"),
+
+    COMPRESSED_FILE_ERROR("COMPRESSED_FILE_ERROR", "The format of the compressed package is incorrect"),
     COMPRESSED_PACKAGE_EMPTY("COMPRESSED_PACKAGE_EMPTY", "Compressed package is empty"),
     DATASET_CLASS_CLASSIFICATION_EMPTY("DATASET_CLASS_CLASSIFICATION_EMPTY", "You don't have any class or classification for your  annotation,do you want to create them at first?"),
 

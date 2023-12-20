@@ -200,9 +200,10 @@ export default function useCardObject() {
     return size;
   };
   const getImageUrl = (item: any) => {
-    const info = item.content && item.content[0]?.file?.extraInfo;
-    const url = item.content && item.content[0]?.file?.url;
-    const largeThumbnail = item.content && item.content[0]?.file?.largeThumbnail?.url;
+    const file = item.content[0]?.file || item.content[0]?.files?.[0]?.file;
+    const info = file?.extraInfo;
+    const url = file?.url;
+    const largeThumbnail = file?.largeThumbnail?.url;
     return info ? largeThumbnail || url : url;
   };
   const canPreview = (data: any, info: any) => {

@@ -8,6 +8,7 @@ import ai.basic.x1.usecase.exception.UsecaseCode;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import ai.basic.x1.util.DefaultConverter;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,22 +55,28 @@ public class DataEditUseCase {
         var lambdaQueryWrapper = new LambdaQueryWrapper<DataEdit>();
         lambdaQueryWrapper.eq(DataEdit::getAnnotationRecordId, recordId);
         lambdaQueryWrapper.eq(DataEdit::getCreatedBy, userId);
+        lambdaQueryWrapper.orderByAsc(DataEdit::getId);
         var dataEditList = dataEditDAO.list(lambdaQueryWrapper);
         return DefaultConverter.convert(dataEditList, DataEditBO.class);
     }
 
-    public void checkLock(Set<Long> dataIds) {
-        Set<Long> lockedDataIdList = getLockedDataIdList(RequestContextHolder.getContext().getUserInfo().getId());
+    public DataEdit checkLock(Set<Long> dataIds) {
+        List<DataEdit> dataEdits = getLockedDataIdList(RequestContextHolder.getContext().getUserInfo().getId());
+        if (CollectionUtil.isEmpty(dataEdits)) {
+            throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
+        }
+        var lockedDataIdList = dataEdits.stream().map(DataEdit::getDataId).collect(Collectors.toSet());
         if (!lockedDataIdList.containsAll(dataIds)) {
             throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
         }
+        return dataEdits.stream().findFirst().orElse(new DataEdit());
     }
 
-    private Set<Long> getLockedDataIdList(Long userId) {
+    private List<DataEdit> getLockedDataIdList(Long userId) {
         var dataEditQueryWrapper = Wrappers.lambdaQuery(DataEdit.class)
                 .eq(DataEdit::getCreatedBy, userId);
         List<DataEdit> dataEdits = dataEditDAO.list(dataEditQueryWrapper);
-        return dataEdits.stream().map(DataEdit::getDataId).collect(Collectors.toSet());
+        return dataEdits;
     }
 
 }

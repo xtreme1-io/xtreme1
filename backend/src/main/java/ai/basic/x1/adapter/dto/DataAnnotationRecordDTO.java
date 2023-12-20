@@ -1,5 +1,6 @@
 package ai.basic.x1.adapter.dto;
 
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,8 @@ public class DataAnnotationRecordDTO {
      * Dataset id
      */
     private Long datasetId;
+
+    private ItemTypeEnum itemType;
 
     /**
      * Serial number

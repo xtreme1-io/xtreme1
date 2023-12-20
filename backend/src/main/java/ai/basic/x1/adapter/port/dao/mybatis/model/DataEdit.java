@@ -26,6 +26,11 @@ public class DataEdit {
      * Data annotation record id
      */
     private Long annotationRecordId;
+
+    /**
+     * Scene id
+     */
+    private Long sceneId;
     /**
      * Data id
      */

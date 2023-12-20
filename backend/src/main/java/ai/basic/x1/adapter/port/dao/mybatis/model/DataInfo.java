@@ -2,6 +2,7 @@ package ai.basic.x1.adapter.port.dao.mybatis.model;
 
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import ai.basic.x1.entity.enums.SplitTypeEnum;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
@@ -41,10 +42,25 @@ public class DataInfo implements Serializable {
     private String name;
 
     /**
+     * Sort data name
+     */
+    private String orderName;
+
+    /**
      * Content (folder path, version information)
      */
     @TableField(value = "content", typeHandler = JacksonTypeHandler.class)
     private List<FileNode> content;
+
+    /**
+     * Type (indicates continuous frames, non-consecutive frames)
+     */
+    private ItemTypeEnum type;
+
+    /**
+     * Parent ID (Scene ID)
+     */
+    private Long parentId;
 
     /**
      * Data status INVALID,VALID
