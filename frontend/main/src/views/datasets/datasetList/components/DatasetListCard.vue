@@ -72,9 +72,9 @@
       </template>
 
       <div class="text-content">
-        <div class="name flex justify-between">
-          {{ props.data.name }}
-          <div class="more" @click.stop>
+        <div class="flex justify-between gap-16px">
+          <div class="name">{{ props.data.name }}</div>
+          <div class="more w-24px" @click.stop>
             <Icon icon="akar-icons:more-horizontal" />
             <div class="action-list">
               <div
@@ -230,6 +230,7 @@
       // right: 5px;
       // bottom: 0px;
       padding: 0 5px;
+      cursor: pointer;
 
       &:hover{
         .action-list{
@@ -240,8 +241,8 @@
       .action-list{
         display: none;
         position: absolute;
-        padding: 10px 0;
-        right: 0;
+        padding: 8px 0;
+        right: 10px;
         background: #FFFFFF;
         box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
         border-radius: 12px;
@@ -249,14 +250,17 @@
 
         .item{
           cursor: pointer;
-          width: 160px;
-          height: 36px;
-          line-height: 36px;
+          width: 120px;
+          height: 24px;
+          // line-height: 36px;
           display: flex;
           align-items: center;
 
           &:hover{
             background: rgba(87, 204, 239, 0.15);
+          }
+          img {
+            width: 10px;
           }
         }
 
