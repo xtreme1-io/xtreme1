@@ -99,6 +99,11 @@ public interface Constants {
     String IMAGE = "image_";
 
     /**
+     * IMAGE_0
+     */
+    String IMAGE_0 = "image_0";
+
+    /**
      * image_
      */
     String IMAGE_PATTERN = String.format("%s\\d", IMAGE);

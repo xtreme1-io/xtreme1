@@ -275,8 +275,9 @@ public class UploadDataUseCase {
         var fileBOS = fileUseCase.saveBatchFile(userId, Collections.singletonList(fileBO));
         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(Constants.FILE).build();
+        var content = DataInfoBO.FileNodeBO.builder().name(Constants.IMAGE_0).type(Constants.DIRECTORY).files(Collections.singletonList(fileNodeBO)).build();
         var dataInfoBO = dataInfoBOBuilder.name(getFilename(file))
-                .content(Collections.singletonList(fileNodeBO)).splitType(SplitTypeEnum.NOT_SPLIT).build();
+                .content(Collections.singletonList(content)).splitType(SplitTypeEnum.NOT_SPLIT).build();
         var errorBuilder = new StringBuilder();
         try {
             dataInfoDAO.save(DefaultConverter.convert(dataInfoBO, DataInfo.class));
@@ -387,7 +388,42 @@ public class UploadDataUseCase {
             }
             FileUtil.del(respPath);
         }
+        this.addDeviceName(DatasetTypeEnum.IMAGE, dataInfoUploadBO.getSavePath());
         this.commonParseUploadFile(dataInfoUploadBO, imageUploadUseCase::findImageParentList, imageUploadUseCase::getDataNames);
+    }
+
+    public List<String> addDeviceName(DatasetTypeEnum datasetType, String dataPath) {
+        // 图片数据集
+        if (datasetType.equals(DatasetTypeEnum.IMAGE)) {
+            var imageList = imageUploadUseCase.findImageList(dataPath);
+            return addDeviceName(imageList, Constants.IMAGE_0);
+        }
+        return ListUtil.empty();
+    }
+
+    /**
+     * Supplement the name of the upper-level device. If it already exists, do not add it.
+     *
+     * @param fileList   File List
+     * @param deviceName Device name
+     * @return Added file list of device names
+     */
+    private List<String> addDeviceName(List<File> fileList, String deviceName) {
+        List<String> addedDeviceNameList = new ArrayList<>();
+        if (CollUtil.isEmpty(fileList)) {
+            return addedDeviceNameList;
+        }
+        fileList.forEach(file -> {
+            var parentFile = file.getParentFile();
+            if (!parentFile.getName().equals(deviceName)) {
+                String newPath = parentFile.getAbsolutePath() + File.separator + deviceName + File.separator + file.getName();
+                File newFile = new File(newPath);
+                FileUtil.mkdir(newFile);
+                FileUtil.moveContent(file, newFile, true);
+                addedDeviceNameList.add(newFile.getAbsolutePath());
+            }
+        });
+        return addedDeviceNameList;
     }
 
     public void commonParseUploadFile(DataInfoUploadBO dataInfoUploadBO, BiConsumer<String, Set<File>> sceneFileListConsumer,

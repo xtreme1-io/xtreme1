@@ -6,6 +6,8 @@ import cn.hutool.core.util.ReUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -64,4 +66,14 @@ public class ImageUploadUseCase {
             imageParentList.add(file.getParentFile());
         }
     }
+
+    public List<File> findImageList(String path) {
+        // Set the level to 100 to prevent the compressed package from having unlimited levels.
+        return FileUtil.loopFiles(Paths.get(path), 100, imageFilter);
+    }
+
+    private final FileFilter imageFilter = file -> {
+        // if the file extension is image return true, else false
+        return Constants.IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath()));
+    };
 }
