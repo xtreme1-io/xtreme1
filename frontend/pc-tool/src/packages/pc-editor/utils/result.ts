@@ -148,7 +148,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         if (!obj.classId && obj.classType) {
             classConfig = editor.getClassType(obj.classType);
         }
-        userData.id = obj.id;
+        userData.id = obj.frontId || obj.id;
         userData.backId = obj.backId;
         // userData.invisibleFlag = obj.invisibleFlag;
         // userData.refId = obj.refId;
@@ -167,23 +167,21 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
         userData.sourceType = obj.sourceType;
         userData.attrs = obj.attrs || {};
         userData.pointN = obj.pointN || 0;
+        createUtils.setIdInfo(editor, userData);
         if (objType === ObjectType.TYPE_3D_BOX || objType === ObjectType.TYPE_3D) {
             position.set(obj.center3D.x, obj.center3D.y, obj.center3D.z);
             rotation.set(obj.rotation3D.x, obj.rotation3D.y, obj.rotation3D.z);
             scale.set(obj.size3D.x, obj.size3D.y, obj.size3D.z);
 
             let box = createUtils.createAnnotate3D(editor, position, scale, rotation, userData);
-            if (obj.frontId) box.uuid = obj.frontId;
+            // if (obj.frontId) box.uuid = obj.frontId;
             if (classConfig) {
                 box.color.setStyle(classConfig.color);
                 // box.editConfig.resize = !userData.isStandard && userData.resultType !== Const.Fixed;
             }
             bindInfo(box, obj);
             annotates.push(box);
-        } else if (
-            objType === ObjectType.TYPE_2D_RECT ||
-            objType === ObjectType.TYPE_RECT
-        ) {
+        } else if (objType === ObjectType.TYPE_2D_RECT || objType === ObjectType.TYPE_RECT) {
             let bbox = getBBox(obj.points as any);
             center.set((bbox.xMax + bbox.xMin) / 2, (bbox.yMax + bbox.yMin) / 2);
             size.set(bbox.xMax - bbox.xMin, bbox.yMax - bbox.yMin);
@@ -193,10 +191,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
             if (classConfig) rect.color = classConfig.color;
             bindInfo(rect, obj);
             annotates.push(rect);
-        } else if (
-            objType === ObjectType.TYPE_2D_BOX ||
-            objType === ObjectType.TYPE_BOX2D
-        ) {
+        } else if (objType === ObjectType.TYPE_2D_BOX || objType === ObjectType.TYPE_BOX2D) {
             let positions1 = [] as THREE.Vector2[];
             let positions2 = [] as THREE.Vector2[];
             obj.points.forEach((e: any, index: number) => {
@@ -212,7 +207,7 @@ export function convertObject2Annotate(objects: IObject[], editor: Editor) {
                 positions2 as any,
                 userData,
             );
-            if (obj.frontId) box2d.uuid = obj.frontId;
+            // if (obj.frontId) box2d.uuid = obj.frontId;
             box2d.viewId = `${editor.state.config.imgViewPrefix}-${obj.viewIndex}`;
             if (classConfig) box2d.color = classConfig.color;
             bindInfo(box2d, obj);

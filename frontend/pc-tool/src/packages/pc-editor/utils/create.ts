@@ -29,6 +29,9 @@ export function createAnnotate3D(
     object.matrixAutoUpdate = true;
     object.updateMatrixWorld();
     // object.dashed = !!userData.invisibleFlag;
+    if (userData.id) {
+        object.uuid = userData.id;
+    }
 
     // setIdInfo(editor, userData);
     return object;

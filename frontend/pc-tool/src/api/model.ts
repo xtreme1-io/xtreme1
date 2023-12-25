@@ -1,6 +1,6 @@
 import { get, post } from './base';
 import { IModel } from 'pc-editor';
-
+import { utils } from 'pc-editor';
 export async function getModelList() {
     let url = '/api/model/list';
     let data = await get(url);
@@ -32,12 +32,11 @@ export async function clearModel(dataIds: number[], recordId: string) {
 
 export async function getModelResult(dataIds: string[], recordId: string) {
     let url = '/api/data/modelAnnotationResult';
-    let args = [];
-    dataIds.forEach((e) => {
-        args.push(`dataIds=${e}`);
+    const query = utils.queryStr({
+        serialNo: recordId,
+        dataIds: dataIds,
     });
-    args.push(`serialNo=${recordId}`);
-    return await get(`${url}?${args.join('&')}`);
+    return await get(`${url}?${query}`);
 }
 
 export async function runModel(config: any) {

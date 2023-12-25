@@ -66,7 +66,9 @@ public class DataEditUseCase {
             throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
         }
         var lockedDataIdList = dataEdits.stream().map(DataEdit::getDataId).collect(Collectors.toSet());
-        if (!lockedDataIdList.containsAll(dataIds)) {
+        var lockedSceneIdList = dataEdits.stream().filter(dataEdit -> ObjectUtil.isNotNull(dataEdit.getSceneId()))
+                .map(DataEdit::getSceneId).collect(Collectors.toSet());
+        if (!lockedDataIdList.containsAll(dataIds) && !lockedSceneIdList.containsAll(dataIds)) {
             throw new UsecaseException(UsecaseCode.DATASET__DATA__DATA_HAS_BEEN_UNLOCKED);
         }
         return dataEdits.stream().findFirst().orElse(new DataEdit());

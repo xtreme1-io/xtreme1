@@ -1,4 +1,13 @@
-import { MainRenderView, CreateAction, Image2DRenderView, Box, Points } from 'pc-render';
+import {
+    MainRenderView,
+    CreateAction,
+    Image2DRenderView,
+    Box,
+    Points,
+    Event,
+    utils,
+    ITransform,
+} from 'pc-render';
 import * as THREE from 'three';
 import * as _ from 'lodash';
 import Editor from '../../../Editor';
@@ -6,6 +15,47 @@ import { define } from '../define';
 import { getTransformFrom3Point, getMiniBox, getMiniBox1 } from '../../../utils';
 import { IAnnotationInfo, StatusType, IUserData, Const, IObject } from '../../../type';
 import EditorEvent from '../../../config/event';
+
+function showLoading(position: THREE.Vector3, view: MainRenderView) {
+    const wrap = document.createElement('div');
+    wrap.className = 'loading-3d-wrap';
+    const iconDiv = document.createElement('div');
+    const icon = document.createElement('i');
+    const msg = document.createElement('div');
+    msg.className = 'loading-msg';
+    icon.className = 'iconfont icon-loading loading create-status';
+    iconDiv.appendChild(msg);
+    iconDiv.appendChild(icon);
+    wrap.appendChild(iconDiv);
+    const update = () => {
+        const pos = new THREE.Vector3().copy(position);
+        const camera = view.camera;
+        const matrix = utils.get(THREE.Matrix4, 1);
+        matrix.copy(camera.projectionMatrix);
+        matrix.multiply(camera.matrixWorldInverse);
+        pos.applyMatrix4(matrix);
+        const invisible = Math.abs(pos.z) > 1 || pos.x < -1 || pos.x > 1 || pos.y > 1 || pos.y < -1;
+        iconDiv.style.display = invisible ? 'none' : 'block';
+        pos.x = ((pos.x + 1) / 2) * view.width;
+        pos.y = (-(pos.y - 1) / 2) * view.height;
+        iconDiv.style.transform = `translate(${pos.x - 8}px, ${pos.y + 8}px) translateY(-100%)`;
+    };
+    const init = () => {
+        view.container.appendChild(wrap);
+        view.addEventListener(Event.RENDER_AFTER, update);
+        update();
+    };
+
+    const clear = () => {
+        view.removeEventListener(Event.RENDER_AFTER, update);
+        view.container.removeChild(wrap);
+    };
+    const updateMsg = (message: string) => {
+        msg.innerText = message;
+    };
+    init();
+    return { clear, updateMsg };
+}
 
 export const createObjectWith3 = define({
     valid(editor: Editor) {
@@ -24,59 +74,134 @@ export const createObjectWith3 = define({
             this.action = action;
 
             editor.state.status = StatusType.Create;
-
+            const config = editor.state.config;
+            const isAIbox = config.boxMethod === 'AI';
+            let points = editor.pc.groupPoints.children[0] as Points;
+            let positions = points.geometry.attributes['position'] as THREE.BufferAttribute;
             return new Promise<any>((resolve) => {
-                action.start({ type: 'points-3' }, (data: THREE.Vector2[]) => {
-                    // console.log(data);
-                    let projectPos = data.map((e) => view.canvasToWorld(e));
-                    let transform = getTransformFrom3Point(projectPos);
-                    // console.log(projectPos);
+                action.start(
+                    {
+                        type: isAIbox ? 'box' : 'points-3',
+                        startClick: !isAIbox,
+                        startMouseDown: isAIbox,
+                    },
+                    async (data: THREE.Vector2[]) => {
+                        let transform: Required<
+                            Pick<ITransform, 'position' | 'rotation' | 'scale'>
+                        >;
+                        if (isAIbox) {
+                            const { clear, updateMsg } = showLoading(
+                                view.canvasToWorld(
+                                    new THREE.Vector2(
+                                        (data[1].x + data[0].x) / 2,
+                                        (data[1].y + data[0].y) / 2,
+                                    ),
+                                ),
+                                view,
+                            );
+                            const createTask = editor.taskManager.createTask;
+                            const projectPos = data.map((e) => view.getProjectPos(e));
+                            const worldPos = data.map((e) => view.canvasToWorld(e));
+                            const headAngle = Math.atan2(
+                                worldPos[1].y - worldPos[0].y,
+                                worldPos[1].x - worldPos[0].x,
+                            );
+                            const matrix = new THREE.Matrix4();
+                            matrix.copy(view.camera.projectionMatrix);
+                            matrix.multiply(view.camera.matrixWorldInverse);
+                            const taskData = await createTask
+                                .create(
+                                    positions,
+                                    projectPos,
+                                    matrix,
+                                    headAngle,
+                                    true,
+                                    config.heightRange,
+                                )
+                                .catch(() => {
+                                    return { data: undefined, frameId: undefined };
+                                });
+                            const result = taskData.data as Required<ITransform>;
+                            const frameId = taskData.frameId;
+                            if (result && frameId == editor.getCurrentFrame().id) {
+                                transform = {
+                                    position: new THREE.Vector3().copy(result.position),
+                                    scale: new THREE.Vector3().copy(result.scale),
+                                    rotation: new THREE.Euler().copy(result.rotation),
+                                };
+                            } else {
+                                data.splice(1, -1, new THREE.Vector2(data[0].x, data[1].y));
+                                const _projectPos = data.map((e) => view.canvasToWorld(e));
+                                transform = getTransformFrom3Point(_projectPos);
+                            }
+                            clear();
+                        } else {
+                            let projectPos = data.map((e) => view.canvasToWorld(e));
+                            transform = getTransformFrom3Point(projectPos);
+                            transform.scale.z = 2;
+                            transform.position.z = editor.pc.ground.plane.constant + 1;
 
-                    transform.scale.z = 2;
-                    transform.position.z = editor.pc.ground.plane.constant + 1;
-                    // transform.position.z = 1;
+                            getMiniBox1(transform, positions, editor.state.config.heightRange);
+                        }
 
-                    let points = editor.pc.groupPoints.children[0] as Points;
-                    let positions = points.geometry.attributes['position'] as THREE.BufferAttribute;
-                    getMiniBox1(transform, positions, editor.state.config.heightRange);
-                    // getMiniBox(transform, positions);
+                        transform.scale.x = Math.max(0.2, transform.scale.x);
+                        transform.scale.y = Math.max(0.2, transform.scale.y);
+                        transform.scale.z = Math.max(0.2, transform.scale.z);
+                        // debugger;
 
-                    transform.scale.x = Math.max(0.2, transform.scale.x);
-                    transform.scale.y = Math.max(0.2, transform.scale.y);
-                    transform.scale.z = Math.max(0.2, transform.scale.z);
-                    // debugger;
+                        let userData = {
+                            resultStatus: Const.True_Value,
+                            resultType: Const.Dynamic,
+                        } as IUserData;
 
-                    let userData = {} as IUserData;
-                    // userData.resultType = Const.Dynamic;
-                    // userData.resultStatus = Const.True_Value;
+                        const classConfig = editor.getClassType(editor.state.currentClass);
 
-                    let box = editor.createAnnotate3D(
-                        transform.position,
-                        transform.scale,
-                        transform.rotation,
-                        userData,
-                    );
+                        if (classConfig) {
+                            userData.classType = classConfig.name;
+                            userData.classId = classConfig.id;
+                        }
+                        if (editor.currentTrack) {
+                            const object3d = editor.pc.getAnnotate3D().find((e) => {
+                                return (
+                                    e instanceof Box &&
+                                    !(e as any).isHolder &&
+                                    e.userData.trackId == editor.currentTrack
+                                );
+                            });
+                            if (!object3d) {
+                                userData.trackId = editor.currentTrack as string;
+                                userData.trackName = editor.currentTrackName;
+                            }
+                        }
 
-                    let trackObject: Partial<IObject> = {
-                        trackId: userData.trackId,
-                        trackName: userData.trackName,
-                        // resultType: userData.resultType,
-                        // resultStatus: userData.resultStatus,
-                    };
+                        let box = editor.createAnnotate3D(
+                            transform.position,
+                            transform.scale,
+                            transform.rotation,
+                            userData,
+                        );
 
-                    editor.state.config.showClassView = true;
+                        let trackObject: Partial<IObject> = {
+                            trackId: userData.trackId,
+                            trackName: userData.trackName,
+                            classType: userData.classType,
+                            classId: userData.classId,
+                        };
 
-                    editor.cmdManager.withGroup(() => {
-                        editor.cmdManager.execute('add-object', box);
-                        // if (editor.state.isSeriesFrame) {
-                        //     editor.cmdManager.execute('add-track', trackObject);
-                        // }
+                        editor.state.config.showClassView = true;
 
-                        editor.cmdManager.execute('select-object', box);
-                    });
+                        editor.cmdManager.withGroup(() => {
+                            editor.cmdManager.execute('add-object', box);
+                            if (editor.state.isSeriesFrame) {
+                                editor.cmdManager.execute('add-track', trackObject);
+                            }
 
-                    resolve(box);
-                });
+                            editor.cmdManager.execute('select-object', box);
+                        });
+
+                        resolve(box);
+                    },
+                );
             });
         }
     },

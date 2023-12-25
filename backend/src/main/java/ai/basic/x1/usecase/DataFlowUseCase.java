@@ -44,14 +44,14 @@ public class DataFlowUseCase {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void submit(Long dataId) {
-        var dataEdit = dataEditUseCase.checkLock(Sets.newHashSet(dataId));
-        DataStatusEnum status = Optional.ofNullable(dataInfoDAO.getById(dataId)).orElseThrow().getStatus();
+    public void submit(Long itemId) {
+        var dataEdit = dataEditUseCase.checkLock(Sets.newHashSet(itemId));
+        DataStatusEnum status = Optional.ofNullable(dataInfoDAO.getById(itemId)).orElseThrow().getStatus();
         DataAnnotationStatusEnum annotationStatus = DataAnnotationStatusEnum.INVALID;
         if (DataStatusEnum.VALID.equals(status)) {
             annotationStatus = DataAnnotationStatusEnum.ANNOTATED;
         }
-        dataInfoDAO.updateById(DataInfo.builder().id(dataId).annotationStatus(annotationStatus).build());
+        dataInfoDAO.updateById(DataInfo.builder().id(itemId).annotationStatus(annotationStatus).build());
         var sceneId = dataEdit.getSceneId();
         if (ObjectUtil.isNotNull(sceneId) && DataStatusEnum.INVALID.equals(status)) {
             dataInfoDAO.updateById(DataInfo.builder().id(sceneId).annotationStatus(DataAnnotationStatusEnum.INVALID).build());

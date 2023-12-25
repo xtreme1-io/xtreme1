@@ -11,7 +11,7 @@
                 <i class="iconfont icon-a-Jobinformation task-header-icon"></i>
             </div>
         </div>
-        <div class="item-wrap data-index" v-if="state.frames.length > 0">
+        <div class="item-wrap data-index" v-if="!state.isSeriesFrame && state.frames.length > 0">
             <LeftOutlined
                 :class="state.frameIndex > 0 && !blocking ? 'icon' : 'icon disable'"
                 @click="state.frameIndex > 0 && !blocking ? onPre() : null"
@@ -53,7 +53,7 @@
                 <div class="title">{{ $$('btn-save') }}</div>
             </a-button>
             <!-- shortcut -->
-            <a-button class="basic-btn" size="large" @click="onHelp">
+            <a-button class="basic-btn" size="large" :disabled="blocking" @click="onHelp">
                 <template #icon
                     ><i style="font-size: 16px" class="iconfont icon-help"></i
                 ></template>
@@ -98,7 +98,7 @@
                 </a-button>
                 <a-button
                     class="basic skip"
-                    v-show="canEdit()"
+                    v-show="canEdit() && !state.isSeriesFrame"
                     @click="onToggleSkip"
                     :disabled="blocking"
                 >

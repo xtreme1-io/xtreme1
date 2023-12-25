@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { AnnotateType } from '../type';
 import { isPointInRect } from '../utils';
+import { ObjectType } from 'pc-editor';
 
 export class Object2D {
     connectId: number = -1;
@@ -12,6 +13,7 @@ export class Object2D {
     annotateType: AnnotateType;
     position: any;
     color: string;
+    objectType = ObjectType.TYPE_2D_RECT;
     constructor() {
         this.userData = {};
         this.annotateType = AnnotateType.ANNOTATE_2D;
@@ -29,6 +31,7 @@ let temp2 = new THREE.Vector2();
 export class Rect extends Object2D {
     center: THREE.Vector2 = new THREE.Vector2();
     size: THREE.Vector2 = new THREE.Vector2();
+    objectType = ObjectType.TYPE_2D_RECT;
     constructor(center?: THREE.Vector2, size?: THREE.Vector2) {
         super();
         if (center) this.center.copy(center);
@@ -49,6 +52,7 @@ let tempVector2Of4 = getVector2Of4();
 export class Box2D extends Object2D {
     positions1: Vector2Of4 = getVector2Of4();
     positions2: Vector2Of4 = getVector2Of4();
+    objectType = ObjectType.TYPE_2D_BOX;
     constructor(positions1?: Vector2Of4, positions2?: Vector2Of4) {
         super();
 

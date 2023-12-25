@@ -275,6 +275,9 @@ public class UploadDataUseCase {
         var fileBOS = fileUseCase.saveBatchFile(userId, Collections.singletonList(fileBO));
         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(Constants.FILE).build();
+        var dataName = getFilename(file);
+        var dataInfoBO = dataInfoBOBuilder.name(dataName).orderName(NaturalSortUtil.convert(dataName))
+                .content(Collections.singletonList(fileNodeBO)).splitType(SplitTypeEnum.NOT_SPLIT).build();
         var content = DataInfoBO.FileNodeBO.builder().name(Constants.IMAGE_0).type(Constants.DIRECTORY).files(Collections.singletonList(fileNodeBO)).build();
         var dataInfoBO = dataInfoBOBuilder.name(getFilename(file)).orderName(NaturalSortUtil.convert(getFilename(file)))
                 .content(Collections.singletonList(content)).splitType(SplitTypeEnum.NOT_SPLIT).build();
@@ -343,7 +346,8 @@ public class UploadDataUseCase {
                         var file = FileUtil.file(tempPath + fileBO.getPath().replace(rootPath, ""));
                         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                                 .fileId(fileBO.getId()).type(FILE).build();
-                        var dataInfoBO = dataInfoBOBuilder.name(getFilename(file)).content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
+                        var dataName = getFilename(file);
+                        var dataInfoBO = dataInfoBOBuilder.name(dataName).orderName(NaturalSortUtil.convert(dataName)).content(Collections.singletonList(fileNodeBO)).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
                         dataInfoBOList.add(dataInfoBO);
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
@@ -491,7 +495,7 @@ public class UploadDataUseCase {
                             handleDataResult(sceneFile, dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                             var fileNodeList = this.assembleContent(dataFiles, rootPath, dataInfoUploadBO);
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
-                            var dataInfoBO = dataInfoBOBuilder.name(dataName).content(fileNodeList).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
+                            var dataInfoBO = dataInfoBOBuilder.name(dataName).orderName(NaturalSortUtil.convert(dataName)).content(fileNodeList).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
                             dataInfoBOList.add(dataInfoBO);
                         }
                     });
@@ -601,7 +605,7 @@ public class UploadDataUseCase {
             boo = Constants.IMAGE_DATA_TYPE.contains(mimeType);
         } else {
             boo = Constants.IMAGE_DATA_TYPE.contains(mimeType) || Constants.PCD_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(filename)) ||
-                    Constants.JSON_SUFFIX.equalsIgnoreCase(FileUtil.getSuffix(filename));
+                    file.getAbsolutePath().toUpperCase().endsWith(Constants.JSON_SUFFIX);
         }
         if (!boo) {
             log.warn("this format file is not supported,filePath:{}", file.getAbsolutePath());

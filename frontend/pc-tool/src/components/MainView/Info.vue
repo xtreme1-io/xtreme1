@@ -41,7 +41,7 @@
     import { formatNumber } from '../../utils';
     import { utils } from 'pc-editor';
     // import { CloseCircleOutlined } from '@ant-design/icons-vue';
-    import { IUserData, StatusType } from 'pc-editor';
+    import { IUserData, StatusType, Event as EditorEvent } from 'pc-editor';
     import * as locale from './lang';
     import Setting from './setting.vue';
 
@@ -137,13 +137,13 @@
     onMounted(() => {
         editor.pc.addEventListener(Event.OBJECT_TRANSFORM, update);
         editor.pc.addEventListener(Event.SELECT, onSelect);
-        editor.pc.addEventListener(Event.USER_DATA_CHANGE, update);
+        editor.addEventListener(EditorEvent.ANNOTATE_CHANGE, update);
     });
 
     onBeforeUnmount(() => {
         editor.pc.removeEventListener(Event.OBJECT_TRANSFORM, update);
         editor.pc.removeEventListener(Event.SELECT, onSelect);
-        editor.pc.removeEventListener(Event.USER_DATA_CHANGE, update);
+        editor.removeEventListener(EditorEvent.ANNOTATE_CHANGE, update);
     });
 </script>
 

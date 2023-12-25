@@ -229,12 +229,14 @@ public class DataInfoUseCase {
         if (count > 0) {
             throw new UsecaseException(UsecaseCode.DATASET_DATA_OTHERS_ANNOTATING);
         }
-        var dataInfoDeleteLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
-        dataInfoDeleteLambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
-        dataInfoDeleteLambdaQueryWrapper.nested(wq -> wq.in(DataInfo::getId, ids)
+
+        var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class);
+        dataInfoLambdaUpdateWrapper.setSql("del_unique_key=id,is_deleted=1");
+        dataInfoLambdaUpdateWrapper.eq(DataInfo::getDatasetId, datasetId);
+        dataInfoLambdaUpdateWrapper.nested(wq -> wq.in(DataInfo::getId, ids)
                 .or()
                 .in(DataInfo::getParentId, ids));
-        dataInfoDAO.remove(dataInfoDeleteLambdaQueryWrapper);
+        dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
 
         executorService.execute(Objects.requireNonNull(TtlRunnable.get(() -> {
             var dataAnnotationObjectLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataAnnotationObject.class);
@@ -652,13 +654,25 @@ public class DataInfoUseCase {
         for (var dataInfo : dataInfos) {
             var dataEdit = dataEditBuilder.dataId(dataInfo.getId()).sceneId(dataInfo.getParentId()).build();
             dataEditSubList.add(dataEdit);
-            if ((i % BATCH_SIZE == 0) || i == dataIds.size()) {
+            if ((i % BATCH_SIZE == 0) || i == dataInfos.size()) {
                 insertCount += dataEditDAO.getBaseMapper().insertIgnoreBatch(dataEditSubList);
                 dataEditSubList.clear();
             }
             i++;
         }
         return insertCount;
+    }
+
+    public Map<Long, List<Long>> getDataIdBySceneIds(Long datasetId, List<Long> sceneIds) {
+        var dataInfoList = getDataInfoBySceneIds(datasetId, sceneIds);
+        var sceneDataMap = new HashMap<Long, List<Long>>();
+        if (CollUtil.isEmpty(dataInfoList)) {
+            return sceneDataMap;
+
+        }
+        dataInfoList.forEach(dataInfo -> sceneDataMap.computeIfAbsent(dataInfo.getParentId(),
+                k -> new ArrayList<>()).add(dataInfo.getId()));
+        return sceneDataMap;
     }
 
     public List<DataInfoBO> getDataInfoBySceneIds(Long datasetId, List<Long> sceneIds) {
@@ -697,6 +711,10 @@ public class DataInfoUseCase {
     private void batchInsertModelDataResult(DataPreAnnotationBO dataPreAnnotationBO, ModelBO modelBO, Long userId, Long serialNo) {
         var modelDataResultList = new ArrayList<ModelDataResult>();
         var dataIds = dataPreAnnotationBO.getDataIds();
+        if (ItemTypeEnum.SCENE.equals(dataPreAnnotationBO.getOperateItemType())) {
+            var dataInfos = getDataInfoBySceneIds(dataPreAnnotationBO.getDatasetId(), dataIds);
+            dataIds = dataInfos.stream().map(DataInfoBO::getId).collect(Collectors.toList());
+        }
         var modelMessageBO = DefaultConverter.convert(dataPreAnnotationBO, ModelMessageBO.class);
         modelMessageBO.setCreatedBy(userId);
         modelMessageBO.setModelSerialNo(serialNo);

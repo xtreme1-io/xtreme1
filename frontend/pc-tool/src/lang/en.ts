@@ -16,6 +16,7 @@ const en = {
     'track-no-data': "No Tracking object found, please check your objects' location and direction",
     'track-error': 'Track Error',
     'track-ok': 'Track Success',
+    'copy-ok': 'Copy Success',
 
     // info
     'load-point': 'Loading....',

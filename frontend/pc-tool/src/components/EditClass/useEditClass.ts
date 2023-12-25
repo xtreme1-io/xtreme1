@@ -339,6 +339,7 @@ export default function useEditClass() {
 
         // let classConfig = editor.getClassType(state.classType);
         // let size3D = undefined;
+        const { isSeriesFrame, frameIndex, frames } = editor.state;
         let classConfig = editor.getClassType(state.classType);
         let userData = {
             classType: classConfig?.name,
@@ -347,10 +348,18 @@ export default function useEditClass() {
             resultStatus: Const.True_Value,
         } as IUserData;
 
-        editor.cmdManager.execute('update-object-user-data', {
-            objects: tempObjects,
+        editor.cmdManager.withGroup(() => {
+            editor.trackManager.setTrackData(state.trackId, {
+                userData: { classType: userData.classType, classId: userData.classId },
+            });
 
-            data: userData,
+            editor.trackManager.setDataByTrackId(
+                state.trackId,
+                {
+                    userData: userData,
+                },
+                isSeriesFrame ? frames : [editor.getCurrentFrame()],
+            );
         });
 
         state.resultStatus = Const.True_Value;
