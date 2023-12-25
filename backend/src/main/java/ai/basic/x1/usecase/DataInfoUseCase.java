@@ -30,13 +30,11 @@ import com.alibaba.ttl.TtlRunnable;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -45,7 +43,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static ai.basic.x1.entity.enums.DatasetTypeEnum.IMAGE;
-import static ai.basic.x1.entity.enums.DatasetTypeEnum.TEXT;
 import static ai.basic.x1.usecase.exception.UsecaseCode.DATASET_NOT_FOUND;
 import static ai.basic.x1.usecase.exception.UsecaseCode.DEFAULT_DATASET_NOT_FOUND;
 import static ai.basic.x1.util.Constants.*;

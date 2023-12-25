@@ -276,10 +276,8 @@ public class UploadDataUseCase {
         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                 .fileId(CollectionUtil.getFirst(fileBOS).getId()).type(Constants.FILE).build();
         var dataName = getFilename(file);
-        var dataInfoBO = dataInfoBOBuilder.name(dataName).orderName(NaturalSortUtil.convert(dataName))
-                .content(Collections.singletonList(fileNodeBO)).splitType(SplitTypeEnum.NOT_SPLIT).build();
         var content = DataInfoBO.FileNodeBO.builder().name(Constants.IMAGE_0).type(Constants.DIRECTORY).files(Collections.singletonList(fileNodeBO)).build();
-        var dataInfoBO = dataInfoBOBuilder.name(getFilename(file)).orderName(NaturalSortUtil.convert(getFilename(file)))
+        var dataInfoBO = dataInfoBOBuilder.name(dataName).orderName(NaturalSortUtil.convert(getFilename(file)))
                 .content(Collections.singletonList(content)).splitType(SplitTypeEnum.NOT_SPLIT).build();
         var errorBuilder = new StringBuilder();
         try {
