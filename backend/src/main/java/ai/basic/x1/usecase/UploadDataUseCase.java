@@ -864,12 +864,13 @@ public class UploadDataUseCase {
                     var suffix = FileUtil.getSuffix(fileName);
                     suffix = suffix.equalsIgnoreCase(TIFF_SUFFIX) || suffix.equalsIgnoreCase(TIF_SUFFIX) ? "jpg" : suffix;
                     var prefix = FileUtil.getPrefix(fileName);
-                    var largeFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, large, suffix));
-                    var mediumFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, medium, suffix));
-                    var smallFile = FileUtil.file(tempPath, String.format("%s_%s.%s", prefix, small, suffix));
+                    var baseSavePath = file.getParentFile().getAbsolutePath();
+                    var largeFile = FileUtil.file(baseSavePath, String.format("%s_%s.%s", prefix, large, suffix));
+                    var mediumFile = FileUtil.file(baseSavePath, String.format("%s_%s.%s", prefix, medium, suffix));
+                    var smallFile = FileUtil.file(baseSavePath, String.format("%s_%s.%s", prefix, small, suffix));
                     Thumbnails.of(file).size(largeFileSize, largeFileSize).toFile(largeFile);
-                    Thumbnails.of(file).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
-                    Thumbnails.of(file).size(smallFileSize, smallFileSize).toFile(smallFile);
+                    Thumbnails.of(largeFile).size(mediumFileSize, mediumFileSize).toFile(mediumFile);
+                    Thumbnails.of(largeFile).size(smallFileSize, smallFileSize).toFile(smallFile);
                     // large thumbnail
                     var largePath = String.format("%s%s", basePath, FileUtil.getName(largeFile));
                     var largeFileBO = fileBOBuilder.path(largePath).relation(LARGE_THUMBTHUMBNAIL).relationId(fileBO.getId()).build();
