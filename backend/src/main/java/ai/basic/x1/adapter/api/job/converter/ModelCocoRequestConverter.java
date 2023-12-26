@@ -7,6 +7,8 @@ import cn.hutool.core.util.StrUtil;
 
 import java.util.List;
 
+import static ai.basic.x1.util.Constants.FILE;
+
 /**
  * @author zhujh
  */
@@ -22,7 +24,13 @@ public class ModelCocoRequestConverter {
         if (CollUtil.isEmpty(fileNodes)) {
             throw new IllegalArgumentException("file is not found");
         }
-        String url = fileNodes.get(0).getFile().getInternalUrl();
+        var fileNodeBO = fileNodes.get(0);
+        String url;
+        if (fileNodeBO.getType().equals(FILE)) {
+            url = fileNodeBO.getFile().getInternalUrl();
+        } else {
+            url = fileNodeBO.getFiles().get(0).getFile().getInternalUrl();
+        }
         if (StrUtil.isEmpty(url)) {
             throw new IllegalArgumentException("file url is empty");
         }
