@@ -167,11 +167,18 @@ export default function useHeader() {
         }
     }
     async function onSubmit() {
-        let { frameIndex, frames } = editor.state;
+        let { frameIndex, frames, isSeriesFrame } = editor.state;
+        const seriesFrameId = editor.bsState.seriesFrameId;
         let frame = frames[frameIndex];
 
         let objects = editor.dataManager.getFrameObject(frame.id) || [];
-
+        if (isSeriesFrame) {
+            objects = [];
+            frames.forEach((f) => {
+                const objs = editor.dataManager.getFrameObject(f.id) || [];
+                objects.push(...objs);
+            });
+        }
         let continueFlag = true;
         if (frame.dataStatus === 'VALID' && objects.length === 0) {
             await editor
@@ -193,9 +200,19 @@ export default function useHeader() {
         // if (frame.skipped) return;
         bsState.submitting = true;
         try {
-            await editor.saveObject([frame], true);
-            await api.submitData(frame.id);
-            await updateDataStatus(frame);
+            if (isSeriesFrame) {
+                editor.saveObject(frames, true);
+                await api.submitData(seriesFrameId ?? '');
+                // await updateDataStatus(frames);
+                unlockData();
+                bsState.submitting = false;
+                return;
+            } else {
+                await editor.saveObject([frame], true);
+                await api.submitData(frame.id);
+                await updateDataStatus([frame]);
+            }
+
             editor.showMsg('success', 'Submit Success');
         } catch (error: any) {
             editor.handleErr(error, 'Operation Error');
@@ -226,14 +243,15 @@ export default function useHeader() {
         }
     }
 
-    async function updateDataStatus(frame: IFrame) {
-        let statusMap = await api.getDataStatus([frame.id]);
-
-        if (statusMap[frame.id]) {
-            let status = statusMap[frame.id];
-            frame.dataStatus = status.status || 'VALID';
-            frame.annotationStatus = status.annotationStatus || 'NOT_ANNOTATED';
-        }
+    async function updateDataStatus(frames: IFrame[]) {
+        let statusMap = await api.getDataStatus(frames.map((e) => e.id));
+        frames.forEach((frame) => {
+            if (statusMap[frame.id]) {
+                let status = statusMap[frame.id];
+                frame.dataStatus = status.status || 'VALID';
+                frame.annotationStatus = status.annotationStatus || 'NOT_ANNOTATED';
+            }
+        });
     }
 
     function nextNotAnnotate() {
@@ -251,9 +269,14 @@ export default function useHeader() {
         let frame = editor.getCurrentFrame();
         let config = {
             dataIds: [frame.id],
-            dataType: 'SINGLE_DATA',
+            operateItemType: 'SINGLE_DATA',
             datasetId: bsState.datasetId,
         };
+
+        if (editor.state.isSeriesFrame) {
+            config.dataIds = [bsState.seriesFrameId ?? ''];
+            config.operateItemType = 'SCENE';
+        }
 
         bsState.modifying = true;
         try {

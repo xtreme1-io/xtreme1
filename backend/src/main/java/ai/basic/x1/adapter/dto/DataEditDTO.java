@@ -28,6 +28,11 @@ public class DataEditDTO {
    private Long  annotationRecordId;
 
    /**
+    * Scene id
+    */
+   private Long sceneId;
+
+   /**
     * Data id
     */
    private Long  dataId;

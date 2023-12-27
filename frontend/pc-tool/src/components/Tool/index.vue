@@ -41,7 +41,7 @@
     import useTool from './useTool';
     import { useInjectEditor } from '../../state';
     import { StatusType } from 'pc-editor';
-import * as locale from './lang';
+    import * as locale from './lang';
 
     let editor = useInjectEditor();
     let $$ = editor.bindLocale(locale);
@@ -205,6 +205,29 @@ import * as locale from './lang';
         .ant-checkbox-wrapper {
             font-size: 12px;
             color: #bec1ca;
+        }
+    }
+    .tool-btn-tooltip {
+        .tool-btn {
+            display: flex;
+            margin: 4px;
+            border-radius: 2px;
+            justify-content: center;
+            align-items: center;
+            width: 30px;
+            height: 30px;
+            background: #1e1f22;
+            color: #bec1ca;
+
+            &:hover {
+                background: #224b77;
+                color: #dee5eb;
+            }
+
+            &.active {
+                background: #224b77;
+                color: #dee5eb;
+            }
         }
     }
 </style>

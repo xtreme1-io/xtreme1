@@ -9,7 +9,13 @@ export function view(): IPageHandler {
     let editor = useInjectEditor();
     let { state } = editor;
 
-    let { loadClasses, loadDataSetInfo, loadDateSetClassification, loadUserInfo } = useTool();
+    let {
+        loadClasses,
+        loadDataSetInfo,
+        loadDateSetClassification,
+        loadUserInfo,
+        loadDataFromFrameSeries,
+    } = useTool();
 
     async function init() {
         let { query } = editor.bsState;
@@ -26,6 +32,10 @@ export function view(): IPageHandler {
             await loadDataSetInfo();
             await loadUserInfo();
             await Promise.all([loadDateSetClassification(), loadClasses(), loadDataInfo()]);
+            if (state.isSeriesFrame) {
+                await editor.loadManager.loadAllObjects();
+                // await editor.loadManager.loadAllClassification();
+            }
             await editor.loadFrame(0, false);
         } catch (error: any) {
             editor.handleErr(new BSError('', editor.lang('load-error'), error));
@@ -34,8 +44,17 @@ export function view(): IPageHandler {
     }
 
     async function loadDataInfo() {
-        let { query } = editor.bsState;
-        createSingleData();
+        const { query } = editor.bsState;
+
+        const dataId = query.dataId;
+        if (['frame', 'scene'].some((e) => new RegExp(e, 'i').test(query.dataType))) {
+            // 连续帧
+            editor.state.isSeriesFrame = true;
+            editor.bsState.seriesFrameId = dataId;
+            await loadDataFromFrameSeries(dataId);
+        } else {
+            createSingleData();
+        }
     }
 
     function createSingleData() {

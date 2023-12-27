@@ -18,6 +18,7 @@ const zh: ILocale = {
     'track-error': '追踪错误',
     'track-no-source': '无追踪对象',
     'track-ok': '追踪成功',
+    'copy-ok': '复制成功',
 
     // info
     'load-point': '加载点云....',
@@ -31,11 +32,32 @@ const zh: ILocale = {
     'network-error': '网络错误',
     'login-invalid': '登录过期',
     'not-login': '未登录',
-    'retry':'重试',
+    retry: '重试',
 
     // msg
     'msg-not-save': '是否保存变更?',
     'create-rect-valid': '不允许标注到图片外',
+    warnNoObject: '请选择一个对象',
+    btnDelete: '删除',
+    deleteTitle: '您将在所有帧中删除此追踪对象.',
+    btnCancelText: '取消',
+    successDelete: '删除成功',
+    errorDelete: '删除失败, 请重试',
+    selectObject: '选择一个对象',
+    noPlayData: '无播放数据',
+    autoLoad: '自动加载',
+    speedDown: '{{n}} 倍速',
+    speedUp: '{{n}} 倍速',
+    replay: '重新播放',
+    pre: '上一帧(←)',
+    next: '下一帧(→)',
+    play: '播放({{n}} 倍速)',
+    pause: '暂停',
+    delete: '删除所有',
+    timeLine: '时间轴',
+    newBadge: '新',
+    copyLeft1: '向左复制一帧(Alt+←)',
+    copyRight1: '向右复制一帧(Alt+→)',
 };
 
 export { zh };

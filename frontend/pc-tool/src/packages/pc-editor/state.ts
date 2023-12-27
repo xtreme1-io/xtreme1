@@ -35,7 +35,8 @@ export interface IState {
     filterActive: string[];
 
     classifications: IClassification[];
-    // isSeriesFrame: boolean;
+    isSeriesFrame: boolean;
+    currentClass: string;
     models: IModel[];
     modelConfig: IModelConfig;
     recentClass: IClassType[];
@@ -64,7 +65,8 @@ export function getDefaultState(): IState {
         frameIndex: -1,
 
         classifications: [],
-        // isSeriesFrame: false,
+        isSeriesFrame: false,
+        currentClass: '',
         models: [],
         modelConfig: {
             confidence: [0.5, 1],
@@ -154,5 +156,7 @@ function getDefaultConfig(): IConfig {
         maxViewWidth: '100%',
         limitRect2Image: true,
         withoutTaskId: withoutTaskId,
+        boxMethod: 'AI',
+        autoLoad: false,
     };
 }

@@ -1,6 +1,7 @@
 package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import ai.basic.x1.entity.enums.ModelCodeEnum;
 import cn.hutool.json.JSONObject;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,8 @@ public class DataModelAnnotateDTO {
      */
     @NotNull(message = "not allow null")
     private Long datasetId;
+
+    private ItemTypeEnum operateItemType;
 
     /**
      * Data id collection

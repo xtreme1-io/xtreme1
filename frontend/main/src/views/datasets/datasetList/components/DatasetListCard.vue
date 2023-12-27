@@ -72,9 +72,9 @@
       </template>
 
       <div class="text-content">
-        <div class="name flex justify-between">
-          {{ props.data.name }}
-          <div class="more" @click.stop>
+        <div class="flex justify-between gap-16px">
+          <div class="name">{{ props.data.name }}</div>
+          <div class="more w-24px" @click.stop>
             <Icon icon="akar-icons:more-horizontal" />
             <div class="action-list">
               <div
@@ -157,12 +157,12 @@
   type Props = {
     data: DatasetListItem;
   };
-
+  const regLidar = new RegExp(/point(_?)cloud/i);
+  const regImage = new RegExp(/image/i);
   const getLidarImgUrl = (index: number) => {
     const content = props.data.datas && props.data.datas[0]?.content;
     if (content && content[0] && content[0].files) {
-      const files = content.filter((record) => record.directoryType?.includes('image'))[index]
-        ?.files;
+      const files = content.filter((record) => regImage.test(record.name))[index]?.files;
       if (files && files[0].file) {
         const file = files[0].file;
         return file.mediumThumbnail?.url || file.url || placeImgSm;
@@ -185,14 +185,14 @@
 
   const getImgUrl = (index) => {
     const files = props.data.datas || [];
-    const file = files[index]?.content[0]?.file;
+    const file = files[index]?.content[0]?.file ?? files[index]?.content[0]?.files?.[0]?.file;
     return file?.mediumThumbnail?.url || file?.url || placeImg;
   };
 
   const getPcImgUrl = () => {
     const placeImgType =
       props.data?.type === datasetTypeEnum.LIDAR_BASIC ? bannerFull : fusionBanner;
-    const pc = props.data.datas[0]?.content.filter((item) => item.name === 'pointCloud')[0];
+    const pc = props.data.datas[0]?.content.filter((item) => regLidar.test(item.name))[0];
     return (pc && pc.files && pc?.files[0].file?.renderImage?.url) || placeImgType;
   };
 
@@ -230,6 +230,7 @@
       // right: 5px;
       // bottom: 0px;
       padding: 0 5px;
+      cursor: pointer;
 
       &:hover{
         .action-list{
@@ -240,8 +241,8 @@
       .action-list{
         display: none;
         position: absolute;
-        padding: 10px 0;
-        right: 0;
+        padding: 8px 0;
+        right: 10px;
         background: #FFFFFF;
         box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
         border-radius: 12px;
@@ -249,14 +250,17 @@
 
         .item{
           cursor: pointer;
-          width: 160px;
-          height: 36px;
-          line-height: 36px;
+          width: 120px;
+          height: 24px;
+          // line-height: 36px;
           display: flex;
           align-items: center;
 
           &:hover{
             background: rgba(87, 204, 239, 0.15);
+          }
+          img {
+            width: 10px;
           }
         }
 
@@ -322,6 +326,7 @@
         .img{
           flex-shrink: 0;
           width: 33.3%;
+          height: 50%;
           img{
             width: 100%;
             height: 100%;

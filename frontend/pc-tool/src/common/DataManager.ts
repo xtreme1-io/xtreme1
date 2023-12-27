@@ -63,7 +63,7 @@ export default class DataManager extends BaseDataManager {
                             let modelResult = info.modelResult;
                             let objects = (modelResult.objects || []) as IObject[];
 
-                            if (modelResult.code !== "OK") {
+                            if (modelResult.code !== 'OK') {
                                 dataMeta.model = undefined;
                                 if (dataMeta.id === curData.id)
                                     editor.showMsg('error', editor.lang('model-run-error'));
@@ -98,8 +98,8 @@ export default class DataManager extends BaseDataManager {
     onAnnotatesAdd(objects: AnnotateObject[], frame?: IFrame | undefined): void {
         let { user } = this.editor.bsState;
 
-        console.log('onAnnotatesAdd')
-        // 
+        console.log('onAnnotatesAdd');
+        //
         if (user.id) {
             objects.forEach((object) => {
                 let bsObj = object as any;

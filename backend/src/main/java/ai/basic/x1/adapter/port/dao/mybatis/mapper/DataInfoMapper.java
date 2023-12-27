@@ -78,6 +78,9 @@ public interface DataInfoMapper extends ExtendBaseMapper<DataInfo> {
      */
     Page<DataInfo> selectDataPage(Page<DataInfo> page, @Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper, @Param("dataInfoQuery") DataInfoQuery dataInfoQuery);
 
+
+    List<DataInfo> getExportData(@Param(Constants.WRAPPER) Wrapper<DataInfo> queryWrapper, @Param("dataInfoQuery") DataInfoQuery dataInfoQuery);
+
     /**
      * This method overrides the deleteById method of baseMapper
      *
@@ -92,4 +95,14 @@ public interface DataInfoMapper extends ExtendBaseMapper<DataInfo> {
      * @param datasetId Dataset id
      */
     int deleteByDatasetId(@Param("datasetId") Long datasetId);
+
+
+    /**
+     * Query the first data ID of consecutive frames
+     *
+     * @param datasetId Dataset Id
+     * @param sceneIds  Continuous frame ID
+     * @return
+     */
+    List<Long> selectFirstDataIdBySceneIds(@Param("datasetId") Long datasetId, @Param("sceneIds") List<Long> sceneIds);
 }

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -69,12 +70,15 @@ public class DataInfoController extends BaseDatasetController {
     @Autowired
     private DataClassificationOptionUseCase dataClassificationOptionUseCase;
 
+    @Autowired
+    protected UploadDataUseCase uploadDataUseCase;
+
     @PostMapping("upload")
     public String upload(@RequestBody @Validated DataInfoUploadDTO dto, @LoggedUser LoggedUserDTO userDTO) throws IOException {
         var dataInfoUploadBO = DefaultConverter.convert(dto, DataInfoUploadBO.class);
         assert dataInfoUploadBO != null;
         dataInfoUploadBO.setUserId(userDTO.getId());
-        return String.valueOf(dataInfoUsecase.upload(dataInfoUploadBO));
+        return String.valueOf(uploadDataUseCase.upload(dataInfoUploadBO));
     }
 
     @GetMapping("findUploadRecordBySerialNumbers")
@@ -287,6 +291,12 @@ public class DataInfoController extends BaseDatasetController {
     @GetMapping("getDataModelRunResult/{dataId}")
     public List<DatasetModelResultDTO> getDataModelRunResult(@PathVariable Long dataId) {
         return DefaultConverter.convert(dataAnnotationObjectUseCase.getDataModelRunResult(dataId), DatasetModelResultDTO.class);
+    }
+
+    @GetMapping("/getDataIdBySceneIds")
+    public Map<Long, List<Long>> getDataIdBySceneIds(@NotNull(message = "datasetId cannot be null") @RequestParam(required = false) Long datasetId,
+                                                     @NotEmpty(message = "sceneIds cannot be null") @RequestParam(required = false) List<Long> sceneIds) {
+        return dataInfoUsecase.getDataIdBySceneIds(datasetId, sceneIds);
     }
 
 }

@@ -41,8 +41,10 @@ export default function useTool() {
 
     async function loadRecord() {
         try {
-            let { dataInfos, seriesFrameId } = await api.getInfoByRecordId(bsState.recordId);
-            // state.isSeriesFrame = isSeriesFrame;
+            let { dataInfos, isSeriesFrame, seriesFrameId } = await api.getInfoByRecordId(
+                bsState.recordId,
+            );
+            state.isSeriesFrame = isSeriesFrame;
             bsState.seriesFrameId = seriesFrameId;
             let dataId = bsState.query.dataId;
             if (dataId) {
@@ -90,6 +92,17 @@ export default function useTool() {
             throw new BSError('', 'load data-set info error', error);
         }
     }
+    async function loadDataFromFrameSeries(frameSeriesId: string) {
+        try {
+            const { datasetId } = editor.bsState;
+            const frames = await api.getFrameSeriesData(datasetId, frameSeriesId);
+            if (frames.length === 0) throw new BSError('', 'load scene error');
+            // state.frames = frames;
+            editor.setFrames(frames);
+        } catch (error) {
+            throw error instanceof BSError ? error : new BSError('', 'load scene error', error);
+        }
+    }
 
     return {
         loadUserInfo,
@@ -98,5 +111,6 @@ export default function useTool() {
         loadDataSetInfo,
         loadRecord,
         loadDateSetClassification,
+        loadDataFromFrameSeries,
     };
 }

@@ -2,6 +2,7 @@ package ai.basic.x1.adapter.dto;
 
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import ai.basic.x1.entity.enums.SplitTypeEnum;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -43,9 +44,24 @@ public class DataInfoDTO {
     private String name;
 
     /**
+     * Sort data name
+     */
+    private String orderName;
+
+    /**
      * Content (folder path, version information)
      */
     private List<FileNodeDTO> content;
+
+    /**
+     * Type (indicates continuous frames, non-consecutive frames)
+     */
+    private ItemTypeEnum type;
+
+    /**
+     * Parent ID (Scene ID)
+     */
+    private Long parentId;
 
     /**
      * Data status INVALID,VALID

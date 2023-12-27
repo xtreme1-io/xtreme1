@@ -6,35 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Transient;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageDataExportBO extends DataExportBaseBO {
 
-    /**
-     * Image url
-     */
-    private String imageUrl;
-
-    /**
-     * The path in the compressed package
-     */
-    private String imageZipPath;
-
-    /**
-     * Camera image width
-     */
-    private Long width;
-
-    /**
-     * Camera image height
-     */
-    private Long height;
-
-    /**
-     * File relative path
-     */
-    private transient String filePath;
+    private List<ExportDataImageFileBO> images;
 
 }

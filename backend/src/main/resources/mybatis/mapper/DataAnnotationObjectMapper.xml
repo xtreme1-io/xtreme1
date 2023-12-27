@@ -43,6 +43,12 @@
         <include refid="commonSql"/>
     </select>
 
+    <select id="findDataIdByScenario" resultMap="BaseResultMap">
+        SELECT DISTINCT
+        dao.data_id
+        <include refid="commonSql"/>
+    </select>
+
     <select id="findDataIdByScenarioPage" resultMap="BaseResultMap">
         SELECT DISTINCT
             dao.data_id

@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -11,14 +14,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TextDataExportBO extends DataExportBaseBO {
 
-    /**
-     * Text url
-     */
-    private String textUrl;
-
-    /**
-     * The path in the compressed package
-     */
-    private String textZipPath;
-
+    private List<ExportDataTextFileBO> texts;
 }

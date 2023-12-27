@@ -35,7 +35,8 @@ const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
   RECTANGLE: OBJECT_TYPE.RECTANGLE,
   POLYLINE: OBJECT_TYPE.POLYLINE,
 };
-
+const regLidar = new RegExp(/point(_?)cloud/i);
+const regImage = new RegExp(/image/i);
 // const fliterAnnotation=()=>{
 
 //   return
@@ -199,16 +200,17 @@ export default function useCardObject() {
     return size;
   };
   const getImageUrl = (item: any) => {
-    const info = item.content && item.content[0]?.file?.extraInfo;
-    const url = item.content && item.content[0]?.file?.url;
-    const largeThumbnail = item.content && item.content[0]?.file?.largeThumbnail?.url;
+    const file = item.content[0]?.file || item.content[0]?.files?.[0]?.file;
+    const info = file?.extraInfo;
+    const url = file?.url;
+    const largeThumbnail = file?.largeThumbnail?.url;
     return info ? largeThumbnail || url : url;
   };
   const canPreview = (data: any, info: any) => {
     const isPc =
       info?.type === datasetTypeEnum.LIDAR_BASIC || info?.type === datasetTypeEnum.LIDAR_FUSION;
     if (!isPc) return true;
-    const pc = data?.content && data?.content.filter((item) => item.name === 'pointCloud')[0];
+    const pc = data?.content && data?.content.filter((item) => regLidar.test(item.name))[0];
     const renderImage = pc?.files && pc.files[0].file?.renderImage;
     return renderImage?.url && renderImage?.extraInfo;
   };
@@ -458,7 +460,7 @@ export function useImgCard(props: {
   } = useCardObject();
   const getExtraInfo = () => {
     const pc = props.data.content
-      ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
+      ? props.data.content.filter((item) => regLidar.test(item.name))[0]
       : { files: null };
     return pc.files ? pc.files[0].file?.renderImage?.extraInfo : null;
   };
@@ -510,7 +512,7 @@ export function useImgCard(props: {
   const updatePcImageObject = () => {
     const imgs: any[] = props.data.content
       ? props.data.content
-          .filter((record) => record?.directoryType?.includes('image'))
+          .filter((record) => regImage.test(record.name))
           .slice(0, 3)
           .map((img) => {
             return Object.assign({}, img, { object: null });
@@ -562,8 +564,9 @@ export function useImgCard(props: {
   };
   const getPlaceImg = () => {
     const placeImgType = props.info?.type === datasetTypeEnum.LIDAR_BASIC ? placeImgFull : placeImg;
+    console.log(props.data);
     const pc = props.data.content
-      ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
+      ? props.data.content.filter((item) => regLidar.test(item.name))[0]
       : { files: null };
     const file = pc.files && pc.files[0].file;
     const thumbnailUrl = file?.largeThumbnail?.url;
@@ -614,7 +617,7 @@ export function useSearchCard(props: {
   const getPlaceImg = () => {
     const placeImgType = props.info?.type === datasetTypeEnum.LIDAR_BASIC ? placeImgFull : placeImg;
     const pc = props.data
-      ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
+      ? props.data.content.filter((item) => regLidar.test(item.name))[0]
       : { files: null };
     const file = pc.files && pc.files[0].file;
     const thumbnailUrl = file?.largeThumbnail?.url;
@@ -645,7 +648,7 @@ export function useSearchCard(props: {
   };
   const getExtraInfo = () => {
     const pc = props.data
-      ? props.data.content.filter((item) => item.name === 'pointCloud')[0]
+      ? props.data.content.filter((item) => regLidar.test(item.name))[0]
       : { files: null };
     return pc.files ? pc.files[0].file?.renderImage?.extraInfo : null;
   };
@@ -711,9 +714,7 @@ export function useSearchCard(props: {
   const pcActiveImage = computed(() => {
     let file: fileItem | undefined;
     if (props.info?.type === datasetTypeEnum.LIDAR_FUSION) {
-      const imgs = props.data?.content.filter(
-        (content) => content.directoryType && content.directoryType.includes('image'),
-      );
+      const imgs = props.data?.content.filter((content) => regImage.test(content.name));
       const img = imgs?.length ? imgs[state.imgIndex] : null;
       file = img?.files && img?.files[0]?.file;
     } else if (props.info?.type === datasetTypeEnum.IMAGE) {
@@ -856,9 +857,7 @@ export function useSearchCard(props: {
   }, 200);
 
   function onChange(n: number) {
-    const imgs = props.data.content.filter(
-      (content) => content.directoryType && content.directoryType.includes('image'),
-    );
+    const imgs = props.data.content.filter((content) => regImage.test(content.name));
     const length = imgs.length;
     const index = state.imgIndex + n;
     state.imgIndex = Math.max(0, Math.min(length - 1, index));

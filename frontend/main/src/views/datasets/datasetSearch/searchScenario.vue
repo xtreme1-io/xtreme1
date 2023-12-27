@@ -316,7 +316,7 @@
     const recordId = await takeRecordByData({
       datasetId: object.datasetId || info.value.id,
       dataIds: [object.dataId],
-      dataType: dataTypeEnum.SINGLE_DATA,
+      operateItemType: data.type,
       isFilterData: true,
     }).catch((error: any = {}) => {
       const { code, message: msg } = error;

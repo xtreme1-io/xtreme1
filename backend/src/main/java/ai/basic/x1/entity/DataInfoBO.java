@@ -2,6 +2,7 @@ package ai.basic.x1.entity;
 
 import ai.basic.x1.entity.enums.DataAnnotationStatusEnum;
 import ai.basic.x1.entity.enums.DataStatusEnum;
+import ai.basic.x1.entity.enums.ItemTypeEnum;
 import ai.basic.x1.entity.enums.SplitTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,9 +43,24 @@ public class DataInfoBO {
     private String name;
 
     /**
+     * Sort data name
+     */
+    private String orderName;
+
+    /**
      * Content (folder path, version information)
      */
     private List<FileNodeBO> content;
+
+    /**
+     * Type (indicates continuous frames, non-consecutive frames)
+     */
+    private ItemTypeEnum type;
+
+    /**
+     * Parent ID (Scene ID)
+     */
+    private Long parentId;
 
     /**
      * Data status INVALID,VALID
@@ -95,6 +111,11 @@ public class DataInfoBO {
      * Temporary data ID is used to associate the ID
      */
     private Long tempDataId;
+
+    /**
+     * Continuous frame name (use continuous frame name when exporting)
+     */
+    private String sceneName;
 
 
     @Data

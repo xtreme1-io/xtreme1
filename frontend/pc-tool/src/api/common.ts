@@ -110,9 +110,9 @@ export async function getInfoByRecordId(recordId: string) {
     if (!data || !data.datas || data.datas.length === 0)
         return { dataInfos: [], isSeriesFrame: false, seriesFrameId: '' };
 
-    let isSeriesFrame = data.dataType === 'FRAME_SERIES';
-    let seriesFrameId = data.frameSeriesId ? data.frameSeriesId + '' : '';
+    let isSeriesFrame = ['FRAME_SERIES', 'SCENE'].includes(data.itemType);
     let modelRecordId = data.serialNo || '';
+    const seriesFrameId = data.datas[0]?.sceneId;
     let model = undefined as IModelResult | undefined;
     if (modelRecordId) {
         model = {
@@ -246,4 +246,35 @@ export async function getResultSources(dataId: string) {
         });
     });
     return sources.filter((e) => e.sourceType !== SourceType.DATA_FLOW);
+}
+export async function getFrameSeriesData(datasetId: string, frameSeriesId: string) {
+    const url = `/api/data/getDataIdBySceneIds`;
+    const data = await get(url, {
+        datasetId,
+        sceneIds: frameSeriesId,
+        // sortFiled: 'ID',
+        // ascOrDesc: 'ASC',
+    });
+
+    const list = (data.data || {})[frameSeriesId] || [];
+    // (list as any[]).reverse();
+    if (list.length === 0) throw '';
+
+    const dataList = [] as IFrame[];
+    list.forEach((e: any) => {
+        dataList.push({
+            id: e,
+            datasetId: datasetId,
+            pointsUrl: '',
+            queryTime: '',
+            loadState: '',
+            needSave: false,
+            classifications: [],
+            dataStatus: 'VALID',
+            annotationStatus: 'NOT_ANNOTATED',
+            skipped: false,
+        });
+    });
+    return dataList;
+    // return configs;
 }

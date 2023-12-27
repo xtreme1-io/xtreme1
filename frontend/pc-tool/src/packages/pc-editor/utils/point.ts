@@ -114,39 +114,47 @@ export function filterPosition(positions: THREE.BufferAttribute, zRange: [number
     return filterPosition;
 }
 export function getMiniBox1(
-    transform: Required<ITransform>,
+    transform: Required<Pick<ITransform, 'position' | 'rotation' | 'scale'>>,
     positions: THREE.BufferAttribute,
     heightRange: [number, number],
+    autoFit = true,
 ) {
-    let matrix = new THREE.Matrix4();
+    const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion().setFromEuler(transform.rotation);
     matrix.compose(transform.position, quaternion, transform.scale);
     let invertMatrix = new THREE.Matrix4().copy(matrix).invert();
 
-    let pos = new THREE.Vector3();
-    let box = new THREE.Box3(new THREE.Vector3(-0.5, -0.5, -0.5), new THREE.Vector3(0.5, 0.5, 0.5));
+    const pos = new THREE.Vector3();
+    const box = new THREE.Box3(
+        new THREE.Vector3(-0.5, -0.5, -0.5),
+        new THREE.Vector3(0.5, 0.5, 0.5),
+    );
     // let newBox = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
     // let pointN = 0;
-    let offsetFloor = 0.15; // ground offset
+    const offsetFloor = 0.15; // 地面偏移
     let preData: THREE.Vector3[] = [];
 
     setPreData();
 
     if (preData.length === 0) return;
-
+    const valid = function (infoRange: { infoMax: number; infoMin: number }) {
+        return infoRange.infoMax > infoRange.infoMin;
+    };
     // filter z
-    let info = statisticPositionVInfo(preData);
-    let infoRange = getMaxMinInfo(info);
-    // console.log('info', info, infoRange);
-    // ground offset
-    if (infoRange.infoMin + offsetFloor < infoRange.infoMax) {
-        infoRange.infoMin += offsetFloor;
+    const zInfo = statisticPositionVInfo(preData);
+    const zInfoRange = getMaxMinInfo(zInfo);
+    // 地面偏移
+    if (zInfoRange.infoMin + offsetFloor < zInfoRange.infoMax) {
+        zInfoRange.infoMin += offsetFloor;
     }
-    if (infoRange.infoMax <= infoRange.infoMin) return;
 
-    preData = preData.filter((e) => e.z >= infoRange.infoMin && e.z <= infoRange.infoMax);
-    transform.position.z = (infoRange.infoMin + infoRange.infoMax) / 2;
-    transform.scale.z = Math.abs(infoRange.infoMax - infoRange.infoMin);
+    if (!valid(zInfoRange)) return;
+
+    preData = preData.filter((e) => e.z >= zInfoRange.infoMin && e.z <= zInfoRange.infoMax);
+    if (autoFit) {
+        transform.scale.z = Math.abs(zInfoRange.infoMax - zInfoRange.infoMin);
+    }
+    transform.position.z = (zInfoRange.infoMin + zInfoRange.infoMax) / 2;
 
     // update matrix
     matrix.compose(transform.position, quaternion, transform.scale);
@@ -157,28 +165,30 @@ export function getMiniBox1(
     });
 
     // x
-    info = statisticPositionVInfo(preData, 2, 'x');
-    infoRange = getMaxMinInfo(info, { filter: 0 } as any);
-    // console.log('info', info, infoRange);
-    let positionX = (infoRange.infoMin + infoRange.infoMax) / 2;
-    transform.scale.x *= Math.abs(infoRange.infoMax - infoRange.infoMin);
+    const xInfo = statisticPositionVInfo(preData, 2, 'x');
+    const xInfoRange = getMaxMinInfo(xInfo, { filter: 0 } as any);
+    const positionX = (xInfoRange.infoMin + xInfoRange.infoMax) / 2;
 
     // y
-    info = statisticPositionVInfo(preData, 2, 'y');
-    infoRange = getMaxMinInfo(info, { filter: 0 } as any);
-    // console.log('info', info, infoRange);
-    let positionY = (infoRange.infoMin + infoRange.infoMax) / 2;
-    transform.scale.y *= Math.abs(infoRange.infoMax - infoRange.infoMin);
+    const yInfo = statisticPositionVInfo(preData, 2, 'y');
+    const yInfoRange = getMaxMinInfo(yInfo, { filter: 0 } as any);
+    const positionY = (yInfoRange.infoMin + yInfoRange.infoMax) / 2;
 
-    let center = new THREE.Vector3(positionX, positionY, 0);
+    const center = new THREE.Vector3(positionX, positionY, 0);
     center.applyMatrix4(matrix);
-    transform.position.copy(center);
+    if (autoFit) {
+        transform.scale.x *= Math.abs(xInfoRange.infoMax - xInfoRange.infoMin);
+        transform.scale.y *= Math.abs(yInfoRange.infoMax - yInfoRange.infoMin);
+        transform.position.copy(center);
+    } else {
+        transform.position.z = center.z;
+    }
 
     function setPreData() {
         for (let i = 0; i < positions.count; i++) {
-            let x = positions.getX(i);
-            let y = positions.getY(i);
-            let z = positions.getZ(i);
+            const x = positions.getX(i);
+            const y = positions.getY(i);
+            const z = positions.getZ(i);
             pos.set(x, y, z).applyMatrix4(invertMatrix);
             if (
                 box.min.x <= pos.x &&

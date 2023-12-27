@@ -147,6 +147,10 @@ public class DataAnnotationObjectUseCase {
         return DefaultConverter.convert(dataAnnotationObjectList, DataAnnotationObjectBO.class);
     }
 
+    public List<Long> findDataIdByScenario(ScenarioQueryBO scenarioQueryBO) {
+        return dataAnnotationObjectDAO.getBaseMapper().findDataIdByScenario(DefaultConverter.convert(scenarioQueryBO, ScenarioQuery.class));
+    }
+
     public Page<DataAnnotationObjectBO> findDataIdByScenarioPage(ScenarioQueryBO scenarioQueryBO) {
         var page = dataAnnotationObjectDAO.getBaseMapper().findDataIdByScenarioPage(
                 new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(scenarioQueryBO.getPageNo(), scenarioQueryBO.getPageSize()),

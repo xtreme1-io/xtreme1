@@ -1,10 +1,10 @@
 <template>
-    <div ref="domRef">
+    <div ref="domRef" class="instance-wrap">
         <!-- classify -->
         <a-collapse
             class="operation-collapse"
             v-for="classify in state.list"
-            v-model:activeKey="classify.active"
+            :activeKey="classify.key"
             :bordered="false"
             :openAnimation="animation"
         >
@@ -13,7 +13,7 @@
                     <Header @toggle-attr="onToggleAttr" :data="classify" />
                 </template>
                 <div class="operation-instance">
-                    <div style="height: 100%; max-height: 400px; overflow-y: auto">
+                    <div style="height: 100%; overflow-y: auto">
                         <!-- class  -->
                         <a-collapse
                             :openAnimation="animation"
@@ -43,21 +43,31 @@
                                     />
                                 </div>
                                 <template #header>
-                                    <span class="class-title limit" :title="item.className">{{
-                                        item.className
-                                    }}</span
-                                    >{{ `(${item.data.length})` }}
+                                    <span
+                                        @click="onClassTool('clickHeader', item)"
+                                        :class="
+                                            !item.isModel &&
+                                            item.classId == editor.state.currentClass
+                                                ? 'class-header active'
+                                                : 'class-header'
+                                        "
+                                    >
+                                        <WarningOutlined
+                                            style="color: #ffa900"
+                                            v-if="!item.classType"
+                                        />
+                                        <i
+                                            class="iconfont icon-lifangti"
+                                            v-else
+                                            :style="{ color: item.color }"
+                                        ></i>
+                                        <span class="class-title limit" :title="item.className">{{
+                                            item.className
+                                        }}</span
+                                        >{{ `(${item.data.length})` }}
+                                    </span>
                                 </template>
                                 <template #extra>
-                                    <WarningOutlined
-                                        style="color: #ffa900"
-                                        v-if="!item.classType"
-                                    />
-                                    <i
-                                        class="iconfont icon-lifangti"
-                                        v-else
-                                        :style="{ color: item.color }"
-                                    ></i>
                                     <div class="extra-tool" v-show="item.data.length > 0">
                                         <EditOutlined
                                             :title="$$('title-edit')"
@@ -113,25 +123,61 @@
     // *********************************************
 
     let { canEdit, canOperate, isPlay } = useUI();
-    let { state, domRef, onTrackTool, onItemTool, onClassTool, onToggleAttr, $$ } = useInstance();
+    let { editor, state, domRef, onTrackTool, onItemTool, onClassTool, onToggleAttr, $$ } =
+        useInstance();
 </script>
 
 <style lang="less">
+    .instance-wrap {
+        flex: 1;
+        position: relative;
+
+        > .ant-collapse {
+            position: absolute;
+            inset: 0;
+            > .ant-collapse-item {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                > .ant-collapse-content {
+                    flex: 1;
+                    position: relative;
+                    > .ant-collapse-content-box {
+                        position: absolute;
+                        inset: 0;
+                        > .operation-instance {
+                            position: absolute;
+                            inset: 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
     .operation-instance {
         // background: black;
-        height: calc(100% - 300px);
+        height: 100%;
         text-align: left;
         position: relative;
 
         .ant-collapse-extra {
             pointer-events: none;
         }
-
+        .class-header {
+            position: absolute;
+            inset: 0;
+            padding-left: 36px;
+            line-height: 30px;
+            &.active {
+                background: #424d6d;
+            }
+        }
         .class-title {
             display: inline-block;
             max-width: 100px;
             line-height: 1;
             vertical-align: middle;
+            margin-left: 8px;
         }
 
         .iconfont {
@@ -221,6 +267,10 @@
 
         .ant-collapse > .ant-collapse-item > .ant-collapse-header {
             background: transparent;
+            height: 30px;
+            .ant-collapse-arrow {
+                z-index: 2;
+            }
             // background: #2a2a2c;
         }
         .ant-collapse > .ant-collapse-item {
@@ -231,9 +281,9 @@
         //     float: left;
         //     margin-right: 4px;
         // }
-        .ant-collapse > .ant-collapse-item > .ant-collapse-header {
-            padding-left: 60px;
-        }
+        // .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+        //     padding-left: 60px;
+        // }
         .ant-collapse .ant-collapse-extra {
             position: absolute !important;
             top: 0px !important;

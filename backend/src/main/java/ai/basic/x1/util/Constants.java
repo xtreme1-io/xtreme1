@@ -8,6 +8,8 @@ import java.util.Set;
  */
 public interface Constants {
 
+    Long DEFAULT_PARENT_ID = 0L;
+
     String X_REAL_IP = "X-Real-Ip";
 
     String HOST = "Host";
@@ -50,14 +52,31 @@ public interface Constants {
     String MACOSX = "__MACOSX";
 
     /**
+     * scene
+     */
+    String SCENE = "scene_";
+
+    /**
      * point_cloud
      */
     String POINT_CLOUD = "point_cloud";
 
     /**
+     * lidar_point_cloud
+     */
+    String LIDAR_POINT_CLOUD = "lidar_point_cloud";
+
+    String LIDAR_POINT_CLOUD_PATTERN = String.format("%s_\\d", LIDAR_POINT_CLOUD);
+
+    /**
      * image
      */
     String POINT_CLOUD_IMG = "image";
+
+    /**
+     * image
+     */
+    String CAMERA_IMAGE = "camera_image";
 
     /**
      * camera_config
@@ -67,7 +86,7 @@ public interface Constants {
     /**
      * .PCD
      */
-    String PCD_SUFFIX = ".PCD";
+    String PCD_SUFFIX = "PCD";
 
     /**
      * .JSON
@@ -75,9 +94,19 @@ public interface Constants {
     String JSON_SUFFIX = ".JSON";
 
     /**
-     * image
+     * image_
      */
-    String IMAGE = "image";
+    String IMAGE = "image_";
+
+    /**
+     * IMAGE_0
+     */
+    String IMAGE_0 = "image_0";
+
+    /**
+     * image_
+     */
+    String IMAGE_PATTERN = String.format("%s\\d", IMAGE);
 
     /**
      * image
@@ -109,6 +138,16 @@ public interface Constants {
 
     String CONVERT_EXPORT = "export";
 
+    /**
+     * TIFF
+     */
+    String TIFF_SUFFIX = "TIFF";
+
+    /**
+     * TIF
+     */
+    String TIF_SUFFIX = "TIF";
+
     Set<String> COMPRESSED_DATA_TYPE = new HashSet<>() {{
         add("application/zip");
         add("application/x-rar");
@@ -121,6 +160,9 @@ public interface Constants {
         add("image/png");
         add("image/jpeg");
         add("image/bmp");
+        add("image/x-ms-bmp");
+        add("image/webp");
+        add("image/tiff");
     }};
 
 

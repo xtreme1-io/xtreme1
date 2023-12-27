@@ -58,7 +58,7 @@ public class ClassificationUseCase {
         return DefaultConverter.convert(classificationPage, ClassificationBO.class);
     }
     /**
-     * 保存classification，返回保存的数据
+     * Save the classification and return the saved data
      * @param bo classificationBO
      */
     public void saveClassification(ClassificationBO bo) {

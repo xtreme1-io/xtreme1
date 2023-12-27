@@ -161,7 +161,10 @@ export default class PointCloud extends THREE.EventDispatcher {
         });
         this.render();
     }
-
+    selectObjectById(id: string) {
+        const objects = [...this.getAnnotate3D(), ...this.getAnnotate2D()];
+        this.selectObject(objects.find((o) => o.uuid == id));
+    }
     addObject(objects: AnnotateObject | AnnotateObject[]) {
         if (!isArray(objects)) objects = [objects];
 

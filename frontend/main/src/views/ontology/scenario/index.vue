@@ -93,7 +93,7 @@
   // import { useMessage } from '/@/hooks/web/useMessage';
   import SearchCard from '../../datasets/datasetSearch/searchCard.vue';
   import { useRoute } from 'vue-router';
-  import { datasetTypeEnum, dataTypeEnum } from '/@/api/business/model/datasetModel';
+  import { datasetTypeEnum } from '/@/api/business/model/datasetModel';
   import exportModalVue from '../../datasets/datasetSearch/exportModal.vue';
   import { useModal } from '/@/components/Modal';
   import { getAllClassByOntologyIdApi } from '/@/api/business/classes';
@@ -267,7 +267,7 @@
     const recordId = await takeRecordByData({
       datasetId: object.datasetId || info.value.id,
       dataIds: [object.dataId],
-      dataType: dataTypeEnum.SINGLE_DATA,
+      operateItemType: data.type,
       isFilterData: true,
     }).catch((error: any = {}) => {
       const { code, message: msg } = error;

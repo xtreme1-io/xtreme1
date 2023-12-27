@@ -14,9 +14,12 @@ export default class LoadManager {
     }
 
     async loadFrame(index: number, showLoading: boolean = true, force: boolean = false) {
-        if (index === this.editor.state.frameIndex && !force) return;
-        if (index > this.editor.state.frames.length - 1 || index < 0) return;
-        // let currentTrack = this.editor.currentTrack;
+        const { isSeriesFrame, frameIndex, frames } = this.editor.state;
+        if (index === frameIndex && !force) return;
+        if (index > frames.length - 1 || index < 0) return;
+        if (!isSeriesFrame) this.editor.cmdManager.reset();
+        const currentTrack = this.editor.currentTrack;
+        const currentTrackName = this.editor.currentTrackName;
 
         this.editor.state.frameIndex = index;
 
@@ -31,11 +34,11 @@ export default class LoadManager {
             this.editor.handleErr(error);
         }
 
-        // if (currentTrack) this.editor.selectByTrackId(currentTrack);
-        this.editor.pc.selectObject();
+        if (currentTrack) this.editor.selectByTrackId(currentTrack);
+        else this.editor.pc.selectObject();
 
         showLoading && this.editor.showLoading(false);
-        // this.editor.setCurrentTrack(currentTrack);
+        this.editor.setCurrentTrack(currentTrack, currentTrackName);
         this.editor.dispatchEvent({ type: Event.FRAME_CHANGE, data: this.editor.state.frameIndex });
     }
 
@@ -98,7 +101,51 @@ export default class LoadManager {
         this.editor.updateIDCounter();
         // this.editor.pc.addObject(annotates);
     }
+    updateTrackMap(frames?: IFrame[]) {
+        const { state } = this.editor;
+        frames = frames || state.frames;
+        const objectMap: Record<string, IObject[]> = {};
+        this.editor.trackManager.trackInfo.clear();
+        frames.forEach((frame) => {
+            const objects = this.editor.dataManager.getFrameObject(frame.id) || [];
+            this.editor.trackManager.addTrackCount(objects, frame);
+            objectMap[frame.id] = objects.map((e) => e.userData as IObject);
+        });
+        this.setTrackData(objectMap);
+    }
+    setTrackData(objectsMap: Record<string, IObject[]>) {
+        // update trackId
+        Object.keys(objectsMap).forEach((frameId) => {
+            const objects = objectsMap[frameId] || [];
+            objects.forEach((obj) => {
+                if (!obj.trackId) obj.trackId = this.editor.createTrackId();
+            });
+        });
 
+        const trackInfo = utils.getTrackFromObject(objectsMap);
+        const objects = Object.keys(trackInfo.globalTrack).map((id) => trackInfo.globalTrack[id]);
+        // update editor Id
+        const maxId = getMaxId(objects);
+        let startId = maxId + 1;
+        objects.forEach((e) => {
+            if (!e.trackName) e.trackName = startId++ + '';
+        });
+        this.editor.idCount = startId;
+        this.editor.trackManager.trackMap.clear();
+        Object.keys(trackInfo.globalTrack).forEach((trackId) => {
+            this.editor.trackManager.addTrackObject(trackId, trackInfo.globalTrack[trackId]);
+        });
+
+        function getMaxId(objects: Partial<IObject>[]) {
+            let maxId = 0;
+            objects.forEach((e) => {
+                if (!e.trackName) return;
+                const id = parseInt(e.trackName);
+                if (id > maxId) maxId = id;
+            });
+            return maxId;
+        }
+    }
     async loadAllClassification() {
         let { frames, classifications } = this.editor.state;
 
@@ -123,7 +170,7 @@ export default class LoadManager {
 
     // SeriesFrame load
     async loadAllObjects() {
-        let { frames } = this.editor.state;
+        let { frames, isSeriesFrame, classifications } = this.editor.state;
 
         let filterFrames = frames.filter((e) => !this.editor.dataManager.getFrameObject(e.id));
 
@@ -132,19 +179,24 @@ export default class LoadManager {
         try {
             let data = await this.editor.businessManager.getFrameObject(filterFrames);
             // let data = await api.getDataObject(dataIds);
-
-            // this.setTrackData(data.objectsMap);
+            console.log(data);
+            if (isSeriesFrame) this.setTrackData(data.objectsMap);
 
             filterFrames.forEach((frame) => {
                 let objects = data.objectsMap[frame.id] || [];
                 frame.queryTime = data.queryTime;
+
+                frame.classifications = utils.copyClassification(
+                    classifications,
+                    data.classificationMap[frame.id] || {},
+                );
 
                 let annotates = utils.convertObject2Annotate(objects, this.editor);
                 annotates.forEach((obj) => {
                     let userData = obj.userData as IUserData;
                     if (!userData.id) userData.id = THREE.MathUtils.generateUUID();
                 });
-
+                if (isSeriesFrame) this.editor.trackManager.addTrackCount(annotates, frame);
                 this.editor.dataManager.setFrameObject(frame.id, annotates);
                 // this.editor.dataManager.updateFrameId(frame.id);
             });

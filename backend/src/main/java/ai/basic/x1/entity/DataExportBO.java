@@ -26,4 +26,6 @@ public class DataExportBO {
      */
     private List<DataResultExportBO> result;
 
+    private String sceneName;
+
 }

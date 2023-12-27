@@ -16,57 +16,18 @@ import java.util.List;
 public class LidarFusionDataExportBO extends DataExportBaseBO {
 
     /**
-     * Pcd url
+     * Lidar point cloud file list
      */
-    private String pointCloudUrl;
+    private List<ExportDataLidarPointCloudFileBO> lidarPointClouds;
 
     /**
-     * The path in the compressed package
+     * Lidar camera parameter file
      */
-    private String pointCloudZipPath;
+    private ExportDataCameraConfigFileBO cameraConfig;
 
     /**
-     * camera ConfigUrl
+     * images
      */
-    private String cameraConfigUrl;
-
-    /**
-     *
-     * The path in the camera parameter compression package
-     */
-    private String cameraConfigZipPath;
-
-    /**
-     * Images
-     */
-    private List<LidarFusionImageBO> cameraImages;
-
-    @Data
-    public static class LidarFusionImageBO {
-        /**
-         * Camera image url
-         */
-        private String url;
-
-        /**
-         *  The path in the compressed package
-         */
-        private String zipPath;
-
-        /**
-         * Camera image width
-         */
-        private Long width;
-
-        /**
-         * Camera image height
-         */
-        private Long height;
-
-        /**
-         * File relative path
-         */
-        private transient String filePath;
-    }
+    private List<ExportDataImageFileBO> cameraImages;
 
 }

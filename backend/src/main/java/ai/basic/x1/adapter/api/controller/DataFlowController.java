@@ -29,8 +29,8 @@ public class DataFlowController {
         dataFlowUseCase.changeDataStatus(dataId, DataStatusEnum.VALID);
     }
 
-    @PostMapping("/submit/{dataId}")
-    public void submit(@PathVariable Long dataId){
-        dataFlowUseCase.submit(dataId);
+    @PostMapping("/submit/{itemId}")
+    public void submit(@PathVariable Long itemId){
+        dataFlowUseCase.submit(itemId);
     }
 }

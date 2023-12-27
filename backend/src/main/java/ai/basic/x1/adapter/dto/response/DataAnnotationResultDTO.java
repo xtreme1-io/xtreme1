@@ -1,4 +1,5 @@
 package ai.basic.x1.adapter.dto.response;
+
 import ai.basic.x1.adapter.dto.DataAnnotationClassificationDTO;
 import ai.basic.x1.adapter.dto.DataAnnotationObjectDTO;
 import lombok.AllArgsConstructor;
@@ -18,20 +19,20 @@ import java.util.List;
 @AllArgsConstructor
 public class DataAnnotationResultDTO {
 
-   /**
-    * 数据ID
-    */
-   private Long  dataId;
+    /**
+     * Data id
+     */
+    private Long dataId;
 
-   /**
-    * Classification 属性取值
-    */
-   private List<DataAnnotationClassificationDTO> classificationValues;
+    /**
+     * Classification values
+     */
+    private List<DataAnnotationClassificationDTO> classificationValues;
 
-   /**
-    * Data 包含的 Object 列表
-    */
-   private List<DataAnnotationObjectDTO>  objects;
+    /**
+     * Object list
+     */
+    private List<DataAnnotationObjectDTO> objects;
 
 
 }

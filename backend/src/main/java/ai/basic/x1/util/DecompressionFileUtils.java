@@ -131,7 +131,7 @@ public class DecompressionFileUtils {
         if (!boo) {
             return validateUrlS(URLUtil.encode(urlStr));
         }
-        return boo;
+        return true;
     }
 
     private static boolean validateUrlS(String urlStr) {
