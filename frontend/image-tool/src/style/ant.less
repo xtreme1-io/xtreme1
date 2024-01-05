@@ -1,91 +1,112 @@
 .ant-input,
 .ant-select-selector {
-    // background: #47474d !important;
-    // outline: none !important;
-    // border: none !important;
+  // background: #47474d !important;
+  // outline: none !important;
+  // border: none !important;
 }
 
 .ant-tooltip-inner {
-    background-color: #333333;
+  background-color: #333333;
 }
 
 .ant-select,
 .ant-select-arrow,
 .ant-input,
 .ant-radio-wrapper {
-    color: #cbcbcb;
+  color: #cbcbcb;
+}
+/* ant-input-number */
+.ant-input-number-input {
+  background: none;
+  text-align: center;
+}
+.ant-input-number-handler-wrap {
+  display: none;
 }
 //
 .ant-collapse {
-    font-family: 'Roboto';
-    font-style: normal;
-    margin-bottom: 10px;
-    background-color: #303036 !important;
-    border: 1px solid #1e1f22 !important;
-    border-radius: 4px;
-    // overflow: auto;
-    .ant-collapse-item {
-        background: #1e1f22;
-        border: none !important;
-        // transition: all 0.2s;
-        &.ant-collapse-item-active {
-            background: #303036;
-            // border-bottom: 1px solid #1e1f22 !important;
-        }
-        .ant-collapse-header {
-            display: flex;
-            align-items: center;
-            height: 40px;
-            font-weight: 600;
-            font-size: 16px;
-            color: #bec1ca;
-            padding: 4px;
-            padding-left: 35px;
-            text-align: left;
-            background: #1e1f22;
-            .ant-collapse-arrow {
-                left: 10px;
-            }
-        }
-        .ant-collapse-content {
-            color: white;
-            border-radius: 0 0 4px 4px;
-            overflow-x: hidden;
-            .ant-collapse-content-box {
-                background: #303036;
-                padding: 0px;
-            }
-        }
+  font-family: 'Roboto';
+  font-style: normal;
+  margin-bottom: 10px;
+  background-color: #303036;
+  border: 1px solid #1e1f22;
+  border-radius: 4px;
+  // overflow: auto;
+  .ant-collapse-item {
+    background: #1e1f22;
+    border: none !important;
+    // transition: all 0.2s;
+    &.ant-collapse-item-active {
+      background: #303036;
+      // border-bottom: 1px solid #1e1f22 !important;
     }
+    .ant-collapse-header {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #bec1ca;
+      padding: 4px;
+      padding-left: 10px;
+      text-align: left;
+      background: #1e1f22;
+    }
+    .ant-collapse-content {
+      color: white;
+      border-radius: 0 0 4px 4px;
+      overflow-x: hidden;
+      .ant-collapse-content-box {
+        // background: #303036;
+        padding: 0px;
+      }
+    }
+  }
 }
 
 .ant-collapse-borderless {
-    background-color: transparent;
-    .ant-collapse-item {
-        &:last-child {
-            .ant-collapse-header {
-                display: flex;
-                align-items: center;
-                border: 1px solid #1e1f22;
-                border-bottom: 0;
-                border-radius: 0 0 4px 4px;
-            }
-        }
+  background-color: transparent;
+  .ant-collapse-item {
+    &:last-child {
+      .ant-collapse-header {
+        display: flex;
+        align-items: center;
+        border: 1px solid #1e1f22;
+        border-bottom: 0;
+        border-radius: 0 0 4px 4px;
+      }
     }
+  }
 }
 
 .ant-dropdown-menu {
-    background-color: #3a393e;
+  background-color: #3a393e;
 }
 
 // ant-slider
 .ant-slider-track {
-    background-color: #177ddc !important;
+  background-color: #177ddc !important;
 }
 .ant-slider-handle {
-    border-color: #177ddc !important;
+  border-color: #177ddc !important;
 }
 
 .ant-slider-rail {
-    background-color: #404040;
+  background-color: #404040;
+}
+// ant-modal
+.ant-modal-content {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #393c45;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+  .ant-modal-header {
+    background: #393c45;
+  }
+  .ant-modal-body {
+    background: #393c45;
+  }
+  .ant-modal-footer {
+    background: #393c45;
+  }
 }

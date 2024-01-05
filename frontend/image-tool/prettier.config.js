@@ -6,6 +6,6 @@ module.exports = {
     trailingComma: 'all',
     proseWrap: 'never',
     htmlWhitespaceSensitivity: 'strict',
-    tabWidth: 4,
+    tabWidth: 2,
     endOfLine: 'auto',
 };

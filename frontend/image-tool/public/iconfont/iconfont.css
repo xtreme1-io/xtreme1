@@ -1,0 +1,183 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4374613 */
+  src: url('iconfont.woff2?t=1704191662778') format('woff2'),
+       url('iconfont.woff?t=1704191662778') format('woff'),
+       url('iconfont.ttf?t=1704191662778') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-cube:before {
+  content: "\e736";
+}
+
+.icon-play:before {
+  content: "\e741";
+}
+
+.icon-replay:before {
+  content: "\e743";
+}
+
+.icon-backup:before {
+  content: "\e745";
+}
+
+.icon-forward:before {
+  content: "\e746";
+}
+
+.icon-Frame23:before {
+  content: "\e750";
+}
+
+.icon-crop-non-first:before {
+  content: "\e769";
+}
+
+.icon-crop-first:before {
+  content: "\e76a";
+}
+
+.icon-transform:before {
+  content: "\e621";
+}
+
+.icon-point:before {
+  content: "\e60d";
+}
+
+.icon-reset:before {
+  content: "\e61a";
+}
+
+.icon-rotate90:before {
+  content: "\e6de";
+}
+
+.icon-rotate270:before {
+  content: "\e6e0";
+}
+
+.icon-information:before {
+  content: "\e6fe";
+}
+
+.icon-hollow:before {
+  content: "\e620";
+}
+
+.icon-cancel-hollow:before {
+  content: "\e752";
+}
+
+.icon-hotkey:before {
+  content: "\e767";
+}
+
+.icon-rect:before {
+  content: "\e67c";
+}
+
+.icon-save:before {
+  content: "\e703";
+}
+
+.icon-help:before {
+  content: "\e704";
+}
+
+.icon-fullscreen:before {
+  content: "\e705";
+}
+
+.icon-exitfullscreen:before {
+  content: "\e706";
+}
+
+.icon-info:before {
+  content: "\e70b";
+}
+
+.icon-setting:before {
+  content: "\e70c";
+}
+
+.icon-toleft:before {
+  content: "\e712";
+}
+
+.icon-toright:before {
+  content: "\e713";
+}
+
+.icon-remind:before {
+  content: "\e71a";
+}
+
+.icon-view:before {
+  content: "\e71f";
+}
+
+.icon-delete:before {
+  content: "\e721";
+}
+
+.icon-editlabel:before {
+  content: "\e722";
+}
+
+.icon-filter:before {
+  content: "\e724";
+}
+
+.icon-more:before {
+  content: "\e72d";
+}
+
+.icon-hidden:before {
+  content: "\e72f";
+}
+
+.icon-left:before {
+  content: "\e730";
+}
+
+.icon-right:before {
+  content: "\e731";
+}
+
+.icon-loading:before {
+  content: "\e737";
+}
+
+.icon-model:before {
+  content: "\e738";
+}
+
+.icon-arrow:before {
+  content: "\e751";
+}
+
+.icon-ai:before {
+  content: "\e764";
+}
+
+.icon-smart:before {
+  content: "\e766";
+}
+
+.icon-polygon:before {
+  content: "\e601";
+}
+
+.icon-polyline:before {
+  content: "\e602";
+}
+
