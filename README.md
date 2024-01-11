@@ -3,7 +3,6 @@
 
 ![](https://img.shields.io/badge/Release-v0.8-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
-[![Slack](https://img.shields.io/badge/Join-Slack-orange.svg?logo=slack)](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/Xtreme1io)
 [![Online](https://img.shields.io/badge/Xtreme1_Online-App-yellow)](https://app.basic.ai/#/login)
 [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.xtreme1.io/) 
@@ -23,12 +22,9 @@ Today, building upon this initiative, we're delighted to present our [AI-powered
 [📙 Find our docs here! ](https://docs.xtreme1.io/xtreme1-docs/)
 
 
-# Join community 
-[Slack](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg) | [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
+# Find Us
+[Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
 
-Join the Xtreme1 community on Slack to share your suggestions, advice, and questions with us.
-
-[👉 Join us on Slack today!](https://join.slack.com/t/xtreme1group/shared_invite/zt-1jhk36uzr-NpdpYXeQAEHN6rYJy5_6pg)
 
 # Key features 
 
