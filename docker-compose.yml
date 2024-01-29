@@ -96,7 +96,7 @@ services:
         condition: service_healthy
   frontend:
     # By default, Compose will pull image from Docker Hub when no local image found.
-    image: basicai/xtreme1-frontend:v0.8
+    image: basicai/xtreme1-frontend:v0.8.1
     pull_policy: always
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./frontend
