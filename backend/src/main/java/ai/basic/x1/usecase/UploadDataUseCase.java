@@ -464,7 +464,15 @@ public class UploadDataUseCase {
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now()).sourceId(sourceId);
         sceneFileList.forEach(sceneFile -> {
-            var sceneId = this.saveScene(sceneFile, dataInfoUploadBO);
+            Long sceneId;
+            try {
+                sceneId = this.saveScene(sceneFile, dataInfoUploadBO);
+            } catch (DuplicateKeyException e) {
+                log.error("The scene already exists,scene name is {}", sceneFile.getName());
+                errorBuilder.append("Duplicate scene names:").append(sceneFile.getName()).append(";");
+                return;
+            }
+
             var dataNameList = getDataNamesFunction.apply(sceneFile);
             if (CollectionUtil.isEmpty(dataNameList)) {
                 log.error("The file in {} folder is empty", sceneFile);
