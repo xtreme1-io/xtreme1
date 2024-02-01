@@ -19,7 +19,7 @@ services:
       - 8191:3306
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./deploy/mysql/custom.cnf:/etc/mysql/conf.d
+      - ./deploy/mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf
       - ./deploy/mysql/migration:/docker-entrypoint-initdb.d
     healthcheck:
       test: '/usr/bin/mysql --user=xtreme1 --password=Rc4K3L6f --execute "SHOW DATABASES;"'
