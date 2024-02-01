@@ -19,7 +19,7 @@ services:
       - 8191:3306
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./deploy/mysql/custom.cnf:/etc/mysql/conf.d
+      - ./deploy/mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf
       - ./deploy/mysql/migration:/docker-entrypoint-initdb.d
     healthcheck:
       test: '/usr/bin/mysql --user=xtreme1 --password=Rc4K3L6f --execute "SHOW DATABASES;"'
@@ -65,7 +65,7 @@ services:
       retries: 10
   backend:
     # By default, Compose will pull image from Docker Hub when no local image found.
-    image: basicai/xtreme1-backend:v0.8
+    image: basicai/xtreme1-backend:v0.8.1
     pull_policy: always
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./backend
@@ -96,7 +96,7 @@ services:
         condition: service_healthy
   frontend:
     # By default, Compose will pull image from Docker Hub when no local image found.
-    image: basicai/xtreme1-frontend:v0.8
+    image: basicai/xtreme1-frontend:v0.8.1
     pull_policy: always
     # Uncomment this line and comment previous line to build image locally, not pull from Docker Hub.
     # build: ./frontend
