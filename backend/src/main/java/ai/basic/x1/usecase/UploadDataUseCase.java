@@ -304,6 +304,7 @@ public class UploadDataUseCase {
         var rootPath = String.format("%s/%s", userId, datasetId);
         var errorBuilder = new StringBuilder();
         var dataInfoBOBuilder = DataInfoBO.builder().datasetId(datasetId)
+                .parentId(Constants.DEFAULT_PARENT_ID)
                 .type(ItemTypeEnum.SINGLE_DATA)
                 .status(DataStatusEnum.VALID)
                 .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
@@ -349,7 +350,7 @@ public class UploadDataUseCase {
                         dataInfoBOList.add(dataInfoBO);
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
-                        insertBatch(dataInfoBOList, datasetId, errorBuilder);
+                        insertBatch(dataInfoBOList, datasetId, errorBuilder, Constants.DEFAULT_PARENT_ID);
                     }
                 } catch (Exception e) {
                     log.error("Handle data error", e);
@@ -463,7 +464,15 @@ public class UploadDataUseCase {
         var dataAnnotationObjectBOBuilder = DataAnnotationObjectBO.builder()
                 .datasetId(datasetId).createdBy(userId).createdAt(OffsetDateTime.now()).sourceId(sourceId);
         sceneFileList.forEach(sceneFile -> {
-            var sceneId = this.saveScene(sceneFile, dataInfoUploadBO);
+            Long sceneId;
+            try {
+                sceneId = this.saveScene(sceneFile, dataInfoUploadBO);
+            } catch (DuplicateKeyException e) {
+                log.error("The scene already exists,scene name is {}", sceneFile.getName());
+                errorBuilder.append("Duplicate scene names:").append(sceneFile.getName()).append(";");
+                return;
+            }
+
             var dataNameList = getDataNamesFunction.apply(sceneFile);
             if (CollectionUtil.isEmpty(dataNameList)) {
                 log.error("The file in {} folder is empty", sceneFile);
@@ -498,7 +507,7 @@ public class UploadDataUseCase {
                         }
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
-                        var resDataInfoList = this.insertBatch(dataInfoBOList, datasetId, errorBuilder);
+                        var resDataInfoList = this.insertBatch(dataInfoBOList, datasetId, errorBuilder, sceneId);
                         this.saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
                     }
                 } catch (Exception e) {
@@ -1045,9 +1054,9 @@ public class UploadDataUseCase {
      *
      * @param dataInfoBOList Collection of data details
      */
-    public List<DataInfoBO> insertBatch(List<DataInfoBO> dataInfoBOList, Long datasetId, StringBuilder errorBuilder) {
+    public List<DataInfoBO> insertBatch(List<DataInfoBO> dataInfoBOList, Long datasetId, StringBuilder errorBuilder, Long parentId) {
         var names = dataInfoBOList.stream().map(DataInfoBO::getName).collect(Collectors.toList());
-        var existDataInfoList = this.findByNames(datasetId, names);
+        var existDataInfoList = this.findByNames(datasetId, parentId, names);
         if (CollUtil.isNotEmpty(existDataInfoList)) {
             var existNames = existDataInfoList.stream().map(DataInfoBO::getName).collect(Collectors.toList());
             dataInfoBOList = dataInfoBOList.stream().filter(dataInfoBO -> !existNames.contains(dataInfoBO.getName())).collect(Collectors.toList());
@@ -1071,10 +1080,11 @@ public class UploadDataUseCase {
         }
     }
 
-    private List<DataInfoBO> findByNames(Long datasetId, List<String> names) {
+    private List<DataInfoBO> findByNames(Long datasetId, Long parentId, List<String> names) {
         var dataInfoLambdaQueryWrapper = Wrappers.lambdaQuery(DataInfo.class);
         dataInfoLambdaQueryWrapper.eq(DataInfo::getDatasetId, datasetId);
         dataInfoLambdaQueryWrapper.in(DataInfo::getName, names);
+        dataInfoLambdaQueryWrapper.eq(DataInfo::getParentId, parentId);
         return DefaultConverter.convert(dataInfoDAO.list(dataInfoLambdaQueryWrapper), DataInfoBO.class);
     }
 
