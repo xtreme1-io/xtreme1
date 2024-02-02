@@ -339,6 +339,9 @@
           fileUrl: props.uploadUrl,
           datasetId: props.id as string,
           source: props.source,
+          resultType: props.resultType as string,
+          modelId: props.modelId as number,
+          dataFormat: props.dataFormat as string,
         };
         // get serialNumbers
         const serialNumbers = await uploadDatasetApi(uploadParams, fileItem.controller.signal);
