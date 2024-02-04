@@ -57,7 +57,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: app-dev-ce.alidev.beisai.com
+    - host: app-test-ce.alidev.beisai.com
       http:
         paths:
           - backend:
@@ -69,7 +69,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - app-dev-ce.alidev.beisai.com
+        - app-test-ce.alidev.beisai.com
       secretName: alidev.beisai.com
 ---
 apiVersion: networking.k8s.io/v1
@@ -81,7 +81,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: app-dev-ce.alidev.beisai.com
+    - host: app-test-ce.alidev.beisai.com
       http:
         paths:
           - backend:
@@ -93,7 +93,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - app-dev-ce.alidev.beisai.com
+        - app-test-ce.alidev.beisai.com
       secretName: alidev.beisai.com
 ---
 apiVersion: networking.k8s.io/v1
@@ -105,7 +105,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: app-dev-ce.alidev.beisai.com
+    - host: app-test-ce.alidev.beisai.com
       http:
         paths:
           - backend:
@@ -117,7 +117,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - app-dev-ce.alidev.beisai.com
+        - app-test-ce.alidev.beisai.com
       secretName: alidev.beisai.com
 ---
 apiVersion: networking.k8s.io/v1
@@ -129,7 +129,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: app-dev-ce.alidev.beisai.com
+    - host: app-test-ce.alidev.beisai.com
       http:
         paths:
           - backend:
@@ -141,5 +141,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - app-dev-ce.alidev.beisai.com
+        - app-test-ce.alidev.beisai.com
       secretName: alidev.beisai.com
