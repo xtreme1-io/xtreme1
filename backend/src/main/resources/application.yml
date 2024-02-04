@@ -78,7 +78,7 @@ minio:
 
 export:
   data:
-    version: Xtreme1 V0.6
+    version: Xtreme1 v0.6
 file:
   tempPath: /tmp/xtreme1/
   size:
@@ -95,7 +95,7 @@ dataset-initial:
       name: LiDAR Fusion Trial
       fileName: xtreme1-lidar-fusion-trial.zip
       type: LIDAR_FUSION
-      userName: admin@xtreme1.io
+      userName: admin
       classes[0]:
         name: Car
         color: "#f39c12"
@@ -118,7 +118,7 @@ dataset-initial:
       name: Image Trial
       fileName: xtreme1-image-trial.zip
       type: IMAGE
-      userName: admin@xtreme1.io
+      userName: admin
       classes[0]:
         name: Cat
         color: "#7dfaf2"
