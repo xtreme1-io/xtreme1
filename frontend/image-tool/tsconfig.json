@@ -2,7 +2,6 @@
     "compilerOptions": {
         "target": "esnext",
         "useDefineForClassFields": true,
-        "suppressImplicitAnyIndexErrors": true,
         "module": "esnext",
         "moduleResolution": "node",
         "strict": true,
@@ -11,25 +10,17 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "lib": [
-            "esnext",
-            "dom"
-        ],
+        "strictFunctionTypes": false,
+        "lib": ["esnext","dom"],
         "paths": {
-            "editor": [
-                "src/editor"
-            ],
-            "editor/*": [
-                "src/editor/*"
-            ]
+            "@": ["src"],
+            "@/*": ["src/*"],
+            "image-editor": ["src/package/image-editor"],
+            "image-editor/*": ["src/package/image-editor/*"],
+            "image-ui/*": ["src/package/image-ui/*"]
         }
     },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.d.ts",
-        "src/**/*.tsx",
-        "src/**/*.vue"
-    ],
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
     "references": [
         {
             "path": "./tsconfig.node.json"

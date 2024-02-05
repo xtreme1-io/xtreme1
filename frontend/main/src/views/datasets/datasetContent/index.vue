@@ -841,7 +841,7 @@
       dataIds: [dataId],
       operateItemType: dataTypeEnum.FRAME_SERIES,
     });
-    goToTool({ recordId: res });
+    goToTool({ recordId: res }, info.value?.type);
     // window.location.reload();
   };
   // Open Frame

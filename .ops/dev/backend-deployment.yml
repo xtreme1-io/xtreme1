@@ -6,14 +6,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: xtreme1
-      app.kubernetes.io/instance: xtreme1
+      app.kubernetes.io/name: $APP_NAME
+      app.kubernetes.io/instance: $APP_NAME
       app.kubernetes.io/component: backend
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: xtreme1
-        app.kubernetes.io/instance: xtreme1
+        app.kubernetes.io/name: $APP_NAME
+        app.kubernetes.io/instance: $APP_NAME
         app.kubernetes.io/component: backend
     spec:
       nodeSelector:
@@ -68,8 +68,8 @@ metadata:
   name: backend
 spec:
   selector:
-    app.kubernetes.io/name: xtreme1
-    app.kubernetes.io/instance: xtreme1
+    app.kubernetes.io/name: $APP_NAME
+    app.kubernetes.io/instance: $APP_NAME
     app.kubernetes.io/component: backend
   ports:
     - name: http
@@ -85,7 +85,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: xtreme1.alidev.beisai.com
+    - host: app-dev-ce.alidev.beisai.com
       http:
         paths:
           - backend:
@@ -97,7 +97,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - xtreme1.alidev.beisai.com
+        - app-dev-ce.alidev.beisai.com
       secretName: alidev.beisai.com
 ---
 apiVersion: v1
@@ -120,7 +120,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: xtreme1.alidev.beisai.com
+    - host: app-dev-ce.alidev.beisai.com
       http:
         paths:
           - backend:
@@ -132,5 +132,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - xtreme1.alidev.beisai.com
+        - app-dev-ce.alidev.beisai.com
       secretName: alidev.beisai.com

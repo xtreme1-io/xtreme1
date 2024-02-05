@@ -26,7 +26,7 @@
           <div class="openBtn">
             <Button type="primary" block border @click.stop="handleOpen"> Open </Button>
           </div>
-          <div class="openBtn" v-if="info?.type != datasetTypeEnum.IMAGE">
+          <div class="openBtn">
             <Button
               type="primary"
               block
@@ -41,7 +41,7 @@
               View
             </Button>
           </div>
-          <div class="openBtn" v-if="info?.type != datasetTypeEnum.IMAGE">
+          <div class="openBtn">
             <Button
               type="primary"
               block

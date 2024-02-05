@@ -432,12 +432,12 @@
       }) && data.length > 1;
 
     if (props.datasetType == datasetTypeEnum.IMAGE) {
-      annotateActionFlag.value = data.some((item) => {
-        return item.type == dataTypeEnum.FRAME_SERIES;
-      });
-      modelRunActionFlag.value = data.some((item) => {
-        return item.type == dataTypeEnum.FRAME_SERIES;
-      });
+      // annotateActionFlag.value = data.some((item) => {
+      //   return item.type == dataTypeEnum.FRAME_SERIES;
+      // });
+      // modelRunActionFlag.value = data.some((item) => {
+      //   return item.type == dataTypeEnum.FRAME_SERIES;
+      // });
     }
   });
 

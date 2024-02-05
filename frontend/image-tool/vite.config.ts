@@ -1,39 +1,50 @@
-const { defineConfig, mergeConfig } = require('vite');
-const vue = require('@vitejs/plugin-vue');
-const path = require('path');
+import { resolve } from 'path';
+import { defineConfig, mergeConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 const fs = require('fs');
 
-let localConfig = getLocalConfig();
+const localConfig = getLocalConfig();
 
+function pathResolve(dir: string) {
+  return resolve(__dirname, dir);
+}
 const config = defineConfig({
-    server: {
-        open: true,
-        port: 3300,
-        proxy: {
-            '/api': {
-                changeOrigin: true,
-                target: 'http://localhost:8190',
-            },
-        },
+  server: {
+    open: true,
+    port: 3300,
+    proxy: {
+      '/api': {
+        changeOrigin: true,
+        target: 'http://localhost:8190',
+      },
     },
-    plugins: [vue()],
+  },
+  plugins: [vue()],
+  resolve: {
     alias: [
-        { find: 'editor', replacement: path.resolve(__dirname, './src/editor') },
-        { find: 'business', replacement: path.resolve(__dirname, './src/business/chengdu') },
-        { find: /^editor/, replacement: path.resolve(__dirname, './src/editor') },
-        { find: /^\/@\//, replacement: path.resolve(__dirname, './src/') + '/' },
+      { find: /^\/@\//, replacement: pathResolve('src/') + '/' },
+      { find: '@', replacement: pathResolve('src/') + '/' },
+      {
+        find: /^image-editor/,
+        replacement: '/src/package/image-editor',
+      },
+      {
+        find: /^image-ui/,
+        replacement: '/src/package/image-ui',
+      },
     ],
+  },
 });
 
 module.exports = mergeConfig(config, localConfig);
 
 function getLocalConfig() {
-    let file = path.resolve(__dirname, './vite.config.local.js');
-    let config = {};
-    if (fs.existsSync(file)) {
-        try {
-            config = require(file);
-        } catch (e) {}
-    }
-    return config;
+  let file = pathResolve('./vite.config.local.js');
+  let config = {};
+  if (fs.existsSync(file)) {
+    try {
+      config = require(file);
+    } catch (e) {}
+  }
+  return config;
 }
