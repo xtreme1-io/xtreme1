@@ -74,15 +74,13 @@ public class DatasetClassificationUseCase {
                 .le(ObjectUtil.isNotNull(datasetClassificationBO.getEndTime()),DatasetClassification::getCreatedAt, datasetClassificationBO.getEndTime())
                 .like(StrUtil.isNotEmpty(datasetClassificationBO.getName()),DatasetClassification::getName, datasetClassificationBO.getName());
         addOrderRule(lambdaQueryWrapper,datasetClassificationBO.getSortBy(),datasetClassificationBO.getAscOrDesc());
-        Page<DatasetClassificationBO> datasetClassificationBOPage = DefaultConverter.convert(datasetClassificationDAO.page(com.baomidou.mybatisplus.extension.plugins.pagination.Page.of(pageNo, pageSize), lambdaQueryWrapper)
+        return DefaultConverter.convert(datasetClassificationDAO.page(com.baomidou.mybatisplus.extension.plugins.pagination.Page.of(pageNo, pageSize), lambdaQueryWrapper)
                 , DatasetClassificationBO.class);
-        return datasetClassificationBOPage;
     }
 
     public DatasetClassificationBO findById(Long id) {
         DatasetClassification datasetClassification = datasetClassificationDAO.getById(id);
-        DatasetClassificationBO datasetClassificationBO = DefaultConverter.convert(datasetClassification, DatasetClassificationBO.class);
-        return datasetClassificationBO;
+        return DefaultConverter.convert(datasetClassification, DatasetClassificationBO.class);
     }
 
     /**

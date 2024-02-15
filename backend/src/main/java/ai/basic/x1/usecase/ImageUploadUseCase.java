@@ -72,8 +72,8 @@ public class ImageUploadUseCase {
         return FileUtil.loopFiles(Paths.get(path), 100, imageFilter);
     }
 
-    private final FileFilter imageFilter = file -> {
-        // if the file extension is image return true, else false
-        return Constants.IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath()));
-    };
+    // if the file extension is image return true, else false
+    private final FileFilter imageFilter = file ->
+         Constants.IMAGE_DATA_TYPE.contains(FileUtil.getMimeType(file.getAbsolutePath()));
+
 }

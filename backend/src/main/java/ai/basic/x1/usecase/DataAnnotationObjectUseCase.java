@@ -66,8 +66,7 @@ public class DataAnnotationObjectUseCase {
         Set<Long> dataIds = dataAnnotationObjectBOs.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toSet());
         dataIds.addAll(deleteDataIds);
         removeAllObjectByDataIds(deleteDataIds);
-        List<DataAnnotationObjectBO> dataAnnotationObjectBOS = updateDataAnnotationObject(dataAnnotationObjectBOs);
-        return dataAnnotationObjectBOS;
+        return updateDataAnnotationObject(dataAnnotationObjectBOs);
     }
 
     private List<DataAnnotationObjectBO> updateDataAnnotationObject(List<DataAnnotationObjectBO> dataAnnotationObjectBOs) {

@@ -77,8 +77,7 @@ public class DataEditUseCase {
     private List<DataEdit> getLockedDataIdList(Long userId) {
         var dataEditQueryWrapper = Wrappers.lambdaQuery(DataEdit.class)
                 .eq(DataEdit::getCreatedBy, userId);
-        List<DataEdit> dataEdits = dataEditDAO.list(dataEditQueryWrapper);
-        return dataEdits;
+        return dataEditDAO.list(dataEditQueryWrapper);
     }
 
 }

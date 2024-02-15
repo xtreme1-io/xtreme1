@@ -152,8 +152,7 @@ public class DatasetUseCase {
         var datasetLambdaQueryWrapper = Wrappers.lambdaQuery(Dataset.class);
         datasetLambdaQueryWrapper.eq(Dataset::getName, datasetName);
         datasetLambdaQueryWrapper.last("limit 1");
-        var dataset = datasetDAO.getOne(datasetLambdaQueryWrapper);
-        return dataset;
+        return datasetDAO.getOne(datasetLambdaQueryWrapper);
     }
 
     /**

@@ -187,9 +187,9 @@ public class ClassUseCase {
         }
         List<Long> datasetClassIds = list.stream().map(DatasetClassOntology::getDatasetClassId).collect(toList());
         List<DatasetClass> datasetClasses = new ArrayList<>();
-        datasetClassIds.forEach(datasetClassId -> {
-            datasetClasses.add(DatasetClass.builder().id(datasetClassId).attributes(attributes).build());
-        });
+        datasetClassIds.forEach(datasetClassId ->
+            datasetClasses.add(DatasetClass.builder().id(datasetClassId).attributes(attributes).build())
+        );
         if (ObjectUtil.isNotEmpty(datasetClasses)) {
             datasetClassDAO.updateBatchById(datasetClasses);
         }

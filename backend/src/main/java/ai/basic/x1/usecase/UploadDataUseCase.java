@@ -137,10 +137,10 @@ public class UploadDataUseCase {
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
     private static final ExecutorService parseExecutorService = ThreadUtil.newExecutor(5);
 
-    private final FileFilter textFileFilter = file -> {
-        //if the file extension is json return true, else false
-        return file.getAbsolutePath().toUpperCase().endsWith(JSON_SUFFIX) && Constants.TEXT.equalsIgnoreCase(FileUtil.getName(file.getParentFile()));
-    };
+    //if the file extension is json return true, else false
+    private final FileFilter textFileFilter = file ->
+        file.getAbsolutePath().toUpperCase().endsWith(JSON_SUFFIX) && Constants.TEXT.equalsIgnoreCase(FileUtil.getName(file.getParentFile()));
+
 
     private static final Integer PC_RENDER_IMAGE_WIDTH = 2000;
     private static final Integer PC_RENDER_IMAGE_HEIGHT = 2000;

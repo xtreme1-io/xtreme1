@@ -568,7 +568,7 @@ public class DataInfoUseCase {
         lambdaQueryWrapper.eq(DataAnnotationRecord::getCreatedBy, userId);
         log.info("userId:{}", RequestContextHolder.getContext().getUserInfo().getId());
         log.info("datasetId:{},userId:{}", dataPreAnnotationBO.getDatasetId(), userId);
-        var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) ? dataPreAnnotationBO.getIsFilterData() : false;
+        var isFilterData = ObjectUtil.isNotNull(dataPreAnnotationBO.getIsFilterData()) && dataPreAnnotationBO.getIsFilterData();
         var boo = true;
         var dataAnnotationRecord = DataAnnotationRecord.builder()
                 .datasetId(dataPreAnnotationBO.getDatasetId()).itemType(dataPreAnnotationBO.getOperateItemType()).createdBy(userId).serialNo(serialNo).build();

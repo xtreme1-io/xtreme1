@@ -398,9 +398,9 @@ public class OntologyUseCase {
 
     private void removeId(JSONArray array) {
         if (ObjectUtil.isNotEmpty(array)) {
-            array.forEach(o -> {
-                removeId((JSONObject) o);
-            });
+            array.forEach(o ->
+                removeId((JSONObject) o)
+            );
         }
     }
 }

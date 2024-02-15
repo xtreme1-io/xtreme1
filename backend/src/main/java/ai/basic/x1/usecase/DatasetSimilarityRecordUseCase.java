@@ -254,8 +254,7 @@ public class DatasetSimilarityRecordUseCase {
 
     public DatasetSimilarityBO getDatasetSimilarityRecordByClassificationId(Long datasetId, Long classificationId) {
         List<DataClassificationOption> dataClassificationOptions = dataClassificationOptionDAO.statisticsDatasetDataClassification(datasetId, classificationId);
-        DatasetSimilarityBO datasetSimilarityBO = buildDatasetSimilarityBO(dataClassificationOptions);
-        return datasetSimilarityBO;
+        return buildDatasetSimilarityBO(dataClassificationOptions);
     }
 
     private DatasetSimilarityBO buildDatasetSimilarityBO(List<DataClassificationOption> dataClassificationOptions) {
