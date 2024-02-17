@@ -8,7 +8,7 @@ import ai.basic.x1.adapter.port.dao.mybatis.model.*;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoCountDAO;
 import ai.basic.x1.adapter.port.dao.redis.ModelSerialNoIncrDAO;
 import ai.basic.x1.entity.*;
-import ai.basic.x1.entity.enums.RunRecordQueryBO;
+import ai.basic.x1.entity.RunRecordQueryBO;
 import ai.basic.x1.entity.enums.RunStatusEnum;
 import ai.basic.x1.entity.enums.SortEnum;
 import ai.basic.x1.usecase.exception.UsecaseCode;

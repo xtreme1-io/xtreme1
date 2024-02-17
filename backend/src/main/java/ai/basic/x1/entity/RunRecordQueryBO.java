@@ -1,6 +1,9 @@
-package ai.basic.x1.entity.enums;
+package ai.basic.x1.entity;
 
 import ai.basic.x1.adapter.api.annotation.valid.ValidStringEnum;
+import ai.basic.x1.entity.enums.RunRecordTypeEnum;
+import ai.basic.x1.entity.enums.RunStatusEnum;
+import ai.basic.x1.entity.enums.SortEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
