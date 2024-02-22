@@ -20,7 +20,7 @@ export default class LoadManager extends BaseLoadManager {
    * load frames data
    */
   async loadFramesData(frames: IFrame[]) {
-    console.log('loadFramesData');
+    // console.log('loadFramesData');
     this.editor.clearResource({ resetBgRotation: true });
 
     // Filter out data that has already been loaded
