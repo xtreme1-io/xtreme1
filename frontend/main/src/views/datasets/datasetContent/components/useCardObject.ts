@@ -14,6 +14,7 @@ import { debounce } from 'lodash-es';
 export enum OBJECT_TYPE {
   POLYGON = 'POLYGON',
   RECTANGLE = 'RECTANGLE',
+  BOUNDING_BOX = 'BOUNDING_BOX',
   POLYLINE = 'POLYLINE',
   RECT = '2D_RECT',
   BOX2D = '2D_BOX',
@@ -32,6 +33,7 @@ const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
   rect: OBJECT_TYPE.RECT,
   box2d: OBJECT_TYPE.BOX2D,
   POLYGON: OBJECT_TYPE.POLYGON,
+  BOUNDING_BOX: OBJECT_TYPE.RECTANGLE,
   RECTANGLE: OBJECT_TYPE.RECTANGLE,
   POLYLINE: OBJECT_TYPE.POLYLINE,
 };
@@ -215,26 +217,16 @@ export default function useCardObject() {
     return renderImage?.url && renderImage?.extraInfo;
   };
   const onImgLoad = (data: any) => {
-    const info = data.content && data.content[0]?.file?.extraInfo;
-    if (!svg.value) return;
+    const info = data.content && (data.content ?? [])[0]?.files[0].file?.extraInfo;
+    if (!svg.value || !info) return;
     const imgDom = svg.value as HTMLImageElement;
     const { clientWidth, clientHeight } = imgDom as HTMLImageElement;
     const naturalWidth = info?.width || imgDom.naturalWidth;
     const naturalHeight = info?.height || imgDom.naturalHeight;
-    // const aspect = naturalWidth / naturalHeight;
-    // const fitAspect = clientWidth / clientHeight;
-
     size.value.width = naturalWidth;
     size.value.height = naturalHeight;
     size.value.svgWidth = clientWidth;
     size.value.svgHeight = clientHeight;
-    // if (aspect > fitAspect) {
-    //   size.value.svgWidth = clientHeight * aspect;
-    //   size.value.svgHeight = clientHeight;
-    // } else {
-    //   size.value.svgWidth = clientWidth;
-    //   size.value.svgHeight = clientWidth / aspect;
-    // }
     size.value.init = true;
   };
   const updatePcResult = (target: any[], { objects, selectedSourceIds }: any, info: any) => {
@@ -390,9 +382,13 @@ export default function useCardObject() {
       const { contour, id, type, meta = {} } = item;
       const { points = [], interior = [] } = contour || item || {};
       let _points: any = [];
-      if (type === OBJECT_TYPE.RECTANGLE) {
-        if (points && points.length === 2) {
-          const newPoints = points.map((p) => {
+      if ([OBJECT_TYPE.BOUNDING_BOX, OBJECT_TYPE.RECTANGLE].includes(type)) {
+        let rectData = points;
+        if (rectData && rectData.length === 4) {
+          rectData = [rectData[0], rectData[2]];
+        }
+        if (rectData && rectData.length === 2) {
+          const newPoints = rectData.map((p) => {
             return convert(p);
           });
           const rect = [
@@ -418,7 +414,6 @@ export default function useCardObject() {
         uuid: id,
       };
     });
-
     return result;
   };
 
@@ -493,6 +488,7 @@ export function useImgCard(props: {
    */
   const updateImageObject = () => {
     let results: any[] = [];
+    console.log(props.object);
     onImgLoad(props.data);
     if (
       props.showAnnotation !== false &&
@@ -564,7 +560,6 @@ export function useImgCard(props: {
   };
   const getPlaceImg = () => {
     const placeImgType = props.info?.type === datasetTypeEnum.LIDAR_BASIC ? placeImgFull : placeImg;
-    console.log(props.data);
     const pc = props.data.content
       ? props.data.content.filter((item) => regLidar.test(item.name))[0]
       : { files: null };
@@ -670,6 +665,7 @@ export function useSearchCard(props: {
   };
   const updatePcObject = () => {
     const results: { id: string; points: string }[] = [];
+    console.log(props);
     if (
       props.info?.type === datasetTypeEnum.LIDAR_FUSION ||
       props.info?.type === datasetTypeEnum.LIDAR_BASIC
@@ -680,6 +676,7 @@ export function useSearchCard(props: {
 
       const size = getSize(svg.value);
       state.imgTransform = '';
+      console.log(object);
       if (info && object) {
         const contour = object.contour || object;
         const { center3D, rotation3D, size3D } = contour;
@@ -718,7 +715,8 @@ export function useSearchCard(props: {
       const img = imgs?.length ? imgs[state.imgIndex] : null;
       file = img?.files && img?.files[0]?.file;
     } else if (props.info?.type === datasetTypeEnum.IMAGE) {
-      file = props.data?.content && props.data?.content[0]?.file;
+      const content = props.data.content as any;
+      file = content && content[0]?.files[0]?.file;
     }
     if (file) {
       const extraInfo = file?.extraInfo;
@@ -964,12 +962,14 @@ export function useSearchCard(props: {
           offsetX = Math.max(-__x, Math.min(__x, offsetX));
           offsetY = Math.max(-__y, Math.min(__y, offsetY));
         }
+
         return {
           offsetX,
           offsetY,
           scale: scale,
         };
       };
+
       const { contour = {}, id, type, meta = {} } = object;
       const { points = [], interior = [] } = contour;
       let _points: any = [];
@@ -986,9 +986,13 @@ export function useSearchCard(props: {
           .join(' ');
       };
 
-      if (type === OBJECT_TYPE.RECTANGLE) {
-        if (points && points.length === 2) {
-          const newPoints = points.map((point) => {
+      if ([OBJECT_TYPE.RECTANGLE, OBJECT_TYPE.BOUNDING_BOX].includes(type)) {
+        let rectData = points;
+        if (rectData && rectData.length === 4) {
+          rectData = [rectData[0], rectData[2]];
+        }
+        if (rectData && rectData.length === 2) {
+          const newPoints = rectData.map((point) => {
             const _x = imgToView_X(cX - (cX - point.x - offsetX) * scale);
             const _y = imgToView_Y(cY - (cY - point.y - offsetY) * scale);
             return [_x, _y];
@@ -1010,6 +1014,7 @@ export function useSearchCard(props: {
         const coord = el.coordinate;
         return getPoints(coord);
       });
+      console.log('[updateCssTransform]--------', naturalHeight, object, offsetX, offsetY, scale);
       updateCssTransform(imgToView_X(offsetX), imgToView_Y(offsetY), scale);
       results.push({
         points: _points,

@@ -49,7 +49,7 @@ export function execute(): IPageHandler {
             }
             // load first data
             await editor.loadFrame(0, false);
-            focusObject();
+            await focusObject();
         } catch (error: any) {
             editor.handleErr(error, editor.lang('load-error'));
         }
@@ -60,13 +60,23 @@ export function execute(): IPageHandler {
         }
     }
 
-    function focusObject() {
-        let trackId = editor.bsState.query.focus;
-        if (trackId) {
-            editor.selectByTrackId(trackId);
-            let selection = editor.pc.selection;
-            let object3D = selection.find((item) => item instanceof Box) as Box;
-            object3D && editor.focusObject(object3D);
+    async function focusObject() {
+        let objectId = editor.bsState.query.focus;
+        if (objectId) {
+            let findObject:any;
+            const frame = editor.state.frames.find(frame=>{
+                const objects = editor.dataManager.getFrameObject(frame.id);
+                findObject = objects?.find(o=>o.uuid==objectId);
+                return !!findObject;
+            })
+            if(frame&&findObject){
+                await editor.loadFrame(editor.getFrameIndex(frame.id))
+                editor.selectByTrackId(findObject.userData.trackId);
+                let selection = editor.pc.selection;
+                let object3D = selection.find((item) => item instanceof Box) as Box;
+                object3D && editor.focusObject(object3D);
+            }
+
         }
     }
 

@@ -256,6 +256,7 @@
         ? classification.value.map((item) => item.split('^')[1]).toString()
         : undefined,
     });
+
     const _list: any[] = [];
     const dataIds = Array.from(new Set(res.list?.map((item) => item.dataId)))
       .filter((item: any) => !dataInfo.value[item])
@@ -296,6 +297,7 @@
           _list.push(e);
         });
       });
+      console.log(_list);
       if (flag) {
         list.value = list.value.concat(_list) || [];
       } else {
@@ -329,9 +331,9 @@
       }
       return null;
     });
-    const trackId = object.trackId || object.classAttributes.trackId;
-    if (!recordId || !trackId) return;
-    goToTool({ recordId: recordId, dataId: object.dataId, focus: trackId }, info.value?.type);
+    const objectId = object.id || object.classAttributes.id;
+    if (!recordId || !objectId) return;
+    goToTool({ recordId: recordId, dataId: object.dataId, focus: objectId }, info.value?.type);
   };
 
   const handleExport = () => {

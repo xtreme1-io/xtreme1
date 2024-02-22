@@ -280,9 +280,9 @@
       }
       return null;
     });
-    const trackId = object.trackId || object.classAttributes.trackId;
-    if (!recordId || !trackId) return;
-    goToTool({ recordId: recordId, dataId: object.dataId, focus: trackId }, info.value?.type);
+    const objectId = object.id || object.classAttributes.id;
+    if (!recordId || !objectId) return;
+    goToTool({ recordId: recordId, dataId: object.dataId, focus: objectId }, info.value?.type);
   };
 
   const handleExport = () => {
