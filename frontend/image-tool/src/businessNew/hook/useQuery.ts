@@ -26,7 +26,7 @@ export default function useQuery() {
       bsState.query.dataIds = parseUrlIds(bsState.query.dataIds || '');
     }
     if (bsState.query.dataType) {
-      bsState.query.dataType = bsState.query.dataType.toUpperCase();
+      bsState.query.dataType = bsState.query.dataType;
     }
   }
   return { query, iniQuery };

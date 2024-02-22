@@ -11,6 +11,7 @@ export const defaultActions: IBsActionName[] = [
   'toggleClassTitle',
   // 'toggleShowPolygonArrow',
   'toggleHelpLine',
+  'toggleSizeInfo',
   'selectTool',
   'changeTool',
   'toNextFrame',

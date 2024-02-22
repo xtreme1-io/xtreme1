@@ -18,10 +18,13 @@
 
 <style lang="less">
   .pc-editor-operation {
-    position: relative;
+    position: absolute;
     color: white;
-    height: 100%;
+    inset: 0;
     overflow-y: overlay;
+    display: flex;
+    flex-direction: column;
+
     &::-webkit-scrollbar {
       width: 0;
     }

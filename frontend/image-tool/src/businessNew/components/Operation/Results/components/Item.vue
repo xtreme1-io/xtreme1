@@ -42,7 +42,7 @@
       </div>
     </div>
     <div v-show="data.attrLabel && config.showAttrs">
-      <div class="props">{{ data.attrLabel }}</div>
+      <AttrLabel :attrs="data.attrLabel" />
     </div>
     <div v-show="data.sizeLabel && config.showSize">
       <div class="props">{{ data.sizeLabel }}</div>
@@ -61,6 +61,7 @@
   import { IAction, IObjectItem } from '../type';
   import { useInjectEditor } from 'image-ui/context';
   import { useResultsInject } from '../context';
+  import { VNode, createVNode } from 'vue';
 
   // ***************Props and Emits***************
   const emit = defineEmits(['tool', 'group-tool']);
@@ -69,6 +70,9 @@
     select: Record<string, true>;
     editable: boolean;
   }>();
+  type IProp = {
+    attrs: any;
+  };
   // *********************************************
 
   const editor = useInjectEditor();
@@ -82,6 +86,58 @@
     const obj = editor.dataManager.getObject(id);
     const invalid = (obj?.userData.limitState || '') !== '';
     return invalid;
+  }
+
+  function AttrLabel(prop: IProp) {
+    const { attrs = '' } = prop;
+    const attrStrArr: (String | VNode)[] = [];
+    if (typeof attrs === 'string') {
+      attrStrArr.push(attrs);
+    } else {
+      const _attrs = Object.keys(attrs);
+      const attrMap = editor.attrMap;
+      _attrs.forEach((attrId, index) => {
+        const attr = attrMap.get(attrId);
+        const value = attrs ? attrs[attrId] : {};
+        let valueStr = String(value.value || '');
+        // if (attr.latexExpression) {
+        //     attrStrArr.push(
+        //         createVNode('span', {
+        //             style: 'display: inline-block',
+        //             innerHTML: editor.utils.toMMl(valueStr),
+        //         }),
+        //     );
+        //     if (index < _attrs.length - 1) {
+        //         attrStrArr.push(' | ');
+        //     }
+        //     return;
+        // } else
+        if (attr && attr.options && valueStr) {
+          const valArr = valueStr.split(',');
+          valArr.forEach((str: string, index: number) => {
+            const obj = attr.options.find((e: any) => e.name === str);
+            if (obj) valArr[index] = editor.showNameOrAlias(obj);
+          });
+          valueStr = String(valArr);
+        }
+        attrStrArr.push(valueStr);
+        if (index < _attrs.length - 1) {
+          attrStrArr.push(' | ');
+        }
+      });
+    }
+    return createVNode(
+      'div',
+      {
+        style: {
+          display: attrStrArr.length <= 0 ? 'none' : '',
+          'word-wrap': 'break-word',
+          width: '100%',
+        },
+        class: 'props',
+      },
+      attrStrArr,
+    );
   }
 </script>
 
@@ -175,6 +231,7 @@
     .item-attrs {
       line-height: 1.4;
       padding: 4px 0;
+
       // border-top: 1px solid #4a4a4a;
       .attrs-item {
         padding: 0 5px;

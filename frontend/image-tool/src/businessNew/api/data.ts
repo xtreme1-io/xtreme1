@@ -1,3 +1,4 @@
+import { IFrame } from '@/package/image-editor';
 import { ISaveFormat, ISaveResp } from '../types';
 import { get, post } from './base';
 import { Api, DataflowAnnotationParamsReq, DataflowAnnotationParamsRsp, IFileConfig } from './type';
@@ -41,4 +42,31 @@ export async function saveData(datasetId: string, dataInfos: Array<ISaveFormat>)
 
   let data = await post(url, { datasetId, dataInfos });
   return (data.data || []) as ISaveResp[];
+}
+
+export async function getFrameSeriesData(datasetId: string, frameSeriesId: string) {
+  const url = `/api/data/getDataIdBySceneIds`;
+  const data = await get(url, {
+    datasetId,
+    sceneIds: frameSeriesId,
+    // sortFiled: 'ID',
+    // ascOrDesc: 'ASC',
+  });
+  console.log(data);
+  const list = (data.data || {})[frameSeriesId] || [];
+  // (list as any[]).reverse();
+  if (list.length === 0) throw '';
+
+  const dataList = [] as IFrame[];
+  list.forEach((e: any) => {
+    dataList.push({
+      id: e,
+      datasetId: datasetId,
+      needSave: false,
+      model: undefined,
+      sceneId: frameSeriesId,
+    } as IFrame);
+  });
+  return dataList;
+  // return configs;
 }

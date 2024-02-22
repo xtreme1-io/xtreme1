@@ -1,13 +1,15 @@
 <template>
-  <Collapse>
-    <template #header>
-      <Header title="Instance" />
-    </template>
-    <div class="operation-instance" ref="domRef">
-      <ResultList />
-      <div v-if="resultState.list.length === 0" style="padding: 4px 10px"> No Data </div>
-    </div>
-  </Collapse>
+  <div class="instance-wrap">
+    <Collapse>
+      <template #header>
+        <Header title="Instance" />
+      </template>
+      <div class="operation-instance" ref="domRef">
+        <ResultList />
+        <div v-if="resultState.list.length === 0" style="padding: 4px 10px"> No Data </div>
+      </div>
+    </Collapse>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -33,6 +35,31 @@
 </script>
 
 <style lang="less">
+  .instance-wrap {
+    flex: 1;
+    position: relative;
+    > .ant-collapse {
+      position: absolute;
+      inset: 0;
+      > .ant-collapse-item {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        > .ant-collapse-content {
+          flex: 1;
+          position: relative;
+          > .ant-collapse-content-box {
+            position: absolute;
+            inset: 0;
+            > .operation-instance {
+              position: absolute;
+              inset: 0;
+            }
+          }
+        }
+      }
+    }
+  }
   .operation-instance {
     position: relative;
     padding: 8px 7px 10px;

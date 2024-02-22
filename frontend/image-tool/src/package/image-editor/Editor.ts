@@ -214,6 +214,11 @@ export default class Editor extends EventEmitter {
   lang(name: string, args?: Record<string, any>) {
     return name;
   }
+  selectByTrackId(trackId: string) {
+    if (!trackId || !this.state.isSeriesFrame) return;
+    const objs = this.trackManager.getObjectByTrackId(trackId);
+    this.selectObject(objs);
+  }
   selectObject(object?: AnnotateObject | AnnotateObject[], force?: boolean) {
     const preSelection = this.selection;
     let selection: AnnotateObject[] = [];
@@ -302,9 +307,11 @@ export default class Editor extends EventEmitter {
     this.emit(Event.FRAME_SWITCH, { from: beforeIndex, to: index });
   }
   async loadFrame(index: number, showLoading: boolean = true, force: boolean = false) {
+    const currentTrack = this.state.currentTrack;
     await this.loadManager.loadFrame(index, showLoading, force);
     await this.mainView.renderFrame();
-    // this.selectByTrackId(this.state.currentTrack);
+    this.selectByTrackId(this.state.currentTrack);
+    this.setCurrentTrack(currentTrack);
     this.emit(Event.FRAME_CHANGE, this.state.frameIndex);
   }
 

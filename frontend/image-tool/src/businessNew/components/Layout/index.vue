@@ -37,6 +37,7 @@
       width: 50px;
     }
     .operation-wrap {
+      position: relative;
       width: 300px;
       padding: 4px;
     }

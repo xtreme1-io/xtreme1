@@ -7,7 +7,7 @@ import { IFrame, MsgType } from 'image-editor';
 export function view(): IPageHandler {
   const editor = useInjectBSEditor();
   const { state, bsState } = editor;
-  const { loadClasses, loadDateSetClassification } = useDataFlow();
+  const { loadClasses, loadDateSetClassification, loadDataFromFrameSeries } = useDataFlow();
 
   async function init() {
     let { query } = bsState;
@@ -33,7 +33,7 @@ export function view(): IPageHandler {
     let dataId = query.dataId;
     if (query.dataType === 'frame') {
       state.isSeriesFrame = true;
-      // await loadDataFromFrameSeries(dataId);
+      await loadDataFromFrameSeries(dataId);
     } else {
       createSingleData();
     }

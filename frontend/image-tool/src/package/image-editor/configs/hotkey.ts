@@ -18,7 +18,7 @@ const toolHotKye: IHotkeyConfig[] = [
   { key: '9', action: 'changeTool' },
   { key: '0', action: 'changeTool' },
   { key: 'q', action: 'selectTool' },
-  { key: 'e', action: 'changeTool' },
+  // { key: 'e', action: 'changeTool' },
 ];
 // LineTool
 export const lineToolHotKey: IHotkeyConfig[] = [
@@ -44,6 +44,7 @@ const displayControllerHotkey: IHotkeyConfig[] = [
   { key: 't', action: 'toggleClassView' },
   { key: 'm', action: 'toggleClassTitle' },
   { key: 'y', action: 'toggleHelpLine' },
+  { key: 'b', action: 'toggleSizeInfo' },
   // { key: 'd', action: 'toggleShowPolygonArrow' },
 ];
 
