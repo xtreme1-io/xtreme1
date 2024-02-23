@@ -1,7 +1,7 @@
 <template>
   <div class="result-data-list">
     <a-collapse
-      style="border: none !important"
+      style="margin: 0; border: none !important"
       v-model:activeKey="resultState.activeClass"
       :bordered="false"
       :openAnimation="animation"
