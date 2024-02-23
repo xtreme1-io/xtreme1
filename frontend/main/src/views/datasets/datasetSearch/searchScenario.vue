@@ -297,7 +297,6 @@
           _list.push(e);
         });
       });
-      console.log(_list);
       if (flag) {
         list.value = list.value.concat(_list) || [];
       } else {

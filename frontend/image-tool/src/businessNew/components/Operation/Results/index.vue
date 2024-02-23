@@ -6,7 +6,12 @@
       </template>
       <div class="operation-instance" ref="domRef">
         <ResultList />
-        <div v-if="resultState.list.length === 0" style="padding: 4px 10px"> No Data </div>
+        <div
+          v-if="resultState.list.length === 0"
+          style="position: absolute; top: 0; padding: 4px 10px"
+        >
+          No Data
+        </div>
       </div>
     </Collapse>
   </div>
