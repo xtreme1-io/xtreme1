@@ -2,7 +2,7 @@ import { IHotkeyConfig } from '../types';
 import { isMac } from '../lib/ua';
 
 const Ctrl = isMac ? '⌘' : 'ctrl';
-const Del = isMac ? 'backspace' : 'del';
+const Del = 'backspace,del';
 const Alt = 'alt';
 
 // tool

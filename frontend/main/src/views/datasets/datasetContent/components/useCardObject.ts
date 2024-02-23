@@ -136,8 +136,9 @@ export function NodePc({ pcObject, ref }) {
       stroke: 'currentColor',
       ref: ref,
     },
-    pcObject?.map(({ id, points, type }) => {
+    pcObject?.map(({ id, points, type, color = '#fff' }) => {
       return h(NodeType[type], {
+        stroke: color,
         key: id,
         points: points,
       });
@@ -154,11 +155,12 @@ export function NodePcImage({ pcImageObject }) {
       stroke: 'currentColor',
       fill: 'transparent',
     },
-    pcImageObject?.reduce((childs, { type, uuid, points }) => {
+    pcImageObject?.reduce((childs, { type, uuid, points, color = '#fff' }) => {
       const nodeType = NodeType[type];
       if (nodeType) {
         childs.push(
           h(NodeType[type], {
+            stroke: color,
             key: uuid,
             points: points,
           }),
@@ -244,6 +246,7 @@ export default function useCardObject() {
         if (center3D && rotation3D && size3D) {
           const { points } = transformToPc(contour, size, info);
           target.push({
+            color: obj.meta?.color,
             id: obj.id,
             type: OBJECT_TYPE.BOX3D,
             points: points.map((pos) => pos.join(',')).join(' '),
@@ -325,6 +328,7 @@ export default function useCardObject() {
           target.push({
             id: item.id,
             type: type,
+            color: item.meta?.color,
             points: points
               .map((point) => {
                 return convert(point).join(',');
@@ -383,12 +387,8 @@ export default function useCardObject() {
       const { points = [], interior = [] } = contour || item || {};
       let _points: any = [];
       if ([OBJECT_TYPE.BOUNDING_BOX, OBJECT_TYPE.RECTANGLE].includes(type)) {
-        let rectData = points;
-        if (rectData && rectData.length === 4) {
-          rectData = [rectData[0], rectData[2]];
-        }
-        if (rectData && rectData.length === 2) {
-          const newPoints = rectData.map((p) => {
+        if (points && points.length === 2) {
+          const newPoints = points.map((p) => {
             return convert(p);
           });
           const rect = [
@@ -398,6 +398,8 @@ export default function useCardObject() {
             [newPoints[1][0], newPoints[0][1]].join(','),
           ];
           _points = rect.join(' ');
+        } else {
+          _points = getPoints(points);
         }
       } else if ([OBJECT_TYPE.POLYGON, OBJECT_TYPE.POLYLINE].includes(type)) {
         _points = getPoints(points);
@@ -488,7 +490,6 @@ export function useImgCard(props: {
    */
   const updateImageObject = () => {
     let results: any[] = [];
-    console.log(props.object);
     onImgLoad(props.data);
     if (
       props.showAnnotation !== false &&
@@ -521,9 +522,7 @@ export function useImgCard(props: {
       props.data.content
     ) {
       const objects = (props.object || []).filter((item) => {
-        const flagNew = ['2D_BOX', '2D_RECT'].includes(item.type);
-        const flagOld = ['rect', 'box2d'].includes(item.objType);
-        return flagNew || flagOld;
+        return [OBJECT_TYPE.BOX2D, OBJECT_TYPE.RECT].includes(item.type);
       });
       imgs.forEach((img, index) => {
         const ref = getRef(index) as HTMLDivElement;
@@ -665,7 +664,6 @@ export function useSearchCard(props: {
   };
   const updatePcObject = () => {
     const results: { id: string; points: string }[] = [];
-    console.log(props);
     if (
       props.info?.type === datasetTypeEnum.LIDAR_FUSION ||
       props.info?.type === datasetTypeEnum.LIDAR_BASIC
@@ -676,7 +674,6 @@ export function useSearchCard(props: {
 
       const size = getSize(svg.value);
       state.imgTransform = '';
-      console.log(object);
       if (info && object) {
         const contour = object.contour || object;
         const { center3D, rotation3D, size3D } = contour;
@@ -699,6 +696,7 @@ export function useSearchCard(props: {
           });
           results.push({
             id: contour.id,
+            color: object.meta?.color,
             points: _points.map((pos) => pos.join(',')).join(' '),
           });
         }
@@ -833,6 +831,7 @@ export function useSearchCard(props: {
 
           if (points.length) {
             object2d.push({
+              color: info.meta?.color,
               id: o.uuid,
               points: points.map((p) => p.join(',')).join(' '),
             });
@@ -976,7 +975,7 @@ export function useSearchCard(props: {
       const { scale, offsetX, offsetY } = getOffsetAndScale(points);
       const cX = naturalWidth / 2;
       const cY = naturalHeight / 2;
-      const getPoints = function getPoints(points: { x: number; y: number }[]) {
+      const pointsToSvgPolyStr = function getPoints(points: { x: number; y: number }[]) {
         return points
           .map((point) => {
             const _x = imgToView_X(cX - (cX - point.x - offsetX) * scale);
@@ -987,12 +986,8 @@ export function useSearchCard(props: {
       };
 
       if ([OBJECT_TYPE.RECTANGLE, OBJECT_TYPE.BOUNDING_BOX].includes(type)) {
-        let rectData = points;
-        if (rectData && rectData.length === 4) {
-          rectData = [rectData[0], rectData[2]];
-        }
-        if (rectData && rectData.length === 2) {
-          const newPoints = rectData.map((point) => {
+        if (points && points.length === 2) {
+          const newPoints = points.map((point) => {
             const _x = imgToView_X(cX - (cX - point.x - offsetX) * scale);
             const _y = imgToView_Y(cY - (cY - point.y - offsetY) * scale);
             return [_x, _y];
@@ -1005,16 +1000,15 @@ export function useSearchCard(props: {
           ];
           _points = rect.join(' ');
         } else {
-          _points = getPoints(points);
+          _points = pointsToSvgPolyStr(points);
         }
       } else if ([OBJECT_TYPE.POLYGON, OBJECT_TYPE.POLYLINE].includes(type)) {
-        _points = getPoints(points);
+        _points = pointsToSvgPolyStr(points);
       }
       const hole = interior.map((el: any) => {
         const coord = el.coordinate;
-        return getPoints(coord);
+        return pointsToSvgPolyStr(coord);
       });
-      console.log('[updateCssTransform]--------', naturalHeight, object, offsetX, offsetY, scale);
       updateCssTransform(imgToView_X(offsetX), imgToView_Y(offsetY), scale);
       results.push({
         points: _points,

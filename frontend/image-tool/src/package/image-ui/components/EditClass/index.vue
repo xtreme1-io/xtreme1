@@ -259,7 +259,7 @@
       padding: 0 5px;
       overflow: auto;
       min-height: 100px;
-      max-height: 600px;
+      max-height: min(600px, 60vh);
     }
     .edit-class-title {
       display: flex;
