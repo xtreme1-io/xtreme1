@@ -117,6 +117,8 @@ public class DataInfoBO {
      */
     private String sceneName;
 
+    private Long firstDataId;
+
 
     @Data
     @Builder
