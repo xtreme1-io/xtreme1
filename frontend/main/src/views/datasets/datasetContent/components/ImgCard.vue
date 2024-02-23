@@ -146,7 +146,9 @@
             </div>
           </template>
         </div>
-        <div class="p-2 name bottom"> {{ data.name }} </div>
+        <div class="p-2 name bottom">
+          <span>{{ data.name }}</span>
+        </div>
       </div>
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
         <div class="place relation-container image-loading">
@@ -189,7 +191,9 @@
         <!-- <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
           <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
         </svg> -->
-        <div class="p-2 name bottom"> {{ data.name }} </div>
+        <div class="p-2 name bottom">
+          <span> {{ data.name }} </span>
+        </div>
       </div>
       <div
         v-else-if="info?.type === datasetTypeEnum.IMAGE"
@@ -255,7 +259,9 @@
             />
           </template>
         </svg> -->
-        <div class="p-2 name bottom"> {{ data.name }} </div>
+        <div class="p-2 name bottom">
+          <span>{{ data.name }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -616,24 +622,23 @@
       }
 
       .name {
-        width: 100%;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 400;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
         position: absolute;
-        height: 38px;
+        left: 0;
         bottom: 0;
-        display: flex;
         z-index: 2;
+        display: flex;
         justify-content: center;
         align-items: center;
-        left: 0;
+        width: 100%;
+        height: 38px;
         background: white;
-
-        &.bottom {
+        span {
+          text-align: center;
+          font-size: 14px;
+          font-weight: 400;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
         }
       }
 
