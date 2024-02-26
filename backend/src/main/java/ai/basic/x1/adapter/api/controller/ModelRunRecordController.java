@@ -5,7 +5,7 @@ import ai.basic.x1.adapter.dto.ModelRunRecordDTO;
 import ai.basic.x1.adapter.dto.request.RunRecordQueryDTO;
 import ai.basic.x1.adapter.port.rpc.dto.DatasetModelResultDTO;
 import ai.basic.x1.entity.ModelRunRecordBO;
-import ai.basic.x1.entity.enums.RunRecordQueryBO;
+import ai.basic.x1.entity.RunRecordQueryBO;
 import ai.basic.x1.usecase.ModelRunRecordUseCase;
 import ai.basic.x1.util.DefaultConverter;
 import ai.basic.x1.util.Page;
