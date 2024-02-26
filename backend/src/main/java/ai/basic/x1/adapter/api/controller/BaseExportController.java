@@ -17,7 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.function.Function;
 
-abstract public class BaseExportController<T, Q extends BaseQueryBO> {
+public abstract class BaseExportController<T, Q extends BaseQueryBO> {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
