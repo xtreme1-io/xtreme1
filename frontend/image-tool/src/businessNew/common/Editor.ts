@@ -123,8 +123,8 @@ export default class Editor extends BaseEditor {
     if (!model || !model.code || model.state !== LoadStatus.COMPLETE) return;
     const result = this.dataManager.hasModelResult(model.code, frame);
     if (result) {
-      // api.clearModel([+frame.id], model.recordId);
       this.addModelData(model.code);
+      api.clearModel([+frame.id], model.recordId);
     } else {
       this.runModel();
     }
