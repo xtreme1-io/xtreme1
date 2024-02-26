@@ -10,9 +10,9 @@ const hasMsg = (editor: Editor) => {
  */
 export const modelTool: IToolItemConfig = {
   action: ToolName.model,
-  name: 'Smart Tool',
-  hotkey: 'E',
-  title: 'modelTips',
+  name: 'model',
+  hotkey: '',
+  title: 'model',
   hasMsg: (editor: Editor) => {
     const frame = editor.getCurrentFrame();
     return frame?.model?.state === LoadStatus.COMPLETE;
