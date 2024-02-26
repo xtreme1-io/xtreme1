@@ -1,6 +1,13 @@
 import { ref, watchEffect } from 'vue';
 import { useInjectEditor } from '../../context';
-import { Event, ToolName, toolMap, IToolItemConfig, tools } from '../../../image-editor';
+import {
+  Event,
+  ToolName,
+  toolMap,
+  IToolItemConfig,
+  tools,
+  LoadStatus,
+} from '../../../image-editor';
 interface IToolConfig {
   toolItems: IToolItemConfig[];
   fixedItems: IToolItemConfig[];
@@ -100,12 +107,10 @@ export default function useTool() {
         break;
       }
       case 'model': {
-        // if (editor.mainView.currentDrawTool?.doing()) {
-        //   return editor.showMsg('warning', editor.lang('resultNotComplete'));
-        // }
+        const frame = editor.getCurrentFrame();
         // const code = editor.state.modelConfig.code;
-        // if (!code) return;
-        // editor.handleModel(code);
+        if (frame?.model?.state !== LoadStatus.COMPLETE) return;
+        editor.handleModel();
         break;
       }
     }

@@ -44,7 +44,6 @@
   });
 
   function onAttChange(name: string, value: any) {
-    console.log(name, value);
     let dataInfo = editor.getCurrentFrame();
     dataInfo.needSave = true;
   }

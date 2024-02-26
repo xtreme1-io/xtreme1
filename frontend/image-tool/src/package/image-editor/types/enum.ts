@@ -23,7 +23,7 @@ export enum ToolName {
   polyline = 'polyline', // polyline tool, ToolType.POLYLINE
   'key-point' = 'key-point', // key-point tool, ToolType.KEY_POINT
   // model
-  // model = 'model',
+  model = 'model',
 }
 export enum AnnotateModeEnum {
   INSTANCE = 'INSTANCE',

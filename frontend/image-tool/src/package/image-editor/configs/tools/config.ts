@@ -15,7 +15,7 @@ export const toolMap: Record<ToolName, IToolItemConfig> = {
   [ToolName.polygon]: polygonTool,
   [ToolName.polyline]: lineTool,
   [ToolName['key-point']]: keyPointTool,
-  // [ToolName.model]: modelTool,
+  [ToolName.model]: modelTool,
 };
 
 // fixed tools
@@ -30,7 +30,7 @@ const tools_graph: IToolItemConfig[] = [
 // segment
 const tools_segment: IToolItemConfig[] = [];
 // model
-const tools_model: IToolItemConfig[] = [];
+const tools_model: IToolItemConfig[] = [toolMap[ToolName.model]];
 // segment model
 const tools_model_seg: IToolItemConfig[] = [];
 // instance tools

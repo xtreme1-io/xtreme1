@@ -43,6 +43,10 @@ export async function getModelResult(dataIds: string[], recordId: string) {
   args.push(`serialNo=${recordId}`);
   return await get(`${url}?${args.join('&')}`);
 }
+export async function clearModel(dataIds: number[], recordId: string) {
+  let url = `/api/data/removeModelDataResult`;
+  let data = await post(url, { serialNo: recordId, dataIds });
+}
 export async function runModel(config: any) {
   const url = `${Api.DATA}/modelAnnotate`;
   return await post(url, config);

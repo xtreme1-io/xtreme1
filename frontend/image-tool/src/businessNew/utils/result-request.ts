@@ -17,7 +17,7 @@ import { checkPoints } from './common';
 
 export function convertObject2Annotate(editor: Editor, objects: IObjectInfo[]) {
   const annotates = [] as AnnotateObject[];
-
+  console.log(objects);
   objects.forEach((e: IObjectInfo) => {
     const obj = e.classAttributes;
     const contour = (obj.contour || {}) as IContour;
