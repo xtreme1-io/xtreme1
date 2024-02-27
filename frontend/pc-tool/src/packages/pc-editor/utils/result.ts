@@ -91,6 +91,7 @@ export function translateToObjectV2(object: IObject, baseClassType: IClassType) 
             updateTime: object.updateTime,
             isProjection: object.isProjection,
             classType: object.classType,
+            color: object.color
         },
         contour: {
             viewIndex: object.viewIndex,
@@ -266,8 +267,9 @@ export function convertAnnotate2Object(annotates: AnnotateObject[], editor: Edit
             trackName: userData.trackName || '',
             // resultStatus: userData.resultStatus || '',
             // resultType: userData.resultType || '',
-            classId: classConfig ? classConfig.id : '',
-            classType: classConfig ? classConfig.name : '',
+            classId: classConfig ? classConfig.id : undefined,
+            classType: classConfig ? classConfig.name : undefined,
+            color: classConfig ? classConfig.color : undefined,
             confidence: userData.confidence || undefined,
             modelRun: userData.modelRun || '',
             modelClass: userData.modelClass || '',

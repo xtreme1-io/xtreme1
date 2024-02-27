@@ -110,12 +110,12 @@ export const resultConfig: IKeyboardConfig[] = [
     keys: ['B'],
     tags: Tags_Instance,
   },
-  {
-    label: 'Show annotation sequence',
-    tips: '',
-    keys: ['D'],
-    tags: Tags_Instance,
-  },
+  // {
+  //   label: 'Show annotation sequence',
+  //   tips: '',
+  //   keys: ['D'],
+  //   tags: Tags_Instance,
+  // },
 ];
 export const imageConfig: IKeyboardConfig[] = [
   {

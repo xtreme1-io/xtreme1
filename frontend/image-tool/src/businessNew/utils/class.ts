@@ -124,3 +124,53 @@ export function classificationAssign(baseArr: IClassification[], values: any[]) 
   });
   return returnArr;
 }
+
+export function classificationToSave(classification: IClassification) {
+  let attrMap = {} as Record<string, IClassificationAttr>;
+  classification.attrs.forEach((attr) => {
+    attrMap[attr.id] = attr;
+  });
+  let attrs = classification.attrs.filter((e) => isAttrVisible(e, attrMap) && isAttrHasValue(e));
+
+  // find leaf
+  attrs.forEach((e) => (e.leafFlag = true));
+  attrs.forEach((e) => {
+    let parent = e.parent && attrMap[e.parent] ? attrMap[e.parent] : null;
+    if (parent) parent.leafFlag = false;
+  });
+  let data = attrs.map((e) => {
+    const isParentMulti = e.parent && attrMap[e.parent]?.type === AttrType.MULTI_SELECTION;
+    return {
+      id: e.id,
+      pid: e.parent ? e.parent : null,
+      name: e.name,
+      value: e.value,
+      alias: e.label,
+      pvalue: isParentMulti ? e.parentValue : undefined,
+      type: e.type,
+      isLeaf: !!e.leafFlag,
+    };
+  });
+
+  return data;
+}
+export function isAttrVisible(
+  attr: IClassificationAttr,
+  attrMap: Record<string, IClassificationAttr>,
+): boolean {
+  if (!attr.parent) return true;
+  let parentAttr = attrMap[attr.parent];
+  let visible =
+    parentAttr.type !== AttrType.MULTI_SELECTION
+      ? parentAttr.value === attr.parentValue
+      : (parentAttr.value as any[]).indexOf(attr.parentValue) >= 0;
+
+  return visible && isAttrVisible(parentAttr, attrMap);
+}
+export function isAttrHasValue(attr: IClassificationAttr) {
+  if (attr.type === AttrType.MULTI_SELECTION) {
+    return Array.isArray(attr.value) && attr.value.length > 0;
+  } else {
+    return !!attr.value;
+  }
+}

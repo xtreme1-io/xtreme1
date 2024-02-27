@@ -33,10 +33,12 @@
                       :key="item.key"
                       :value="item.value"
                     >
-                      <div class="img-tool">
-                        <img :src="item.img" alt="" />
-                        <span>{{ item.label }}</span>
-                      </div>
+                      <Tooltip :title="item.label">
+                        <div class="img-tool">
+                          <img :src="item.img" alt="" />
+                          <span>{{ item.label }}</span>
+                        </div>
+                      </Tooltip>
                     </Select.Option>
                   </Select>
                 </Form.Item>
@@ -83,7 +85,7 @@
 <script lang="ts" setup>
   import { ref, reactive, watch, unref, inject, computed } from 'vue';
   // components
-  import { Form, Select, Switch, Input } from 'ant-design-vue';
+  import { Form, Select, Switch, Input, Tooltip } from 'ant-design-vue';
   // import { RuleObject } from 'ant-design-vue/es/form/interface';
   import { useModal, BasicModal, useModalInner } from '/@/components/Modal';
   import { Button } from '/@@/Button';

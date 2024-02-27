@@ -1,3 +1,4 @@
+import { IClassification } from '@/businessNew/types';
 import {
   AnnotateModeEnum,
   LoadStatus,
@@ -57,6 +58,7 @@ export interface IFrame {
   model?: IModelRunningState;
   // save
   needSave?: boolean;
+  classifications: IClassification[];
   // other any
   [k: string]: any;
 }

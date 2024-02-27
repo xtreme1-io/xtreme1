@@ -40,10 +40,12 @@
                     :open="showToolTypeDropdown"
                   >
                     <Select.Option v-for="item in toolTypeOption" :key="item.id" :value="item.type">
-                      <div class="img-tool" @click.stop="handleChangeToolType(item.type)">
-                        <img :src="item.img" alt="" />
-                        <span>{{ item.text }}</span>
-                      </div>
+                      <Tooltip :title="item.text">
+                        <div class="img-tool" @click.stop="handleChangeToolType(item.type)">
+                          <img :src="item.img" alt="" />
+                          <span>{{ item.text }}</span>
+                        </div>
+                      </Tooltip>
                     </Select.Option>
                     <template #suffixIcon>
                       <DownOutlined @click.stop="showToolTypeDropdown = !showToolTypeDropdown" />

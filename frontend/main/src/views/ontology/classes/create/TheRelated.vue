@@ -5,7 +5,9 @@
         <span>Ontology</span>
         <Select :value="props.ontologyId" @change="handleChangeOntology">
           <Select.Option v-for="item in ontologyList" :key="item.id" :value="item.id">
-            <span>{{ item.name }}</span>
+            <Tooltip :title="item.name">
+              <span>{{ item.name }}</span>
+            </Tooltip>
           </Select.Option>
         </Select>
       </div>
@@ -13,7 +15,9 @@
         <span>Class</span>
         <Select :value="props.classId" @change="handleChangeClass">
           <Select.Option v-for="item in classList" :key="item.id" :value="item.id">
-            <span>{{ item.name }}</span>
+            <Tooltip :title="item.name">
+              <span>{{ item.name }}</span>
+            </Tooltip>
           </Select.Option>
         </Select>
       </div>
@@ -38,7 +42,7 @@
 </template>
 <script lang="ts" setup>
   import { onMounted, ref, watch, inject } from 'vue';
-  import { Select, message } from 'ant-design-vue';
+  import { Select, message, Tooltip } from 'ant-design-vue';
   import { useModal } from '/@/components/Modal';
   import TheAttributes from '../attributes/TheAttributes.vue';
   import emitter from 'tiny-emitter/instance';

@@ -142,6 +142,7 @@ export interface fileDetail<T> {
 
 export interface DatasetItem {
   id: string;
+  firstDataId?: string;
   datasetId?: string;
   directoryId?: string;
   displaySettings?: {};

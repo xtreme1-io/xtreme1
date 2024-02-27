@@ -55,6 +55,10 @@ export default class TrackManager {
 
   updateTrackData(trackId: string, object: Partial<IUserData>) {
     const trackObject = this.getTrackObject(trackId);
+    if (!trackObject) {
+      console.error('[method updateTrackData error]');
+      return;
+    }
     Object.assign(trackObject, object || {});
     this.editor.emit(Event.TRACK_OBJECT_CHANGE, trackId);
     // this.editor.frameChange(frame);

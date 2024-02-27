@@ -1,7 +1,7 @@
 import { FlowAction, IPageHandler } from '../types';
 import { useInjectBSEditor } from '../context';
 import pageModes from '../configs/mode';
-import { MsgType } from 'image-editor';
+import { AnnotateObject, MsgType } from 'image-editor';
 import useDataFlow from '../hook/useDataflow';
 import useCommon from '../hook/useCommon';
 
@@ -23,6 +23,7 @@ export function execute(): IPageHandler {
       await loadRecord();
       await Promise.all([loadClasses(), loadDateSetClassification(), loadModels()]);
       await editor.loadManager.loadSceneData(0);
+      await focusObject();
     } catch (error: any) {
       editor.handleErr(error, 'Load Error');
     }
@@ -32,7 +33,21 @@ export function execute(): IPageHandler {
       editor.dataManager.pollDataModelResult();
     }
   }
-
+  async function focusObject() {
+    let objectId = editor.bsState.query.focus;
+    if (objectId) {
+      let findObject: AnnotateObject | undefined;
+      const frame = editor.state.frames.find((frame) => {
+        const objects = editor.dataManager.getFrameObject(frame.id);
+        findObject = objects?.find((o) => o.uuid == objectId);
+        return !!findObject;
+      });
+      if (frame && findObject) {
+        await editor.loadFrame(editor.getFrameIndex(frame.id));
+        editor.selectByTrackId(findObject.userData.trackId);
+      }
+    }
+  }
   function onAction(action: FlowAction) {
     console.log(action);
     switch (action) {

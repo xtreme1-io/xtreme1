@@ -346,6 +346,7 @@ public class DataInfoUseCase {
                     var dataInfo = sceneDataInfoMap.get(dataInfoBO.getId());
                     if (ObjectUtil.isNotNull(dataInfo)) {
                         dataInfoBO.setContent(DefaultConverter.convert(dataInfo.getContent(), DataInfoBO.FileNodeBO.class));
+                        dataInfoBO.setFirstDataId(dataInfo.getId());
                     }
                 }
             });

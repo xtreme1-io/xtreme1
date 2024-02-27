@@ -69,3 +69,15 @@ export const adjustObject = define({
     editor.cmdManager.execute('update-transform', { objects, transforms });
   },
 });
+
+// 绘制结果时的尺寸信息的显隐控制
+export const toggleSizeInfo = define({
+  valid() {
+    return true;
+  },
+  canBlocked: () => false,
+  execute(editor: Editor) {
+    const { config } = editor.state;
+    config.showSizeTips = !config.showSizeTips;
+  },
+});

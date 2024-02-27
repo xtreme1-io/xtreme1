@@ -83,6 +83,8 @@ public class DataInfoDTO {
      */
     private String lockedBy;
 
+    private Long firstDataId;
+
 
     @Data
     @JsonInclude(value = JsonInclude.Include.NON_NULL)

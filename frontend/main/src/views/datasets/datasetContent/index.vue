@@ -19,7 +19,7 @@
           <Button type="primary" @click="handleUnlock">Unlock</Button>
         </div>
       </div>
-      <TipModal @register="tipRegister" :datasetType="(info?.type as datasetTypeEnum )" />
+      <TipModal @register="tipRegister" :datasetType="(info?.type as datasetTypeEnum)" />
       <ModelRun
         modelType="model"
         @register="registerRunModel"
@@ -104,7 +104,7 @@
               class="listcard"
               v-for="i in list"
               :key="i.id + sortWithLabel"
-              :object="objectMap[i.id]"
+              :object="objectMap[i.firstDataId ?? i.id]"
               @handleSelected="handleSelected"
               :showAnnotation="showAnnotation"
               :isSelected="selectedList.filter((item) => item === i.id).length > 0"
@@ -154,8 +154,10 @@
           <div class="custom-item font-bold mb-2 flex justify-between">
             <div class="font-bold">Filter and Sort</div>
 
-            <div class="cursor-pointer"> <SvgIcon @click="resetFilter" name="reload" /> </div
-          ></div>
+            <div class="cursor-pointer">
+              <SvgIcon @click="resetFilter" name="reload" />
+            </div>
+          </div>
           <div>Sort with</div>
           <Tabs size="small" v-model:activeKey="sortWithLabel">
             <Tabs.TabPane key="Data">
@@ -284,8 +286,8 @@
             </CollContainer>
           </div>
         </template>
-        <template v-else
-          ><div>
+        <template v-else>
+          <div>
             <div class="custom-item">
               <div class="custom-label font-bold"> If display results</div>
               <Switch @change="showAnnotationChange" v-model:checked="showAnnotation" />
@@ -642,7 +644,7 @@
         list.value = res.list;
         total.value = res.total;
       }
-      const dataIds = tempList.map((e) => e.id);
+      const dataIds = tempList.map((e: any) => e.firstDataId ?? e.id);
       if (dataIds.length)
         datasetObjectApi({ dataIds: dataIds.toString() }).then((res) => {
           const map = {};
@@ -935,6 +937,7 @@
 </script>
 <style lang="less" scoped>
   @import url(./index.less);
+
   .list {
     margin: 0 -10px;
     position: relative;

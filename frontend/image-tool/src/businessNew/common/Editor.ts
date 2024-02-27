@@ -9,6 +9,7 @@ import {
   IModel,
   DataTypeEnum,
   LoadStatus,
+  ModelCodeEnum,
 } from 'image-editor';
 import { getDefault } from '../state';
 import { IBSState, ISaveResp } from '../types';
@@ -58,7 +59,7 @@ export default class Editor extends BaseEditor {
     if (saveFrames.length == 0) return;
 
     const { saveDatas } = utils.getDataFlowSaveData(this, saveFrames);
-    console.log('========> saveDataFlow saveDatas: ', saveDatas);
+    // console.log('========> saveDataFlow saveDatas: ', saveDatas);
     if (saveDatas.length === 0) return;
 
     bsState.doing.saving = true;
@@ -115,6 +116,75 @@ export default class Editor extends BaseEditor {
 
       return !!(validSource && validClass);
     };
+  }
+  handleModel() {
+    const frame = this.getCurrentFrame();
+    const model = frame.model;
+    if (!model || !model.code || model.state !== LoadStatus.COMPLETE) return;
+    const result = this.dataManager.hasModelResult(model.code, frame);
+    if (result) {
+      this.addModelData(model.code);
+      api.clearModel([+frame.id], model.recordId);
+    } else {
+      this.runModel();
+    }
+  }
+  async addModelData(modelCode: ModelCodeEnum) {
+    const frame = this.getCurrentFrame();
+    if (!frame || !frame.model) return;
+    const { state } = this;
+    const data = this.dataManager.getModelResult(modelCode, frame);
+    if (!data) return;
+    const subTitle = this.lang('Add Results?');
+
+    const ok = await this.showConfirm({
+      title: this.lang('Warning'),
+      subTitle,
+      okText: this.lang('confirm'),
+      cancelText: this.lang('cancel'),
+      okDanger: true,
+    })
+      .then(
+        () => true,
+        () => false,
+      )
+      .catch(() => false);
+    if (!ok) return;
+    await this.addInstanceResult(data);
+    frame.model = undefined;
+    frame.needSave = true;
+    this.dataManager.removeModelResult(frame.id);
+    this.emit(Event.MODEL_RESULT_ADD);
+  }
+  async addInstanceResult(data: any) {
+    const { objects, segmentFileUrl } = data;
+    if (!objects) {
+      const errTips = segmentFileUrl
+        ? '检测到有分割模型结果,若想要添加分割模型结果, 请先切换到分割模式'
+        : '无模型结果数据';
+      this.handleErr(errTips);
+      return;
+    }
+    const annotates = utils.convertObject2Annotate(
+      this,
+      objects.map((o: any) => {
+        return {
+          classAttributes: Object.assign({ contour: o }, o.classAttributes || o || {}),
+          ...o,
+        };
+      }),
+    );
+    annotates.forEach((e) => {
+      this.initIDInfo(e);
+    });
+    if (annotates.length > 0) {
+      this.cmdManager.withGroup(() => {
+        if (this.state.isSeriesFrame) {
+          this.cmdManager.execute('add-track', this.createTrackObj(annotates));
+        }
+        this.cmdManager.execute('add-object', annotates);
+      });
+    }
   }
   async runModel() {
     const modelConfig = this.state.modelConfig;

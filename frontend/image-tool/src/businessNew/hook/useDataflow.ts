@@ -53,6 +53,24 @@ export default function useDataFlow() {
         : new BSError('', editor.lang('load-model-error'), error);
     }
   }
+  async function loadDataFromFrameSeries(frameSeriesId: string) {
+    try {
+      const { datasetId } = editor.bsState;
+      const frames = await api.getFrameSeriesData(datasetId, frameSeriesId);
+      if (frames.length === 0) throw new BSError('', 'load scene error');
+      // state.frames = frames;
+      state.sceneIds = [frameSeriesId];
+      editor.dataManager.setSceneDataByFrames(frames);
+    } catch (error) {
+      throw error instanceof BSError ? error : new BSError('', 'load scene error', error);
+    }
+  }
 
-  return { loadModels, loadClasses, loadRecord, loadDateSetClassification };
+  return {
+    loadModels,
+    loadClasses,
+    loadRecord,
+    loadDateSetClassification,
+    loadDataFromFrameSeries,
+  };
 }

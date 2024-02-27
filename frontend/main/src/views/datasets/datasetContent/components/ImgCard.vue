@@ -146,15 +146,14 @@
             </div>
           </template>
         </div>
-        <div class="p-2 name bottom"> {{ data.name }} </div>
+        <div class="p-2 name bottom">
+          <span>{{ data.name }}</span>
+        </div>
       </div>
       <template v-else-if="info?.type === datasetTypeEnum.LIDAR_FUSION">
         <div class="place relation-container image-loading">
           <img class="pointCloudImg h-83px" v-lazyload="getPlaceImg()" alt="" />
           <NodePc :pcObject="iState.pcObject" ref="svg" />
-          <!-- <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
-            <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
-          </svg> -->
         </div>
         <div class="camera">
           <div
@@ -165,16 +164,6 @@
           >
             <img :key="item" v-lazyload="getPcImage(iState.pcImageObject[item])" alt="" />
             <NodePcImage :pcImageObject="iState.pcImageObject[item]?.object" />
-            <!-- <svg class="easy-image" stroke-width="1" stroke="currentColor" fill="transparent">
-              <template v-for="_item in iState.pcImageObject[item]?.object || []">
-                <polygon v-if="_item.type === '2D_RECT'" :key="_item.id" :points="_item.points" />
-                <polyline
-                  v-else-if="_item.type === '2D_BOX'"
-                  :key="_item.uuid"
-                  :points="_item.points"
-                />
-              </template>
-            </svg> -->
           </div>
         </div>
         <div class="name"> {{ data.name }} </div>
@@ -186,10 +175,9 @@
       >
         <img class="object-cover pointCloudImg image-loading" v-lazyload="getPlaceImg()" alt="" />
         <NodePc :pcObject="iState.pcObject" ref="svg" />
-        <!-- <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
-          <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
-        </svg> -->
-        <div class="p-2 name bottom"> {{ data.name }} </div>
+        <div class="p-2 name bottom">
+          <span> {{ data.name }} </span>
+        </div>
       </div>
       <div
         v-else-if="info?.type === datasetTypeEnum.IMAGE"
@@ -208,54 +196,9 @@
           :viewBox="{ width: size.svgWidth, height: size.svgHeight }"
           :imageObject="iState.imageObject"
         />
-        <!-- <svg
-          class="easy-image"
-          :style="{
-            width: size.svgWidth + 'px',
-            height: size.svgHeight + 'px',
-          }"
-          v-if="size.init"
-          stroke-width="1"
-          stroke="white"
-          fill="transparent"
-        >
-          <template v-for="item in iState.imageObject">
-            <polyline
-              v-if="item.type === 'POLYLINE'"
-              :stroke="item.color"
-              :key="item.uuid"
-              :points="item.points"
-            />
-            <template v-else-if="item.hole.length > 0">
-              <mask :id="item.uuid" :key="item.uuid">
-                <polygon :points="item.points" fill="currentColor" />
-                <polygon
-                  v-for="(_item, _idx) in item.hole"
-                  fill="#000"
-                  :key="_idx"
-                  :points="_item"
-                />
-              </mask>
-
-              <rect
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                :fill="item.color || '#fff'"
-                :key="item.uuid"
-                :style="{ mask: `url(#${item.uuid})` }"
-              />
-            </template>
-            <polygon
-              v-else
-              :key="item.type + item.uuid"
-              :stroke="item.color"
-              :points="item.points"
-            />
-          </template>
-        </svg> -->
-        <div class="p-2 name bottom"> {{ data.name }} </div>
+        <div class="p-2 name bottom">
+          <span>{{ data.name }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -616,24 +559,23 @@
       }
 
       .name {
-        width: 100%;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 400;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
         position: absolute;
-        height: 38px;
+        left: 0;
         bottom: 0;
-        display: flex;
         z-index: 2;
+        display: flex;
         justify-content: center;
         align-items: center;
-        left: 0;
+        width: 100%;
+        height: 38px;
         background: white;
-
-        &.bottom {
+        span {
+          text-align: center;
+          font-size: 14px;
+          font-weight: 400;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
         }
       }
 

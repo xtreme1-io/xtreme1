@@ -1,4 +1,14 @@
-import { IDataResource, IFrame, IObjectSource, SourceType, __UNSERIES__ } from '..';
+import {
+  AnnotateModeEnum,
+  AnnotateObject,
+  IDataResource,
+  IFrame,
+  IObjectSource,
+  IUserData,
+  SourceType,
+  __UNSERIES__,
+  utils,
+} from '..';
 import Editor from '../Editor';
 import { Event } from '../configs';
 import { ResourceLoader } from './ResourceManager/ResourceLoader';
@@ -25,14 +35,60 @@ export default class LoadManager {
     // If it is a seriesFrame, all frames need to be loaded
     if (state.isSeriesFrame) {
       await this.loadFramesData(state.frames);
-      this.editor.updateTrack();
+      const allObject: AnnotateObject[] = [];
+      sceneFrames.forEach((frame) => {
+        const frameObject = this.editor.dataManager.getFrameObject(frame.id) || [];
+        allObject.push(...frameObject);
+      });
+      this.updateTrack(allObject);
     }
     await this.editor.loadFrame(0, false, true);
 
     this.editor.showLoading(false);
     this.editor.emit(Event.SCENE_LOADED);
   }
+  updateTrack(objects: AnnotateObject[]) {
+    const { defaultSourceId } = this.editor.state;
+    const globalTrack = {} as Record<string, Partial<IUserData>>;
+    // let frameTrack = {} as Record<string, Record<string, Partial<IObject>>>;
 
+    const trackNames = objects
+      .filter((e) => e.userData.trackName)
+      .map((e) => parseInt(e.userData.trackName as any))
+      .filter((e) => !isNaN(e));
+
+    let maxId = 0;
+    if (trackNames.length > 0) maxId = Math.max(...trackNames);
+
+    objects.forEach((obj) => {
+      const userData = obj.userData;
+      if (!userData.trackId) userData.trackId = utils.createTrackId();
+      const trackId = userData.trackId as string;
+
+      if (!globalTrack[trackId]) {
+        const classConfig = this.editor.getClassType(userData.classId || '');
+        let trackName = userData.trackName;
+        if (!trackName) trackName = '' + maxId++;
+        globalTrack[trackId] = {
+          trackName: trackName,
+          trackId: userData.trackId,
+          classType: classConfig ? classConfig.name : '',
+          classId: classConfig ? classConfig.id : '',
+          sourceId: userData.sourceId || defaultSourceId,
+          annotationType: AnnotateModeEnum.INSTANCE,
+          // sourceType: obj.sourceType || SourceType.DATA_FLOW,
+        };
+      } else {
+        Object.assign(obj, globalTrack[trackId]);
+      }
+    });
+
+    Object.keys(globalTrack).forEach((trackId) => {
+      this.editor.trackManager.addTrackObject(trackId, globalTrack[trackId]);
+    });
+
+    this.editor.idCount = maxId + 1;
+  }
   async loadFrame(index: number, showLoading: boolean = true, force: boolean = false) {
     const { isSeriesFrame, frameIndex, frames } = this.editor.state;
     if (index > frames.length - 1 || index < 0) return;

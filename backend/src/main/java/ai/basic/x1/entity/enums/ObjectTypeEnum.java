@@ -5,7 +5,7 @@ public enum ObjectTypeEnum {
     TWO_D_BOX("2D_BOX"),
 
     TWO_RECT("2D_RECT"),
-    RECTANGLE("RECTANGLE"),
+    BOUNDING_BOX("BOUNDING_BOX"),
 
     POLYLINE("POLYLINE"),
 

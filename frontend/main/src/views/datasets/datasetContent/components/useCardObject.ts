@@ -14,6 +14,7 @@ import { debounce } from 'lodash-es';
 export enum OBJECT_TYPE {
   POLYGON = 'POLYGON',
   RECTANGLE = 'RECTANGLE',
+  BOUNDING_BOX = 'BOUNDING_BOX',
   POLYLINE = 'POLYLINE',
   RECT = '2D_RECT',
   BOX2D = '2D_BOX',
@@ -32,6 +33,7 @@ const AnnotationTypeMap: Record<string, OBJECT_TYPE> = {
   rect: OBJECT_TYPE.RECT,
   box2d: OBJECT_TYPE.BOX2D,
   POLYGON: OBJECT_TYPE.POLYGON,
+  BOUNDING_BOX: OBJECT_TYPE.RECTANGLE,
   RECTANGLE: OBJECT_TYPE.RECTANGLE,
   POLYLINE: OBJECT_TYPE.POLYLINE,
 };
@@ -134,8 +136,9 @@ export function NodePc({ pcObject, ref }) {
       stroke: 'currentColor',
       ref: ref,
     },
-    pcObject?.map(({ id, points, type }) => {
+    pcObject?.map(({ id, points, type, color = '#fff' }) => {
       return h(NodeType[type], {
+        stroke: color,
         key: id,
         points: points,
       });
@@ -152,11 +155,12 @@ export function NodePcImage({ pcImageObject }) {
       stroke: 'currentColor',
       fill: 'transparent',
     },
-    pcImageObject?.reduce((childs, { type, uuid, points }) => {
+    pcImageObject?.reduce((childs, { type, uuid, points, color = '#fff' }) => {
       const nodeType = NodeType[type];
       if (nodeType) {
         childs.push(
           h(NodeType[type], {
+            stroke: color,
             key: uuid,
             points: points,
           }),
@@ -215,26 +219,16 @@ export default function useCardObject() {
     return renderImage?.url && renderImage?.extraInfo;
   };
   const onImgLoad = (data: any) => {
-    const info = data.content && data.content[0]?.file?.extraInfo;
-    if (!svg.value) return;
+    const info = data.content && (data.content ?? [])[0]?.files[0].file?.extraInfo;
+    if (!svg.value || !info) return;
     const imgDom = svg.value as HTMLImageElement;
     const { clientWidth, clientHeight } = imgDom as HTMLImageElement;
     const naturalWidth = info?.width || imgDom.naturalWidth;
     const naturalHeight = info?.height || imgDom.naturalHeight;
-    // const aspect = naturalWidth / naturalHeight;
-    // const fitAspect = clientWidth / clientHeight;
-
     size.value.width = naturalWidth;
     size.value.height = naturalHeight;
     size.value.svgWidth = clientWidth;
     size.value.svgHeight = clientHeight;
-    // if (aspect > fitAspect) {
-    //   size.value.svgWidth = clientHeight * aspect;
-    //   size.value.svgHeight = clientHeight;
-    // } else {
-    //   size.value.svgWidth = clientWidth;
-    //   size.value.svgHeight = clientWidth / aspect;
-    // }
     size.value.init = true;
   };
   const updatePcResult = (target: any[], { objects, selectedSourceIds }: any, info: any) => {
@@ -252,6 +246,7 @@ export default function useCardObject() {
         if (center3D && rotation3D && size3D) {
           const { points } = transformToPc(contour, size, info);
           target.push({
+            color: obj.meta?.color,
             id: obj.id,
             type: OBJECT_TYPE.BOX3D,
             points: points.map((pos) => pos.join(',')).join(' '),
@@ -333,6 +328,7 @@ export default function useCardObject() {
           target.push({
             id: item.id,
             type: type,
+            color: item.meta?.color,
             points: points
               .map((point) => {
                 return convert(point).join(',');
@@ -390,7 +386,7 @@ export default function useCardObject() {
       const { contour, id, type, meta = {} } = item;
       const { points = [], interior = [] } = contour || item || {};
       let _points: any = [];
-      if (type === OBJECT_TYPE.RECTANGLE) {
+      if ([OBJECT_TYPE.BOUNDING_BOX, OBJECT_TYPE.RECTANGLE].includes(type)) {
         if (points && points.length === 2) {
           const newPoints = points.map((p) => {
             return convert(p);
@@ -402,6 +398,8 @@ export default function useCardObject() {
             [newPoints[1][0], newPoints[0][1]].join(','),
           ];
           _points = rect.join(' ');
+        } else {
+          _points = getPoints(points);
         }
       } else if ([OBJECT_TYPE.POLYGON, OBJECT_TYPE.POLYLINE].includes(type)) {
         _points = getPoints(points);
@@ -418,7 +416,6 @@ export default function useCardObject() {
         uuid: id,
       };
     });
-
     return result;
   };
 
@@ -525,9 +522,7 @@ export function useImgCard(props: {
       props.data.content
     ) {
       const objects = (props.object || []).filter((item) => {
-        const flagNew = ['2D_BOX', '2D_RECT'].includes(item.type);
-        const flagOld = ['rect', 'box2d'].includes(item.objType);
-        return flagNew || flagOld;
+        return [OBJECT_TYPE.BOX2D, OBJECT_TYPE.RECT].includes(item.type);
       });
       imgs.forEach((img, index) => {
         const ref = getRef(index) as HTMLDivElement;
@@ -564,7 +559,6 @@ export function useImgCard(props: {
   };
   const getPlaceImg = () => {
     const placeImgType = props.info?.type === datasetTypeEnum.LIDAR_BASIC ? placeImgFull : placeImg;
-    console.log(props.data);
     const pc = props.data.content
       ? props.data.content.filter((item) => regLidar.test(item.name))[0]
       : { files: null };
@@ -702,6 +696,7 @@ export function useSearchCard(props: {
           });
           results.push({
             id: contour.id,
+            color: object.meta?.color,
             points: _points.map((pos) => pos.join(',')).join(' '),
           });
         }
@@ -718,7 +713,8 @@ export function useSearchCard(props: {
       const img = imgs?.length ? imgs[state.imgIndex] : null;
       file = img?.files && img?.files[0]?.file;
     } else if (props.info?.type === datasetTypeEnum.IMAGE) {
-      file = props.data?.content && props.data?.content[0]?.file;
+      const content = props.data.content as any;
+      file = content && content[0]?.files[0]?.file;
     }
     if (file) {
       const extraInfo = file?.extraInfo;
@@ -835,6 +831,7 @@ export function useSearchCard(props: {
 
           if (points.length) {
             object2d.push({
+              color: info.meta?.color,
               id: o.uuid,
               points: points.map((p) => p.join(',')).join(' '),
             });
@@ -964,19 +961,21 @@ export function useSearchCard(props: {
           offsetX = Math.max(-__x, Math.min(__x, offsetX));
           offsetY = Math.max(-__y, Math.min(__y, offsetY));
         }
+
         return {
           offsetX,
           offsetY,
           scale: scale,
         };
       };
+
       const { contour = {}, id, type, meta = {} } = object;
       const { points = [], interior = [] } = contour;
       let _points: any = [];
       const { scale, offsetX, offsetY } = getOffsetAndScale(points);
       const cX = naturalWidth / 2;
       const cY = naturalHeight / 2;
-      const getPoints = function getPoints(points: { x: number; y: number }[]) {
+      const pointsToSvgPolyStr = function getPoints(points: { x: number; y: number }[]) {
         return points
           .map((point) => {
             const _x = imgToView_X(cX - (cX - point.x - offsetX) * scale);
@@ -986,7 +985,7 @@ export function useSearchCard(props: {
           .join(' ');
       };
 
-      if (type === OBJECT_TYPE.RECTANGLE) {
+      if ([OBJECT_TYPE.RECTANGLE, OBJECT_TYPE.BOUNDING_BOX].includes(type)) {
         if (points && points.length === 2) {
           const newPoints = points.map((point) => {
             const _x = imgToView_X(cX - (cX - point.x - offsetX) * scale);
@@ -1001,14 +1000,14 @@ export function useSearchCard(props: {
           ];
           _points = rect.join(' ');
         } else {
-          _points = getPoints(points);
+          _points = pointsToSvgPolyStr(points);
         }
       } else if ([OBJECT_TYPE.POLYGON, OBJECT_TYPE.POLYLINE].includes(type)) {
-        _points = getPoints(points);
+        _points = pointsToSvgPolyStr(points);
       }
       const hole = interior.map((el: any) => {
         const coord = el.coordinate;
-        return getPoints(coord);
+        return pointsToSvgPolyStr(coord);
       });
       updateCssTransform(imgToView_X(offsetX), imgToView_Y(offsetY), scale);
       results.push({

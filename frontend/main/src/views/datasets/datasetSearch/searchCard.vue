@@ -13,7 +13,12 @@
         alt=""
       />
       <svg ref="svg" class="easy-pc" fill="transparent" stroke-width="1" stroke="currentColor">
-        <polygon v-for="item in iState.pcObject" :key="item.id" :points="item.points" />
+        <polygon
+          v-for="item in iState.pcObject"
+          :key="item.id"
+          :stroke="item.color"
+          :points="item.points"
+        />
       </svg>
     </template>
     <!-- LIDAR_FUSION images  -->
@@ -26,7 +31,12 @@
           :src="pcActiveImage?.url"
         />
         <svg class="easy-svg" fill="transparent" stroke-width="1" stroke="currentColor">
-          <polygon v-for="_item in state.object2d" :key="_item.id" :points="_item.points" />
+          <polygon
+            v-for="_item in state.object2d"
+            :key="_item.id"
+            :stroke="_item.color"
+            :points="_item.points"
+          />
         </svg>
         <div @click.stop="() => onChange(-1)" :class="['handle-icon left']">
           <LeftCircleOutlined />

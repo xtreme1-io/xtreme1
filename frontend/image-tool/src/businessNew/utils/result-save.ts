@@ -2,7 +2,7 @@
  *
  */
 import Editor from '../common/Editor';
-import { IContour, IObject, IObjectBasicInfo, ISaveFormat } from '../types';
+import { IClassificationAttr, IContour, IObject, IObjectBasicInfo, ISaveFormat } from '../types';
 import {
   AnnotateObject,
   IFrame,
@@ -16,6 +16,7 @@ import {
   SourceType,
 } from 'image-editor';
 import { checkPoints, empty, fixed, validNumber } from './common';
+import { classificationToSave } from './class';
 
 function objToArray(obj: Record<string, any> = {}, attrMap: Map<string, any>) {
   const data = [] as any[];
@@ -134,9 +135,19 @@ export function getDataFlowSaveData(editor: Editor, frames?: IFrame[]) {
         });
       });
     });
-
+    const dataAnnotations: any[] = [];
+    frame.classifications.forEach((classification) => {
+      let values = classificationToSave(classification);
+      dataAnnotations.push({
+        classificationId: classification.id,
+        classificationAttributes: {
+          id: classification.id,
+          values: values,
+        },
+      });
+    });
     dataMap[id] = {
-      dataAnnotations: [],
+      dataAnnotations: dataAnnotations,
       dataId: id,
       objects: objectInfos,
     };

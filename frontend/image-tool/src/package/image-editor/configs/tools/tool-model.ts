@@ -1,14 +1,8 @@
-import { Editor, IToolItemConfig } from '../..';
-import { ToolName } from '../../types/enum';
+import { Editor, IToolItemConfig, UIType } from '../..';
+import { LoadStatus, ToolName } from '../../types/enum';
 import ModelConfig from 'image-ui/components/Tools/components/ModelConfig.vue';
 
 const hasMsg = (editor: Editor) => {
-  return false;
-  // const list = editor
-  //   .getModelsByType(ModelTypeEnum.DETECTION)
-  //   .filter((e) => e.code !== ModelCodeEnum.IMAGE_SAM_EMBEDDING);
-  // const result = list.find((e) => editor.modelManager.hasModelResult(e.code));
-  // if (result) return true;
   // return false;
 };
 /**
@@ -16,15 +10,19 @@ const hasMsg = (editor: Editor) => {
  */
 export const modelTool: IToolItemConfig = {
   action: ToolName.model,
-  name: 'Smart Tool',
-  hotkey: 'E',
-  title: 'modelTips',
-  hasMsg,
+  name: 'model',
+  hotkey: '',
+  title: 'model',
+  hasMsg: (editor: Editor) => {
+    const frame = editor.getCurrentFrame();
+    return frame?.model?.state === LoadStatus.COMPLETE;
+  },
   extra: () => ModelConfig,
   extraClass: true,
-  getIcon: (editor?: Editor) => {
+  getIcon: (editor: Editor) => {
     const icon = ToolName.model;
-    return icon;
+    const frame = editor.getCurrentFrame();
+    return frame?.model?.state === LoadStatus.LOADING ? 'loading' : icon;
     // if (!editor) return icon;
     // const frame = editor.getCurrentFrame();
     // if (!frame || !frame.model) return icon;
@@ -33,13 +31,14 @@ export const modelTool: IToolItemConfig = {
     // return isLoading && codes.includes(frame.model.code) ? 'loading' : icon;
   },
   isDisplay: function (editor: Editor) {
-    return true;
+    return editor.state.modeConfig.ui[UIType.model];
     // return (
     //   editor.state.modeConfig.ui[UIType.model] &&
     //   editor.getModelsByType(ModelTypeEnum.DETECTION, AnnotateModeEnum.INSTANCE).length > 0
     // );
   },
-  isActive: function () {
-    return false;
+  isActive: function (editor: Editor) {
+    const frame = editor.getCurrentFrame();
+    return frame?.model?.state === LoadStatus.LOADING;
   },
 };
