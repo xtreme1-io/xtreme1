@@ -29,6 +29,7 @@ spring:
     host: redis
     port: 6379
     password:
+    database: 0
 
 management:
   endpoints:
