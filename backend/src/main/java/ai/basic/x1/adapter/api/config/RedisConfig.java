@@ -33,6 +33,9 @@ public class RedisConfig {
     @Value("${spring.redis.password}")
     private String password;
 
+    @Value("${spring.redis.database}")
+    private int database;
+
     @Bean
     public GenericJackson2JsonRedisSerializer jsonRedisSerializer(
             Jackson2ObjectMapperBuilder objectMapperBuilder) {
@@ -55,6 +58,7 @@ public class RedisConfig {
     public LettuceConnectionFactory redisConnectionFactory() {
         var serverConfig = new RedisStandaloneConfiguration(host, port);
         serverConfig.setPassword(password);
+        serverConfig.setDatabase(database);
 
         var clientConfig = LettucePoolingClientConfiguration.builder()
                 .readFrom(REPLICA_PREFERRED)
