@@ -6,16 +6,14 @@
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/Xtreme1io)
 [![Online](https://img.shields.io/badge/Xtreme1_Online-App-yellow)](https://app.basic.ai/#/login)
 [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.xtreme1.io/) 
-
-[![Use Cloud for Free](https://basicai-asset.s3.amazonaws.com/docs/Open-source/Operation/App_Button.png)](https://app.basic.ai/login)
 </div>
 
 # Intro 
-Xtreme1 is an all-in-one open-source platform for Multimodal training data.
+Xtreme1 is the world's first open-source platform for Multimodal training data.
 
-Xtreme1 unlocks efficiency in data annotation, curation, and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation to the next efficiency level, powering your projects in 2D/3D Object Detection, 3D Instance Segmentation, and LiDAR-Camera Fusion like never before.
+Xtreme1 unlocks deep insights into data annotation, curation and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation game to the next level of efficiency, powering your projects in 2D/3D Object Detection, 3D Instance Segmentation and LiDAR-Camera Fusion like never before.
 
-A long-term free plan is offered in the Xtreme1 Cloud version. Click to [🎉 Use Cloud for Free](https://app.basic.ai/login).
+Today, building upon this initiative, we're delighted to present our [AI-powered Cloud platform](https://app.basic.ai/#/login/) — **completely FREE of charge!** This groundbreaking decision marks another important step towards AI democracy, making AI solutions more accessible to everyone.
 
 # Documentation 
 
