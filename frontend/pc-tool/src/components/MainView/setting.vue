@@ -90,12 +90,10 @@
         const heightRange = config.heightRange;
         if (isNaN(heightRange[0]) || isNaN(heightRange[1])) return;
         let points = editor.pc.groupPoints.children[0] as THREE.Points;
-        let positions = points.geometry.getAttribute('position') as THREE.BufferAttribute;
         let material = points.material as PointsMaterial;
         let option = {} as any;
         option.heightRange = new THREE.Vector2().fromArray(heightRange);
         material.setUniforms(option);
-        config.pointInfo.vCount = utils.filterPosition(positions, heightRange).length;
         editor.pc.render();
     }, 300);
 </script>

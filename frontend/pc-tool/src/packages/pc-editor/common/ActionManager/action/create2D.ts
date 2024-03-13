@@ -43,7 +43,7 @@ export const create2DRect = define({
                 action.start(
                     {
                         type: 'box',
-                        trackLine: config.activeTrack,
+                        trackLine: false,
                         // startMouseDown: true,
                         // startClick: false,
                     },
@@ -160,7 +160,7 @@ export const create2DBox = define({
                 action.start(
                     {
                         type: 'box-2',
-                        trackLine: config.activeTrack,
+                        trackLine: false,
                         // startMouseDown: true,
                         // startClick: false,
                     },

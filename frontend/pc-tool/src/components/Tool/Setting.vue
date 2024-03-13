@@ -84,135 +84,109 @@
                     style="width: 200px; margin: 0px; margin-top: 5px"
                     v-model:value="config.pointSize"
                     :tip-formatter="formatter"
+                    :min="1"
+                    :max="10"
+                    :step="0.1"
+                    @change="() => update('pointSize')"
+                />
+                <div class="title3"
+                    >{{ $$('setting_brightness')
+                    }}<a-button
+                        type="dashed"
+                        class="reset"
+                        size="small"
+                        @click="onResetBrightness"
+                        >{{ $$('setting_pointreset') }}</a-button
+                    >
+                </div>
+                <a-slider
+                    style="width: 200px; margin: 0px; margin-top: 5px"
+                    v-model:value="config.brightness"
+                    :tip-formatter="formatter"
                     :min="0.1"
                     :max="2"
                     :step="0.1"
+                    @change="() => update('brightness')"
                 />
             </div>
             <div class="wrap">
                 <div class="title3"
                     >{{ $$('setting_pointcolor') }}
+                    <br />
                     <a-radio-group
                         v-model:value="config.pointColorMode"
                         size="small"
-                        style="width: 200px; font-size: 12px; margin-top: 5px"
+                        style="font-size: 12px; margin-top: 5px"
                     >
-                        <a-radio-button style="width: 100px; text-align: center" value="height">
-                            {{ $$('setting_colorheight') }}
+                        <a-radio-button
+                            style="width: 80px; text-align: center"
+                            :value="ColorModeEnum.PURE"
+                        >
+                            {{ $$('setting_colorsingle') }}
                         </a-radio-button>
                         <a-radio-button
-                            v-if="config.pointInfo.hasIntensity"
-                            style="width: 100px; text-align: center"
-                            value="intensity"
+                            style="width: 80px; text-align: center"
+                            :value="ColorModeEnum.HEIGHT"
                         >
-                            {{ $$('setting_colorintensity') }}
+                            {{ $$('setting_colorheight') }}
+                        </a-radio-button>
+
+                        <a-radio-button
+                            v-if="config.pointInfo.hasRGB"
+                            style="width: 100px; text-align: center"
+                            :value="ColorModeEnum.RGB"
+                        >
+                            {{ 'RGB' }}
                         </a-radio-button>
                     </a-radio-group>
                 </div>
             </div>
-            <div
-                class="wrap"
-                v-show="config.pointColorMode === 'intensity' && config.pointInfo.hasIntensity"
-            >
-                <div class="title3" style="padding-top: 10px"
+            <ColorSlider />
+            <div class="wrap" v-if="config.pointInfo.hasIntensity">
+                <div class="title3"
                     >{{ $$('setting_colorintensity') }}
+                    <a-switch
+                        size="small"
+                        style="margin-top: 5px; float: right"
+                        v-model:checked="state.config.openIntensity"
+                    />
+                </div>
+                <div class="title3" style="padding-top: 10px">
+                    <a-input-number
+                        v-model:value="config.pointIntensity[0]"
+                        size="small"
+                        :min="0"
+                        :max="255"
+                        style="width: 80px"
+                    ></a-input-number>
+                    <a-input-number
+                        v-model:value="config.pointIntensity[1]"
+                        size="small"
+                        :min="0"
+                        :max="255"
+                        style="width: 80px"
+                    ></a-input-number>
                     <a-button
                         :title="$$('setting_pointreset')"
                         size="small"
-                        style="border: none; float: right"
+                        style="border: none"
                         @click="onResetIntensity"
                     >
                         <template #icon>
                             <RetweetOutlined />
                         </template>
                     </a-button>
-                    <a-input-number
-                        v-model:value="config.pointIntensity[1]"
-                        size="small"
-                        :min="0"
-                        :max="255"
-                        style="width: 60px; float: right"
-                    ></a-input-number>
-                    <a-input-number
-                        v-model:value="config.pointIntensity[0]"
-                        size="small"
-                        :min="0"
-                        :max="255"
-                        style="width: 60px; float: right"
-                    ></a-input-number>
                 </div>
-                <div style="margin-top: 5px" class="title3">
+                <div style="margin: 5px 0 0 5px; margin-top: 5px; width: 180px" class="title3">
                     <a-slider
                         range
-                        style="width: 180px; margin: 5px 0 0 5px"
                         v-model:value="config.pointIntensity"
                         :min="0"
                         :max="255"
-                        :step="1"
-                    />
-                </div>
-            </div>
-            <!-- <div class="wrap" v-show="config.pointColorMode !== 'intensity'">
-                <div class="title3" style="margin-top: 5px"
-                    >{{ $$('setting_ground') }}
-                    <a-button
-                        :title="$$('setting_pointreset')"
-                        size="small"
-                        style="border: none; float: right"
-                        @click="onResetGround"
-                    >
-                        <template #icon>
-                            <RetweetOutlined />
-                        </template>
-                    </a-button>
-                    <a-input-number
-                        v-model:value="config.groundValue"
-                        size="small"
-                        :min="config.pointInfo.min.z"
-                        :max="config.pointInfo.max.z"
-                        style="width: 80px; float: right"
-                        :step="0.1"
-                    ></a-input-number>
-                </div>
-                <div class="title3" style="margin-top: 5px">
-                    <a-slider
-                        style="width: 200px; margin: 0px; margin-top: 5px"
-                        v-model:value="config.groundValue"
-                        :tip-formatter="formatter"
-                        :min="config.pointInfo.min.z"
-                        :max="config.pointInfo.max.z"
                         :step="0.1"
                     />
                 </div>
-            </div> -->
-            <div class="wrap">
-                <!-- <div
-                    :style="{
-                        'margin-top': '6px',
-                        height: '10px',
-                        background: iState.colorCodeBg,
-                    }"
-                    ref="colorCodeRef"
-                ></div> -->
-                <ColorSlider />
             </div>
-            <!-- <div class="title2">
-                <span style="vertical-align: middle; margin-right: 10px">{{
-                    $$('setting_resultview')
-                }}</span>
-            </div>
-            <div class="wrap">
-                <div class="title3"
-                    >{{ $$('setting_showlabel') }}
-                    <a-switch
-                        size="small"
-                        style="float: right; margin-top: 5px"
-                        v-model:checked="state.config.showLabel"
-                    />
-                </div>
-                <slot name="object"></slot>
-            </div> -->
-
             <div class="title2" v-if="!_config.noUtility">
                 <span style="vertical-align: middle; margin-right: 10px">{{ $$('utility') }}</span>
                 <!-- <div class="divider"></div> -->
@@ -266,8 +240,7 @@
     import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue';
     // import { getColorRange } from '../../utils';
     import * as _ from 'lodash';
-    import { useInjectEditor } from '../../state';
-    import { useInjectState } from '../../state';
+    import { useInjectState, useInjectEditor } from '../../state';
     // import useRenderConfig from '../hook/useRenderConfig';
     import { RetweetOutlined } from '@ant-design/icons-vue';
     import { PointsMaterial, Event, Image2DRenderView } from 'pc-render';
@@ -275,6 +248,7 @@
     import * as locale from './lang';
     import { IConfig } from './useTool';
     import ColorSlider from './colorSlider.vue';
+    import { ColorModeEnum } from 'pc-editor';
     let editor = useInjectEditor();
     let $$ = editor.bindLocale(locale);
     let pc = editor.pc;
@@ -352,11 +326,14 @@
             case 'pointSize':
                 options.pointSize = config.pointSize * 10;
                 break;
-            case 'type':
-                // options.trimType = config.type === 'range-only' ? 1 : 2;
+            case 'colorType':
+                options.colorMode = config.pointColorMode || 0;
                 break;
-            case 'colorModel':
-                options.colorMode = config.pointColorMode === 'height' ? -1.0 : 1.0;
+            case 'intensity':
+                options.openIntensity = config.openIntensity ? 1.0 : -1.0;
+                break;
+            case 'brightness':
+                options.brightness = config.brightness;
                 break;
             case 'intensityRange':
                 options.intensityRange = new THREE.Vector2(
@@ -379,11 +356,14 @@
     function onResetIntensity() {
         config.pointIntensity = [0, 255];
     }
-
+    function onResetBrightness() {
+        config.brightness = 1;
+        update('brightness');
+    }
     watch(
         () => config.pointColorMode,
         () => {
-            update('colorModel');
+            update('colorType');
         },
     );
 
@@ -395,18 +375,11 @@
     );
 
     watch(
-        () => config.pointSize,
+        () => config.openIntensity,
         () => {
-            update('pointSize');
+            update('intensity');
         },
     );
-
-    // watch(
-    //     () => [config.showAnnotation, config.showLabel],
-    //     () => {
-    //         pc.render();
-    //     },
-    // );
 
     watch(
         () => [

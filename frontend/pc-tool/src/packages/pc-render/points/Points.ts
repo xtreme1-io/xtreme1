@@ -25,7 +25,7 @@ function createGeometry(data: IData = { position: [], color: [], intensity: [] }
     let intensityAttr = new THREE.Float32BufferAttribute(data.intensity || [], 1);
     // intensityAttr.usage = THREE.DynamicDrawUsage;
 
-    let colorAttr = new THREE.Float32BufferAttribute(data.color || [], 3);
+    let colorAttr = new THREE.Uint8BufferAttribute(data.color || [], 3);
     // colorAttr.usage = THREE.DynamicDrawUsage;
 
     geometry.setAttribute('position', positionAttr);

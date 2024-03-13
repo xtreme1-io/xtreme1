@@ -17,6 +17,9 @@ const en = {
     setting_colorheight: 'Height',
     setting_colorintensity: 'Intensity',
     setting_ground: 'Ground',
+    setting_colorvelocity: 'Speed',
+    setting_brightness: 'Brightness',
+    setting_colorsingle: 'Single',
 
     title_rect: 'Create Rect',
     title_create2DBox: 'Create Box(2D)',
@@ -27,6 +30,9 @@ const en = {
     title_model: 'Run Model',
     title_3d_default: 'Manual',
     title_3d_ai: 'AI-assisted',
+    title_aux_line: 'Auxiliary Line',
+    title_aux_circle: 'Auxiliary Shape',
+    title_radius: 'Radius',
 
     model_title: 'AI Annotation Setting',
     model_name: 'Model',

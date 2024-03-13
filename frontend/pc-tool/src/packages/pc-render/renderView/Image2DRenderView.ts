@@ -19,7 +19,13 @@ const defaultActions: string[] = [
 ];
 // const defaultActions: string[] = ['select-2d'];
 
-type ActionType = 'select' | 'render-2d-shape' | 'create-obj' | 'edit-2d' | 'transform-2d';
+type ActionType =
+    | 'select'
+    | 'render-2d-shape'
+    | 'create-obj'
+    | 'edit-2d'
+    | 'transform-2d'
+    | 'render-2d-track';
 
 interface IOption {
     cameraInternal: ICameraInternal;
