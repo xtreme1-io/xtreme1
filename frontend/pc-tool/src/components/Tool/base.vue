@@ -14,7 +14,13 @@
             </span>
         </a-tooltip>
 
-        <a-tooltip placement="rightBottom" trigger="click" overlayClassName="tool-info-tooltip">
+        <a-tooltip
+            v-model:visible="iState.infoVisible"
+            :onVisibleChange="onVisibleChange"
+            placement="rightBottom"
+            trigger="click"
+            overlayClassName="tool-info-tooltip"
+        >
             <template #title>
                 <Info />
             </template>
@@ -32,12 +38,22 @@
     import Setting from './Setting.vue';
     import useTool, { IConfig } from './useTool';
     import * as locale from './lang';
+    import { reactive } from 'vue';
     const props = defineProps<{
         config?: IConfig;
     }>();
-    let editor = useInjectEditor();
-    let state = useInjectState();
+    const editor = useInjectEditor();
+    const state = useInjectState();
+    const iState = reactive({
+        infoVisible: false,
+    });
+
     let $$ = editor.bindLocale(locale);
+    async function onVisibleChange(value: any) {
+        if (value) {
+            await editor.configManager.countVisiblePointN();
+        }
+    }
 </script>
 
 <style lang="less">

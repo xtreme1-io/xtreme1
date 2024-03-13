@@ -8,7 +8,8 @@ export * from './config/type';
 
 export type { IState } from './state';
 export * from './uitype';
-
+import { ColorModeEnum } from 'pc-render';
+export { ColorModeEnum };
 // export type { IMergeCodeData, IMergeStatus } from './common/TrackManager';
 
 export enum AttrType {
@@ -53,6 +54,8 @@ export type ResultType = Const.Dynamic | Const.Fixed;
 export type ResultStatus = Const.True_Value | Const.Predicted | Const.Copied;
 
 export type LangType = 'zh' | 'en';
+
+export type IHelper2D = 'aux_line' | 'aux_circle';
 
 export enum ObjectType {
     TYPE_3D = '3d',
@@ -228,6 +231,8 @@ export interface IConfig {
     activeAnnotation: boolean;
     activeTranslate: boolean;
     activeTrack: boolean;
+    circleRadius: number;
+    activeHelper2d: IHelper2D[];
     // project
     projectPoint4: boolean;
     projectPoint8: boolean;
@@ -239,12 +244,17 @@ export interface IConfig {
     heightRange: [number, number];
     groundEnable: boolean;
     // setting
-    pointColorMode: 'height' | 'intensity';
+    pointColorMode: ColorModeEnum;
     pointIntensity: [number, number];
     pointGround: number;
+    edgeColor: [string, string];
+    singleColor: string;
     pointInfo: IPointInfo;
     pointColors: string[];
     pointHeight: [number, number];
+    pointVelocity: [number, number];
+    brightness: number; // 强度因子
+    openIntensity: boolean;
     // renderProjectRect: boolean;
     renderRect: boolean;
     renderBox: boolean;
@@ -274,7 +284,10 @@ export interface IPointInfo {
     min: Vector3;
     max: Vector3;
     hasIntensity: boolean;
+    hasVelocity: boolean;
+    hasRGB: boolean;
     intensityRange: Vector2;
+    vRange: Vector2;
 }
 
 export enum StatusType {

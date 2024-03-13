@@ -1,6 +1,7 @@
 // import Action from './action/Action';
 import OrbitControlsAction from './action/OrbitControlsAction';
 import TransformControlsAction from './action/TransformControlsAction';
+import Render2DTrackAction from './action/Render2DTrackAction';
 import SelectAction from './action/SelectAction';
 import ResizeTransAction from './action/ResizeTransAction';
 import CreateAction from './action/CreateAction';
@@ -15,6 +16,7 @@ import { registryAction } from './action/index';
 [
     OrbitControlsAction,
     TransformControlsAction,
+    Render2DTrackAction,
     SelectAction,
     ResizeTransAction,
     CreateAction,
@@ -43,6 +45,7 @@ export * as utils from '../pc-render/utils';
 export {
     OrbitControlsAction,
     TransformControlsAction,
+    Render2DTrackAction,
     SelectAction,
     ResizeTransAction,
     CreateAction,

@@ -105,7 +105,7 @@
         if (dom.value) {
             view = new Image2DRenderView(dom.value, pc, {
                 name: state.config.singleViewPrefix,
-                actions: ['select', 'render-2d-shape', 'create-obj', 'edit-2d', 'transform-2d'],
+                actions: ['select', 'render-2d-shape', 'create-obj', 'edit-2d', 'transform-2d', 'render-2d-track'],
             });
             pc.addRenderView(view);
             // view.lineWidth = 2;

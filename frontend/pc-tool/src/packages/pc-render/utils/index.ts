@@ -2,9 +2,11 @@ import { ICameraInternal } from '../type';
 import * as THREE from 'three';
 import { Box, Box2D, Rect } from '../objects';
 import Image2DRenderView from '../renderView/Image2DRenderView';
-
+import { Lut } from 'three/examples/jsm/math/Lut';
 let near = 0.01;
 let far = 10000;
+const lut = new Lut();
+const colorKeyCode = 'PointColor';
 export function createMatrixFromCameraInternal(
     option: ICameraInternal,
     w: number,
@@ -292,4 +294,19 @@ export function get<T>(type: new () => T, index: number = 0): T {
     }
 
     return value;
+}
+
+export function getColorTable(count = 64, seed?: [string, string]) {
+    const colors = getThemeColor(seed);
+    const len = colors.length - 1;
+    const lookupTable = colors.map((color, index) => {
+        return [index / len, color];
+    });
+    lut.addColorMap(colorKeyCode, lookupTable as any);
+    lut.setColorMap(colorKeyCode, count);
+    const table = lut.lut.slice(0, count);
+    return table;
+}
+export function getThemeColor(seed?: [string, string]) {
+    return ['#00ff00', '#ffff00', '#ff0000'];
 }

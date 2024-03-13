@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-
+export { ColorModeEnum } from './material/PointsMaterial'
 export type { AnnotateObject, Vector2Of4 } from './objects';
 
 export interface Intersect {

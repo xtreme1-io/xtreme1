@@ -153,7 +153,12 @@ export default class DataResource {
             });
         }
     }
-
+    setGround(ground: number, frameId: string) {
+        const source = this.dataMap[frameId];
+        if (source.pointsData) {
+            source.ground = ground;
+        }
+    }
     calculatePointInfo(data: Record<PointAttr, number[]>) {
         let position = data.position || [];
         let intensity = data.intensity || [];

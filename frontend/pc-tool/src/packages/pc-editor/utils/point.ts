@@ -101,17 +101,29 @@ export function getMiniBox(transform: Required<ITransform>, positions: THREE.Buf
 
     // return newBox;
 }
-export function filterPosition(positions: THREE.BufferAttribute, zRange: [number, number]) {
-    let filterPosition = [];
-    for (let i = 0; i < positions.count; i++) {
-        let x = positions.getX(i);
-        let y = positions.getY(i);
-        let z = positions.getZ(i);
-        if (z <= zRange[1] && z >= zRange[0]) {
-            filterPosition.push(new THREE.Vector3(x, y, z));
-        }
-    }
-    return filterPosition;
+export function countVisiblePointN(positions: THREE.BufferAttribute, zRange: [number, number]) {
+    return new Promise<number>((resolve) => {
+        let pointN = 0;
+        const batchSize = 200000;
+        let flag = 0;
+        if (positions.count === 0) resolve(pointN);
+        const count = () => {
+            const forMax = Math.min(flag + batchSize, positions.count);
+            for (let i = flag; i < forMax; i++) {
+                const z = positions.getZ(i);
+                if (z <= zRange[1] && z >= zRange[0]) {
+                    pointN++;
+                }
+            }
+            if (forMax < positions.count) {
+                flag = forMax;
+                window.requestAnimationFrame(count);
+            } else {
+                resolve(pointN);
+            }
+        };
+        window.requestAnimationFrame(count);
+    });
 }
 export function getMiniBox1(
     transform: Required<Pick<ITransform, 'position' | 'rotation' | 'scale'>>,

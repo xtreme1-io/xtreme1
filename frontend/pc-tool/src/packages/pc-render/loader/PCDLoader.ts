@@ -12,7 +12,16 @@ interface IPCDHeader {
     size: number[];
     rowSize: number;
 }
-
+export function correctNumber(n: number) {
+    return isFinite(n) ? n : 0;
+}
+export function correctXYZ(x: number, y: number, z: number) {
+    return {
+        x: correctNumber(x),
+        y: correctNumber(y),
+        z: correctNumber(z),
+    };
+}
 class PCDLoader extends Loader {
     littleEndian: boolean;
     constructor() {
@@ -200,9 +209,9 @@ class PCDLoader extends Loader {
 
                 if (offset.x !== undefined) {
                     // [...Array(N)].forEach((e) => {
-                    position.push(parseFloat(line[offset.x]));
-                    position.push(parseFloat(line[offset.y]));
-                    position.push(parseFloat(line[offset.z]));
+                    position.push(correctNumber(parseFloat(line[offset.x])));
+                    position.push(correctNumber(parseFloat(line[offset.y])));
+                    position.push(correctNumber(parseFloat(line[offset.z])));
                     // });
                 }
 
@@ -213,7 +222,7 @@ class PCDLoader extends Loader {
                     const b = (rgb >> 0) & 0x0000ff;
 
                     // [...Array(N)].forEach((e) => {
-                    color.push(r / 255, g / 255, b / 255);
+                    color.push(r, g, b);
                     // });
                 }
                 if (offset.i !== undefined) {
@@ -254,41 +263,38 @@ class PCDLoader extends Loader {
 
             for (let i = 0; i < PCDheader.points; i++) {
                 if (offset.x !== undefined) {
-                    position.push(
+                    const { x, y, z } = correctXYZ(
                         dataview.getFloat32(
                             PCDheader.points * offset.x + PCDheader.size[0] * i,
                             this.littleEndian,
                         ),
-                    );
-                    position.push(
                         dataview.getFloat32(
                             PCDheader.points * offset.y + PCDheader.size[1] * i,
                             this.littleEndian,
                         ),
-                    );
-                    position.push(
                         dataview.getFloat32(
                             PCDheader.points * offset.z + PCDheader.size[2] * i,
                             this.littleEndian,
                         ),
                     );
+                    position.push(x, y, z);
                 }
 
                 if (offset.rgb !== undefined) {
                     color.push(
                         dataview.getUint8(
                             PCDheader.points * offset.rgb + PCDheader.size[3] * i + 0,
-                        ) / 255.0,
+                        ),
                     );
                     color.push(
                         dataview.getUint8(
                             PCDheader.points * offset.rgb + PCDheader.size[3] * i + 1,
-                        ) / 255.0,
+                        ),
                     );
                     color.push(
                         dataview.getUint8(
                             PCDheader.points * offset.rgb + PCDheader.size[3] * i + 2,
-                        ) / 255.0,
+                        ),
                     );
                 }
 
@@ -321,9 +327,15 @@ class PCDLoader extends Loader {
 
             for (let i = 0, row = 0; i < PCDheader.points; i++, row += PCDheader.rowSize) {
                 if (offset.x !== undefined) {
-                    position.push(dataview.getFloat32(row + offset.x, this.littleEndian));
-                    position.push(dataview.getFloat32(row + offset.y, this.littleEndian));
-                    position.push(dataview.getFloat32(row + offset.z, this.littleEndian));
+                    position.push(
+                        correctNumber(dataview.getFloat32(row + offset.x, this.littleEndian)),
+                    );
+                    position.push(
+                        correctNumber(dataview.getFloat32(row + offset.y, this.littleEndian)),
+                    );
+                    position.push(
+                        correctNumber(dataview.getFloat32(row + offset.z, this.littleEndian)),
+                    );
                 }
 
                 if (offset.i !== undefined) {
@@ -337,9 +349,9 @@ class PCDLoader extends Loader {
                 }
 
                 if (offset.rgb !== undefined) {
-                    color.push(dataview.getUint8(row + offset.rgb + 2) / 255.0);
-                    color.push(dataview.getUint8(row + offset.rgb + 1) / 255.0);
-                    color.push(dataview.getUint8(row + offset.rgb + 0) / 255.0);
+                    color.push(dataview.getUint8(row + offset.rgb + 2));
+                    color.push(dataview.getUint8(row + offset.rgb + 1));
+                    color.push(dataview.getUint8(row + offset.rgb + 0));
                 }
 
                 // if (offset.normal_x !== undefined) {

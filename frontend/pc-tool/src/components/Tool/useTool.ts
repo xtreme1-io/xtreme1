@@ -56,12 +56,7 @@ export default function useTool() {
                 project();
                 break;
             case 'track':
-                let view = editor.pc.renderViews.find(
-                    (e) => e.name === config.singleViewPrefix,
-                ) as Image2DRenderView;
-                let action = view.getAction('create-obj') as CreateAction;
-                editor.state.config.activeTrack = !editor.state.config.activeTrack;
-                action.trackLine = editor.state.config.activeTrack;
+                config.activeTrack = !config.activeTrack;
                 break;
             case 'model':
                 onModel();

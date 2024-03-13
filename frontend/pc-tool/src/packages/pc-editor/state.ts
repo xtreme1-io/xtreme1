@@ -21,6 +21,7 @@ import {
     IResultSource,
     ICheckConfig,
     IUserData,
+    ColorModeEnum,
 } from './type';
 
 const withoutTaskId = '-1';
@@ -122,6 +123,8 @@ function getDefaultConfig(): IConfig {
         activeAnnotation: false,
         activeTranslate: false,
         activeTrack: false,
+        circleRadius: 100,
+        activeHelper2d: ['aux_line'],
         // project
         projectPoint4: true,
         projectPoint8: true,
@@ -131,15 +134,23 @@ function getDefaultConfig(): IConfig {
         heightRange: [-10000, 10000],
         groundEnable: true,
         // render
-        pointColorMode: 'height',
+        edgeColor: ['#000dff', '#ff0000'],
+        singleColor: '#87abff',
+        pointColorMode: ColorModeEnum.HEIGHT,
         pointIntensity: [0, 255],
+        openIntensity: false,
+        brightness: 1,
         pointGround: -1.5,
         pointColors: ['#141ff0', '#Fab942'],
-        pointHeight: [-10000, 10000],
+        pointHeight: [-Infinity, Infinity],
+        pointVelocity: [-Infinity, Infinity],
         pointInfo: {
             count: 0,
             hasIntensity: false,
+            hasVelocity: false,
+            hasRGB: false,
             intensityRange: new THREE.Vector2(),
+            vRange: new THREE.Vector2(),
             min: new THREE.Vector3(),
             max: new THREE.Vector3(),
             vCount: 0,

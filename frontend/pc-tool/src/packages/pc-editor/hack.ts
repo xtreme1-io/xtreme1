@@ -8,6 +8,7 @@ import {
     RenderView,
     ITransform,
     TransformControlsAction,
+    Render2DTrackAction,
     SelectAction,
     AnnotateObject,
     Edit2DAction,
@@ -78,6 +79,22 @@ function hackImgView(editor: Editor, view: Image2DRenderView) {
     if (selectAction) {
         selectAction.selectObject = (object?: AnnotateObject) => {
             editor.cmdManager.execute('select-object', object);
+        };
+    }
+
+    const trackAction = view.getAction('render-2d-track') as Render2DTrackAction;
+    if (trackAction) {
+        trackAction.activeTrack = () => {
+            return editor.state.config.activeTrack;
+        };
+        trackAction.trackCircle = () => {
+            return editor.state.config.activeHelper2d.includes('aux_circle');
+        };
+        trackAction.trackLine = () => {
+            return editor.state.config.activeHelper2d.includes('aux_line');
+        };
+        trackAction.trackRadius = () => {
+            return editor.state.config.circleRadius;
         };
     }
 
