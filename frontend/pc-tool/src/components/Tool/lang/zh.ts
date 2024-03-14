@@ -19,6 +19,9 @@ const zh: ILocale = {
     setting_colorheight: '高度',
     setting_colorintensity: '强度',
     setting_ground: '地面偏移',
+    setting_colorvelocity: '速度',
+    setting_brightness: '亮度',
+    setting_colorsingle: '单一颜色',
 
     title_rect: '创建矩形',
     title_create2DBox: '创建立方体(2D)',
@@ -29,6 +32,9 @@ const zh: ILocale = {
     title_model: '跑模型',
     title_3d_default: '手动框',
     title_3d_ai: '智能框',
+    title_aux_line: '辅助线',
+    title_aux_circle: '辅助圆',
+    title_radius: '半径',
 
     model_title: 'AI标注设置',
     model_name: '模型',
