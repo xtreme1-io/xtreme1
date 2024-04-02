@@ -3,7 +3,7 @@ debug: false
 logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: debug
-    ai.basic.basicai.user.adapter.port.dao.mybatis.mapper: debug
+    ai.basic.x1.adapter.port.dao.mybatis.mapper: debug
   request:
     maxPayloadLength: 100000
 

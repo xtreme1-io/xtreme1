@@ -48,7 +48,6 @@
   import Icon, { SvgIcon } from '/@/components/Icon';
   import { FileItem } from './uploadTyping';
   import { UploadResultStatus } from '/@/components/Upload/src/typing';
-  import { getBufferWithFile } from '/@/components/Upload/src/helper';
   import {
     generatePresignedUrl,
     uploadDatasetApi,
@@ -302,7 +301,7 @@
           isUploading.value = false;
         }
       };
-      getBufferWithFile(fileItem.file).then(upload);
+      upload(fileItem);
     } else {
       isUploading.value = false;
     }
