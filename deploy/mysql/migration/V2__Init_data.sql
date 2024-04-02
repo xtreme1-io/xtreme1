@@ -3,7 +3,7 @@ INSERT INTO `model`(`id`, `name`, `version`, `description`, `scenario`, `dataset
 INSERT INTO `user`(`id`,`username`, `password`, `nickname`) VALUES (1,'admin', '$2a$10$0qk8vIkREsV6KYPeYJLU..C/JxJZc/ccfZIcEmFcnS8W9DtOD/y5K', 'admin');
 INSERT INTO `model_class`(`model_id`, `name`, `code`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES (2, 'Person', 'person', current_timestamp, 1, NULL, NULL);
 INSERT INTO `model_class`(`model_id`, `name`, `code`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES (2, 'Bicycle', 'bicycle', current_timestamp, 1, NULL, NULL);
-INSERT INTO `model_class`(`model_id`, `name`, `code`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES (2, 'Car', 'CAR', current_timestamp, 1, NULL, NULL);
+INSERT INTO `model_class`(`model_id`, `name`, `code`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES (2, 'Car', 'car', current_timestamp, 1, NULL, NULL);
 INSERT INTO `model_class`(`model_id`, `name`, `code`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES (2, 'Motorcycle', 'motorcycle', current_timestamp, 1, NULL, NULL);
 INSERT INTO `model_class`(`model_id`, `name`, `code`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES (2, 'Airplane', 'airplane', current_timestamp, 1, NULL, NULL);
 INSERT INTO `model_class`(`model_id`, `name`, `code`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES (2, 'Train', 'train', current_timestamp, 1, NULL, NULL);
