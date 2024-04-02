@@ -484,6 +484,7 @@ public class UploadDataUseCase {
                     .parentId(sceneId)
                     .status(DataStatusEnum.VALID)
                     .annotationStatus(DataAnnotationStatusEnum.NOT_ANNOTATED)
+                    .splitType(NOT_SPLIT)
                     .createdAt(OffsetDateTime.now())
                     .updatedAt(OffsetDateTime.now())
                     .createdBy(userId)
@@ -497,16 +498,24 @@ public class UploadDataUseCase {
                     subDataNameList.forEach(dataName -> {
                         var dataFiles = this.getSingleDataFiles(sceneFile, dataName, errorBuilder, datasetType);
                         if (CollectionUtil.isNotEmpty(dataFiles)) {
+                            log.info("dataStart,dataName:{},dataFiles:{}",dataName,dataFiles.stream().map(File::getName).collect(Collectors.toList()));
                             var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
-                            var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.dataId(tempDataId).build();
+                            var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.build();
+                            dataAnnotationObjectBO.setDataId(tempDataId);
                             handleDataResult(sceneFile, dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
                             var fileNodeList = this.assembleContent(dataFiles, rootPath, dataInfoUploadBO);
                             log.info("Get data content,frameName:{},content:{} ", dataName, JSONUtil.toJsonStr(fileNodeList));
-                            var dataInfoBO = dataInfoBOBuilder.name(dataName).orderName(NaturalSortUtil.convert(dataName)).content(fileNodeList).splitType(NOT_SPLIT).tempDataId(tempDataId).build();
+                            var dataInfoBO = dataInfoBOBuilder.build();
+                            dataInfoBO.setName(dataName);
+                            dataInfoBO.setOrderName(NaturalSortUtil.convert(dataName));
+                            dataInfoBO.setContent(fileNodeList);
+                            dataInfoBO.setTempDataId(tempDataId);
                             dataInfoBOList.add(dataInfoBO);
                         }
                     });
                     if (CollectionUtil.isNotEmpty(dataInfoBOList)) {
+                        log.info("dataInfoBOList:{}",dataInfoBOList.stream().map(DataInfoBO::getTempDataId).collect(Collectors.toList()));
+                        log.info("dataAnnotationObjectBOList:{}",dataAnnotationObjectBOList.stream().map(DataAnnotationObjectBO::getDataId).collect(Collectors.toList()));
                         var resDataInfoList = this.insertBatch(dataInfoBOList, datasetId, errorBuilder, sceneId);
                         this.saveBatchDataResult(resDataInfoList, dataAnnotationObjectBOList);
                     }
@@ -651,6 +660,7 @@ public class UploadDataUseCase {
                     .filter(fc -> fc.getName().toUpperCase().endsWith(JSON_SUFFIX) && dataName.equals(FileUtil.getPrefix(fc))
                             && fc.getParentFile().getName().equalsIgnoreCase(RESULT)).findFirst();
             if (resultFile.isPresent()) {
+                log.info("dataResult,dataName:{},resultFileName:{}",dataName,resultFile.get().getName());
                 try {
                     var resultJson = JSONUtil.readJSON(resultFile.get(), Charset.defaultCharset());
                     var result = new DataImportResultBO();
