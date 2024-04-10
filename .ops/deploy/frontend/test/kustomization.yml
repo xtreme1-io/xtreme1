@@ -1,0 +1,59 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../base
+
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/rules/0/host
+        value: app-test-ce.alidev.beisai.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - app-test-ce.alidev.beisai.com
+            secretName: alidev.beisai.com
+    target:
+      kind: Ingress
+      name: frontend-main
+  - patch: |-
+      - op: add
+        path: /spec/rules/0/host
+        value: app-test-ce.alidev.beisai.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - app-test-ce.alidev.beisai.com
+            secretName: alidev.beisai.com
+    target:
+      kind: Ingress
+      name: frontend-image-tool
+  - patch: |-
+      - op: add
+        path: /spec/rules/0/host
+        value: app-test-ce.alidev.beisai.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - app-test-ce.alidev.beisai.com
+            secretName: alidev.beisai.com
+    target:
+      kind: Ingress
+      name: frontend-pc-tool
+  - patch: |-
+      - op: add
+        path: /spec/rules/0/host
+        value: app-test-ce.alidev.beisai.com
+      - op: add
+        path: /spec/tls
+        value:
+          - hosts:
+              - app-test-ce.alidev.beisai.com
+            secretName: alidev.beisai.com
+    target:
+      kind: Ingress
+      name: frontend-text-tool

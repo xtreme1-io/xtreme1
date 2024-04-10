@@ -1,0 +1,37 @@
+debug: false
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: debug
+    ai.basic.x1.adapter.port.dao.mybatis.mapper: debug
+spring:
+  datasource:
+    url: jdbc:mysql://basicai-mysql.mysql:3306/basicai_ce_dev
+    username: basicai_ce_dev
+    password: $APP_MYSQL_PASSWORD_DEV
+  redis:
+    host: basicai-redis-master.redis-cluster
+    port: 6379
+    password: $APP_REDIS_PASSWORD_DEV
+    database: 2
+    
+jwt:
+  secret: $APP_JWT_SECRET_DEV
+auth:
+  register:
+    enabled: true
+image:
+  resultEvaluate:
+    url: http://124.70.35.89:18886/image/resultEvaluate     
+pointCloud:
+  resultEvaluate:
+    url: http://106.15.11.113:5007/pointCloud/resultEvaluate
+  convertRender:
+    url: http://pcd-tools.basicai-ce-dev/pointcloud/convert_render
+dataset:
+  similarity:
+    url: http://124.70.35.89:18881/api/v1/calcSimilarity
+minio:
+  endpoint: https://minio-endpoint-basicai.alidev.beisai.com
+  accessKey: admin
+  secretKey: $APP_MINIO_ACCESSKEYSECRET_DEV
+  bucketName: basicai-ce-dev
