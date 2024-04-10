@@ -2,52 +2,48 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  labels:
+    app.kubernetes.io/component: backend
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: $APP_NAME
-      app.kubernetes.io/instance: $APP_NAME
       app.kubernetes.io/component: backend
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: $APP_NAME
-        app.kubernetes.io/instance: $APP_NAME
         app.kubernetes.io/component: backend
     spec:
-      nodeSelector:
-        dedicated: app
-      imagePullSecrets:
-        - name: basicai-registry
       containers:
         - name: backend
-          image: $BACKEND_IMAGE
+          image: backend
           env:
             - name: JAVA_OPTS
               value: "-XX:InitialRAMPercentage=20.0 -XX:MinRAMPercentage=80.0 -XX:MaxRAMPercentage=80.0 -XshowSettings:vm"
           resources:
             requests:
-              memory: 200Mi
-              cpu: 10m
+              memory: 400Mi
+              cpu: 100m
             limits:
-              memory: 2Gi
-              cpu: 1
+              memory: 4Gi
+              cpu: "1"
           ports:
             - name: http
               containerPort: 8080
+          # 启动探针，会尝试多次，如果失败将重启服务
           startupProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
             periodSeconds: 10
             failureThreshold: 6
+          # 存活探针，会尝试多次，如果失败将重启服务
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
             periodSeconds: 10
             failureThreshold: 3
+          # 就绪探针，如果失败将拒绝服务
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -66,10 +62,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backend
+  labels:
+    app.kubernetes.io/component: backend
 spec:
   selector:
-    app.kubernetes.io/name: $APP_NAME
-    app.kubernetes.io/instance: $APP_NAME
     app.kubernetes.io/component: backend
   ports:
     - name: http
@@ -79,14 +75,15 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: backend
+  labels:
+    app.kubernetes.io/component: backend
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-  name: backend
 spec:
   ingressClassName: nginx
   rules:
-    - host: app-dev-ce.alidev.beisai.com
-      http:
+    - http:
         paths:
           - backend:
               service:
@@ -95,33 +92,32 @@ spec:
                   number: 80
             path: /api(/|$)(.*)
             pathType: Prefix
-  tls:
-    - hosts:
-        - app-dev-ce.alidev.beisai.com
-      secretName: alidev.beisai.com
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: minio
+  labels:
+    app.kubernetes.io/component: minio
 spec:
+  selector:
+    app.kubernetes.io/component: minio
   type: ExternalName
-  externalName: basicai-dataset-tmp-minio-endpoint.alidev.beisai.com
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: minio
+  labels:
+    app.kubernetes.io/component: minio
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-    nginx.ingress.kubernetes.io/upstream-vhost: basicai-dataset-tmp-minio-endpoint.alidev.beisai.com
     nginx.ingress.kubernetes.io/proxy-body-size: 1048576m
-  name: minio
 spec:
   ingressClassName: nginx
   rules:
-    - host: app-dev-ce.alidev.beisai.com
-      http:
+    - http:
         paths:
           - backend:
               service:
@@ -130,7 +126,3 @@ spec:
                   number: 443
             path: /minio(/|$)(.*)
             pathType: Prefix
-  tls:
-    - hosts:
-        - app-dev-ce.alidev.beisai.com
-      secretName: alidev.beisai.com

@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>ai.basic</groupId>
-    <artifactId>xtreme1-backend</artifactId>
+    <artifactId>xtreme1</artifactId>
     <version>0.9-SNAPSHOT</version>
 
     <properties>

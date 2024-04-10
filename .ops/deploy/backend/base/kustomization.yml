@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - backend.yml
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: xtreme1
+      app.kubernetes.io/instance: xtreme1
+    includeSelectors: true
+# Kubectl v1.24 不支持，默认为 True
+#    includeTemplates: true
+
+images:
+  - name: backend
+    newName: $IMAGE_NAME
+    # 使用引号防止全数字情况下被当做数字而不是字符串
+    newTag: "$IMAGE_TAG"
+
+patches:
+  - path: patch/deployment-common.yml
+    target:
+      kind: Deployment

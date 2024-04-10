@@ -1,0 +1,33 @@
+debug: true
+spring:
+  datasource:
+    url: jdbc:mysql://basicai-mysql.mysql:3306/basicai_ce_test
+    username: basicai_ce_test
+    password: $APP_MYSQL_PASSWORD_TEST
+  redis:
+    host: basicai-redis-master.redis-cluster
+    port: 6379
+    password: $APP_REDIS_PASSWORD_TEST
+    database: 3
+    
+jwt:
+  secret: $APP_JWT_SECRET_TEST
+auth:
+  register:
+    enabled: true
+image:
+  resultEvaluate:
+    url: http://124.70.35.89:18886/image/resultEvaluate     
+pointCloud:
+  resultEvaluate:
+    url: http://106.15.11.113:5007/pointCloud/resultEvaluate
+  convertRender:
+    url: http://pcd-tools.basicai-ce-test/pointcloud/convert_render
+dataset:
+  similarity:
+    url: http://124.70.35.89:18881/api/v1/calcSimilarity
+minio:
+  endpoint: https://minio-endpoint-basicai.alidev.beisai.com/
+  accessKey: admin
+  secretKey: $APP_MINIO_ACCESSKEYSECRET_TEST
+  bucketName: basicai-ce-test
