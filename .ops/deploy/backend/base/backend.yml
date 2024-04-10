@@ -28,7 +28,7 @@ spec:
               cpu: "1"
           ports:
             - name: http
-              containerPort: 
+              containerPort: 8080
           # 启动探针，会尝试多次，如果失败将重启服务
           startupProbe:
             httpGet:
