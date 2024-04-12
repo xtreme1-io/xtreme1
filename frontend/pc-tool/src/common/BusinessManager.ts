@@ -48,7 +48,7 @@ export default class BusinessManager extends BaseBusinessManager {
     async getFrameClassification(
         frame: IFrame | IFrame[],
     ): Promise<Record<string, Record<string, string>>> {
-        let valueMap = await api.getDataClassification(
+        let valueMap = await api.getDataClassificationBatch(
             Array.isArray(frame) ? frame.map((e) => e.id) : frame.id,
         );
         return valueMap;
@@ -59,7 +59,7 @@ export default class BusinessManager extends BaseBusinessManager {
         classificationMap: Record<string, IObject[]>;
         queryTime: string;
     }> {
-        let data = await api.getDataObject(
+        let data = await api.getDataObjectBatch(
             Array.isArray(frame) ? frame.map((e) => e.id) : frame.id,
         );
         return data;

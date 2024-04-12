@@ -35,6 +35,26 @@ export async function saveObject(config: any) {
     return keyMap;
 }
 
+export async function getDataObjectBatch(dataIds: string[] | string) {
+    if (!Array.isArray(dataIds)) dataIds = [dataIds];
+    const batchSize = 200;
+    const requests: ReturnType<typeof getDataObject>[] = [];
+    while (dataIds.length > 0) {
+        const batchIds = dataIds.splice(0, batchSize);
+        requests.push(getDataObject(batchIds));
+    }
+    return Promise.all(requests).then((res) => {
+        return res.reduce(
+            (map, item) => {
+                Object.assign(map.objectsMap, item.objectsMap || {});
+                Object.assign(map.classificationMap, item.classificationMap || {});
+                return map;
+            },
+            { objectsMap: {}, classificationMap: {}, queryTime: Date.now() },
+        );
+    });
+}
+
 export async function getDataObject(dataIds: string[] | string) {
     if (!Array.isArray(dataIds)) dataIds = [dataIds];
 
@@ -84,22 +104,43 @@ export async function getDataClassification(dataIds: string[] | string) {
     });
     return attrsMap;
 }
-
+export async function getDataClassificationBatch(dataIds: string[] | string) {
+    if (!Array.isArray(dataIds)) dataIds = [dataIds];
+    const batchSize = 200;
+    const requests: Promise<any>[] = [];
+    while (dataIds.length > 0) {
+      const batchIds = dataIds.splice(0, batchSize);
+      requests.push(getDataClassification(batchIds));
+    }
+    return Promise.all(requests).then((res) => {
+      return res.reduce((map, item) => {
+        return Object.assign(map, item);
+      }, {});
+    });
+  }
 export async function unlockRecord(recordId: string) {
     let url = `/api/data/unLock/${recordId}`;
     return await post(url);
 }
 
 export async function getDataStatus(dataIds: string[]) {
+    const batchSize = 200;
+    const requests: Promise<any>[] = [];
     let url = '/api/data/getDataStatusByIds';
-    let argsStr = queryStr({ dataIds });
-    let data = await get(`${url}?${argsStr}`);
-
-    let statusMap = {};
-    data.data.forEach((e: any) => {
-        statusMap[e.id] = e;
+    while (dataIds.length > 0) {
+        const batchIds = dataIds.splice(0, batchSize);
+        let argsStr = queryStr({ dataIds: batchIds });
+        requests.push(get(`${url}?${argsStr}`));
+    }
+    return Promise.all(requests).then((res) => {
+        const statusMap = {};
+        res.forEach((re) => {
+            re.data.forEach((item: any) => {
+                statusMap[item.id] = item;
+            });
+        });
+        return statusMap;
     });
-    return statusMap;
 }
 
 export async function getInfoByRecordId(recordId: string) {
@@ -146,7 +187,6 @@ export async function getInfoByRecordId(recordId: string) {
 
     let ids = dataInfos.map((e) => e.id);
     let stateMap = await getDataStatus(ids);
-
     dataInfos.forEach((data) => {
         let status = stateMap[data.id];
         if (!status) return;
