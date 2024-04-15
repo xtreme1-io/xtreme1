@@ -14,8 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 /**
- * @author chenchao
- * @date 2022/8/26
+ * @author chenchao, chanYoung
+ * @date 2024/4/15
  */
 public class DataFlowUseCase {
 
@@ -65,6 +65,15 @@ public class DataFlowUseCase {
             } else {
                 dataInfoDAO.updateById(DataInfo.builder().id(sceneId).annotationStatus(DataAnnotationStatusEnum.INVALID).build());
             }
+            var dataInfoLambdaUpdateWrapper = Wrappers.lambdaUpdate(DataInfo.class)
+                    .eq(DataInfo::getDatasetId, dataEdit.getDatasetId())
+                    .eq(DataInfo::getParentId, sceneId);
+            dataInfoLambdaUpdateWrapper.setSql(
+                    "annotation_status = " +
+                    "CASE WHEN status = 'INVALID' THEN 'INVALID' " +
+                    "     WHEN status = 'VALID'  THEN 'ANNOTATED' END"
+            );
+            dataInfoDAO.update(dataInfoLambdaUpdateWrapper);
         }
     }
 
