@@ -341,7 +341,10 @@ public class UploadDataUseCase {
                     var fileBOS = uploadFileList(rootPath, newTextFileList, dataInfoUploadBO);
                     createUploadThumbnail(userId, fileBOS, rootPath);
                     fileBOS.forEach(fileBO -> {
-                        var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
+                        Long tempDataId;
+                        synchronized (this) {
+                            tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
+                        }
                         var file = FileUtil.file(tempPath + fileBO.getPath().replace(rootPath, ""));
                         var fileNodeBO = DataInfoBO.FileNodeBO.builder().name(fileBO.getName())
                                 .fileId(fileBO.getId()).type(FILE).build();
@@ -499,7 +502,10 @@ public class UploadDataUseCase {
                         var dataFiles = this.getSingleDataFiles(sceneFile, dataName, errorBuilder, datasetType);
                         if (CollectionUtil.isNotEmpty(dataFiles)) {
                             log.info("dataStart,dataName:{},dataFiles:{}",dataName,dataFiles.stream().map(File::getName).collect(Collectors.toList()));
-                            var tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
+                            Long tempDataId;
+                            synchronized (this) {
+                                tempDataId = ByteUtil.bytesToLong(SecureUtil.md5().digest(UUID.randomUUID().toString()));
+                            }
                             var dataAnnotationObjectBO = dataAnnotationObjectBOBuilder.build();
                             dataAnnotationObjectBO.setDataId(tempDataId);
                             handleDataResult(sceneFile, dataName, dataAnnotationObjectBO, dataAnnotationObjectBOList, errorBuilder);
