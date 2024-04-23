@@ -13,7 +13,7 @@
 
     <groupId>ai.basic</groupId>
     <artifactId>xtreme1</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
 
     <properties>
         <java.version>11</java.version>
