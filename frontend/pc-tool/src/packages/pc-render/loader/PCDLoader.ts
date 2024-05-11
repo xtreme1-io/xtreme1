@@ -1,4 +1,5 @@
-import { FileLoader, Loader, LoaderUtils, MathUtils } from 'three';
+import { FileLoader, Loader, LoaderUtils, MathUtils, Cache } from 'three';
+import PCDFile from './PCDFile';
 
 type ICallBack = (args?: any) => void;
 type PCDData = 'ascii' | 'binary_compressed' | 'binary';
@@ -6,11 +7,63 @@ type PCDFields = 'x' | 'y' | 'z' | 'i' | 'intensity' | 'rgb' | 'normal_x' | 'nor
 interface IPCDHeader {
     data: PCDData;
     offset: { [key in PCDFields]: number };
+    fields: string[];
+    type: Type[];
     headerLen: number;
     height: number;
     points: number;
-    size: number[];
+    size: SizeType[];
     rowSize: number;
+}
+type Type = 'F' | 'I' | 'U';
+type SizeType = 1 | 2 | 4 | 8;
+Cache.enabled = false;
+export function getWithTypeFromDataView(
+    dataview: DataView,
+    offset: number,
+    littleEndian: boolean,
+    type: Type,
+    size: SizeType,
+) {
+    switch (type) {
+        case 'F':
+            switch (size) {
+                case 4:
+                    return dataview.getFloat32(offset, littleEndian);
+                case 8:
+                    return dataview.getFloat64(offset, littleEndian);
+                default:
+                    break;
+            }
+            break;
+        case 'U':
+            switch (size) {
+                case 1:
+                    return dataview.getUint8(offset);
+                case 2:
+                    return dataview.getUint16(offset, littleEndian);
+                case 4:
+                    return dataview.getUint32(offset, littleEndian);
+                default:
+                    break;
+            }
+            break;
+        case 'I':
+            switch (size) {
+                case 1:
+                    return dataview.getInt8(offset);
+                case 2:
+                    return dataview.getInt16(offset, littleEndian);
+                case 4:
+                    return dataview.getInt32(offset, littleEndian);
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
+    throw 'PCD-Format: parse data failed';
 }
 export function correctNumber(n: number) {
     return isFinite(n) ? n : 0;
@@ -42,12 +95,10 @@ class PCDLoader extends Loader {
             url,
             function (data) {
                 try {
-                    onLoad(scope.parse(data, url));
+                    onLoad(scope.parse2(data));
                 } catch (e) {
                     if (onError) {
                         onError(e);
-                    } else {
-                        console.error(e);
                     }
 
                     scope.manager.itemError(url);
@@ -324,7 +375,10 @@ class PCDLoader extends Loader {
         if (PCDheader.data === 'binary') {
             const dataview = new DataView(data, PCDheader.headerLen);
             const offset = PCDheader.offset;
-
+            const iFieldIndex = PCDheader.fields.findIndex((field) =>
+                ['i', 'intensity'].includes(field),
+            );
+            const iFieldKey = PCDheader.fields[iFieldIndex];
             for (let i = 0, row = 0; i < PCDheader.points; i++, row += PCDheader.rowSize) {
                 if (offset.x !== undefined) {
                     position.push(
@@ -338,12 +392,14 @@ class PCDLoader extends Loader {
                     );
                 }
 
-                if (offset.i !== undefined) {
-                    const _i = dataview.getFloat32(row + offset.i, this.littleEndian);
-                    intensity.push(_i);
-                    maxIntensity = Math.max(_i, maxIntensity);
-                } else if (offset.intensity !== undefined) {
-                    const _i = dataview.getFloat32(row + offset.intensity, this.littleEndian);
+                if (iFieldKey != undefined) {
+                    const _i = getWithTypeFromDataView(
+                        dataview,
+                        row + offset.i,
+                        this.littleEndian,
+                        PCDheader.type[iFieldIndex],
+                        PCDheader.size[iFieldIndex],
+                    );
                     intensity.push(_i);
                     maxIntensity = Math.max(_i, maxIntensity);
                 }
@@ -371,6 +427,41 @@ class PCDLoader extends Loader {
             intensity,
         };
     }
+    parse2(data: any) {
+        const pcdData = PCDFile.parse(data).pointsDataMap;
+        const {
+            x = [],
+            y = [],
+            z = [],
+            intensity = [],
+            i = [],
+            rgb = [],
+          } = pcdData;
+        
+          const pointN = x.length;
+          const _position = new Float32Array(pointN * 3);
+          const _color = new Uint8Array(pointN * 3);
+          const targetI = intensity.length > 0 ? intensity : i.length > 0 ? i : undefined;
+          const hasColor = rgb.length > 0;
+          for (let i = 0; i < pointN; i++) {
+            _position[i * 3] = x[i];
+            _position[i * 3 + 1] = y[i];
+            _position[i * 3 + 2] = z[i];
+            if (hasColor) {
+              _color[i * 3] = (rgb[i] >> 16) & 0x0000ff;
+              _color[i * 3 + 1] = (rgb[i] >> 8) & 0x0000ff;
+              _color[i * 3 + 2] = (rgb[i] >> 0) & 0x0000ff;
+            }
+            if (targetI && targetI[i] > 0 && targetI[i] < 1) {
+              targetI[i] = targetI[i] * 255;
+            }
+          }
+          return {
+            position: _position,
+            color: hasColor ? _color : [],
+            intensity:  targetI,
+          }
+      }
 }
 
 export default PCDLoader;
