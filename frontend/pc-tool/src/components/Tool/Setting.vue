@@ -324,7 +324,7 @@
         let options = {} as any;
         switch (type) {
             case 'pointSize':
-                options.pointSize = config.pointSize * 10;
+                options.pointSize = config.pointSize;
                 break;
             case 'colorType':
                 options.colorMode = config.pointColorMode || 0;
