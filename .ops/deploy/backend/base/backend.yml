@@ -34,22 +34,19 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
-            periodSeconds: 10
-            failureThreshold: 6
+            # 默认 periodSeconds 为 10s，failureThreshold 为 3 次，那么默认的等待时长为 10 * 3 = 30s，
+            # 对于启动比较慢的 Java 应用不太够，需要上调 periodSeconds 或 failureThreshold
+            failureThreshold: 10
           # 存活探针，会尝试多次，如果失败将重启服务
           livenessProbe:
             httpGet:
               path: /actuator/health/liveness
               port: 8080
-            periodSeconds: 10
-            failureThreshold: 3
           # 就绪探针，如果失败将拒绝服务
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
           volumeMounts:
             - name: config
               mountPath: /app/config
