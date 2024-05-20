@@ -27,9 +27,9 @@ public class ModelCocoRequestConverter {
         var fileNodeBO = fileNodes.get(0);
         String url;
         if (fileNodeBO.getType().equals(FILE)) {
-            url = fileNodeBO.getFile().getInternalUrl();
+            url = fileNodeBO.getFile().getUrl();
         } else {
-            url = fileNodeBO.getFiles().get(0).getFile().getInternalUrl();
+            url = fileNodeBO.getFiles().get(0).getFile().getUrl();
         }
         if (StrUtil.isEmpty(url)) {
             throw new IllegalArgumentException("file url is empty");

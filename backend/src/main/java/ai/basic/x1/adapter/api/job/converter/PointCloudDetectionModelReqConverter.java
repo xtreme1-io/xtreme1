@@ -52,19 +52,19 @@ public class PointCloudDetectionModelReqConverter {
             if (prePath.startsWith(CAMERA_IMAGE)) {
                 if (CollUtil.isEmpty(dataInfo.getImageUrls())) {
                     List<String> imageUrlList = new ArrayList<>();
-                    imageUrlList.add(fileNodeBO.getFile().getInternalUrl());
+                    imageUrlList.add(fileNodeBO.getFile().getUrl());
                     dataInfo.setImageUrls(imageUrlList);
                 } else {
-                    dataInfo.getImageUrls().add(fileNodeBO.getFile().getInternalUrl());
+                    dataInfo.getImageUrls().add(fileNodeBO.getFile().getUrl());
                 }
             }
             //pcd
             if (prePath.startsWith(LIDAR_POINT_CLOUD)) {
-                dataInfo.setPointCloudUrl(getFileBO(fileNodeBO.getFile()).getInternalUrl());
+                dataInfo.setPointCloudUrl(getFileBO(fileNodeBO.getFile()).getUrl());
             }
             //cameraConfig
             if (prePath.startsWith(CAMERA_CONFIG)) {
-                dataInfo.setCameraConfigUrl(fileNodeBO.getFile().getInternalUrl());
+                dataInfo.setCameraConfigUrl(fileNodeBO.getFile().getUrl());
             }
         }
         if (DIRECTORY.equals(fileNodeBO.getType()) && CollUtil.isNotEmpty(fileNodeBO.getFiles())) {
