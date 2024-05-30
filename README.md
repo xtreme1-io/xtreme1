@@ -9,7 +9,8 @@
 [![Use Cloud for Free](https://basicai-asset.s3.amazonaws.com/docs/Open-source/Operation/App_Button.png)](https://app.basic.ai)
 </div>
 
-# Intro 
+# Intro
+
 Xtreme1 is an all-in-one open-source platform for multimodal training data.
 
 Xtreme1 unlocks efficiency in data annotation, curation, and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation to the next efficiency level, powering your projects in 2D/3D Object Detection, 2D/3D Semantic/Instance Segmentation, and LiDAR-Camera Fusion like never before.
@@ -20,7 +21,7 @@ The README document only includes content related to installation, building, and
 
 Find us on [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
 
-# Key features 
+# Key Features
 
 Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/yolor) & [RITM](https://github.com/saic-vul/ritm_interactive_segmentation) |  Lidar-camera Fusion Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
 :-------------------------:|:-------------------------:
@@ -40,7 +41,7 @@ Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/y
  
  :seven: RLHF for Large Language Models :new: (beta version)
 
-Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE)  | RLHF Annotation tool for LLM (beta version)
+Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE)  | RLHF Annotation Tool for LLM (beta version)
 :-------------------------:|:-------------------------:
 ![](/docs/images/2d_v.gif) |  <img src="/docs/images/0.7rlhf.webp" width="640"> 
 
@@ -78,7 +79,7 @@ The built-in models only can be running on Linux server with [NVIDIA Driver](htt
 
 ## Install with Docker
 
-### Download package
+### Download Package
 
 Download the latest release package and unzip it.
 
@@ -87,7 +88,7 @@ wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.9.1/xtreme1-v0.9
 unzip -d xtreme1-v0.9.1 xtreme1-v0.9.1.zip
 ```
 
-### Start services
+### Start Services
 
 Enter into the release package directory, and execute the following command to start all services. It needs a few minutes to initialize database and prepare a test dataset.
 
@@ -120,7 +121,7 @@ docker compose down
 docker compose down -v
 ```
 
-### Install built-in models
+### Start Built-in Models
 
 You need to explicitly specify a model profile to enable model services.
 
@@ -145,7 +146,7 @@ Make sure you have installed [NVIDIA Driver](https://docs.nvidia.com/datacenter/
 
 If you use **Docker Desktop** + **WSL2.0**, please find this [issue #144](https://github.com/xtreme1-io/xtreme1/issues/144) for your reference.
 
-### Running docker images on ARM architecture machines 
+### Run on ARM CPU
 
 Please note that certain Docker images, including `MySQL`, may not be compatible with the ARM architecture. In case your computer is based on an ARM CPU (e.g. Apple M1), you can create a Docker Compose override file called docker-compose.override.yml and include the following content. While this method uses QEMU emulation to enforce the use of the ARM64 image on the ARM64 platform, it may impact performance.
 
@@ -175,14 +176,14 @@ vi /etc/docker/daemon.json
 docker builder prune
 ```
 
-### Clone repository
+### Clone Repository
 
 ```bash
 git clone https://github.com/basicai/xtreme1.git
 cd xtreme1
 ```
 
-### Build images and run services
+### Build Images and Run Services
 
 The `docker-compose.yml` default will pull application images from Docker Hub, if you want to build images from source code, you can comment on the service's image line and un-comment build line.
 
