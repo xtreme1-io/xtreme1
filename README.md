@@ -54,10 +54,8 @@ Any OS can install the Xtreme1 platform with Docker Compose (installing [Docker 
 
 *Hardware Requirements*
 
-**CPU**: AMD64 or ARM64
-
-**RAM**: 2GB or higher
-
+**CPU**: AMD64 or ARM64  
+**RAM**: 2GB or higher  
 **Hard Drive**: 10GB+ free disk space (depends on data size)
 
 *Software Requirements*
@@ -68,16 +66,14 @@ For Mac, Windows, and Linux with desktop.
 
 For Linux server.
 
-**Docker Engine**: 20.10 or newer
-
+**Docker Engine**: 20.10 or newer  
 **Docker Compose Plugin**: 2.0 or newer
 
 *(Built-in) Models Deployment Requirements*
 
-Two built-in models only can be running on Linux server with [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
+The built-in models only can be running on Linux server with [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
 
-**GPU**: NVIDIA Tesla T4 or other similar NVIDIA GPU
-
+**GPU**: NVIDIA Tesla T4 or other similar NVIDIA GPU  
 **RAM**: 4G or higher
 
 ## Install with Docker
