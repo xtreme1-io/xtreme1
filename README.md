@@ -48,11 +48,11 @@ Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xi
 
 ## Prerequisites
 
-### Operating System Requirements
+*Operating System Requirements*
 
 Any OS can install the Xtreme1 platform with Docker Compose (installing [Docker Desktop](https://docs.docker.com/desktop/) on Mac, Windows, and Linux devices). On the Linux server, you can install Docker Engine with [Docker Compose Plugin](https://docs.docker.com/compose/install/linux/).
 
-### Hardware Requirements
+*Hardware Requirements*
 
 **CPU**: AMD64 or ARM64
 
@@ -60,7 +60,7 @@ Any OS can install the Xtreme1 platform with Docker Compose (installing [Docker 
 
 **Hard Drive**: 10GB+ free disk space (depends on data size)
 
-### Software Requirements
+*Software Requirements*
 
 For Mac, Windows, and Linux with desktop.
 
@@ -72,7 +72,7 @@ For Linux server.
 
 **Docker Compose Plugin**: 2.0 or newer
 
-### (Built-in) Models Deployment Requirements
+*(Built-in) Models Deployment Requirements*
 
 Two built-in models only can be running on Linux server with [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
 
