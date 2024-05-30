@@ -17,7 +17,7 @@ Xtreme1 unlocks efficiency in data annotation, curation, and ontology management
 
 A long-term free plan is offered in the Xtreme1 Cloud version. Click to [🎉 Use Cloud for Free](https://app.basic.ai).
 
-The README document only includes content related to installation, building, and running, if you have any questions or doubts about features, you can always refer to our [Doc Site](https://docs.xtreme1.io/xtreme1-docs/).
+The README document only includes content related to installation, building, and running, if you have any questions or doubts about features, you can always refer to our [Docs Site](https://docs.xtreme1.io/xtreme1-docs/).
 
 Find us on [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.com/multisensory-data-training) | [Issues](https://github.com/xtreme1-io/xtreme1/issues) 
 
