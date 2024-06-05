@@ -72,9 +72,9 @@ For Linux server.
 
 *(Built-in) Models Deployment Requirements*
 
-The built-in models only can be running on Linux server with [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker).
+The built-in model containers only can be running on Linux server with [NVIDIA CUDA Driver](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html).
 
-**GPU**: NVIDIA Tesla T4 or other similar NVIDIA GPU  
+**GPU**: NVIDIA T4 or other similar GPU  
 **RAM**: 4G or higher
 
 ## Install with Docker
@@ -129,7 +129,7 @@ You need to explicitly specify a model profile to enable model services.
 docker compose --profile model up
 ```
 
-Make sure you have installed [NVIDIA Driver](https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker). But you do not need to install the CUDA Toolkit, as it already contained in the model image.
+Make sure you have installed [NVIDIA CUDA Driver](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html) on host machine.
 
 ```bash
 # You need set "default-runtime" as "nvidia" in /etc/docker/daemon.json and restart docker to enable NVIDIA Container Toolkit
