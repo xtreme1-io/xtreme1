@@ -70,6 +70,7 @@ export function copyData(
         updateTrans.transforms.push(copyedAttrs);
       } else {
         const newObject = annotate.cloneThisShape();
+        newObject.userData.backId = undefined;
         newObject.userData.resultStatus = Const.Copied;
         addOption.objects.push(newObject);
       }
