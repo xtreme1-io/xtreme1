@@ -201,7 +201,7 @@ export default function useHeader() {
         bsState.submitting = true;
         try {
             if (isSeriesFrame) {
-                editor.saveObject(frames, true);
+                await editor.saveObject(frames, true);
                 await api.submitData(seriesFrameId ?? '');
                 // await updateDataStatus(frames);
                 unlockData();
