@@ -141,7 +141,7 @@ export default function useBottom() {
   onMounted(() => {
     editor.on(EditorEvent.CURRENT_TRACK_CHANGE, onSelect);
     editor.on(EditorEvent.ANNOTATE_ADD, onUpdate);
-    // editor.playManager.on(EditorEvent.PLAY_STOP, onFrameStop);
+    PlayManager.instance.on(EditorEvent.PLAY_STOP, onFrameStop);
     // editor.cmdManager.addEventListener(EditorEvent.UNDO, onUpdate);
     // editor.cmdManager.addEventListener(EditorEvent.REDO, onUpdate);
     editor.hotkeyManager.bindSeriesFrameEvent();
@@ -154,7 +154,7 @@ export default function useBottom() {
   onBeforeUnmount(() => {
     editor.off(EditorEvent.CURRENT_TRACK_CHANGE, onSelect);
     editor.off(EditorEvent.ANNOTATE_ADD, onUpdate);
-    // editor.playManager.off(EditorEvent.PLAY_STOP, onFrameStop);
+    PlayManager.instance.off(EditorEvent.PLAY_STOP, onFrameStop);
     // editor.cmdManager.removeEventListener(EditorEvent.UNDO, onUpdate);
     // editor.cmdManager.removeEventListener(EditorEvent.REDO, onUpdate);
   });
