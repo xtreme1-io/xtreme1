@@ -25,8 +25,8 @@ As you can see from [Xtreme1 GitHub](https://github.com/xtreme1-io/xtreme1), Xtr
 
 | Component Name | Component Description | Related Language |
 |----------------|-----------------------|------------------|
-| [Frontend (FE)](https://github.com/xtreme1-io/xtreme1) | Xtreme1 web ui | Java |
-| [Backend (BE)](https://github.com/xtreme1-io/xtreme1)  | Xtreme1 api service | JavaScript, TypeScript, HTML, CSS |
+| [Frontend (FE)](https://github.com/xtreme1-io/xtreme1) | Xtreme1 web ui | JavaScript, TypeScript, HTML, CSS |
+| [Backend (BE)](https://github.com/xtreme1-io/xtreme1)  | Xtreme1 api service | Java |
 | [Docs](https://github.com/xtreme1-io/docs)        | Xtreme1 documents | Markdown |
 
 ## Improving documentation
