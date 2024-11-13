@@ -1,6 +1,6 @@
 include:
   - project: 'basicai/xtreme1/common'
-    file: '/ci/template/xtreme1-app.yml'
+    file: '/ops/ci/template/xtreme1-app.yml'
 
 variables:
   APP_NAME: "xtreme1"
