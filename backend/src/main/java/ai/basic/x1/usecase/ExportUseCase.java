@@ -144,12 +144,13 @@ public class ExportUseCase {
         var zipPath = srcPath + ".zip";
         File zipFile;
         var path = String.format("%s/%s", rootPath, FileUtil.getName(zipPath));
+
         if (DataFormatEnum.COCO.equals(query.getDataFormat())) {
             var basePath = String.format("%s/%s", tempPath, IdUtil.fastSimpleUUID());
             var respPath = String.format("%s/resp.json", basePath);
             var baseOutPath = String.format("%s/%s", basePath, FileUtil.getPrefix(zipPath));
             var outPathNew = String.format("%s/result", baseOutPath);
-            FileUtil.move(Path.of(String.format("%s/image", srcPath)), Path.of(String.format("%s/image", baseOutPath)), true);
+            //FileUtil.move(Path.of(String.format("%s/image", srcPath)), Path.of(String.format("%s/image", baseOutPath)), true);
             ZipUtil.zip(srcPath, zipPath, true);
             FileUtil.mkdir(outPathNew);
             DataFormatUtil.convert(Constants.CONVERT_EXPORT, zipPath, outPathNew, respPath);
@@ -157,7 +158,12 @@ public class ExportUseCase {
                 zipFile = ZipUtil.zip(baseOutPath, zipPath, true);
             } else {
                 FileUtil.del(basePath);
-                throw new UsecaseException("convert coco error");
+                var exportRecordBO = exportRecordBOBuilder
+                        .status(ExportStatusEnum.FAILED)
+                        .updatedAt(OffsetDateTime.now())
+                        .build();
+                exportRecordUsecase.saveOrUpdate(exportRecordBO);
+                return;
             }
             FileUtil.del(basePath);
         } else {
