@@ -17,6 +17,10 @@
                         <component v-if="item.extra" :is="item.extra()" />
                     </div>
                 </template>
+                <div>
+                    <!-- 刷新按钮 -->
+                    <button @click="refreshMsg(item)">刷新</button>
+                </div>
                 <div
                     v-show="editor.state.status === StatusType.Play"
                     class="over-not-allowed"
@@ -47,6 +51,11 @@
     let $$ = editor.bindLocale(locale);
 
     let { tools, onTool } = useTool();
+
+    function refreshMsg(item) {
+        // 在这里重新评估消息显示条件
+        item.hasMsg = item.hasMsg(editor);
+    };
 </script>
 
 <style lang="less">
