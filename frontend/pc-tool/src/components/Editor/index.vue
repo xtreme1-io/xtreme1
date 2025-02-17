@@ -32,12 +32,15 @@
 
     import ModelHelp from '../Modal/sub/ModelHelp.vue';
     import ModalConfirm from '../Modal/sub/ModalConfirm.vue';
+    import ModalRefresh from '../Modal/sub/ModalRefresh.vue';
 
     let editor = useProvideEditor();
 
     onMounted(() => {
         editor.registerModal('ModelHelp', ModelHelp);
         editor.registerModal('ModalConfirm', ModalConfirm);
+        editor.registerModal('ModalRefresh', ModalRefresh);
+
     });
 </script>
 

@@ -17,14 +17,14 @@
                         <component v-if="item.extra" :is="item.extra()" />
                     </div>
                 </template>
-                <div>
-                    <!-- 刷新按钮 -->
-                    <button @click="refreshMsg(item)">刷新</button>
-                </div>
                 <div
                     v-show="editor.state.status === StatusType.Play"
                     class="over-not-allowed"
                 ></div>
+                <!-- 刷新 -->
+                <span class="item" title="Refresh" @click="handleRefresh">
+                    <i class="iconfont icon-a-Workflow"></i><span class="title"></span>
+                </span>
             </div>
         </template>
         <template #titleInfo>
@@ -52,10 +52,41 @@
 
     let { tools, onTool } = useTool();
 
-    function refreshMsg(item) {
-        // 在这里重新评估消息显示条件
-        item.hasMsg = item.hasMsg(editor);
-    };
+    /**
+     * 刷新处理 #有时 '+' 号显示异常的补充做法
+     * @returns void
+     */
+    async function handleRefresh() {
+        let status = '';
+        if (editor.needSave()) {
+            status = await editor
+                .showModal('ModalRefresh', {
+                    title: '',
+                    closable: false,
+                    data: {
+                        btns: ['ok', 'cancel'],
+                        okText: 'Save and refresh',
+                        content: 'Tips',
+                        subContent: 'Can be refreshed after saving, are you sure about the operation?',
+                    },
+                })
+                .then(
+                    async (_status: 'discard' | 'ok') => {
+                        return _status;
+                    },
+                    async (error) => 'cancel',
+                );
+        } else {
+            window.location.reload();
+        }
+        if (status === 'ok') {
+            await editor.saveObject();
+            window.location.reload();
+        } else if (status === 'cancel') {
+            return;
+        }
+    }
+    
 </script>
 
 <style lang="less">

@@ -874,6 +874,7 @@
     resultModel: Nullable<ResultsModelParam>,
     _dataModel: Nullable<DataModelParam>,
   ) => {
+    console.log('运行模型');
     let templist: DatasetItem[] = [];
     let type = dataTypeEnum.SINGLE_DATA;
     const data = unref(list).filter((item) => {
