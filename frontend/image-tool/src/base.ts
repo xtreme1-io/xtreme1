@@ -1,21 +1,27 @@
 import { createApp, DefineComponent } from 'vue';
 import { Router } from 'vue-router';
 import VueClipboard from 'vue-clipboard2';
-// import { setupI18n } from '/@/locales/setupI18n';
 import Antd from 'ant-design-vue';
 // import 'ant-design-vue/dist/antd.css';
-import 'ant-design-vue/dist/antd.dark.css';
+// import 'ant-design-vue/dist/antd.dark.css';
+// import Icons from '@basicai/icons';
+import { setupI18n } from './lang';
 
 import './style/index.less';
+import { createPinia } from 'pinia';
+import { useProvideBSEditor } from './business/chengduNew/context';
 
 export async function init(App: DefineComponent<{}, {}, any>, router?: Router) {
-    const app = createApp(App);
-    app.use(VueClipboard);
-    app.use(Antd);
+  const app = createApp(App);
+  const pinia = createPinia();
+  app.use(VueClipboard);
+  app.use(Antd);
+  // app.use(Icons);
+  app.use(pinia);
 
-    if (router) app.use(router);
+  if (router) app.use(router);
+  setupI18n(app);
+  useProvideBSEditor(app);
 
-    // await setupI18n(app);
-
-    app.mount('#app');
+  app.mount('#app');
 }

@@ -1,0 +1,73 @@
+import * as BsActions from '../actions';
+import { IActionName, AllActions as baseActions } from 'image-editor';
+
+export type IBsActionName = keyof typeof BsActions | IActionName;
+export const allActions = [...baseActions, ...Object.keys(BsActions)] as IBsActionName[];
+
+export const defaultActions: IBsActionName[] = [
+  'dataFrameNext',
+  'dataFrameLast',
+  'toggleComment',
+  'toggleClassView',
+  'toggleClassTitle',
+  'toggleAttrsView',
+  'toggleShowPolygonArrow',
+  'toggleSingleResult',
+  'toggleSelectedMask',
+  'toggleResultTrackName',
+  'toggleSkeAnchorTag',
+  'toggleSkeAnchorNum',
+  'toggleHelpLine',
+  'toggleHelpCircle',
+  'toggleBisectrixLine',
+  'toggleVisibleSelection',
+  'showGroupBox',
+  'selectTool',
+  'changeTool',
+  'toNextFrame',
+  'previousFrame',
+  'changeResultListSelect',
+  'changeToolMode',
+  'switchSegmentTool',
+  'changeNameShowType',
+  'resetImageZoom',
+  'switchDisplayMode',
+];
+
+export const baseEditActions: IBsActionName[] = [
+  ...defaultActions,
+  // 'clipPolygon',
+  // 'translate',
+  // 'KeyBackDown',
+  // 'KeyEnterDown',
+  // 'KeyForwardDown',
+  // 'cancelClip',
+  'redo',
+  'undo',
+  'mergePolyline1',
+  'mergePolyline2',
+  'cutSelectionOther',
+  'cutSelectionFirst',
+  'deleteSelection',
+  'adjustObject',
+  'adjustRect',
+  'drawTool',
+  'createGroup',
+  'dissolveGroup',
+  'holeSelection',
+  'removeHoleSelection',
+  'stopCurrentDraw',
+  'copyToNext',
+  'copyToLast',
+  'copyObject',
+  'pasteObject',
+  'cloneObject',
+  'pasteObjectWithClass',
+  'sharedDrawingMode',
+  'sharedClipMode',
+  'toggleSizeInfo',
+  'lineToolDrawMode',
+  'toggleSkeComponentNum',
+];
+
+export const baseViewActions: IBsActionName[] = [...defaultActions];
