@@ -1,5 +1,6 @@
 <template>
   <ConfigProvider :locale="getAntdLocale">
+    <!-- zh_CN -->
     <AppProvider>
       <RouterView />
     </AppProvider>
