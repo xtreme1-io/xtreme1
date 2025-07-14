@@ -6,7 +6,6 @@
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/Xtreme1io)
 [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.xtreme1.io/) 
 
-[![Use Cloud for Free](https://basicai-asset.s3.amazonaws.com/docs/Open-source/Operation/App_Button.png)](https://app.basic.ai)
 </div>
 
 # Intro
@@ -14,8 +13,6 @@
 Xtreme1 is an all-in-one open-source platform for multimodal training data.
 
 Xtreme1 unlocks efficiency in data annotation, curation, and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation to the next efficiency level, powering your projects in 2D/3D Object Detection, 2D/3D Semantic/Instance Segmentation, and LiDAR-Camera Fusion like never before.
-
-A long-term free plan is offered in the Xtreme1 Cloud version. Click to [🎉 Use Cloud for Free](https://app.basic.ai).
 
 The README document only includes content related to installation, building, and running, if you have any questions or doubts about features, you can always refer to our [Docs Site](https://docs.xtreme1.io/xtreme1-docs/).
 
