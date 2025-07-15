@@ -1,15 +1,13 @@
-import { FlowAction, IPageHandler } from '../types';
+import { IPageHandler } from '../types';
 import { useInjectBSEditor } from '../context';
 import useDataFlow from '../hook/useDataflow';
 import pageModes from '../configs/mode';
 import { IFrame, MsgType } from 'image-editor';
-import useCommon from '../hook/useCommon';
 
 export function view(): IPageHandler {
   const editor = useInjectBSEditor();
   const { state, bsState } = editor;
   const { loadClasses, loadDateSetClassification, loadDataFromFrameSeries } = useDataFlow();
-  const { onClose } = useCommon();
 
   async function init() {
     let { query } = bsState;
@@ -57,13 +55,7 @@ export function view(): IPageHandler {
     };
     editor.dataManager.setSceneDataByFrames([data]);
   }
-function onAction(action: FlowAction) {
-    switch (action) {
-      case FlowAction.close:
-        onClose();
-        break;
-    }
-  }
+  function onAction() {}
 
   return { init, onAction };
 }
