@@ -8,6 +8,10 @@
 
 </div>
 
+> [!WARNING]
+> **Project Status: No Longer Maintained**
+> The development team for this project has disbanded, and this repository is no longer being actively developed or supported. The code is remains available for archival purposes; feel free to fork it if you wish to continue its development.
+
 # Intro
 
 Xtreme1 is an all-in-one open-source platform for multimodal training data.
