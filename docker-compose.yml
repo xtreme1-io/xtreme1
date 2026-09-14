@@ -41,7 +41,6 @@ services:
       retries: 10
   minio:
     image: bitnamilegacy/minio:2025.7.23-debian-12-r5
-    platform: linux/arm64
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: 1tQB970y
@@ -50,7 +49,8 @@ services:
       - 8193:9000
       - 8194:9001
     volumes:
-      - minio-data:/data
+      # The bitnami MinIO image serves /bitnami/minio/data (older 2022.x images used /data).
+      - minio-data:/bitnami/minio/data
     healthcheck:
       test:
         [
