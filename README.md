@@ -174,6 +174,10 @@ vi /etc/docker/daemon.json
 
 # You can clear the builder cache if you encounter some package version related problem.
 docker builder prune
+
+# The frontend image caches node_modules between builds. After switching to a different version of the code
+# (for example rolling back), clear that cache if the build fails with errors such as "esbuild-linux-64 could not be found".
+docker builder prune --filter type=exec.cachemount
 ```
 
 ### Clone Repository

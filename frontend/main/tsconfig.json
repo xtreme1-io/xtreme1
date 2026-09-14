@@ -27,7 +27,7 @@
       "/@@/*": ["src/components/BasicCustom/*"]
     }
   },
-  "exclude": ["node_modules", "tests/server/**/*.ts", "dist", "**/*.js", "**/typing.ts"],
+  "exclude": ["node_modules", "dist", "**/*.js", "**/typing.ts"],
   "include": [
     "tests/**/*.ts",
     "src/**/*.ts",

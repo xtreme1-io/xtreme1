@@ -56,15 +56,15 @@ main application of Xtreme1, developed width Vue 3 + Typescript + Vite.
 
 ## Installation Project Dependence
 
-> yarn
+> npm install
 
 ## Start the project in development mode
 
-> yarn dev
+> npm run dev
 
 ## Build
 
-> yarn build
+> npm run build
 
 ## Set proxy config in `.env.development`
 
