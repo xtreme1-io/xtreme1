@@ -6,7 +6,7 @@
     "email": "870891018@qq.com"
   },
   "scripts": {
-    "bootstrap": "yarn install",
+    "bootstrap": "npm install",
     "serve": "npm run dev",
     "dev": "vite",
     "dev:local": "vite --mode localDev",
