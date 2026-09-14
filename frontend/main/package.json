@@ -159,6 +159,7 @@
   "overrides": {
     "semver@7": "^7.7.2",
     "rollup@2": "^2.80.0",
-    "axios@0": "^0.33.0"
+    "axios@0": "^0.33.0",
+    "@vue/babel-plugin-jsx": "^1.5.0"
   }
 }
