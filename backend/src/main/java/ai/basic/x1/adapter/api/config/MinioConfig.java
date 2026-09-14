@@ -2,6 +2,8 @@ package ai.basic.x1.adapter.api.config;
 
 import ai.basic.x1.adapter.port.minio.ExtendMinioClient;
 import ai.basic.x1.adapter.port.minio.MinioProp;
+import io.minio.MinioAsyncClient;
+import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +29,9 @@ public class MinioConfig {
      */
     @Bean(value = "extendMinioClient")
     public ExtendMinioClient extendMinioClient() {
-        return new ExtendMinioClient(ExtendMinioClient.builder().endpoint(minioProp.getEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build());
+        var client = MinioClient.builder().endpoint(minioProp.getEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build();
+        var asyncClient = MinioAsyncClient.builder().endpoint(minioProp.getEndpoint()).credentials(minioProp.getAccessKey(), minioProp.getSecretKey()).build();
+        return new ExtendMinioClient(client, asyncClient);
     }
 
 }

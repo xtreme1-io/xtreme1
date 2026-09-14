@@ -16,7 +16,7 @@
     "@typescript-eslint/eslint-plugin": "^5.16.0",
     "@vueuse/core": "^8.7.5",
     "ant-design-vue": "2.2.8",
-    "axios": "^0.26.1",
+    "axios": "^0.33.0",
     "colord": "^2.9.2",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.1",
@@ -34,8 +34,7 @@
     "lodash": "^4.17.21",
     "mixpanel-browser": "^2.45.0",
     "mustache": "^4.2.0",
-    "nanoid": "^4.0.0",
-    "npm": "^8.13.1",
+    "nanoid": "^5.1.16",
     "prettier": "^2.6.1",
     "qs": "^6.10.3",
     "query-string": "^7.1.1",
@@ -61,5 +60,10 @@
     "typescript": "^4.5.4",
     "vite": "^2.8.0",
     "vue-tsc": "^0.29.8"
+  },
+  "overrides": {
+    "semver@7": "^7.7.2",
+    "rollup@2": "^2.80.0",
+    "axios@0": "^0.33.0"
   }
 }

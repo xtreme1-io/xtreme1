@@ -17,14 +17,20 @@
 
     <properties>
         <java.version>11</java.version>
-        <guava.version>31.0.1-jre</guava.version>
-        <cn.hutool.verion>5.8.5</cn.hutool.verion>
+        <guava.version>33.4.8-jre</guava.version>
+        <cn.hutool.verion>5.8.47</cn.hutool.verion>
         <jaxb-api.version>2.3.0</jaxb-api.version>
         <jjwt.version>0.9.1</jjwt.version>
         <mybatis-plus.version>3.5.0</mybatis-plus.version>
         <transmittable-thread-local.version>2.12.6</transmittable-thread-local.version>
-        <minio-version>8.3.7</minio-version>
-        <okhttp.version>4.8.1</okhttp.version>
+        <minio-version>8.6.0</minio-version>
+        <okhttp.version>5.1.0</okhttp.version>
+        <!-- Spring Boot manages okhttp at 3.x; minio 8.6 needs 5.x -->
+        <okhttp3.version>${okhttp.version}</okhttp3.version>
+        <!-- commons-compress 1.28 (via minio 8.6) needs newer versions than Spring Boot manages -->
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <commons-codec.version>1.19.0</commons-codec.version>
+        <kotlin.version>2.2.0</kotlin.version>
         <fegin.version>11.7</fegin.version>
         <thumbnail.version>0.4.17</thumbnail.version>
         <webp-imageio-version>0.1.6</webp-imageio-version>
@@ -153,8 +159,19 @@
 
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <artifactId>okhttp-jvm</artifactId>
             <version>${okhttp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
         </dependency>
 
         <dependency>
