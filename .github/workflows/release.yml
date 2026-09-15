@@ -4,13 +4,17 @@ name: Release
 # images, pushes them to Docker Hub, verifies the pushed images on amd64 and
 # arm64, and creates a draft GitHub release with the install package.
 # The draft must be reviewed and published by hand.
+#
+# Docker Hub credentials live in the `release` environment. Jobs that push
+# images wait for approval in the `release-approval` environment. Both
+# environments only accept v*.*.* tags, and only admins may create those tags.
 on:
   push:
     tags:
       - "v*.*.*"
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   IMAGE_TAG: ${{ github.ref_name }}
@@ -36,8 +40,16 @@ jobs:
             fi
           done
 
-  backend:
+  approval:
     needs: preflight
+    runs-on: ubuntu-24.04
+    environment: release-approval
+    steps:
+      - run: echo "Release $IMAGE_TAG approved"
+
+  backend:
+    needs: approval
+    environment: release
     # The runtime stage runs apt/pip, so build each architecture on a native runner.
     strategy:
       matrix:
@@ -73,6 +85,7 @@ jobs:
 
   backend-manifest:
     needs: backend
+    environment: release
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
@@ -91,7 +104,8 @@ jobs:
           docker buildx imagetools inspect "$BACKEND_IMAGE:$IMAGE_TAG"
 
   frontend:
-    needs: preflight
+    needs: approval
+    environment: release
     # The build stage runs on $BUILDPLATFORM (amd64); the arm64 image only copies static files into nginx.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -149,6 +163,8 @@ jobs:
   draft-release:
     needs: verify
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Build install package
