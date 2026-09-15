@@ -134,7 +134,7 @@ public interface Constants {
 
     Integer PAGE_SIZE_100 = 100;
 
-    String CONVERT_UPLOAD = "upload";
+    String CONVERT_UPLOAD = "import";
 
     String CONVERT_EXPORT = "export";
 
