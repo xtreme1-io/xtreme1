@@ -1,7 +1,7 @@
 <div align="center">
 <img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
 
-![](https://img.shields.io/badge/Release-v0.9.1-green) 
+![](https://img.shields.io/badge/Release-v0.9.2-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
 [![Twitter](https://img.shields.io/badge/Follow-Twitter-blue)](https://twitter.com/Xtreme1io)
 [![Docs](https://img.shields.io/badge/Docs-Stable-success.svg?style=flat&longCache=true)](http://docs.xtreme1.io/) 
@@ -84,8 +84,8 @@ The built-in model containers only can be running on Linux server with [NVIDIA C
 Download the latest release package and unzip it.
 
 ```bash
-wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.9.1/xtreme1-v0.9.1.zip
-unzip -d xtreme1-v0.9.1 xtreme1-v0.9.1.zip
+wget https://github.com/xtreme1-io/xtreme1/releases/download/v0.9.2/xtreme1-v0.9.2.zip
+unzip -d xtreme1-v0.9.2 xtreme1-v0.9.2.zip
 ```
 
 ### Start Services
@@ -93,7 +93,7 @@ unzip -d xtreme1-v0.9.1 xtreme1-v0.9.1.zip
 Enter into the release package directory, and execute the following command to start all services. It needs a few minutes to initialize database and prepare a test dataset.
 
 ```bash
-cd xtreme1-v0.9.1
+cd xtreme1-v0.9.2
 docker compose up
 ```
 
