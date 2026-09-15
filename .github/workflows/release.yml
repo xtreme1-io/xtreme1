@@ -1,0 +1,162 @@
+name: Release
+
+# Pushing a version tag (e.g. v0.9.2) builds multi-arch backend and frontend
+# images, pushes them to Docker Hub, verifies the pushed images on amd64 and
+# arm64, and creates a draft GitHub release with the install package.
+# The draft must be reviewed and published by hand.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+env:
+  IMAGE_TAG: ${{ github.ref_name }}
+  BACKEND_IMAGE: basicai/xtreme1-backend
+  FRONTEND_IMAGE: basicai/xtreme1-frontend
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker-compose.yml references this tag
+        run: |
+          grep -q "image: $BACKEND_IMAGE:$IMAGE_TAG" docker-compose.yml
+          grep -q "image: $FRONTEND_IMAGE:$IMAGE_TAG" docker-compose.yml
+      - uses: docker/setup-buildx-action@v3
+      - name: Refuse to overwrite existing Docker Hub tags
+        run: |
+          for image in "$BACKEND_IMAGE" "$FRONTEND_IMAGE"; do
+            if docker buildx imagetools inspect "$image:$IMAGE_TAG" > /dev/null 2>&1; then
+              echo "::error::$image:$IMAGE_TAG already exists on Docker Hub"
+              exit 1
+            fi
+          done
+
+  backend:
+    needs: preflight
+    # The runtime stage runs apt/pip, so build each architecture on a native runner.
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=${{ env.BACKEND_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+      - name: Save digest
+        run: |
+          mkdir -p digests
+          echo "${{ steps.build.outputs.digest }}" > "digests/$(echo ${{ matrix.platform }} | tr / -)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-digest-${{ strategy.job-index }}
+          path: digests/*
+
+  backend-manifest:
+    needs: backend
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: backend-digest-*
+          merge-multiple: true
+          path: digests
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Create multi-arch tag
+        run: |
+          docker buildx imagetools create -t "$BACKEND_IMAGE:$IMAGE_TAG" $(for f in digests/*; do echo "$BACKEND_IMAGE@$(cat $f)"; done)
+          docker buildx imagetools inspect "$BACKEND_IMAGE:$IMAGE_TAG"
+
+  frontend:
+    needs: preflight
+    # The build stage runs on $BUILDPLATFORM (amd64); the arm64 image only copies static files into nginx.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.FRONTEND_IMAGE }}:${{ env.IMAGE_TAG }}
+      - run: docker buildx imagetools inspect "$FRONTEND_IMAGE:$IMAGE_TAG"
+
+  verify:
+    needs: [backend-manifest, frontend]
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      # mysql:5.7 is only published for amd64; emulate it on arm64 like Docker Desktop does on Apple Silicon.
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: amd64
+      - name: Start stack from the released docker-compose.yml
+        run: |
+          printf 'services:\n  mysql:\n    platform: linux/amd64\n' > docker-compose.ci.yml
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --wait nginx mysql redis minio backend frontend
+          uname -m
+          for s in backend frontend; do
+            id=$(docker compose -f docker-compose.yml -f docker-compose.ci.yml ps -q $s)
+            docker image inspect $(docker inspect -f '{{.Image}}' $id) --format "$s $(docker inspect -f '{{.Config.Image}}' $id) arch={{.Architecture}}"
+          done
+      - name: Smoke test
+        run: |
+          mkdir -p samples
+          docker run --rm --entrypoint sh -v "$PWD/samples:/out" "$BACKEND_IMAGE:$IMAGE_TAG" -c 'cp /app/*.zip /out/'
+          pip install --quiet requests
+          python3 .github/ci-verify/smoke.py
+      - name: Logs
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml ps -a
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --no-color backend minio | tail -200
+
+  draft-release:
+    needs: verify
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build install package
+        run: zip -r "xtreme1-$IMAGE_TAG.zip" docker-compose.yml deploy
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$IMAGE_TAG" "xtreme1-$IMAGE_TAG.zip" \
+            --draft --verify-tag --title "Release $IMAGE_TAG" \
+            --notes "Draft created by the release workflow. Replace this text with the release notes before publishing."

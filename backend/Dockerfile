@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM maven:3.8-eclipse-temurin-11 as build
+FROM --platform=$BUILDPLATFORM maven:3.8-eclipse-temurin-11 as build
 WORKDIR /build
 ADD . .
 RUN --mount=type=cache,target=/root/.m2 mvn package

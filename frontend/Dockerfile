@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:16 as build
+FROM --platform=$BUILDPLATFORM node:16 as build
 WORKDIR /build
 COPY . .
 RUN --mount=type=cache,target=main/node_modules \
