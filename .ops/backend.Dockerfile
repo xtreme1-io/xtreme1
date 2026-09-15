@@ -1,8 +1,9 @@
-FROM openjdk:11
+# openjdk images were removed from Docker Hub; JDK 11.0.16 also crashes on cgroup v2 hosts
+FROM eclipse-temurin:11-jre-jammy
 
 RUN apt update && \
-    apt install -y iputils-ping curl wget netcat python3 python3-pip
-RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git@d0cf4cc
+    apt install -y iputils-ping curl wget netcat python3 python3-pip git
+RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git@a16984b
 WORKDIR /app
 COPY target/$BACKEND_PACKAGE_NAME ./app.jar
 RUN mkdir -p config
