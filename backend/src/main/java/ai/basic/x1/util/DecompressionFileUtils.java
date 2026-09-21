@@ -2,6 +2,7 @@ package ai.basic.x1.util;
 
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -28,6 +29,9 @@ import static cn.hutool.core.util.CharsetUtil.UTF_8;
  */
 @Slf4j
 public class DecompressionFileUtils {
+
+    private static final int CONNECT_TIMEOUT_MS = 15000;
+    private static final int READ_TIMEOUT_MS = 15000;
 
     /**
      * Unzip the zip file
@@ -127,27 +131,44 @@ public class DecompressionFileUtils {
      * @return boolean
      */
     public static boolean validateUrl(String urlStr) {
-        var boo = validateUrlS(urlStr);
-        if (!boo) {
-            return validateUrlS(URLUtil.encode(urlStr));
-        }
-        return true;
+        return describeUrlProblem(urlStr) == null;
     }
 
-    private static boolean validateUrlS(String urlStr) {
+    /**
+     * Why this URL cannot be fetched, or null if it can. The text ends up in the upload
+     * record, because "File url error" on its own tells the user nothing they can act on.
+     */
+    public static String describeUrlProblem(String urlStr) {
+        var problem = probe(urlStr);
+        if (problem == null) {
+            return null;
+        }
+        var encoded = URLUtil.encode(urlStr);
+        return encoded.equals(urlStr) ? problem : probe(encoded);
+    }
+
+    private static String probe(String urlStr) {
         try {
             var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
-            oc.setConnectTimeout(1000);
+            // One second is shorter than a TLS handshake to a bucket on another continent, so
+            // a perfectly good URL was rejected as unreachable (#316).
+            oc.setConnectTimeout(CONNECT_TIMEOUT_MS);
+            oc.setReadTimeout(READ_TIMEOUT_MS);
             // Do not follow redirects: UploadUrlValidator checks every hop of the chain, and
             // following one here would reach a host nothing has checked. A redirect still counts
             // as reachable, which is what this method is asked.
             oc.setInstanceFollowRedirects(false);
-            return oc.getResponseCode() < HttpStatus.BAD_REQUEST.value();
+            var status = oc.getResponseCode();
+            if (status < HttpStatus.BAD_REQUEST.value()) {
+                return null;
+            }
+            return "the server answered HTTP " + status;
         } catch (Exception e) {
-            log.error("url error", e);
-            return false;
+            log.warn("Upload url not reachable: {} ({})", urlStr, e.toString());
+            var message = e.getMessage();
+            return e.getClass().getSimpleName() + (StrUtil.isEmpty(message) ? "" : ": " + message);
         }
     }
 

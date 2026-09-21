@@ -178,10 +178,11 @@ public class UploadDataUseCase {
             log.error("File url illegal,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
             return uploadRecordBO.getSerialNumber();
         }
-        var boo = DecompressionFileUtils.validateUrl(dataInfoUploadBO.getFileUrl());
-        if (!boo) {
-            uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ERROR.getMessage());
-            log.error("File url error,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
+        var urlProblem = DecompressionFileUtils.describeUrlProblem(dataInfoUploadBO.getFileUrl());
+        if (urlProblem != null) {
+            uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED,
+                    DATASET_DATA_FILE_URL_ERROR.getMessage() + " - " + urlProblem);
+            log.error("File url error,datasetId:{},userId:{},fileUrl:{},reason:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl(), urlProblem);
             return uploadRecordBO.getSerialNumber();
         }
         var dataset = datasetDAO.getById(dataInfoUploadBO.getDatasetId());
