@@ -16,6 +16,8 @@ BASE = "http://localhost:8190"
 API = BASE + "/api"
 s = requests.Session()
 plain = requests.Session()
+# never route localhost through a system proxy; this is run on developer machines too
+s.trust_env = plain.trust_env = False
 failures = []
 
 
@@ -68,13 +70,16 @@ s.headers["Authorization"] = f"Bearer {token}"
 check("register", bool(token))
 
 for dtype, path, expect in [("IMAGE", "samples/xtreme1-image-trial.zip", 12),
-                            ("LIDAR_FUSION", "samples/xtreme1-lidar-fusion-trial.zip", None)]:
+                            ("LIDAR_FUSION", "samples/xtreme1-lidar-fusion-trial.zip", 16)]:
     ds, rec = upload(dtype, path, dtype.lower())
     parsed = rec and rec.get("parsedDataNum")
+    total = rec and rec.get("totalDataNum")
     check(f"upload {dtype}", rec is not None and rec.get("status") == "PARSE_COMPLETED" and not rec.get("errorMessage"),
           json.dumps({k: rec.get(k) for k in ("status", "parsedDataNum", "totalDataNum", "errorMessage")} if rec else None))
-    if expect:
-        check(f"parsed count {dtype}", parsed == expect, f"{parsed}")
+    # PARSE_COMPLETED on its own does not mean everything in the archive came through:
+    # both counts have to be the number this sample actually holds.
+    check(f"parsed count {dtype}", parsed == total == expect,
+          f"parsed={parsed} total={total} expected={expect}")
     items = call("GET", "/data/findByPage", params={"pageNo": 1, "pageSize": 5, "datasetId": ds})["list"]
     urls = file_urls(items)[:4]
     statuses = [plain.get(u, timeout=60).status_code for u in urls]
