@@ -15,7 +15,6 @@ const zh: ILocale = {
     'hk-label': '展示 / 隐藏标签',
     'hk-rotate-head': '调整3D框朝向',
     'hk-axis': '开启 / 关闭移动',
-    'hk-filter': '展示 / 隐藏选中物体外的2D结果',
     'hk-measure': '展示 / 隐藏辅助线',
 };
 export { zh };
