@@ -14,7 +14,6 @@ const zh: ILocale = {
     setting_colorreset: '重置颜色',
     setting_resultview: '结果显示',
     setting_showlabel: '显示标签(M)',
-    setting_showannotate: '显示批注(Shift+H)',
     setting_pointcolor: '点云颜色',
     setting_colorheight: '高度',
     setting_colorintensity: '强度',

@@ -12,7 +12,6 @@ const en = {
     setting_colorreset: 'Reset Color',
     setting_resultview: 'Objects',
     setting_showlabel: 'Show Tags(M)',
-    setting_showannotate: 'Show Annotate(Shift+H)',
     setting_pointcolor: 'Color',
     setting_colorheight: 'Height',
     setting_colorintensity: 'Intensity',
