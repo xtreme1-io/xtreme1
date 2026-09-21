@@ -16,7 +16,7 @@ name: PR
 on:
   pull_request:
     branches: [main]
-  workflow_dispatch:      # needed to run this against main before it is merged
+  workflow_dispatch:      # re-run by hand after a flaky red; unavailable until this is on main
 
 permissions:
   contents: read
@@ -61,4 +61,4 @@ jobs:
         if: always()
         run: |
           docker compose -f docker-compose.yml -f docker-compose.pr.yml ps -a
-          docker compose -f docker-compose.yml -f docker-compose.pr.yml logs --no-color backend minio | tail -200
+          docker compose -f docker-compose.yml -f docker-compose.pr.yml logs --no-color backend minio mysql nginx | tail -300
