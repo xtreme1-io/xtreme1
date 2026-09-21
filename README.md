@@ -146,6 +146,30 @@ Make sure you have installed [NVIDIA CUDA Driver](https://docs.nvidia.com/cuda/c
 
 If you use **Docker Desktop** + **WSL2.0**, please find this [issue #144](https://github.com/xtreme1-io/xtreme1/issues/144) for your reference.
 
+### Upgrading
+
+The backend applies any outstanding database migrations when it starts, so upgrading is
+replacing the release package and starting the stack again. The data volumes are reused, and
+`docker compose down` without `-v` keeps them.
+
+Back up the database first. A migration that fails leaves the database where it stopped, and the
+backend then refuses to start rather than serve on a half-migrated schema — the log names the
+version it is on and the scripts that did not run.
+
+```bash
+# From the directory of the version you are currently running.
+docker compose exec -T mysql mysqldump -uxtreme1 -pRc4K3L6f --databases xtreme1 > xtreme1-backup.sql
+docker compose down
+
+# Then, from the new release package directory.
+docker compose up -d
+```
+
+To restore that backup, `docker compose exec -T mysql mysql -uxtreme1 -pRc4K3L6f < xtreme1-backup.sql`.
+
+File storage is not in the database. `docker compose down -v` deletes the MinIO volume along with
+everything else, and no migration will bring it back.
+
 ### Run on ARM CPU
 
 Please note that certain Docker images, including `MySQL`, may not be compatible with the ARM architecture. In case your computer is based on an ARM CPU (e.g. Apple M1), you can create a Docker Compose override file called docker-compose.override.yml and include the following content. While this method uses QEMU emulation to enforce the use of the ARM64 image on the ARM64 platform, it may impact performance.
