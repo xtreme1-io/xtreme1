@@ -27,7 +27,6 @@ const zh: ILocale = {
     title_create3DBox: '创建立方体(3D)',
     title_translate: '移动',
     title_track: '辅助线',
-    title_filter2D: '过滤2D显示',
     title_model: '跑模型',
     title_3d_default: '手动框',
     title_3d_ai: '智能框',

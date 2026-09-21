@@ -25,7 +25,6 @@ const en = {
     title_create3DBox: 'Create Box(3D)',
     title_translate: 'Translate',
     title_track: 'Track Line',
-    title_filter2D: 'Filter other object in 2d view',
     title_model: 'Run Model',
     title_3d_default: 'Manual',
     title_3d_ai: 'AI-assisted',
