@@ -78,7 +78,7 @@ for dtype, path, expect in [("IMAGE", "samples/xtreme1-image-trial.zip", 12),
           json.dumps({k: rec.get(k) for k in ("status", "parsedDataNum", "totalDataNum", "errorMessage")} if rec else None))
     # PARSE_COMPLETED on its own does not mean everything in the archive came through:
     # both counts have to be the number this sample actually holds.
-    check(f"parsed count {dtype}", parsed == expect and total == expect,
+    check(f"parsed count {dtype}", parsed == total == expect,
           f"parsed={parsed} total={total} expected={expect}")
     items = call("GET", "/data/findByPage", params={"pageNo": 1, "pageSize": 5, "datasetId": ds})["list"]
     urls = file_urls(items)[:4]

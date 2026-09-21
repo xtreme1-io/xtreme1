@@ -16,7 +16,6 @@ name: PR
 on:
   pull_request:
     branches: [main]
-  workflow_dispatch:      # re-run by hand after a flaky red; unavailable until this is on main
 
 permissions:
   contents: read
@@ -28,9 +27,10 @@ concurrency:
 jobs:
   smoke:
     runs-on: ubuntu-24.04
-    # 90, not 45: four frontends install 7190 packages serially on node:16 while maven
-    # competes for the same 4 vCPU. Lower this once a real baseline has been measured.
-    timeout-minutes: 90
+    # Measured at 5-6 minutes over 14 runs; a failure is slower because `up --wait`
+    # burns the backend healthcheck budget first. 30 leaves room without letting a
+    # genuinely hung job hold a runner for an hour.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -61,4 +61,4 @@ jobs:
         if: always()
         run: |
           docker compose -f docker-compose.yml -f docker-compose.pr.yml ps -a
-          docker compose -f docker-compose.yml -f docker-compose.pr.yml logs --no-color backend minio mysql nginx | tail -300
+          docker compose -f docker-compose.yml -f docker-compose.pr.yml logs --no-color | tail -300
