@@ -53,12 +53,20 @@ class UploadUrlValidatorTest {
 
     @Test
     void whitelistMatchesHostsNotSubstrings() {
+        // allowPrivateNetwork short-circuits after the whitelist check, so this exercises the
+        // host matching on its own -- no name has to resolve for the assertions to mean what
+        // they say.
         var list = "example.com";
-        assertTrue(UploadUrlValidator.isAllowed("https://example.com/d.zip", list, STORAGE, false));
-        assertTrue(UploadUrlValidator.isAllowed("https://files.example.com/d.zip", list, STORAGE, false));
+        assertTrue(UploadUrlValidator.isAllowed("https://example.com/d.zip", list, STORAGE, true));
+        assertTrue(UploadUrlValidator.isAllowed("https://files.example.com/d.zip", list, STORAGE, true));
         // the substring match this replaces let both of these through
-        assertFalse(UploadUrlValidator.isAllowed("https://8.8.8.8/?x=example.com", list, STORAGE, false));
-        assertFalse(UploadUrlValidator.isAllowed("https://notexample.com/d.zip", list, STORAGE, false));
+        assertFalse(UploadUrlValidator.isAllowed("https://8.8.8.8/?x=example.com", list, STORAGE, true));
+        assertFalse(UploadUrlValidator.isAllowed("https://notexample.com/d.zip", list, STORAGE, true));
+    }
+
+    @Test
+    void rejectsAHostThatDoesNotResolve() {
+        assertFalse(allowed("https://no-such-host.invalid/d.zip"));
     }
 
     @Test
