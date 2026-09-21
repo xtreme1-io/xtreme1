@@ -1,5 +1,5 @@
 <div align="center">
-<img width="386" alt="Xtreme1 logo" src="https://user-images.githubusercontent.com/84139543/190300943-98da7d5c-bd67-4074-a94f-b7405d29fb90.png">
+<img width="386" alt="Xtreme1 logo" src="brand/xtreme1-logo.png">
 
 ![](https://img.shields.io/badge/Release-v0.9.3-green) 
 ![](https://img.shields.io/badge/License-Apache%202.0-blueviolet)
@@ -13,7 +13,7 @@
 
 Xtreme1 is an all-in-one open-source platform for multimodal training data.
 
-Xtreme1 unlocks efficiency in data annotation, curation, and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation to the next efficiency level, powering your projects in 2D/3D Object Detection, 2D/3D Semantic/Instance Segmentation, and LiDAR-Camera Fusion like never before.
+Xtreme1 unlocks efficiency in data annotation, curation, and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation to the next efficiency level, powering your projects in 2D/3D Object Detection and LiDAR-Camera Fusion like never before.
 
 Check the Enterprise Version here [🎉 Request Demo for Free](https://www.basic.ai/request-platform-demo).
 
@@ -23,13 +23,13 @@ Find us on [Twitter](https://twitter.com/Xtreme1io) |  [Medium](https://medium.c
 
 # Key Features
 
-Image Annotation (B-box, Segmentation) - [YOLOR](https://github.com/WongKinYiu/yolor) & [RITM](https://github.com/saic-vul/ritm_interactive_segmentation) |  Lidar-camera Fusion Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
+Image Annotation (B-box, Polygon, Polyline, Key Point) - [YOLOR](https://github.com/WongKinYiu/yolor) |  Lidar-camera Fusion Annotation - [OpenPCDet](https://github.com/open-mmlab/OpenPCDet) & [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT)
 :-------------------------:|:-------------------------:
 ![](/docs/images/image_ai.gif)  |  ![](/docs/images/3d_ai.gif)
 
  :one: Supports data labeling for images, 3D LiDAR and 2D/3D Sensor Fusion datasets
  
- :two: Built-in pre-labeling and interactive models support 2D/3D object detection, segmentation and classification
+ :two: Built-in pre-labeling models support 2D/3D object detection and classification
  
  :three: Configurable Ontology Center for general classes (with hierarchies) and attributes for use in your model training
 
@@ -249,7 +249,7 @@ docker builder prune --filter type=exec.cachemount
 ### Clone Repository
 
 ```bash
-git clone https://github.com/basicai/xtreme1.git
+git clone https://github.com/xtreme1-io/xtreme1.git
 cd xtreme1
 ```
 
