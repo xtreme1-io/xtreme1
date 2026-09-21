@@ -157,5 +157,11 @@ dataset:
 
 upload:
   url:
-    # If not set, no check is performed.  Multiple commas separated
+    # Hosts that /data/upload may fetch from, comma separated. An entry also covers its
+    # subdomains. Leave empty to allow any public host; either way the backend refuses to
+    # fetch a URL that resolves into a private, loopback or link-local address.
     whitelist:
+    # Set to true only if this installation imports from a file server on its own network.
+    # It turns off the private-address rule, which is what stops /data/upload being used to
+    # reach the metadata service, the database or anything else behind the firewall.
+    allowPrivateNetwork: false

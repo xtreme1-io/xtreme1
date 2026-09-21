@@ -137,6 +137,12 @@ public class UploadDataUseCase {
     @Value("${upload.url.whitelist}")
     private String whitelist;
 
+    @Value("${upload.url.allowPrivateNetwork:false}")
+    private boolean allowPrivateNetwork;
+
+    @Value("${minio.endpoint}")
+    private String storageEndpoint;
+
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
     private static final ExecutorService parseExecutorService = ThreadUtil.newExecutor(5);
 
@@ -159,7 +165,7 @@ public class UploadDataUseCase {
     @Transactional(rollbackFor = RuntimeException.class)
     public Long upload(DataInfoUploadBO dataInfoUploadBO) {
         var uploadRecordBO = uploadUseCase.createUploadRecord(dataInfoUploadBO.getFileUrl());
-        if(!checkUrlIsValid(whitelist,dataInfoUploadBO.getFileUrl())){
+        if (!UploadUrlValidator.isAllowed(dataInfoUploadBO.getFileUrl(), whitelist, storageEndpoint, allowPrivateNetwork)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ILLEGAL.getMessage());
             log.error("File url illegal,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
             return uploadRecordBO.getSerialNumber();
@@ -204,19 +210,6 @@ public class UploadDataUseCase {
     }
 
 
-    public static boolean checkUrlIsValid(String whitelist, String url) {
-        if(StrUtil.isEmpty(whitelist)){
-            return true;
-        }
-        String[] substrings = whitelist.split(",");
-        for (String substring : substrings) {
-            if (url.contains(substring.trim())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Download the file and unzip the file
      *
@@ -226,6 +219,16 @@ public class UploadDataUseCase {
     private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
+        // Re-check here as well as in upload(): this is the request that actually leaves the
+        // process, and a redirect is a second URL the user chose.
+        var resolvedUrl = UploadUrlValidator.resolve(fileUrl, whitelist, storageEndpoint, allowPrivateNetwork);
+        if (resolvedUrl == null) {
+            uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED,
+                    DATASET_DATA_FILE_URL_ILLEGAL.getMessage());
+            log.error("File url illegal,datasetId:{},userId:{},fileUrl:{}", datasetId,
+                    dataInfoUploadBO.getUserId(), fileUrl);
+            return;
+        }
         var path = DecompressionFileUtils.removeUrlParameter(fileUrl);
         dataInfoUploadBO.setFileName(FileUtil.getPrefix(path));
         var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
@@ -233,7 +236,7 @@ public class UploadDataUseCase {
         FileUtil.mkParentDirs(savePath);
         // Download the compressed package locally
         log.info("Get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
-        HttpUtil.downloadFileFromUrl(fileUrl, FileUtil.newFile(savePath), new StreamProgress() {
+        HttpUtil.downloadFileFromUrl(resolvedUrl, FileUtil.newFile(savePath), new StreamProgress() {
             @Override
             public void start() {
                 uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOADING, null);
