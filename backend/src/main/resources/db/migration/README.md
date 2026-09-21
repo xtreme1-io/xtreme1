@@ -25,5 +25,13 @@ Adding one:
   refuse to start against a database where it ran with different contents. Fix it with a new
   version, never by editing the old file.
 
+## The Flyway version is pinned on purpose
+
+`flyway.version` in `backend/pom.xml` is 7.15.0, which is old. `docker-compose.yml` ships
+MySQL 5.7, and Flyway 8 moved MySQL 5.7 to the paid edition — it refuses to run at all against
+it ("MySQL 5.7 is no longer supported by Flyway Community Edition"), and because a failed
+migration stops the backend, a bump makes the whole product refuse to start. Moving MySQL comes
+first; the Flyway version follows it.
+
 Back up before upgrading. `README.md`, "Upgrading", has the command; a failed migration leaves
 the database where it stopped and the backend will refuse to start until it is resolved.

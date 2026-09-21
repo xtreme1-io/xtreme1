@@ -34,8 +34,12 @@
         <fegin.version>11.7</fegin.version>
         <thumbnail.version>0.4.17</thumbnail.version>
         <webp-imageio-version>0.1.6</webp-imageio-version>
-        <!-- Boot 2.6.6 manages 8.0.5, which predates the flyway-mysql module -->
-        <flyway.version>8.5.13</flyway.version>
+        <!-- Last Flyway that runs against MySQL 5.7, which is what docker-compose.yml ships.
+             Flyway 8 moved MySQL 5.7 to the paid edition and refuses to start on it:
+             "MySQL 5.7 is no longer supported by Flyway Community Edition". Do not bump this
+             without moving MySQL first; the backend will not start if you do. MySQL support is
+             still inside flyway-core at 7.x, so there is no flyway-mysql module to add. -->
+        <flyway.version>7.15.0</flyway.version>
     </properties>
 
     <dependencies>
@@ -191,12 +195,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-mysql</artifactId>
-            <!-- flyway-mysql only entered Boot's dependency management in 2.7 -->
-            <version>${flyway.version}</version>
         </dependency>
 
     </dependencies>
