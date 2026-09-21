@@ -1,7 +1,0 @@
-include:
-  - project: 'basicai/xtreme1/common'
-    file: '/ops/ci/template/xtreme1-app.yml'
-
-variables:
-  APP_NAME: "xtreme1"
-  APP_VERSION: "0.9.1"

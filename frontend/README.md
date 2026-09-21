@@ -17,7 +17,6 @@ Each part is developed independently, and finally the static files are put toget
 `image-tool` build to `/image-tool` -- nginx: `/tool/image`
 `text-tool` build to `/text-tool` -- nginx: `/tool/text`
 
-For more information, refer to `.ops/**/frontend-deployment.yml`
 
 ## Related Information
 - [vue](https://vuejs.org/)
