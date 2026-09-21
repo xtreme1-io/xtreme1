@@ -7,7 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Only cases that resolve without DNS: IP literals, and hosts that are rejected before any
- * lookup happens. {@code resolve} is not covered here because it makes a request.
+ * lookup happens.
+ *
+ * <p>The "host does not resolve, so refuse it" branch is deliberately not covered. Whether a
+ * name fails to resolve is a property of the machine running the test, not of this class: on a
+ * developer machine behind a fake-IP proxy every name resolves, including {@code .invalid}
+ * ones, so an assertion about it passes in CI and fails locally. That is a test of the
+ * resolver, and it would only ever be flaky here.
+ *
+ * <p>{@link UploadUrlValidator#resolve} is covered in {@link UploadUrlValidatorRedirectTest},
+ * which stands up a server rather than relying on the network.
  */
 class UploadUrlValidatorTest {
 
@@ -64,10 +73,6 @@ class UploadUrlValidatorTest {
         assertFalse(UploadUrlValidator.isAllowed("https://notexample.com/d.zip", list, STORAGE, true));
     }
 
-    @Test
-    void rejectsAHostThatDoesNotResolve() {
-        assertFalse(allowed("https://no-such-host.invalid/d.zip"));
-    }
 
     @Test
     void privateNetworkCanBeOptedBackIn() {
