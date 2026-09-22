@@ -30,6 +30,14 @@ spring:
     port: 6379
     password:
     database: 0
+  flyway:
+    # Everything else is left at its default. deploy/mysql/migration (V1, V2) is applied by the
+    # MySQL image's entrypoint, and only ever on an empty data directory, so Flyway never runs
+    # V1/V2: it adopts whatever is already there as version 2 and applies V3 onwards. A new
+    # installation and an upgraded one end up on the same schema by the same set of scripts.
+    baseline-on-migrate: true
+    baseline-version: 2
+    baseline-description: "Schema created by deploy/mysql/migration (V1, V2)"
 
 management:
   endpoints:

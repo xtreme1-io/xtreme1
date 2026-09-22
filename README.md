@@ -146,6 +146,63 @@ Make sure you have installed [NVIDIA CUDA Driver](https://docs.nvidia.com/cuda/c
 
 If you use **Docker Desktop** + **WSL2.0**, please find this [issue #144](https://github.com/xtreme1-io/xtreme1/issues/144) for your reference.
 
+### Upgrading
+
+The backend applies any outstanding database migrations when it starts, so upgrading is
+replacing the release package and starting the stack again. The data volumes are reused: the
+project name is pinned in `docker-compose.yml`, so they do not depend on which directory the
+package was unzipped into. `docker compose down` without `-v` keeps them.
+
+Back up the database first. A migration that fails leaves the database where it stopped, and the
+backend then serves nothing rather than serve on a half-migrated schema — the log names the
+version it is on, the script that failed and the statement that failed. Recovering is by hand:
+`backend/src/main/resources/db/migration/README.md` has the steps.
+
+```bash
+# From the directory of the version you are currently running.
+docker compose exec -T mysql mysqldump -uxtreme1 -pRc4K3L6f --databases xtreme1 > xtreme1-backup.sql
+docker compose down
+
+# Then, from the new release package directory.
+docker compose up -d
+```
+
+To restore that backup, `docker compose exec -T mysql mysql -uxtreme1 -pRc4K3L6f < xtreme1-backup.sql`.
+
+File storage is not in the database. `docker compose down -v` deletes the MinIO volume along with
+everything else, and no migration will bring it back.
+
+#### Upgrading from v0.9.2 or earlier
+
+Those releases took their volume names from the directory the package was unzipped into, so
+starting a new release from a new directory gives an empty installation and leaves the old data
+in volumes nothing is using. The project name is pinned from v0.9.3 on, so this is a one-time
+copy. Do it with both stacks stopped.
+
+```bash
+# The old volumes are named after the old directory: a package unzipped into xtreme1-v0.9.2
+# gives xtreme1-v092_mysql-data and so on. Find yours.
+docker volume ls
+
+# From the new release package directory, create the stack without starting it, so that Compose
+# creates the volumes it is going to use.
+docker compose create
+
+# Copy each one across, replacing xtreme1-v092 with your own prefix.
+docker run --rm -v xtreme1-v092_mysql-data:/from:ro -v xtreme1_mysql-data:/to alpine sh -c 'cd /from && cp -a . /to'
+docker run --rm -v xtreme1-v092_redis-data:/from:ro -v xtreme1_redis-data:/to alpine sh -c 'cd /from && cp -a . /to'
+docker run --rm -v xtreme1-v092_minio-data:/from:ro -v xtreme1_minio-data:/to alpine sh -c 'cd /from && cp -a . /to'
+
+docker compose up -d
+```
+
+`docker compose create` has to run before the copy. Into a volume Compose did not create itself
+it still starts, but it warns that the volume is not its own and suggests declaring it external,
+which is not what you want here.
+
+Nothing writes to the old volumes. Remove them with `docker volume rm` once the upgraded stack
+has proved itself.
+
 ### Run on ARM CPU
 
 Please note that certain Docker images, including `MySQL`, may not be compatible with the ARM architecture. In case your computer is based on an ARM CPU (e.g. Apple M1), you can create a Docker Compose override file called docker-compose.override.yml and include the following content. While this method uses QEMU emulation to enforce the use of the ARM64 image on the ARM64 platform, it may impact performance.

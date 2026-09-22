@@ -1,3 +1,10 @@
+# Pinned so the volumes do not depend on what the release package was unzipped into.
+# Without it Compose names the project after the directory, and a new directory per
+# release means a new, empty set of volumes on every upgrade. A second installation on the
+# same host needs its own project name -- `docker compose -p <name>` -- or it drives the
+# containers and volumes of the first.
+name: xtreme1
+
 services:
   nginx:
     image: nginx:1.22
