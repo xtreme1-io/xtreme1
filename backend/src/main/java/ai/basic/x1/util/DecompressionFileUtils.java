@@ -140,10 +140,11 @@ public class DecompressionFileUtils {
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
             oc.setConnectTimeout(1000);
-            if (HttpStatus.OK.value() == oc.getResponseCode()) {
-                return true;
-            }
-            return false;
+            // Do not follow redirects: UploadUrlValidator checks every hop of the chain, and
+            // following one here would reach a host nothing has checked. A redirect still counts
+            // as reachable, which is what this method is asked.
+            oc.setInstanceFollowRedirects(false);
+            return oc.getResponseCode() < HttpStatus.BAD_REQUEST.value();
         } catch (Exception e) {
             log.error("url error", e);
             return false;

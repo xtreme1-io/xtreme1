@@ -30,6 +30,7 @@ import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
@@ -40,6 +41,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -137,6 +139,18 @@ public class UploadDataUseCase {
     @Value("${upload.url.whitelist}")
     private String whitelist;
 
+    @Value("${upload.url.allowPrivateNetwork:false}")
+    private boolean allowPrivateNetwork;
+
+    /**
+     * Where this installation's own objects live: the endpoint joined with the bucket, the same
+     * pair saveFile() strips off a stored url. From minioProp rather than a second @Value, so
+     * there is one binding of minio.* in this class.
+     */
+    private String storageObjectPrefix() {
+        return StrUtil.appendIfMissing(minioProp.getEndpoint(), "/") + minioProp.getBucketName() + "/";
+    }
+
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
     private static final ExecutorService parseExecutorService = ThreadUtil.newExecutor(5);
 
@@ -159,7 +173,7 @@ public class UploadDataUseCase {
     @Transactional(rollbackFor = RuntimeException.class)
     public Long upload(DataInfoUploadBO dataInfoUploadBO) {
         var uploadRecordBO = uploadUseCase.createUploadRecord(dataInfoUploadBO.getFileUrl());
-        if(!checkUrlIsValid(whitelist,dataInfoUploadBO.getFileUrl())){
+        if (!UploadUrlValidator.isAllowed(dataInfoUploadBO.getFileUrl(), whitelist, storageObjectPrefix(), allowPrivateNetwork)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ILLEGAL.getMessage());
             log.error("File url illegal,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
             return uploadRecordBO.getSerialNumber();
@@ -204,19 +218,6 @@ public class UploadDataUseCase {
     }
 
 
-    public static boolean checkUrlIsValid(String whitelist, String url) {
-        if(StrUtil.isEmpty(whitelist)){
-            return true;
-        }
-        String[] substrings = whitelist.split(",");
-        for (String substring : substrings) {
-            if (url.contains(substring.trim())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Download the file and unzip the file
      *
@@ -226,6 +227,16 @@ public class UploadDataUseCase {
     private <T extends DataInfoUploadBO> void downloadAndDecompressionFile(T dataInfoUploadBO, Consumer<T> function) throws IOException {
         var fileUrl = URLUtil.decode(dataInfoUploadBO.getFileUrl());
         var datasetId = dataInfoUploadBO.getDatasetId();
+        // Re-check here as well as in upload(): this is the request that actually leaves the
+        // process, and a redirect is a second URL the user chose.
+        var resolvedUrl = UploadUrlValidator.resolve(fileUrl, whitelist, storageObjectPrefix(), allowPrivateNetwork);
+        if (resolvedUrl == null) {
+            uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED,
+                    DATASET_DATA_FILE_URL_ILLEGAL.getMessage());
+            log.error("File url illegal,datasetId:{},userId:{},fileUrl:{}", datasetId,
+                    dataInfoUploadBO.getUserId(), fileUrl);
+            return;
+        }
         var path = DecompressionFileUtils.removeUrlParameter(fileUrl);
         dataInfoUploadBO.setFileName(FileUtil.getPrefix(path));
         var baseSavePath = String.format("%s%s/", tempPath, UUID.randomUUID().toString().replace("-", ""));
@@ -233,7 +244,10 @@ public class UploadDataUseCase {
         FileUtil.mkParentDirs(savePath);
         // Download the compressed package locally
         log.info("Get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
-        HttpUtil.downloadFileFromUrl(fileUrl, FileUtil.newFile(savePath), new StreamProgress() {
+        // Not HttpUtil.downloadFileFromUrl: it calls createGet(url, true), so it follows 30x
+        // itself. resolve() already walked and checked the chain, and a redirect appearing now
+        // is a second chain nothing has checked -- refuse it rather than follow it.
+        var progress = new StreamProgress() {
             @Override
             public void start() {
                 uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOADING, null);
@@ -255,7 +269,17 @@ public class UploadDataUseCase {
             public void finish() {
                 uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOAD_COMPLETED, null);
             }
-        });
+        };
+        try (var response = HttpRequest.get(resolvedUrl).setMaxRedirectCount(0).executeAsync()) {
+            if (response.getStatus() >= HttpStatus.MULTIPLE_CHOICES.value()) {
+                uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED,
+                        DATASET_DATA_FILE_URL_ILLEGAL.getMessage());
+                log.error("Download answered {} where the check saw none,datasetId:{},userId:{},fileUrl:{}",
+                        response.getStatus(), datasetId, dataInfoUploadBO.getUserId(), fileUrl);
+                return;
+            }
+            response.writeBody(FileUtil.newFile(savePath), progress);
+        }
         log.info("Get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
         dataInfoUploadBO.setSavePath(savePath);
         dataInfoUploadBO.setBaseSavePath(baseSavePath);
