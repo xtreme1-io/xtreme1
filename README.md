@@ -149,8 +149,9 @@ If you use **Docker Desktop** + **WSL2.0**, please find this [issue #144](https:
 ### Upgrading
 
 The backend applies any outstanding database migrations when it starts, so upgrading is
-replacing the release package and starting the stack again. The data volumes are reused, and
-`docker compose down` without `-v` keeps them.
+replacing the release package and starting the stack again. The data volumes are reused: the
+project name is pinned in `docker-compose.yml`, so they do not depend on which directory the
+package was unzipped into. `docker compose down` without `-v` keeps them.
 
 Back up the database first. A migration that fails leaves the database where it stopped, and the
 backend then serves nothing rather than serve on a half-migrated schema — the log names the
@@ -170,6 +171,37 @@ To restore that backup, `docker compose exec -T mysql mysql -uxtreme1 -pRc4K3L6f
 
 File storage is not in the database. `docker compose down -v` deletes the MinIO volume along with
 everything else, and no migration will bring it back.
+
+#### Upgrading from v0.9.2 or earlier
+
+Those releases took their volume names from the directory the package was unzipped into, so
+starting a new release from a new directory gives an empty installation and leaves the old data
+in volumes nothing is using. The project name is pinned from v0.9.3 on, so this is a one-time
+copy. Do it with both stacks stopped.
+
+```bash
+# The old volumes are named after the old directory: a package unzipped into xtreme1-v0.9.2
+# gives xtreme1-v092_mysql-data and so on. Find yours.
+docker volume ls
+
+# From the new release package directory, create the stack without starting it, so that Compose
+# creates the volumes it is going to use.
+docker compose create
+
+# Copy each one across, replacing xtreme1-v092 with your own prefix.
+docker run --rm -v xtreme1-v092_mysql-data:/from:ro -v xtreme1_mysql-data:/to alpine sh -c 'cd /from && cp -a . /to'
+docker run --rm -v xtreme1-v092_redis-data:/from:ro -v xtreme1_redis-data:/to alpine sh -c 'cd /from && cp -a . /to'
+docker run --rm -v xtreme1-v092_minio-data:/from:ro -v xtreme1_minio-data:/to alpine sh -c 'cd /from && cp -a . /to'
+
+docker compose up -d
+```
+
+`docker compose create` has to run before the copy. Into a volume Compose did not create itself
+it still starts, but it warns that the volume is not its own and suggests declaring it external,
+which is not what you want here.
+
+Nothing writes to the old volumes. Remove them with `docker volume rm` once the upgraded stack
+has proved itself.
 
 ### Run on ARM CPU
 
