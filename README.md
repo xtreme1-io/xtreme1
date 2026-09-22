@@ -81,6 +81,10 @@ The built-in model containers only can be running on Linux server with [NVIDIA C
 
 ### Download Package
 
+**Already running an earlier version?** Read [Upgrading](#upgrading) first. The steps below
+install a fresh copy: followed on their own they start an empty installation beside the one you
+have, and leave its data behind.
+
 Download the latest release package and unzip it.
 
 ```bash
@@ -202,6 +206,11 @@ which is not what you want here.
 
 Nothing writes to the old volumes. Remove them with `docker volume rm` once the upgraded stack
 has proved itself.
+
+**If you started the new version first and it came up empty, stop there.** Nothing has been
+deleted: the old data is still in its volumes, and `docker volume ls` will show them. Take the
+copy above and it comes back. What cannot be undone is annotating in the empty installation
+first — that leaves two databases with no way to merge them.
 
 ### Run on ARM CPU
 
