@@ -142,15 +142,13 @@ public class UploadDataUseCase {
     @Value("${upload.url.allowPrivateNetwork:false}")
     private boolean allowPrivateNetwork;
 
-    @Value("${minio.endpoint}")
-    private String storageEndpoint;
-
-    @Value("${minio.bucketName}")
-    private String storageBucket;
-
-    /** Where this installation's own objects live: the endpoint joined with the bucket. */
+    /**
+     * Where this installation's own objects live: the endpoint joined with the bucket, the same
+     * pair saveFile() strips off a stored url. From minioProp rather than a second @Value, so
+     * there is one binding of minio.* in this class.
+     */
     private String storageObjectPrefix() {
-        return StrUtil.appendIfMissing(storageEndpoint, "/") + storageBucket + "/";
+        return StrUtil.appendIfMissing(minioProp.getEndpoint(), "/") + minioProp.getBucketName() + "/";
     }
 
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
