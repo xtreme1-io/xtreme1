@@ -30,8 +30,12 @@ import static cn.hutool.core.util.CharsetUtil.UTF_8;
 @Slf4j
 public class DecompressionFileUtils {
 
-    private static final int CONNECT_TIMEOUT_MS = 15000;
-    private static final int READ_TIMEOUT_MS = 15000;
+    // upload() runs inside a transaction and probes twice, so this is paid up to four times
+    // over before the caller hears anything. One second was too short for a TLS handshake to a
+    // bucket on another continent (#316); five is several times that and keeps the worst case
+    // near where it was.
+    private static final int CONNECT_TIMEOUT_MS = 5000;
+    private static final int READ_TIMEOUT_MS = 5000;
 
     /**
      * Unzip the zip file
@@ -125,16 +129,6 @@ public class DecompressionFileUtils {
     }
 
     /**
-     * Verify that the url address can be connected
-     *
-     * @param urlStr url
-     * @return boolean
-     */
-    public static boolean validateUrl(String urlStr) {
-        return describeUrlProblem(urlStr) == null;
-    }
-
-    /**
      * Why this URL cannot be fetched, or null if it can. The text ends up in the upload
      * record, because "File url error" on its own tells the user nothing they can act on.
      */
@@ -152,8 +146,6 @@ public class DecompressionFileUtils {
             var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
-            // One second is shorter than a TLS handshake to a bucket on another continent, so
-            // a perfectly good URL was rejected as unreachable (#316).
             oc.setConnectTimeout(CONNECT_TIMEOUT_MS);
             oc.setReadTimeout(READ_TIMEOUT_MS);
             // Do not follow redirects: UploadUrlValidator checks every hop of the chain, and
