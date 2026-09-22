@@ -29,7 +29,7 @@ Image Annotation (B-box, Polygon, Polyline, Key Point) - [YOLOR](https://github.
 
  :one: Supports data labeling for images, 3D LiDAR and 2D/3D Sensor Fusion datasets
  
- :two: Built-in pre-labeling models support 2D/3D object detection and classification
+ :two: Built-in pre-labeling models support 2D/3D object detection
  
  :three: Configurable Ontology Center for general classes (with hierarchies) and attributes for use in your model training
 
