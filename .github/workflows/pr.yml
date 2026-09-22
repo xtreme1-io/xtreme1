@@ -39,6 +39,12 @@ jobs:
         run: |
           printf 'services:\n' > docker-compose.pr.yml
           printf '  backend:\n    image: xtreme1-backend:pr\n    pull_policy: never\n    build: ./backend\n' >> docker-compose.pr.yml
+          # Names that look public and answer with an internal address, so the smoke test can
+          # check that the upload guard resolves a host rather than pattern-matching it. Here
+          # and not in docker-compose.yml: they are for the gate, not for an installation.
+          printf '    extra_hosts:\n' >> docker-compose.pr.yml
+          printf '      - "metadata.example.test:169.254.169.254"\n' >> docker-compose.pr.yml
+          printf '      - "fileserver.example.test:10.0.0.5"\n' >> docker-compose.pr.yml
           printf '  frontend:\n    image: xtreme1-frontend:pr\n    pull_policy: never\n    build: ./frontend\n' >> docker-compose.pr.yml
 
       - name: Build

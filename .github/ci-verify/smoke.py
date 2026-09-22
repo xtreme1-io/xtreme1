@@ -85,6 +85,31 @@ for dtype, path, expect in [("IMAGE", "samples/xtreme1-image-trial.zip", 12),
     statuses = [plain.get(u, timeout=60).status_code for u in urls]
     check(f"download {dtype}", urls and all(x == 200 for x in statuses), f"{statuses}")
 
+# The upload guard, on the paths a refactor is most likely to reopen. The full set of attacks
+# lives in attack_ssrf.py, which needs a stack this job cannot arrange; these need only the two
+# extra_hosts the workflow adds, so they can run on every pull request.
+ds = call("POST", "/dataset/create", json={"name": f"guard-{uuid.uuid4().hex[:6]}", "type": "IMAGE"})["id"]
+for label, url in [
+        ("a name that answers with a link-local address", "http://metadata.example.test/latest/meta-data/"),
+        ("a name that answers with a private address", "http://fileserver.example.test/d.zip"),
+        ("an address written as a decimal", "http://2130706433/d.zip"),
+        ("a path that leaves the bucket", "http://minio:9000/xtreme1/../minio/admin/v3/list-buckets"),
+        ("a scheme that is not http", "file:///etc/passwd")]:
+    serial = call("POST", "/data/upload",
+                  json={"fileUrl": url, "datasetId": ds, "source": "URL", "dataFormat": "XTREME1"})
+    rec = None
+    for _ in range(30):
+        recs = call("GET", "/data/findUploadRecordBySerialNumbers", params={"serialNumbers": str(serial)})
+        rec = recs[0] if recs else None
+        if rec and rec.get("status") in ("PARSE_COMPLETED", "FAILED"):
+            break
+        time.sleep(2)
+    message = (rec or {}).get("errorMessage") or ""
+    # "illegal" is the guard refusing. Any other failure means the request left the process.
+    check(f"upload refuses {label}",
+          rec is not None and rec.get("status") == "FAILED" and "illegal" in message.lower(),
+          f"status={(rec or {}).get('status')} message={message!r}")
+
 for page in ["/", "/tool/image/", "/tool/pc/", "/tool/text/"]:
     r = plain.get(BASE + page, timeout=30)
     check(f"frontend {page}", r.status_code == 200 and "<html" in r.text.lower(), str(r.status_code))

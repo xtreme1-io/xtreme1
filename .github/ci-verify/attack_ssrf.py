@@ -14,6 +14,13 @@ serving evil_redirector.py, which is beside this file:
 
   docker run -d --name evil --network <stack>_default -v "$PWD/.github/ci-verify:/x"       python:3.11-slim python /x/evil_redirector.py
 
+Two of the targets below are names rather than addresses, which is the point: the guard has to
+resolve a host, not pattern-match it. Give the backend container:
+
+  extra_hosts:
+    - "metadata.example.test:169.254.169.254"
+    - "fileserver.example.test:10.0.0.5"
+
 Two runs, because the halves need opposite configuration -- see X1_REDIRECT_CASE below.
 Both must exit 0:
 
@@ -107,6 +114,15 @@ INTERNAL_TARGETS = [
     ("the same, with the dots encoded", "http://minio:9000/xtreme1/%2e%2e/minio/admin/v3/list-buckets"),
     ("loopback inside the container", "http://127.0.0.1:8080/actuator/env"),
     ("a private LAN address", "http://192.168.1.10/dataset.zip"),
+    ("a name that answers with a link-local address", "http://metadata.example.test/latest/meta-data/"),
+    ("a name that answers with a private address", "http://fileserver.example.test/d.zip"),
+    ("127.0.0.1 written as a decimal", "http://2130706433/d.zip"),
+    ("127.0.0.1 written as hex", "http://0x7f000001/d.zip"),
+    ("127.0.0.1 in its short form", "http://127.1/d.zip"),
+    ("loopback as an ipv4-mapped ipv6", "http://[::ffff:127.0.0.1]/d.zip"),
+    ("localhost with a trailing dot", "http://localhost./d.zip"),
+    ("the unspecified address", "http://0.0.0.0:8080/d.zip"),
+    ("a bucket the prefix only starts", "http://minio:9000/xtreme1evil/d.zip"),
     ("a non-http scheme", "file:///etc/passwd"),
 ]
 
