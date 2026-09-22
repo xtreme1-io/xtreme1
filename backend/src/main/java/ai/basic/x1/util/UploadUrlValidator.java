@@ -28,6 +28,12 @@ import java.util.stream.Collectors;
  * <p>Two settings widen it. {@code upload.url.whitelist}, when set, restricts uploads to the hosts
  * listed and nothing else. {@code upload.url.allowPrivateNetwork} turns the private-address rule
  * off for an installation that genuinely imports from a file server on its own LAN.
+ *
+ * <p>What this does not stop: DNS rebinding. The name is resolved here and resolved again by the
+ * download, so a host whose record has a short TTL can answer with a public address for the check
+ * and a private one for the fetch. Closing that means pinning the address this class resolved and
+ * connecting to it directly with an explicit Host header, which is a larger change than the one
+ * this fix is. Anyone tightening this later should start there.
  */
 public final class UploadUrlValidator {
 
