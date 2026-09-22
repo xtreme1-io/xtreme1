@@ -62,6 +62,13 @@ class UploadUrlValidatorTest {
         // whole-origin exemption would hand it over -- including past a configured whitelist.
         assertFalse(allowed("http://minio:9000/minio/admin/v3/list-buckets"));
         assertFalse(allowed("http://minio:9000/some-other-bucket/d.zip"));
+        // The bucket prefix is not a string test: the server resolves dot segments, so this
+        // leaves the bucket by the time it arrives. %2e is the same trick with the dot hidden.
+        assertFalse(allowed("http://minio:9000/xtreme1/../minio/admin/v3/list-buckets"));
+        assertFalse(allowed("http://minio:9000/xtreme1/%2e%2e/minio/admin/v3/list-buckets"));
+        assertFalse(allowed("http://minio:9000/xtreme1/a/../../minio/admin/v3/list-buckets"));
+        // Dot segments that stay inside the bucket are still an object.
+        assertTrue(allowed("http://minio:9000/xtreme1/1/2/../3/dataset.zip"));
         assertFalse(UploadUrlValidator.isAllowed("http://minio:9000/minio/admin/v3/list-buckets",
                 "example.com", STORAGE, false));
     }

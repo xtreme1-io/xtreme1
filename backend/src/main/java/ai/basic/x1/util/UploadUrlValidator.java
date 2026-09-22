@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -170,10 +171,29 @@ public final class UploadUrlValidator {
             return url.getProtocol().equalsIgnoreCase(store.getProtocol())
                     && url.getHost().equalsIgnoreCase(store.getHost())
                     && port(url) == port(store)
-                    && url.getPath().startsWith(store.getPath());
+                    && objectPath(url).startsWith(store.getPath());
         } catch (MalformedURLException e) {
             log.warn("minio.endpoint and minio.bucketName do not make a url: {}", prefix);
             return false;
+        }
+    }
+
+    /**
+     * The path with its dot segments resolved, because the server at the far end resolves them
+     * too: without this {@code /<bucket>/../minio/admin/...} starts with the bucket here and
+     * does not by the time it arrives. {@code %2e} is refused outright — it encodes a character
+     * that never needs encoding, and the only use anyone has for it is hiding a dot from a check
+     * like this one. Returns an empty path when it cannot tell, which fails the prefix test.
+     */
+    private static String objectPath(URL url) {
+        var path = url.getPath();
+        if (path.toLowerCase(Locale.ROOT).contains("%2e")) {
+            return "";
+        }
+        try {
+            return URI.create(path).normalize().getPath();
+        } catch (IllegalArgumentException e) {
+            return "";
         }
     }
 

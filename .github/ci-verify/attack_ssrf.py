@@ -103,6 +103,8 @@ INTERNAL_TARGETS = [
     ("the database", "http://mysql:3306/"),
     ("MinIO's console port", "http://minio:9001/"),
     ("MinIO's admin API, which shares the object port", "http://minio:9000/minio/admin/v3/list-buckets"),
+    ("the same, walked out of the bucket", "http://minio:9000/xtreme1/../minio/admin/v3/list-buckets"),
+    ("the same, with the dots encoded", "http://minio:9000/xtreme1/%2e%2e/minio/admin/v3/list-buckets"),
     ("loopback inside the container", "http://127.0.0.1:8080/actuator/env"),
     ("a private LAN address", "http://192.168.1.10/dataset.zip"),
     ("a non-http scheme", "file:///etc/passwd"),
