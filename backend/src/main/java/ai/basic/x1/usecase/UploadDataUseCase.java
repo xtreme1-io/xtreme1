@@ -30,6 +30,7 @@ import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
@@ -40,6 +41,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -236,7 +238,10 @@ public class UploadDataUseCase {
         FileUtil.mkParentDirs(savePath);
         // Download the compressed package locally
         log.info("Get compressed package start fileUrl:{},savePath:{}", fileUrl, savePath);
-        HttpUtil.downloadFileFromUrl(resolvedUrl, FileUtil.newFile(savePath), new StreamProgress() {
+        // Not HttpUtil.downloadFileFromUrl: it calls createGet(url, true), so it follows 30x
+        // itself. resolve() already walked and checked the chain, and a redirect appearing now
+        // is a second chain nothing has checked -- refuse it rather than follow it.
+        var progress = new StreamProgress() {
             @Override
             public void start() {
                 uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOADING, null);
@@ -258,7 +263,17 @@ public class UploadDataUseCase {
             public void finish() {
                 uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), DOWNLOAD_COMPLETED, null);
             }
-        });
+        };
+        try (var response = HttpRequest.get(resolvedUrl).setMaxRedirectCount(0).executeAsync()) {
+            if (response.getStatus() >= HttpStatus.MULTIPLE_CHOICES.value()) {
+                uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED,
+                        DATASET_DATA_FILE_URL_ILLEGAL.getMessage());
+                log.error("Download answered {} where the check saw none,datasetId:{},userId:{},fileUrl:{}",
+                        response.getStatus(), datasetId, dataInfoUploadBO.getUserId(), fileUrl);
+                return;
+            }
+            response.writeBody(FileUtil.newFile(savePath), progress);
+        }
         log.info("Get compressed package end fileUrl:{},savePath:{}", fileUrl, savePath);
         dataInfoUploadBO.setSavePath(savePath);
         dataInfoUploadBO.setBaseSavePath(baseSavePath);
