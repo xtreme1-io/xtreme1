@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class UploadUrlValidatorTest {
 
-    private static final String STORAGE = "http://minio:9000/";
+    private static final String STORAGE = "http://minio:9000/xtreme1/";
 
     private static boolean allowed(String url) {
         return UploadUrlValidator.isAllowed(url, "", STORAGE, false);
@@ -58,6 +58,12 @@ class UploadUrlValidatorTest {
         // private network the rule above rejects.
         assertTrue(allowed("http://minio:9000/xtreme1/1/2/abc/dataset.zip?X-Amz-Signature=x"));
         assertFalse(allowed("http://minio:9001/xtreme1/dataset.zip"));
+        // Objects, not the origin. MinIO's admin API answers on the same host and port, and a
+        // whole-origin exemption would hand it over -- including past a configured whitelist.
+        assertFalse(allowed("http://minio:9000/minio/admin/v3/list-buckets"));
+        assertFalse(allowed("http://minio:9000/some-other-bucket/d.zip"));
+        assertFalse(UploadUrlValidator.isAllowed("http://minio:9000/minio/admin/v3/list-buckets",
+                "example.com", STORAGE, false));
     }
 
     @Test

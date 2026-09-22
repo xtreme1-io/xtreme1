@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 class UploadUrlValidatorRedirectTest {
 
-    private static final String STORAGE = "http://minio:9000/";
+    private static final String STORAGE = "http://minio:9000/xtreme1/";
 
     private HttpServer server;
     private int port;

@@ -145,6 +145,14 @@ public class UploadDataUseCase {
     @Value("${minio.endpoint}")
     private String storageEndpoint;
 
+    @Value("${minio.bucketName}")
+    private String storageBucket;
+
+    /** Where this installation's own objects live: the endpoint joined with the bucket. */
+    private String storageObjectPrefix() {
+        return StrUtil.appendIfMissing(storageEndpoint, "/") + storageBucket + "/";
+    }
+
     private static final ExecutorService executorService = ThreadUtil.newExecutor(2);
     private static final ExecutorService parseExecutorService = ThreadUtil.newExecutor(5);
 
@@ -167,7 +175,7 @@ public class UploadDataUseCase {
     @Transactional(rollbackFor = RuntimeException.class)
     public Long upload(DataInfoUploadBO dataInfoUploadBO) {
         var uploadRecordBO = uploadUseCase.createUploadRecord(dataInfoUploadBO.getFileUrl());
-        if (!UploadUrlValidator.isAllowed(dataInfoUploadBO.getFileUrl(), whitelist, storageEndpoint, allowPrivateNetwork)) {
+        if (!UploadUrlValidator.isAllowed(dataInfoUploadBO.getFileUrl(), whitelist, storageObjectPrefix(), allowPrivateNetwork)) {
             uploadUseCase.updateUploadRecordStatus(uploadRecordBO.getId(), FAILED, DATASET_DATA_FILE_URL_ILLEGAL.getMessage());
             log.error("File url illegal,datasetId:{},userId:{},fileUrl:{}", dataInfoUploadBO.getDatasetId(), dataInfoUploadBO.getUserId(), dataInfoUploadBO.getFileUrl());
             return uploadRecordBO.getSerialNumber();
@@ -223,7 +231,7 @@ public class UploadDataUseCase {
         var datasetId = dataInfoUploadBO.getDatasetId();
         // Re-check here as well as in upload(): this is the request that actually leaves the
         // process, and a redirect is a second URL the user chose.
-        var resolvedUrl = UploadUrlValidator.resolve(fileUrl, whitelist, storageEndpoint, allowPrivateNetwork);
+        var resolvedUrl = UploadUrlValidator.resolve(fileUrl, whitelist, storageObjectPrefix(), allowPrivateNetwork);
         if (resolvedUrl == null) {
             uploadUseCase.updateUploadRecordStatus(dataInfoUploadBO.getUploadRecordId(), FAILED,
                     DATASET_DATA_FILE_URL_ILLEGAL.getMessage());

@@ -53,7 +53,7 @@ public final class UploadUrlValidator {
      * Whether this exact URL may be fetched. Does not look at redirects; see
      * {@link #resolve(String, String, String, boolean)}.
      */
-    public static boolean isAllowed(String rawUrl, String whitelist, String storageEndpoint,
+    public static boolean isAllowed(String rawUrl, String whitelist, String storageObjectPrefix,
                                     boolean allowPrivateNetwork) {
         URL url;
         try {
@@ -69,8 +69,9 @@ public final class UploadUrlValidator {
         }
         // The product's own object store is where every browser upload lands, and it sits on the
         // private compose network by design. Checked first because an operator setting a
-        // whitelist cannot be expected to know they have to list their own MinIO.
-        if (sameOrigin(url, storageEndpoint)) {
+        // whitelist cannot be expected to know they have to list their own MinIO. Objects only:
+        // exempting the whole origin would also exempt MinIO's admin API, which shares the port.
+        if (isStorageObject(url, storageObjectPrefix)) {
             return true;
         }
         var allowedHosts = hosts(whitelist);
@@ -108,11 +109,11 @@ public final class UploadUrlValidator {
      * Walks the redirect chain, checking every hop, and returns the URL the download should
      * actually use. Returns null if any hop is not allowed, or the chain does not end.
      */
-    public static String resolve(String rawUrl, String whitelist, String storageEndpoint,
+    public static String resolve(String rawUrl, String whitelist, String storageObjectPrefix,
                                  boolean allowPrivateNetwork) {
         var current = rawUrl;
         for (var hop = 0; hop <= MAX_REDIRECTS; hop++) {
-            if (!isAllowed(current, whitelist, storageEndpoint, allowPrivateNetwork)) {
+            if (!isAllowed(current, whitelist, storageObjectPrefix, allowPrivateNetwork)) {
                 return null;
             }
             String next;
@@ -155,17 +156,23 @@ public final class UploadUrlValidator {
         }
     }
 
-    private static boolean sameOrigin(URL url, String endpoint) {
-        if (StrUtil.isEmpty(endpoint)) {
+    /**
+     * Whether this is a URL for an object in the store the product writes to. The prefix is
+     * {@code minio.endpoint} joined with {@code minio.bucketName}, which is what
+     * {@code generatePresignedUrl} hands the browser back as its access url.
+     */
+    private static boolean isStorageObject(URL url, String prefix) {
+        if (StrUtil.isEmpty(prefix)) {
             return false;
         }
         try {
-            var other = new URL(endpoint);
-            return url.getProtocol().equalsIgnoreCase(other.getProtocol())
-                    && url.getHost().equalsIgnoreCase(other.getHost())
-                    && port(url) == port(other);
+            var store = new URL(prefix);
+            return url.getProtocol().equalsIgnoreCase(store.getProtocol())
+                    && url.getHost().equalsIgnoreCase(store.getHost())
+                    && port(url) == port(store)
+                    && url.getPath().startsWith(store.getPath());
         } catch (MalformedURLException e) {
-            log.warn("minio.endpoint is not a url: {}", endpoint);
+            log.warn("minio.endpoint and minio.bucketName do not make a url: {}", prefix);
             return false;
         }
     }
