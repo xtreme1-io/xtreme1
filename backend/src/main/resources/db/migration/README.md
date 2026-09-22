@@ -18,6 +18,14 @@ instance, has no `LONG_TEXT` in `ontology_class.input_type`. Nothing detects thi
 scripts here yet nothing goes wrong; the first script that assumes a column will be the one that
 finds out. Upgrade such an installation through v0.9.2 first, or check its schema by hand.
 
+`baseline-on-migrate` only baselines a schema that is *not* empty. A database that exists but
+holds no xtreme1 tables — an external MySQL, or a volume that predates the initdb mount — is
+therefore not baselined at 2; Flyway reports `<< Empty Schema >>` and starts at V3, which fails
+because the table it alters was never created. The backend then refuses to start, which is the
+right outcome, but the error names the migration rather than the missing installation. The
+bundled compose always runs V1/V2 from the MySQL entrypoint, so this is reachable only by
+pointing the backend at a database something else was supposed to set up.
+
 Adding one:
 
 - name it `V<n>__<short_description>.sql`, `<n>` being the next unused integer
