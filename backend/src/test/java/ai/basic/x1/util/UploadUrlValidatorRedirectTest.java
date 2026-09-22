@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -23,26 +25,31 @@ class UploadUrlValidatorRedirectTest {
 
     private HttpServer server;
     private int port;
+    private final AtomicInteger hits = new AtomicInteger();
 
     @BeforeEach
     void start() throws IOException {
         server = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
         port = server.getAddress().getPort();
         server.createContext("/final", exchange -> {
+            hits.incrementAndGet();
             exchange.sendResponseHeaders(200, -1);
             exchange.close();
         });
         server.createContext("/once", exchange -> {
+            hits.incrementAndGet();
             exchange.getResponseHeaders().add("Location", base() + "/final");
             exchange.sendResponseHeaders(302, -1);
             exchange.close();
         });
         server.createContext("/to-other-host", exchange -> {
+            hits.incrementAndGet();
             exchange.getResponseHeaders().add("Location", "http://127.0.0.1:" + port + "/final");
             exchange.sendResponseHeaders(302, -1);
             exchange.close();
         });
         server.createContext("/loop", exchange -> {
+            hits.incrementAndGet();
             exchange.getResponseHeaders().add("Location", base() + "/loop");
             exchange.sendResponseHeaders(302, -1);
             exchange.close();
@@ -64,12 +71,16 @@ class UploadUrlValidatorRedirectTest {
         // allowPrivateNetwork, because a loopback server is a private address by definition.
         var resolved = UploadUrlValidator.resolve(base() + "/once", "", STORAGE, true);
         assertEquals(base() + "/final", resolved);
+        // The URL above is also what a single un-redirected hop would return, so without this
+        // the assertion passes whether or not the second hop was ever requested.
+        assertEquals(2, hits.get(), "both hops should have been requested");
     }
 
     @Test
     void returnsTheUrlItselfWhenThereIsNoRedirect() {
         assertEquals(base() + "/final",
                 UploadUrlValidator.resolve(base() + "/final", "", STORAGE, true));
+        assertEquals(1, hits.get(), "the one hop should have been requested");
     }
 
     @Test
@@ -77,6 +88,7 @@ class UploadUrlValidatorRedirectTest {
         // The whitelist admits 'localhost' but not '127.0.0.1'. The first hop passes and the
         // redirect target does not, so the chain must be refused rather than followed.
         assertNull(UploadUrlValidator.resolve(base() + "/to-other-host", "localhost", STORAGE, true));
+        assertEquals(1, hits.get(), "the first hop should have been requested before the refusal");
         // Same first hop, no redirect away from it: allowed, which shows the rejection above
         // came from the second hop.
         assertEquals(base() + "/final",
@@ -87,6 +99,22 @@ class UploadUrlValidatorRedirectTest {
     void refusesTheFirstHopWhenItIsInternal() {
         // Same server, now without the private-network opt-in: loopback is refused outright.
         assertNull(UploadUrlValidator.resolve(base() + "/once", "", STORAGE, false));
+    }
+
+    @Test
+    void refusesWhenAHopCannotBeChecked() {
+        // Nothing is listening on this port. Returning the URL anyway would hand the download an
+        // address no check has looked at.
+        var dead = "http://127.0.0.1:" + deadPort() + "/d.zip";
+        assertNull(UploadUrlValidator.resolve(dead, "", STORAGE, true));
+    }
+
+    private static int deadPort() {
+        try (var socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Test

@@ -34,6 +34,11 @@ import java.util.stream.Collectors;
  * and a private one for the fetch. Closing that means pinning the address this class resolved and
  * connecting to it directly with an explicit Host header, which is a larger change than the one
  * this fix is. Anyone tightening this later should start there.
+ *
+ * <p>The unit tests here cover the decision; they do not cover what the download then does with
+ * the answer, which is where the first version of this went wrong. {@code
+ * .github/ci-verify/attack_ssrf.py} runs the attacks against a live stack. Run it by hand when
+ * changing this class or the download in {@code UploadDataUseCase}.
  */
 public final class UploadUrlValidator {
 
@@ -63,12 +68,19 @@ public final class UploadUrlValidator {
             return false;
         }
         // The product's own object store is where every browser upload lands, and it sits on the
-        // private compose network by design.
+        // private compose network by design. Checked first because an operator setting a
+        // whitelist cannot be expected to know they have to list their own MinIO.
         if (sameOrigin(url, storageEndpoint)) {
             return true;
         }
         var allowedHosts = hosts(whitelist);
-        if (!allowedHosts.isEmpty() && !matchesHost(url.getHost(), allowedHosts)) {
+        if (!allowedHosts.isEmpty()) {
+            if (matchesHost(url.getHost(), allowedHosts)) {
+                // Naming a host in the whitelist is the operator vouching for it, including a
+                // file server on their own LAN. Running it through the address rule afterwards
+                // would reject exactly the hosts the setting exists to allow.
+                return true;
+            }
             log.warn("Upload url rejected, host is not in upload.url.whitelist: {}", rawUrl);
             return false;
         }
@@ -107,8 +119,11 @@ public final class UploadUrlValidator {
             try {
                 next = redirectTarget(current);
             } catch (IOException e) {
-                // Not reachable, or not a redirect we can read. Let the download report it.
-                return current;
+                // Refuse rather than hand back an unexamined URL. This branch has been observed
+                // returning the redirect target of a hop whose own probe then failed, which is
+                // the address the download would have used.
+                log.warn("Upload url rejected, could not check {} for a redirect ({})", current, e.toString());
+                return null;
             }
             if (next == null) {
                 return current;
@@ -165,9 +180,26 @@ public final class UploadUrlValidator {
         }
         return Arrays.stream(whitelist.split(","))
                 .map(String::trim)
+                .map(UploadUrlValidator::toHost)
                 .filter(StrUtil::isNotEmpty)
-                .map(entry -> entry.toLowerCase(Locale.ROOT))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Before this setting meant hosts it meant "the URL contains this string", so entries in the
+     * wild look like {@code https://files.acme.com/datasets} or {@code files.acme.com:8443}.
+     * getHost() carries neither scheme, port nor path, so such an entry would match nothing and
+     * silently reject every upload. Reduce each entry to the host it names.
+     */
+    private static String toHost(String entry) {
+        var host = entry.toLowerCase(Locale.ROOT);
+        var scheme = host.indexOf("://");
+        if (scheme >= 0) {
+            host = host.substring(scheme + 3);
+        }
+        host = StrUtil.subBefore(host, "/", false);
+        host = StrUtil.subBefore(host, ":", false);
+        return StrUtil.removePrefix(host, ".");
     }
 
     private static boolean matchesHost(String host, List<String> allowed) {

@@ -75,6 +75,25 @@ class UploadUrlValidatorTest {
 
 
     @Test
+    void aWhitelistedHostIsAllowedEvenOnTheLocalNetwork() {
+        // The setting exists so an installation can import from its own file server. Running a
+        // whitelisted host through the address rule afterwards would reject exactly those.
+        assertTrue(UploadUrlValidator.isAllowed("http://192.168.1.10/d.zip", "192.168.1.10", STORAGE, false));
+        assertFalse(UploadUrlValidator.isAllowed("http://192.168.1.11/d.zip", "192.168.1.10", STORAGE, false));
+    }
+
+    @Test
+    void whitelistEntriesSurviveTheOldSubstringFormat() {
+        // This setting used to mean "the URL contains this string", so entries in the wild carry
+        // a scheme, a port or a path. Reduced to the host rather than silently matching nothing.
+        for (var entry : new String[]{"https://files.acme.com/datasets", "files.acme.com:8443",
+                                      ".files.acme.com", "FILES.ACME.COM"}) {
+            assertTrue(UploadUrlValidator.isAllowed("https://files.acme.com/d.zip", entry, STORAGE, true),
+                    "entry should have been read as a host: " + entry);
+        }
+    }
+
+    @Test
     void privateNetworkCanBeOptedBackIn() {
         assertTrue(UploadUrlValidator.isAllowed("http://192.168.1.10/d.zip", "", STORAGE, true));
         // the scheme rule is not negotiable
