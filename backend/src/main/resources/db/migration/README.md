@@ -10,6 +10,14 @@ and never run again. Flyway adopts whatever it finds as version 2 (`baseline-ver
 `application.yml`) and takes over from `V3` onwards. A new installation and an upgraded one
 therefore reach the same schema through the same scripts.
 
+What `baseline-version: 2` asserts is that the database already holds the schema
+`deploy/mysql/migration` builds today. That file last changed in v0.8.1, so it holds for any
+installation from v0.8.1 (February 2024) onwards, which is what the upgrade instructions cover.
+An older one is baselined at 2 while its schema is not the one version 2 describes — v0.6.x, for
+instance, has no `LONG_TEXT` in `ontology_class.input_type`. Nothing detects this, and with no
+scripts here yet nothing goes wrong; the first script that assumes a column will be the one that
+finds out. Upgrade such an installation through v0.9.2 first, or check its schema by hand.
+
 Adding one:
 
 - name it `V<n>__<short_description>.sql`, `<n>` being the next unused integer
