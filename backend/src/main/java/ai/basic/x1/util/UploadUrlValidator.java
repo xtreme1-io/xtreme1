@@ -26,9 +26,11 @@ import java.util.stream.Collectors;
  * LAN. Redirects are checked at every hop, because a public URL answering 302 is otherwise a way
  * straight back in.
  *
- * <p>Two settings widen it. {@code upload.url.whitelist}, when set, restricts uploads to the hosts
- * listed and nothing else. {@code upload.url.allowPrivateNetwork} turns the private-address rule
- * off for an installation that genuinely imports from a file server on its own LAN.
+ * <p>Two settings change it. {@code upload.url.whitelist}, when set, restricts uploads to the
+ * hosts listed and nothing else — and a listed host is allowed even on this network, because
+ * naming it is the operator vouching for it; the address rule does not run for a host that
+ * matched. {@code upload.url.allowPrivateNetwork} turns the address rule off altogether, for an
+ * installation that imports from a file server on its own LAN without wanting a whitelist.
  *
  * <p>What this does not stop: DNS rebinding. The name is resolved here and resolved again by the
  * download, so a host whose record has a short TTL can answer with a public address for the check

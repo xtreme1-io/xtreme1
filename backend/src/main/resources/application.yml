@@ -158,8 +158,10 @@ dataset:
 upload:
   url:
     # Hosts that /data/upload may fetch from, comma separated. An entry also covers its
-    # subdomains. Leave empty to allow any public host; either way the backend refuses to
-    # fetch a URL that resolves into a private, loopback or link-local address.
+    # subdomains, and an entry written as a url or with a port is read as the host it names.
+    # Naming a host here is vouching for it: a listed host is fetched even if it is on this
+    # network, which is the point of the setting. Leave empty and any public host is allowed,
+    # while one that resolves into a private, loopback or link-local address is not.
     whitelist:
     # Set to true only if this installation imports from a file server on its own network.
     # It turns off the private-address rule, which is what stops /data/upload being used to
