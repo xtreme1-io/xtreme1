@@ -25,13 +25,27 @@ Adding one:
   refuse to start against a database where it ran with different contents. Fix it with a new
   version, never by editing the old file.
 
-## The Flyway version is pinned on purpose
+## When one fails
 
-`flyway.version` in `backend/pom.xml` is 7.15.0, which is old. `docker-compose.yml` ships
-MySQL 5.7, and Flyway 8 moved MySQL 5.7 to the paid edition — it refuses to run at all against
-it ("MySQL 5.7 is no longer supported by Flyway Community Edition"), and because a failed
-migration stops the backend, a bump makes the whole product refuse to start. Moving MySQL comes
-first; the Flyway version follows it.
+Back up before upgrading; `README.md`, "Upgrading", has the command.
 
-Back up before upgrading. `README.md`, "Upgrading", has the command; a failed migration leaves
-the database where it stopped and the backend will refuse to start until it is resolved.
+A failed migration does not roll back. MySQL commits DDL statement by statement, so the
+statements before the failing one stay applied while the history row records a failure. Flyway
+then refuses every later start with "Detected failed migration to version N ... run repair",
+and the backend never becomes healthy — it serves nothing, though the container does stay up.
+
+Flyway's advice to run `repair` assumes a Flyway CLI, which this image does not carry. The
+recovery is by hand, against the database:
+
+```sql
+-- 1. undo whatever the failed script managed to apply, statement by statement
+ALTER TABLE `dataset` DROP COLUMN `probe`;
+-- 2. clear the failed row, which is all `flyway repair` would have done here
+DELETE FROM `flyway_schema_history` WHERE success = 0;
+```
+
+Then fix the script and start the backend again. This is why every script carries its rollback
+comment, and why one script should do one thing: the shorter it is, the less there is to undo.
+
+`flyway.version` in `backend/pom.xml` is pinned, with the reason in a comment there. It is not
+a free upgrade.

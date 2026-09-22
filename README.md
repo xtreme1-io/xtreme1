@@ -153,8 +153,9 @@ replacing the release package and starting the stack again. The data volumes are
 `docker compose down` without `-v` keeps them.
 
 Back up the database first. A migration that fails leaves the database where it stopped, and the
-backend then refuses to start rather than serve on a half-migrated schema — the log names the
-version it is on and the scripts that did not run.
+backend then serves nothing rather than serve on a half-migrated schema — the log names the
+version it is on, the script that failed and the statement that failed. Recovering is by hand:
+`backend/src/main/resources/db/migration/README.md` has the steps.
 
 ```bash
 # From the directory of the version you are currently running.
