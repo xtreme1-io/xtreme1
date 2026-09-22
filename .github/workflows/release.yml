@@ -26,10 +26,22 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: docker-compose.yml references this tag
+      # v0.9.2 shipped with backend/pom.xml still on 0.9.1-SNAPSHOT, because only
+      # docker-compose.yml was checked here.
+      - name: Every file that names the version names this tag
         run: |
-          grep -q "image: $BACKEND_IMAGE:$IMAGE_TAG" docker-compose.yml
-          grep -q "image: $FRONTEND_IMAGE:$IMAGE_TAG" docker-compose.yml
+          version="${IMAGE_TAG#v}"
+          fail=0
+          check() {  # check <description> <file> <pattern>
+            grep -q "$3" "$2" || { echo "::error file=$2::$1 does not match $IMAGE_TAG"; fail=1; }
+          }
+          check "backend/pom.xml <version>" backend/pom.xml "<version>$version</version>"
+          check "docker-compose.yml backend image" docker-compose.yml "image: $BACKEND_IMAGE:$IMAGE_TAG"
+          check "docker-compose.yml frontend image" docker-compose.yml "image: $FRONTEND_IMAGE:$IMAGE_TAG"
+          check "README release badge" README.md "Release-$IMAGE_TAG-green"
+          check "README download link" README.md "releases/download/$IMAGE_TAG/xtreme1-$IMAGE_TAG.zip"
+          check "README install directory" README.md "cd xtreme1-$IMAGE_TAG"
+          exit $fail
       - uses: docker/setup-buildx-action@v3
       - name: Refuse to overwrite existing Docker Hub tags
         run: |
