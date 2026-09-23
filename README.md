@@ -13,7 +13,7 @@
 
 Xtreme1 is an all-in-one open-source platform for multimodal training data.
 
-Xtreme1 unlocks efficiency in data annotation, curation, and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation to the next efficiency level, powering your projects in 2D/3D Object Detection and LiDAR-Camera Fusion like never before.
+Xtreme1 unlocks efficiency in data annotation, curation, and ontology management for tackling machine learning challenges in computer vision and LLM. The platform's AI-fueled tools elevate your annotation to the next efficiency level, powering your projects in 2D/3D Object Detection, 3D Semantic/Instance Segmentation, and LiDAR-Camera Fusion like never before.
 
 Check the Enterprise Version here [🎉 Request Demo for Free](https://www.basic.ai/request-platform-demo).
 
@@ -44,17 +44,6 @@ Image Annotation (B-box, Polygon, Polyline, Key Point) - [YOLOR](https://github.
 Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xiaolai-sqlai/mobilenetv3) & [openTSNE](https://github.com/pavlin-policar/openTSNE)  | RLHF Annotation Tool for LLM (beta version)
 :-------------------------:|:-------------------------:
 ![](/docs/images/2d_v.gif) |  <img src="/docs/images/0.7rlhf.webp" width="640"> 
-
-# Roadmap
-
-Not in this release, and planned without a date:
-
-- **Segmentation** — point cloud, and 2D polygons
-- New geometry types, BEV/IPM, camera calibration, model tracking
-- Comments and replies on annotations
-
-Key Features above describes what this release does today. Anything here is
-work in progress and may change.
 
 # Install
 
