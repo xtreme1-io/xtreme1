@@ -45,6 +45,17 @@ Image Data Curation (Visualizing & Debug)  - [MobileNetV3](https://github.com/xi
 :-------------------------:|:-------------------------:
 ![](/docs/images/2d_v.gif) |  <img src="/docs/images/0.7rlhf.webp" width="640"> 
 
+# Roadmap
+
+Not in this release, and planned without a date:
+
+- **Segmentation** — point cloud, and 2D polygons
+- New geometry types, BEV/IPM, camera calibration, model tracking
+- Comments and replies on annotations
+
+Key Features above describes what this release does today. Anything here is
+work in progress and may change.
+
 # Install
 
 ## Prerequisites
