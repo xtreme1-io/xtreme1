@@ -3,7 +3,6 @@ package ai.basic.x1.util;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -30,10 +29,10 @@ import static cn.hutool.core.util.CharsetUtil.UTF_8;
 @Slf4j
 public class DecompressionFileUtils {
 
-    // upload() runs inside a transaction and probes twice, so this is paid up to four times
-    // over before the caller hears anything. One second was too short for a TLS handshake to a
-    // bucket on another continent (#316); five is several times that and keeps the worst case
-    // near where it was.
+    // One second was too short for a TLS handshake to a bucket on another continent (#316).
+    // upload() is @Transactional, so whatever is spent here is spent holding a pooled database
+    // connection: measured at 5.1s for an address that blackholes, against 1s before. There is
+    // one probe per upload, not two -- see describeUrlProblem for why the second one went.
     private static final int CONNECT_TIMEOUT_MS = 5000;
     private static final int READ_TIMEOUT_MS = 5000;
 
@@ -131,17 +130,16 @@ public class DecompressionFileUtils {
     /**
      * Why this URL cannot be fetched, or null if it can. The text ends up in the upload
      * record, because "File url error" on its own tells the user nothing they can act on.
+     *
+     * <p>The previous version retried with {@code URLUtil.encode(url)} when the first probe
+     * failed. That form is fetched by nothing: the download uses {@code URLUtil.decode}. And
+     * encode() escapes the '?' as well, so for any url carrying a query string — every
+     * presigned url — the retry asked about {@code /x%3Fk=a%252Fb} rather than {@code /x?k=a%2Fb},
+     * and reported that url's diagnosis as if it were this one's. It could only turn a real
+     * answer into a misleading one, or pass a url the download would then fail on, at the cost
+     * of a second timeout inside the caller's transaction.
      */
     public static String describeUrlProblem(String urlStr) {
-        var problem = probe(urlStr);
-        if (problem == null) {
-            return null;
-        }
-        var encoded = URLUtil.encode(urlStr);
-        return encoded.equals(urlStr) ? problem : probe(encoded);
-    }
-
-    private static String probe(String urlStr) {
         try {
             var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
@@ -152,11 +150,15 @@ public class DecompressionFileUtils {
             // following one here would reach a host nothing has checked. A redirect still counts
             // as reachable, which is what this method is asked.
             oc.setInstanceFollowRedirects(false);
-            var status = oc.getResponseCode();
-            if (status < HttpStatus.BAD_REQUEST.value()) {
-                return null;
+            try {
+                var status = oc.getResponseCode();
+                if (status < HttpStatus.BAD_REQUEST.value()) {
+                    return null;
+                }
+                return "the server answered HTTP " + status;
+            } finally {
+                oc.disconnect();
             }
-            return "the server answered HTTP " + status;
         } catch (Exception e) {
             log.warn("Upload url not reachable: {} ({})", urlStr, e.toString());
             var message = e.getMessage();
