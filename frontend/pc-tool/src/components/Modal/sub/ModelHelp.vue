@@ -93,12 +93,10 @@
                 key: ['G'],
                 action: $$('hk-axis'),
             },
-            editor.state.imgViews.length > 0
-                ? {
-                      key: ['B'],
-                      action: $$('hk-filter'),
-                  }
-                : null,
+            // B was listed here but is never bound: HotkeyManager.setHotKeyFromAction only
+            // binds a key whose action is enabled, and 'filter2DByTrack' is commented out of
+            // generalActions in src/config/action.ts. To put it back, re-enable that action and
+            // restore both this entry and its 'hk-filter' string in ../lang/{en,zh}.ts.
             {
                 key: ['N'],
                 action: $$('hk-measure'),

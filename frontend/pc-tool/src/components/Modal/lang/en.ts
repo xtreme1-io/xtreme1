@@ -14,7 +14,6 @@ const en = {
     'hk-label': 'Show/Hide Label',
     'hk-rotate-head': 'Rotate Head',
     'hk-axis': 'Show/hide Coordinate Axis',
-    'hk-filter': 'Filter other object in 2d view',
     'hk-measure': 'Show/hide Distance Measure',
 };
 export type ILocale = typeof en;

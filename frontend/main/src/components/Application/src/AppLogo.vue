@@ -6,7 +6,6 @@
   <div class="anticon" :class="getAppLogoClass">
     <div class="wrapper" :style="!getCollapsed ? { width: '100%', marginLeft: '7px' } : {}">
       <img width="117" v-if="!getCollapsed" src="../../../assets/images/logo.png" @click="goHome" />
-      <!-- <img v-else class="logo" src="../../../assets/images/logo-sm.png" @click="goHome" /> -->
       <SvgIcon
         v-else
         style="

@@ -68,11 +68,11 @@
         </FormItem>
         <FormItem class="text-sm text-left">
           Registration means that I agree to the Xtreme1
-          <a target="_blank" class="tips" href="https://www.basic.ai/privacypolicy">
+          <a target="_blank" class="tips" href="https://www.basic.ai/privacy-policy">
             Privacy Policy
           </a>
           and
-          <a target="_blank" class="tips" href="https://www.basic.ai/termsofservice/"> Terms </a>
+          <a target="_blank" class="tips" href="https://www.basic.ai/terms-of-service"> Terms </a>
         </FormItem>
       </Form>
     </div>
