@@ -49,9 +49,11 @@ applications: `main`, built from the vben admin template, whose conventions appl
 
 ## Running the checks
 
-Every pull request builds both images from your branch, starts the stack, and runs the end-to-end
-smoke test. A green run means the stack comes up and one upload-parse-download round trip works.
-It does not mean your change is right, so run the smallest of these that covers it before pushing:
+Every pull request builds both images from your branch, starts the stack and runs the end-to-end
+smoke test. A green run means the stack comes up, one upload-parse-download round trip works for
+an image and a lidar-fusion dataset with every file accounted for, the four front-end entry pages
+answer, and `/data/upload` still refuses the shapes it is meant to refuse. It does not mean your
+change is right, so run the smallest of these that covers it before pushing:
 
 1. `mvn -B package` in `backend/`. There are few tests, but there are some now — do not reach for
    `-DskipTests` out of habit. `mvn checkstyle:check` checks nothing:
@@ -63,7 +65,12 @@ It does not mean your change is right, so run the smallest of these that covers 
 3. Backend and frontend together: `docker compose up -d --wait`, then
    `python3 .github/ci-verify/smoke.py`. It wants the stack on `:8190` and the trial zips under
    `./samples`, and `docker-compose.yml` pulls released images until you uncomment the `build:`
-   lines.
+   lines. Two of its checks need names that answer with an internal address, which the workflow
+   arranges and a plain `docker compose up` does not; they are skipped, with a line saying so,
+   unless you add the `extra_hosts` from `.github/workflows/pr.yml` and set `X1_GUARD_HOSTS=1`.
+   The whole set of upload-guard attacks lives in `.github/ci-verify/attack_ssrf.py`, which needs
+   a stack arranged by hand — its header says how. Run it if you touch `UploadUrlValidator` or the
+   download in `UploadDataUseCase`.
 
 If a check could not be run, say so in the pull request description. An unrun check is not a
 passed check.
@@ -73,12 +80,12 @@ passed check.
 - `backend/Dockerfile` pip-installs `xtreme1-io/xtreme1-sdk` at a pinned commit and downloads the
   trial datasets from `xtreme1-io/asset`. Neither repository can be archived, made private or
   vendored without editing that Dockerfile in the same change.
-- A schema change is a new `V3__*.sql` and upwards under
-  `backend/src/main/resources/db/migration`, applied by Flyway when the backend starts.
-  `deploy/mysql/migration` holds `V1` and `V2` only; it is mounted at
-  `/docker-entrypoint-initdb.d`, so the MySQL image runs it on a new installation and never
-  again. Do not add a `V3` there, and never edit a migration that has shipped — Flyway checksums
-  it and will refuse to start against a database where it ran with different contents.
+- There are two directories of migrations and only one of them is where yours goes.
+  `deploy/mysql/migration` is mounted at `/docker-entrypoint-initdb.d`, so the MySQL image runs
+  it on a new installation and never again — a script added there reaches new installations and
+  silently skips every existing one. New migrations go under
+  `backend/src/main/resources/db/migration`, whose README has the rules; read it before writing
+  one.
 - `DatasetTypeEnum.TEXT` and `InputTypeEnum.TEXT` outlive `frontend/text-tool` — they are read
   across the upload and classification paths, and existing TEXT datasets must keep loading.
   Removing the app is not removing the enum value.
