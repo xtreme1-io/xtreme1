@@ -2,6 +2,7 @@ package ai.basic.x1.util;
 
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.net.URL;
 
 import static ai.basic.x1.entity.enums.UploadStatusEnum.FAILED;
@@ -28,6 +30,16 @@ import static cn.hutool.core.util.CharsetUtil.UTF_8;
  */
 @Slf4j
 public class DecompressionFileUtils {
+
+    // upload() runs inside a transaction and probes twice, so this is paid up to four times
+    // over before the caller hears anything. One second was too short for a TLS handshake to a
+    // bucket on another continent (#316); five is several times that and keeps the worst case
+    // near where it was.
+    /** The printable ASCII characters a url may not carry literally (RFC 3986 "unwise" plus '"'). */
+    private static final String NOT_ALLOWED_IN_A_URL = "\"<>\\^`{|}";
+
+    private static final int CONNECT_TIMEOUT_MS = 5000;
+    private static final int READ_TIMEOUT_MS = 5000;
 
     /**
      * Unzip the zip file
@@ -121,33 +133,69 @@ public class DecompressionFileUtils {
     }
 
     /**
-     * Verify that the url address can be connected
-     *
-     * @param urlStr url
-     * @return boolean
+     * Why this URL cannot be fetched, or null if it can. The text ends up in the upload
+     * record, because "File url error" on its own tells the user nothing they can act on.
      */
-    public static boolean validateUrl(String urlStr) {
-        var boo = validateUrlS(urlStr);
-        if (!boo) {
-            return validateUrlS(URLUtil.encode(urlStr));
+    public static String describeUrlProblem(String urlStr) {
+        var problem = probe(urlStr);
+        if (problem == null) {
+            return null;
         }
-        return true;
+        // A url carrying a raw space or a non-ASCII name is rejected by the server as it
+        // stands and accepted once those characters are escaped, and the download escapes
+        // them too, so it is worth a second look. Not URLUtil.encode: that also escapes '?'
+        // and '%', which turns a query string into part of the path and double-escapes an
+        // already-encoded url -- for http://h/x?k=a%2Fb it asked about /x%3Fk=a%252Fb.
+        var escaped = escapeIllegalCharacters(urlStr);
+        if (escaped.equals(urlStr) || probe(escaped) != null) {
+            // Report the url the caller gave us, not the one we tried on their behalf.
+            return problem;
+        }
+        return null;
     }
 
-    private static boolean validateUrlS(String urlStr) {
+    /**
+     * Percent-escapes the characters that cannot appear literally in a url, and nothing else.
+     * An already-escaped url comes back unchanged, so this never runs twice over the same
+     * character and never rewrites a url that was already valid.
+     */
+    private static String escapeIllegalCharacters(String urlStr) {
+        var out = new StringBuilder(urlStr.length());
+        for (var b : urlStr.getBytes(StandardCharsets.UTF_8)) {
+            var c = (char) (b & 0xff);
+            if (c > 0x20 && c < 0x7f && NOT_ALLOWED_IN_A_URL.indexOf(c) < 0) {
+                out.append(c);
+            } else {
+                out.append('%').append(String.format("%02X", b & 0xff));
+            }
+        }
+        return out.toString();
+    }
+
+    private static String probe(String urlStr) {
         try {
             var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
             oc.setUseCaches(false);
-            oc.setConnectTimeout(1000);
+            oc.setConnectTimeout(CONNECT_TIMEOUT_MS);
+            oc.setReadTimeout(READ_TIMEOUT_MS);
             // Do not follow redirects: UploadUrlValidator checks every hop of the chain, and
             // following one here would reach a host nothing has checked. A redirect still counts
             // as reachable, which is what this method is asked.
             oc.setInstanceFollowRedirects(false);
-            return oc.getResponseCode() < HttpStatus.BAD_REQUEST.value();
+            try {
+                var status = oc.getResponseCode();
+                if (status < HttpStatus.BAD_REQUEST.value()) {
+                    return null;
+                }
+                return "the server answered HTTP " + status;
+            } finally {
+                oc.disconnect();
+            }
         } catch (Exception e) {
-            log.error("url error", e);
-            return false;
+            log.warn("Upload url not reachable: {} ({})", urlStr, e.toString());
+            var message = e.getMessage();
+            return e.getClass().getSimpleName() + (StrUtil.isEmpty(message) ? "" : ": " + message);
         }
     }
 
