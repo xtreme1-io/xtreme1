@@ -3,6 +3,7 @@ package ai.basic.x1.util;
 import ai.basic.x1.usecase.exception.UsecaseException;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.net.URL;
 
 import static ai.basic.x1.entity.enums.UploadStatusEnum.FAILED;
@@ -29,10 +31,13 @@ import static cn.hutool.core.util.CharsetUtil.UTF_8;
 @Slf4j
 public class DecompressionFileUtils {
 
-    // One second was too short for a TLS handshake to a bucket on another continent (#316).
-    // upload() is @Transactional, so whatever is spent here is spent holding a pooled database
-    // connection: measured at 5.1s for an address that blackholes, against 1s before. There is
-    // one probe per upload, not two -- see describeUrlProblem for why the second one went.
+    // upload() runs inside a transaction and probes twice, so this is paid up to four times
+    // over before the caller hears anything. One second was too short for a TLS handshake to a
+    // bucket on another continent (#316); five is several times that and keeps the worst case
+    // near where it was.
+    /** The printable ASCII characters a url may not carry literally (RFC 3986 "unwise" plus '"'). */
+    private static final String NOT_ALLOWED_IN_A_URL = "\"<>\\^`{|}";
+
     private static final int CONNECT_TIMEOUT_MS = 5000;
     private static final int READ_TIMEOUT_MS = 5000;
 
@@ -130,16 +135,44 @@ public class DecompressionFileUtils {
     /**
      * Why this URL cannot be fetched, or null if it can. The text ends up in the upload
      * record, because "File url error" on its own tells the user nothing they can act on.
-     *
-     * <p>The previous version retried with {@code URLUtil.encode(url)} when the first probe
-     * failed. That form is fetched by nothing: the download uses {@code URLUtil.decode}. And
-     * encode() escapes the '?' as well, so for any url carrying a query string — every
-     * presigned url — the retry asked about {@code /x%3Fk=a%252Fb} rather than {@code /x?k=a%2Fb},
-     * and reported that url's diagnosis as if it were this one's. It could only turn a real
-     * answer into a misleading one, or pass a url the download would then fail on, at the cost
-     * of a second timeout inside the caller's transaction.
      */
     public static String describeUrlProblem(String urlStr) {
+        var problem = probe(urlStr);
+        if (problem == null) {
+            return null;
+        }
+        // A url carrying a raw space or a non-ASCII name is rejected by the server as it
+        // stands and accepted once those characters are escaped, and the download escapes
+        // them too, so it is worth a second look. Not URLUtil.encode: that also escapes '?'
+        // and '%', which turns a query string into part of the path and double-escapes an
+        // already-encoded url -- for http://h/x?k=a%2Fb it asked about /x%3Fk=a%252Fb.
+        var escaped = escapeIllegalCharacters(urlStr);
+        if (escaped.equals(urlStr) || probe(escaped) != null) {
+            // Report the url the caller gave us, not the one we tried on their behalf.
+            return problem;
+        }
+        return null;
+    }
+
+    /**
+     * Percent-escapes the characters that cannot appear literally in a url, and nothing else.
+     * An already-escaped url comes back unchanged, so this never runs twice over the same
+     * character and never rewrites a url that was already valid.
+     */
+    private static String escapeIllegalCharacters(String urlStr) {
+        var out = new StringBuilder(urlStr.length());
+        for (var b : urlStr.getBytes(StandardCharsets.UTF_8)) {
+            var c = (char) (b & 0xff);
+            if (c > 0x20 && c < 0x7f && NOT_ALLOWED_IN_A_URL.indexOf(c) < 0) {
+                out.append(c);
+            } else {
+                out.append('%').append(String.format("%02X", b & 0xff));
+            }
+        }
+        return out.toString();
+    }
+
+    private static String probe(String urlStr) {
         try {
             var url = new URL(urlStr);
             var oc = (HttpURLConnection) url.openConnection();
