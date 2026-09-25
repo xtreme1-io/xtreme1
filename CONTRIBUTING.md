@@ -2,8 +2,8 @@
 
 ## What to expect
 
-- Small, self-contained fixes are what lands. The median external pull request merged here
-  changed one file and seven lines; anything larger takes longer.
+- Small, self-contained fixes are what lands: most merged contributions from outside the
+  maintainers touch a single file. Anything larger takes longer.
 - No reply for two weeks? Comment again and mention @jotamotk. That is the intended way to get
   attention, not rudeness.
 - Releases happen when there is something worth releasing. Do not plan around a date.
@@ -108,8 +108,8 @@ Open an [issue](https://github.com/xtreme1-io/xtreme1/issues/new/choose) with th
 - the relevant part of `docker compose logs backend`
 
 A bug nobody can reproduce gets closed rather than investigated; reopen it if you find the steps.
-Questions and ideas are welcome too — use the question template so they are not read as bug
-reports. Security problems: do not open a public issue, follow [`SECURITY.md`](SECURITY.md).
+Questions and ideas are welcome too — there is a question template and a feature-request
+template, so they are not read as bug reports. Security problems: do not open a public issue, follow [`SECURITY.md`](SECURITY.md).
 
 ## Staying in touch
 
