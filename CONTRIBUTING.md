@@ -128,6 +128,18 @@ bug reports.
 
 Security problems: do not open a public issue. Follow `SECURITY.md`.
 
+## Staying in touch
+
+Suggestions, comments and criticism are all welcome, and every kind of contribution counts —
+code, tests, documentation. Follow along wherever you already are:
+
+* [GitHub](https://github.com/xtreme1-io/xtreme1)
+* [Twitter](https://twitter.com/Xtreme1io)
+* [YouTube](https://www.youtube.com/@basicai)
+* [LinkedIn](https://linkedin.com/company/basicaius)
+* [Facebook](https://www.facebook.com/basicaiinc)
+* [Reddit](https://www.reddit.com/r/BasicAI)
+
 ## Language
 
 English is the default for everything in the repository: code, comments, commit messages,
