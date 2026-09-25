@@ -1,8 +1,5 @@
 # Contributing to Xtreme1
 
-No fixed release cadence, and no promise about response times. The two sections below decide
-whether your work gets merged; the rest is detail.
-
 ## What to expect
 
 - Small, self-contained fixes are what lands. The median external pull request merged here
@@ -67,8 +64,7 @@ that covers it first:
    Touching `UploadUrlValidator` or the download in `UploadDataUseCase`? Run
    `.github/ci-verify/attack_ssrf.py` as well; its header says what stack it needs.
 
-If a check could not be run, say so in the pull request description. An unrun check is not a
-passed check.
+If a check could not be run, say so in the pull request description.
 
 ## Things that will catch you out
 
@@ -80,8 +76,7 @@ passed check.
   added there silently skips every existing installation. Yours goes under
   `backend/src/main/resources/db/migration`; read its README first.
 - `DatasetTypeEnum.TEXT` and `InputTypeEnum.TEXT` outlive `frontend/text-tool`: the upload and
-  classification paths read them, and existing TEXT datasets must keep loading. Removing the app
-  is not removing the enum value.
+  classification paths read them, and existing TEXT datasets must keep loading.
 - Prettier is not uniform: `pc-tool` and `text-tool` comment it out of `.eslintrc.js` and use
   `tabWidth: 4`, `main` and `image-tool` enable it at 2. Each app's own config is authoritative —
   running Prettier across `pc-tool` rewrites the whole app.
