@@ -1,52 +1,130 @@
-# Contribute to Xtreme1
+# Contributing to Xtreme1
 
-Thank you very much for your interest in the Xtreme1 project. We welcome your suggestions, comments (including criticisms) and contributions to the Xtreme1 project.
+## What to expect
 
-Your suggestions and comments on Xtreme1 can be made directly through GitHub's [Issues](https://github.com/xtreme1-io/xtreme1/issues/new/choose).
+- Small, self-contained fixes are what lands: most merged contributions from outside the
+  maintainers touch a single file. Anything larger takes longer.
+- No reply for two weeks? Comment again and mention @jotamotk. That is the intended way to get
+  attention, not rudeness.
+- Releases happen when there is something worth releasing. Do not plan around a date.
 
-There are many ways to participate in and contribute to Xtreme1 projects: code implementation, test writing, document improvement, and so on. Any contribution will be welcomed and you will be added to the list of contributors.
+## Before you write code
 
-## Initial contact
+**Ask first for anything that is not obviously small.** Open an issue describing what you want to
+change and why, and wait for a reply before building it — a design turned down costs an
+afternoon, a finished pull request turned down costs a week.
 
-For the first time in Xtreme1 community, you can:
+No need to ask for typos, broken links, documentation, a crash with an obvious one-line cause, or
+a dependency or image-tag bump you have verified.
 
-* Follow [Xtreme1 GitHub](https://github.com/xtreme1-io/xtreme1)
-* Follow [Xtreme1 Twitter](https://twitter.com/Xtreme1io)
-* Follow [Xtreme1 YouTube](https://www.youtube.com/@basicai)
-* Follow [Xtreme1 LinkedIn](https://linkedin.com/company/basicaius)
-* Follow [Xtreme1 Facebook](https://www.facebook.com/basicaiinc)
-* Follow [Xtreme1 Reddit](https://www.reddit.com/r/BasicAI)
+**Likely to be merged**: a bug you hit yourself fixed with the smallest change that fixes it; a
+change that keeps existing data readable and existing installations working; a change confined to
+one area of the repository.
 
-Learn the development trends of Xtreme1 project in time and give your opinions on the topics you are concerned about.
+**Often declined, so ask first**: refactors, renames or reformatting a fix does not require; new
+runtime dependencies, build tooling or CI workflows; features outside point cloud and
+multi-sensor annotation, since the product surface is being narrowed rather than widened; changes
+that only move code between files or only change style.
 
-## Xtreme1's code and documentation
+## Where things are
 
-As you can see from [Xtreme1 GitHub](https://github.com/xtreme1-io/xtreme1), Xtreme1 code base mainly consists of two parts: Frontend (FE) and Backend (BE). Documents are also maintained on [GitHub](https://github.com/xtreme1-io/docs), and deployed on [GitBook](https://www.gitbook.com/). Details of these components can be found in the following table:
+`backend/` is a Java 11 / Spring Boot 2.6 monolith. `frontend/` holds four independent Vue 3
+applications: `main`, built from the vben admin template, whose conventions apply nowhere else;
+`pc-tool`, point cloud and multi-sensor annotation, where most of the work is; `image-tool`; and
+`text-tool`, which is not under development.
 
-| Component Name | Component Description | Related Language |
-|----------------|-----------------------|------------------|
-| [Frontend (FE)](https://github.com/xtreme1-io/xtreme1) | Xtreme1 web ui | JavaScript, TypeScript, HTML, CSS |
-| [Backend (BE)](https://github.com/xtreme1-io/xtreme1)  | Xtreme1 api service | Java |
-| [Docs](https://github.com/xtreme1-io/docs)        | Xtreme1 documents | Markdown |
+- Install and run the released stack: [`README.md`](README.md)
+- Backend development: [`backend/README.md`](https://github.com/xtreme1-io/xtreme1/blob/main/backend/README.md)
+- Frontend development: [`frontend/README.md`](https://github.com/xtreme1-io/xtreme1/blob/main/frontend/README.md)
+  and each app's own README
+- Database schema changes: [`db/migration/README.md`](backend/src/main/resources/db/migration/README.md)
+- User-facing documentation: the [docs repository](https://github.com/xtreme1-io/docs), published
+  through [GitBook](https://www.gitbook.com/)
 
-## Improving documentation
+## Running the checks
 
-Documentation is the most important way for you to understand Xtreme1, and it's where we need help most!
+Every pull request builds both images from your branch, starts the stack and runs the smoke test.
+Green means: the stack comes up, an image and a lidar-fusion dataset each upload, parse and
+download with every file accounted for, the four front-end entry pages answer, and `/data/upload`
+still refuses what it should. It does not mean your change is right, so run the smallest of these
+that covers it first:
 
-Browse the document, you can deepen your understanding of Xtreme1, can also help you understand Xtreme1's function and technical details, if you find that the document has problems, please contact us in time;
+1. `mvn -B package` in `backend/`. There are few tests, but there are some now — do not reach for
+   `-DskipTests` out of habit. `mvn checkstyle:check` checks nothing:
+   `backend/coding-standards/` has five config files, but `backend/pom.xml` declares only
+   `spring-boot-maven-plugin`, whatever `backend/README.md` implies.
+2. `npm run build` in the app you touched, on Node 16 — `frontend/Dockerfile` builds with `node:16`,
+   so a build needing newer Node is a broken build. Not `npm run test`: in `frontend/main` that is
+   `vite --mode test`, which starts a dev server. `npm run lint:eslint` exists in `image-tool` only.
+3. Both together: `docker compose up -d --wait`, then `python3 .github/ci-verify/smoke.py`. It
+   wants the stack on `:8190` and the trial zips under `./samples`; `docker-compose.yml` pulls
+   released images until you uncomment the `build:` lines. Two of its checks need hostnames that
+   answer with an internal address, so they skip — printing a line — unless you copy the
+   `extra_hosts` from `.github/workflows/pr.yml` and set `X1_GUARD_HOSTS=1`.
+   Touching `UploadUrlValidator` or the download in `UploadDataUseCase`? Run
+   `.github/ci-verify/attack_ssrf.py` as well; its header says what stack it needs.
 
-If you are interested in improving the quality of documents, whether it is revising the address of a page, correcting a link, and writing a better introductory document, we are very welcome!
+If a check could not be run, say so in the pull request description.
 
-Most of our documents are written in Markdown format, and you can modify and submit document changes directly in [Xtreme1 Docs](https://github.com/xtreme1-io/docs).
+## Things that will catch you out
 
-## If a Bug or problem is found
+- `backend/Dockerfile` pip-installs `xtreme1-io/xtreme1-sdk` at a pinned commit and downloads the
+  trial datasets from `xtreme1-io/asset`. Neither repository can be archived, made private or
+  vendored without editing that Dockerfile in the same change.
+- Two migration directories, one of them yours. `deploy/mysql/migration` is mounted at
+  `/docker-entrypoint-initdb.d`, so it runs on a new installation and never again — a script
+  added there silently skips every existing installation. Yours goes under
+  `backend/src/main/resources/db/migration`; read its README first.
+- `DatasetTypeEnum.TEXT` and `InputTypeEnum.TEXT` outlive `frontend/text-tool`: the upload and
+  classification paths read them, and existing TEXT datasets must keep loading.
+- Prettier is not uniform: `pc-tool` and `text-tool` comment it out of `.eslintrc.js` and use
+  `tabWidth: 4`, `main` and `image-tool` enable it at 2. Each app's own config is authoritative —
+  running Prettier across `pc-tool` rewrites the whole app.
+- `@commitlint/*`, `lint-staged` and `husky` appear in `package.json`, but there is no `.husky/`
+  directory and no commitlint config. The hooks are dead — do not repair them to make a command
+  work.
+- `frontend/text-tool/package.json` still declares `"name": "pc-tool"`.
 
-If a Bug or problem is found, you can directly raise a new Issue through GitHub's [Issues](https://github.com/xtreme1-io/xtreme1/issues/new/choose), and we will have someone deal with it regularly.
+## Pull requests
 
-You can also fix it yourself by reading and analyzing the source code (of course, it's better to talk to us before that, maybe someone has fixed the same problem) and submit a [Pull Request](https://github.com/xtreme1-io/xtreme1/compare).
+- Fork, branch from `main`, one logical change per [pull request](https://github.com/xtreme1-io/xtreme1/compare).
+- Squash-merged, so **the title becomes the commit message on `main`**. Write it as
+  `type: subject` — `fix:`, `feat:`, `docs:`, `chore:`, `refactor:`, `ci:`, optionally scoped like
+  `fix(pc-tool):`. Nothing enforces it; it is what makes release notes writable.
+- The description says what changed, why, and what you ran to convince yourself it works.
+  Screenshots or a short clip for anything visible in the annotation tools.
+- Do not reformat files you did not otherwise change. The four frontend apps are configured
+  differently on purpose, and a diff buried in formatting cannot be reviewed.
+- No CLA. The template has one checkbox confirming you submit under the project's Apache-2.0
+  license.
 
-## Modify the code and submit PR (Pull Request)
+## Reporting bugs
 
-You can download the code, build and run it for a try (refer to [Frontend README](https://github.com/xtreme1-io/xtreme1/blob/main/frontend/README.md) and [Backend README](https://github.com/xtreme1-io/xtreme1/blob/main/backend/README.md)) to see if it works as you expected. If you have problems, you can contact us directly, ask questions or fix them by reading and analyzing the source code.
+Open an [issue](https://github.com/xtreme1-io/xtreme1/issues/new/choose) with the bug template and include:
 
-Whether it's fixing Bugs or adding Features, we're all very welcome. If you want to submit code to Xtreme1, you need to create a new branch for your submitted code from your forked repository and submit a PR.
+- the version — a release tag, or the commit you built from
+- how you installed it: release package, `docker compose up`, or a local build
+- browser and operating system for annotation tool bugs
+- the relevant part of `docker compose logs backend`
+
+A bug nobody can reproduce gets closed rather than investigated; reopen it if you find the steps.
+Questions and ideas are welcome too — there is a question template and a feature-request
+template, so they are not read as bug reports. Security problems: do not open a public issue, follow [`SECURITY.md`](SECURITY.md).
+
+## Staying in touch
+
+Suggestions, comments and criticism are all welcome, and code is not the only contribution that
+counts. Follow along wherever you already are:
+
+* [GitHub](https://github.com/xtreme1-io/xtreme1)
+* [Twitter](https://twitter.com/Xtreme1io)
+* [YouTube](https://www.youtube.com/@basicai)
+* [LinkedIn](https://linkedin.com/company/basicaius)
+* [Facebook](https://www.facebook.com/basicaiinc)
+* [Reddit](https://www.reddit.com/r/BasicAI)
+
+## Language
+
+English is the default for everything in the repository: code, comments, commit messages, file
+names, documentation. Issues and pull request descriptions may be in any language — you will get
+a reply in the one you used.
