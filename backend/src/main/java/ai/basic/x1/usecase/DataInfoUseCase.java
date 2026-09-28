@@ -524,6 +524,11 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
+        // Selecting no result means the manual annotations, not none of them. Without this an
+        // export that leaves selectModelRunIds out completes with an archive holding no results.
+        if (CollectionUtil.isEmpty(dataInfoQueryBO.getSelectModelRunIds())) {
+            dataInfoQueryBO.setSelectModelRunIds(List.of(GROUND_TRUTH));
+        }
         var resultMap = new HashMap<Long, String>();
         if (CollectionUtil.isNotEmpty(dataInfoQueryBO.getSelectModelRunIds())) {
             var modelRunRecordBOList = modelRunRecordUseCase.findByIds(dataInfoQueryBO.getSelectModelRunIds());
