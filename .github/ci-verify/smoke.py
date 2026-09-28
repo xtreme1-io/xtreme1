@@ -4,6 +4,7 @@ Uploads the trial datasets bundled in the backend image, waits for parsing and
 downloads a few files through presigned URLs. Exits non-zero on failure.
 """
 import io
+import os
 import json
 import sys
 import time
@@ -86,12 +87,23 @@ for dtype, path, expect in [("IMAGE", "samples/xtreme1-image-trial.zip", 12),
     check(f"download {dtype}", urls and all(x == 200 for x in statuses), f"{statuses}")
 
 # The upload guard, on the paths a refactor is most likely to reopen. The full set of attacks
-# lives in attack_ssrf.py, which needs a stack this job cannot arrange; these need only the two
-# extra_hosts the workflow adds, so they can run on every pull request.
+# lives in attack_ssrf.py, which needs a stack this job cannot arrange.
+#
+# The first two need the stack to answer metadata.example.test and fileserver.example.test with
+# an internal address, which the workflow arranges with extra_hosts. Without that they do not
+# fail honestly: on a machine whose resolver answers every name they are allowed and the check
+# fails, and on one that does not resolve them the guard refuses them for not resolving, which
+# is a pass for the wrong reason. So they run only when the setup is there, and say so when it
+# is not.
 ds = call("POST", "/dataset/create", json={"name": f"guard-{uuid.uuid4().hex[:6]}", "type": "IMAGE"})["id"]
-for label, url in [
+guard_hosts = os.environ.get("X1_GUARD_HOSTS") == "1"
+if not guard_hosts:
+    print("SKIP upload refuses a name that resolves internally (x2) - needs X1_GUARD_HOSTS=1 "
+          "and the extra_hosts the workflow adds", flush=True)
+for label, url in ([
         ("a name that answers with a link-local address", "http://metadata.example.test/latest/meta-data/"),
         ("a name that answers with a private address", "http://fileserver.example.test/d.zip"),
+] if guard_hosts else []) + [
         ("an address written as a decimal", "http://2130706433/d.zip"),
         ("a path that leaves the bucket", "http://minio:9000/xtreme1/../minio/admin/v3/list-buckets"),
         ("a scheme that is not http", "file:///etc/passwd")]:

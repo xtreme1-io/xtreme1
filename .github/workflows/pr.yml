@@ -61,7 +61,7 @@ jobs:
           mkdir -p samples
           docker run --rm --entrypoint sh -v "$PWD/samples:/out" xtreme1-backend:pr -c 'cp /app/*.zip /out/'
           pip install --quiet --break-system-packages requests   # Ubuntu 24.04 is PEP 668 managed
-          python3 .github/ci-verify/smoke.py
+          X1_GUARD_HOSTS=1 python3 .github/ci-verify/smoke.py   # the two extra_hosts above are in place
 
       - name: Logs
         if: always()
