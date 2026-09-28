@@ -530,14 +530,12 @@ public class DataInfoUseCase {
             dataInfoQueryBO.setSelectModelRunIds(List.of(GROUND_TRUTH));
         }
         var resultMap = new HashMap<Long, String>();
-        if (CollectionUtil.isNotEmpty(dataInfoQueryBO.getSelectModelRunIds())) {
-            var modelRunRecordBOList = modelRunRecordUseCase.findByIds(dataInfoQueryBO.getSelectModelRunIds());
-            if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
-                resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
-            }
-            if (dataInfoQueryBO.getSelectModelRunIds().contains(GROUND_TRUTH)) {
-                resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
-            }
+        var modelRunRecordBOList = modelRunRecordUseCase.findByIds(dataInfoQueryBO.getSelectModelRunIds());
+        if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
+            resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
+        }
+        if (dataInfoQueryBO.getSelectModelRunIds().contains(GROUND_TRUTH)) {
+            resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
         }
         dataInfoQueryBO.setIsAllResult(false);
         dataInfoQueryBO.setDataFormat(IMAGE.equals(dataInfoQueryBO.getDatasetType()) ? dataInfoQueryBO.getDataFormat() : DataFormatEnum.XTREME1);
