@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn package
 FROM eclipse-temurin:11-jre-jammy
 RUN apt update && \
     apt install -y iputils-ping curl wget netcat python3 python3-pip git
-RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git@a16984b
+RUN pip3 install --upgrade --force-reinstall git+https://github.com/xtreme1-io/xtreme1-sdk.git@8cb99c9
 WORKDIR /app
 # A glob, not the versioned name: target holds one .jar beside one .jar.original,
 # so this keeps working when <version> moves and nothing has to be renamed.
