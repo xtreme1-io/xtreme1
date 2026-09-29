@@ -524,15 +524,18 @@ public class DataInfoUseCase {
         if (CollectionUtil.isNotEmpty(datasetClassBOList)) {
             classMap.putAll(datasetClassBOList.stream().collect(Collectors.toMap(DatasetClassBO::getId, DatasetClassBO::getName)));
         }
+        // Selecting no result means the manual annotations, not none of them. Without this an
+        // export that leaves selectModelRunIds out completes with an archive holding no results.
+        if (CollectionUtil.isEmpty(dataInfoQueryBO.getSelectModelRunIds())) {
+            dataInfoQueryBO.setSelectModelRunIds(List.of(GROUND_TRUTH));
+        }
         var resultMap = new HashMap<Long, String>();
-        if (CollectionUtil.isNotEmpty(dataInfoQueryBO.getSelectModelRunIds())) {
-            var modelRunRecordBOList = modelRunRecordUseCase.findByIds(dataInfoQueryBO.getSelectModelRunIds());
-            if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
-                resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
-            }
-            if (dataInfoQueryBO.getSelectModelRunIds().contains(GROUND_TRUTH)) {
-                resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
-            }
+        var modelRunRecordBOList = modelRunRecordUseCase.findByIds(dataInfoQueryBO.getSelectModelRunIds());
+        if (CollUtil.isNotEmpty(modelRunRecordBOList)) {
+            resultMap.putAll(modelRunRecordBOList.stream().collect(Collectors.toMap(ModelRunRecordBO::getId, ModelRunRecordBO::getRunNo)));
+        }
+        if (dataInfoQueryBO.getSelectModelRunIds().contains(GROUND_TRUTH)) {
+            resultMap.put(GROUND_TRUTH, GROUND_TRUTH_NAME);
         }
         dataInfoQueryBO.setIsAllResult(false);
         dataInfoQueryBO.setDataFormat(IMAGE.equals(dataInfoQueryBO.getDatasetType()) ? dataInfoQueryBO.getDataFormat() : DataFormatEnum.XTREME1);
