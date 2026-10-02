@@ -30,15 +30,15 @@ public class DataInfoSplitFilterDTO {
     @NotNull(message = "totalSizeRatio cannot be null")
     private Integer totalSizeRatio;
 
-    @Range(min = 1, max = 100, message = "trainingRatio is error")
+    @Range(min = 0, max = 100, message = "trainingRatio is error")
     @NotNull(message = "trainingRatio cannot be null")
     private Integer trainingRatio;
 
-    @Range(min = 1, max = 100, message = "validationRatio is error")
+    @Range(min = 0, max = 100, message = "validationRatio is error")
     @NotNull(message = "validationRatio cannot be null")
     private Integer validationRatio;
 
-    @Range(min = 1, max = 100, message = "testRatio is error")
+    @Range(min = 0, max = 100, message = "testRatio is error")
     @NotNull(message = "testRatio cannot be null")
     private Integer testRatio;
 
